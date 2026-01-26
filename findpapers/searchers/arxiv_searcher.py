@@ -229,11 +229,11 @@ def _get_search_url(search: Search, start_record: Optional[int] = 0) -> str:
         final_query = transformed_query.replace("FIELD_TYPE:", "")
 
     url = f"{BASE_URL}/api/query?search_query={final_query}&start={start_record}&sortBy=submittedDate&sortOrder=descending&max_results={MAX_ENTRIES_PER_PAGE}"
-
+    logging.debug("URL: {url}")
     return url
 
 
-def _get_api_result(search: Search, start_record: Optional[int] = 0) -> dict: # pragma: no cover
+def _get_api_result(search: Search, start_record: Optional[int] = 0) -> dict:  # pragma: no cover
     """
     This method return results from arXiv database using the provided search parameters
 
@@ -320,7 +320,7 @@ def _get_paper(paper_entry: dict, paper_publication_date: datetime.date, publica
     if paper_title is None or len(paper_title) == 0:
         return None
 
-    paper_title = paper_title.replace("\n","") 
+    paper_title = paper_title.replace("\n", "") 
     paper_title = re.sub(" +", " ", paper_title)
 
     paper_doi = paper_entry.get("arxiv:doi").get(
@@ -371,10 +371,10 @@ def run(search: Search):
 
     logging.info(f"arXiv: {total_papers} papers to fetch")
 
-    while(papers_count < total_papers and not search.reached_its_limit(DATABASE_LABEL)):
+    while (papers_count < total_papers and not search.reached_its_limit(DATABASE_LABEL)):
 
         entries = result.get("feed", {}).get("entry", [])
-        if type(entries) != list: # if there"s only one entry the result is not a list just a dict
+        if not isinstance(list, entries):  # if there"s only one entry the result is not a list just a dict
             entries = [entries]
 
         for paper_entry in entries:
@@ -413,5 +413,5 @@ def run(search: Search):
                 logging.debug(e, exc_info=True)
 
         if papers_count < total_papers and not search.reached_its_limit(DATABASE_LABEL):
-            time.sleep(1) # sleep for 1 second to avoid server blocking
+            time.sleep(1)  # sleep for 1 second to avoid server blocking
             result = _get_api_result(search, papers_count)
