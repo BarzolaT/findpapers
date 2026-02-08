@@ -23,7 +23,7 @@ class TestQueryValidCases:
         assert len(query.root.children) == 3
         assert query.root.children[0].value == "term a"
         assert query.root.children[1].node_type == NodeType.CONNECTOR
-        assert query.root.children[1].value == "OR"
+        assert query.root.children[1].value == "or"
         assert query.root.children[2].value == "term b"
 
     def test_two_terms_with_and(self):
@@ -31,7 +31,7 @@ class TestQueryValidCases:
         query = Query("[term a] AND [term b]")
         assert len(query.root.children) == 3
         assert query.root.children[0].value == "term a"
-        assert query.root.children[1].value == "AND"
+        assert query.root.children[1].value == "and"
         assert query.root.children[2].value == "term b"
 
     def test_and_not_operator(self):
@@ -40,7 +40,7 @@ class TestQueryValidCases:
         assert len(query.root.children) == 3
         assert query.root.children[0].value == "term a"
         assert query.root.children[1].node_type == NodeType.CONNECTOR
-        assert query.root.children[1].value == "AND NOT"
+        assert query.root.children[1].value == "and not"
         assert query.root.children[2].value == "term b"
 
     def test_grouped_query(self):
@@ -51,7 +51,7 @@ class TestQueryValidCases:
         group = query.root.children[0]
         assert len(group.children) == 3
         assert group.children[0].value == "term a"
-        assert group.children[1].value == "OR"
+        assert group.children[1].value == "or"
         assert group.children[2].value == "term b"
 
     def test_nested_groups(self):
@@ -59,20 +59,20 @@ class TestQueryValidCases:
         query = Query("[a] AND ([b] OR ([c] AND [d]))")
         assert len(query.root.children) == 3  # term, connector, group
         assert query.root.children[0].value == "a"
-        assert query.root.children[1].value == "AND"
+        assert query.root.children[1].value == "and"
 
         outer_group = query.root.children[2]
         assert outer_group.node_type == NodeType.GROUP
         # [b] OR ([c] AND [d])
         assert len(outer_group.children) == 3
         assert outer_group.children[0].value == "b"
-        assert outer_group.children[1].value == "OR"
+        assert outer_group.children[1].value == "or"
 
         inner_group = outer_group.children[2]
         assert inner_group.node_type == NodeType.GROUP
         assert len(inner_group.children) == 3
         assert inner_group.children[0].value == "c"
-        assert inner_group.children[1].value == "AND"
+        assert inner_group.children[1].value == "and"
         assert inner_group.children[2].value == "d"
 
     def test_complex_query_from_readme(self):
@@ -80,34 +80,34 @@ class TestQueryValidCases:
         query = Query("[happiness] AND ([joy] OR [peace of mind]) AND NOT [stressful]")
         assert len(query.root.children) == 5  # term, AND, group, AND NOT, term
         assert query.root.children[0].value == "happiness"
-        assert query.root.children[1].value == "AND"
+        assert query.root.children[1].value == "and"
         assert query.root.children[2].node_type == NodeType.GROUP
-        assert query.root.children[3].value == "AND NOT"
+        assert query.root.children[3].value == "and not"
         assert query.root.children[4].value == "stressful"
 
     def test_lowercase_and_operator(self):
         """Lowercase 'and' should be accepted and normalized to uppercase."""
         query = Query("[term a] and [term b]")
         assert len(query.root.children) == 3
-        assert query.root.children[1].value == "AND"
+        assert query.root.children[1].value == "and"
 
     def test_lowercase_or_operator(self):
         """Lowercase 'or' should be accepted and normalized to uppercase."""
         query = Query("[term a] or [term b]")
         assert len(query.root.children) == 3
-        assert query.root.children[1].value == "OR"
+        assert query.root.children[1].value == "or"
 
     def test_lowercase_and_not_operator(self):
         """Lowercase 'and not' should be accepted and normalized to uppercase."""
         query = Query("[term a] and not [term b]")
         assert len(query.root.children) == 3
-        assert query.root.children[1].value == "AND NOT"
+        assert query.root.children[1].value == "and not"
 
     def test_mixed_case_operators(self):
         """Mixed case operators should be accepted and normalized."""
         query = Query("[a] And [b] Or [c]")
-        assert query.root.children[1].value == "AND"
-        assert query.root.children[3].value == "OR"
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "or"
 
     def test_term_with_question_mark_wildcard(self):
         """Question mark wildcard in valid position should be accepted."""
@@ -135,7 +135,7 @@ class TestQueryValidCases:
         """Various whitespace should be accepted."""
         query = Query("[term a]  AND  [term b]")
         assert len(query.root.children) == 3
-        assert query.root.children[1].value == "AND"
+        assert query.root.children[1].value == "and"
 
     def test_newline_as_whitespace(self):
         """Newlines should be valid whitespace."""
@@ -424,9 +424,9 @@ class TestConnectorType:
 
     def test_connector_values(self):
         """ConnectorType values should match expected strings."""
-        assert ConnectorType.AND.value == "AND"
-        assert ConnectorType.OR.value == "OR"
-        assert ConnectorType.AND_NOT.value == "AND NOT"
+        assert ConnectorType.AND.value == "and"
+        assert ConnectorType.OR.value == "or"
+        assert ConnectorType.AND_NOT.value == "and not"
 
 
 class TestNodeType:
@@ -640,3 +640,204 @@ class TestQueryNodeMethods:
         assert child2.field == "abs"
         # Group should have field cleared after propagation
         assert group.field is None
+
+
+class TestConnectorsCaseInsensitivity:
+    """Comprehensive tests to verify connectors are fully case-insensitive."""
+
+    def test_all_lowercase_simple_and(self):
+        """Completely lowercase AND should work."""
+        query = Query("[a] and [b]")
+        assert len(query.root.children) == 3
+        assert query.root.children[1].value == "and"
+
+    def test_all_lowercase_simple_or(self):
+        """Completely lowercase OR should work."""
+        query = Query("[a] or [b]")
+        assert len(query.root.children) == 3
+        assert query.root.children[1].value == "or"
+
+    def test_all_lowercase_and_not(self):
+        """Completely lowercase AND NOT should work."""
+        query = Query("[a] and not [b]")
+        assert len(query.root.children) == 3
+        assert query.root.children[1].value == "and not"
+
+    def test_all_uppercase_simple_and(self):
+        """Completely uppercase AND should work."""
+        query = Query("[a] AND [b]")
+        assert len(query.root.children) == 3
+        assert query.root.children[1].value == "and"
+
+    def test_all_uppercase_simple_or(self):
+        """Completely uppercase OR should work."""
+        query = Query("[a] OR [b]")
+        assert len(query.root.children) == 3
+        assert query.root.children[1].value == "or"
+
+    def test_all_uppercase_and_not(self):
+        """Completely uppercase AND NOT should work."""
+        query = Query("[a] AND NOT [b]")
+        assert len(query.root.children) == 3
+        assert query.root.children[1].value == "and not"
+
+    def test_mixed_case_and_variations(self):
+        """Various case combinations for AND should work."""
+        variations = ["And", "AnD", "aNd", "aND", "and"]
+        for variant in variations:
+            query = Query(f"[a] {variant} [b]")
+            assert query.root.children[1].value == "and", f"Failed for variant: {variant}"
+
+    def test_mixed_case_or_variations(self):
+        """Various case combinations for OR should work."""
+        variations = ["Or", "oR", "or"]
+        for variant in variations:
+            query = Query(f"[a] {variant} [b]")
+            assert query.root.children[1].value == "or", f"Failed for variant: {variant}"
+
+    def test_mixed_case_and_not_variations(self):
+        """Various case combinations for AND NOT should work."""
+        variations = [
+            "and not",
+            "And Not",
+            "AND not",
+            "and NOT",
+            "AnD NoT",
+            "aNd nOt",
+        ]
+        for variant in variations:
+            query = Query(f"[a] {variant} [b]")
+            assert query.root.children[1].value == "and not", f"Failed for variant: {variant}"
+
+    def test_complex_query_all_lowercase(self):
+        """Complex query with all operators in lowercase should work."""
+        query = Query("[a] and [b] or [c] and not [d]")
+        assert len(query.root.children) == 7
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "or"
+        assert query.root.children[5].value == "and not"
+
+    def test_complex_query_all_uppercase(self):
+        """Complex query with all operators in uppercase should work."""
+        query = Query("[a] AND [b] OR [c] AND NOT [d]")
+        assert len(query.root.children) == 7
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "or"
+        assert query.root.children[5].value == "and not"
+
+    def test_complex_query_mixed_case(self):
+        """Complex query with mixed case operators should work and normalize."""
+        query = Query("[a] And [b] oR [c] and NOT [d]")
+        assert len(query.root.children) == 7
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "or"
+        assert query.root.children[5].value == "and not"
+
+    def test_grouped_query_lowercase_connectors(self):
+        """Grouped query with lowercase connectors should work."""
+        query = Query("([a] or [b]) and [c]")
+        assert len(query.root.children) == 3
+        group = query.root.children[0]
+        assert group.children[1].value == "or"
+        assert query.root.children[1].value == "and"
+
+    def test_grouped_query_mixed_case_connectors(self):
+        """Grouped query with mixed case connectors should work."""
+        query = Query("([a] Or [b]) aNd [c]")
+        assert len(query.root.children) == 3
+        group = query.root.children[0]
+        assert group.children[1].value == "or"
+        assert query.root.children[1].value == "and"
+
+    def test_nested_groups_mixed_case(self):
+        """Nested groups with mixed case connectors should work."""
+        query = Query("[a] AnD ([b] oR ([c] and [d]))")
+        assert query.root.children[1].value == "and"
+        outer_group = query.root.children[2]
+        assert outer_group.children[1].value == "or"
+        inner_group = outer_group.children[2]
+        assert inner_group.children[1].value == "and"
+
+    def test_readme_example_lowercase(self):
+        """README example with lowercase operators should work."""
+        query = Query("[happiness] and ([joy] or [peace of mind]) and not [stressful]")
+        assert len(query.root.children) == 5
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "and not"
+
+    def test_readme_example_mixed_case(self):
+        """README example with mixed case operators should work."""
+        query = Query("[happiness] And ([joy] OR [peace of mind]) and Not [stressful]")
+        assert len(query.root.children) == 5
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "and not"
+
+    def test_whitespace_variations_with_lowercase(self):
+        """Whitespace variations with lowercase connectors should work."""
+        query = Query("[a]  and  [b]")
+        assert query.root.children[1].value == "and"
+
+    def test_newline_as_whitespace_lowercase(self):
+        """Newlines with lowercase connectors should work."""
+        query = Query("[a]\nand\n[b]")
+        assert query.root.children[1].value == "and"
+
+    def test_tab_as_whitespace_lowercase(self):
+        """Tabs with lowercase connectors should work."""
+        query = Query("[a]\tor\t[b]")
+        assert query.root.children[1].value == "or"
+
+    def test_case_insensitive_with_field_specifiers(self):
+        """Case-insensitive connectors with field specifiers should work."""
+        query = Query("ti[a] and abs[b] or key[c]")
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "or"
+
+    def test_case_insensitive_with_wildcards(self):
+        """Case-insensitive connectors with wildcards should work."""
+        query = Query("[son*] or [t?rm] and [another*]")
+        assert query.root.children[1].value == "or"
+        assert query.root.children[3].value == "and"
+
+    def test_all_connectors_types_lowercase(self):
+        """All three connector types in lowercase should work."""
+        query = Query("[a] and [b] or [c] and not [d]")
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "or"
+        assert query.root.children[5].value == "and not"
+
+    def test_all_connectors_types_uppercase(self):
+        """All three connector types in uppercase should work."""
+        query = Query("[a] AND [b] OR [c] AND NOT [d]")
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "or"
+        assert query.root.children[5].value == "and not"
+
+    def test_serialization_preserves_normalized_case(self):
+        """Serialization should preserve normalized uppercase connectors."""
+        original = Query("[a] and [b] or [c]")
+        data = original.to_dict()
+        reconstructed = Query.from_dict(data)
+        assert reconstructed.root.children[1].value == "and"
+        assert reconstructed.root.children[3].value == "or"
+
+    def test_get_all_terms_with_lowercase_connectors(self):
+        """get_all_terms should work regardless of connector case."""
+        query_lower = Query("[a] and [b] or [c]")
+        query_upper = Query("[a] AND [b] OR [c]")
+        assert set(query_lower.get_all_terms()) == {"a", "b", "c"}
+        assert set(query_upper.get_all_terms()) == {"a", "b", "c"}
+
+    def test_capitalized_first_letter_only(self):
+        """Connectors with only first letter capitalized should work."""
+        query = Query("[a] And [b] Or [c] And Not [d]")
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "or"
+        assert query.root.children[5].value == "and not"
+
+    def test_random_case_pattern(self):
+        """Random case patterns should work (e.g., aNd, Or, aNd NoT)."""
+        query = Query("[a] aNd [b] Or [c] AnD nOt [d]")
+        assert query.root.children[1].value == "and"
+        assert query.root.children[3].value == "or"
+        assert query.root.children[5].value == "and not"

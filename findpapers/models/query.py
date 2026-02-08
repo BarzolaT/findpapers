@@ -20,9 +20,9 @@ class NodeType(Enum):
 class ConnectorType(Enum):
     """Type of boolean connector."""
 
-    AND = "AND"
-    OR = "OR"
-    AND_NOT = "AND NOT"
+    AND = "and"
+    OR = "or"
+    AND_NOT = "and not"
 
 
 @dataclass
@@ -165,8 +165,8 @@ class Query:
 
     The query must follow these rules:
     - All terms must be enclosed in square brackets: [term]
-    - Boolean operators (AND, OR, NOT) must be uppercase
     - Operators must have whitespace before and after them
+    - Operators are case-insensitive (normalized to lowercase internally)
     - NOT must be preceded by AND: [term a] AND NOT [term b]
     - Subqueries can be enclosed in parentheses
     - Terms cannot be empty
@@ -181,7 +181,7 @@ class Query:
       - Valid field codes: ti (title), abs (abstract), key (keywords),
         au (author), pu (publication), af (affiliation),
         tiabs (title + abstract), tiabskey (title + abstract + keywords)
-      - Field codes are case-insensitive (TI[term] == ti[term])
+      - Field codes are case-insensitive (normalized to lowercase internally)
       - When omitted, defaults to tiabs (title + abstract)
       - Group fields propagate to child terms (innermost wins)
 
@@ -707,13 +707,15 @@ class Query:
         # The pattern should be at the end and followed by nothing (we're at [ or ()
         # Case-insensitive pattern
         pattern = r"([a-zA-Z]+)$"
-        match = re.search(pattern, text.strip())
+        # Strip the text to work with clean version
+        text_stripped = text.strip()
+        match = re.search(pattern, text_stripped)
         if match:
             field_code = match.group(1).lower()
             # Verify field is valid
             if field_code in VALID_FIELD_CODES:
-                # Remove the field prefix from text
-                remaining = text[: match.start()] + text[match.end() :]
+                # Remove the field prefix from the stripped text
+                remaining = text_stripped[: match.start()]
                 return field_code, remaining.rstrip()
         return None, text
 
@@ -748,7 +750,7 @@ class Query:
                     parent.children.append(
                         QueryNode(
                             node_type=NodeType.CONNECTOR,
-                            value=remaining_connector.strip().upper(),
+                            value=remaining_connector.strip().lower(),
                         )
                     )
                 current_connector = ""
@@ -796,7 +798,7 @@ class Query:
                     parent.children.append(
                         QueryNode(
                             node_type=NodeType.CONNECTOR,
-                            value=remaining_connector.strip().upper(),
+                            value=remaining_connector.strip().lower(),
                         )
                     )
                 current_connector = ""
