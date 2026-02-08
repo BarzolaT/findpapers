@@ -9,6 +9,32 @@
 * To run the tests, use the command `make test`.
 * To run the linter and code formatter checks, use the command `make lint`.
 
+### Running Commands on Specific Files or Tests
+
+The `make test`, `make lint`, and `make format` commands support targeting specific files, directories, or test cases:
+
+**Test specific files or cases:**
+```bash
+make test PYTEST_ARGS='-k test_name'                          # Run tests matching pattern
+make test PYTEST_ARGS='tests/unit/test_query.py'              # Run all tests in file
+make test PYTEST_ARGS='tests/unit/test_query.py::TestClass'   # Run specific test class
+make test PYTEST_ARGS='tests/unit/test_query.py -v --tb=short' # Multiple pytest args
+```
+
+**Lint specific files or directories:**
+```bash
+make lint TARGET='findpapers/models/query.py'     # Lint single file
+make lint TARGET='findpapers/models'              # Lint entire directory
+make lint                                         # Lint entire project (default)
+```
+
+**Format specific files or directories:**
+```bash
+make format TARGET='tests/unit/test_query.py'     # Format single file
+make format TARGET='findpapers/models'            # Format directory
+make format                                       # Format entire project (default)
+```
+
 ## Code Guidelines
 
 To ensure consistency throughout the source code, keep these rules in mind as you are working:
