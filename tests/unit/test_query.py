@@ -3,7 +3,7 @@
 import pytest
 
 from findpapers.models import Query, QueryNode, QueryValidationError
-from findpapers.models.query import VALID_FIELD_CODES, ConnectorType, NodeType
+from findpapers.models.query import VALID_FILTER_CODES, ConnectorType, NodeType
 
 
 class TestQueryValidCases:
@@ -472,174 +472,193 @@ class TestQueryEdgeCases:
         assert len(all_terms) == 10
 
 
-class TestQueryFieldSpecifiers:
-    """Test field specifier parsing and propagation."""
+class TestQueryFilterSpecifiers:
+    """Test filter specifier parsing and propagation."""
 
-    def test_single_field_on_term(self):
-        """Single field specifier on term should be parsed."""
+    def test_single_filter_on_term(self):
+        """Single filter specifier on term should be parsed."""
         query = Query("ti[machine learning]")
         term_node = query.root.children[0]
-        assert term_node.field == "ti"
+        assert term_node.filter_code == "ti"
 
-    def test_combined_field_tiabs(self):
-        """Combined field tiabs should be parsed."""
+    def test_combined_filter_tiabs(self):
+        """Combined filter tiabs should be parsed."""
         query = Query("tiabs[neural networks]")
         term_node = query.root.children[0]
-        assert term_node.field == "tiabs"
+        assert term_node.filter_code == "tiabs"
 
-    def test_combined_field_tiabskey(self):
-        """Combined field tiabskey should be parsed."""
+    def test_combined_filter_tiabskey(self):
+        """Combined filter tiabskey should be parsed."""
         query = Query("tiabskey[deep learning]")
         term_node = query.root.children[0]
-        assert term_node.field == "tiabskey"
+        assert term_node.filter_code == "tiabskey"
 
-    def test_field_on_group(self):
-        """Field on group should propagate to child terms."""
+    def test_filter_on_group(self):
+        """Filter on group should propagate to child terms."""
         query = Query("abs([a] OR [b])")
         group_node = query.root.children[0]
-        # After propagation, group field should be None
-        assert group_node.field is None
-        # But children should have inherited the field
+        # After propagation, group filter_code should be preserved from original query
+        assert group_node.filter_code == "abs"
+        # Group's inherited filter should match its explicit filter
+        assert group_node.inherited_filter_code == "abs"
+        # But children should have inherited the filter
         term_a = group_node.children[0]
         term_b = group_node.children[2]
-        assert term_a.field == "abs"
-        assert term_b.field == "abs"
+        assert term_a.inherited_filter_code == "abs"
+        assert term_b.inherited_filter_code == "abs"
+        # Children should have children_match_filter set to True
+        assert group_node.children_match_filter is True
 
-    def test_nested_field_override(self):
-        """Inner field should override outer field."""
+    def test_nested_filter_override(self):
+        """Inner filter should override outer filter."""
         query = Query("abs(ti[a] OR [b])")
         group_node = query.root.children[0]
         term_a = group_node.children[0]
         term_b = group_node.children[2]
-        # First term has explicit ti, should override abs
-        assert term_a.field == "ti"
+        # First term has explicit ti in original query, should be preserved
+        assert term_a.filter_code == "ti"
+        # First term's inherited filter should be ti (overrides abs)
+        assert term_a.inherited_filter_code == "ti"
+        # Second term has no explicit filter in original query
+        assert term_b.filter_code is None
         # Second term inherits abs from group
-        assert term_b.field == "abs"
+        assert term_b.inherited_filter_code == "abs"
+        # Group should not match all children since they have different filters
+        assert group_node.children_match_filter is False
 
-    def test_deeply_nested_field_propagation(self):
-        """Deeply nested groups should propagate fields correctly."""
+    def test_deeply_nested_filter_propagation(self):
+        """Deeply nested groups should propagate filters correctly."""
         query = Query("ti(abs([a] OR [b]))")
         outer_group = query.root.children[0]
         inner_group = outer_group.children[0]
         term_a = inner_group.children[0]
         term_b = inner_group.children[2]
+        # Terms have no explicit filter in original query
+        assert term_a.filter_code is None
+        assert term_b.filter_code is None
         # Inner group has abs, which overrides outer ti
-        assert term_a.field == "abs"
-        assert term_b.field == "abs"
+        assert term_a.inherited_filter_code == "abs"
+        assert term_b.inherited_filter_code == "abs"
+        # Inner group should match all children
+        assert inner_group.children_match_filter is True
 
-    def test_term_without_field_defaults_to_none(self):
-        """Terms without field specifiers should have None (default applied later)."""
+    def test_term_without_filter_defaults_to_none(self):
+        """Terms without filter specifiers should have None (default applied later)."""
         query = Query("[term]")
         term_node = query.root.children[0]
-        assert term_node.field is None
+        assert term_node.filter_code is None
 
-    def test_mixed_fields_in_query(self):
-        """Query with mixed field specifiers should parse correctly."""
+    def test_mixed_filters_in_query(self):
+        """Query with mixed filter specifiers should parse correctly."""
         query = Query("ti[a] AND abs[b] OR key[c]")
-        assert query.root.children[0].field == "ti"
-        assert query.root.children[2].field == "abs"
-        assert query.root.children[4].field == "key"
+        assert query.root.children[0].filter_code == "ti"
+        assert query.root.children[2].filter_code == "abs"
+        assert query.root.children[4].filter_code == "key"
 
-    def test_all_valid_field_codes(self):
-        """All valid field codes should be accepted."""
-        for field_code in VALID_FIELD_CODES:
-            query = Query(f"{field_code}[test]")
-            assert query.root.children[0].field == field_code
+    def test_all_valid_filter_codes(self):
+        """All valid filter codes should be accepted."""
+        for filter_code in VALID_FILTER_CODES:
+            query = Query(f"{filter_code}[test]")
+            assert query.root.children[0].filter_code == filter_code
 
-    def test_get_all_fields(self):
-        """get_all_fields should return all unique fields from query."""
+    def test_get_all_filters(self):
+        """get_all_filters should return all unique filters from query."""
         query = Query("ti[a] AND abs[b] OR ti[c]")
-        fields = query.get_all_fields()
-        assert set(fields) == {"ti", "abs"}
+        filters = query.get_all_filters()
+        assert set(filters) == {"ti", "abs"}
 
-    def test_get_all_fields_from_groups(self):
-        """get_all_fields should extract fields from groups."""
+    def test_get_all_filters_from_groups(self):
+        """get_all_filters should extract filters from groups."""
         query = Query("ti([a] OR [b]) AND key[c]")
-        fields = query.get_all_fields()
-        assert set(fields) == {"ti", "key"}
+        filters = query.get_all_filters()
+        assert set(filters) == {"ti", "key"}
 
-    def test_field_in_serialization(self):
-        """Fields should be preserved in to_dict/from_dict."""
+    def test_filter_in_serialization(self):
+        """Filters should be preserved in to_dict/from_dict."""
         original = Query("tiabs[machine learning]")
         data = original.to_dict()
         reconstructed = Query.from_dict(data)
-        assert reconstructed.root.children[0].field == "tiabs"
+        assert reconstructed.root.children[0].filter_code == "tiabs"
 
 
-class TestQueryFieldValidation:
-    """Test field specifier validation."""
+class TestQueryFilterValidation:
+    """Test filter specifier validation."""
 
-    def test_invalid_field_code(self):
-        """Invalid field code should raise error."""
-        with pytest.raises(QueryValidationError, match="Invalid field code"):
+    def test_invalid_filter_code(self):
+        """Invalid filter code should raise error."""
+        with pytest.raises(QueryValidationError, match="Invalid filter code"):
             Query("invalid[test]")
 
-    def test_field_codes_are_case_insensitive(self):
-        """Field codes are case-insensitive and normalized to lowercase."""
+    def test_filter_codes_are_case_insensitive(self):
+        """Filter codes are case-insensitive and normalized to lowercase."""
         query = Query("TI[test]")
         # Should be normalized to lowercase
-        assert query.root.children[0].field == "ti"
+        assert query.root.children[0].filter_code == "ti"
 
-    def test_field_codes_mixed_case(self):
-        """Mixed case field codes should be normalized to lowercase."""
+    def test_filter_codes_mixed_case(self):
+        """Mixed case filter codes should be normalized to lowercase."""
         query = Query("TiAbS[test]")
-        assert query.root.children[0].field == "tiabs"
+        assert query.root.children[0].filter_code == "tiabs"
 
-    def test_invalid_field_code_case_insensitive(self):
-        """Invalid field codes should be rejected regardless of case."""
-        with pytest.raises(QueryValidationError, match="Invalid field code"):
+    def test_invalid_filter_code_case_insensitive(self):
+        """Invalid filter codes should be rejected regardless of case."""
+        with pytest.raises(QueryValidationError, match="Invalid filter code"):
             Query("INVALID[test]")
 
-    def test_field_on_empty_term(self):
-        """Field on empty term should still raise empty term error."""
+    def test_filter_on_empty_term(self):
+        """Filter on empty term should still raise empty term error."""
         with pytest.raises(QueryValidationError, match="empty"):
             Query("ti[]")
 
-    def test_field_with_wildcard(self):
-        """Fields should work with wildcards."""
+    def test_filter_with_wildcard(self):
+        """Filters should work with wildcards."""
         query = Query("ti[mach*]")
-        assert query.root.children[0].field == "ti"
+        assert query.root.children[0].filter_code == "ti"
         assert query.root.children[0].value == "mach*"
 
-    def test_field_with_operators(self):
-        """Fields should work with all operators."""
+    def test_filter_with_operators(self):
+        """Filters should work with all operators."""
         query = Query("ti[a] AND abs[b] OR key[c] AND NOT au[d]")
-        assert query.root.children[0].field == "ti"
-        assert query.root.children[2].field == "abs"
-        assert query.root.children[4].field == "key"
-        assert query.root.children[6].field == "au"
+        assert query.root.children[0].filter_code == "ti"
+        assert query.root.children[2].filter_code == "abs"
+        assert query.root.children[4].filter_code == "key"
+        assert query.root.children[6].filter_code == "au"
 
 
 class TestQueryNodeMethods:
     """Test QueryNode new methods."""
 
-    def test_get_all_fields_empty(self):
-        """get_all_fields on node without field should return empty list."""
+    def test_get_all_filters_empty(self):
+        """get_all_filters on node without filter should return empty list."""
         node = QueryNode(node_type=NodeType.TERM, value="test")
-        assert node.get_all_fields() == []
+        assert node.get_all_filters() == []
 
-    def test_get_all_fields_with_children(self):
-        """get_all_fields should collect from children."""
-        child1 = QueryNode(node_type=NodeType.TERM, value="a", field="ti")
-        child2 = QueryNode(node_type=NodeType.TERM, value="b", field="abs")
+    def test_get_all_filters_with_children(self):
+        """get_all_filters should collect from children."""
+        child1 = QueryNode(node_type=NodeType.TERM, value="a", filter_code="ti")
+        child2 = QueryNode(node_type=NodeType.TERM, value="b", filter_code="abs")
         parent = QueryNode(node_type=NodeType.GROUP, children=[child1, child2])
-        fields = parent.get_all_fields()
-        assert set(fields) == {"ti", "abs"}
+        filters = parent.get_all_filters()
+        assert set(filters) == {"ti", "abs"}
 
-    def test_propagate_fields_with_override(self):
-        """propagate_fields should respect explicit field."""
-        child1 = QueryNode(node_type=NodeType.TERM, value="a", field="ti")
+    def test_propagate_filters_with_override(self):
+        """propagate_filters should respect explicit filter."""
+        child1 = QueryNode(node_type=NodeType.TERM, value="a", filter_code="ti")
         child2 = QueryNode(node_type=NodeType.TERM, value="b")
-        group = QueryNode(node_type=NodeType.GROUP, children=[child1, child2], field="abs")
+        group = QueryNode(node_type=NodeType.GROUP, children=[child1, child2], filter_code="abs")
 
-        group.propagate_fields()
+        group.propagate_filters()
 
-        # child1 has explicit ti, should keep it
-        assert child1.field == "ti"
-        # child2 inherits from group
-        assert child2.field == "abs"
-        # Group should have field cleared after propagation
-        assert group.field is None
+        # child1 has explicit ti, should keep it in filter_code and inherited_filter_code
+        assert child1.filter_code == "ti"
+        assert child1.inherited_filter_code == "ti"
+        # child2 has no explicit filter but inherits from group
+        assert child2.filter_code is None
+        assert child2.inherited_filter_code == "abs"
+        # Group should preserve its original filter_code
+        assert group.filter_code == "abs"
+        # Group's children don't all match (ti vs abs)
+        assert group.children_match_filter is False
 
 
 class TestConnectorsCaseInsensitivity:

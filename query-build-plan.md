@@ -15,7 +15,7 @@ Este documento descreve o plano detalhado para converter a query geral do Findpa
    - [medRxiv](#medrxiv)
    - [OpenAlex](#openalex)
    - [Semantic Scholar](#semantic-scholar)
-4. [Busca por Campos Específicos](#busca-por-campos-específicos)
+4. [Busca por Filtros Específicos](#busca-por-filtros-específicos)
    - [Comportamento Padrão por Base](#comportamento-padrão-por-base)
 5. [Estratégia de Implementação](#estratégia-de-implementação)
 6. [Tradeoffs e Limitações](#tradeoffs-e-limitações)
@@ -649,17 +649,17 @@ Semantic Scholar aceita diversos formatos de ID:
 
 ---
 
-## Busca por Campos Específicos
+## Busca por Filtros Específicos
 
 ### Proposta de Sintaxe
 
-A proposta é estender a sintaxe atual permitindo especificar campos antes do termo:
+A proposta é estender a sintaxe atual permitindo especificar filtros antes do termo:
 
 ```
 abs[termo1] AND key[termo2]
 ```
 
-Campos combinados são especificados com códigos predefinidos:
+Filtros combinados são especificados com códigos predefinidos:
 ```
 tiabs[termo1] AND key[termo2]    # título + abstract
 tiabskey[termo1]                  # título + abstract + keywords
@@ -671,11 +671,11 @@ Comportamento padrão (quando omitido):
 ```
 
 **Observações importantes:**
-- **Códigos de campo são case-insensitive**: `TI[termo]` é equivalente a `ti[termo]`
+- **Códigos de filtro são case-insensitive**: `TI[termo]` é equivalente a `ti[termo]`
 - Os códigos são normalizados para minúsculas internamente
 - **Todas as bases usam `tiabs` (título + abstract) como comportamento padrão.** Keywords (`key`) não são incluídas por padrão, mas podem ser adicionadas explicitamente quando desejado.
 
-### Códigos de Campo Válidos
+### Códigos de Filtro Válidos
 
 | Código | Campo | Descrição |
 |--------|-------|-----------|
@@ -688,11 +688,11 @@ Comportamento padrão (quando omitido):
 | `tiabs` | Título + Abstract | Busca em título e abstract (combinação fixa) |
 | `tiabskey` | Título + Abstract + Keywords | Busca em título, abstract e keywords (combinação fixa) |
 
-**Nota:** Combinações arbitrárias como `ti:abs:` ou `abs:key:` não são mais suportadas. Use os códigos predefinidos (`tiabs`, `tiabskey`) para buscas combinadas.
+**Nota:** Combinações arbitrárias de filtros como `ti:abs:` ou `abs:key:` não são mais suportadas. Use os códigos predefinidos (`tiabs`, `tiabskey`) para buscas combinadas.
 
 ### Comportamento Padrão por Base
 
-Quando o campo é omitido (ex: `[termo]`), **todas as bases buscam em título + abstract (`tiabs`)**:
+Quando o filtro é omitido (ex: `[termo]`), **todas as bases buscam em título + abstract (`tiabs`)**:
 
 | Base | Comportamento Padrão | Campo Real | Para incluir Keywords |
 |------|---------------------|------------|----------------------|
@@ -749,86 +749,86 @@ Quando o campo é omitido (ex: `[termo]`), **todas as bases buscam em título + 
 #### Configuração de Comportamento Padrão
 
 ```python
-DEFAULT_FIELD_BEHAVIOR = {
+DEFAULT_FILTER_BEHAVIOR = {
     'arxiv': {
-        'default_fields': ['ti', 'abs'],
-        'actual_field': 'ti:x OR abs:x',  # Combinação explícita
+        'default_filters': ['ti', 'abs'],
+        'actual_filter': 'ti:x OR abs:x',  # Combinação explícita
         'includes_extra': [],
-        'missing_fields': ['key'],
-        'alternative_field': 'all',  # Inclui campos extras (au, co, jr, cat, id)
+        'missing_filters': ['key'],
+        'alternative_filter': 'all',  # Inclui campos extras (au, co, jr, cat, id)
     },
     'pubmed': {
-        'default_fields': ['ti', 'abs'],
-        'actual_field': '[tiab]',
+        'default_filters': ['ti', 'abs'],
+        'actual_filter': '[tiab]',
         'includes_extra': [],
-        'missing_fields': ['key'],
+        'missing_filters': ['key'],
         'optional_expansion': '[tiab] OR [mh]',  # Expansão opcional para incluir keywords
     },
     'ieee': {
-        'default_fields': ['ti', 'abs'],
-        'actual_field': '("Abstract":x OR "Article Title":x)',  # Via querytext
+        'default_filters': ['ti', 'abs'],
+        'actual_filter': '("Abstract":x OR "Article Title":x)',  # Via querytext
         'includes_extra': [],
-        'missing_fields': ['key'],
-        'alternative_field': 'querytext',  # Busca em todos os campos
+        'missing_filters': ['key'],
+        'alternative_filter': 'querytext',  # Busca em todos os campos
         'optional_expansion': '("Abstract":x OR "Article Title":x OR "Index Terms":x)',
     },
     'scopus': {
-        'default_fields': ['ti', 'abs'],
-        'actual_field': 'TITLE-ABS',
+        'default_filters': ['ti', 'abs'],
+        'actual_filter': 'TITLE-ABS',
         'includes_extra': [],
-        'missing_fields': ['key'],
-        'alternative_field': 'TITLE-ABS-KEY',  # Inclui keywords
+        'missing_filters': ['key'],
+        'alternative_filter': 'TITLE-ABS-KEY',  # Inclui keywords
     },
     'biorxiv': {
-        'default_fields': ['ti', 'abs'],
-        'actual_field': 'abstract_title',
+        'default_filters': ['ti', 'abs'],
+        'actual_filter': 'abstract_title',
         'includes_extra': [],
-        'missing_fields': ['key'],
+        'missing_filters': ['key'],
     },
     'medrxiv': {
-        'default_fields': ['ti', 'abs'],
-        'actual_field': 'abstract_title',
+        'default_filters': ['ti', 'abs'],
+        'actual_filter': 'abstract_title',
         'includes_extra': [],
-        'missing_fields': ['key'],
+        'missing_filters': ['key'],
     },
     'openalex': {
-        'default_fields': ['ti', 'abs'],
-        'actual_field': 'title_and_abstract.search',
+        'default_filters': ['ti', 'abs'],
+        'actual_filter': 'title_and_abstract.search',
         'includes_extra': [],
-        'missing_fields': ['key'],
-        'alternative_field': 'search',  # Inclui fulltext
+        'missing_filters': ['key'],
+        'alternative_filter': 'search',  # Inclui fulltext
         'optional_expansion': 'concepts.display_name',  # Para aproximar keywords
     },
     'semanticscholar': {
-        'default_fields': ['ti', 'abs'],
-        'actual_field': 'query',
+        'default_filters': ['ti', 'abs'],
+        'actual_filter': 'query',
         'includes_extra': [],
-        'missing_fields': ['key'],
+        'missing_filters': ['key'],
     },
 }
 ```
 
 #### Recomendação de Implementação
 
-1. **Comportamento padrão conservador**: Usar o campo que melhor representa `tiabs` sem incluir campos extras indesejados
+1. **Comportamento padrão conservador**: Usar o filtro que melhor representa `tiabs` sem incluir campos extras indesejados
 2. **Flag de expansão**: Permitir configuração para expandir a busca incluindo keywords quando disponível
-3. **Warning e Skip**: Se a query utilizar um campo não suportado pela base (ex: `key[...]` no Semantic Scholar ou `ti[...]` separado no bioRxiv), o searcher deve logar um **warning** informando a incompatibilidade e **pular a busca nesta base**. Não deve haver fallback silencioso ou execução parcial. A política é rígida: se qualquer campo da query não for suportado, toda a busca naquela base é abortada.
+3. **Warning e Skip**: Se a query utilizar um filtro não suportado pela base (ex: `key[...]` no Semantic Scholar ou `ti[...]` separado no bioRxiv), o searcher deve logar um **warning** informando a incompatibilidade e **pular a busca nesta base**. Não deve haver fallback silencioso ou execução parcial. A política é rígida: se qualquer filtro da query não for suportado, toda a busca naquela base é abortada.
 
 ```python
-def get_default_query_field(database: str, include_keywords: bool = False) -> str:
+def get_default_query_filter(database: str, include_keywords: bool = False) -> str:
     """
-    Retorna o campo padrão a ser usado quando nenhum campo é especificado.
+    Retorna o filtro padrão a ser usado quando nenhum filtro é especificado.
     
     Args:
         database: Nome do banco de dados
         include_keywords: Se True, tenta incluir keywords quando disponível
     """
-    config = DEFAULT_FIELD_BEHAVIOR[database]
+    config = DEFAULT_FILTER_BEHAVIOR[database]
     
     if include_keywords and 'optional_expansion' in config:
         return config['optional_expansion']
     
-    return config['actual_field']
+    return config['actual_filter']
 ```
 
 ### Mapeamento por Banco
@@ -858,10 +858,10 @@ def get_default_query_field(database: str, include_keywords: bool = False) -> st
 - ✅ `tiabskey` - via OR `[tiab] OR [mh]`
 
 #### IEEE
-- ✅ Todos os campos como parâmetros separados
-- ⚠️ **Tradeoff**: Para combinar campos na mesma query, é necessário usar `querytext` com sintaxe de campo inline ou fazer múltiplas requisições
+- ✅ Todos os filtros como parâmetros separados
+- ⚠️ **Tradeoff**: Para combinar filtros na mesma query, é necessário usar `querytext` com sintaxe de campo inline ou fazer múltiplas requisições
 
-Exemplo IEEE com campos específicos:
+Exemplo IEEE com filtros específicos:
 ```
 abstract="machine learning"&article_title="nlp"
 ```
@@ -872,39 +872,39 @@ querytext=("Abstract":"machine learning" AND "Article Title":"nlp")
 ```
 
 #### Scopus
-- ✅ Todos os campos suportados nativamente
-- ✅ Campos compostos via wrappers como `TITLE-ABS-KEY()`
+- ✅ Todos os filtros suportados nativamente
+- ✅ Filtros compostos via wrappers como `TITLE-ABS-KEY()`
 
 #### bioRxiv / medRxiv
 - ✅ `tiabs` - busca em `abstract_title` (título + abstract combinados)
 - ❌ `ti`, `abs` - não permite separar título de abstract (warning + skip)
 - ❌ `tiabskey`, `key`, `au`, `pu`, `af` - não suportados (warning + skip)
-- **Política rígida**: Campos não suportados causam abort da busca nessa base
+- **Política rígida**: Filtros não suportados causam abort da busca nessa base
 
 #### OpenAlex
 - ✅ `ti`, `abs` - suporte nativo via `.search` filters
 - ✅ `au`, `af`, `pu` - suporte via filters específicos
 - ⚠️ `key` - não há campo direto, mas `concepts` pode ser usado como aproximação
-- ✅ Campos compostos: `title_and_abstract.search` combina título e abstract
+- ✅ Filtros compostos: `title_and_abstract.search` combina título e abstract
 - ✅ Suporte completo a boolean (AND, OR, NOT) via parâmetro `search`
 
 #### Semantic Scholar
-- ❌ `ti`, `abs`, `key`, `af` - **não permite busca por campo específico**
+- ❌ `ti`, `abs`, `key`, `af` - **não permite busca por filtro específico**
 - ⚠️ `au` - apenas via filtro `authors`, não na query principal
 - ⚠️ `pu` - apenas via filtro `venue`, não na query principal
 - ✅ Busca geral em título+abstract combinados (nativo)
 - ✅ Boolean operators suportados na Bulk Search API
-- **Comportamento**: Se a query contiver especificadores de campo não suportados (`ti`, `abs`, `key`, `af`), a busca deverá ser **abortada** para esta base.
+- **Comportamento**: Se a query contiver especificadores de filtro não suportados (`ti`, `abs`, `key`, `af`), a busca deverá ser **abortada** para esta base.
 
 ---
 
-## Tratamento de Campos Combinados
+## Tratamento de Filtros Combinados
 
-Esta seção detalha como campos combinados (`tiabs`, `tiabskey`) serão tratados em cada banco, incluindo o número de requisições necessárias.
+Esta seção detalha como filtros combinados (`tiabs`, `tiabskey`) serão tratados em cada banco, incluindo o número de requisições necessárias.
 
 ### Estratégia Geral
 
-Com a nova sintaxe, os campos combinados são predefinidos:
+Com a nova sintaxe, os filtros combinados são predefinidos:
 - `tiabs` = título + abstract
 - `tiabskey` = título + abstract + keywords
 
@@ -917,18 +917,18 @@ Dependendo do suporte do banco, existem duas possíveis abordagens:
 
 ### Tabela de Estratégias por Banco
 
-| Campo | arXiv | PubMed | IEEE | Scopus | bioRxiv/medRxiv | OpenAlex | Semantic Scholar |
+| Filtro | arXiv | PubMed | IEEE | Scopus | bioRxiv/medRxiv | OpenAlex | Semantic Scholar |
 |-------|-------|--------|------|--------|-----------------|----------|------------------|
 | `tiabs[x]` | 1 req (`ti:x OR abs:x`) | 1 req (`x[tiab]`) | 2 req | 1 req (`TITLE-ABS(x)`) | 1 req (nativo) | 1 req (`title_and_abstract.search`) | 1 req (nativo) |
 | `tiabskey[x]` | ❌ skip | 1 req (`x[tiab] OR x[mh]`) | 1 req (`querytext`) | 1 req (`TITLE-ABS-KEY(x)`) | ❌ skip | 1 req (`search`) | ❌ skip |
 
 **Notas:**
-- ❌ skip = Campo não suportado, busca abortada com warning
+- ❌ skip = Filtro não suportado, busca abortada com warning
 - `N req` = Número de requisições necessárias
 
 ### Detalhamento por Banco
 
-#### arXiv - Campos Combinados
+#### arXiv - Filtros Combinados
 
 ```
 # tiabs[machine learning]
@@ -938,11 +938,11 @@ ti:"machine learning" OR abs:"machine learning"
 ❌ Warning/Skip - keywords não suportados, busca abortada
 ```
 
-**Campos não suportados**: `key`
+**Filtros não suportados**: `key`
 
 Para `tiabskey`, arXiv faz skip da busca (política rígida: não executa parcialmente sem keywords).
 
-#### PubMed - Campos Combinados
+#### PubMed - Filtros Combinados
 
 O PubMed possui tags especiais que combinam campos:
 - `[tiab]` = título + abstract
@@ -983,7 +983,7 @@ Requisição 2: abstract="machine learning"
 
 **Estratégia para `tiabskey`**: Usar querytext (1 requisição)
 
-#### Scopus - Campos Combinados
+#### Scopus - Filtros Combinados
 
 O Scopus é o **mais flexível** - suporta campos agregados nativamente:
 
@@ -1002,7 +1002,7 @@ TITLE-ABS-KEY(x)
 - `TITLE-ABS-KEY()` = título + abstract + keywords
 - `ALL()` = todos os campos
 
-#### bioRxiv / medRxiv - Campos Combinados
+#### bioRxiv / medRxiv - Filtros Combinados
 
 Estes bancos são os **mais limitados**:
 
@@ -1011,7 +1011,7 @@ Estes bancos são os **mais limitados**:
 - Não suportam outros campos (keywords, autor, etc.)
 
 **Mapeamento**:
-| Campo Findpapers | Resultado bioRxiv/medRxiv |
+| Filtro Findpapers | Resultado bioRxiv/medRxiv |
 |------------------|---------------------------|
 | `ti[x]` | ❌ Warning/Skip |
 | `abs[x]` | ❌ Warning/Skip |
@@ -1023,9 +1023,9 @@ Estes bancos são os **mais limitados**:
 **Política rígida**: 
 - Apenas `tiabs` é suportado nativamente
 - `tiabskey` causa skip (não executa parcialmente ignorando keywords)
-- Todos os outros campos causam warning + skip
+- Todos os outros filtros causam warning + skip
 
-#### OpenAlex - Campos Combinados
+#### OpenAlex - Filtros Combinados
 
 OpenAlex oferece bom suporte a campos separados e alguns campos agregados:
 
@@ -1035,7 +1035,7 @@ OpenAlex oferece bom suporte a campos separados e alguns campos agregados:
 - `search` - busca em título + abstract + fulltext
 
 **Mapeamento**:
-| Campo Findpapers | Resultado OpenAlex |
+| Filtro Findpapers | Resultado OpenAlex |
 |------------------|-------------------|
 | `ti[x]` | ✅ `filter=title.search:x` |
 | `abs[x]` | ✅ `filter=abstract.search:x` |
@@ -1044,27 +1044,27 @@ OpenAlex oferece bom suporte a campos separados e alguns campos agregados:
 | `key[x]` | ⚠️ `filter=concepts.display_name:x` (aproximação) |
 | `au[x]` | ✅ `filter=authorships.author.display_name.search:x` |
 
-**Estratégia para campos compostos não agregados**:
+**Estratégia para filtros compostos não agregados**:
 ```python
-# Campos separados podem requerer múltiplas requisições ou OR nativo
+# Filtros separados podem requerer múltiplas requisições ou OR nativo
 # OpenAlex não suporta OR entre filters diferentes
 # Solução: múltiplas requisições ou usar search geral
 ```
 
 **Número de requisições**:
-- Campos com agregado disponível (`tiabs`, `tiabskey`): 1 requisição
-- Campos separados: pode requerer N requisições
+- Filtros com agregado disponível (`tiabs`, `tiabskey`): 1 requisição
+- Filtros separados: pode requerer N requisições
 
-#### Semantic Scholar - Campos Combinados
+#### Semantic Scholar - Filtros Combinados
 
-Semantic Scholar é **mais limitado** para busca por campos específicos:
+Semantic Scholar é **mais limitado** para busca por filtros específicos:
 
 - A busca principal (`query`) sempre busca em **título + abstract combinados**
 - Não há como separar a busca por título ou abstract individualmente
 - Filtros para autor e venue são **separados** da query principal
 
 **Mapeamento**:
-| Campo Findpapers | Resultado Semantic Scholar |
+| Filtro Findpapers | Resultado Semantic Scholar |
 |------------------|---------------------------|
 | `ti[x]` | ❌ Warning/Skip (não separa título) |
 | `abs[x]` | ❌ Warning/Skip (não separa abstract) |
@@ -1077,13 +1077,13 @@ Semantic Scholar é **mais limitado** para busca por campos específicos:
 
 **Política rígida**: 
 - Apenas `tiabs` é suportado nativamente
-- Campos separados (`ti`, `abs`) causam warning + skip (API não permite separar)
+- Filtros separados (`ti`, `abs`) causam warning + skip (API não permite separar)
 - `tiabskey`, `key`, `af` causam warning + skip (keywords/afiliação não disponíveis)
 - `au` e `pu` são tratados como filtros separados (não na query principal)
 
 ### Cálculo de Requisições para Queries Complexas
 
-Para uma query com múltiplos termos e campos:
+Para uma query com múltiplos termos e filtros:
 
 ```
 tiabs[termo A] AND key[termo B] AND au[termo C]
@@ -1096,7 +1096,7 @@ tiabs[termo A] AND key[termo B] AND au[termo C]
 
 Como os termos estão conectados por AND, não podemos simplesmente multiplicar.
 A estratégia é:
-1. Executar cada campo separadamente
+1. Executar cada filtro separadamente
 2. Fazer a interseção (AND) dos resultados em memória
 
 **Total**: 2 + 1 + 1 = 4 requisições + processamento em memória
@@ -1107,47 +1107,47 @@ TITLE-ABS(termo A) AND KEY(termo B) AND AUTH(termo C)
 ```
 **Total**: 1 requisição
 
-### Algoritmo de Expansão de Campos
+### Algoritmo de Expansão de Filtros
 
 ```python
-def expand_field(term: QueryNode, db_capabilities: dict) -> List[FieldQuery]:
+def expand_filter(term: QueryNode, db_capabilities: dict) -> List[FilterQuery]:
     """
-    Expande um termo com campo especificado em queries específicas por banco.
+    Expande um termo com filtro especificado em queries específicas por banco.
     
     Args:
-        term: Nó do termo com field='tiabskey' (código de campo)
+        term: Nó do termo com filter_code='tiabskey' (código de filtro)
         db_capabilities: Dict com capacidades do banco
         
     Returns:
-        Lista de queries de campo a serem executadas
+        Lista de queries de filtro a serem executadas
         
     Raises:
-        UnsupportedFieldError: Se o campo não é suportado pelo banco
+        UnsupportedFilterError: Se o filtro não é suportado pelo banco
     """
-    field = term.field or 'tiabskey'  # default
+    filter_code = term.filter_code or 'tiabskey'  # default
     
-    # Verificar se o campo é suportado
-    if field not in db_capabilities['supported_fields']:
+    # Verificar se o filtro é suportado
+    if filter_code not in db_capabilities['supported_filters']:
         # Política rígida: não há execução parcial
-        raise UnsupportedFieldError(
-            f"Campo '{field}' não suportado. "
+        raise UnsupportedFilterError(
+            f"Filtro '{filter_code}' não suportado. "
             f"Busca será abortada para esta base."
         )
     
-    # Verificar se há campo agregado disponível
-    aggregate_field = db_capabilities.get('aggregate_fields', {}).get(tuple(sorted(supported)))
+    # Verificar se há filtro agregado disponível
+    aggregate_filter = db_capabilities.get('aggregate_filters', {}).get(tuple(sorted(supported)))
     
-    if aggregate_field:
-        # Uma única query com campo agregado
-        return [FieldQuery(field=aggregate_field, value=term.value)]
+    if aggregate_filter:
+        # Uma única query com filtro agregado
+        return [FilterQuery(filter_code=aggregate_filter, value=term.value)]
     
-    elif db_capabilities.get('supports_field_or', False):
-        # Uma query com OR entre campos
-        return [FieldQuery(field=supported, value=term.value, operator='OR')]
+    elif db_capabilities.get('supports_filter_or', False):
+        # Uma query com OR entre filtros
+        return [FilterQuery(filter_code=supported, value=term.value, operator='OR')]
     
     else:
-        # Múltiplas queries, uma por campo
-        return [FieldQuery(field=f, value=term.value) for f in supported]
+        # Múltiplas queries, uma por filtro
+        return [FilterQuery(filter_code=f, value=term.value) for f in supported]
 ```
 
 ### Configuração de Capacidades por Banco
@@ -1155,57 +1155,57 @@ def expand_field(term: QueryNode, db_capabilities: dict) -> List[FieldQuery]:
 ```python
 DB_CAPABILITIES = {
     'arxiv': {
-        'supported_fields': ['ti', 'abs', 'au'],
-        'supports_field_or': True,
-        'aggregate_fields': {
+        'supported_filters': ['ti', 'abs', 'au'],
+        'supports_filter_or': True,
+        'aggregate_filters': {
             ('abs', 'au', 'ti'): 'all',  # sorted tuple -> aggregate
         },
     },
     'pubmed': {
-        'supported_fields': ['ti', 'abs', 'key', 'au', 'pu', 'af'],
-        'supports_field_or': True,
-        'aggregate_fields': {
+        'supported_filters': ['ti', 'abs', 'key', 'au', 'pu', 'af'],
+        'supports_filter_or': True,
+        'aggregate_filters': {
             ('abs', 'ti'): 'tiab',
         },
     },
     'ieee': {
-        'supported_fields': ['ti', 'abs', 'key', 'au', 'pu', 'af'],
-        'supports_field_or': False,  # Requer múltiplas requisições
-        'aggregate_fields': {
+        'supported_filters': ['ti', 'abs', 'key', 'au', 'pu', 'af'],
+        'supports_filter_or': False,  # Requer múltiplas requisições
+        'aggregate_filters': {
             ('abs', 'key', 'ti'): 'querytext',
         },
     },
     'scopus': {
-        'supported_fields': ['ti', 'abs', 'key', 'au', 'pu', 'af'],
-        'supports_field_or': True,
-        'aggregate_fields': {
+        'supported_filters': ['ti', 'abs', 'key', 'au', 'pu', 'af'],
+        'supports_filter_or': True,
+        'aggregate_filters': {
             ('abs', 'key', 'ti'): 'TITLE-ABS-KEY',
         },
     },
     'biorxiv': {
-        'supported_fields': ['ti', 'abs'],  # Sempre combinados
-        'supports_field_or': False,
-        'aggregate_fields': {
+        'supported_filters': ['ti', 'abs'],  # Sempre combinados
+        'supports_filter_or': False,
+        'aggregate_filters': {
             ('abs', 'ti'): 'abstract_title',
         },
         'force_aggregate': True,  # Sempre usa o agregado
     },
     'medrxiv': {
-        'supported_fields': ['ti', 'abs'],
-        'supports_field_or': False,
-        'aggregate_fields': {
+        'supported_filters': ['ti', 'abs'],
+        'supports_filter_or': False,
+        'aggregate_filters': {
             ('abs', 'ti'): 'abstract_title',
         },
         'force_aggregate': True,
     },
     'openalex': {
-        'supported_fields': ['ti', 'abs', 'au', 'pu', 'af'],  # key via concepts (aproximação)
-        'supports_field_or': False,  # OR não funciona entre filters diferentes
-        'aggregate_fields': {
+        'supported_filters': ['ti', 'abs', 'au', 'pu', 'af'],  # key via concepts (aproximação)
+        'supports_filter_or': False,  # OR não funciona entre filters diferentes
+        'aggregate_filters': {
             ('abs', 'ti'): 'title_and_abstract.search',
             ('abs', 'key', 'ti'): 'search',  # busca geral
         },
-        'field_mapping': {
+        'filter_mapping': {
             'ti': 'title.search',
             'abs': 'abstract.search',
             'au': 'authorships.author.display_name.search',
@@ -1215,26 +1215,26 @@ DB_CAPABILITIES = {
         },
     },
     'semanticscholar': {
-        'supported_fields': ['ti', 'abs'],  # au e pu são filtros separados
-        'supports_field_or': False,
-        'aggregate_fields': {
+        'supported_filters': ['ti', 'abs'],  # au e pu são filtros separados
+        'supports_filter_or': False,
+        'aggregate_filters': {
             ('abs', 'ti'): 'query',  # busca nativa é ti+abs
             ('abs', 'key', 'ti'): 'query',
         },
-        'force_aggregate': True,  # Sempre usa query para campos de texto
-        'separate_filters': ['au', 'pu'],  # Campos tratados como filtros separados
+        'force_aggregate': True,  # Sempre usa query para filtros de texto
+        'separate_filters': ['au', 'pu'],  # Filtros tratados como filtros separados
         'filter_mapping': {
             'au': 'authors',
             'pu': 'venue',
         },
     },
 }
+```
+### Busca com Filtro em Grupos
 
-### Busca com Campo em Grupos
+É possível aplicar filtros a um grupo inteiro, propagando essa restrição para todos os termos dentro do grupo.
 
-É possível aplicar campos a um grupo inteiro, propagando essa restrição para todos os termos dentro do grupo.
-
-**Sintaxe**: `campo([expressão])`
+**Sintaxe**: `filtro([expressão])`
 
 Exemplo: `abs([term a] OR [term b])`
 
@@ -1242,15 +1242,15 @@ Isso equivale semanticamente a: `abs[term a] OR abs[term b]`
 
 #### Regras de Propagação
 
-A propagação de campos segue um modelo de "herança com override explícito", onde **o grupo mais interno sempre tem prioridade**. Quando um campo é especificado em um nó de Grupo (GROUP), ele é passado para os nós filhos de acordo com as seguintes regras:
+A propagação de filtros segue um modelo de "herança com override explícito", onde **o grupo mais interno sempre tem prioridade**. Quando um filtro é especificado em um nó de Grupo (GROUP), ele é passado para os nós filhos de acordo com as seguintes regras:
 
-1.  **Herança**: Se um nó filho (TERM ou outro GROUP) não possui campo especificado, ele herda o campo do nó pai.
-2.  **Explicitude (Override)**: Se um nó filho possui campo explicitamente definido na query, esse campo tem precedência sobre o campo herdado do pai. **O grupo mais interno sempre vence.**
+1.  **Herança**: Se um nó filho (TERM ou outro GROUP) não possui filtro especificado, ele herda o filtro do nó pai.
+2.  **Explicitude (Override)**: Se um nó filho possui filtro explicitamente definido na query, esse filtro tem precedência sobre o filtro herdado do pai. **O grupo mais interno sempre vence.**
     *   *Exemplo*: `abs([a] OR ti[b])` -> O termo `a` herda `abs`. O termo `b` usa `ti` (ignora `abs`).
     *   *Exemplo com grupos aninhados*: `abs(ti([A] OR [B]))` -> **Ambos os termos `A` e `B` usam apenas `ti`**, pois o grupo interno `ti(...)` tem prioridade sobre o externo `abs(...)`.
-3.  **Default**: Se nenhum campo for especificado nem no termo nem herdado de nenhum ancestral, aplica-se o comportamento padrão (`tiabs` - título + abstract).
+3.  **Default**: Se nenhum filtro for especificado nem no termo nem herdado de nenhum ancestral, aplica-se o comportamento padrão (`tiabs` - título + abstract).
 
-**Importante**: A prioridade é sempre do **mais interno para o mais externo**. O campo mais próximo do termo é o que será aplicado.
+**Importante**: A prioridade é sempre do **mais interno para o mais externo**. O filtro mais próximo do termo é o que será aplicado.
 
 #### Compilação Prévia (Universalidade)
 
@@ -1266,7 +1266,6 @@ O adaptador de cada base receberá a query já expandida (ex: `abs[a] OR abs[b]`
 | `ti([machine learning] AND au[bengio])` | `ti[machine learning] AND au[bengio]` *(au tem precedência no segundo termo)* |
 | `tiabs([a] OR [b])` | `tiabs[a] OR tiabs[b]` |
 | `ti(abs[a] OR key[b])` | `abs[a] OR key[b]` |
-```
 
 ---
 
@@ -1274,50 +1273,50 @@ O adaptador de cada base receberá a query já expandida (ex: `abs[a] OR abs[b]`
 
 ### 1. Extensão do Modelo Query
 
-Modificar a classe `Query` para suportar campo opcional nos termos:
+Modificar a classe `Query` para suportar filtro opcional nos termos:
 
 ```python
 @dataclass
 class QueryNode:
     node_type: NodeType
     value: Optional[str] = None
-    field: Optional[str] = None  # 'ti', 'abs', 'tiabs', etc. ou None para default
+    filter_code: Optional[str] = None  # 'ti', 'abs', 'tiabs', etc. ou None para default
     children: List["QueryNode"] = field(default_factory=list)
 ```
 
-### 2. Parser de Campo e Grupos
+### 2. Parser de Filtro e Grupos
 
-Atualizar lógica de parsing para suportar campos em termos e em grupos.
+Atualizar lógica de parsing para suportar filtros em termos e em grupos.
 
 ```python
-# Códigos de campo válidos (case-insensitive)
+# Códigos de filtro válidos (case-insensitive)
 # Single: ti, abs, key, au, pu, af
 # Combined: tiabs, tiabskey
-VALID_FIELD_CODES = frozenset({"ti", "abs", "key", "au", "pu", "af", "tiabs", "tiabskey"})
+VALID_FILTER_CODES = frozenset({"ti", "abs", "key", "au", "pu", "af", "tiabs", "tiabskey"})
 
-# Padrão para campos: letras seguidas diretamente de [ ou (
-FIELD_PREFIX_PATTERN = r'([a-zA-Z]+)(?=\[|\()'
+# Padrão para filtros: letras seguidas diretamente de [ ou (
+FILTER_PREFIX_PATTERN = r'([a-zA-Z]+)(?=\[|\()'
 ```
 
-### 3. Propagação de Campos (Visitor)
+### 3. Propagação de Filtros (Visitor)
 
-Implementar lógica (ex: `Query.propagate_fields()`) que percorre a árvore após o parsing inicial e distribui os campos dos grupos para os termos filhos.
+Implementar lógica (ex: `Query.propagate_filters()`) que percorre a árvore após o parsing inicial e distribui os filtros dos grupos para os termos filhos.
 
 ```python
-def propagate_fields(node: QueryNode, parent_field: str = None):
-    # Se o nó tem campo explícito, ele prevalece (override)
-    current_field = node.field or parent_field
+def propagate_filters(node: QueryNode, parent_filter: str = None):
+    # Se o nó tem filtro explícito, ele prevalece (override)
+    current_filter = node.filter_code or parent_filter
     
     if node.node_type == NodeType.TERM:
-        # Atribui campo final ao termo
-        node.field = current_field
+        # Atribui filtro final ao termo
+        node.filter_code = current_filter
         
     elif node.node_type == NodeType.GROUP:
-        # Recursão para filhos passando o campo atual
+        # Recursão para filhos passando o filtro atual
         for child in node.children:
-            propagate_fields(child, current_field)
-        # Limpa campo do grupo para simplificar conversão subsequente
-        node.field = None 
+            propagate_filters(child, current_filter)
+        # Limpa filtro do grupo para simplificar conversão subsequente
+        node.filter_code = None 
 ```
 
 ### 4. Interface de Conversão no Searcher
@@ -1386,7 +1385,7 @@ class SearcherBase(ABC):
 @dataclass
 class QueryValidationResult:
     is_valid: bool
-    unsupported_features: List[str]  # Ex: ['wildcard ?', 'field:key', 'AND NOT']
+    unsupported_features: List[str]  # Ex: ['wildcard ?', 'filter:key', 'AND NOT']
     error_message: Optional[str] = None
 ```
 
@@ -1570,8 +1569,10 @@ def test_arxiv_response_parsing():
 ## Referências
 
 - [arXiv API User Manual](https://info.arxiv.org/help/api/user-manual.html)
-- [PubMed E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25500/)
+- [PubMed E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25500)
 - [IEEE Xplore API](https://developer.ieee.org/docs/read/Metadata_API_details)
 - [Scopus Search Tips](https://dev.elsevier.com/sc_search_tips.html)
 - [bioRxiv/medRxiv Search Tips](https://www.medrxiv.org/content/search-tips)
-- [bioRxiv API](https://api.biorxiv.org/)
+- [bioRxiv API](https://api.biorxiv.org)
+- [OpenAlex API](https://docs.openalex.org/how-to-use-the-api)
+- [Semantic Scholar API](https://api.semanticscholar.org/api-docs)
