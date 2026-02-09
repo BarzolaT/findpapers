@@ -229,7 +229,7 @@ def _get_search_url(search: Search, start_record: Optional[int] = 0) -> str:
         final_query = transformed_query.replace("FIELD_TYPE:", "")
 
     url = f"{BASE_URL}/api/query?search_query={final_query}&start={start_record}&sortBy=submittedDate&sortOrder=descending&max_results={MAX_ENTRIES_PER_PAGE}"
-    logging.debug("URL: {url}")
+    logging.debug(f"URL: {url}")
     return url
 
 
@@ -272,8 +272,7 @@ def _get_publication(paper_entry: dict) -> Publication:
 
     if "arxiv:journal_ref" in paper_entry:
 
-        publication_title = paper_entry.get("arxiv:journal_ref").get("#text")
-
+        publication_title = paper_entry.get("arxiv:journal_ref")
         if publication_title is None or len(publication_title) == 0:
             return None
 
@@ -320,11 +319,10 @@ def _get_paper(paper_entry: dict, paper_publication_date: datetime.date, publica
     if paper_title is None or len(paper_title) == 0:
         return None
 
-    paper_title = paper_title.replace("\n", "") 
+    paper_title = paper_title.replace("\n", "")
     paper_title = re.sub(" +", " ", paper_title)
 
-    paper_doi = paper_entry.get("arxiv:doi").get(
-        "#text") if "arxiv:doi" in paper_entry else None
+    paper_doi = paper_entry.get("arxiv:doi", None)
     paper_abstract = paper_entry.get("summary", None)
     paper_urls = set()
     paper_authors = []
@@ -343,7 +341,7 @@ def _get_paper(paper_entry: dict, paper_publication_date: datetime.date, publica
         else:
             paper_authors.append(paper_entry.get("author").get("name"))
 
-    paper_comments = paper_entry.get("arxiv:comment", {}).get("#text", None)
+    paper_comments = paper_entry.get("arxiv:comment", None)
 
     paper = Paper(paper_title, paper_abstract, paper_authors, publication,
                   paper_publication_date, paper_urls, paper_doi, comments=paper_comments)
@@ -365,16 +363,15 @@ def run(search: Search):
 
     papers_count = 0
     result = _get_api_result(search)
-
     total_papers = int(result.get("feed").get(
-        "opensearch:totalResults").get("#text"))
+        "opensearch:totalResults"))
 
     logging.info(f"arXiv: {total_papers} papers to fetch")
 
     while (papers_count < total_papers and not search.reached_its_limit(DATABASE_LABEL)):
 
         entries = result.get("feed", {}).get("entry", [])
-        if not isinstance(list, entries):  # if there"s only one entry the result is not a list just a dict
+        if not isinstance(entries, list):  # if there"s only one entry the result is not a list just a dict
             entries = [entries]
 
         for paper_entry in entries:

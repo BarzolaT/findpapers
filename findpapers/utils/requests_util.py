@@ -131,7 +131,7 @@ class DefaultSession(requests.Session, metaclass=common_util.ThreadSafeSingleton
             response = requests.Response()
             response.status_code = 500
 
-        if not response.ok and ("http" in self.proxies or "https" in self.proxies):
+        if not response.ok and self.proxies:
             # if the response is not ok using proxies,
             # let"s try one more time without using them
             kwargs["proxies"] = {
