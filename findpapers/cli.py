@@ -1,9 +1,6 @@
 import typer
-import re
-import random
 import logging
 from datetime import datetime
-from typing import Tuple, List
 import findpapers
 
 
@@ -91,7 +88,7 @@ def search(
 
         You can constraint the search by date using the -s (or --since) and -u (or --until) arguments
         following the pattern YYYY-MM-DD (E.g. 2020-12-31). 
-        
+
         You can restrict the max number of retrieved papers by using -l (or --limit).
         And, restrict the max number of retrieved papers by database using -ld (or --limit_per_database) argument.
 

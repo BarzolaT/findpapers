@@ -1,15 +1,11 @@
 import logging
-import math
-import requests
 import datetime
-from urllib.parse import urlencode
-from typing import Optional, List
+from typing import List
 from lxml import html
 import findpapers.utils.query_util as query_util
 import findpapers.utils.common_util as common_util
 from findpapers.models.search import Search
 from findpapers.models.paper import Paper
-from findpapers.models.publication import Publication
 from findpapers.utils.requests_util import DefaultSession
 
 
@@ -38,21 +34,21 @@ def _get_search_urls(search: Search, database: str) -> List[str]:
     # The databases don"t support wildcards properly nowadays
     if "?" in search.query or "*" in search.query:
         raise ValueError("Queries with wildcards are not supported by medRxiv/bioRxiv database")
-    
+
     # NOT connectors aren"t supported
     if " AND NOT " in search.query:
         raise ValueError("NOT connectors aren't supported")
-    
+
     # Parentheses are used for URL splitting purposes and only 1-level grouping is supported with an OR connector between the groups
-    
+
     max_group_level = query_util.get_max_group_level(search.query)
 
     if max_group_level > 1:
         raise ValueError("Max 1-level parentheses grouping exceeded")
-    
+
     if ") AND (" in search.query:
         raise ValueError("Only the OR connector can be used between the groups")
-    
+
     query = query_util.apply_on_each_term(search.query, lambda x: x.replace(" ", "+"))
     queries = query.split(") OR (")
     queries = [x[1:] if x[0] == "(" else x for x in queries]
@@ -74,7 +70,7 @@ def _get_search_urls(search: Search, database: str) -> List[str]:
         # All the inner connectors of the groups needs to be the same
         if ors_count > 0 and ands_count > 0:
             raise ValueError(f"Mixed inner connectors found. Each query group must use only one connector type, only ANDs or only ORs: {query}")
-        
+
         query_match_flag = "match-any"
         if ands_count > 0:
             query_match_flag = "match-all"
@@ -129,7 +125,7 @@ def _get_result_page_data(result_page: html.HtmlElement) -> dict:
 
     dois = []
     next_page_url = None
-    
+
     if total_papers > 0:
 
         dois = result_page.xpath("//*[@class=\"highwire-cite-metadata-doi highwire-cite-metadata\"]/text()")
@@ -147,7 +143,7 @@ def _get_result_page_data(result_page: html.HtmlElement) -> dict:
     }
 
     return data
-    
+
 
 def _get_paper_metadata(doi: str, database: str) -> dict:  # pragma: no cover
     """
@@ -230,8 +226,8 @@ def _get_paper(paper_metadata: dict) -> Paper:
         paper_doi = paper_metadata.get("published").replace("\\", "")
 
     return Paper(paper_title, paper_abstract, paper_authors, publication,
-                  paper_publication_date, {paper_url}, paper_doi,
-                  paper_citations, paper_keywords, paper_comments, paper_number_of_pages, paper_pages)
+                 paper_publication_date, {paper_url}, paper_doi,
+                 paper_citations, paper_keywords, paper_comments, paper_number_of_pages, paper_pages)
 
 
 def run(search: Search, database: str):
@@ -275,11 +271,11 @@ def run(search: Search, database: str):
                 paper_metadata = _get_paper_metadata(doi, database)
 
                 paper_title = paper_metadata.get("title")
-                
+
                 logging.info(f"({papers_count}/{total_papers}) Fetching {database} paper: {paper_title}")
-                
+
                 paper = _get_paper(paper_metadata)
-                
+
                 paper.add_database(database)
 
                 search.add_paper(paper)
