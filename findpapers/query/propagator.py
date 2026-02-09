@@ -30,10 +30,10 @@ class FilterPropagator:
         Query
             The same query with updated filter inheritance.
         """
-        query.root.propagate_filters()
+        query.root.propagate_filters()  # type: ignore[attr-defined]
         return query
 
-   
+
 def propagate_filters(node: QueryNode, parent_filter: Optional[str] = None) -> None:
     """Propagate filter specifier from parent nodes to children.
 
@@ -54,9 +54,7 @@ def propagate_filters(node: QueryNode, parent_filter: Optional[str] = None) -> N
         Filter inherited from the parent node.
     """
     # Determine inherited filter: explicit filter overrides inherited one
-    node.inherited_filter_code = (
-        node.filter_code if node.filter_code is not None else parent_filter
-    )
+    node.inherited_filter_code = node.filter_code if node.filter_code is not None else parent_filter
 
     if node.node_type == NodeType.TERM:
         # Terminal node: inherited_filter_code is already set
@@ -64,7 +62,7 @@ def propagate_filters(node: QueryNode, parent_filter: Optional[str] = None) -> N
     elif node.node_type in (NodeType.ROOT, NodeType.GROUP):
         # Propagate to children
         for child in node.children:
-            propagate_filters(child, node.inherited_filter_code)
+            propagate_filters(child, node.inherited_filter_code)  # type: ignore[arg-type]
 
         # For GROUP nodes, check if all children match the group's filter
         if node.node_type == NodeType.GROUP:
@@ -128,4 +126,4 @@ def _check_node_uses_filter(node: QueryNode, target_filter: Optional[str]) -> bo
 
 
 # Monkey-patch the propagate_filters method onto QueryNode
-QueryNode.propagate_filters = propagate_filters
+QueryNode.propagate_filters = propagate_filters  # type: ignore[attr-defined]

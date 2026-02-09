@@ -5,7 +5,13 @@ from __future__ import annotations
 import re
 from typing import Optional
 
-from findpapers.core.query import NodeType, Query, QueryNode, QueryValidationError, VALID_FILTER_CODES
+from findpapers.core.query import (
+    VALID_FILTER_CODES,
+    NodeType,
+    Query,
+    QueryNode,
+    QueryValidationError,
+)
 
 
 class QueryParser:

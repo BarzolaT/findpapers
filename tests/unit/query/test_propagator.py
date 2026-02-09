@@ -32,9 +32,7 @@ class TestFilterPropagator:
         query = parser.parse(query_string)
         return propagator.propagate(query)
 
-    def test_simple_term_without_filter_inherits_none(
-        self, parser, validator, propagator
-    ):
+    def test_simple_term_without_filter_inherits_none(self, parser, validator, propagator):
         """Test that a simple term without filter has inherited_filter_code as None."""
         query = self.parse_and_propagate("[term]", parser, validator, propagator)
         term = query.root.children[0]
@@ -65,9 +63,7 @@ class TestFilterPropagator:
 
     def test_innermost_filter_wins(self, parser, validator, propagator):
         """Test that innermost filter overrides parent filter."""
-        query = self.parse_and_propagate(
-            "ti([a] OR abs[b])", parser, validator, propagator
-        )
+        query = self.parse_and_propagate("ti([a] OR abs[b])", parser, validator, propagator)
         group = query.root.children[0]
 
         term_a = group.children[0]
@@ -108,18 +104,14 @@ class TestFilterPropagator:
 
     def test_children_match_filter_different(self, parser, validator, propagator):
         """Test children_match_filter when children use different filters."""
-        query = self.parse_and_propagate(
-            "ti([a] OR abs[b])", parser, validator, propagator
-        )
+        query = self.parse_and_propagate("ti([a] OR abs[b])", parser, validator, propagator)
         group = query.root.children[0]
         assert group.children_match_filter is False
 
     def test_children_match_filter_nested(self, parser, validator, propagator):
         """Test children_match_filter with nested groups."""
         # All children (including nested) use ti
-        query = self.parse_and_propagate(
-            "ti([a] AND ([b] OR [c]))", parser, validator, propagator
-        )
+        query = self.parse_and_propagate("ti([a] AND ([b] OR [c]))", parser, validator, propagator)
         outer_group = query.root.children[0]
         assert outer_group.children_match_filter is True
 
