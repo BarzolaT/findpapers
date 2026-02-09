@@ -44,14 +44,14 @@ class TestFilterPropagator:
         query = self.parse_and_propagate("ti[term]", parser, validator, propagator)
         term = query.root.children[0]
         assert term.filter_code == "ti"
-        assert term.inherited_filter_code == "ti"
+        assert term.inherited_filter_code is None  # ROOT has no filter to inherit
 
     def test_group_filter_propagates_to_children(self, parser, validator, propagator):
         """Test that group filter propagates to child terms."""
         query = self.parse_and_propagate("ti([a] OR [b])", parser, validator, propagator)
         group = query.root.children[0]
         assert group.filter_code == "ti"
-        assert group.inherited_filter_code == "ti"
+        assert group.inherited_filter_code is None  # ROOT has no filter to inherit
 
         # Children should inherit
         term_a = group.children[0]
@@ -70,11 +70,12 @@ class TestFilterPropagator:
         term_b = group.children[2]
 
         # term_a inherits from group
+        assert term_a.filter_code is None
         assert term_a.inherited_filter_code == "ti"
 
-        # term_b has explicit filter that wins
+        # term_b has explicit filter, but still inherits ti from group
         assert term_b.filter_code == "abs"
-        assert term_b.inherited_filter_code == "abs"
+        assert term_b.inherited_filter_code == "ti"  # inherited from parent group
 
     def test_nested_groups_propagate_correctly(self, parser, validator, propagator):
         """Test that nested groups propagate filters correctly."""
@@ -89,7 +90,7 @@ class TestFilterPropagator:
 
         inner_group = outer_group.children[2]
         assert inner_group.filter_code == "abs"
-        assert inner_group.inherited_filter_code == "abs"  # overrides parent
+        assert inner_group.inherited_filter_code == "ti"  # inherited from outer group
 
         term_b = inner_group.children[0]
         term_c = inner_group.children[2]
@@ -131,9 +132,13 @@ class TestFilterPropagator:
             propagator,
         )
         terms = [child for child in query.root.children if child.node_type == NodeType.TERM]
-        assert terms[0].inherited_filter_code == "ti"
-        assert terms[1].inherited_filter_code == "abs"
-        assert terms[2].inherited_filter_code == "key"
+        # All terms are direct children of ROOT, so they inherit None
+        assert terms[0].filter_code == "ti"
+        assert terms[0].inherited_filter_code is None
+        assert terms[1].filter_code == "abs"
+        assert terms[1].inherited_filter_code is None
+        assert terms[2].filter_code == "key"
+        assert terms[2].inherited_filter_code is None
 
     def test_no_filter_defaults_to_none(self, parser, validator, propagator):
         """Test that queries without filters have None as inherited filter."""
