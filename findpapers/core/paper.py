@@ -17,7 +17,8 @@ class Paper:
         authors: List[str],
         publication: Publication | None,
         publication_date: datetime.date | None,
-        urls: Set[str],
+        url: Optional[str] = None,
+        pdf_url: Optional[str] = None,
         doi: Optional[str] = None,
         citations: Optional[int] = None,
         keywords: Optional[Set[str]] = None,
@@ -40,8 +41,10 @@ class Paper:
             Publication where it was published.
         publication_date : datetime.date | None
             Publication date.
-        urls : set[str]
-            URLs that reference the paper.
+        url : str | None
+            URL that references the paper.
+        pdf_url : str | None
+            Direct URL to PDF file.
         doi : str | None
             Paper DOI.
         citations : int | None
@@ -70,9 +73,9 @@ class Paper:
         self.authors = authors
         self.publication = publication
         self.publication_date = publication_date
-        self.urls = urls
-        self.doi: Optional[str] = None
-        self._set_doi(doi)
+        self.url = url
+        self.pdf_url = pdf_url
+        self.doi = doi
         self.citations = citations
         self.keywords = keywords if keywords is not None else set()
         self.comments = comments
@@ -95,21 +98,6 @@ class Paper:
         if database_name:
             self.databases.add(database_name)
 
-    def add_url(self, url: str) -> None:
-        """Add a URL that references the paper.
-
-        Parameters
-        ----------
-        url : str
-            URL to add.
-
-        Returns
-        -------
-        None
-        """
-        if url:
-            self.urls.add(url)
-
     def merge(self, paper: Paper) -> None:
         """Merge another paper into this one.
 
@@ -128,43 +116,25 @@ class Paper:
 
         # Merge scalar fields using shared rules.
         self.title = merge_value(self.title, paper.title)
-        self._set_doi(merge_value(self.doi, paper.doi))
+        self.doi = merge_value(self.doi, paper.doi)
         self.abstract = merge_value(self.abstract, paper.abstract)
         self.citations = merge_value(self.citations, paper.citations)
         self.comments = merge_value(self.comments, paper.comments)
         self.number_of_pages = merge_value(self.number_of_pages, paper.number_of_pages)
         self.pages = merge_value(self.pages, paper.pages)
+        self.url = merge_value(self.url, paper.url)
+        self.pdf_url = merge_value(self.pdf_url, paper.pdf_url)
 
         # Merge authors/keywords as collections while keeping uniqueness.
         self.authors = merge_value(self.authors, paper.authors)
         self.keywords = merge_value(self.keywords, paper.keywords)
 
-        # Always accumulate URLs and databases for traceability.
-        self.urls |= paper.urls
+        # Always accumulate databases for traceability.
         self.databases |= paper.databases
         if self.publication is None:
             self.publication = paper.publication
         elif paper.publication is not None:
             self.publication.merge(paper.publication)
-
-    def _set_doi(self, doi: Optional[str]) -> None:
-        """Set DOI and ensure DOI URL is present.
-
-        Parameters
-        ----------
-        doi : str | None
-            DOI string.
-
-        Returns
-        -------
-        None
-        """
-        self.doi = doi
-        if not self.doi:
-            return
-        doi_url = f"https://doi.org/{self.doi}"
-        if doi_url not in self.urls:
-            self.urls.add(doi_url)
 
     @classmethod
     def from_dict(cls, paper_dict: dict) -> "Paper":
@@ -209,11 +179,14 @@ class Paper:
                 publication_date = datetime.datetime.strptime(publication_date, "%Y-%m-%d").date()
             except ValueError:
                 publication_date = None
-        raw_urls = paper_dict.get("urls") or []
-        if isinstance(raw_urls, (list, set, tuple)):
-            urls = {str(url) for url in raw_urls}
-        else:
-            urls = {str(raw_urls)} if raw_urls else set()
+
+        url = paper_dict.get("url")
+        if url is not None and not isinstance(url, str):
+            url = str(url)
+
+        pdf_url = paper_dict.get("pdf_url")
+        if pdf_url is not None and not isinstance(pdf_url, str):
+            pdf_url = str(pdf_url)
 
         doi = paper_dict.get("doi")
         if doi is not None and not isinstance(doi, str):
@@ -239,7 +212,8 @@ class Paper:
             authors=authors,
             publication=publication,
             publication_date=publication_date,
-            urls=urls,
+            url=url,
+            pdf_url=pdf_url,
             doi=doi,
             citations=citations,
             keywords=keywords,
@@ -273,7 +247,8 @@ class Paper:
             "publication_date": (
                 paper.publication_date.isoformat() if paper.publication_date is not None else None
             ),
-            "urls": sorted(paper.urls),
+            "url": paper.url,
+            "pdf_url": paper.pdf_url,
             "doi": paper.doi,
             "citations": paper.citations,
             "keywords": sorted(paper.keywords),

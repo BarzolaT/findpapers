@@ -85,7 +85,8 @@ def csv_columns() -> list[str]:
         "abstract",
         "authors",
         "publication_date",
-        "urls",
+        "url",
+        "pdf_url",
         "doi",
         "citations",
         "keywords",
@@ -128,7 +129,8 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
         "abstract": paper.abstract,
         "authors": "; ".join(paper.authors),
         "publication_date": paper.publication_date.isoformat() if paper.publication_date else None,
-        "urls": "; ".join(sorted(paper.urls)),
+        "url": paper.url,
+        "pdf_url": paper.pdf_url,
         "doi": paper.doi,
         "citations": paper.citations,
         "keywords": "; ".join(sorted(paper.keywords)),
@@ -251,9 +253,8 @@ def bibtex_note(paper: Paper) -> str:
         Note field content.
     """
     parts: list[str] = []
-    urls = sorted(paper.urls)
-    if urls:
-        parts.append(f"Available at {urls[0]}")
+    if paper.url:
+        parts.append(f"Available at {paper.url}")
     if paper.publication_date is not None:
         parts.append(f"({paper.publication_date.strftime('%Y/%m/%d')})")
     if paper.comments:
@@ -274,8 +275,7 @@ def bibtex_how_published(paper: Paper) -> str:
     str
         howpublished content.
     """
-    urls = sorted(paper.urls)
-    if not urls or paper.publication_date is None:
+    if not paper.url or paper.publication_date is None:
         return ""
     date = paper.publication_date.strftime("%Y/%m/%d")
-    return f"Available at {urls[0]} ({date})"
+    return f"Available at {paper.url} ({date})"

@@ -52,22 +52,24 @@ def test_paper_requires_title():
             authors=[],
             publication=None,
             publication_date=datetime.date.today(),
-            urls=set(),
         )
 
 
-def test_paper_adds_doi_url_when_missing_urls():
-    """Test that DOI URL is automatically added."""
+def test_paper_url_and_pdf_url():
+    """Test that paper accepts url and pdf_url."""
     paper = Paper(
         title="Title",
-        abstract="",
+        abstract="Abstract",
         authors=["A"],
         publication=None,
         publication_date=None,
-        urls=set(),
+        url="https://example.com/paper",
+        pdf_url="https://example.com/paper.pdf",
         doi="10.123/abc",
     )
-    assert "https://doi.org/10.123/abc" in paper.urls
+    assert paper.url == "https://example.com/paper"
+    assert paper.pdf_url == "https://example.com/paper.pdf"
+    assert paper.doi == "10.123/abc"
 
 
 def test_paper_add_and_merge():
@@ -79,12 +81,11 @@ def test_paper_add_and_merge():
         authors=["A"],
         publication=publication,
         publication_date=datetime.date(2020, 1, 1),
-        urls=set(),
+        url="https://example.com",
     )
     paper.add_database("arxiv")
-    paper.add_url("https://example.com")
     assert "arxiv" in paper.databases
-    assert "https://example.com" in paper.urls
+    assert paper.url == "https://example.com"
 
     incoming = Paper(
         title="Longer Title",
@@ -92,14 +93,16 @@ def test_paper_add_and_merge():
         authors=["A", "B"],
         publication=Publication(title="Journal", publisher="Pub"),
         publication_date=datetime.date(2020, 1, 1),
-        urls={"https://b"},
+        url="https://longer-example.com",
+        pdf_url="https://example.com/paper.pdf",
         citations=5,
     )
     paper.merge(incoming)
     assert paper.title == "Longer Title"
     assert paper.abstract == "Abstract"
     assert paper.citations == 5
-    assert "https://b" in paper.urls
+    assert paper.url == "https://longer-example.com"
+    assert paper.pdf_url == "https://example.com/paper.pdf"
 
 
 def test_search_add_paper():
@@ -111,7 +114,6 @@ def test_search_add_paper():
         authors=["Author"],
         publication=None,
         publication_date=None,
-        urls=set(),
     )
     search.add_paper(paper)
     assert len(search.papers) == 1
