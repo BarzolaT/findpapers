@@ -22,9 +22,9 @@ class Search:
         databases: Optional[List[str]] = None,
         publication_types: Optional[List[str]] = None,
         papers: Optional[List[Paper]] = None,
-        metrics: Optional[dict[str, int | float]] = None,
         timeout: Optional[float] = None,
         runtime_seconds: Optional[float] = None,
+        runtime_seconds_per_database: Optional[dict[str, float]] = None,
     ) -> None:
         """Create a Search instance.
 
@@ -48,12 +48,12 @@ class Search:
             Publication types filter.
         papers : list[Paper] | None
             Initial papers.
-        metrics : dict[str, int | float] | None
-            Numeric metrics snapshot.
         timeout : float | None
             Global timeout used for the run.
         runtime_seconds : float | None
             Total runtime of the search pipeline.
+        runtime_seconds_per_database : dict[str, float] | None
+            Runtime in seconds for each database.
         """
         self.query = query
         self.since = since
@@ -71,9 +71,11 @@ class Search:
         self.databases = databases
         self.publication_types = publication_types
         self.papers: List[Paper] = papers or []
-        self.metrics: dict[str, int | float] = dict(metrics or {})
         self.timeout = timeout
         self.runtime_seconds = runtime_seconds
+        self.runtime_seconds_per_database: dict[str, float] = dict(
+            runtime_seconds_per_database or {}
+        )
 
     def add_paper(self, paper: Paper) -> None:
         """Add a paper to the results.
@@ -118,11 +120,11 @@ class Search:
             "timestamp": self.processed_at.astimezone(datetime.timezone.utc).isoformat(),
             "version": package_version(),
             "runtime_seconds": self.runtime_seconds,
+            "runtime_seconds_per_database": dict(self.runtime_seconds_per_database),
         }
         return {
             "metadata": metadata,
             "papers": [Paper.to_dict(paper) for paper in self.papers],
-            "metrics": dict(self.metrics),
         }
 
     def to_json(self, path: str) -> None:
