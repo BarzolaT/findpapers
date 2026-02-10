@@ -16,13 +16,11 @@ class Search:
         query: str,
         since: Optional[datetime.date] = None,
         until: Optional[datetime.date] = None,
-        limit: Optional[int] = None,
-        limit_per_database: Optional[int] = None,
+        max_papers_per_database: Optional[int] = None,
         processed_at: Optional[datetime.datetime] = None,
         databases: Optional[List[str]] = None,
         publication_types: Optional[List[str]] = None,
         papers: Optional[List[Paper]] = None,
-        timeout: Optional[float] = None,
         runtime_seconds: Optional[float] = None,
         runtime_seconds_per_database: Optional[dict[str, float]] = None,
     ) -> None:
@@ -36,10 +34,8 @@ class Search:
             Lower bound date.
         until : datetime.date | None
             Upper bound date.
-        limit : int | None
-            Global limit.
-        limit_per_database : int | None
-            Per-database limit.
+        max_papers_per_database : int | None
+            Maximum papers per database.
         processed_at : datetime.datetime | None
             Processing timestamp.
         databases : list[str] | None
@@ -48,8 +44,6 @@ class Search:
             Publication types filter.
         papers : list[Paper] | None
             Initial papers.
-        timeout : float | None
-            Global timeout used for the run.
         runtime_seconds : float | None
             Total runtime of the search pipeline.
         runtime_seconds_per_database : dict[str, float] | None
@@ -58,8 +52,7 @@ class Search:
         self.query = query
         self.since = since
         self.until = until
-        self.limit = limit
-        self.limit_per_database = limit_per_database
+        self.max_papers_per_database = max_papers_per_database
         processed_at = (
             processed_at
             if processed_at is not None
@@ -71,7 +64,6 @@ class Search:
         self.databases = databases
         self.publication_types = publication_types
         self.papers: List[Paper] = papers or []
-        self.timeout = timeout
         self.runtime_seconds = runtime_seconds
         self.runtime_seconds_per_database: dict[str, float] = dict(
             runtime_seconds_per_database or {}
@@ -106,17 +98,10 @@ class Search:
         dict[str, object]
             Dictionary representation of the search.
         """
-        limits = None
-        if self.limit is not None or self.limit_per_database is not None:
-            limits = {
-                "limit": self.limit,
-                "limit_per_database": self.limit_per_database,
-            }
         metadata = {
             "query": self.query,
             "databases": self.databases,
-            "limits": limits,
-            "timeout": self.timeout,
+            "max_papers_per_database": self.max_papers_per_database,
             "timestamp": self.processed_at.astimezone(datetime.timezone.utc).isoformat(),
             "version": package_version(),
             "runtime_seconds": self.runtime_seconds,
