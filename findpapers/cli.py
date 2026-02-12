@@ -87,7 +87,7 @@ def search(
         If these tokens are not provided the search on these databases will be skipped.
 
         You can constraint the search by date using the -s (or --since) and -u (or --until) arguments
-        following the pattern YYYY-MM-DD (E.g. 2020-12-31). 
+        following the pattern YYYY-MM-DD (E.g. 2020-12-31).
 
         You can restrict the max number of retrieved papers by using -l (or --limit).
         And, restrict the max number of retrieved papers by database using -ld (or --limit_per_database) argument.
@@ -102,7 +102,7 @@ def search(
 
         You can control which publication types you would like to fetch in your search by the -p (or --publication-types) option. This parameter
         accepts a comma-separated list of database names, and is case-insensitive. Nowadays the available publication types are
-        journal, conference proceedings, book, other. 
+        journal, conference proceedings, book, other.
         When a particular publication does not fit into any of the other types it is classified as "other", e.g., magazines, newsletters, unpublished manuscripts.
 
         E.g.:
@@ -185,7 +185,7 @@ def refine(
     E.g.: 
     --categories "Contribution:Metric,Tool,Model,Method"
     --categories "Research Type:Validation Research,Evaluation Research,Solution Proposal,Philosophical,Opinion,Experience"
-    
+
     The -c parameter can be defined several times, so you can define as many facets as you want
     The -c parameter is case-sensitive.
 
@@ -197,7 +197,7 @@ def refine(
 
     try:
         highlights = [x.strip() for x in highlights.split(",")] if highlights is not None else None
-        
+
         categories_by_facet = {} if len(categories) > 0 else None
         for categories_string in categories:
             string_split = categories_string.split(":")
@@ -253,7 +253,7 @@ def download(
 
     E.g.: 
     --categories "Contribution:Metric,Tool"
-    
+
     The -c parameter can be defined several times, so you can define as many filters as you want
     The -c parameter is case-sensitive.
 
@@ -266,7 +266,7 @@ def download(
     However, if you have a proxy provided for the institution where you study or work that permit you 
     to "break" this paywall. You can use this proxy configuration here
     by setting the environment variable FINDPAPERS_PROXY.
-    
+
     You can control the command logging verbosity by the -v (or --verbose) argument.
     """
 
@@ -322,7 +322,7 @@ def bibtex(
 
     E.g.: 
     --categories "Contribution:Metric,Tool"
-    
+
     The -c parameter can be defined several times, so you can define as many filters as you want.
     The -c parameter is case-sensitive.
 
@@ -336,7 +336,7 @@ def bibtex(
             string_split = categories_string.split(":")
             facet = string_split[0].strip()
             categories_by_facet[facet] = [x.strip() for x in string_split[1].split(",")]
-        
+
         findpapers.generate_bibtex(filepath, outputpath, only_selected_papers, categories_by_facet, add_findpapers_citation, verbose)
     except Exception as e:
         if verbose:
@@ -353,7 +353,7 @@ def version():
     """
 
     typer.echo(f"findpapers {findpapers.__version__}")
-    
+
 
 def main():
     app()
