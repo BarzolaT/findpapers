@@ -35,7 +35,7 @@ make format TARGET='findpapers/models'            # Format directory
 make format                                       # Format entire project (default)
 ```
 
-## Code Guidelines
+## Code Guidelines (IT'S EXTREMELY IMPORTANT TO FOLLOW THESE GUIDELINES)
 
 To ensure consistency throughout the source code, keep these rules in mind as you are working:
 
