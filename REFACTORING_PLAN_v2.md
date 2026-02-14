@@ -253,7 +253,7 @@ make test PYTEST_ARGS='tests/unit/'  # ✅ 59 testes passando, coverage 74%
 
 **Referência:** Especificações completas no [query-build-plan.md](query-build-plan.md)
 
-#### 2.1. Interface QueryBuilder ⏳
+#### 2.1. Interface QueryBuilder ✅
 
 **Criar `findpapers/query/builder.py`:**
 ```python
@@ -320,7 +320,7 @@ class QueryBuilder(ABC):
     
     @abstractmethod
     def expand_query(self, query: Query) -> List[Query]:
-        """Expand query into multiple queries if needed (bioRxiv/medRxiv).
+        """Expand query into multiple queries if needed (e.g. bioRxiv/medRxiv).
         
         Returns
         -------
@@ -330,14 +330,14 @@ class QueryBuilder(ABC):
         pass
 ```
 
-#### 2.2. Implementar Builders (Do Zero) ⏳
+#### 2.2. Implementar Builders (Do Zero) 🔄
 
 **⚠️ IMPORTANTE:** Os arquivos em `findpapers_0/searchers/*.py` são apenas **placeholders**. NÃO extrair código deles. Toda a lógica de builders deve ser **implementada do zero** seguindo as especificações detalhadas no [query-build-plan.md](query-build-plan.md).
 
 Para cada builder, seguir especificações completas em [query-build-plan.md](query-build-plan.md):
 
 **Builders a implementar (do zero):**
-- [ ] `query/builders/arxiv.py` - ArxivQueryBuilder
+- [x] `query/builders/arxiv.py` - ArxivQueryBuilder
   - Implementar seguindo [query-build-plan.md - arXiv](query-build-plan.md#arxiv)
   - Conversão: `ti:`, `abs:`, `au:`, `all:`
   - Operadores: `AND`, `OR`, `ANDNOT`
@@ -346,28 +346,28 @@ Para cada builder, seguir especificações completas em [query-build-plan.md](qu
   - Parênteses: URL encode `%28` `%29`
   - Retorna: query string
 
-- [ ] `query/builders/pubmed.py` - PubmedQueryBuilder
+- [x] `query/builders/pubmed.py` - PubmedQueryBuilder
   - Implementar seguindo [query-build-plan.md - PubMed](query-build-plan.md#pubmed)
   - Conversão: `[ti]`, `[tiab]`, `[au]`, `[mh]`, `[journal]`, `[ad]`
   - Operadores: `AND`, `OR`, `NOT`
   - Wildcards: apenas `*` (não `?`)
   - Retorna: query string
 
-- [ ] `query/builders/ieee.py` - IEEEQueryBuilder
+- [x] `query/builders/ieee.py` - IEEEQueryBuilder
   - Implementar seguindo [query-build-plan.md - IEEE](query-build-plan.md#ieee-xplore)
   - Conversão: `article_title`, `abstract`, `author`, `index_terms`
   - Operadores: `AND`, `OR`, `NOT`
   - Wildcards: `*` (mín 3 chars antes)
   - Retorna: dict de parâmetros
 
-- [ ] `query/builders/scopus.py` - ScopusQueryBuilder
+- [x] `query/builders/scopus.py` - ScopusQueryBuilder
   - Implementar seguindo [query-build-plan.md - Scopus](query-build-plan.md#scopus)
   - Conversão: `TITLE()`, `ABS()`, `KEY()`, `AUTH()`, `AFFIL()`, `SRCTITLE()`, `TITLE-ABS-KEY()`
   - Operadores: `AND`, `OR`, `AND NOT`
   - Wildcards: `?` e `*`
   - Retorna: query string
 
-- [ ] `query/builders/biorxiv.py` - BiorxivQueryBuilder
+- [x] `query/builders/biorxiv.py` - BiorxivQueryBuilder
   - Implementar seguindo [query-build-plan.md - bioRxiv](query-build-plan.md#biorxiv)
   - Apenas `abstract_title` (nativo)
   - Operadores: `AND` via match-all, `OR` via match-any
@@ -375,33 +375,28 @@ Para cada builder, seguir especificações completas em [query-build-plan.md](qu
   - Warning se >20 combinações
   - Retorna: lista de dicts de parâmetros
 
-- [ ] `query/builders/medrxiv.py` - MedrxivQueryBuilder
+- [x] `query/builders/medrxiv.py` - MedrxivQueryBuilder
   - Implementar seguindo [query-build-plan.md - medRxiv](query-build-plan.md#medrxiv)
   - Mesmas regras do bioRxiv (compartilham API)
 
-- [ ] `query/builders/openalex.py` - OpenAlexQueryBuilder
+- [x] `query/builders/openalex.py` - OpenAlexQueryBuilder
   - Implementar seguindo [query-build-plan.md - OpenAlex](query-build-plan.md#openalex)
   - Conversão: `title.search`, `abstract.search`, `authorships.author.display_name.search`, etc.
   - Operadores: `,` (AND), `|` (OR), `!` (NOT)
   - Retorna: dict de parâmetros
   - Suporte a filtros: ti, abs, au, pu, af, tiabs, tiabskey
 
-- [ ] `query/builders/semantic_scholar.py` - SemanticScholarQueryBuilder
+- [x] `query/builders/semantic_scholar.py` - SemanticScholarQueryBuilder
   - Implementar seguindo [query-build-plan.md - Semantic Scholar](query-build-plan.md#semantic-scholar)
-  - Conversão: `query` (tiabs nativo), filters para venue, author
+  - Conversão: `query` (tiabs nativo)
   - Operadores: `+` (AND), `|` (OR), `-` (NOT) via bulk search
   - Retorna: dict ou str dependendo do endpoint
-  - Suporte limitado: tiabs (nativo), pu e au (via filters)
+  - Suporte limitado: tiabs (nativo)
 
 **Criar testes:**
-- [ ] `tests/unit/query/builders/test_arxiv_builder.py`
-- [ ] `tests/unit/query/builders/test_pubmed_builder.py`
-- [ ] `tests/unit/query/builders/test_ieee_builder.py`
-- [ ] `tests/unit/query/builders/test_scopus_builder.py`
-- [ ] `tests/unit/query/builders/test_biorxiv_builder.py`
-- [ ] `tests/unit/query/builders/test_medrxiv_builder.py`
-- [ ] `tests/unit/query/builders/test_openalex_builder.py` 🆕
-- [ ] `tests/unit/query/builders/test_semantic_scholar_builder.py` 🆕
+- [x] Suíte de builders em arquivos específicos por base (`tests/unit/query/builders/test_*_builder.py`)
+- [x] Fixtures compartilhadas extraídas para `tests/unit/query/builders/conftest.py`
+- [x] Cobertura de filtros por base adicionada (validação/conversão para todos os filtros suportados)
 
 **Usar dados de `tests/data/` (copiar de tests_0/) para testes offline**
 
@@ -1005,13 +1000,13 @@ make test  # TODOS os testes (unit + integration) passando
 ### Status Geral
 - [✅] **Fase 0:** Limpeza e Preparação (100%) ✅ CONCLUÍDA
 - [✅] **Fase 1:** Core + Query System (100%) ✅ CONCLUÍDA - 59 testes passando
-- [ ] **Fase 2:** Query Builders (0%)
+- [✅] **Fase 2:** Query Builders (100%) ✅ CONCLUÍDA - suíte de builders dividida e passando
 - [ ] **Fase 3:** Searchers com DI (0%)
 - [ ] **Fase 4:** Runners + Utils (0%)
 - [ ] **Fase 5:** Testes Integrados + API (0%)
 - [ ] **Fase 6:** Documentação + Limpeza Final (0%)
 
-**Progresso Total: ~29%** (2/7 fases completas)
+**Progresso Total: ~43%** (3 fases completas)
 
 **Fase 1 Resultados:**
 - ✅ 59 testes unitários passando
@@ -1097,9 +1092,9 @@ Atualizar "Status Geral" no topo após concluir cada fase.
 
 ---
 
-**Última atualização:** 8 de fevereiro de 2026  
-**Status:** ✅ Fase 0 concluída, pronto para Fase 1  
-**Próximo passo:** Executar Fase 1.1 - Migrar Core Entities
+**Última atualização:** 14 de fevereiro de 2026  
+**Status:** ✅ Fase 2 concluída, pronto para Fase 3  
+**Próximo passo:** Executar Fase 3.1 - Migrar Base Searcher
 
 **Novos requisitos adicionados:**
 - ✅ Interface simples (apenas tipos nativos Python)

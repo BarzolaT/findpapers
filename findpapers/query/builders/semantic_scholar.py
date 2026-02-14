@@ -1,0 +1,133 @@
+"""Semantic Scholar query builder."""
+
+from __future__ import annotations
+
+import re
+
+from findpapers.core.query import Query, QueryNode
+from findpapers.query.builder import QueryBuilder, QueryValidationResult
+from findpapers.query.builders.common import (
+    clone_query,
+    convert_expression,
+    get_effective_filter,
+    iter_term_nodes,
+)
+
+
+class SemanticScholarQueryBuilder(QueryBuilder):
+    """Build Semantic Scholar bulk-search payloads."""
+
+    _SUPPORTED_FILTERS = {"tiabs"}
+
+    def validate_query(self, query: Query) -> QueryValidationResult:
+        """Validate whether Semantic Scholar supports this query.
+
+        Parameters
+        ----------
+        query : Query
+            Query to validate.
+
+        Returns
+        -------
+        QueryValidationResult
+            Validation result.
+        """
+        term_nodes = iter_term_nodes(query.root)
+
+        for term in term_nodes:
+            filter_code = get_effective_filter(term)
+            if not self.supports_filter(filter_code):
+                return QueryValidationResult(
+                    is_valid=False,
+                    error_message=f"Filter '{filter_code}' is not supported by Semantic Scholar.",
+                )
+            if term.value and "?" in term.value:
+                return QueryValidationResult(
+                    is_valid=False,
+                    error_message="Wildcard '?' is not supported by Semantic Scholar bulk search.",
+                )
+        return QueryValidationResult(is_valid=True)
+
+    def convert_query(self, query: Query) -> dict:
+        """Convert query into Semantic Scholar bulk-search parameters.
+
+        Parameters
+        ----------
+        query : Query
+            Query to convert.
+
+        Returns
+        -------
+        dict
+            Semantic Scholar request parameters.
+        """
+        preprocessed = self.preprocess_terms(query)
+
+        connector_map = {
+            "and": "+",
+            "or": "|",
+            "and not": "-",
+        }
+
+        def convert_term(term_node: QueryNode) -> str:
+            term = term_node.value or ""
+            return f'"{term}"' if " " in term else term
+
+        expression = convert_expression(preprocessed.root, convert_term, connector_map)
+        normalized_query = " ".join(expression.split())
+        normalized_query = normalized_query.replace(" - ", " -")
+        normalized_query = re.sub(r"(^|\s)[+|](?=\s|$)", " ", normalized_query)
+        normalized_query = re.sub(r"(^|\s)-(?=\s|$)", " ", normalized_query)
+        normalized_query = re.sub(r"\(\s*\)", "", normalized_query)
+        normalized_query = " ".join(normalized_query.split())
+
+        return {"query": normalized_query or "*"}
+
+    def preprocess_terms(self, query: Query) -> Query:
+        """Replace hyphens with spaces due to API tokenization behavior.
+
+        Parameters
+        ----------
+        query : Query
+            Query to preprocess.
+
+        Returns
+        -------
+        Query
+            Preprocessed query.
+        """
+        cloned = clone_query(query)
+        for term in iter_term_nodes(cloned.root):
+            if term.value:
+                term.value = term.value.replace("-", " ")
+        return cloned
+
+    def supports_filter(self, filter_code: str) -> bool:
+        """Check filter support for Semantic Scholar.
+
+        Parameters
+        ----------
+        filter_code : str
+            Filter code.
+
+        Returns
+        -------
+        bool
+            True when supported.
+        """
+        return filter_code in self._SUPPORTED_FILTERS
+
+    def expand_query(self, query: Query) -> list[Query]:
+        """Return query without expansion for Semantic Scholar.
+
+        Parameters
+        ----------
+        query : Query
+            Input query.
+
+        Returns
+        -------
+        list[Query]
+            Single query list.
+        """
+        return [query]

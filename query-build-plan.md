@@ -60,8 +60,8 @@ O objeto `Query` já realiza o parsing da string de query em uma árvore (tree) 
 | Título | `ti` | ✅ `ti:` | ✅ `[ti]` | ✅ `article_title` | ✅ `TITLE()` | ❌ skip | ❌ skip | ✅ `title.search` | ❌ skip |
 | Abstract | `abs` | ✅ `abs:` | ✅ `[tiab]` | ✅ `abstract` | ✅ `ABS()` | ❌ skip | ❌ skip | ✅ `abstract.search` | ❌ skip |
 | Keywords | `key` | ❌ skip | ✅ `[mh]` | ✅ `index_terms` | ✅ `KEY()` | ❌ skip | ❌ skip | ⚠️ via `concepts` | ❌ skip |
-| Autor | `au` | ✅ `au:` | ✅ `[au]` | ✅ `author` | ✅ `AUTH()` | ❌ skip | ❌ skip | ✅ `authorships.author.display_name.search` | ⚠️ filter |
-| Publicação | `pu` | ❌ skip | ✅ `[journal]` | ✅ `publication_title` | ✅ `SRCTITLE()` | ❌ skip | ❌ skip | ✅ `primary_location.source` | ✅ `venue` filter |
+| Autor | `au` | ✅ `au:` | ✅ `[au]` | ✅ `author` | ✅ `AUTH()` | ❌ skip | ❌ skip | ✅ `authorships.author.display_name.search` | ❌ skip |
+| Publicação | `pu` | ❌ skip | ✅ `[journal]` | ✅ `publication_title` | ✅ `SRCTITLE()` | ❌ skip | ❌ skip | ✅ `primary_location.source` | ❌ skip |
 | Afiliação | `af` | ❌ skip | ✅ `[ad]` | ✅ `affiliation` | ✅ `AFFIL()` | ❌ skip | ❌ skip | ✅ `authorships.institutions` | ❌ skip |
 | Tít+Abs | `tiabs` | ✅ via OR | ✅ `[tiab]` | ⚠️ 2 req | ✅ `TITLE-ABS()` | ✅ nativo | ✅ nativo | ✅ `title_and_abstract.search` | ✅ `query` |
 | Tít+Abs+Key | `tiabskey` | ❌ skip | ✅ OR | ✅ `querytext` | ✅ `TITLE-ABS-KEY()` | ❌ skip | ❌ skip | ✅ `search` | ❌ skip |
@@ -637,12 +637,13 @@ Semantic Scholar aceita diversos formatos de ID:
 - **Bulk Search**: Sem busca por campo específico (título, abstract separadamente)
 - Wildcards tradicionais (`*`, `?`) não suportados (usa `~` para fuzzy)
 - Hífen é tratado incorretamente (substituir por espaço)
+- No builder atual do projeto, filtros `au[...]` e `pu[...]` são tratados como não suportados (warning + skip)
 - Rate limit: 1 req/seg (sem API key) ou 10 req/seg (com API key)
 - Máximo de 10 MB de dados por requisição
 
 #### Peculiaridades
 - Busca apenas em título e abstract combinados (não permite separar)
-- Filtros por autor e venue são via parâmetros separados, não na query
+- A API possui filtros separados como `venue`, mas o builder atual não os utiliza para preservar semântica
 - Suporte a fuzzy search nativo
 - API de autocomplete disponível para sugestões
 - TLDR (resumo automático) disponível nos resultados
@@ -838,8 +839,8 @@ def get_default_query_filter(database: str, include_keywords: bool = False) -> s
 | `ti[x]` | `ti:x` | `x[ti]` | `article_title=x` | `TITLE(x)` | `filter=title.search:x` | ❌ skip |
 | `abs[x]` | `abs:x` | `x[ab]` | `abstract=x` | `ABS(x)` | `filter=abstract.search:x` | ❌ skip |
 | `key[x]` | ❌ skip | `x[mh]` | `index_terms=x` | `KEY(x)` | ⚠️ `concepts.display_name` | ❌ skip |
-| `au[x]` | `au:x` | `x[au]` | `author=x` | `AUTH(x)` | `authorships.author.display_name.search:x` | ⚠️ `authors` filter |
-| `pu[x]` | ❌ skip | `x[journal]` | `publication_title=x` | `SRCTITLE(x)` | `primary_location.source.display_name.search:x` | ⚠️ `venue` filter |
+| `au[x]` | `au:x` | `x[au]` | `author=x` | `AUTH(x)` | `authorships.author.display_name.search:x` | ❌ skip |
+| `pu[x]` | ❌ skip | `x[journal]` | `publication_title=x` | `SRCTITLE(x)` | `primary_location.source.display_name.search:x` | ❌ skip |
 | `af[x]` | ❌ skip | `x[ad]` | `affiliation=x` | `AFFIL(x)` | `authorships.institutions.display_name.search:x` | ❌ skip |
 | `tiabs[x]` | `ti:x OR abs:x` | `x[tiab]` | ⚠️ 2 req | `TITLE(x) OR ABS(x)` | `filter=title_and_abstract.search:x` | ✅ `query=x` (nativo) |
 | `tiabskey[x]` | ❌ skip | `x[tiab] OR x[mh]` | `querytext=x` | `TITLE-ABS-KEY(x)` | `search=x` | ❌ skip |
@@ -1519,6 +1520,41 @@ def expand_query_for_db(query: Query, db_name: str) -> List[Query]:
 5. **Para preprints**: bioRxiv/medRxiv com queries simples
 6. **Para CS/Engineering**: IEEE + arXiv
 7. **Para Medicina/Biomédica**: PubMed + Scopus + medRxiv
+
+### Validação Cruzada (2026-02-14)
+
+Esta seção registra o resultado da revisão entre **plano**, **implementação** e **documentação oficial** das APIs.
+
+#### 1) IEEE: expansão não é obrigatória em todos os casos
+
+- O plano menciona expansão para alguns cenários de filtros no IEEE.
+- A documentação oficial do IEEE Xplore Metadata API indica que `querytext` aceita booleanos e consultas complexas com nomes de campos.
+- Portanto, para os cenários em que a expressão em `querytext` é válida, **não é obrigatório expandir em múltiplas requisições**.
+
+**Conclusão**: o comportamento atual (preferir `querytext` para expressões compostas) é consistente com a API e o plano deve ser interpretado como estratégia conservadora/opcional, não regra mandatória.
+
+#### 2) Semantic Scholar: remoção de suporte a `pu` no builder
+
+- Em `paper/search/bulk`, `venue` é parâmetro de filtro separado da query textual.
+- Para simplificar comportamento e evitar distorções semânticas, o builder atual passou a suportar apenas `tiabs`.
+
+**Ajuste aplicado no código**:
+- Remover suporte a `pu[...]` do builder de Semantic Scholar.
+- Tratar `pu[...]` e `au[...]` como filtros não suportados (warning + skip na base).
+
+#### 3) PubMed: wildcard `*` exige mínimo de 4 caracteres
+
+- A documentação atual do PubMed especifica mínimo de 4 caracteres antes do primeiro `*`.
+
+**Ajuste aplicado no código**:
+- `validate_query()` do builder de PubMed passou a rejeitar termos com `*` antes de 4 caracteres.
+
+#### 4) bioRxiv/medRxiv: divergência entre busca web e política do projeto
+
+- A página de Search Tips do medRxiv descreve suporte a operadores que, na prática do projeto, são tratados de forma mais restrita para garantir previsibilidade e qualidade dos resultados.
+- A implementação atual mantém política conservadora (warning/skip para recursos não suportados no fluxo adotado).
+
+**Conclusão**: essa diferença deve ser tratada como decisão de produto/robustez e documentada explicitamente para evitar ambiguidade.
 
 ---
 
