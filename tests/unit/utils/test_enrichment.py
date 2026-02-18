@@ -1,0 +1,974 @@
+"""Unit tests for findpapers.utils.enrichment.
+
+Tests use real HTML pages collected from arXiv, PubMed, medRxiv, OpenAlex,
+IEEE, Scopus, and SemanticScholar that are stored in tests/data/pages/.  This
+lets us verify parsing correctness against real-world markup without making
+live network requests.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from findpapers.utils.enrichment import (
+    _parse_authors,
+    _parse_keywords,
+    build_paper_from_metadata,
+    enrich_from_sources,
+    extract_metadata_from_html,
+    fetch_metadata,
+)
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+PAGES_DIR = Path(__file__).parent.parent.parent / "data" / "pages"
+
+# Pre-load each fixture once at module import so tests do not hit the filesystem
+# repeatedly.  If a fixture does not exist on disk the fixture will be None and
+# we skip the corresponding tests.
+
+
+def _load(rel: str) -> str | None:
+    """Read an HTML fixture file relative to PAGES_DIR; return None if absent."""
+    path = PAGES_DIR / rel
+    if not path.exists():
+        return None
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
+ARXIV_HTML = _load("arxiv/abs_2301.00306v4.html")
+ARXIV_HTML_WITH_DOI = _load("arxiv/10.1016_j.apenergy.2023.121323.html")
+PUBMED_HTML = _load("pubmed/10.3758_s13428-022-02028-7.html")
+MEDRXIV_HTML = _load("medrxiv/10.1101_19004184.html")
+OPENALEX_HTML = _load("openalex/10.3126_nelta.v27i1-2.53203.html")
+IEEE_HTML = _load("ieee/10.1109_ACCESS.2021.3119621.html")
+SCOPUS_HTML = _load("scopus/10.1055_a-2233-2736.html")
+SEMANTICSCHOLAR_HTML = _load("semanticscholar/10.4230_DagRep.12.6.14.html")
+
+
+def _skip_if_missing(fixture: str | None) -> None:
+    """Skip the current test when the HTML fixture is missing from disk."""
+    if fixture is None:
+        pytest.skip("HTML fixture not found on disk — run tests/data/pages/collect_pages.py first")
+
+
+# ---------------------------------------------------------------------------
+# extract_metadata_from_html
+# ---------------------------------------------------------------------------
+
+
+class TestExtractMetadataFromHtml:
+    """Tests for the pure extract_metadata_from_html() parser."""
+
+    def test_empty_string_returns_empty_dict(self) -> None:
+        """Empty HTML yields an empty metadata mapping."""
+        assert extract_metadata_from_html("") == {}
+
+    def test_no_meta_tags_returns_empty_dict(self) -> None:
+        """HTML without <meta> tags yields an empty mapping."""
+        html = "<html><body><h1>Hello</h1></body></html>"
+        assert extract_metadata_from_html(html) == {}
+
+    def test_single_meta_name_content(self) -> None:
+        """A single <meta name=… content=…> is captured."""
+        html = '<html><head><meta name="citation_title" content="My Paper"></head></html>'
+        meta = extract_metadata_from_html(html)
+        assert meta.get("citation_title") == "My Paper"
+
+    def test_meta_property_captured(self) -> None:
+        """<meta property=…> (Open Graph style) is treated the same as name=…."""
+        html = '<html><head><meta property="og:title" content="OG Title"></head></html>'
+        meta = extract_metadata_from_html(html)
+        assert meta.get("og:title") == "OG Title"
+
+    def test_keys_are_lowercased(self) -> None:
+        """Meta key names are normalised to lower-case."""
+        html = '<html><head><meta name="Citation_Title" content="A Title"></head></html>'
+        meta = extract_metadata_from_html(html)
+        assert "citation_title" in meta
+
+    def test_dc_colon_prefix_normalised_to_dot(self) -> None:
+        """Dublin Core colon-form keys (dc:creator) are mapped to dot-form (dc.creator)."""
+        html = "<html><head>" '<meta name="dc:creator" content="Smith, J">' "</head></html>"
+        meta = extract_metadata_from_html(html)
+        # The colon-form key must NOT appear; the dot-form must be present.
+        assert "dc:creator" not in meta
+        assert meta.get("dc.creator") == "Smith, J"
+
+    def test_multiple_dc_colon_creator_collected_as_list(self) -> None:
+        """Multiple dc:creator tags produce a list under dc.creator."""
+        html = (
+            "<html><head>"
+            '<meta name="dc:creator" content="Smith, J">'
+            '<meta name="dc:creator" content="Doe, J">'
+            "</head></html>"
+        )
+        meta = extract_metadata_from_html(html)
+        creators = meta.get("dc.creator")
+        assert isinstance(creators, list)
+        assert "Smith, J" in creators
+
+    def test_duplicate_keys_collected_as_list(self) -> None:
+        """Multiple <meta> with the same key produce a list value."""
+        html = (
+            "<html><head>"
+            '<meta name="citation_author" content="Smith, John">'
+            '<meta name="citation_author" content="Doe, Jane">'
+            "</head></html>"
+        )
+        meta = extract_metadata_from_html(html)
+        authors = meta.get("citation_author")
+        assert isinstance(authors, list)
+        assert len(authors) == 2
+        assert "Smith, John" in authors
+        assert "Doe, Jane" in authors
+
+    def test_empty_content_skipped(self) -> None:
+        """<meta> tags with empty content are not included in the mapping."""
+        html = '<html><head><meta name="citation_title" content=""></head></html>'
+        meta = extract_metadata_from_html(html)
+        assert "citation_title" not in meta
+
+    # ------------------------------------------------------------------
+    # Real-page tests
+    # ------------------------------------------------------------------
+
+    def test_arxiv_has_citation_title(self) -> None:
+        """arXiv page contains a citation_title meta tag."""
+        _skip_if_missing(ARXIV_HTML)
+        meta = extract_metadata_from_html(ARXIV_HTML)  # type: ignore[arg-type]
+        assert "citation_title" in meta or "og:title" in meta
+        title = meta.get("citation_title") or meta.get("og:title")
+        assert isinstance(title, str) and len(title) > 5
+
+    def test_arxiv_has_citation_authors(self) -> None:
+        """arXiv page exposes one or more citation_author meta tags."""
+        _skip_if_missing(ARXIV_HTML)
+        meta = extract_metadata_from_html(ARXIV_HTML)  # type: ignore[arg-type]
+        authors = meta.get("citation_author")
+        assert authors is not None
+        if isinstance(authors, list):
+            assert all(isinstance(a, str) and a for a in authors)
+        else:
+            assert isinstance(authors, str) and authors
+
+    def test_arxiv_has_citation_date(self) -> None:
+        """arXiv page provides a citation_date or citation_online_date meta tag."""
+        _skip_if_missing(ARXIV_HTML)
+        meta = extract_metadata_from_html(ARXIV_HTML)  # type: ignore[arg-type]
+        assert "citation_date" in meta or "citation_online_date" in meta
+
+    def test_arxiv_has_citation_pdf_url(self) -> None:
+        """arXiv page provides a PDF URL in citation_pdf_url meta tag."""
+        _skip_if_missing(ARXIV_HTML)
+        meta = extract_metadata_from_html(ARXIV_HTML)  # type: ignore[arg-type]
+        assert "citation_pdf_url" in meta
+        assert meta["citation_pdf_url"].startswith("https://")
+
+    def test_pubmed_has_citation_doi(self) -> None:
+        """PubMed page provides a DOI via citation_doi or dc.identifier."""
+        _skip_if_missing(PUBMED_HTML)
+        meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
+        doi_val = meta.get("citation_doi") or meta.get("dc.identifier")
+        assert doi_val and "10." in str(doi_val)
+
+    def test_pubmed_has_journal_title(self) -> None:
+        """PubMed page provides a citation_journal_title meta tag."""
+        _skip_if_missing(PUBMED_HTML)
+        meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
+        assert "citation_journal_title" in meta
+        assert isinstance(meta["citation_journal_title"], str) and meta["citation_journal_title"]
+
+    def test_pubmed_has_issn(self) -> None:
+        """PubMed page exposes citation_issn meta tag."""
+        _skip_if_missing(PUBMED_HTML)
+        meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
+        assert "citation_issn" in meta
+
+    def test_medrxiv_has_doi(self) -> None:
+        """medRxiv page provides a citation_doi (bioRxiv/medRxiv format)."""
+        _skip_if_missing(MEDRXIV_HTML)
+        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
+        doi_val = meta.get("citation_doi")
+        assert doi_val and str(doi_val).startswith("10.1101/")
+
+    def test_medrxiv_has_pdf_url(self) -> None:
+        """medRxiv page provides a PDF URL."""
+        _skip_if_missing(MEDRXIV_HTML)
+        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
+        assert "citation_pdf_url" in meta
+
+    def test_openalex_has_doi(self) -> None:
+        """OpenAlex landing page provides a citation_doi meta tag."""
+        _skip_if_missing(OPENALEX_HTML)
+        meta = extract_metadata_from_html(OPENALEX_HTML)  # type: ignore[arg-type]
+        doi_val = meta.get("citation_doi") or meta.get("dc.identifier.doi")
+        assert doi_val and "10." in str(doi_val)
+
+    def test_openalex_has_journal_title(self) -> None:
+        """OpenAlex landing page exposes a citation_journal_title."""
+        _skip_if_missing(OPENALEX_HTML)
+        meta = extract_metadata_from_html(OPENALEX_HTML)  # type: ignore[arg-type]
+        assert "citation_journal_title" in meta
+
+    def test_ieee_js_blob_extracts_authors(self) -> None:
+        """IEEE Xplore JS-blob extractor populates citation_author."""
+        _skip_if_missing(IEEE_HTML)
+        meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
+        authors_raw = meta.get("citation_author")
+        assert authors_raw is not None
+        authors = _parse_authors(authors_raw)
+        assert len(authors) >= 1
+        assert all(isinstance(a, str) and a for a in authors)
+
+    def test_ieee_js_blob_extracts_doi(self) -> None:
+        """IEEE Xplore JS-blob extractor populates citation_doi."""
+        _skip_if_missing(IEEE_HTML)
+        meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
+        doi_val = meta.get("citation_doi")
+        assert doi_val and "10." in str(doi_val)
+
+    def test_ieee_js_blob_extracts_keywords(self) -> None:
+        """IEEE Xplore JS-blob extractor populates citation_keywords."""
+        _skip_if_missing(IEEE_HTML)
+        meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
+        kw_val = meta.get("citation_keywords")
+        assert kw_val is not None and len(str(kw_val)) > 0
+
+    def test_ieee_js_blob_extracts_journal_title(self) -> None:
+        """IEEE Xplore JS-blob extractor populates citation_journal_title."""
+        _skip_if_missing(IEEE_HTML)
+        meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
+        assert "citation_journal_title" in meta
+
+    def test_pubmed_citation_authors_plural_extracted(self) -> None:
+        """PubMed pages expose citation_authors (plural) which must be captured."""
+        _skip_if_missing(PUBMED_HTML)
+        meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
+        assert "citation_authors" in meta
+        assert ";" in str(meta["citation_authors"])  # semicolon-separated
+
+    def test_scopus_dc_colon_creator_normalised(self) -> None:
+        """Scopus pages use dc:creator (colon form) which must be normalised to dc.creator."""
+        _skip_if_missing(SCOPUS_HTML)
+        meta = extract_metadata_from_html(SCOPUS_HTML)  # type: ignore[arg-type]
+        assert "dc:creator" not in meta
+        assert "dc.creator" in meta
+
+    def test_semanticscholar_citation_keyword_singular_extracted(self) -> None:
+        """SemanticScholar pages use citation_keyword (singular) which must be captured."""
+        _skip_if_missing(SEMANTICSCHOLAR_HTML)
+        meta = extract_metadata_from_html(SEMANTICSCHOLAR_HTML)  # type: ignore[arg-type]
+        assert "citation_keyword" in meta
+
+
+# ---------------------------------------------------------------------------
+# _parse_authors
+# ---------------------------------------------------------------------------
+
+
+class TestParseAuthors:
+    """Unit tests for the _parse_authors() helper."""
+
+    def test_none_returns_empty_list(self) -> None:
+        """None input yields an empty list."""
+        assert _parse_authors(None) == []
+
+    def test_single_string_returned_as_single_item(self) -> None:
+        """A plain string with no semicolons is returned as a one-element list."""
+        result = _parse_authors("Smith, John")
+        assert result == ["Smith, John"]
+
+    def test_semicolon_separated_string_split(self) -> None:
+        """PubMed-style semicolon-separated author string is split into individual names."""
+        result = _parse_authors("Wang Y;Tian J;Yazar Y")
+        assert result == ["Wang Y", "Tian J", "Yazar Y"]
+
+    def test_trailing_semicolon_ignored(self) -> None:
+        """A trailing semicolon (PubMed sometimes adds one) does not produce an empty entry."""
+        result = _parse_authors("Smith J;Doe J;")
+        assert result == ["Smith J", "Doe J"]
+
+    def test_list_of_strings_returned_flat(self) -> None:
+        """A list of plain name strings is returned as-is."""
+        result = _parse_authors(["Smith, J", "Doe, J"])
+        assert result == ["Smith, J", "Doe, J"]
+
+    def test_list_items_with_semicolons_split(self) -> None:
+        """List items that themselves contain semicolons are expanded."""
+        result = _parse_authors(["Smith J;Doe J", "Jones K"])
+        assert result == ["Smith J", "Doe J", "Jones K"]
+
+    def test_duplicates_deduplicated_preserving_order(self) -> None:
+        """Duplicate author names in a list are removed while preserving order."""
+        result = _parse_authors(["Smith, J", "Doe, J", "Smith, J"])
+        assert result == ["Smith, J", "Doe, J"]
+
+
+# ---------------------------------------------------------------------------
+# _parse_keywords
+# ---------------------------------------------------------------------------
+
+
+class TestParseKeywords:
+    """Unit tests for the _parse_keywords() helper."""
+
+    def test_none_returns_empty_set(self) -> None:
+        """None input yields an empty set."""
+        assert _parse_keywords(None) == set()
+
+    def test_empty_string_returns_empty_set(self) -> None:
+        """Empty string yields an empty set."""
+        assert _parse_keywords("") == set()
+
+    def test_comma_separated_string_split(self) -> None:
+        """Comma-separated keywords are split correctly."""
+        result = _parse_keywords("machine learning, deep learning, NLP")
+        assert result == {"machine learning", "deep learning", "NLP"}
+
+    def test_semicolon_separated_string_split(self) -> None:
+        """Semicolon-separated keywords are split correctly."""
+        result = _parse_keywords("AI; ML; DL")
+        assert result == {"AI", "ML", "DL"}
+
+    def test_single_keyword_returned_as_set(self) -> None:
+        """A string with no delimiter is returned as a one-element set."""
+        assert _parse_keywords("deep learning") == {"deep learning"}
+
+    def test_list_of_keywords_merged(self) -> None:
+        """A list of keyword strings (e.g. from multiple dc.subject tags) is merged."""
+        result = _parse_keywords(["machine learning", "NLP", "deep learning"])
+        assert result == {"machine learning", "NLP", "deep learning"}
+
+    def test_list_with_comma_separated_items_expanded(self) -> None:
+        """List items that are themselves comma-separated strings are fully expanded."""
+        result = _parse_keywords(["AI, ML", "DL"])
+        assert result == {"AI", "ML", "DL"}
+
+    def test_whitespace_stripped(self) -> None:
+        """Leading/trailing whitespace on each keyword is stripped."""
+        result = _parse_keywords("  AI  ,  ML  ")
+        assert result == {"AI", "ML"}
+
+
+# ---------------------------------------------------------------------------
+# build_paper_from_metadata
+# ---------------------------------------------------------------------------
+
+
+class TestBuildPaperFromMetadata:
+    """Tests for build_paper_from_metadata()."""
+
+    def test_citation_authors_plural_semicolon_parsed(self) -> None:
+        """PubMed-style citation_authors (plural, semicolons) is parsed into an author list."""
+        meta = {
+            "citation_title": "Paper",
+            "citation_authors": "Wang Y;Tian J;Yazar Y;",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert "Wang Y" in paper.authors
+        assert "Tian J" in paper.authors
+        assert len(paper.authors) == 3
+
+    def test_dc_subject_used_as_keywords(self) -> None:
+        """dc.subject meta tags contribute to the paper's keyword set."""
+        meta = {
+            "citation_title": "Paper",
+            "dc.subject": ["Machine Learning", "NLP"],
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert "Machine Learning" in (paper.keywords or set())
+        assert "NLP" in (paper.keywords or set())
+
+    def test_citation_keyword_singular_used_as_keywords(self) -> None:
+        """citation_keyword (singular) meta tags contribute to the keyword set."""
+        meta = {
+            "citation_title": "Paper",
+            "citation_keyword": ["deep learning", "efficiency"],
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert "deep learning" in (paper.keywords or set())
+
+    def test_keyword_sources_merged(self) -> None:
+        """Keywords from different sources (citation_keywords and dc.subject) are merged."""
+        meta = {
+            "citation_title": "Paper",
+            "citation_keywords": "AI, ML",
+            "dc.subject": "NLP",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.keywords is not None
+        assert {"AI", "ML", "NLP"}.issubset(paper.keywords)
+
+    def test_citation_inbook_title_creates_book_publication(self) -> None:
+        """citation_inbook_title (Scopus book chapters) creates a Book publication."""
+        meta = {
+            "citation_title": "Chapter Title",
+            "citation_inbook_title": "Advances in Machine Learning",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.publication is not None
+        assert paper.publication.title == "Advances in Machine Learning"
+        assert paper.publication.category == "Book"
+
+    def test_pages_built_from_firstpage_and_lastpage(self) -> None:
+        """citation_firstpage + citation_lastpage are combined into paper.pages."""
+        meta = {
+            "citation_title": "Paper",
+            "citation_firstpage": "100",
+            "citation_lastpage": "115",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.pages == "100\u2013115"  # en-dash
+
+    def test_pages_only_firstpage(self) -> None:
+        """When only citation_firstpage is present, it is stored as pages."""
+        meta = {"citation_title": "Paper", "citation_firstpage": "42"}
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.pages == "42"
+
+    def test_number_of_pages_extracted(self) -> None:
+        """citation_num_pages is parsed and stored as paper.number_of_pages."""
+        meta = {"citation_title": "Paper", "citation_num_pages": "26"}
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.number_of_pages == 26
+
+    def test_doi_url_prefix_stripped(self) -> None:
+        """A doi.org URL prefix is stripped from the DOI value."""
+        meta = {
+            "citation_title": "Paper",
+            "citation_doi": "https://doi.org/10.1234/test",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.doi == "10.1234/test"
+
+    def test_dc_identifier_doi_used_when_citation_doi_absent(self) -> None:
+        """dc.identifier.doi is used as DOI when citation_doi is not present."""
+        meta = {
+            "citation_title": "Paper",
+            "dc.identifier.doi": "10.9999/example",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.doi == "10.9999/example"
+
+    def test_dc_creator_used_for_authors(self) -> None:
+        """dc.creator (from dc:creator colon-form normalisation) is used for authors."""
+        meta = {
+            "citation_title": "Paper",
+            "dc.creator": ["Smith, J", "Doe, J"],
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert "Smith, J" in paper.authors
+
+    def test_dc_date_issued_used_for_date(self) -> None:
+        """dc.date.issued is used as publication date when other date keys are absent."""
+        from datetime import date
+
+        meta = {"citation_title": "Paper", "dc.date.issued": "2021-03-15"}
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.publication_date == date(2021, 3, 15)
+
+    def test_citation_online_date_used_as_fallback_date(self) -> None:
+        """citation_online_date is used as last-resort date fallback."""
+        from datetime import date
+
+        meta = {"citation_title": "Paper", "citation_online_date": "2024/02/12"}
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.publication_date == date(2024, 2, 12)
+
+    def test_non_doi_dc_identifier_ignored(self) -> None:
+        """A dc.identifier value that is not a DOI (e.g. PMID) is ignored."""
+        meta = {
+            "citation_title": "Paper",
+            "dc.identifier": "PMID: 36006759",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.doi is None
+        """Returns None when no title key is found in metadata."""
+        assert build_paper_from_metadata({}, "http://example.com") is None
+
+    def test_minimal_metadata_creates_paper(self) -> None:
+        """A metadata dict with only a title produces a Paper with that title."""
+        paper = build_paper_from_metadata({"citation_title": "My Title"}, "http://x.com")
+        assert paper is not None
+        assert paper.title == "My Title"
+
+    def test_url_stored_on_paper(self) -> None:
+        """The page URL passed to build_paper_from_metadata is set on the paper."""
+        url = "https://example.org/paper"
+        paper = build_paper_from_metadata({"citation_title": "T"}, url)
+        assert paper is not None
+        assert paper.url == url
+
+    def test_doi_extracted(self) -> None:
+        """DOI is captured from citation_doi."""
+        meta = {"citation_title": "Paper", "citation_doi": "10.1234/test"}
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.doi == "10.1234/test"
+
+    def test_authors_from_list(self) -> None:
+        """Multiple citation_author values become an author list."""
+        meta = {
+            "citation_title": "T",
+            "citation_author": ["Smith, J", "Doe, J"],
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert "Smith, J" in paper.authors
+
+    def test_journal_publication_created(self) -> None:
+        """citation_journal_title creates a Publication with category=Journal."""
+        meta = {
+            "citation_title": "Paper",
+            "citation_journal_title": "Nature",
+            "citation_issn": "0028-0836",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.publication is not None
+        assert paper.publication.title == "Nature"
+        assert paper.publication.category == "Journal"
+        assert paper.publication.issn == "0028-0836"
+
+    def test_conference_publication_created(self) -> None:
+        """citation_conference_title creates a Publication with category=Conference Proceedings."""
+        meta = {
+            "citation_title": "A Conference Paper",
+            "citation_conference_title": "NeurIPS",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.publication is not None
+        assert paper.publication.category == "Conference Proceedings"
+
+    def test_preprint_server_publication_not_created(self) -> None:
+        """Preprint server names (arxiv, biorxiv, medrxiv) are not treated as publications."""
+        for server in ("arxiv", "bioRxiv", "medRxiv"):
+            meta = {
+                "citation_title": "A Preprint",
+                "citation_journal_title": server,
+            }
+            paper = build_paper_from_metadata(meta, "http://x.com")
+            assert paper is not None, f"Paper should be created for {server}"
+            assert (
+                paper.publication is None
+            ), f"Publication should be None for preprint server {server}"
+
+    def test_pdf_url_captured(self) -> None:
+        """citation_pdf_url is stored on the paper."""
+        meta = {
+            "citation_title": "T",
+            "citation_pdf_url": "https://example.com/paper.pdf",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.pdf_url == "https://example.com/paper.pdf"
+
+    def test_keywords_parsed_from_comma_separated(self) -> None:
+        """Comma-separated keywords are split into a set."""
+        meta = {
+            "citation_title": "T",
+            "keywords": "machine learning, deep learning, NLP",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.keywords is not None
+        assert "machine learning" in paper.keywords
+
+    def test_date_parsed(self) -> None:
+        """citation_date is parsed into a datetime.date."""
+        from datetime import date
+
+        meta = {
+            "citation_title": "T",
+            "citation_date": "2023-06-15",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.publication_date == date(2023, 6, 15)
+
+    # ------------------------------------------------------------------
+    # Real-page integration tests
+    # ------------------------------------------------------------------
+
+    def test_arxiv_paper_has_no_doi_no_publication(self) -> None:
+        """arXiv abs/* pages have no DOI and no formal publication attached."""
+        _skip_if_missing(ARXIV_HTML)
+        meta = extract_metadata_from_html(ARXIV_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://arxiv.org/abs/2301.00306v4")
+        assert paper is not None
+        assert paper.doi is None
+        assert paper.publication is None  # preprint — no journal
+
+    def test_arxiv_paper_has_pdf_url(self) -> None:
+        """arXiv page should populate pdf_url on the built paper."""
+        _skip_if_missing(ARXIV_HTML)
+        meta = extract_metadata_from_html(ARXIV_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://arxiv.org/abs/2301.00306v4")
+        assert paper is not None
+        assert paper.pdf_url is not None
+        assert "arxiv.org/pdf" in paper.pdf_url
+
+    def test_arxiv_paper_with_doi_has_no_publication(self) -> None:
+        """arXiv pre-print with a DOI still exposes no publication (server is arxiv)."""
+        _skip_if_missing(ARXIV_HTML_WITH_DOI)
+        meta = extract_metadata_from_html(ARXIV_HTML_WITH_DOI)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://arxiv.org/abs/2301.01148v1")
+        assert paper is not None
+        # The DOI points to the published version, but the HTML page is arXiv
+        assert paper.doi == "10.1016/j.apenergy.2023.121323"
+
+    def test_pubmed_paper_has_doi_and_journal(self) -> None:
+        """PubMed page produces a paper with a DOI and a journal publication."""
+        _skip_if_missing(PUBMED_HTML)
+        meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://pubmed.ncbi.nlm.nih.gov/36006759/")
+        assert paper is not None
+        assert paper.doi is not None and paper.doi.startswith("10.")
+        assert paper.publication is not None
+        assert paper.publication.category == "Journal"
+        assert paper.publication.issn is not None
+
+    def test_pubmed_paper_has_authors(self) -> None:
+        """PubMed pages expose citation_authors (plural, semicolons); authors must be populated."""
+        _skip_if_missing(PUBMED_HTML)
+        meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://pubmed.ncbi.nlm.nih.gov/36006759/")
+        assert paper is not None
+        assert len(paper.title) > 5
+        assert len(paper.authors) > 0
+
+    def test_medrxiv_paper_has_doi_no_publication(self) -> None:
+        """medRxiv page builds a paper with a DOI but no journal (preprint server)."""
+        _skip_if_missing(MEDRXIV_HTML)
+        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://doi.org/10.1101/19004184")
+        assert paper is not None
+        assert paper.doi is not None and paper.doi.startswith("10.1101/")
+        assert paper.publication is None
+
+    def test_medrxiv_paper_has_pdf_url(self) -> None:
+        """medRxiv page populates pdf_url."""
+        _skip_if_missing(MEDRXIV_HTML)
+        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://doi.org/10.1101/19004184")
+        assert paper is not None
+        assert paper.pdf_url is not None
+        assert "medrxiv" in paper.pdf_url.lower()
+
+    def test_openalex_paper_has_doi_and_journal(self) -> None:
+        """OpenAlex landing page produces a paper with DOI and journal publication."""
+        _skip_if_missing(OPENALEX_HTML)
+        meta = extract_metadata_from_html(OPENALEX_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "http://dx.doi.org/10.3126/nelta.v27i1-2.53203")
+        assert paper is not None
+        assert paper.doi is not None and paper.doi.startswith("10.")
+        assert paper.publication is not None
+        assert paper.publication.category == "Journal"
+
+    def test_openalex_paper_has_keywords(self) -> None:
+        """OpenAlex landing page exposes at least one keyword on the paper."""
+        _skip_if_missing(OPENALEX_HTML)
+        meta = extract_metadata_from_html(OPENALEX_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "http://dx.doi.org/10.3126/nelta.v27i1-2.53203")
+        assert paper is not None
+        assert paper.keywords and len(paper.keywords) > 0
+
+    def test_ieee_paper_has_authors(self) -> None:
+        """IEEE Xplore page (JS blob) produces a paper with populated authors."""
+        _skip_if_missing(IEEE_HTML)
+        meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://ieeexplore.ieee.org/document/9568778/")
+        assert paper is not None
+        assert len(paper.authors) > 0
+
+    def test_ieee_paper_has_doi_and_journal(self) -> None:
+        """IEEE Xplore page (JS blob) produces a paper with a DOI and journal."""
+        _skip_if_missing(IEEE_HTML)
+        meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://ieeexplore.ieee.org/document/9568778/")
+        assert paper is not None
+        assert paper.doi is not None and paper.doi.startswith("10.")
+        assert paper.publication is not None
+        assert paper.publication.category == "Journal"
+
+    def test_ieee_paper_has_keywords(self) -> None:
+        """IEEE Xplore page (JS blob) produces a paper with keywords."""
+        _skip_if_missing(IEEE_HTML)
+        meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://ieeexplore.ieee.org/document/9568778/")
+        assert paper is not None
+        assert paper.keywords and len(paper.keywords) > 0
+
+    def test_scopus_authors_from_dc_colon_creator(self) -> None:
+        """Scopus pages use dc:creator which must be normalised and used for authors."""
+        _skip_if_missing(SCOPUS_HTML)
+        meta = extract_metadata_from_html(SCOPUS_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://doi.org/10.1055/a-2233-2736")
+        assert paper is not None
+        assert len(paper.authors) > 0
+
+    def test_semanticscholar_keywords_from_citation_keyword_singular(self) -> None:
+        """SemanticScholar pages use citation_keyword (singular) which must populate keywords."""
+        _skip_if_missing(SEMANTICSCHOLAR_HTML)
+        meta = extract_metadata_from_html(SEMANTICSCHOLAR_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://doi.org/10.4230/DagRep.12.6.14")
+        assert paper is not None
+        assert paper.keywords and len(paper.keywords) > 0
+
+    def test_medrxiv_paper_has_number_of_pages(self) -> None:
+        """medRxiv pages expose citation_num_pages; it must populate number_of_pages."""
+        _skip_if_missing(MEDRXIV_HTML)
+        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
+        paper = build_paper_from_metadata(meta, "https://doi.org/10.1101/19004184")
+        assert paper is not None
+        assert paper.number_of_pages is not None
+        assert paper.number_of_pages > 0
+
+
+# ---------------------------------------------------------------------------
+# fetch_metadata
+# ---------------------------------------------------------------------------
+
+
+class TestFetchMetadata:
+    """Tests for fetch_metadata() — the function that makes HTTP requests."""
+
+    def test_returns_none_for_non_html_content_type(self) -> None:
+        """fetch_metadata returns None when content-type is not text/html."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {"content-type": "application/pdf"}
+        mock_resp.text = ""
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            result = fetch_metadata("https://example.com/paper.pdf")
+        assert result is None
+
+    def test_returns_dict_for_html_content_type(self) -> None:
+        """fetch_metadata returns a dict when content-type is text/html."""
+        html = '<html><head><meta name="citation_title" content="Test Paper"></head></html>'
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
+        mock_resp.text = html
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            result = fetch_metadata("https://example.com/paper")
+        assert isinstance(result, dict)
+        assert result.get("citation_title") == "Test Paper"
+
+    def test_raises_on_http_error(self) -> None:
+        """fetch_metadata propagates HTTP errors raised by raise_for_status()."""
+        import requests as req_lib
+
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.side_effect = req_lib.HTTPError("404")
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            with pytest.raises(req_lib.HTTPError):
+                fetch_metadata("https://example.com/missing")
+
+    def test_timeout_forwarded_to_requests(self) -> None:
+        """The timeout parameter is forwarded to requests.get."""
+        mock_resp = MagicMock()
+        mock_resp.headers = {"content-type": "text/html"}
+        mock_resp.text = "<html><head><meta name='citation_title' content='T'></head></html>"
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp) as mock_get:
+            fetch_metadata("https://example.com", timeout=42.0)
+
+        _, kwargs = mock_get.call_args
+        assert kwargs.get("timeout") == 42.0
+
+    def test_real_arxiv_page_via_mock(self) -> None:
+        """fetch_metadata can parse a real arXiv page when requests.get is mocked."""
+        _skip_if_missing(ARXIV_HTML)
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
+        mock_resp.text = ARXIV_HTML
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            result = fetch_metadata("https://arxiv.org/abs/2301.00306v4")
+
+        assert result is not None
+        assert "citation_title" in result or "og:title" in result
+
+    def test_real_pubmed_page_via_mock(self) -> None:
+        """fetch_metadata can parse a real PubMed page when requests.get is mocked."""
+        _skip_if_missing(PUBMED_HTML)
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
+        mock_resp.text = PUBMED_HTML
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            result = fetch_metadata("https://pubmed.ncbi.nlm.nih.gov/36006759/")
+
+        assert result is not None
+        assert "citation_doi" in result
+
+
+# ---------------------------------------------------------------------------
+# enrich_from_sources
+# ---------------------------------------------------------------------------
+
+
+class TestEnrichFromSources:
+    """Tests for enrich_from_sources()."""
+
+    def test_returns_none_when_all_urls_fail(self) -> None:
+        """enrich_from_sources returns None when every URL raises an error."""
+        with patch(
+            "findpapers.utils.enrichment.fetch_metadata",
+            side_effect=Exception("network error"),
+        ):
+            result = enrich_from_sources(["https://example.com/paper"], timeout=5)
+        assert result is None
+
+    def test_returns_none_when_metadata_is_none(self) -> None:
+        """enrich_from_sources returns None when fetch_metadata returns None (non-HTML)."""
+        with patch("findpapers.utils.enrichment.fetch_metadata", return_value=None):
+            result = enrich_from_sources(["https://example.com/paper"], timeout=5)
+        assert result is None
+
+    def test_returns_none_when_metadata_has_no_title(self) -> None:
+        """enrich_from_sources returns None when metadata produces no title (can't build Paper)."""
+        with patch(
+            "findpapers.utils.enrichment.fetch_metadata", return_value={"og:description": "x"}
+        ):
+            result = enrich_from_sources(["https://example.com/paper"], timeout=5)
+        assert result is None
+
+    def test_skips_pdf_urls(self) -> None:
+        """URLs containing 'pdf' are skipped entirely without a network call."""
+        with patch("findpapers.utils.enrichment.fetch_metadata") as mock_fetch:
+            enrich_from_sources(["https://example.com/document.pdf"], timeout=5)
+        mock_fetch.assert_not_called()
+
+    def test_returns_paper_on_successful_fetch(self) -> None:
+        """enrich_from_sources returns a Paper when one URL succeeds."""
+        good_meta = {
+            "citation_title": "Great Paper",
+            "citation_author": "Smith, J",
+        }
+        with patch("findpapers.utils.enrichment.fetch_metadata", return_value=good_meta):
+            result = enrich_from_sources(["https://example.com/paper"], timeout=5)
+        assert result is not None
+        assert result.title == "Great Paper"
+
+    def test_real_arxiv_page_end_to_end(self) -> None:
+        """Full end-to-end: mock requests for an arXiv HTML page and build a Paper."""
+        _skip_if_missing(ARXIV_HTML)
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
+        mock_resp.text = ARXIV_HTML
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            result = enrich_from_sources(["https://arxiv.org/abs/2301.00306v4"], timeout=10)
+
+        assert result is not None
+        assert len(result.title) > 5
+        assert result.pdf_url is not None
+
+    def test_real_pubmed_page_end_to_end(self) -> None:
+        """Full end-to-end: mock requests for a PubMed HTML page and build a Paper."""
+        _skip_if_missing(PUBMED_HTML)
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
+        mock_resp.text = PUBMED_HTML
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            result = enrich_from_sources(["https://pubmed.ncbi.nlm.nih.gov/36006759/"], timeout=10)
+
+        assert result is not None
+        assert result.doi is not None and result.doi.startswith("10.")
+        assert result.publication is not None
+        assert result.publication.category == "Journal"
+
+    def test_real_medrxiv_page_end_to_end(self) -> None:
+        """Full end-to-end: mock requests for a medRxiv HTML page and build a Paper."""
+        _skip_if_missing(MEDRXIV_HTML)
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
+        mock_resp.text = MEDRXIV_HTML
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            result = enrich_from_sources(["https://doi.org/10.1101/19004184"], timeout=10)
+
+        assert result is not None
+        assert result.doi is not None and result.doi.startswith("10.1101/")
+        # medRxiv is a preprint server — no formal publication
+        assert result.publication is None
+        assert result.pdf_url is not None
+
+    def test_real_openalex_page_end_to_end(self) -> None:
+        """Full end-to-end: mock requests for an OpenAlex landing page and build a Paper."""
+        _skip_if_missing(OPENALEX_HTML)
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
+        mock_resp.text = OPENALEX_HTML
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            result = enrich_from_sources(
+                ["http://dx.doi.org/10.3126/nelta.v27i1-2.53203"], timeout=10
+            )
+
+        assert result is not None
+        assert result.doi is not None and result.doi.startswith("10.")
+        assert result.publication is not None
+
+    def test_real_ieee_page_end_to_end(self) -> None:
+        """Full end-to-end: mock requests for an IEEE Xplore page and build a Paper."""
+        _skip_if_missing(IEEE_HTML)
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
+        mock_resp.text = IEEE_HTML
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            result = enrich_from_sources(
+                ["https://ieeexplore.ieee.org/document/9568778/"], timeout=10
+            )
+
+        assert result is not None
+        assert result.doi is not None and result.doi.startswith("10.")
+        assert result.publication is not None
+        assert result.publication.category == "Journal"
+        assert len(result.authors) > 0
+        assert result.keywords and len(result.keywords) > 0

@@ -23,7 +23,8 @@ coverage.xml
 *.bib
 
 # ignore pattern
-_ignore*
+_ignore_*
+_tmp_*
 
 # venv
 venv

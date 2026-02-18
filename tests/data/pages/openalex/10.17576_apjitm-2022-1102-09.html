@@ -1,0 +1,582 @@
+<!-- DEBUG-VIEW START 6 APPPATH/Views/view.php -->
+<!-- DEBUG-VIEW START 5 APPPATH/Views/layouts/master2.php -->
+
+
+<!DOCTYPE html>
+
+<html dir="ltr" lang="en">
+
+
+<!-- DEBUG-VIEW START 1 APPPATH/Views/layouts/partials/scripts3.php -->
+
+
+<link href="../../public/assets/images/favicon.png" rel="shortcut icon" type="image/png">
+<link href="../../public/assets/images/apple-icon.png" rel="apple-touch-icon">
+<link href="../../public/assets/images/apple-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+<link href="../../public/assets/images/apple-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+<link href="../../public/assets/images/apple-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+
+
+<link href="../../public/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="../../public/assets/css/jquery-ui.min.css" rel="stylesheet" type="text/css">
+<link href="../../public/assets/css/animate.css" rel="stylesheet" type="text/css">
+<link href="../../public/assets/css/css-plugin-collections.css" rel="stylesheet"/>
+
+
+
+<link id="menuzord-menu-skins" href="../../public/assets/css/menuzord-skins/menuzord-rounded-boxed.css" rel="stylesheet"/>
+
+
+<link href="../../public/assets/css/style-main.css" rel="stylesheet" type="text/css">
+<link href="../../public/assets/css/preloader.css" rel="stylesheet" type="text/css">
+<link href="../../public/assets/css/custom-bootstrap-margin-padding.css" rel="stylesheet" type="text/css">
+<link href="../../public/assets/css/responsive.css" rel="stylesheet" type="text/css">
+
+<link  href="../../public/assets/js/revolution-slider/css/settings.css" rel="stylesheet" type="text/css"/>
+<link  href="../../public/assets/js/revolution-slider/css/layers.css" rel="stylesheet" type="text/css"/>
+<link  href="../../public/assets/js/revolution-slider/css/navigation.css" rel="stylesheet" type="text/css"/>
+
+
+<link href="../../public/assets/css/colors/theme-skin-color-set-1.css" rel="stylesheet" type="text/css">
+
+
+<script src="../../public/assets/js/jquery-2.2.4.min.js"></script>
+<script src="../../public/assets/js/jquery-ui.min.js"></script>
+<script src="../../public/assets/js/bootstrap.min.js"></script>
+<script src="../../public/assets/js/jquery-plugin-collection.js"></script>
+
+<script src="../../public/assets/js/revolution-slider/js/jquery.themepunch.tools.min.js"></script>
+<script src="../../public/assets/js/revolution-slider/js/jquery.themepunch.revolution.min.js"></script>
+
+
+<!-- DEBUG-VIEW ENDED 1 APPPATH/Views/layouts/partials/scripts3.php -->
+
+<body class="boxed-layout pt-40 pb-40 pt-sm-0 bg-lighter">
+
+<div id="wrapper" class="clearfix"> 
+
+  <header id="header" class="header">
+      
+
+
+<!-- DEBUG-VIEW START 2 APPPATH/Views/layouts/partials/head.php -->
+
+
+
+<head>
+<script type="text/javascript"  id="debugbar_loader" data-time="1771435508" src="https://www.ukm.my/apjitm/?debugbar&__ncforminfo=q9y2WwX7UxAE0loTZN2Y_nXPAbHgo4C8Tok9LgVjh0mJJPE6fGcq-phawQhhsCm0YxyKQRq56oYW-2uUQMoUvA=="></script><script type="text/javascript"  id="debugbar_dynamic_script"></script><style type="text/css"  id="debugbar_dynamic_style"></style><script  class="kint-rich-script">void 0===window.kintShared&&(window.kintShared=function(){"use strict";var e={dedupe:function(e,n){return[].forEach.call(document.querySelectorAll(e),function(e){e!==(n=!n||!n.ownerDocument.contains(n)?e:n)&&e.parentNode.removeChild(e)}),n},runOnce:function(e){"complete"===document.readyState?e():window.addEventListener("load",e)}};return window.addEventListener("click",function(e){var n;e.target.classList.contains("kint-ide-link")&&((n=new XMLHttpRequest).open("GET",e.target.href),n.send(null),e.preventDefault())}),e}());
+void 0===window.kintRich&&(window.kintRich=function(){"use strict";var i={selectText:function(e){var t=window.getSelection(),a=document.createRange();a.selectNodeContents(e),t.removeAllRanges(),t.addRange(a)},each:function(e,t){Array.prototype.slice.call(document.querySelectorAll(e),0).forEach(t)},hasClass:function(e,t){return!!e.classList&&e.classList.contains(t=void 0===t?"kint-show":t)},addClass:function(e,t){e.classList.add(t=void 0===t?"kint-show":t)},removeClass:function(e,t){return e.classList.remove(t=void 0===t?"kint-show":t),e},toggle:function(e,t){var a=i.getChildren(e);a&&((t=void 0===t?i.hasClass(e):t)?i.removeClass(e):i.addClass(e),1===a.childNodes.length&&(a=a.childNodes[0].childNodes[0])&&i.hasClass(a,"kint-parent")&&i.toggle(a,t))},toggleChildren:function(e,t){var a=i.getChildren(e);if(a){var o=a.getElementsByClassName("kint-parent"),r=o.length;for(void 0===t&&(t=!i.hasClass(e));r--;)i.toggle(o[r],t)}},toggleAll:function(e){for(var t=document.getElementsByClassName("kint-parent"),a=t.length,o=!i.hasClass(e.parentNode);a--;)i.toggle(t[a],o)},switchTab:function(e){var t=e.previousSibling,a=0;for(i.removeClass(e.parentNode.getElementsByClassName("kint-active-tab")[0],"kint-active-tab"),i.addClass(e,"kint-active-tab");t;)1===t.nodeType&&a++,t=t.previousSibling;for(var o=e.parentNode.nextSibling.childNodes,r=0;r<o.length;r++)r===a?(i.addClass(o[r]),1===o[r].childNodes.length&&(t=o[r].childNodes[0].childNodes[0])&&i.hasClass(t,"kint-parent")&&i.toggle(t,!1)):i.removeClass(o[r])},mktag:function(e){return"<"+e+">"},openInNewWindow:function(e){var t=window.open();t&&(t.document.open(),t.document.write(i.mktag("html")+i.mktag("head")+i.mktag("title")+"Kint ("+(new Date).toISOString()+")"+i.mktag("/title")+i.mktag('meta charset="utf-8"')+document.getElementsByClassName("kint-rich-script")[0].outerHTML+document.getElementsByClassName("kint-rich-style")[0].outerHTML+i.mktag("/head")+i.mktag("body")+'<input style="width: 100%" placeholder="Take some notes!"><div class="kint-rich">'+e.parentNode.outerHTML+"</div>"+i.mktag("/body")),t.document.close())},sortTable:function(e,a){var t=e.tBodies[0];[].slice.call(e.tBodies[0].rows).sort(function(e,t){if(e=e.cells[a].textContent.trim().toLocaleLowerCase(),t=t.cells[a].textContent.trim().toLocaleLowerCase(),isNaN(e)||isNaN(t)){if(isNaN(e)&&!isNaN(t))return 1;if(isNaN(t)&&!isNaN(e))return-1}else e=parseFloat(e),t=parseFloat(t);return e<t?-1:t<e?1:0}).forEach(function(e){t.appendChild(e)})},showAccessPath:function(e){for(var t=e.childNodes,a=0;a<t.length;a++)if(i.hasClass(t[a],"access-path"))return void(i.hasClass(t[a],"kint-show")?i.removeClass(t[a]):(i.addClass(t[a]),i.selectText(t[a])))},showSearchBox:function(e){var t=e.querySelector(".kint-search");t&&(i.hasClass(t)?(i.removeClass(t),i.removeClass(e.parentNode,"kint-search-root")):(i.addClass(e),i.addClass(t),t.focus(),t.select(),i.search(e.parentNode,t.value)))},search:function(e,t){var a=e.querySelectorAll(".kint-search-match");[].forEach.call(a,function(e){i.removeClass(e,"kint-search-match")}),i.removeClass(e,"kint-search-match"),t.length?(i.addClass(e,"kint-search-root"),i.findMatches(e,t)):i.removeClass(e,"kint-search-root")},findMatches:function(e,t){var a,o,r,s=e.cloneNode(!0);if(s.querySelectorAll(".access-path").forEach(function(e){e.remove()}),-1!=s.textContent.toUpperCase().indexOf(t.toUpperCase())){for(n in i.addClass(e,"kint-search-match"),e.childNodes)if("DD"==e.childNodes[n].tagName){a=e.childNodes[n];break}if(a)if([].forEach.call(a.childNodes,function(e){"DL"==e.tagName?i.findMatches(e,t):"UL"==e.tagName&&(i.hasClass(e,"kint-tabs")?o=e.childNodes:i.hasClass(e,"kint-tab-contents")&&(r=e.childNodes))}),o&&r&&o.length==r.length)for(var n=0;n<o.length;n++){var l=!1;-1!=o[n].textContent.toUpperCase().indexOf(t.toUpperCase())?l=!0:((s=r[n].cloneNode(!0)).querySelectorAll(".access-path").forEach(function(e){e.remove()}),-1!=s.textContent.toUpperCase().indexOf(t.toUpperCase())&&(l=!0)),l&&(i.addClass(o[n],"kint-search-match"),[].forEach.call(r[n].childNodes,function(e){"DL"==e.tagName&&i.findMatches(e,t)}))}}},getParentByClass:function(e,t){for(void 0===t&&(t="kint-rich");(e=e.parentNode)&&!i.hasClass(e,t););return e},getParentHeader:function(e,t){for(var a=e.nodeName.toLowerCase();"dd"!==a&&"dt"!==a&&i.getParentByClass(e);)a=(e=e.parentNode).nodeName.toLowerCase();return i.getParentByClass(e)?(e="dd"===a&&t?e.previousElementSibling:e)&&"dt"===e.nodeName.toLowerCase()&&i.hasClass(e,"kint-parent")?e:void 0:null},getChildren:function(e){for(;(e=e.nextElementSibling)&&"dd"!==e.nodeName.toLowerCase(););return e},isFolderOpen:function(){if(i.folder&&i.folder.querySelector("dd.kint-foldout"))return i.hasClass(i.folder.querySelector("dd.kint-foldout").previousSibling)},initLoad:function(){i.style=window.kintShared.dedupe("style.kint-rich-style",i.style),i.script=window.kintShared.dedupe("script.kint-rich-script",i.script),i.folder=window.kintShared.dedupe(".kint-rich.kint-folder",i.folder);var t,e=document.querySelectorAll("input.kint-search");[].forEach.call(e,function(t){function e(e){window.clearTimeout(a),t.value!==o&&(a=window.setTimeout(function(){o=t.value,i.search(t.parentNode.parentNode,o)},500))}var a=null,o=null;t.removeEventListener("keyup",e),t.addEventListener("keyup",e)}),i.folder&&(t=i.folder.querySelector("dd"),[].forEach.call(document.querySelectorAll(".kint-rich.kint-file"),function(e){e.parentNode!==i.folder&&t.appendChild(e)}),document.body.appendChild(i.folder),i.addClass(i.folder))},keyboardNav:{targets:[],target:0,active:!1,fetchTargets:function(){var e=i.keyboardNav.targets[i.keyboardNav.target];i.keyboardNav.targets=[],i.each(".kint-rich nav, .kint-tabs>li:not(.kint-active-tab)",function(e){i.isFolderOpen()&&!i.folder.contains(e)||0===e.offsetWidth&&0===e.offsetHeight||i.keyboardNav.targets.push(e)}),e&&-1!==i.keyboardNav.targets.indexOf(e)&&(i.keyboardNav.target=i.keyboardNav.targets.indexOf(e))},sync:function(e){var t=document.querySelector(".kint-focused");t&&i.removeClass(t,"kint-focused"),i.keyboardNav.active&&(t=i.keyboardNav.targets[i.keyboardNav.target],i.addClass(t,"kint-focused"),e||i.keyboardNav.scroll(t))},scroll:function(e){var t,a;e!==i.folder.querySelector("dt > nav")&&(a=(t=function(e){return e.offsetTop+(e.offsetParent?t(e.offsetParent):0)})(e),i.isFolderOpen()?(e=i.folder.querySelector("dd.kint-foldout")).scrollTo(0,a-e.clientHeight/2):window.scrollTo(0,a-window.innerHeight/2))},moveCursor:function(e){for(i.keyboardNav.target+=e;i.keyboardNav.target<0;)i.keyboardNav.target+=i.keyboardNav.targets.length;for(;i.keyboardNav.target>=i.keyboardNav.targets.length;)i.keyboardNav.target-=i.keyboardNav.targets.length;i.keyboardNav.sync()},setCursor:function(e){if(i.isFolderOpen()&&!i.folder.contains(e))return!1;i.keyboardNav.fetchTargets();for(var t=0;t<i.keyboardNav.targets.length;t++)if(e===i.keyboardNav.targets[t])return i.keyboardNav.target=t,!0;return!1}},mouseNav:{lastClickTarget:null,lastClickTimer:null,lastClickCount:0,renewLastClick:function(){window.clearTimeout(i.mouseNav.lastClickTimer),i.mouseNav.lastClickTimer=window.setTimeout(function(){i.mouseNav.lastClickTarget=null,i.mouseNav.lastClickTimer=null,i.mouseNav.lastClickCount=0},250)}},style:null,script:null,folder:null};return window.addEventListener("click",function(e){var t=e.target,a=t.nodeName.toLowerCase();if(i.mouseNav.lastClickTarget&&i.mouseNav.lastClickTimer&&i.mouseNav.lastClickCount)return t=i.mouseNav.lastClickTarget,void(1===i.mouseNav.lastClickCount?(i.toggleChildren(t.parentNode),i.keyboardNav.setCursor(t),i.keyboardNav.sync(!0),i.mouseNav.lastClickCount++,i.mouseNav.renewLastClick()):(i.toggleAll(t),i.keyboardNav.setCursor(t),i.keyboardNav.sync(!0),i.keyboardNav.scroll(t),window.clearTimeout(i.mouseNav.lastClickTimer),i.mouseNav.lastClickTarget=null,i.mouseNav.lastClickTarget=null,i.mouseNav.lastClickCount=0));if(i.getParentByClass(t)){if("dfn"===a)i.selectText(t);else if("th"===a)return void(e.ctrlKey||i.sortTable(t.parentNode.parentNode.parentNode,t.cellIndex));if((t=i.getParentHeader(t))&&(i.keyboardNav.setCursor(t.querySelector("nav")),i.keyboardNav.sync(!0)),t=e.target,"li"===a&&"kint-tabs"===t.parentNode.className)"kint-active-tab"!==t.className&&i.switchTab(t),(t=i.getParentHeader(t,!0))&&(i.keyboardNav.setCursor(t.querySelector("nav")),i.keyboardNav.sync(!0));else if("nav"===a)"footer"===t.parentNode.nodeName.toLowerCase()?(i.keyboardNav.setCursor(t),i.keyboardNav.sync(!0),t=t.parentNode,i.hasClass(t)?i.removeClass(t):i.addClass(t)):(i.toggle(t.parentNode),i.keyboardNav.fetchTargets(),i.mouseNav.lastClickCount=1,i.mouseNav.lastClickTarget=t,i.mouseNav.renewLastClick());else if(i.hasClass(t,"kint-popup-trigger")){var o=t.parentNode;if("footer"===o.nodeName.toLowerCase())o=o.previousSibling;else for(;o&&!i.hasClass(o,"kint-parent");)o=o.parentNode;i.openInNewWindow(o)}else i.hasClass(t,"kint-access-path-trigger")?i.showAccessPath(t.parentNode):i.hasClass(t,"kint-search-trigger")?i.showSearchBox(t.parentNode):i.hasClass(t,"kint-search")||("pre"===a&&3===e.detail?i.selectText(t):i.getParentByClass(t,"kint-source")&&3===e.detail?i.selectText(i.getParentByClass(t,"kint-source")):i.hasClass(t,"access-path")?i.selectText(t):"a"!==a&&(t=i.getParentHeader(t))&&(i.toggle(t),i.keyboardNav.fetchTargets()))}},!0),window.addEventListener("keydown",function(e){if(e.target===document.body&&!e.altKey&&!e.ctrlKey){if(68===e.keyCode){if(i.keyboardNav.active)i.keyboardNav.active=!1;else if(i.keyboardNav.active=!0,i.keyboardNav.fetchTargets(),0===i.keyboardNav.targets.length)return void(i.keyboardNav.active=!1);return i.keyboardNav.sync(),void e.preventDefault()}if(i.keyboardNav.active){if(9===e.keyCode)return i.keyboardNav.moveCursor(e.shiftKey?-1:1),void e.preventDefault();if(38===e.keyCode||75===e.keyCode)return i.keyboardNav.moveCursor(-1),void e.preventDefault();if(40===e.keyCode||74===e.keyCode)return i.keyboardNav.moveCursor(1),void e.preventDefault();var t,a,o=i.keyboardNav.targets[i.keyboardNav.target];if("li"===o.nodeName.toLowerCase()){if(32===e.keyCode||13===e.keyCode)return i.switchTab(o),i.keyboardNav.fetchTargets(),i.keyboardNav.sync(),void e.preventDefault();if(39===e.keyCode||76===e.keyCode)return i.keyboardNav.moveCursor(1),void e.preventDefault();if(37===e.keyCode||72===e.keyCode)return i.keyboardNav.moveCursor(-1),void e.preventDefault()}o=o.parentNode,65===e.keyCode?(i.showAccessPath(o),e.preventDefault()):"footer"===o.nodeName.toLowerCase()&&i.hasClass(o.parentNode,"kint-rich")?32===e.keyCode||13===e.keyCode?(i.hasClass(o)?i.removeClass(o):i.addClass(o),e.preventDefault()):37===e.keyCode||72===e.keyCode?(i.removeClass(o),e.preventDefault()):39!==e.keyCode&&76!==e.keyCode||(i.addClass(o),e.preventDefault()):32===e.keyCode||13===e.keyCode?(i.toggle(o),i.keyboardNav.fetchTargets(),e.preventDefault()):39!==e.keyCode&&76!==e.keyCode&&37!==e.keyCode&&72!==e.keyCode||(t=37===e.keyCode||72===e.keyCode,i.hasClass(o)?i.toggleChildren(o,t):!t||(a=i.getParentHeader(o.parentNode.parentNode,!0))&&(i.keyboardNav.setCursor((o=a).querySelector("nav")),i.keyboardNav.sync()),i.toggle(o,t),i.keyboardNav.fetchTargets(),e.preventDefault())}}},!0),i}()),window.kintShared.runOnce(window.kintRich.initLoad);
+void 0===window.kintMicrotimeInitialized&&(window.kintMicrotimeInitialized=1,window.addEventListener("load",function(){"use strict";var a={},t=Array.prototype.slice.call(document.querySelectorAll("[data-kint-microtime-group]"),0);t.forEach(function(t){var i,e;t.querySelector(".kint-microtime-lap")&&(i=t.getAttribute("data-kint-microtime-group"),e=parseFloat(t.querySelector(".kint-microtime-lap").innerHTML),t=parseFloat(t.querySelector(".kint-microtime-avg").innerHTML),void 0===a[i]&&(a[i]={}),(void 0===a[i].min||a[i].min>e)&&(a[i].min=e),(void 0===a[i].max||a[i].max<e)&&(a[i].max=e),a[i].avg=t)}),t.forEach(function(t){var i,e,r,o,n=t.querySelector(".kint-microtime-lap");null!==n&&(i=parseFloat(n.textContent),o=t.dataset.kintMicrotimeGroup,e=a[o].avg,r=a[o].max,o=a[o].min,i===(t.querySelector(".kint-microtime-avg").textContent=e)&&i===o&&i===r||(n.style.background=e<i?"hsl("+(40-40*((i-e)/(r-e)))+", 100%, 65%)":"hsl("+(40+80*(e===o?0:(e-i)/(e-o)))+", 100%, 65%)"))})}));
+</script><style  class="kint-rich-style">.kint-rich{font-size:13px;overflow-x:auto;white-space:nowrap;background:rgba(255,255,255,0.9)}.kint-rich.kint-folder{position:fixed;bottom:0;left:0;right:0;z-index:999999;width:100%;margin:0;display:block}.kint-rich.kint-folder dd.kint-foldout{max-height:calc(100vh - 100px);padding-right:8px;overflow-y:scroll;display:none}.kint-rich.kint-folder dd.kint-foldout.kint-show{display:block}.kint-rich::selection,.kint-rich::-moz-selection,.kint-rich::-webkit-selection{background:#aaa;color:#1d1e1e}.kint-rich .kint-focused{box-shadow:0 0 3px 2px red}.kint-rich,.kint-rich::before,.kint-rich::after,.kint-rich *,.kint-rich *::before,.kint-rich *::after{box-sizing:border-box;border-radius:0;color:#1d1e1e;float:none !important;font-family:Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;line-height:15px;margin:0;padding:0;text-align:left}.kint-rich{margin:8px 0}.kint-rich dt,.kint-rich dl{width:auto}.kint-rich dt,.kint-rich div.access-path{background:#f8f8f8;border:1px solid #d7d7d7;color:#1d1e1e;display:block;font-weight:bold;list-style:none outside none;overflow:auto;padding:4px}.kint-rich dt:hover,.kint-rich div.access-path:hover{border-color:#aaa}.kint-rich>dl dl{padding:0 0 0 12px}.kint-rich dt.kint-parent>nav,.kint-rich>footer>nav{background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAxNTAiPjxwYXRoIGQ9Ik02IDdoMThsLTkgMTV6bTAgMzBoMThsLTkgMTV6bTAgNDVoMThsLTktMTV6bTAgMzBoMThsLTktMTV6bTAgMTJsMTggMThtLTE4IDBsMTgtMTgiIGZpbGw9IiM1NTUiLz48cGF0aCBkPSJNNiAxMjZsMTggMThtLTE4IDBsMTgtMTgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjNTU1Ii8+PC9zdmc+") no-repeat scroll 0 0/15px 75px transparent;cursor:pointer;display:inline-block;height:15px;width:15px;margin-right:3px;vertical-align:middle}.kint-rich dt.kint-parent:hover>nav,.kint-rich>footer>nav:hover{background-position:0 25%}.kint-rich dt.kint-parent.kint-show>nav,.kint-rich>footer.kint-show>nav{background-position:0 50%}.kint-rich dt.kint-parent.kint-show:hover>nav,.kint-rich>footer.kint-show>nav:hover{background-position:0 75%}.kint-rich dt.kint-parent.kint-locked>nav{background-position:0 100%}.kint-rich dt.kint-parent+dd{display:none;border-left:1px dashed #d7d7d7}.kint-rich dt.kint-parent.kint-show+dd{display:block}.kint-rich var,.kint-rich var a{color:#06f;font-style:normal}.kint-rich dt:hover var,.kint-rich dt:hover var a{color:red}.kint-rich dfn{font-style:normal;font-family:monospace;color:#1d1e1e}.kint-rich pre{color:#1d1e1e;margin:0 0 0 12px;padding:5px;overflow-y:hidden;border-top:0;border:1px solid #d7d7d7;background:#f8f8f8;display:block;word-break:normal}.kint-rich .kint-popup-trigger,.kint-rich .kint-access-path-trigger,.kint-rich .kint-search-trigger{background:rgba(29,30,30,0.8);border-radius:3px;height:16px;font-size:16px;margin-left:5px;font-weight:bold;width:16px;text-align:center;float:right !important;cursor:pointer;color:#f8f8f8;position:relative;overflow:hidden;line-height:17.6px}.kint-rich .kint-popup-trigger:hover,.kint-rich .kint-access-path-trigger:hover,.kint-rich .kint-search-trigger:hover{color:#1d1e1e;background:#f8f8f8}.kint-rich dt.kint-parent>.kint-popup-trigger{line-height:19.2px}.kint-rich .kint-search-trigger{font-size:20px}.kint-rich input.kint-search{display:none;border:1px solid #d7d7d7;border-top-width:0;border-bottom-width:0;padding:4px;float:right !important;margin:-4px 0;color:#1d1e1e;background:#f8f8f8;height:24px;width:160px;position:relative;z-index:100}.kint-rich input.kint-search.kint-show{display:block}.kint-rich .kint-search-root ul.kint-tabs>li:not(.kint-search-match){background:#f8f8f8;opacity:0.5}.kint-rich .kint-search-root dl:not(.kint-search-match){opacity:0.5}.kint-rich .kint-search-root dl:not(.kint-search-match)>dt{background:#f8f8f8}.kint-rich .kint-search-root dl:not(.kint-search-match) dl,.kint-rich .kint-search-root dl:not(.kint-search-match) ul.kint-tabs>li:not(.kint-search-match){opacity:1}.kint-rich div.access-path{background:#f8f8f8;display:none;margin-top:5px;padding:4px;white-space:pre}.kint-rich div.access-path.kint-show{display:block}.kint-rich footer{padding:0 3px 3px;font-size:9px;background:transparent}.kint-rich footer>.kint-popup-trigger{background:transparent;color:#1d1e1e}.kint-rich footer nav{height:10px;width:10px;background-size:10px 50px}.kint-rich footer>ol{display:none;margin-left:32px}.kint-rich footer.kint-show>ol{display:block}.kint-rich a{color:#1d1e1e;text-shadow:none;text-decoration:underline}.kint-rich a:hover{color:#1d1e1e;border-bottom:1px dotted #1d1e1e}.kint-rich ul{list-style:none;padding-left:12px}.kint-rich ul:not(.kint-tabs) li{border-left:1px dashed #d7d7d7}.kint-rich ul:not(.kint-tabs) li>dl{border-left:none}.kint-rich ul.kint-tabs{margin:0 0 0 12px;padding-left:0;background:#f8f8f8;border:1px solid #d7d7d7;border-top:0}.kint-rich ul.kint-tabs>li{background:#f8f8f8;border:1px solid #d7d7d7;cursor:pointer;display:inline-block;height:24px;margin:2px;padding:0 12px;vertical-align:top}.kint-rich ul.kint-tabs>li:hover,.kint-rich ul.kint-tabs>li.kint-active-tab:hover{border-color:#aaa;color:red}.kint-rich ul.kint-tabs>li.kint-active-tab{background:#f8f8f8;border-top:0;margin-top:-1px;height:27px;line-height:24px}.kint-rich ul.kint-tabs>li:not(.kint-active-tab){line-height:20px}.kint-rich ul.kint-tabs li+li{margin-left:0}.kint-rich ul.kint-tab-contents>li{display:none}.kint-rich ul.kint-tab-contents>li.kint-show{display:block}.kint-rich dt:hover+dd>ul>li.kint-active-tab{border-color:#aaa;color:red}.kint-rich dt>.kint-color-preview{width:16px;height:16px;display:inline-block;vertical-align:middle;margin-left:10px;border:1px solid #d7d7d7;background-color:#ccc;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="%23FFF" d="M0 0h1v2h1V1H0z"/></svg>');background-size:100%}.kint-rich dt>.kint-color-preview:hover{border-color:#aaa}.kint-rich dt>.kint-color-preview>div{width:100%;height:100%}.kint-rich table{border-collapse:collapse;empty-cells:show;border-spacing:0}.kint-rich table *{font-size:12px}.kint-rich table dt{background:none;padding:2px}.kint-rich table dt .kint-parent{min-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.kint-rich table td,.kint-rich table th{border:1px solid #d7d7d7;padding:2px;vertical-align:center}.kint-rich table th{cursor:alias}.kint-rich table td:first-child,.kint-rich table th{font-weight:bold;background:#f8f8f8;color:#1d1e1e}.kint-rich table td{background:#f8f8f8;white-space:pre}.kint-rich table td>dl{padding:0}.kint-rich table pre{border-top:0;border-right:0}.kint-rich table thead th:first-child{background:none;border:0}.kint-rich table tr:hover>td{box-shadow:0 0 1px 0 #aaa inset}.kint-rich table tr:hover var{color:red}.kint-rich table ul.kint-tabs li.kint-active-tab{height:20px;line-height:17px}.kint-rich pre.kint-source{margin-left:-1px}.kint-rich pre.kint-source[data-kint-filename]:before{display:block;content:attr(data-kint-filename);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid #f8f8f8}.kint-rich pre.kint-source>div:before{display:inline-block;content:counter(kint-l);counter-increment:kint-l;border-right:1px solid #aaa;padding-right:8px;margin-right:8px}.kint-rich pre.kint-source>div.kint-highlight{background:#f8f8f8}.kint-rich .kint-microtime-lap{text-shadow:-1px 0 #aaa,0 1px #aaa,1px 0 #aaa,0 -1px #aaa;color:#f8f8f8;font-weight:bold}.kint-rich .kint-focused{box-shadow:0 0 3px 2px red}.kint-rich dt{font-weight:normal}.kint-rich dt.kint-parent{margin-top:4px}.kint-rich dl dl{margin-top:4px;padding-left:25px;border-left:none}.kint-rich>dl>dt{background:#f8f8f8}.kint-rich ul{margin:0;padding-left:0}.kint-rich ul:not(.kint-tabs)>li{border-left:0}.kint-rich ul.kint-tabs{background:#f8f8f8;border:1px solid #d7d7d7;border-width:0 1px 1px 1px;padding:4px 0 0 12px;margin-left:-1px;margin-top:-1px}.kint-rich ul.kint-tabs li,.kint-rich ul.kint-tabs li+li{margin:0 0 0 4px}.kint-rich ul.kint-tabs li{border-bottom-width:0;height:25px}.kint-rich ul.kint-tabs li:first-child{margin-left:0}.kint-rich ul.kint-tabs li.kint-active-tab{border-top:1px solid #d7d7d7;background:#fff;font-weight:bold;padding-top:0;border-bottom:1px solid #fff !important;margin-bottom:-1px}.kint-rich ul.kint-tabs li.kint-active-tab:hover{border-bottom:1px solid #fff}.kint-rich ul>li>pre{border:1px solid #d7d7d7}.kint-rich dt:hover+dd>ul{border-color:#aaa}.kint-rich pre{background:#fff;margin-top:4px;margin-left:25px}.kint-rich .kint-source{margin-left:-1px}.kint-rich .kint-source .kint-highlight{background:#cfc}.kint-rich .kint-parent.kint-show>.kint-search{border-bottom-width:1px}.kint-rich table td{background:#fff}.kint-rich table td>dl{padding:0;margin:0}.kint-rich table td>dl>dt.kint-parent{margin:0}.kint-rich table td:first-child,.kint-rich table td,.kint-rich table th{padding:2px 4px}.kint-rich table dd,.kint-rich table dt{background:#fff}.kint-rich table tr:hover>td{box-shadow:none;background:#cfc}
+</style>
+
+
+<!-- Meta Tags -->
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<meta name="description" content="APJITM | Asia-Pacific Journal of Information Technology and Multimedia" />
+<meta name="keywords" content="apjitm, journal, asia-pacific, asia, information technology, multimedia" />
+<meta name="author" content="APJITM" />
+<meta name="google-site-verification" content="dutf9RS9ZnLxcf_wfmuXYw6pD-DvLGjSUZ25mNxYIng" />
+<!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> -->
+
+<!-- Page Title -->
+<title>APJITM UKM</title>
+
+
+
+
+
+
+<!-- DEBUG-VIEW ENDED 2 APPPATH/Views/layouts/partials/head.php -->
+
+<!-- DEBUG-VIEW START 3 APPPATH/Views/layouts/partials/menu.php -->
+<div class="header-top bg-theme-color-2 sm-text-center p-0">
+
+  <div class="container">
+
+    <div class="row">
+
+      <div class="col-md-3">
+
+        <!--<div class="widget no-border m-0">
+
+              <ul class="list-inline font-13 sm-text-center mt-5 mb-5">
+
+                <li>
+                  
+					<a class="text-white" href="http://www.ukm.my" target="_blank">UKM</a>
+
+                </li>
+				  
+				<li class="text-white">|</li>
+
+				<li>
+
+                  <a class="text-white" href="https://www.ukm.my/penerbit/en/" target="_blank">UKM PRESS</a>
+
+                </li>
+
+                <li class="text-white">|</li>
+
+                <li>
+
+                  <a class="text-white" href="http://www.ftsm.ukm.my" target="_blank">FTSM</a>
+
+                </li>
+
+				
+
+              </ul>
+
+            </div>-->
+
+      </div>
+
+      <div class="col-md-9 visible-lg visible-md">
+
+        <div class="widget no-border m-0 pull-right mb-5">
+
+          <ul class="list-inline font-13 sm-text-center mt-5">
+
+            <!--<li><a href="" class="text-white"><i class="fa fa-envelope text-white"></i> apjitm@ukm.edu.my</a></li>
+
+				  <li><a href="" class="text-white"><i class="fa fa-phone text-white"></i> +6 03 - 8921 6089</a></li>
+				  <li><a href="" class="text-white" data-toggle="modal" data-target=".contact"><i class="fa fa-phone text-white"></i> Contact Us</a></li>-->
+
+            <li><a href="https://www.facebook.com/apjitm/" target="_blank" class="text-white"><i class="fa fa-facebook text-white"></i> apjitm</a></li>
+
+            <li><a href="https://my.linkedin.com/in/editor-in-chief-apjitm-6b8341206" target="_blank" class="text-white"><i class="fa fa-linkedin text-white"></i> APJITM</a></li>
+
+          </ul>
+
+        </div>
+
+      </div>
+
+
+      <!-- contact -->
+      <div class="modal fade contact" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title font-weight-700 text-uppercase" id="myModalLabel2">Contact Us</h4>
+
+            </div>
+            <div class="modal-body">
+              <div class="table-responsive">
+
+                <div class="row mt-30">
+
+                  <div class="col-md-5">
+
+                    <div class="row">
+
+                      <div class="col-xs-12 col-sm-6 col-md-12">
+
+                        <div class="icon-box left media bg-deep p-15 mb-10"> <a class="media-left pull-left" href="#"> <i class="pe-7s-user text-theme-colored"></i></a>
+
+                          <div class="media-body"> <strong>EDITOR IN CHIEF</strong>
+
+                            <p> Prof. Dr. Mohd Juzaiddin Ab Aziz</p>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                      <!--<div class="col-xs-12 col-sm-6 col-md-12">
+
+                <div class="icon-box left media bg-deep p-15 mb-10"> <a class="media-left pull-left" href="#"> <i class="pe-7s-call text-theme-colored"></i></a>
+
+                  <div class="media-body"> <strong>PHONE NUMBER</strong>
+
+                    <p> +6 03 - 8921 6089</p>
+
+                  </div>
+
+                </div>
+
+              </div>-->
+
+                      <div class="col-xs-12 col-sm-6 col-md-12">
+
+                        <div class="icon-box left media bg-deep p-15 mb-10"> <a class="media-left pull-left" href="#"> <i class="pe-7s-mail text-theme-colored"></i></a>
+
+                          <div class="media-body"> <strong>E-MAIL</strong>
+
+                            <p>apjitm@ukm.edu.my</p>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                      <div class="col-xs-12 col-sm-12 col-md-12">
+
+                        <div class="icon-box left media bg-deep p-15 mb-10"> <a class="media-left pull-left" href="#"> <i class="pe-7s-map-2 text-theme-colored"></i></a>
+
+                          <div class="media-body">
+                            <strong class="text-uppercase">Fakulti Teknologi dan Sains Maklumat</strong>
+
+                            <p>Universiti Kebangsaan Malaysia, 43600 Bangi, Selangor, Malaysia</p>
+
+                            <div class="separator">
+                              <i class="fa fa-cog fa-spin"></i>
+                            </div>
+
+                            <strong class="text-uppercase">Penerbit Universiti Kebangsaan Malaysia</strong>
+
+                            <p>Universiti Kebangsaan Malaysia, 43600 Bangi, Selangor, Malaysia</p>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+
+
+                    </div>
+
+                  </div>
+
+                  <div class="col-md-7">
+
+                    <p><iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15938.449054540597!2d101.7751551!3d2.9272698!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x13f9016814bba3!2sPenerbit%20Universiti%20Kebangsaan%20Malaysia!5e0!3m2!1sen!2smy!4v1662350532410!5m2!1sen!2smy" width="550" height="504" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+
+
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- contact -->
+
+
+      <div class="col-md-9 visible-sm visible-xs">
+
+        <div class="widget no-border m-0 mb-5">
+
+          <ul class="list-inline font-13 sm-text-center mt-5">
+
+            <!--<li><a href="" class="text-white"><i class="fa fa-envelope text-white"></i> apjitm@ukm.edu.my</a></li>
+
+				  <li><a href="" class="text-white"><i class="fa fa-phone text-white"></i> +6 03 - 8921 6089</a></li>
+				  <li><a href="" class="text-white" data-toggle="modal" data-target=".contact"><i class="fa fa-phone text-white"></i> Contact Us</a></li>-->
+
+            <li><a href="https://www.facebook.com/apjitm/" target="_blank" class="text-white"><i class="fa fa-facebook text-white"></i> apjitm</a></li>
+
+            <li><a href="https://my.linkedin.com/in/editor-in-chief-apjitm-6b8341206" target="_blank" class="text-white"><i class="fa fa-linkedin text-white"></i> APJITM</a></li>
+
+          </ul>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="header-middle p-0 bg-lightest xs-text-center">
+
+  <div class="container pt-0 pb-0">
+
+    <div class="row">
+
+
+
+      <div class="col-xs-12 col-sm-6 col-md-9">
+
+        <div class=" no-border m-0"><!--widget-->
+
+          <span class="menuzord-brand pull-left flip xs-pull-center mb-15">
+
+            <a href="https://www.ukm.my/penerbit/"><img src="https://www.ukm.my/apjitm/public/assets/images/headapj.png" alt=""></a>
+
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="col-xs-12 col-sm-6 col-md-3">
+
+        <div class="widget no-border pull-right sm-pull-none sm-text-center mt-30 mb-0 m-0 mt-sm-0">
+
+          <ul class="list-inline">
+
+            <li><a href="https://portal.issn.org/resource/ISSN/2289-2192" target="_blank">
+                <h5 class="font-15 text-black m-0 mb-xs-10"> e-ISSN : 2289-2192</h5>
+              </a></li>
+
+
+          </ul>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="header-nav">
+
+  <div class="header-nav-wrapper navbar-scrolltofixed bg-theme-colored border-bottom-theme-color-2-1px">
+
+    <div class="container">
+
+      <nav id="menuzord" class="menuzord bg-theme-colored pull-left flip menuzord-responsive">
+
+        <ul class="menuzord-menu">
+
+          <li><a href="https://www.ukm.my/apjitm/" class="text-uppercase font-weight-600 font-13">Home</a></li>
+
+          <li><a href="https://www.ukm.my/apjitm/focus" class="text-uppercase font-weight-600 font-13">Focus & Scope</a></li>
+
+          <li><a href="https://www.ukm.my/apjitm/editorial" class="text-uppercase font-weight-600 font-13">Editorial Board</a></li>
+
+          <!--<li><a href="https://www.ukm.my/apjitm/guidelines" class="text-uppercase font-weight-600 font-13">Author Guidelines</a></li>-->
+
+          <li><a href="#" class="text-uppercase font-weight-600 font-13">Submission</a>
+
+            <ul class="dropdown">
+
+              <li><a href="https://www.ukm.my/apjitm/guidelines" class="text-uppercase font-13">Author Guidelines</a></li>
+
+              <li><a href="https://ejournal.ukm.my/apjitm/user/register" target="_blank" class="text-uppercase font-13">Submit a Manuscript</a></li>
+
+            </ul>
+
+          </li>
+
+          <li><a href="#" class="text-uppercase font-weight-600 font-13">Ethics</a>
+
+            <ul class="dropdown">
+
+              <li><a href="https://www.ukm.my/apjitm/policy" class="text-uppercase font-13">Journal Policy</a></li>
+
+              <li><a href="https://www.ukm.my/apjitm/ethics" class="text-uppercase font-13">Ethics Statement</a></li>
+
+            </ul>
+
+          </li>
+
+          <li><a href="#" class="text-uppercase font-weight-600 font-13">Articles</a>
+
+            <ul class="dropdown">
+
+              <li><a href="https://www.ukm.my/apjitm/articles-issues" class="text-uppercase font-13">By Issue</a></li>
+
+              <li><a href="https://www.ukm.my/apjitm/articles-area" class="text-uppercase font-13">By Area</a></li>
+
+            </ul>
+
+          </li>
+
+
+
+
+
+          <!--<li><a href="https://www.ukm.my/apjitm/contact-us" class="text-uppercase font-weight-600 font-13">Contact Us</a></li>-->
+
+        </ul>
+
+        <ul class="pull-right flip inline-block">
+
+
+
+          <li>
+
+            <a class="btn btn-colored btn-flat text-white font-13 bs-modal-ajax-load mt-0 p-25 pr-15 pl-15 text-uppercase font-weight-600 font-13" href="https://www.ukm.my/apjitm/search"><i class="fa fa-search font-13"></i> Search</i> </a>
+
+          </li>
+
+        </ul>
+
+      </nav>
+
+    </div>
+
+  </div>
+
+</div>
+<!-- DEBUG-VIEW ENDED 3 APPPATH/Views/layouts/partials/menu.php -->
+
+</header>
+
+  <!-- Start main-content --> 
+
+  <div class="main-content">
+
+  
+
+<section>
+
+    <div class="container">
+
+		<div class="section-title text-left">
+            <div class="row" data-margin-top="-40px">
+                <div class="col-md-12">
+				<h6 class="text-uppercase letter-space-5 line-bottom title font-playfair text-uppercase">Article Info</h6>
+                </div>
+			</div>
+		</div>
+
+          
+		<div class="row" data-margin-top="-40px">
+            <div class="col-md-12">
+								
+							<div class="row">				  
+								<div class="col-md-6">
+								    									<h3 class="text-uppercase font-weight-700"><a style="color: #202C45">Named Entity Recognition For Quranic Text Using Rule Based Approaches</a></h3>
+									<p class="mb-30 font-13">Shasha Arzila Tarmizi, Saidah Saad									<br>
+									<a href="https://www.doi.org/10.17576/apjitm-2022-1102-09" class="text-info" style="cursor: pointer;">dx.doi.org/10.17576/apjitm-2022-1102-09</a>  
+									</p>
+
+									<div class="row" data-margin-top="-20px">
+										<div class="col-md-8">
+											<a class="btn btn-sm text-white" style="background-color: #265db9"><i class="fa fa-file text-white"></i> Page <strong class="text-info text-white">112 - 122</strong></a>
+											<!--<a class="btn btn-sm text-white" style="background-color: #265db9"><i class="fa fa-eye text-white"></i> <strong class="text-info text-white">0</strong> views</a>-->
+										</div> 
+
+										<div class="col-md-4" onclick='count()'>
+											<p class="visible-lg"><a href="../../public/assets/article/2022/1102/09.pdf" target="_blank"><img src="https://www.ukm.my/apjitm/public/assets/images/download.png" class="img-fullwidth pull-right" data-margin-top="-10px"></a></p>
+											<p class="visible-sm"><a href="../../public/assets/article/2022/1102/09.pdf" target="_blank"><img src="https://www.ukm.my/apjitm/public/assets/images/download.png" class="pull-right"  width="20%" data-margin-top="-40px"></a></p>
+											<p class="visible-xs mt-20"><a href="../../public/assets/article/2022/1102/09.pdf" target="_blank"><img src="https://www.ukm.my/apjitm/public/assets/images/download.png" width="40%"></a></p>
+										</div> 
+									</div>
+				
+									<h4 class="entry-title text-uppercase pt-0 mt-20 font-weight-700">Abstract</h4>
+									<p class="mb-30 text-justify font-13">The variety and difference between domains for textual data require customization in the Natural Language Processing component especially in Named Entity Recognition where different domains contain several types of entities. The current NER model is deemed not fit to accurately extract entities from Quranic text due to its unique content. This paper describes the building of a rule-based Named Entity Recognition method to extract the entities that exist in the English translation to the meaning of the Quranic text and its performance evaluation. Named entity tagging, a common task in-text annotation, in which entities (nouns) in the unstructured text are identified and assigned a class. A few rules are built to extract several types of entities such as the name of prophets and people, creation, location, time, and the various names of God. The rules are built mainly using regular expressions and gazetteers. The rules that have been built result in high precision and recall as well as a satisfactory F-score of over 90%. The results from this experiment can be used as annotation in building a machine learning model to extract entities from the same type of domain specifically on the Quranic text or generally in the Islamic domain text.</p>
+
+									<h4 class="entry-title text-uppercase pt-0 mt-0 font-weight-700">keyword</h4>
+									<p class="mb-30 font-13">Named Entity Recognition (NER), rule-based method, Quranic text </p>
+								
+									<h4 class="entry-title text-uppercase pt-0 mt-30 font-weight-700">Area</h4>
+									<p class="mb-30 font-13">Knowledge Technology</p>
+								</div>
+
+								<div class="col-md-6 bg-dark-gray">
+									<div class="row mt-30"></div>
+										<iframe src = "../../public/assets/ViewerJS/#../article/2022/1102/09.pdf" width='100%' height='600' allowfullscreen webkitallowfullscreen></iframe>
+																		        										<div class="mt-40">
+    										<hr class="separator border-bottom-theme-color-2-1px">
+											<h5 class="pt-0 mt-30">You might interested with these articles</h5>
+
+													   									<ul >
+		   										<li class="mb-10 font-13"><a href="https://www.doi.org/10.17576/apjitm-2017-0601-02" class="mt-40 font-13 text-info"><i class="fa fa-external-link-square font-10"></i> Heuristics-Based Method for Head and Modifier Detection in Malay Sentences from the Cultural Heritage Domain</a></li>
+		   									</ul>
+		   											   									<ul >
+		   										<li class="mb-10 font-13"><a href="https://www.doi.org/10.17576/apjitm-2015-0401-03" class="mt-40 font-13 text-info"><i class="fa fa-external-link-square font-10"></i> Pashto Language Stemming Algorithm</a></li>
+		   									</ul>
+		   											   									<ul >
+		   										<li class="mb-10 font-13"><a href="https://www.doi.org/10.17576/apjitm-2014-0301-03" class="mt-40 font-13 text-info"><i class="fa fa-external-link-square font-10"></i> Extraction of Compound Nouns in Malay Noun Phrases Using a Noun Phrase Frame Structure</a></li>
+		   									</ul>
+		   											   																		    </div>
+								</div>
+  								
+    						</div>
+						
+				<div class="mt-10"><a class="btn btn-sm btn-gray" onclick="history.back(-1)"><i class="fa fa-reply"></i> Back</a></div>
+			</div>
+		</div>
+
+	</div>
+
+</section>
+
+
+  </div>
+
+ <!-- end main-content -->
+
+</div>
+
+</body>
+
+</html>
+
+
+
+<!-- DEBUG-VIEW START 4 APPPATH/Views/layouts/partials/footer3.php -->
+  <footer id="footer" class="footer divider layer-overlay overlay-dark-7">
+
+    <div class="footer-bottom bg-gray-darkgray">
+      <div class="container pt-20 pb-20">
+        <div class="row">
+          <div class="col-md-9">
+            <p class="font-12 text-white mt-10"><span class="font-weight-600 text-uppercase" data-toggle="modal" data-target=".contact" style="cursor: pointer"><i class="fa fa-phone text-white"></i> Contact Us</span> | <span class="font-weight-600 text-uppercase" data-toggle="modal" data-target=".copy" style="cursor: pointer"><i class="fa fa-external-link"></i> Copyright</span> | &copy;2022 Asia-Pacific Journal of Information Technology and Multimedia (APJITM) FTSM UKM. All Rights Reserved</p>
+            <div class="modal fade copy" tabindex="-1" role="dialog">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel2">Copyright</h4>
+                  </div>
+                  <div class="modal-body">
+                    <p>If the article is accepted for publication, copyright of this article will be vested to UKM Press, National University of Malaysia (UKM).</p>
+
+                    <p>All articles published in this journal are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) license, unless otherwise stated.</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 text-right">
+            <div class="widget no-border m-0">
+              <ul class="list-inline sm-text-center mt-5 font-12">
+                <li>
+                  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/" target="_blank"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <a class="scrollToTop" href="#"><i class="fa fa-angle-up"></i></a>
+  </div>
+
+  <script src="../../public/assets/js/custom.js"></script>
+
+  <script type="text/javascript" src="../../public/assets/js/revolution-slider/js/extensions/revolution.extension.actions.min.js"></script>
+  <script type="text/javascript" src="../../public/assets/js/revolution-slider/js/extensions/revolution.extension.carousel.min.js"></script>
+  <script type="text/javascript" src="../../public/assets/js/revolution-slider/js/extensions/revolution.extension.kenburn.min.js"></script>
+  <script type="text/javascript" src="../../public/assets/js/revolution-slider/js/extensions/revolution.extension.layeranimation.min.js"></script>
+  <script type="text/javascript" src="../../public/assets/js/revolution-slider/js/extensions/revolution.extension.migration.min.js"></script>
+  <script type="text/javascript" src="../../public/assets/js/revolution-slider/js/extensions/revolution.extension.navigation.min.js"></script>
+  <script type="text/javascript" src="../../public/assets/js/revolution-slider/js/extensions/revolution.extension.parallax.min.js"></script>
+  <script type="text/javascript" src="../../public/assets/js/revolution-slider/js/extensions/revolution.extension.slideanims.min.js"></script>
+  <script type="text/javascript" src="../../public/assets/js/revolution-slider/js/extensions/revolution.extension.video.min.js"></script>
+<!-- DEBUG-VIEW ENDED 4 APPPATH/Views/layouts/partials/footer3.php -->
+
+
+
+
+<!-- DEBUG-VIEW ENDED 5 APPPATH/Views/layouts/master2.php -->
+
+<!-- DEBUG-VIEW ENDED 6 APPPATH/Views/view.php -->

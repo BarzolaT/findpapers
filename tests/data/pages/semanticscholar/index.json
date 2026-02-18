@@ -1,0 +1,102 @@
+[
+  {
+    "key": "10.1109/SOLI54607.2021.9672398",
+    "url": "https://doi.org/10.1109/SOLI54607.2021.9672398",
+    "doi": "10.1109/SOLI54607.2021.9672398",
+    "final_url": "https://ieeexplore.ieee.org/document/9672398/",
+    "status": 200,
+    "content_type": "text/html;charset=utf-8",
+    "size_bytes": 49391,
+    "error": null
+  },
+  {
+    "key": "10.1109/ACCESS.2021.3139586",
+    "url": "https://doi.org/10.1109/ACCESS.2021.3139586",
+    "doi": "10.1109/ACCESS.2021.3139586",
+    "final_url": "https://ieeexplore.ieee.org/document/9665772/",
+    "status": 200,
+    "content_type": "text/html;charset=utf-8",
+    "size_bytes": 51692,
+    "error": null
+  },
+  {
+    "key": "10.56578/ataiml010201",
+    "url": "https://doi.org/10.56578/ataiml010201",
+    "doi": "10.56578/ataiml010201",
+    "final_url": "https://www.acadlore.com/article/ATAIML/2022_1_2/ataiml010201",
+    "status": 200,
+    "content_type": "text/html;charset=utf-8",
+    "size_bytes": 347480,
+    "error": null
+  },
+  {
+    "key": "10.1007/s10278-022-00633-8",
+    "url": "https://doi.org/10.1007/s10278-022-00633-8",
+    "doi": "10.1007/s10278-022-00633-8",
+    "final_url": "https://link.springer.com/article/10.1007/s10278-022-00633-8",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 320488,
+    "error": null
+  },
+  {
+    "key": "10.5220/0010819500003123",
+    "url": "https://doi.org/10.5220/0010819500003123",
+    "doi": "10.5220/0010819500003123",
+    "final_url": "https://www.scitepress.org/Link.aspx?doi=10.5220/0010819500003123",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 286120,
+    "error": null
+  },
+  {
+    "key": "10.1109/ACCESS.2020.2974101",
+    "url": "https://doi.org/10.1109/ACCESS.2020.2974101",
+    "doi": "10.1109/ACCESS.2020.2974101",
+    "final_url": "https://ieeexplore.ieee.org/document/8999624/",
+    "status": 200,
+    "content_type": "text/html;charset=utf-8",
+    "size_bytes": 52576,
+    "error": null
+  },
+  {
+    "key": "10.3171/2022.1.FOCUS21561",
+    "url": "https://doi.org/10.3171/2022.1.FOCUS21561",
+    "doi": "10.3171/2022.1.FOCUS21561",
+    "final_url": "https://thejns.org/view/journals/neurosurg-focus/52/4/article-pE7.xml",
+    "status": 202,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 0,
+    "error": null
+  },
+  {
+    "key": "10.1109/ICAISS55157.2022.10010807",
+    "url": "https://doi.org/10.1109/ICAISS55157.2022.10010807",
+    "doi": "10.1109/ICAISS55157.2022.10010807",
+    "final_url": "https://ieeexplore.ieee.org/document/10010807/",
+    "status": 200,
+    "content_type": "text/html;charset=utf-8",
+    "size_bytes": 48581,
+    "error": null
+  },
+  {
+    "key": "10.1109/ISCMI56532.2022.10068440",
+    "url": "https://doi.org/10.1109/ISCMI56532.2022.10068440",
+    "doi": "10.1109/ISCMI56532.2022.10068440",
+    "final_url": "https://ieeexplore.ieee.org/document/10068440/",
+    "status": 200,
+    "content_type": "text/html;charset=utf-8",
+    "size_bytes": 51402,
+    "error": null
+  },
+  {
+    "key": "10.4230/DagRep.12.6.14",
+    "url": "https://doi.org/10.4230/DagRep.12.6.14",
+    "doi": "10.4230/DagRep.12.6.14",
+    "final_url": "https://drops.dagstuhl.de/entities/document/10.4230/DagRep.12.6.14",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 95402,
+    "error": null
+  }
+]

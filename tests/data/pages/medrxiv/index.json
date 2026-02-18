@@ -1,0 +1,102 @@
+[
+  {
+    "key": "10.1101/2019.12.26.19014274",
+    "url": "https://www.medrxiv.org/content/10.1101/2019.12.26.19014274",
+    "doi": "10.1101/2019.12.26.19014274",
+    "final_url": "https://www.medrxiv.org/content/10.1101/2019.12.26.19014274v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 102975,
+    "error": null
+  },
+  {
+    "key": "10.1101/19004184",
+    "url": "https://www.medrxiv.org/content/10.1101/19004184",
+    "doi": "10.1101/19004184",
+    "final_url": "https://www.medrxiv.org/content/10.1101/19004184v4",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 141104,
+    "error": null
+  },
+  {
+    "key": "10.1101/2019.12.09.19014233",
+    "url": "https://www.medrxiv.org/content/10.1101/2019.12.09.19014233",
+    "doi": "10.1101/2019.12.09.19014233",
+    "final_url": "https://www.medrxiv.org/content/10.1101/2019.12.09.19014233v2",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 126292,
+    "error": null
+  },
+  {
+    "key": "10.1101/2019.12.28.19015974",
+    "url": "https://www.medrxiv.org/content/10.1101/2019.12.28.19015974",
+    "doi": "10.1101/2019.12.28.19015974",
+    "final_url": "https://www.medrxiv.org/content/10.1101/2019.12.28.19015974v2",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 169342,
+    "error": null
+  },
+  {
+    "key": "10.1101/2019.12.28.19015628",
+    "url": "https://www.medrxiv.org/content/10.1101/2019.12.28.19015628",
+    "doi": "10.1101/2019.12.28.19015628",
+    "final_url": "https://www.medrxiv.org/content/10.1101/2019.12.28.19015628v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 126671,
+    "error": null
+  },
+  {
+    "key": "10.1101/2019.12.28.19015941",
+    "url": "https://www.medrxiv.org/content/10.1101/2019.12.28.19015941",
+    "doi": "10.1101/2019.12.28.19015941",
+    "final_url": "https://www.medrxiv.org/content/10.1101/2019.12.28.19015941v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 149890,
+    "error": null
+  },
+  {
+    "key": "10.1101/2019.12.28.19016048",
+    "url": "https://www.medrxiv.org/content/10.1101/2019.12.28.19016048",
+    "doi": "10.1101/2019.12.28.19016048",
+    "final_url": "https://www.medrxiv.org/content/10.1101/2019.12.28.19016048v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 104920,
+    "error": null
+  },
+  {
+    "key": "10.1101/2019.12.30.19016154",
+    "url": "https://www.medrxiv.org/content/10.1101/2019.12.30.19016154",
+    "doi": "10.1101/2019.12.30.19016154",
+    "final_url": "https://www.medrxiv.org/content/10.1101/2019.12.30.19016154v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 107999,
+    "error": null
+  },
+  {
+    "key": "10.1101/2019.12.30.19015842",
+    "url": "https://www.medrxiv.org/content/10.1101/2019.12.30.19015842",
+    "doi": "10.1101/2019.12.30.19015842",
+    "final_url": "https://www.medrxiv.org/content/10.1101/2019.12.30.19015842v2",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 154557,
+    "error": null
+  },
+  {
+    "key": "10.1101/2019.12.30.19016162",
+    "url": "https://www.medrxiv.org/content/10.1101/2019.12.30.19016162",
+    "doi": "10.1101/2019.12.30.19016162",
+    "final_url": "https://www.medrxiv.org/content/10.1101/2019.12.30.19016162v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 131810,
+    "error": null
+  }
+]

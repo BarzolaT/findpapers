@@ -1,0 +1,102 @@
+[
+  {
+    "key": "10.1515/9783110750584",
+    "url": "https://doi.org/10.1515/9783110750584",
+    "doi": "10.1515/9783110750584",
+    "final_url": "https://www.degruyterbrill.com:443/document/doi/10.1515/9783110750584/html",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 164354,
+    "error": null
+  },
+  {
+    "key": "10.31202/ecjse.1135868",
+    "url": "https://doi.org/10.31202/ecjse.1135868",
+    "doi": "10.31202/ecjse.1135868",
+    "final_url": "https://dergipark.org.tr/tr/pub/ecjse/article/1135868",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 122960,
+    "error": null
+  },
+  {
+    "key": "10.3837/tiis.2022.12.005",
+    "url": "https://doi.org/10.3837/tiis.2022.12.005",
+    "doi": "10.3837/tiis.2022.12.005",
+    "final_url": "https://itiis.org/digital-library/38210",
+    "status": 200,
+    "content_type": "text/html;charset=utf-8",
+    "size_bytes": 24438,
+    "error": null
+  },
+  {
+    "key": "10.1515/9783110750584-011",
+    "url": "https://doi.org/10.1515/9783110750584-011",
+    "doi": "10.1515/9783110750584-011",
+    "final_url": "https://www.degruyterbrill.com:443/document/doi/10.1515/9783110750584-011/html",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 123235,
+    "error": null
+  },
+  {
+    "key": "10.1556/606.2022.00608",
+    "url": "https://doi.org/10.1556/606.2022.00608",
+    "doi": "10.1556/606.2022.00608",
+    "final_url": "https://akjournals.com/view/journals/606/17/3/article-p13.xml",
+    "status": 202,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 0,
+    "error": null
+  },
+  {
+    "key": "10.1007/978-1-4842-8931-0",
+    "url": "https://doi.org/10.1007/978-1-4842-8931-0",
+    "doi": "10.1007/978-1-4842-8931-0",
+    "final_url": "https://link.springer.com/book/10.1007/978-1-4842-8931-0",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 266727,
+    "error": null
+  },
+  {
+    "key": "10.1055/a-2233-2736",
+    "url": "https://doi.org/10.1055/a-2233-2736",
+    "doi": "10.1055/a-2233-2736",
+    "final_url": "https://www.thieme-connect.de/products/ejournals/abstract/10.1055/a-2233-2736",
+    "status": 200,
+    "content_type": "text/html;charset=utf-8",
+    "size_bytes": 166198,
+    "error": null
+  },
+  {
+    "key": "10.3837/tiis.2022.12.013",
+    "url": "https://doi.org/10.3837/tiis.2022.12.013",
+    "doi": "10.3837/tiis.2022.12.013",
+    "final_url": "https://itiis.org/digital-library/38218",
+    "status": 200,
+    "content_type": "text/html;charset=utf-8",
+    "size_bytes": 25296,
+    "error": null
+  },
+  {
+    "key": "10.56979/401/2022/85",
+    "url": "https://doi.org/10.56979/401/2022/85",
+    "doi": "10.56979/401/2022/85",
+    "final_url": "https://jcbi.org/index.php/Main/article/view/85",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 30852,
+    "error": null
+  },
+  {
+    "key": "10.1201/9781003272649-5",
+    "url": "https://doi.org/10.1201/9781003272649-5",
+    "doi": "10.1201/9781003272649-5",
+    "final_url": "https://www.taylorfrancis.com/chapters/edit/10.1201/9781003272649-5/natural-language-processing-graph-machine-learning-algorithms-based-large-scale-text-document-summarization-applications-shaikh-ashfaq-amir-pathan-mohd-shafi-vinod-kimbahune-vijaykumar-bidve",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 58379,
+    "error": null
+  }
+]

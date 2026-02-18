@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<head>
+
+
+
+<!-- 2.3.8 -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Access full-text academic articles: J-STAGE is an online platform for Japanese academic journals.">
+<meta name="citation_journal_title" content="IEICE Transactions on Information and Systems" />
+<meta name="citation_journal_abbrev" content="IEICE Trans. Inf. &amp; Syst." />
+<meta name="citation_publisher" content="The Institute of Electronics, Information and Communication Engineers" />
+<meta name="citation_author" content="Hitoshi KIYA" />
+<meta name="citation_author_institution" content="Tokyo Metropolitan University" />
+<meta name="citation_author" content="Ryota IIJIMA" />
+<meta name="citation_author_institution" content="Tokyo Metropolitan University" />
+<meta name="citation_author" content="Aprilpyone MAUNGMAUNG" />
+<meta name="citation_author_institution" content="Tokyo Metropolitan University" />
+<meta name="citation_author" content="Yuma KINOSHITA" />
+<meta name="citation_author_institution" content="Tokyo Metropolitan University" />
+<meta name="citation_title" content="Image and Model Transformation with Secret Key for Vision Transformer" />
+<meta name="citation_publication_date" content="2023/01/01" />
+<meta name="citation_online_date" content="2023/01/01" />
+<meta name="citation_volume" content="E106.D" />
+<meta name="citation_issue" content="1" />
+<meta name="citation_firstpage" content="2" />
+<meta name="citation_lastpage" content="11" />
+<meta name="citation_doi" content="10.1587/transinf.2022MUI0001" />
+<meta name="citation_fulltext_world_readable" content="" />
+<meta name="citation_pdf_url" content="https://www.jstage.jst.go.jp/article/transinf/E106.D/1/E106.D_2022MUI0001/_pdf" />
+<meta name="citation_issn" content="0916-8532" />
+<meta name="citation_issn" content="1745-1361" />
+<meta name="citation_language" content="en" />
+<meta name="citation_keywords" content="perceptual image encryption" />
+<meta name="citation_keywords" content="vision transformer" />
+<meta name="citation_keywords" content="DNN" />
+<meta name="citation_keywords" content="privacy preserving" />
+<meta name="citation_reference" content="[1] Y. LeCun, Y. Bengio, and G. Hinton, “Deep learning,” nature, vol.521, no.7553, p.436, 2015. 10.1038/nature14539" />
+<meta name="citation_reference" content="[2] X. Liu, Z. Deng, and Y. Yang, “Recent progress in semantic image segmentation,” Artif. Intell. Rev., vol.52, no.2, pp.1089-1106, 2019. 10.1007/s10462-018-9641-3" />
+<meta name="citation_reference" content="[3] C.-T. Huang, L. Huang, Z. Qin, H. Yuan, L. Zhou, V. Varadharajan, and C.-C.J. Kuo, “Survey on securing data storage in the cloud,” APSIPA Trans. Signal and Information Processing, vol.3, p.e7, 2014. 10.1017/ATSIP.2014.6" />
+<meta name="citation_reference" content="[4] M.-R. Ra, R. Govindan, and A. Ortega, “P3: Toward privacy-preserving photo sharing,” 10th USENIX Symposium on Networked Systems Design and Implementation (NSDI 13), pp.515-528, USENIX Association, Lombard, IL, April 2013." />
+<meta name="citation_reference" content="[5] R. Lagendijk, Z. Erkin, and M. Barni, “Encrypted signal processing for privacy protection: Conveying the utility of homomorphic encryption and multiparty computation,” IEEE Signal Process. Mag., vol.30, no.1, pp.82-105, Jan. 2013. 10.1109/MSP.2012.2219653" />
+<meta name="citation_reference" content="[6] M. Fredrikson, S. Jha, and T. Ristenpart, “Model inversion attacks that exploit confidence information and basic countermeasures,” Proc. 22nd ACM SIGSAC Conference on Computer and Communications Security, ser. CCS&apos;15, pp.1322-1333, Association for Computing Machinery, New York, NY, USA, 2015. 10.1145/2810103.2813677" />
+<meta name="citation_reference" content="[7] R. Shokri, M. Stronati, C. Song, and V. Shmatikov, “Membership inference attacks against machine learning models,” 2017 IEEE symposium on security and privacy (SP), pp.3-18, IEEE, 2017. 10.1109/SP.2017.41" />
+<meta name="citation_reference" content="[8] C. Szegedy, W. Zaremba, I. Sutskever, J. Bruna, D. Erhan, I.J. Goodfellow, and R. Fergus, “Intriguing properties of neural networks,” 2nd Int. Conf. Learning Representations, ICLR 2014, Banff, AB, Canada, April 14-16, 2014, Conference Track Proceedings, Y. Bengio and Y. LeCun, eds., 2014." />
+<meta name="citation_reference" content="[9] R.S.S. Kumar, M. Nyström, J. Lambert, A. Marshall, M. Goertzel, A. Comissoneru, M. Swann, and S. Xia, “Adversarial machine learning-industry perspectives,” 2020 IEEE Security and Privacy Workshops (SPW), pp.69-75, 2020. 10.1109/SPW50608.2020.00028" />
+<meta name="citation_reference" content="[10] H. Kiya, A.P.M. Maung, Y. Kinoshita, S. Imaizumi, and S. Shiota, “An overview of compressible and learnable image transformation with secret key and its applications,” APSIPA Trans. Signal and Information Processing, vol.11, no.1, e11, 2022. [Online]. Available: http://dx.doi.org/10.1561/116.00000048 10.1561/116.00000048" />
+<meta name="citation_reference" content="[11] M. Aprilpyone and H. Kiya, “Block-wise image transformation with secret key for adversarially robust defense,” IEEE Trans. Inf. Forensics Security, vol.16, pp.2709-2723, 2021. 10.1109/TIFS.2021.3062977" />
+<meta name="citation_reference" content="[12] A. Maungmaung and H. Kiya, “A protection method of trained CNN model with a secret key from unauthorized access,” APSIPA Trans. Signal and Information Processing, vol.10, p.e10, 2021. 10.1017/ATSIP.2021.9" />
+<meta name="citation_reference" content="[13] M. Maung, A. Pyone, and H. Kiya, “Encryption inspired adversarial defense for visual classification,” 2020 IEEE Int. Conf. Image Process. (ICIP), 2020, pp.1681-1685. 10.1109/ICIP40778.2020.9190904" />
+<meta name="citation_reference" content="[14] A. MaungMaung and H. Kiya, “Ensemble of key-based models: Defense against black-box adversarial attacks,” 2021 IEEE 10th Global Conference on Consumer Electronics (GCCE), pp.95-98, 2021. 10.1109/GCCE53005.2021.9621775" />
+<meta name="citation_reference" content="[15] M. AprilPyone and H. Kiya, “Privacy-preserving image classification using an isotropic network,” IEEE MultiMedia, vol.29, no.2, pp.23-33, April-June 2022. 10.1109/MMUL.2022.3168441" />
+<meta name="citation_reference" content="[16] Z. Qi, A. MaungMaung, Y. Kinoshita, and H. Kiya, “Privacy-preserving image classification using vision transformer,” arXiv preprint arXiv:1804.00750, 2022. [Online]. Available: https://arxiv.org/abs/2205.12041 10.48550/arXiv.2205.12041" />
+<meta name="citation_reference" content="[17] A. Dosovitskiy, L. Beyer, A. Kolesnikov, D. Weissenborn, X. Zhai, T. Unterthiner, M. Dehghani, M. Minderer, G. Heigold, S. Gelly, J. Uszkoreit, and N. Houlsby, “An image is worth 16x16 words: Transformers for image recognition at scale,” Int. Conf. Learning Repre-sentations, 2021. [Online]. Available: https://openreview.net/forum?id=YicbFdNTTy" />
+<meta name="citation_reference" content="[18] T. Chuman, W. Sirichotedumrong, and H. Kiya, “Encryption-then-compression systems using grayscale-based image encryption for jpeg images,” IEEE Trans. Inf. Forensics Security, vol.14, no.6, pp.1515-1525, June 2019. 10.1109/TIFS.2018.2881677" />
+<meta name="citation_reference" content="[19] T. Chuman, K. Kurihara, and H. Kiya, “On the security of block scrambling-based etc systems against jigsaw puzzle solver attacks,” 2017 IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP), pp.2157-2161, 2017. 10.1109/ICASSP.2017.7952538" />
+<meta name="citation_reference" content="[20] J. Zhou, X. Liu, O.C. Au, and Y.Y. Tang, “Designing an efficient image encryption-then-compression system via prediction error clustering and random permutation,” IEEE Trans. Inf. Forensics Security, vol.9, no.1, pp.39-50, Jan. 2014. 10.1109/TIFS.2013.2291625" />
+<meta name="citation_reference" content="[21] M. Ghonge and K. Nimbokar, “A survey based on designing an efficient image encryption-then-compression system,” Int. J. Computer Applications, p.8887, 2014." />
+<meta name="citation_reference" content="[22] T.Y. Liu, K.J. Lin, and H.C. Wu, “ECG data encryption then compression using singular value decomposition,” IEEE J. Biomedical and Health Informatics, vol.22, no.3, pp.707-713, May 2018. 10.1109/JBHI.2017.2698498" />
+<meta name="citation_reference" content="[23] W. Liu, W. Zeng, L. Dong, and Q. Yao, “Efficient compression of encrypted grayscale images,” IEEE Trans. Image Process., vol.19, no.4, pp.1097-1102, April 2010. 10.1109/TIP.2009.2038773" />
+<meta name="citation_reference" content="[24] R. Hu, X. Li, and B. Yang, “A new lossy compression scheme for encrypted gray-scale images,” 2014 IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP), pp.7387-7390, 2014. 10.1109/ICASSP.2014.6855035" />
+<meta name="citation_reference" content="[25] M. Johnson, P. Ishwar, V. Prabhakaran, D. Schonberg, and K. Ramchandran, “On compressing encrypted data,” IEEE Trans. Signal Process., vol.52, no.10, pp.2992-3006, Oct. 2004. 10.1109/TSP.2004.833860" />
+<meta name="citation_reference" content="[26] M. Gaata and F.F. Hantoosh, “An efficient image encryption technique using chaotic logistic map and rc4 stream cipher,” Int. J. Modern Trends in Engineering and Research, vol.3, pp.213-218, 2016. 10.21884/IJMTER.2016.3054.PVA2I" />
+<meta name="citation_reference" content="[27] O. Watanabe, A. Uchida, T. Fukuhara, and H. Kiya, “An encryption-then-compression system for jpeg 2000 standard,” 2015 IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP), pp.1226-1230, 2015. 10.1109/ICASSP.2015.7178165" />
+<meta name="citation_reference" content="[28] S. Imaizumi, Y. Izawa, R. Hirasawa, and H. Kiya, “A reversible data hiding method in compressible encrypted images,” IEICE Trans. Fundamentals, vol.E103-A, no.12, pp.1579-1588, Dec. 2020. 10.1587/transfun.2020SMP0029" />
+<meta name="citation_reference" content="[29] K. Iida and H. Kiya, “Privacy-preserving content-based image retrieval using compressible encrypted images,” IEEE Access, vol.8, pp.200038-200050, 2020. 10.1109/ACCESS.2020.3035563" />
+<meta name="citation_reference" content="[30] K. Iida and H. Kiya, “An image identification scheme of encrypted jpeg images for privacy-preserving photo sharing services,” 2019 IEEE Int. Conf. Image Process. (ICIP), pp.4564-4568, 2019. 10.1109/ICIP.2019.8803431" />
+<meta name="citation_reference" content="[31] S. Liu, Z. Lian, S. Gu, and L. Xiao, “Block shuffling learning for deepfake detection,” arXiv preprint arXiv:2202.02819, 2022. [Online]. Available: https://arxiv.org/abs/2202.02819 10.48550/arXiv.2202.02819" />
+<meta name="citation_reference" content="[32] A. Kawamura, Y. Kinoshita, T. Nakachi, S. Shiota, and H. Kiya, “A privacy-preserving machine learning scheme using etc images,” IEICE Trans. Fundamentals, vol.E103-A, no.12, pp.1571-1578, Dec. 2020. 10.1587/transfun.2020SMP0022" />
+<meta name="citation_reference" content="[33] Y. Bandoh, T. Nakachi, and H. Kiya, “Distributed secure sparse modeling based on random unitary transform,” IEEE Access, vol.8, pp.211762-211772, 2020. 10.1109/ACCESS.2020.3039997" />
+<meta name="citation_reference" content="[34] T. Nakachi, Y. Bandoh, and H. Kiya, “Secure overcomplete dictionary learning for sparse representation,” IEICE Trans. Inf. &amp; Syst., vol.E103-D, no.1, pp.50-58, Jan. 2020. 10.1587/transinf.2019MUP0009" />
+<meta name="citation_reference" content="[35] T. Nakachi, Y. Wang, and H. Kiya, “Privacy-preserving pattern recognition using encrypted sparse representations in l0 norm minimization,” ICASSP 2020-2020 IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP), pp.2697-2701, 2020. 10.1109/ICASSP40776.2020.9053463" />
+<meta name="citation_reference" content="[36] I. Nakamura, Y. Tonomura, and H. Kiya, “Unitary transform-based template protection and its application to l2-norm minimization problems,” IEICE Trans. Inf. &amp; Syst., vol.E99-D, no.1, pp.60-68, Jan. 2016. 10.1587/transinf.2015MUP0007" />
+<meta name="citation_reference" content="[37] T. Maekawa, A. Kwamura, T. Nakachi, and H. Kiya, “Privacy-preserving support vector machine computing using random unitary transformation,” IEICE Trans. Fundamentals, vol.E102-A, no.12, pp.1849-1855, 2019. 10.1587/transfun.E102.A.1849" />
+<meta name="citation_reference" content="[38] M. Chen and M. Wu, “Protect your deep neural networks from piracy,” 2018 IEEE International Workshop on Inf. Forensics Security (WIFS), pp.1-7, 2018. 10.1109/WIFS.2018.8630791" />
+<meta name="citation_reference" content="[39] H. Chen, C. Fu, B.D. Rouhani, J. Zhao, and F. Koushanfar, “Deepattest: An end-to-end attestation framework for deep neural networks,” 2019 ACM/IEEE 46th Annual International Symposium on Computer Architecture (ISCA), pp.487-498, Junet 2019. 10.1145/3307650.3322251" />
+<meta name="citation_reference" content="[40] Y. Uchida, Y. Nagai, S. Sakazawa, and S. Satoh, “Embedding watermarks into deep neural networks,” Proc. 2017 ACM on Int. Conf. Multimedia Retrieval, ser. ICMR&apos;17, pp.269-277, Association for Computing Machinery, June 2017. 10.1145/3078971.3078974" />
+<meta name="citation_reference" content="[41] H. Chen, B.D. Rouhani, C. Fu, J. Zhao, and F. Koushanfar, “Deepmarks: A secure fingerprinting framework for digital rights management of deep learning models,” Proc. 2019 Int. Conf. Multimedia Retrieval, ser. ICMR&apos;19, p.105-113, Association for Computing Machinery, June 2019. 10.1145/3323873.3325042" />
+<meta name="citation_reference" content="[42] B.D. Rouhani, H. Chen, and F. Koushanfar, “Deepsigns: A generic watermarking framework for IP protection of deep learning models,” arXiv preprint arXiv:1804.00750, 2018. [Online]. Available: https://arxiv.org/abs/1804.00750 10.48550/arXiv.1804.00750" />
+<meta name="citation_reference" content="[43] L. Fan, K.W. Ng, C.S. Chan, and Q. Yang, “DeepIPR: Deep neural network intellectual property protection with passports,” IEEE Trans. Pattern Anal. Mach. Intell., vol.44, no.10, pp.6122-6139, Oct. 2021. 10.1109/TPAMI.2021.3088846" />
+<meta name="citation_reference" content="[44] Y. Adi, C. Baum, M. Cisse, B. Pinkas, and J. Keshet, “Turning your weakness into a strength: Watermarking deep neural networks by backdooring,” Proc. 27th USENIX Conference on Security Symposium, ser. SEC&apos;18, pp.1615-1631, USENIX Association, Aug. 2018." />
+<meta name="citation_reference" content="[45] J. Zhang, Z. Gu, J. Jang, H. Wu, M.P. Stoecklin, H. Huang, and I. Molloy, “Protecting intellectual property of deep neural networks with watermarking,” Proc. 2018 on Asia Conference on Computer and Communications Security, ser. ASIACCS&apos;18, pp.159-172, Association for Computing Machinery, May 2018. 10.1145/3196494.3196550" />
+<meta name="citation_reference" content="[46] S. Sakazawa, E. Myodo, K. Tasaka, and H. Yanagihara, “Visual decoding of hidden watermark in trained deep neural network,” 2019 IEEE Conf. Multimedia Information Processing and Retrieval (MIPR), pp.371-374, 2019. 10.1109/MIPR.2019.00073" />
+<meta name="citation_reference" content="[47] E. Le Merrer, P. Pérez, and G. Trédan, “Adversarial frontier stitching for remote neural network watermarking,” Neural Computing and Applications, vol.32, no.13, pp.9233-9244, 2019. 10.1007/s00521-019-04434-z" />
+<meta name="citation_reference" content="[48] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, “BERT: Pre-training of deep bidirectional transformers for language understanding,” Proc. 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers), pp.4171-4186, Association for Computational Linguistics, June 2019. 10.18653/v1/N19-1423" />
+<meta name="citation_reference" content="[49] I. Tolstikhin, N. Houlsby, A. Kolesnikov, L. Beyer, X. Zhai, T. Unterthiner, J. Yung, A.P. Steiner, D. Keysers, J. Uszkoreit, M. Lucic, and A. Dosovitskiy, “MLP-mixer: An all-MLP architecture for vision,” Advances in Neural Information Processing Systems, A. Beygelzimer, Y. Dauphin, P. Liang, and J.W. Vaughan, eds., 2021." />
+<meta name="citation_reference" content="[50] H. Touvron, P. Bojanowski, M. Caron, M. Cord, A. El-Nouby, E. Grave, A. Joulin, G. Synnaeve, J. Verbeek, and H. Jégou, “ResMLP: Feedforward networks for image classification with data-efficient training,” CoRR, vol.abs/2105.03404, 2021." />
+<meta name="citation_reference" content="[51] S. Chen, E. Xie, C. GE, R. Chen, D. Liang, and P. Luo, “CycleMLP: A MLP-like architecture for dense prediction,” Int. Conf. Learning Representations, 2022. [Online]. Available: https://openreview.net/forum?id=NMEceG4v69Y" />
+<meta name="citation_reference" content="[52] H. Liu, Z. Dai, D. So, and Q.V. Le, “Pay attention to MLPs,” Advances in Neural Information Processing Systems, A. Beygelzimer, Y. Dauphin, P. Liang, and J.W. Vaughan, eds., 2021." />
+<meta name="citation_reference" content="[53] Q. Hou, Z. Jiang, L. Yuan, M.-M. Cheng, S. Yan, and J. Feng, “Vision Permutator: A permutable MLP-like architecture for visual recognition,” IEEE Trans. Pattern Anal. Mach. Intell., 2022. 10.1109/TPAMI.2022.3145427" />
+<meta name="citation_reference" content="[54] A. Trockman and J.Z. Kolter, “Patches are all you need?” arXiv preprint arXiv:2201.09792, 2022. [Online]. Available: https://arxiv.org/abs/2201.09792 10.48550/arXiv.2201.09792" />
+<meta name="citation_reference" content="[55] A. Paszke, S. Gross, F. Massa, A. Lerer, J. Bradbury, G. Chanan, T. Killeen, Z. Lin, N. Gimelshein, L. Antiga, A. Desmaison, A. Kopf, E. Yang, Z. DeVito, M. Raison, A. Tejani, S. Chilamkurthy, B. Steiner, L. Fang, J. Bai, and S. Chintala, “Pytorch: An imperative style, high-performance deep learning library,” Advances in Neural Information Processing Systems 32, H. Wallach, H. Larochelle, A. Beygelzimer, F. d&apos;Alché-Buc, E. Fox, and R. Garnett, eds., pp.8024-8035, Curran Associates, Inc., 2019." />
+<meta name="citation_reference" content="[56] M. Tanaka, “Learnable image encryption,” 2018 IEEE Int. Conf. Consumer Electronics-Taiwan (ICCE-TW), pp.1-2, 2018. 10.1109/ICCE-China.2018.8448772" />
+<meta name="citation_reference" content="[57] W. Sirichotedumrong, T. Maekawa, Y. Kinoshita, and H. Kiya, “Privacy-preserving deep neural networks with pixel-based image encryption considering data augmentation in the encrypted domain,” 2019 IEEE Int. Conf. Image Process. (ICIP), pp.674-678, 2019. 10.1109/ICIP.2019.8804201" />
+<meta name="citation_reference" content="[58] W. Sirichotedumrong and H. Kiya, “A gan-based image transformation scheme for privacy-preserving deep neural networks,” 2020 28th European Signal Processing Conference (EUSIPCO), pp.745-749, 2021. 10.23919/Eusipco47968.2020.9287532" />
+<meta name="citation_reference" content="[59] H. Ito, Y. Kinoshita, M. Aprilpyone, and H. Kiya, “Image to perturbation: An image transformation network for generating visually protected images for privacy-preserving deep neural networks,” IEEE Access, vol.9, pp.64629-64638, 2021. 10.1109/ACCESS.2021.3074968" />
+<meta name="citation_reference" content="[60] B. Schneier and P. Sutherland, Applied Cryptography: Protocols, Algorithms, and Source Code in C, 2nd ed. USA: John Wiley and Sons, Inc., 1995." />
+<meta name="dc.identifier" content="10.1587/transinf.2022MUI0001" />
+<meta name="journal_code" content="transinf" />
+<meta name="journal_title" content="IEICE Transactions on Information and Systems" />
+<meta name="journal_abbrev" content="IEICE Trans. Inf. &amp; Syst." />
+<meta name="publisher" content="The Institute of Electronics, Information and Communication Engineers" />
+<meta name="authors" content="Hitoshi KIYA" />
+<meta name="authors_institutions" content="Tokyo Metropolitan University" />
+<meta name="authors" content="Ryota IIJIMA" />
+<meta name="authors_institutions" content="Tokyo Metropolitan University" />
+<meta name="authors" content="Aprilpyone MAUNGMAUNG" />
+<meta name="authors_institutions" content="Tokyo Metropolitan University" />
+<meta name="authors" content="Yuma KINOSHITA" />
+<meta name="authors_institutions" content="Tokyo Metropolitan University" />
+<meta name="title" content="Image and Model Transformation with Secret Key for Vision Transformer" />
+<meta name="publication_date" content="2023/01/01" />
+<meta name="online_date" content="2023/01/01" />
+<meta name="volume" content="E106.D" />
+<meta name="issue" content="1" />
+<meta name="firstpage" content="2" />
+<meta name="lastpage" content="11" />
+<meta name="doi" content="10.1587/transinf.2022MUI0001" />
+<meta name="fulltext_world_readable" content="" />
+<meta name="pdf_url" content="https://www.jstage.jst.go.jp/article/transinf/E106.D/1/E106.D_2022MUI0001/_pdf" />
+<meta name="print_issn" content="0916-8532" />
+<meta name="online_issn" content="1745-1361" />
+<meta name="language" content="en" />
+<meta name="keywords" content="perceptual image encryption" />
+<meta name="keywords" content="vision transformer" />
+<meta name="keywords" content="DNN" />
+<meta name="keywords" content="privacy preserving" />
+<meta name="abstract" content="In this paper, we propose a combined use of transformed images and vision transformer (ViT) models transformed with a secret key. We show for the first time that models trained with plain images can be directly transformed to models trained with encrypted images on the basis of the ViT architecture, and the performance of the transformed models is the same as models trained with plain images when using test images encrypted with the key. In addition, the proposed scheme does not require any specially prepared data for training models or network modification, so it also allows us to easily update the secret key. In an experiment, the effectiveness of the proposed scheme is evaluated in terms of performance degradation and model protection performance in an image classification task on the CIFAR-10 dataset." />
+<meta name="references" content="[1] Y. LeCun, Y. Bengio, and G. Hinton, “Deep learning,” nature, vol.521, no.7553, p.436, 2015. 10.1038/nature14539" />
+<meta name="references" content="[2] X. Liu, Z. Deng, and Y. Yang, “Recent progress in semantic image segmentation,” Artif. Intell. Rev., vol.52, no.2, pp.1089-1106, 2019. 10.1007/s10462-018-9641-3" />
+<meta name="references" content="[3] C.-T. Huang, L. Huang, Z. Qin, H. Yuan, L. Zhou, V. Varadharajan, and C.-C.J. Kuo, “Survey on securing data storage in the cloud,” APSIPA Trans. Signal and Information Processing, vol.3, p.e7, 2014. 10.1017/ATSIP.2014.6" />
+<meta name="references" content="[4] M.-R. Ra, R. Govindan, and A. Ortega, “P3: Toward privacy-preserving photo sharing,” 10th USENIX Symposium on Networked Systems Design and Implementation (NSDI 13), pp.515-528, USENIX Association, Lombard, IL, April 2013." />
+<meta name="references" content="[5] R. Lagendijk, Z. Erkin, and M. Barni, “Encrypted signal processing for privacy protection: Conveying the utility of homomorphic encryption and multiparty computation,” IEEE Signal Process. Mag., vol.30, no.1, pp.82-105, Jan. 2013. 10.1109/MSP.2012.2219653" />
+<meta name="references" content="[6] M. Fredrikson, S. Jha, and T. Ristenpart, “Model inversion attacks that exploit confidence information and basic countermeasures,” Proc. 22nd ACM SIGSAC Conference on Computer and Communications Security, ser. CCS&apos;15, pp.1322-1333, Association for Computing Machinery, New York, NY, USA, 2015. 10.1145/2810103.2813677" />
+<meta name="references" content="[7] R. Shokri, M. Stronati, C. Song, and V. Shmatikov, “Membership inference attacks against machine learning models,” 2017 IEEE symposium on security and privacy (SP), pp.3-18, IEEE, 2017. 10.1109/SP.2017.41" />
+<meta name="references" content="[8] C. Szegedy, W. Zaremba, I. Sutskever, J. Bruna, D. Erhan, I.J. Goodfellow, and R. Fergus, “Intriguing properties of neural networks,” 2nd Int. Conf. Learning Representations, ICLR 2014, Banff, AB, Canada, April 14-16, 2014, Conference Track Proceedings, Y. Bengio and Y. LeCun, eds., 2014." />
+<meta name="references" content="[9] R.S.S. Kumar, M. Nyström, J. Lambert, A. Marshall, M. Goertzel, A. Comissoneru, M. Swann, and S. Xia, “Adversarial machine learning-industry perspectives,” 2020 IEEE Security and Privacy Workshops (SPW), pp.69-75, 2020. 10.1109/SPW50608.2020.00028" />
+<meta name="references" content="[10] H. Kiya, A.P.M. Maung, Y. Kinoshita, S. Imaizumi, and S. Shiota, “An overview of compressible and learnable image transformation with secret key and its applications,” APSIPA Trans. Signal and Information Processing, vol.11, no.1, e11, 2022. [Online]. Available: http://dx.doi.org/10.1561/116.00000048 10.1561/116.00000048" />
+<meta name="references" content="[11] M. Aprilpyone and H. Kiya, “Block-wise image transformation with secret key for adversarially robust defense,” IEEE Trans. Inf. Forensics Security, vol.16, pp.2709-2723, 2021. 10.1109/TIFS.2021.3062977" />
+<meta name="references" content="[12] A. Maungmaung and H. Kiya, “A protection method of trained CNN model with a secret key from unauthorized access,” APSIPA Trans. Signal and Information Processing, vol.10, p.e10, 2021. 10.1017/ATSIP.2021.9" />
+<meta name="references" content="[13] M. Maung, A. Pyone, and H. Kiya, “Encryption inspired adversarial defense for visual classification,” 2020 IEEE Int. Conf. Image Process. (ICIP), 2020, pp.1681-1685. 10.1109/ICIP40778.2020.9190904" />
+<meta name="references" content="[14] A. MaungMaung and H. Kiya, “Ensemble of key-based models: Defense against black-box adversarial attacks,” 2021 IEEE 10th Global Conference on Consumer Electronics (GCCE), pp.95-98, 2021. 10.1109/GCCE53005.2021.9621775" />
+<meta name="references" content="[15] M. AprilPyone and H. Kiya, “Privacy-preserving image classification using an isotropic network,” IEEE MultiMedia, vol.29, no.2, pp.23-33, April-June 2022. 10.1109/MMUL.2022.3168441" />
+<meta name="references" content="[16] Z. Qi, A. MaungMaung, Y. Kinoshita, and H. Kiya, “Privacy-preserving image classification using vision transformer,” arXiv preprint arXiv:1804.00750, 2022. [Online]. Available: https://arxiv.org/abs/2205.12041 10.48550/arXiv.2205.12041" />
+<meta name="references" content="[17] A. Dosovitskiy, L. Beyer, A. Kolesnikov, D. Weissenborn, X. Zhai, T. Unterthiner, M. Dehghani, M. Minderer, G. Heigold, S. Gelly, J. Uszkoreit, and N. Houlsby, “An image is worth 16x16 words: Transformers for image recognition at scale,” Int. Conf. Learning Repre-sentations, 2021. [Online]. Available: https://openreview.net/forum?id=YicbFdNTTy" />
+<meta name="references" content="[18] T. Chuman, W. Sirichotedumrong, and H. Kiya, “Encryption-then-compression systems using grayscale-based image encryption for jpeg images,” IEEE Trans. Inf. Forensics Security, vol.14, no.6, pp.1515-1525, June 2019. 10.1109/TIFS.2018.2881677" />
+<meta name="references" content="[19] T. Chuman, K. Kurihara, and H. Kiya, “On the security of block scrambling-based etc systems against jigsaw puzzle solver attacks,” 2017 IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP), pp.2157-2161, 2017. 10.1109/ICASSP.2017.7952538" />
+<meta name="references" content="[20] J. Zhou, X. Liu, O.C. Au, and Y.Y. Tang, “Designing an efficient image encryption-then-compression system via prediction error clustering and random permutation,” IEEE Trans. Inf. Forensics Security, vol.9, no.1, pp.39-50, Jan. 2014. 10.1109/TIFS.2013.2291625" />
+<meta name="references" content="[21] M. Ghonge and K. Nimbokar, “A survey based on designing an efficient image encryption-then-compression system,” Int. J. Computer Applications, p.8887, 2014." />
+<meta name="references" content="[22] T.Y. Liu, K.J. Lin, and H.C. Wu, “ECG data encryption then compression using singular value decomposition,” IEEE J. Biomedical and Health Informatics, vol.22, no.3, pp.707-713, May 2018. 10.1109/JBHI.2017.2698498" />
+<meta name="references" content="[23] W. Liu, W. Zeng, L. Dong, and Q. Yao, “Efficient compression of encrypted grayscale images,” IEEE Trans. Image Process., vol.19, no.4, pp.1097-1102, April 2010. 10.1109/TIP.2009.2038773" />
+<meta name="references" content="[24] R. Hu, X. Li, and B. Yang, “A new lossy compression scheme for encrypted gray-scale images,” 2014 IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP), pp.7387-7390, 2014. 10.1109/ICASSP.2014.6855035" />
+<meta name="references" content="[25] M. Johnson, P. Ishwar, V. Prabhakaran, D. Schonberg, and K. Ramchandran, “On compressing encrypted data,” IEEE Trans. Signal Process., vol.52, no.10, pp.2992-3006, Oct. 2004. 10.1109/TSP.2004.833860" />
+<meta name="references" content="[26] M. Gaata and F.F. Hantoosh, “An efficient image encryption technique using chaotic logistic map and rc4 stream cipher,” Int. J. Modern Trends in Engineering and Research, vol.3, pp.213-218, 2016. 10.21884/IJMTER.2016.3054.PVA2I" />
+<meta name="references" content="[27] O. Watanabe, A. Uchida, T. Fukuhara, and H. Kiya, “An encryption-then-compression system for jpeg 2000 standard,” 2015 IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP), pp.1226-1230, 2015. 10.1109/ICASSP.2015.7178165" />
+<meta name="references" content="[28] S. Imaizumi, Y. Izawa, R. Hirasawa, and H. Kiya, “A reversible data hiding method in compressible encrypted images,” IEICE Trans. Fundamentals, vol.E103-A, no.12, pp.1579-1588, Dec. 2020. 10.1587/transfun.2020SMP0029" />
+<meta name="references" content="[29] K. Iida and H. Kiya, “Privacy-preserving content-based image retrieval using compressible encrypted images,” IEEE Access, vol.8, pp.200038-200050, 2020. 10.1109/ACCESS.2020.3035563" />
+<meta name="references" content="[30] K. Iida and H. Kiya, “An image identification scheme of encrypted jpeg images for privacy-preserving photo sharing services,” 2019 IEEE Int. Conf. Image Process. (ICIP), pp.4564-4568, 2019. 10.1109/ICIP.2019.8803431" />
+<meta name="references" content="[31] S. Liu, Z. Lian, S. Gu, and L. Xiao, “Block shuffling learning for deepfake detection,” arXiv preprint arXiv:2202.02819, 2022. [Online]. Available: https://arxiv.org/abs/2202.02819 10.48550/arXiv.2202.02819" />
+<meta name="references" content="[32] A. Kawamura, Y. Kinoshita, T. Nakachi, S. Shiota, and H. Kiya, “A privacy-preserving machine learning scheme using etc images,” IEICE Trans. Fundamentals, vol.E103-A, no.12, pp.1571-1578, Dec. 2020. 10.1587/transfun.2020SMP0022" />
+<meta name="references" content="[33] Y. Bandoh, T. Nakachi, and H. Kiya, “Distributed secure sparse modeling based on random unitary transform,” IEEE Access, vol.8, pp.211762-211772, 2020. 10.1109/ACCESS.2020.3039997" />
+<meta name="references" content="[34] T. Nakachi, Y. Bandoh, and H. Kiya, “Secure overcomplete dictionary learning for sparse representation,” IEICE Trans. Inf. &amp; Syst., vol.E103-D, no.1, pp.50-58, Jan. 2020. 10.1587/transinf.2019MUP0009" />
+<meta name="references" content="[35] T. Nakachi, Y. Wang, and H. Kiya, “Privacy-preserving pattern recognition using encrypted sparse representations in l0 norm minimization,” ICASSP 2020-2020 IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP), pp.2697-2701, 2020. 10.1109/ICASSP40776.2020.9053463" />
+<meta name="references" content="[36] I. Nakamura, Y. Tonomura, and H. Kiya, “Unitary transform-based template protection and its application to l2-norm minimization problems,” IEICE Trans. Inf. &amp; Syst., vol.E99-D, no.1, pp.60-68, Jan. 2016. 10.1587/transinf.2015MUP0007" />
+<meta name="references" content="[37] T. Maekawa, A. Kwamura, T. Nakachi, and H. Kiya, “Privacy-preserving support vector machine computing using random unitary transformation,” IEICE Trans. Fundamentals, vol.E102-A, no.12, pp.1849-1855, 2019. 10.1587/transfun.E102.A.1849" />
+<meta name="references" content="[38] M. Chen and M. Wu, “Protect your deep neural networks from piracy,” 2018 IEEE International Workshop on Inf. Forensics Security (WIFS), pp.1-7, 2018. 10.1109/WIFS.2018.8630791" />
+<meta name="references" content="[39] H. Chen, C. Fu, B.D. Rouhani, J. Zhao, and F. Koushanfar, “Deepattest: An end-to-end attestation framework for deep neural networks,” 2019 ACM/IEEE 46th Annual International Symposium on Computer Architecture (ISCA), pp.487-498, Junet 2019. 10.1145/3307650.3322251" />
+<meta name="references" content="[40] Y. Uchida, Y. Nagai, S. Sakazawa, and S. Satoh, “Embedding watermarks into deep neural networks,” Proc. 2017 ACM on Int. Conf. Multimedia Retrieval, ser. ICMR&apos;17, pp.269-277, Association for Computing Machinery, June 2017. 10.1145/3078971.3078974" />
+<meta name="references" content="[41] H. Chen, B.D. Rouhani, C. Fu, J. Zhao, and F. Koushanfar, “Deepmarks: A secure fingerprinting framework for digital rights management of deep learning models,” Proc. 2019 Int. Conf. Multimedia Retrieval, ser. ICMR&apos;19, p.105-113, Association for Computing Machinery, June 2019. 10.1145/3323873.3325042" />
+<meta name="references" content="[42] B.D. Rouhani, H. Chen, and F. Koushanfar, “Deepsigns: A generic watermarking framework for IP protection of deep learning models,” arXiv preprint arXiv:1804.00750, 2018. [Online]. Available: https://arxiv.org/abs/1804.00750 10.48550/arXiv.1804.00750" />
+<meta name="references" content="[43] L. Fan, K.W. Ng, C.S. Chan, and Q. Yang, “DeepIPR: Deep neural network intellectual property protection with passports,” IEEE Trans. Pattern Anal. Mach. Intell., vol.44, no.10, pp.6122-6139, Oct. 2021. 10.1109/TPAMI.2021.3088846" />
+<meta name="references" content="[44] Y. Adi, C. Baum, M. Cisse, B. Pinkas, and J. Keshet, “Turning your weakness into a strength: Watermarking deep neural networks by backdooring,” Proc. 27th USENIX Conference on Security Symposium, ser. SEC&apos;18, pp.1615-1631, USENIX Association, Aug. 2018." />
+<meta name="references" content="[45] J. Zhang, Z. Gu, J. Jang, H. Wu, M.P. Stoecklin, H. Huang, and I. Molloy, “Protecting intellectual property of deep neural networks with watermarking,” Proc. 2018 on Asia Conference on Computer and Communications Security, ser. ASIACCS&apos;18, pp.159-172, Association for Computing Machinery, May 2018. 10.1145/3196494.3196550" />
+<meta name="references" content="[46] S. Sakazawa, E. Myodo, K. Tasaka, and H. Yanagihara, “Visual decoding of hidden watermark in trained deep neural network,” 2019 IEEE Conf. Multimedia Information Processing and Retrieval (MIPR), pp.371-374, 2019. 10.1109/MIPR.2019.00073" />
+<meta name="references" content="[47] E. Le Merrer, P. Pérez, and G. Trédan, “Adversarial frontier stitching for remote neural network watermarking,” Neural Computing and Applications, vol.32, no.13, pp.9233-9244, 2019. 10.1007/s00521-019-04434-z" />
+<meta name="references" content="[48] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, “BERT: Pre-training of deep bidirectional transformers for language understanding,” Proc. 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers), pp.4171-4186, Association for Computational Linguistics, June 2019. 10.18653/v1/N19-1423" />
+<meta name="references" content="[49] I. Tolstikhin, N. Houlsby, A. Kolesnikov, L. Beyer, X. Zhai, T. Unterthiner, J. Yung, A.P. Steiner, D. Keysers, J. Uszkoreit, M. Lucic, and A. Dosovitskiy, “MLP-mixer: An all-MLP architecture for vision,” Advances in Neural Information Processing Systems, A. Beygelzimer, Y. Dauphin, P. Liang, and J.W. Vaughan, eds., 2021." />
+<meta name="references" content="[50] H. Touvron, P. Bojanowski, M. Caron, M. Cord, A. El-Nouby, E. Grave, A. Joulin, G. Synnaeve, J. Verbeek, and H. Jégou, “ResMLP: Feedforward networks for image classification with data-efficient training,” CoRR, vol.abs/2105.03404, 2021." />
+<meta name="references" content="[51] S. Chen, E. Xie, C. GE, R. Chen, D. Liang, and P. Luo, “CycleMLP: A MLP-like architecture for dense prediction,” Int. Conf. Learning Representations, 2022. [Online]. Available: https://openreview.net/forum?id=NMEceG4v69Y" />
+<meta name="references" content="[52] H. Liu, Z. Dai, D. So, and Q.V. Le, “Pay attention to MLPs,” Advances in Neural Information Processing Systems, A. Beygelzimer, Y. Dauphin, P. Liang, and J.W. Vaughan, eds., 2021." />
+<meta name="references" content="[53] Q. Hou, Z. Jiang, L. Yuan, M.-M. Cheng, S. Yan, and J. Feng, “Vision Permutator: A permutable MLP-like architecture for visual recognition,” IEEE Trans. Pattern Anal. Mach. Intell., 2022. 10.1109/TPAMI.2022.3145427" />
+<meta name="references" content="[54] A. Trockman and J.Z. Kolter, “Patches are all you need?” arXiv preprint arXiv:2201.09792, 2022. [Online]. Available: https://arxiv.org/abs/2201.09792 10.48550/arXiv.2201.09792" />
+<meta name="references" content="[55] A. Paszke, S. Gross, F. Massa, A. Lerer, J. Bradbury, G. Chanan, T. Killeen, Z. Lin, N. Gimelshein, L. Antiga, A. Desmaison, A. Kopf, E. Yang, Z. DeVito, M. Raison, A. Tejani, S. Chilamkurthy, B. Steiner, L. Fang, J. Bai, and S. Chintala, “Pytorch: An imperative style, high-performance deep learning library,” Advances in Neural Information Processing Systems 32, H. Wallach, H. Larochelle, A. Beygelzimer, F. d&apos;Alché-Buc, E. Fox, and R. Garnett, eds., pp.8024-8035, Curran Associates, Inc., 2019." />
+<meta name="references" content="[56] M. Tanaka, “Learnable image encryption,” 2018 IEEE Int. Conf. Consumer Electronics-Taiwan (ICCE-TW), pp.1-2, 2018. 10.1109/ICCE-China.2018.8448772" />
+<meta name="references" content="[57] W. Sirichotedumrong, T. Maekawa, Y. Kinoshita, and H. Kiya, “Privacy-preserving deep neural networks with pixel-based image encryption considering data augmentation in the encrypted domain,” 2019 IEEE Int. Conf. Image Process. (ICIP), pp.674-678, 2019. 10.1109/ICIP.2019.8804201" />
+<meta name="references" content="[58] W. Sirichotedumrong and H. Kiya, “A gan-based image transformation scheme for privacy-preserving deep neural networks,” 2020 28th European Signal Processing Conference (EUSIPCO), pp.745-749, 2021. 10.23919/Eusipco47968.2020.9287532" />
+<meta name="references" content="[59] H. Ito, Y. Kinoshita, M. Aprilpyone, and H. Kiya, “Image to perturbation: An image transformation network for generating visually protected images for privacy-preserving deep neural networks,” IEEE Access, vol.9, pp.64629-64638, 2021. 10.1109/ACCESS.2021.3074968" />
+<meta name="references" content="[60] B. Schneier and P. Sutherland, Applied Cryptography: Protocols, Algorithms, and Source Code in C, 2nd ed. USA: John Wiley and Sons, Inc., 1995." />
+<meta name="access_control" content="FREE ACCESS" />
+<meta name="copyright" content="2023 The Institute of Electronics, Information and Communication Engineers" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@jstage_ej" />
+<meta name="og:url" content="https://www.jstage.jst.go.jp/article/transinf/E106.D/1/E106.D_2022MUI0001/_article" />
+<meta name="og:title" content="Image and Model Transformation with Secret Key for Vision Transformer" />
+<meta name="og:description" content="In this paper, we propose a combined use of transformed images and vision transformer (ViT) models transformed with a secret key. We show for the firs &hellip;" />
+<meta name="og:site_name" content="J-STAGE" />
+<meta name="og:image" content="https://www.jstage.jst.go.jp/html/images/common/SNS/J-STAGE_logo_sns.png" />
+
+<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+<title>Image and Model Transformation with Secret Key for Vision Transformer</title>
+<link rel="stylesheet" href="/web/css/bootstrap3-wysiwyg5-color.css" />
+<link rel="stylesheet" href="/web/css/bootstrap3-wysiwyg5.css" />
+<link rel="stylesheet" href="/web/css/ranking.css?rn=2.3.8" />
+
+<link rel="stylesheet" href="/web/css/bootstrap.min.css" />
+
+<link rel="stylesheet" href="/web/css/style.css?rn=2.3.8"/>
+<link rel="stylesheet" href="/web/css/common-elements-style.css?rn=2.3.8" />
+<link rel="stylesheet" href="/web/css/jquery.treefilter.css" />
+<link rel="stylesheet" href="/web/css/jplayer.blue.monday.css" />
+<link rel="stylesheet" href="/web/css/main.css?rn=2.3.8" />
+
+<link rel="stylesheet" media="print" href="/web/css/print.css" />
+
+<!--[if lt IE 9]>
+
+<script src="/web/js/html5shiv.min.js"></script>
+<script src="/web/js/respond.min.js"></script>
+<![endif]-->
+<style type="text/css">
+<!--
+b {
+	font-weight: bold;
+}
+i {
+	font-style: italic;
+}
+// -->
+</style>
+</head>
+	<body class="body-offcanvas addition-pages">
+
+	
+
+
+<!-- HEADER :: START -->
+<span class="noprint">
+<header class="clearfix">
+	<!-- NAVIGATION :: START -->
+	<nav class="navbar navbar-default navbar-fixed-top ep-nav-shadow " >
+
+						
+		<div class="container">
+			<button type="button" class="navbar-toggle offcanvas-toggle" data-toggle="offcanvas" data-target="#js-bootstrap-offcanvas" style="float:left;"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span> <span class="icon-bar">&nbsp;</span> </button>
+			<!-- RIGHT NAV SEARCH :: BEGIN -->
+			<div class="search-nav-block dropdown">
+				<a href="javascript:;" class=""  data-toggle="collapse" data-target="#Search_nav"><i class="search-nav-icon"></i></a>
+			</div>
+			<!-- RIGHT NAV SEARCH :: END -->
+			<!-- LOGO :: START -->
+			<a class="navbar-brand ms-logowrap hm-logo-padding" href="https://www.jstage.jst.go.jp/browse/-char/en">
+				<img src="/web/images/J-STAGE_logo_A3.png" alt=""  style="margin-top:6px;" />
+			</a>
+			<!-- LOGO :: END -->
+			<!-- HAMBURGER LEFT TO RIGHT SLIDE :: START -->
+			<div class="offcanvas-left-wrap register-offcanvas-left-wrap">
+								<div class="navbar-offcanvas navbar-offcanvas-touch navbar-offcanvas-fade" role="navigation" id="js-bootstrap-offcanvas">
+					<div class="offcanvas-left-wrap">
+						<div class="navbar-header">
+							<a class="navbar-brand jst-homelink" href="https://www.jstage.jst.go.jp/browse/-char/en">J-STAGE home</a>
+							<button type="button" class="navbar-toggle offcanvas-toggle pull-right" data-toggle="offcanvas" data-target="#js-bootstrap-offcanvas" style="float:left;"> <img src="/web/images/edit-profile/icon-close-menu.png" alt=""></button>
+						</div>
+						<div class="offcanvas-nav-wrap">
+							<ul class="nav navbar-nav">
+																<li class="dropdown reponsive-menu"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Browse<b class="caret"></b></a>
+									<ul class="dropdown-menu ep-dropdown-menu">
+										<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""/></span></li>
+										<li><a href="/journal/list/-char/en">All titles</a></li>
+										<li><a href="/journal/fields/-char/en">All subject areas</a></li>
+										<li><a href="/journal/publisher/-char/en">All publishers</a></li>
+										<li><a href="/search/global/_search/-char/en">Search articles</a></li>
+										<li><a href="https://jstagedata.jst.go.jp/" target="_blank" rel="noopener noreferrer">Search J-STAGE Data <img src="/web/images/information-tab2/bg-arrow-white.png" width="13" height="10" alt=""></a></li>
+									</ul>
+								</li>
+																<li class="dropdown reponsive-menu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">About J-STAGE <b class="caret"></b></a>
+									<ul class="dropdown-menu ep-dropdown-menu">
+										<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""/></span></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/JstageOverview/-char/en">Overview</a></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/JstageServices/TAB1/-char/en">Services and features</a></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/PublicDataAboutJstage/-char/en">Public data</a></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/TermsAndPolicies/ForIndividuals/-char/en">Terms and Policy</a></li>
+									</ul>
+								</li>
+
+																<li class="dropdown reponsive-menu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">News and PR  <b class="caret"></b></a>
+									<ul class="dropdown-menu ep-dropdown-menu">
+										<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""/></span></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB1/Current/Page1/-char/en">News</a></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB2/Page1/-char/en">Maintenance information</a></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB6/Page1/-char/en">Special contents </a></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB7/Page1/-char/en">Media resources </a></li>
+									</ul>
+								</li>
+																<li class="dropdown reponsive-menu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Support  <b class="caret"></b></a>
+									<ul class="dropdown-menu ep-dropdown-menu">
+										<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""/></span></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/ForReaders/-char/en">User manuals</a></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/RecommendedEnvironment/-char/en">Browser compatibility</a></li>
+ <li><a href="https://www.jstage.jst.go.jp/static/pages/FAQs/TAB3/-char/en">FAQ</a></li> 										<li><a href="https://www.jstage.jst.go.jp/static/pages/Contact/-char/en">Contact </a></li>
+										<li><a href="https://www.jstage.jst.go.jp/static/pages/Sitemap/-char/en">Sitemap </a></li>
+									</ul>
+								</li>
+																													<li class="reponsive-menu">
+												<a href="/mylogin/-char/en?sourceurl=https%3A%2F%2Fwww.jstage.jst.go.jp%2Farticle%2Ftransinf%2FE106.D%2F1%2FE106.D_2022MUI0001%2F_article%2F-char%2Fen">Sign in</a>
+										</li>
+																		<li class="reponsive-menu">
+											<li class="reponsive-menu"><a href="/cart/list/-char/en?backurl=https%3A%2F%2Fwww.jstage.jst.go.jp%2Farticle%2Ftransinf%2FE106.D%2F1%2FE106.D_2022MUI0001%2F_article%2F-char%2Fen" class="" >Cart <img src="/web/images/edit-profile/icon-cart.png" alt=""></a>
+									</li>
+								<li class="dropdown reponsive-menu">
+																		<a href="#" class="dropdown-toggle" data-toggle="dropdown"> EN  <img src="/web/images/edit-profile/icon-lang.png" alt=""> <b class="caret"></b></a>
+									<ul class="dropdown-menu ep-dropdown-menu">
+									<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""/></span></li>
+										<li><a href="javascript:;" onclick="doChangeLang('en')">English</a></li>
+										<li><a href="javascript:;" onclick="doChangeLang('ja')">日本語</a></li>
+									</ul>
+								</li>
+							</ul>
+						</div>
+						<div class="clearfix"></div>
+					</div>
+				</div>
+								<ul class="nav navbar-nav offcanvas-left-display-none">
+										<li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown">Browse<b class="caret"></b></a>
+						<ul class="dropdown-menu ep-dropdown-menu">
+							<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""/></span></li>
+							<li><a href="/journal/list/-char/en">All titles</a></li>
+							<li><a href="/journal/fields/-char/en">All subject areas</a></li>
+							<li><a href="/journal/publisher/-char/en">All publishers</a></li>
+							<li><a href="/search/global/_search/-char/en">Search articles</a></li>
+							<li><a href="https://jstagedata.jst.go.jp/" target="_blank" rel="noopener noreferrer">Search J-STAGE Data <img src="/web/images/information-tab2/bg-arrow.png" width="13" height="10" alt=""></a></li>
+						</ul>
+					</li>
+										<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">About J-STAGE <b class="caret"></b></a>
+						<ul class="dropdown-menu ep-dropdown-menu">
+							<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""/></span></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/JstageOverview/-char/en">Overview</a></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/JstageServices/TAB1/-char/en">Services and features</a></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/PublicDataAboutJstage/-char/en">Public data</a></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/TermsAndPolicies/ForIndividuals/-char/en">Terms and Policy</a></li>
+						</ul>
+					</li>
+										<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">News and PR  <b class="caret"></b></a>
+						<ul class="dropdown-menu ep-dropdown-menu">
+							<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""/></span></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB1/Current/Page1/-char/en">News</a></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB2/Page1/-char/en">Maintenance information</a></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB6/Page1/-char/en">Special contents </a></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB7/Page1/-char/en">Media resources </a></li>
+						</ul>
+					</li>
+										<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Support  <b class="caret"></b></a>
+						<ul class="dropdown-menu ep-dropdown-menu">
+							<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""/></span></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/ForReaders/-char/en">User manuals</a></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/RecommendedEnvironment/-char/en">Browser compatibility</a></li>
+ <li><a href="https://www.jstage.jst.go.jp/static/pages/FAQs/TAB3/-char/en">FAQ</a></li> 							<li><a href="https://www.jstage.jst.go.jp/static/pages/Contact/-char/en">Contact </a></li>
+							<li><a href="https://www.jstage.jst.go.jp/static/pages/Sitemap/-char/en">Sitemap </a></li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+			<!-- HAMBURGER LEFT TO RIGHT SLIDE :: END -->
+			<div class="offcanvas-right-wrap register-offcanvas-right-wrap">
+				<ul class="nav navbar-nav">
+												<li class="">
+								<a href="/mylogin/-char/en?sourceurl=https%3A%2F%2Fwww.jstage.jst.go.jp%2Farticle%2Ftransinf%2FE106.D%2F1%2FE106.D_2022MUI0001%2F_article%2F-char%2Fen" class="" >Sign in  </a>
+						</li>
+										<li class="">
+							<li class=""><a href="/cart/list/-char/en?backurl=https%3A%2F%2Fwww.jstage.jst.go.jp%2Farticle%2Ftransinf%2FE106.D%2F1%2FE106.D_2022MUI0001%2F_article%2F-char%2Fen" class="" >Cart </a>
+					</li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+ EN 					<b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu ep-dropdown-menu" style="min-width: 80px;">
+						<li style="background:none !important;"><span class="topnav-dropdown-icon"><img src="/web/images/top-nav-dropdown-arrow.png" width="18" height="10" alt=""></span></li>
+						<li><a href="javascript:;" onclick="doChangeLang('en')">English</a></li>
+						<li><a href="javascript:;" onclick="doChangeLang('ja')">日本語</a></li>
+					</ul>
+				</li>
+				</ul>
+			</div>
+			<!-- RIGHT NAV SEARCH DROPDOWN :: BEGIN -->
+			<ul class="dropdown-menu collapse ep-dropdown-menu search-dropdown-menu" id="Search_nav" style="max-width: 300px;">
+				<li style="background:none !important;"><span class="topnav-dropdown-icon"></span></li>
+				<li>
+					<div class="col-md-24 edit-profile-form-control">
+						<form action="/result/journal/-char/en" method="get">
+						<div class="input-group">
+							<input name="globalSearchKey" type="text" class="form-control search-nav-input" placeholder="Search within all titles on J-STAGE">
+							<span class="input-group-btn search-btn">
+							<button class="btn btn-default" type="submit"><i class="search-nav-icon"></i></button>
+							</span>
+						</div><!-- /input-group -->
+						<a href="https://www.jstage.jst.go.jp/search/global/_search/-char/en" class="advanced-search-link">Advanced search </a>
+						</form>
+					</div>
+				</li>
+			</ul>
+			<!-- RIGHT NAV SEARCH DROPDOWN :: END -->
+
+			<div class="clearfix"></div>
+		</div>
+	</nav>
+	<!-- NAVIGATION :: END -->
+</header>
+</span>
+<!-- HEADER :: END -->
+
+
+
+
+
+
+<!-- JOURNAL INTRODUCTION :: START -->
+<div id="page-content">
+	<div id="journal-header-compact" class="secondlevel-tabnavigation-detail colorscheme09-normal">
+		<div class="container">
+			<div class="flt-left" style="width:100%; position:relative;">
+				<div class="journal-name">IEICE Transactions on Information and Systems</div>
+
+										<div id="journal-right-infosection" class="col-sm-6" style="padding-top:15px;">
+						<div class="fs-12">
+								Online ISSN : 1745-1361<br>
+								Print ISSN : 0916-8532<br>
+						</div>
+					</div>
+				<div class="journal-tags-clearfix"></div>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+	</div>
+</div>
+<!-- JOURNAL INTRODUCTION :: END -->
+
+<!-- SECOND LEVEL TAB NAVIGATION :: START -->
+<div class="colorscheme09-normal">
+	<div class="container">
+		<div id="second-level-nav-tabs">
+			<ul class="nav nav-tabs">
+				<li ><a href="https://www.jstage.jst.go.jp/browse/transinf/-char/en">Journal home</a></li>
+					<li ><a href="https://www.jstage.jst.go.jp/browse/transinf/advpub/0/_contents/-char/en">Advance online publication</a></li>
+				<li ><a href="https://www.jstage.jst.go.jp/browse/transinf/list/-char/en">All issues</a></li>
+				<li ><a href="https://www.jstage.jst.go.jp/browse/transinf/_pubinfo/-char/en">About the journal</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!-- SECOND LEVEL TAB NAVIGATION :: END --><div class="container">
+	<div class="row">
+		<div class="col-md-24">
+					
+	<!-- BREDCRUMBS :: START -->
+		<ul class="global-breadcrumbs">
+			<li><a href="https://www.jstage.jst.go.jp/browse/-char/en">J-STAGE home</a></li>
+			<li>/</li>
+			<li><a href="https://www.jstage.jst.go.jp/browse/transinf/-char/en" class="customTooltip" title="IEICE Transactions on Information and Systems">IEICE Transactions on Informat ...</a></li>
+			<li> / </li>
+			<li><a href='https://www.jstage.jst.go.jp/browse/transinf/E106.D/1/_contents/-char/en'>Volume E106.D (2023) Issue 1</a></li><li> / </li><li>Article overview</li>
+		</ul>
+<div class="clearfix"></div>	<!-- BREDCRUMBS :: END -->		</div>
+	</div>
+	<div class="row">
+		<!-- LEFT SECTION :: START -->
+		<div class="col-md-18">
+			<!-- #163を追加-->
+			<div class="top-margin-2x bottom-margin-2x"></div>
+			<div class="global-article-subtitle">Special Section on Enriched Multimedia&mdash;Advanced Safety, Security and Convenience&mdash;</div>
+			<div class="global-article-title">Image and Model Transformation with Secret Key for Vision Transformer</div>
+			<div class="global-article-inner-title"></div>
+			<div class="global-authors-name-tags">         	<!--
+						
+						
+						
+						
+					--><a name = "authorNmlist" id="authorNmList"></a><!--
+
+
+
+									--><a href="https://www.jstage.jst.go.jp/search/global/_search/-char/en?item=8&word=Hitoshi+KIYA" class="customTooltip" title="Hitoshi KIYA, Tokyo Metropolitan University"><span>Hitoshi KIYA</span></a><!--
+
+
+		-->,&nbsp;<!--
+									--><a href="https://www.jstage.jst.go.jp/search/global/_search/-char/en?item=8&word=Ryota+IIJIMA" class="customTooltip" title="Ryota IIJIMA, Tokyo Metropolitan University"><span>Ryota IIJIMA</span></a><!--
+
+
+		-->,&nbsp;<!--
+									--><a href="https://www.jstage.jst.go.jp/search/global/_search/-char/en?item=8&word=Aprilpyone+MAUNGMAUNG" class="customTooltip" title="Aprilpyone MAUNGMAUNG, Tokyo Metropolitan University"><span>Aprilpyone MAUNGMAUNG</span></a><!--
+
+
+		-->,&nbsp;<!--
+									--><a href="https://www.jstage.jst.go.jp/search/global/_search/-char/en?item=8&word=Yuma+KINOSHITA" class="customTooltip" title="Yuma KINOSHITA, Tokyo Metropolitan University"><span>Yuma KINOSHITA</span></a><!--
+	-->
+
+
+
+			<div class="accordion_container">
+				<div class="accordion_head plus-icn"name="authInfo" id="authInfo">Author information</div>
+				<div class="accordion_body new_accordion_body_style" style="display: none;">
+					<ul class="accodion_body_ul">
+						<li>
+							<span style="font-size:1.1em">Hitoshi KIYA</span>
+														<p class="accordion_affilinfo">
+									Tokyo Metropolitan University
+							</p>
+						</li>
+
+
+						<li>
+							<span style="font-size:1.1em">Ryota IIJIMA</span>
+														<p class="accordion_affilinfo">
+									Tokyo Metropolitan University
+							</p>
+						</li>
+
+
+						<li>
+							<span style="font-size:1.1em">Aprilpyone MAUNGMAUNG</span>
+														<p class="accordion_affilinfo">
+									Tokyo Metropolitan University
+							</p>
+						</li>
+
+
+						<li>
+							<span style="font-size:1.1em">Yuma KINOSHITA</span>
+														<p class="accordion_affilinfo">
+									Tokyo Metropolitan University
+							</p>
+						</li>
+											</ul>
+				</div>
+			</div>
+			<div class="corr-auth-sapopup-wrap" id="saPopup" style="display:none">
+				<div class="corr-auth-sapopup-overlay" id="saWindow"></div>
+				<div class="corr-auth-sapopup-inner">
+					<div class="corr-auth-sapopup-cont">
+						<div class="sapopup-title"><h4>Corresponding author</h4></div>
+
+							<div class="subject-list subject-sapopup-list" >
+								<div class="corr-auth-subject-li">
+									<div class="corr-auth-subject-item" id="corrAuthMailContainer" style="display:none">
+										<span class="fa fa-envelope outlook-share-icn"></span>
+										<a id="corrAuthMail" class="bluelink-style"></a>
+									</div>
+								</div>
+							</div>
+
+							<div class="subject-list subject-sapopup-list" >
+								<div class="corr-auth-subject-li">
+									<div class="corr-auth-subject-item" id="corrAuthOrcidContainer" style="display:none">
+										<img src="/web/images/id-logo.jpg" class="id-logo" alt="ORCID" />
+										<a target="_blank" rel="noopener noreferrer" id="corrAuthOrcid" class="bluelink-style"></a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+</div>
+			<div class="global-para">	Keywords:
+
+		<a href="/search/global/_search/-char/en?item=5&word=perceptual+image+encryption" class="bluelink-style">perceptual image encryption</a>,
+
+		<a href="/search/global/_search/-char/en?item=5&word=vision+transformer" class="bluelink-style">vision transformer</a>,
+
+		<a href="/search/global/_search/-char/en?item=5&word=DNN" class="bluelink-style">DNN</a>,
+
+		<a href="/search/global/_search/-char/en?item=5&word=privacy+preserving" class="bluelink-style">privacy preserving</a>
+</div>
+			<div class="global-tags"><span class="tags-wrap original-tag-style" title="JOURNAL">JOURNAL</span>
+		<span class="tags-wrap freeaccess-tag-style" title="FREE ACCESS">FREE ACCESS</span>
+
+
+
+</div>
+			<p class="global-para">	2023
+ Volume E106.D
+		Issue 1
+		Pages 2-11
+</p>
+
+				<div class="articleoverview-doi-wrap" id="fig-doi">	<span class="doi-icn">DOI</span>
+	<a href="https://doi.org/10.1587/transinf.2022MUI0001" class="bluelink-style" style="word-break:break-all">https://doi.org/10.1587/transinf.2022MUI0001</a>
+</div>
+				<div class="articleoverview-doi-wrap"></div>
+			<div class="top-margin-2x bottom-margin-2x"></div>
+<div class="accordion_container">
+	<div class="accordion_head plus-icn">Details</div>
+	<div class="accordion_body new_accordion_body_style" style="display: none;">
+		<ul class="accodion_body_ul accodion_detail">
+			<li>
+				<span class="accodion_lic">Published: January 01, 2023</span>
+				<span class="accodion_lic">Manuscript Received: March 16, 2022</span>
+				<span class="accodion_lic">Released on J-STAGE: January 01, 2023</span>
+				<span class="accodion_lic">Accepted: -</span>
+				<span class="accodion_lic">
+						Advance online publication: -
+				</span>
+				<span class="accodion_lic">Manuscript Revised: July 19, 2022</span>
+			</li>
+		</ul>
+	</div>
+</div>
+		</div>
+		<!-- LEFT SECTION :: END -->
+		<!-- RIGHT SECTION :: START -->
+		<div class="col-md-6 print-non-disp">
+
+
+
+
+
+
+
+<div id="third-level-navigation">
+				<a href="https://www.jstage.jst.go.jp/article/transinf/E106.D/1/E106.D_2022MUI0001/_pdf/-char/en" class="thirdlevel-pdf-btn">
+					Download PDF  <span class="download-file-size">(1127K)</span>
+				</a>
+			<span class="third-level-nav-divider"></span>
+	<div class="third-level-sublinks">
+		<span class="heading">Download citation</span>
+			<span class="fa fa-file-o"></span><a href="https://www.jstage.jst.go.jp/AF06S010ShoshJkuDld?sryCd=transinf&noVol=E106.D&noIssue=1&kijiCd=E106.D_2022MUI0001&kijiLangKrke=en&kijiToolIdHkwtsh=AT0072&request_locale=EN">RIS</a>
+			<p class="notice_mess">(compatible with EndNote, Reference Manager, ProCite, RefWorks)</p>
+			<div class="clearfix"> </div>
+			<span class="fa fa-file-o"></span><a href="https://www.jstage.jst.go.jp/AF06S010ShoshJkuDld?sryCd=transinf&noVol=E106.D&noIssue=1&kijiCd=E106.D_2022MUI0001&kijiLangKrke=en&kijiToolIdHkwtsh=AT0073&request_locale=EN">BIB TEX</a>
+			<p class="notice_mess">(compatible with BibDesk, LaTeX)</p>
+			<div class="clearfix"> </div>
+		<span class="fa fa-file-o"></span> <a href="javascript:void(0);" onclick="downloadText('https://www.jstage.jst.go.jp/article/transinf/E106.D/1/E106.D_2022MUI0001/_article/-char/en'.replace('&amp;amp;','&'))">Text</a>
+	<div class="clearfix"> </div>
+
+		<a href="https://www.jstage.jst.go.jp/static/pages/HowToDownload/-char/en" class="download-help-link bluelink-style">How to download citation</a>
+	</div>
+
+	<a href="https://www.jstage.jst.go.jp/browse/transinf/_pubinfo/-char/en#information" class="thirdlevel-links">Contact us</a>
+	<span class="third-level-nav-divider"></span>
+</div>
+		</div>
+		<!-- RIGHT SECTION :: END -->
+		<div class="clearfix"></div>
+	</div>
+</div>
+<!-- ARTICLE OVERVIEW  INTRODUCTION :: END -->
+
+<!-- ARTICLE OVERVIEW :: START -->
+<div class="clearfix container">
+	<!-- LEFT STICKY SIDEBAR :: START -->
+	<div id="sticky-sidebar" class="print-non-disp">
+		<div class="section-title-14">Article overview</div>
+		<!-- ARTICLE OVERVIEW LINKS :: START -->
+		<nav id="article-overiew-section-links">
+<nav id="article-overiew-section-links">
+	<ul id="article-overiew-section-list">
+			<li> <a href="#article-overiew-abstract-wrap" onClick="menueAnime('Abstract')" title="Abstract" class="customTooltip">Abstract</a></li>
+			<li><a href="#article-overiew-references-wrap" onClick="menueAnime('References')" title="References" class="customTooltip">References (60)</a></li>
+		<li id="author-info-navi"><a href="#author-information-wrap" onClick="menueAnime('information')" title="Content from these authors" class="customTooltip ">Content from these authors</a></li>
+				<li><a href="#citedby-wrap" onClick="menueAnime('Cited')" title="Cited by" class="customTooltip ">Cited by (6)</a></li>
+	</ul>
+</nav>
+		</nav>
+		<!-- ARTICLE OVERVIEW LINKS :: END -->
+		<!-- SHARING ICONS :: SMALL SET :: START -->
+		<div id="sticky-sidebar-shareicons">
+<div class="section-title-noborder-14">Share</div>
+<ul class="global-share-x-icons-list">
+<li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdoi.org%2F10.1587%2Ftransinf.2022MUI0001" target="_blank" rel="noopener noreferrer"><span class="fa fa-facebook facebook-share-icn"></span></a></li>
+<li><a href="http://twitter.com/share?url=https%3A%2F%2Fdoi.org%2F10.1587%2Ftransinf.2022MUI0001&text=J-STAGE+Articles+-+Image+and+Model+Transformation+with+Secret+Key+for+Vision+Transformer" target="_blank" rel="noopener noreferrer"><span class="twitter-share-icn" style="background:#000000;display:inline-block;font-size:20px;"><img src="/web/images/logo-white.png" width="16" height="16" alt="X"></img></span></a></li>
+<li><a href="mailto:?body=IEICE%20Transactions%20on%20Information%20and%20Systems%0A%0AImage%20and%20Model%20Transformation%20with%20Secret%20Key%20for%20Vision%20Transformer%0A%0Ahttps%3A%2F%2Fdoi.org%2F10.1587%2Ftransinf.2022MUI0001%0A"> <span class="fa fa-envelope outlook-share-icn"></span></a></li>
+<li><a href="http://www.mendeley.com/import/?doi=10.1587/transinf.2022MUI0001" target="_blank" rel="noopener noreferrer"><span class="mendeley-share-icn"><img src="/web/images/mendeley-share-icon.png" width="32" height="32" alt=""/>&nbsp;</span></a></li>
+</ul>
+		</div>
+		<!-- SHARING ICONS :: SMALL SET :: END -->
+	</div>
+	<!-- LEFT STICKY SIDEBAR :: END -->
+
+	<!-- RIGHT NON-STICKY SIDEBAR :: START -->
+	<div class="non-sticky-content">
+		<div id="non-sticky-content-leftsection">
+			<div id="article-overiew-abstract-wrap">
+			<!-- INNER SECTION :: START -->
+<div class="section-title-18">Abstract</div>
+<div class="global-para-14">
+<p>In this paper, we propose a combined use of transformed images and vision transformer (ViT) models transformed with a secret key. We show for the first time that models trained with plain images can be directly transformed to models trained with encrypted images on the basis of the ViT architecture, and the performance of the transformed models is the same as models trained with plain images when using test images encrypted with the key. In addition, the proposed scheme does not require any specially prepared data for training models or network modification, so it also allows us to easily update the secret key. In an experiment, the effectiveness of the proposed scheme is evaluated in terms of performance degradation and model protection performance in an image classification task on the CIFAR-10 dataset.</p>
+</div>
+<div style="text-align:center;">
+</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+
+			<!-- INNER SECTION :: START -->
+			<div id="datarepo-wrap"></div>
+			<input type="hidden" id="figshareArticleSearchUrl" value="https://api.figshare.com/v2/articles">
+			<!-- INNER SECTION :: END -->
+
+			<!-- INNER SECTION :: START -->
+			<div id="article-overiew-references-wrap">
+				<div class="section-title-18" style="display:none;">References (60)</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div id="article-overiew-related-wrap">
+				<div class="section-title-18" style="display:none;">Related articles (0)</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div id="figures-tables-wrap">
+				<div class="section-title-noborder-18" style="display:none;">Figures (0)</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div id="author-information-wrap" style="">
+				<div id="author_info_main">
+					<div id="author_info_title" class="section-title-18" onClick="getAuthorList(this)">
+					<img src="/web/images/data-services/J-GLOBAL.jpg" alt="" class="jglobal_img">
+					<span id="author_info_label">Content from these authors</span></div>
+					<div class="accordion_container">
+						<div id="author_info_status"></div>
+						<div id="author_info_contents"></div>
+					</div>
+				</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div id="supplimentary-materials-wrap">
+				<div class="section-title-18" style="display:none;">Supplementary material (0)</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div id="resultsanddiscussion-wrap">
+				<div class="section-title-18" style="display:none;">Result List ()</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div id="citedby-wrap">
+				<div class="section-title-18" style="display:none;">Cited by (6)</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div id="jstage-external-links">
+			</div>
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div class="section-divider">
+<div class="grey-txt-color fontsize12">
+ &copy; 	2023 The Institute of Electronics, Information and Communication Engineers
+</div>
+	<div class="grey-txt-color fontsize12 margintop10">
+	
+
+		</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div id="article-navigation-links" class="print-non-disp">
+<a href="https://www.jstage.jst.go.jp/article/transinf/E106.D/1/E106.D_2022MUF0001/_article/-char/en" class="next-icon colorscheme09-lighter">Previous article</a>
+<a href="https://www.jstage.jst.go.jp/article/transinf/E106.D/1/E106.D_2022MUP0002/_article/-char/en" class="previous-icon colorscheme09-lighter">Next article</a>
+<div class="clearfix"> </div>			</div>
+			<!-- INNER SECTION :: END -->
+		</div>
+		<div id="non-sticky-content-rightsection" class="print-non-disp">
+			<!-- INNER SECTION :: START -->
+<div class="section-divider">
+	<div class="section-title-14">Favorites & Alerts</div>
+	<ul class="star-list-style">
+				<li><a href = "javascript:;" class = "add-favorites-articles" value= "1">Add to favorites</a></li>
+				<li><a href = "javascript:;" class = "add-favorites-articles" value= "4">Additional info alert</a></li>
+				<li><a href =" javascript:;" class = "add-favorites-articles" value= "2">Citation alert</a></li>
+				<li><a href = "javascript:;" class = "add-favorites-articles" value= "3">Authentication alert</a></li>
+	</ul>
+</div>
+<form action = "/fav/articles/_insert/-char/en" method = "get" id = "favorites-articles" name = "favorites-articles"></form>
+<form action = "/fav/title/_insert/-char/en" method = "get" id = "favorites-titles" name = "favorites-titles"></form>
+<input type="hidden" name="sryCd" value="transinf">
+<input type="hidden" name="noVol" value="E106.D">
+<input type="hidden" name="noIssue" value="1">
+<input type="hidden" name="kijiCd" value="E106.D_2022MUI0001">
+			<!-- INNER SECTION :: END -->
+			<!-- INNER SECTION :: START -->
+			<div id="related_articles_main">
+				<div id="related_articles_title" class="section-title-14">
+					<span onclick="getArticleJGID(this)" style="cursor: pointer;">
+						<img src="/web/images/data-services/J-GLOBAL.jpg" alt="" class="jglobal_img_side">
+						<div id="related_articles_label">
+							<span style="display:inline-block; vertical-align:middle;">Related articles</span>
+							<span id="glyphiconmenu" class="glyphicon glyphicon-menu-right"style="display:inline; vertical-align:middle;"></span>
+						</div>
+					</span>
+				</div>
+				<div class="accordion_container">
+					<div id="related_articles_status"></div>
+					<div id="related_articles_contents"></div>
+				</div>
+			</div>
+			<!-- INNER SECTION :: END -->
+			<div class="clearfix"></div>
+			<br>
+			<!-- ALTMETRIC WRAPPER :: END -->
+			<div class="clearfix"></div>
+			<!-- INNER SECTION :: START -->
+<div class="section-title-14">Recently viewed articles</div>
+<ul class="common-list-style">
+</ul>			<!-- INNER SECTION :: END -->
+			<div class="clearfix"></div>
+			<!-- INNER SECTION :: START -->
+				<!-- INNER SECTION :: START -->
+<div class='section-divider'>
+<div class='section-title-14'>Announcements from publisher</div>
+<ul class='common-list-style wysiwyg'>
+<li>Readers can also download the PDF from <a class="bluelink-style" href="https://search.ieice.org/iss/" target="_blank" rel="nofollow">https://globals.ieice.org/en_transactions/information</a><br></li>
+<li>PayPerView service</li>
+<li>Please contact trans-d [a] ieice.org, if you want to unlock PDF security.</li>
+</ul>
+</div>
+<!-- INNER SECTION :: END -->
+
+			<!-- INNER SECTION :: END -->
+			<div class="clearfix"></div>
+			<!-- SHARING ICONS :: BIG SET :: START -->
+
+<div class="sticky-sidebar-shareicons-rightsection top-margin-2x">
+	<div id="socialmedia-share-plugins" class="colorscheme09-lighter">
+		<div class="sectionheading">Share this page</div>
+		<ul class="share-icons-list">
+		<li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdoi.org%2F10.1587%2Ftransinf.2022MUI0001" target="_blank" rel="noopener noreferrer"><span class="fa fa-facebook facebook-share-icn"></span></a></li>
+		<li><a href="http://twitter.com/share?url=https%3A%2F%2Fdoi.org%2F10.1587%2Ftransinf.2022MUI0001&text=J-STAGE+Articles+-+Image+and+Model+Transformation+with+Secret+Key+for+Vision+Transformer" target="_blank" rel="noopener noreferrer"><span class="twitter-share-icn" style="background:#000000;display:inline-block;font-size:28px;"><img src="/web/images/logo-white.png" width="20" height="20" alt="X"></img></span></a></li>
+		<li><a href="mailto:?body=IEICE%20Transactions%20on%20Information%20and%20Systems%0A%0AImage%20and%20Model%20Transformation%20with%20Secret%20Key%20for%20Vision%20Transformer%0A%0Ahttps%3A%2F%2Fdoi.org%2F10.1587%2Ftransinf.2022MUI0001%0A"> <span class="fa fa-envelope outlook-share-icn"></span></a></li>
+		<li><a href="http://www.mendeley.com/import/?doi=10.1587/transinf.2022MUI0001" target="_blank" rel="noopener noreferrer"><span class="mendeley-share-icn"><img src="/web/images/mendeley-share-icon.png" width="32" height="32" alt=""/>&nbsp;</span></a></li>
+		</ul>
+	</div>
+</div>
+			<!-- SHARING ICONS :: BIG SET :: END -->
+		</div>
+		<!-- RIGHT NON-STICKY SIDEBAR :: END -->
+	</div>
+</div>
+<!-- ARTICLE OVERVIEW :: END -->
+<div class="clearfix"></div>
+
+<!-- MODAL POPUP :: START -->
+<!-- MODAL POPUP :: END -->
+
+
+
+<!-- FOOTER :: START -->
+<span class="noprint">
+<footer class="footer-style2">
+<div id="footer-strip" class="colorscheme09-lighter">
+	<div class="container">
+		Edited and published by The Institute of Electronics, Information and Communication Engineers
+		<br>
+		Production services Sanbi Printing Co.,Ltd.
+	</div>
+</div>
+<div class="footer-wrap print-non-disp">
+	<a href="#0" class="take-on-top1">Top</a>
+	<div class="container">
+		<div class="footer-link-section">
+						<div class="footer-link-heading">Browse</div>
+			<ul class="footer-link-list">
+				<li><a href="/journal/list/-char/en">All titles</a></li>
+				<li><a href="/journal/fields/-char/en">All subject areas</a></li>
+				<li><a href="/journal/publisher/-char/en">All publishers</a></li>
+				<li><a href="/search/global/_search/-char/en">Search articles</a></li>
+				<li><a href="https://jstagedata.jst.go.jp/" target="_blank" rel="noopener noreferrer">Search J-STAGE Data <img src="/web/images/information-tab2/bg-arrow-white.png" width="13" height="10" alt=""></a></li>
+			</ul>
+		</div>
+
+		<div class="footer-link-section">
+						<div class="footer-link-heading">About J-STAGE</div>
+			<ul class="footer-link-list">
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/JstageOverview/-char/en">Overview</a></li>
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/JstageServices/TAB1/-char/en">Services and features</a></li>
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/PublicDataAboutJstage/-char/en">Public data</a></li>
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/TermsAndPolicies/ForIndividuals/-char/en">Terms and Policy</a></li>
+			</ul>
+		</div>
+		<div class="footer-link-section">
+						<div class="footer-link-heading">News and PR</div>
+			<ul class="footer-link-list">
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB1/Current/Page1/-char/en">News</a></li>
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB2/Page1/-char/en">Maintenance information</a></li>
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB6/Page1/-char/en">Special contents </a></li>
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/News/TAB7/Page1/-char/en">Media resources </a></li>
+			</ul>
+		</div>
+		<div class="footer-link-section">
+						<div class="footer-link-heading">Support</div>
+			<ul class="footer-link-list">
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/ForReaders/-char/en">User manuals</a></li>
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/RecommendedEnvironment/-char/en">Browser compatibility</a></li>
+ <li><a href="https://www.jstage.jst.go.jp/static/pages/FAQs/TAB3/-char/en">FAQ</a></li> 				<li><a href="https://www.jstage.jst.go.jp/static/pages/Contact/-char/en">Contact </a></li>
+				<li><a href="https://www.jstage.jst.go.jp/static/pages/Sitemap/-char/en">Sitemap </a></li>
+			</ul>
+		</div>
+
+		<div class="clearfix"></div>
+				<div class="clearfix"></div>
+	</div>
+</div>
+</footer>
+</span>
+<!-- FOOTER :: END -->
+<!-- FEEDBACK BUTTON :: START -->
+<span class="noprint print-non-disp">
+<div id="right-feedback-btn"><a href="https://form2.jst.go.jp/s/jstage-feedback" target="_blank" rel="noopener noreferrer">feedback</a></div>
+</span>
+<!-- FEEDBACK BUTTON :: END -->
+<!-- TAKE ME TO TOP :: START -->
+<a href="#0" class="take-on-top" style="z-index:inherit">Top</a>
+<!-- TAKE ME TO TOP :: END -->
+
+<!-- STICKY REGISTER TO J-STAGE HERE :: START -->
+<div id="sticky-register-to-j-stage" class="sticky-register-to-j-stage print-non-disp" style="display:none;">
+<span class="noprint">
+<a href="javascript:;" class="sticky-register-to-j-stage-close" onclick="registerStickyClose();"><i class="fa fa-times-circle-o"></i></a>
+</span>
+<h3 class="register-for-free"><nobr>Register with J-STAGE for free!</nobr></h3>
+<a href="/myregister/-char/en" class="sticky-register-btn">Register</a>
+<p class="register-for-already">Already have an account? Sign in <a href="/mylogin/-char/en?sourceurl=https%3A%2F%2Fwww.jstage.jst.go.jp%2Farticle%2Ftransinf%2FE106.D%2F1%2FE106.D_2022MUI0001%2F_article%2F-char%2Fen">here</a></p>
+</div>
+<!-- STICKY REGISTER TO J-STAGE HERE :: END -->
+<script src="/web/js/jquery.min.js"></script>
+<!-- Include all compiled plugins (below) -->
+<script src="/web/js/bootstrap.js"></script>
+
+<script src="/web/js/bootstrap.offcanvas.min.js"></script>
+
+<script src="/web/js/bootstrap-tabdrop.min.js"></script>
+
+<script src="/web/js/modernizr.js"></script>
+
+	<script src="/web/js/jquery.hc-sticky.min.js"></script>
+
+<script src="/web/js/jquery.touchSwipe.min.js"></script>
+
+<script src="/web/js/jquery.advancedSlider.min.js"></script>
+
+<script src="/web/js/jquery-navtoselect.min.js?rn=2.3.8"></script>
+
+<script src="/web/js/jquery.treefilter.min.js"></script>
+
+<script src="/web/js/jquery.jplayer.min.js"></script>
+
+<script src="/web/js/jquery.coolfieldset.min.js"></script>
+
+<script src="/web/js/select2.full.min.js"></script>
+
+<script src="/web/js/prettify.min.js"></script>
+
+<script src="/web/js/common.js?rn=2.3.8"></script>
+
+<script src="/web/js/tableHeadFixe.min.js"></script>
+
+<script src="/web/js/validation.js?rn=2.3.8"></script>
+
+
+<script src="/web/js/jquery.hc-sticky.min.js"></script>
+<script src="/web/js/jglobal_related_article_api.js?rn=2.3.8"></script>
+<script src="/web/js/jglobal_author_info_api.js?rn=2.3.8"></script>
+
+<script type="text/javascript" src="https://widgets.figshare.com/static/figshare.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_HTMLorMML"></script>
+
+
+<script type="text/javascript" src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+<script src="/web/js/new_plugin/slick/slick.js"></script>
+<script src="/web/js/new_plugin/slick/slick.min.js"></script>
+<script src="/web/js/favoriteAlerts.js"></script>
+<script src="/web/js/downloadText.js"></script>
+<script src="/web/js/articleHome_getArticleMenu.js?rn=2.3.8"></script>
+<link rel="stylesheet" href="/web/css/lity.css" />
+<script src="/web/js/lity.js"></script>
+
+<script>
+$(document).ready(function () {
+if(('localStorage' in window) && (window.localStorage !== null)) {
+	if(localStorage.getItem('C.regsticky') != 'off'){
+	$('#sticky-register-to-j-stage').show();
+	}
+}
+$('.dropdown-toggle').on('click', function(E) {
+	$(this).find('.glyphicon').toggleClass("glyphicon-chevron-up");
+	$(this).find('.glyphicon').toggleClass("glyphicon-chevron-down");
+});
+$('[data-toggle="tooltip"]').tooltip({});
+$('.warningtooltip').tooltip();
+
+
+	var header = 0;
+	if ($('.navbar-fixed-top').length) {
+		header = $('.navbar-fixed-top').eq(0).outerHeight();
+	}
+	$('#sticky-sidebar').hcSticky({
+		responsive: true,
+		followScroll: false,
+		top:header + pheader + 5
+	});
+
+		$('#targetLink').click(function(){
+		var rrkskMlAdrs = $('#targetLink').attr('href');
+		rrkskMlAdrs = rrkskMlAdrs.replace('(at)','@');
+		$('#targetLink').attr('href', rrkskMlAdrs);
+	});
+
+		$('#corrAuthMail').click(function(){
+		var rrkskMlAdrs = $('#corrAuthMail').attr('href');
+		rrkskMlAdrs = rrkskMlAdrs.replace('(at)','@');
+		$('#corrAuthMail').attr('href', rrkskMlAdrs);
+	});
+
+		$('.licensedescription').find('a').each(function() {
+		$(this).attr('target', '_blank');
+		$(this).attr('rel', 'noopener noreferrer');
+	});
+
+		$('#saWindow').click(function(){
+		$('#saPopup').attr('style', 'display:none;');
+	});
+
+	window.setTimeout( related_articles_invoke('','10.1587/transinf.2022MUI0001','true','en'), 100 );
+	window.setTimeout( author_info_invoke('','10.1587/transinf.2022MUI0001','true','true','true','false','en'), 100 );
+
+
+});
+$(".journal-volume-dd").select2( {width: 'resolve'});
+$(".journal-issue-dd").select2();
+$('#facetsearch-header').facetsearch();
+$('.facetsearch-subheader').facetsearch();
+$(window).load(function(){
+	$('.collapseall-icon').hide();
+	$('.vol-link').click(function(e){
+		e.stopPropagation();
+	});
+	$('.expandall-icon').click(function(){
+		$(this).addClass('expand-inactive');
+		$('.collapseall-icon').removeClass('collapse-inactive')
+		$('.inner-content').slideDown();
+		$('.content').each(function(index, element) {
+			$(this).find('.expand').removeClass('collapse1');
+		});
+		$('.collapseall-icon').show();
+		$('.expandall-icon').hide();
+		$('.show_abstract').hide();
+		$('.hide_abstract').show();
+	});
+	$('.collapseall-icon').addClass('collapse-inactive');
+	$('.collapseall-icon').click(function(){
+		$(this).addClass('collapse-inactive');
+		$('.expandall-icon').removeClass('expand-inactive');
+		$('.inner-content').slideUp();
+		$('.content').each(function(index, element) {
+			$(this).find('.expand').addClass('collapse1');
+		});
+		$('.expandall-icon').show();
+		$('.collapseall-icon').hide();
+		$('.show_abstract').show();
+		$('.hide_abstract').hide();
+	});
+	$('.inner-content').hide();
+	$(".expand a").click(function (e) {
+		e.preventDefault();
+		$(this).parent().toggleClass('collapse1');
+		$(this).closest('.content').find('.inner-content').slideToggle().toggleClass('datapanel_opend');
+		if(!$(this).closest('.content').find('.inner-content').hasClass("datapanel_opend")){
+			$('div.collapseall-icon').removeClass('collapse-inactive');
+		} else {
+			$('div.collapseall-icon').addClass('collapse-inactive');
+		}
+
+		$(this).find('.show_abstract').toggle();
+		$(this).find('.hide_abstract').toggle();
+
+	});
+});
+$(".journal-volume-dd").select2();
+$(".journal-issue-dd").select2();
+$(".searchresults-noofpages-dropdown").select2({
+	minimumResultsForSearch: Infinity
+});
+$(".search-browse-volissue-tabs a").click(function(event) {
+	event.preventDefault();
+	$(this).parent().addClass("current");
+	$(this).parent().siblings().removeClass("current");
+	var tab = $(this).attr("href");
+	$(".searchbrowse-volissue-tab-content").not(tab).css("display", "none");
+	$(tab).fadeIn();
+});
+$('.inner-content .abstract').each(function(){
+	if ($(this).height() < 120) {
+		$(this).find('.full-abstract').hide();
+	}
+});
+
+if ( document.getElementById("selectedVol") != null ) {
+	var pos = $("#selectedVol").position();
+	$(".faceted-search-scrollwrap").scrollTop((pos.top - 50));
+}
+var ddd = [
+];
+$("#selectVol").bind("change", function() {
+	var selectVol = $(":selected").val();
+	if (selectVol == "") {
+		$("#selectIssue").attr("disabled", "disabled");
+	} else {
+		var disabledAttr = $("#selectIssue").attr("disabled");
+		if (typeof disabledAttr !== "undefined") {
+			$("#selectIssue").removeAttr("disabled");
+		}
+	}
+	$("#selectIssue").children().remove();
+	$('#selectIssue').append($('<option>').html("").val(""));
+	if (selectVol != "") {
+		for (var idx in ddd) {
+			var noVol = ddd[idx].noVol;
+			if (noVol == selectVol) {
+				var noIssueArry = ddd[idx].noIssue;
+				for (i = 0; i < noIssueArry.length; i++) {
+						$('#selectIssue').append($('<option>').html("" + noIssueArry[i]).val(noIssueArry[i]));
+				}
+				break;
+			}
+		}
+	}
+	$("#selectIssue").select2();
+});
+$("#mobileSelectVol").bind("change", function() {
+	var selectVol = $("#mobileSelectVol option:selected").val();
+	if (selectVol == "") {
+		$("#mobileSelectIssue").attr("disabled", "disabled");
+	} else {
+		var disabledAttr = $("#mobileSelectIssue").attr("disabled");
+		if (typeof disabledAttr !== "undefined") {
+			$("#mobileSelectIssue").removeAttr("disabled");
+		}
+	}
+	$("#mobileSelectIssue").children().remove();
+	$('#mobileSelectIssue').append($('<option>').html("").val(""));
+	if (selectVol != "") {
+		for (var idx in ddd) {
+			var noVol = ddd[idx].noVol;
+			if (noVol == selectVol) {
+				var noIssueArry = ddd[idx].noIssue;
+				for (i = 0; i < noIssueArry.length; i++) {
+						$('#mobileSelectIssue').append($('<option>').html("" + noIssueArry[i]).val(noIssueArry[i]));
+				}
+				break;
+			}
+		}
+	}
+	$("#mobileSelectIssue").select2();
+});
+$("#goBtn").bind("click", function() {
+	var noVol = $("#selectVol").val();
+	var noIssue = $("#selectIssue").val();
+	var pageInput = $('#pageInput').val();
+	if (pageInput === undefined) {
+		pageInput = null;
+	}
+	return clickGoBtn("1", noVol, noIssue, pageInput);
+});
+$("#mobileGoBtn").bind("click", function() {
+	var noVol = $("#mobileSelectVol").val();
+	var noIssue = $("#mobileSelectIssue").val();
+	var pageInput = $('#mobilePageInput').val();
+	if (pageInput === undefined) {
+		pageInput = null;
+	}
+	return clickGoBtn("2", noVol, noIssue, pageInput);
+});
+$(window).load(function(){
+	try {
+		var issueList1 = '';
+		var issueOptions = jQuery('#selectIssue').children();
+		if (issueOptions.length > 1) {
+			for ( var i=1; i<issueOptions.length; i++ ){
+				issueList1 = issueList1 + issueOptions.eq(i).val();
+			}
+		}
+		var selectVol = $("#selectVol").val();
+		var selectIssue = $("#selectIssue").val();
+		if (selectVol != "") {
+			for (var idx in ddd) {
+				var noVol = ddd[idx].noVol;
+				if (noVol == selectVol) {
+					var issueList2 = '';
+					var noIssueArry = ddd[idx].noIssue;
+					for (i = 0; i < noIssueArry.length; i++) {
+						issueList2 = issueList2 + noIssueArry[i];
+					}
+					if (issueList1 != issueList2) {
+						$("#selectVol").trigger("change");
+						$("#mobileSelectVol").trigger("change");
+					}
+				}
+			}
+		}
+	} catch (e) {console.log("Exception : " + e);}
+});
+$(window).unload(function(){});
+function pressEnter4GoBtn() {
+	if (window.event.keyCode == 13) {
+		$('#goBtn').trigger("click");
+	}
+}
+function pressEnter4MobileGoBtn() {
+	if (window.event.keyCode == 13) {
+		$('#mobileGoBtn').trigger("click");
+	}
+}
+function clickGoBtn(mode, noVol, noIssue, pageInput) {
+	if (mode == "1") {
+		$("#pageMessage01").css("display", "none");
+		$("#pageMessage02").css("display", "none");
+		$("#pageMessage03").css("display", "none");
+	} else if (mode == "2") {
+		$("#mobilePageMessage01").css("display", "none");
+		$("#mobilePageMessage02").css("display", "none");
+		$("#mobilePageMessage03").css("display", "none");
+	}
+	try {
+
+		if ((noVol == null || noVol == "") && (noIssue == null || noIssue == "")){
+				noVol = "E109.D";
+				noIssue = "2"
+		}
+
+		if (noIssue == null || noIssue == ""){
+			noIssue = "0"
+		}
+
+		if (pageInput == null || pageInput == "") {
+			var url = getUrl(noVol, noIssue);
+			url = url.replace('repXXX', noVol);
+			url = url.replace('repYYY', noIssue);
+			document.location.href = url;
+			return;
+		}
+		if (noVol == null) {
+			if (mode == "1") {
+				$("#pageMessage01").css("display", "block");
+			} else if (mode == "2") {
+				$("#mobilePageMessage01").css("display", "block");
+			}
+			return;
+		}
+		var jsonUrl = 'https://www.jstage.jst.go.jp/pageSearch/transinf/repXXX/repYYY/repZZZ';
+		jsonUrl = jsonUrl.replace('repXXX', noVol);
+		jsonUrl = jsonUrl.replace('repYYY', noIssue);
+		jsonUrl = jsonUrl.replace('repZZZ', pageInput);
+		$.ajax({
+			cache: false,
+			type: 'GET',
+			url: jsonUrl,
+			dataType: 'json',
+			contentType:'application/json',
+			success: function(json) {
+				var errorCd = json.errorCd;
+				var redirectSryCd = json.redirectSryCd;
+				var redirectNoVol = json.redirectNoVol;
+				var redirectNoIssue = json.redirectNoIssue;
+				var redirectCdArticle = json.redirectCdArticle;
+				if (
+						"0" == errorCd
+						&& redirectSryCd != null && redirectSryCd != ''
+						&& redirectNoVol != null && redirectNoVol != ''
+						&& redirectNoIssue != null && redirectNoIssue != ''
+						&& redirectCdArticle != null && redirectCdArticle != ''
+				) {
+					var shosiUrl = 'https://www.jstage.jst.go.jp/article/transinf/repXXX/repYYY/repZZZ/_article/-char/en';
+					var urls = shosiUrl.match('(http.+/article/)([0-9a-z]+)(/repXXX.+)');
+					if(urls.length == 4){
+						shosiUrl = urls[1];
+						shosiUrl += redirectSryCd;
+						shosiUrl += urls[3];
+					}
+					shosiUrl = shosiUrl.replace('repXXX', redirectNoVol);
+					shosiUrl = shosiUrl.replace('repYYY', redirectNoIssue);
+					shosiUrl = shosiUrl.replace('repZZZ', redirectCdArticle);
+					document.location.href = shosiUrl;
+					return true;
+				} else if ("1" == errorCd) {
+					if (mode == "1") {
+						$("#pageMessage02").css("display", "block");
+					} else if (mode == "2") {
+						$("#mobilePageMessage02").css("display", "block");
+					}
+				} else if ("2" == errorCd) {
+					if (mode == "1") {
+						$("#pageMessage03").css("display", "block");
+					} else if (mode == "2") {
+						$("#mobilePageMessage03").css("display", "block");
+					}
+				}
+			}
+		});
+	} catch (e) {
+	}
+	return false;
+}
+function getUrl(noVol, noIssue) {
+	return 'https://www.jstage.jst.go.jp/browse/transinf/repXXX/repYYY/_contents/-char/en';
+}
+
+var pheader = 0;
+var header = 0;
+if ($('.navbar-fixed-top').length) {
+	header = $('.navbar-fixed-top').eq(0).outerHeight();
+}
+var adjustHeight = header + pheader - 10;
+function menueAnime(title) {
+	var position = '';
+	switch (title){
+		case 'Abstract':
+			position = $('#article-overiew-abstract-wrap').offset().top - adjustHeight;
+			break;
+		case 'Datarepo':
+			position = $('#datarepo-wrap').offset().top - adjustHeight;
+			break;
+		case 'Manuscript':
+			position = $('#manuscript-wrap').offset().top - adjustHeight;
+			break;
+		case 'References':
+			position = $('#article-overiew-references-wrap').offset().top - adjustHeight;
+			break;
+		case 'Relations':
+			position = $('#article-overiew-related-wrap').offset().top - adjustHeight;
+			break;
+		case 'Figures':
+			position = $('#figures-tables-wrap').offset().top - adjustHeight;
+			break;
+		case 'Results':
+			position = $('#resultsanddiscussion-wrap').offset().top - adjustHeight;
+			break;
+		case 'information':
+			position = $('#author-information-wrap').offset().top - adjustHeight;
+			break;
+		case 'Supplementary':
+			position = $('#supplimentary-materials-wrap').offset().top - adjustHeight;
+			break;
+		case 'Cited':
+			position = $('#citedby-wrap').offset().top - adjustHeight;
+			break;
+		case 'External':
+			position = $('#jstage-external-links').offset().top - adjustHeight;
+			break;
+	}
+	$('html, body').animate({scrollTop: position}, 1100);
+	return false;
+}
+
+function authorContributionAnime(anchor) {
+	var position = '';
+	switch (anchor) {
+		case 'authorContribution':
+			$('#authInfo').next('.accordion_body').slideDown(300);
+			$('#authInfo').removeClass('plus-icn');
+			$('#authInfo').addClass('minus-icn');
+			position = $('#authorContribution').offset().top - adjustHeight - 15;
+			break;
+		case 'authorNmList':
+			position = $('#authorNmList').offset().top - adjustHeight - 15;
+			break;
+	}
+	$('html, body').animate({scrollTop: position}, 1100);
+	return false;
+}
+
+function corrAuthPopupClick(mail,orcid){
+
+	if (!mail) {
+		$('#corrAuthMailContainer').attr('style', 'display:none;');
+	} else {
+		$('#corrAuthMailContainer').attr('style', 'block');
+		$('#corrAuthMail').text(mail);
+		var mailAt = mail.replace('@','(at)')
+		$('#corrAuthMail').attr('href','mailto:' + mailAt);
+	}
+
+	if (!orcid) {
+		$('#corrAuthOrcidContainer').attr('style', 'display:none;');
+	} else {
+		$('#corrAuthOrcidContainer').attr('style', 'block');
+		$('#corrAuthOrcid').attr('href',orcid)
+		$('#corrAuthOrcid').text(orcid);
+	}
+
+	$('#saPopup').attr('style', 'block');
+}
+
+function callAjax(tabId, callback, errorCallback, last) {
+	var jsonUrl = 'https://www.jstage.jst.go.jp/article/transinf/E106.D/1/E106.D_2022MUI0001/_article/_tab/-char/en?cdstat=&amp;amp;nologrec=';
+	var revision = '';
+	jsonUrl += '&tabId=' + tabId;
+	if(revision != null){
+		jsonUrl += '&revision=' + revision;
+	}
+	jsonUrl = jsonUrl.replace('&amp;amp;','&');
+	if (!last) {
+		$.ajax({
+			cache: false,
+			type: 'GET',
+			url: jsonUrl,
+			dataType: 'html',
+			contentType:'text/html',
+			success: callback,
+			error: errorCallback,
+			complete : function() {
+				$('.loading-view').remove();
+			}
+		});
+	} else {
+		$.ajax({
+			cache: false,
+			type: 'GET',
+			url: jsonUrl,
+			dataType: 'html',
+			contentType:'text/html',
+			success: callback,
+			error: errorCallback,
+			complete : function() {
+				$('.loading-view').remove();
+			}
+		});
+	}
+}
+
+function createCallBack(idx) {
+	if (idx >= ajaxCall.length) {
+		return null;
+	}
+	var callback = function(data) {
+		if (ajaxCall[idx].outerDivId === '') {
+			$('#' + ajaxCall[idx].innerDivId).append(data);
+		} else {
+			var spritHtml = data.split('@@@');
+			var str = '#' + ajaxCall[idx].innerDivId
+			$('#' + ajaxCall[idx].innerDivId).append(spritHtml[0]);
+			if (ajaxCall[idx].outerDivId == 'supplimentary-materials-modal') {
+				$.getScript("/web/js/jquery.jplayer.min.js");
+				dnsFlkApply();
+			}
+		}
+
+		if (ajaxCall[idx].doPreparationForJPlayer === true) {
+			dnsFlkApply();
+		}
+
+		replaceLicenseErrorBtn();
+		addReferenceModeTooltipHandler('#' + ajaxCall[idx].innerDivId);
+
+		idx++;
+		if (idx < ajaxCall.length) {
+			if (idx == ajaxCall.length - 1) {
+				callAjax(ajaxCall[idx].tabId, createCallBack(idx), createErrorCallback(idx), true);
+			} else {
+				callAjax(ajaxCall[idx].tabId, createCallBack(idx), createErrorCallback(idx), false);
+			}
+		}
+	}
+	return callback;
+}
+
+function createErrorCallback(idx) {
+	var errorCallback = function(data) {
+		var errorMsg = '<div>Data could not be acquired.</div>';
+		if (ajaxCall[idx].outerDivId === '') {
+			$('#' + ajaxCall[idx].innerDivId).after(errorMsg);
+		} else {
+			$('#' + ajaxCall[idx].innerDivId).after(errorMsg);
+			if (ajaxCall[idx].outerDivId == 'supplimentary-materials-modal') {
+				$.getScript("/web/js/jquery.jplayer.min.js");
+				dnsFlkApply();
+			}
+		}
+
+		if (ajaxCall[idx].doPreparationForJPlayer === true) {
+			dnsFlkApply();
+		}
+
+		idx++;
+		if (idx < ajaxCall.length) {
+			if (idx == ajaxCall.length - 1) {
+				callAjax(ajaxCall[idx].tabId, createCallBack(idx), createErrorCallback(idx), true);
+			} else {
+				callAjax(ajaxCall[idx].tabId, createCallBack(idx), createErrorCallback(idx), false);
+			}
+		}
+	}
+	return errorCallback;
+}
+
+var ajaxFlg = true;
+var zhyoLbl = '0';
+var inYuBnknLbl = '60';
+var knrnkjLbl = '0';
+var hinYuBnknLbl = '6';
+var dnsFrkLbl = '0';
+var seikLstLbl = '';
+var datarepoLbl = '0';
+var searching = '<div class = "loading-view"style="text-align: center;"><img src="/web/images/new_update/ajax-loader.gif" alt=""></div>'
+var ajaxCall = [];
+if (zhyoLbl !== null && zhyoLbl !== '' && zhyoLbl !== '0') {
+	$('#figures-tables-wrap').find('.section-title-noborder-18').css('display', 'block');
+	$('#figures-tables-wrap').append(searching);
+	ajaxCall.push({
+		'tabId' : 'ZHYO',
+		'innerDivId' : 'figures-tables-wrap',
+		'outerDivId' : '',
+		'doPreparationForJPlayer' : true
+	});
+}
+if (inYuBnknLbl !== null && inYuBnknLbl !== '' && inYuBnknLbl !== '0') {
+	$('#article-overiew-references-wrap').find('.section-title-18').css('display', 'block');
+	$('#article-overiew-references-wrap').append(searching);
+	ajaxCall.push({
+		'tabId' : 'INYUBNKN',
+		'innerDivId' : 'article-overiew-references-wrap',
+		'outerDivId' : ''
+	});
+}
+
+if (knrnkjLbl !== null && knrnkjLbl !== '' && knrnkjLbl !== '0') {
+	$('#article-overiew-related-wrap').find('.section-title-18').css('display', 'block');
+	$('#article-overiew-related-wrap').append(searching);
+	ajaxCall.push({
+		'tabId' : 'KNRNKJ',
+		'innerDivId' : 'article-overiew-related-wrap',
+		'outerDivId' : ''
+	});
+}
+
+if (hinYuBnknLbl !== null && hinYuBnknLbl !== '' && hinYuBnknLbl !== '0') {
+	$('#citedby-wrap').find('.section-title-18').css('display', 'block');
+	if(hinYuBnknLbl !== 'n/a'){
+	$('#citedby-wrap').append(searching);
+	ajaxCall.push({
+		'tabId' : 'HINYUBNKN',
+		'innerDivId' : 'citedby-wrap',
+		'outerDivId' : ''
+	});
+	}
+}
+
+if (dnsFrkLbl !== null && dnsFrkLbl !== '' &&  dnsFrkLbl !== '0') {
+	$('#supplimentary-materials-wrap').find('.section-title-18').css('display', 'block');
+	$('#supplimentary-materials-wrap').append(searching);
+	ajaxCall.push({
+		'tabId' : 'DNSFRK',
+		'innerDivId' : 'supplimentary-materials-wrap',
+		'outerDivId' : 'supplimentary-materials-modal'
+	});
+}
+
+if (seikLstLbl !== null && seikLstLbl !== '' && seikLstLbl !== '0') {
+	$('#resultsanddiscussion-wrap').find('.section-title-18').css('display', 'block');
+	$('#resultsanddiscussion-wrap').append(searching);
+	ajaxCall.push({
+		'tabId' : 'SEIKLST',
+		'innerDivId' : 'resultsanddiscussion-wrap',
+		'outerDivId' : ''
+	});
+}
+
+if (datarepoLbl !== null && datarepoLbl !== '' && datarepoLbl != '0') {
+	$('#datarepo-wrap').find('.section-title-18').css('display', 'block');
+	$('#datarepo-wrap').append(searching);
+	ajaxCall.push({
+		'tabId' : 'DATAREPO',
+		'innerDivId' : 'datarepo-wrap',
+		'outerDivId' : ''
+	});
+}
+
+switch (ajaxCall.length) {
+	case 0:
+		break;
+	case 1:
+		callAjax(ajaxCall[0].tabId, createCallBack(0), createErrorCallback(0), true);
+		break;
+	default:
+		callAjax(ajaxCall[0].tabId, createCallBack(0), createErrorCallback(0), false);
+		break;
+}
+
+function dnsFlkApply(){
+	$('[id^=jp_container_]').each(function () {
+		var vid= this.id;
+		var result = vid.split( '_' );
+		var no = result[result.length-1];
+
+		var target_player = '#jquery_jplayer_' + no;
+		var container = '#jp_container_' + no;
+		var source = '#jp_source_' + no;
+		if ($(target_player)) {
+			var sourcename = $(source).val();
+			$(target_player).jPlayer({
+				ready: function () {
+					$(this).jPlayer('setMedia', {
+						m4v: sourcename
+					});
+				},
+				play: function() { // To avoid both jPlayers playing together.
+					$(this).jPlayer('pauseOthers');
+				},
+				errorAlerts: false,
+				cssSelectorAncestor: container,
+				swfPath: '/pub/lib/raspberry/jplayer/swf/',
+				supplied: 'm4a,m4v,mp4'
+			});
+		}
+	});
+}
+
+$(function () {
+    $('div.altmetric-embed').on('altmetric:show', function () {
+        $('#altmetric-widget').find('a').attr({
+        	'target': '_blank',
+        	'rel': 'noopener noreferrer'
+        })
+    });
+});
+
+
+	window.setTimeout( set_jglobalApikey_authorinformation('JDEkcmFzbXVzbGUkYmhyak4xSXJxbGVKbDN1YXNXZkdYMQ=='),100);
+	window.setTimeout( set_jglobalApikey_relatedarticle('JDEkcmFzbXVzbGUkYmhyak4xSXJxbGVKbDN1YXNXZkdYMQ=='),100);
+
+
+function registerStickyClose(){
+	$("#sticky-register-to-j-stage").hide();
+	if(('localStorage' in window) && (window.localStorage !== null)) {
+		localStorage.setItem('C.regsticky', 'off');
+	}
+}
+function doChangeLang(langKind){
+
+	if (typeof changeLang == "function")  {
+				changeLang(langKind);
+		return;
+
+	} else {
+				var encStr = "";
+		if(langKind == "ja") {
+			encStr = "https%3A%2F%2Fwww.jstage.jst.go.jp%2Farticle%2Ftransinf%2FE106.D%2F1%2FE106.D_2022MUI0001%2F_article%2F-char%2Fja";
+		} else {
+			encStr = "https%3A%2F%2Fwww.jstage.jst.go.jp%2Farticle%2Ftransinf%2FE106.D%2F1%2FE106.D_2022MUI0001%2F_article%2F-char%2Fen";
+		}
+		location.href = decodeURIComponent(encStr);
+		return;
+	}
+}
+function hBack(){
+		var ans;
+		var ref = document.referrer;
+		re = new RegExp(location.hostname,"i");
+		if(ref.match(re)){
+				ans = false;
+		}else{
+				ans = true
+		}
+		if(!ans){
+			history.back();
+		} else {
+			location.href = "https://www.jstage.jst.go.jp/browse/-char/en";
+		}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{
+  "collected_at": "2026-02-18T17:26:22.092635+00:00",
+  "databases": [
+    {
+      "db": "arxiv",
+      "collected": 10,
+      "errors": 0,
+      "skipped": false
+    },
+    {
+      "db": "medrxiv",
+      "collected": 10,
+      "errors": 0,
+      "skipped": false
+    },
+    {
+      "db": "ieee",
+      "collected": 10,
+      "errors": 0,
+      "skipped": false
+    },
+    {
+      "db": "pubmed",
+      "collected": 10,
+      "errors": 0,
+      "skipped": false
+    },
+    {
+      "db": "scopus",
+      "collected": 10,
+      "errors": 4,
+      "skipped": false
+    },
+    {
+      "db": "openalex",
+      "collected": 10,
+      "errors": 4,
+      "skipped": false
+    },
+    {
+      "db": "semanticscholar",
+      "collected": 10,
+      "errors": 2,
+      "skipped": false
+    }
+  ],
+  "total_collected": 70,
+  "total_errors": 10
+}

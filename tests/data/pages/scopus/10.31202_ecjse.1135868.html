@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head prefix="og: https://ogp.me/ns#">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0 shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+    <title>El-Cezeri &raquo;  Makale  &raquo; Öznitelik Seçiminde Genetik Algoritma Kullanılarak Kur’an-ı Kerim Ayetlerinin Otomatik Sınıflandırılması</title>
+    <base href="/"/>
+    <meta name="generator" content="uds"/>
+
+        <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />                                                        
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                
+                                                <meta name="DC.Title" content="Öznitelik Seçiminde Genetik Algoritma Kullanılarak Kur’an-ı Kerim Ayetlerinin Otomatik Sınıflandırılması" />
+                                                
+                                                <meta name="DC.Source" content="El-Cezeri" />
+                                                <meta name="DC.Source.ISSN" content="2148-3736" />
+                                                <meta name="DC.Source.Issue" content="4" />
+                                                <meta name="DC.Source.URI" content="https://dergipark.org.tr/tr/pub/ecjse" />
+                                                <meta name="DC.Source.Volume" content="9" />
+                                                <meta name="DC.Type" content="Text.Serial.Journal" />
+                                                <meta name="DC.Type.articleType" content="Araştırma Makalesi" />
+                                                
+                                                <meta name="DC.Creator.PersonalName" content="Fatih Mert" /><meta name="DC.Creator.PersonalName" content="Muhammed Ali Aydın" /><meta name="DC.Creator.PersonalName" content="Zeynep Orman" />
+                                                <meta name="DC.Identifier" content="1135868" />
+                                                <meta name="DC.Identifier.pageNumber" content="1484-1494" />
+                                                <meta name="DC.Identifier.DOI" content="10.31202/ecjse.1135868" />
+                                                <meta name="DC.Identifier.URI" content="https://dergipark.org.tr/tr/pub/ecjse/article/1135868" />
+                                                <meta name="DC.Language" content="tr scheme=&quot;ISO639-1&quot;" />
+                                                <meta name="citation_journal_title" content="El-Cezeri" />
+                                                <meta name="citation_journal_abbrev" content="ECJSE" />
+                                                <meta name="citation_issn" content="2148-3736" /><meta name="citation_issn" content="2148-3736" />
+                                                <meta name="citation_author" content="Fatih Mert" /><meta name="citation_author_institution" content="Huawei Türkiye Ar-Ge Merkezi" /><meta name="citation_author_orcid" content="0000-0002-2896-5475" /><meta name="citation_author" content="Muhammed Ali Aydın" /><meta name="citation_author_institution" content="İSTANBUL ÜNİVERSİTESİ-CERRAHPAŞA" /><meta name="citation_author_orcid" content="0000-0002-1846-6090" /><meta name="citation_author" content="Zeynep Orman" /><meta name="citation_author_institution" content="İSTANBUL ÜNİVERSİTESİ-CERRAHPAŞA" /><meta name="citation_author_orcid" content="0000-0002-0205-4198" />
+                                                <meta name="citation_publisher" content="Tayfun UYGUNOĞLU" />
+                                                
+                                                <meta name="citation_title" content="Öznitelik Seçiminde Genetik Algoritma Kullanılarak Kur’an-ı Kerim Ayetlerinin Otomatik Sınıflandırılması" />
+                                                <meta name="citation_publication_date" content="2022-12-31" />
+                                                <meta name="citation_publisher" content="Tayfun UYGUNOĞLU" />
+                                                <meta name="citation_article_type" content="Araştırma Makalesi" />
+                                                <meta name="citation_volume" content="9" />
+                                                <meta name="citation_issue" content="4" />
+                                                <meta name="citation_firstpage" content="1484" />
+                                                <meta name="citation_lastpage" content="1494" />
+                                                <meta name="citation_doi" content="10.31202/ecjse.1135868" />
+                                                
+                                                <meta name="citation_abstract" content="Metin etiketleme olarak da bilinen metin sınıflandırması verilen bir metni organize gruplara ayırma işlemidir. Metin sınıflandırıcılar, Doğal Dil İşleme yöntemlerini kullanarak metni otomatik olarak analiz edebilir ve ardından içeriğine göre bir dizi önceden tanımlanmış etiket veya kategori ataması yapabilir. Söz konusu bir Kur'an ayeti ise, etiketlenmedeki temel amaç ayetin ilgili olduğu temanın belirlenmesidir. Ancak mevcuttaki ayet etiketleme yaklaşımları öncelikli olarak Arapça dilinde ve Kur'an tefsirinde derin uzmanlığa sahip alimlerin mevcudiyetine bağlıdır. Bu çalışmada metin sınıflandırma algoritmalarını kullanarak Kur'an ayetlerinin etiketlenmesi görevinin otomatikleştirilmesi önerilmektedir. Sınıflandırma algoritmaları ile gerçekleştirdiğimiz deneylerde ayetlerin İngilizce çevirilerinin ait oldukları önceden tanımlanmış 15 kategori öznitelik olarak kullanılmıştır. Literatürdeki benzer çalışmalardan farklı olarak öznitelik seçimi aşamasında Genetik Algoritma kullanılmıştır. Böylece gerçekleştirilen bu ara adımın nihai performansa olumlu etki etmesi amaçlanmıştır. Çalışmanın sonunda çeşitli performans değerlendirme metrikleri kullanılarak sınıflandırma modellerinin başarım değerleri karşılaştırılmalı olarak verilmiştir." />
+                                                <meta name="citation_abstract_html_url" content="https://dergipark.org.tr/tr/pub/ecjse/article/1135868" />
+                                                <meta name="citation_language" content="tr" />
+                                                <meta name="citation_keywords" content="Kur;Metin Sınıflandırma;Genetik Algoritma;Makine Öğrenmesi;Öznitelik Seçimi" />
+                                                <meta name="citation_reference" content="Al-Kabi, M. N., Ata, B. M. A., Wahsheh, H. A., & Alsmadi, I. M. (2013, December). A topical classification of Quranic Arabic text. In Proceedings of the 2013 Taibah University International Conference on Advances in Information Technology for the Holy Quran and Its Sciences (pp. 252-257)." /><meta name="citation_reference" content="M.H. Shakir. Al-Quran English Translation." /><meta name="citation_reference" content="Adeleke AO, Samsudin NA, Mustapha A & Nawi NM (2017), Comparative Analysis of Text Classification Algorithms for Automated Labelling of Quranic Verses. Int. J. on Advance Science, Engineering and Info. Tech. 7, 1419-1427." /><meta name="citation_reference" content="Adeleke AO, Samsudin NA, Mustapha A & Nawi NM (2018), A Group-Based Feature Selection Approach to Improve Classification of Holy Quran Verses. in R. Ghazali et al. (eds.), Recent Advances on Soft Computing and Data Mining, Advances in Intelligent Systems and Computing 700, 549, 282-297" /><meta name="citation_reference" content="Goudjil M, Bedda M, Koudil M, & Ghoggali N (2015), Using Active Learning in Text Classification of Quranic Sciences. Int. Conf. on Advances in Information Technology for the Holy Quran and Its Sciences, 209-213" /><meta name="citation_reference" content="Ibrahim EAA, Ataelfadiel MAM & Atwel ES (2017), Provisions of Quran Tajweed Ontology (Articulations Points of Letters, UN Vowel Noon and Tanween). Int. J. of Science and Research, 6, 8, 756-761" /><meta name="citation_reference" content="Zharmagambetov AS & Pak AA (2015), Sentiment analysis of document using deep learning and decision trees. Twelve IEEE Int. Conf. on Electronics Computer and Computation, 1-4." /><meta name="citation_reference" content="Wang JH & Wang HY (2014), Incremental Neural Network Construction for Text Classification. IEEE Int. Symposium on Computer Consumer and Control, 970-973." /><meta name="citation_reference" content="Townsend KR, Sun S, Johson T, Attia OG, Jones PH, and Zambreno J (2015), k-NN text classification using an FPGA-based sparse matrix vector multiplication accelerator. IEEE Int. Conf. on Electro/Information Technology, 257-263." /><meta name="citation_reference" content="Sabbah T & Selamat A (2014), Support Vector Machine based approach for Quranic words detection in online textual content. 8th IEEE Malaysian Software Engineering Conference, Malaysia, 325- 330." /><meta name="citation_reference" content="Al-Kabi, M. N., Ata, B. M. A., Wahsheh, H. A., & Alsmadi, I. M. (2013, December). A topical classification of Quranic Arabic text. In Proceedings of the 2013 Taibah University International Conference on Advances in Information Technology for the Holy Quran and Its Sciences (pp. 252-257)." /><meta name="citation_reference" content="A. Kalousis, J. Prados and M. Hilario, “Stability of Feature Selection Algorithms: a study on high dimensional spaces,” Knowledge and information System, vol. 12, no. 1, 2007, pp. 95-116. Y. Sun, W. Qu, J. Zhou, X.i Tang, Y. Di1 and W. Wu, “An Improved Feature Selection Method in Chinese Text Categorization,” International Journal of Knowledge www.ijklp.org and Language Processing KLP International, 2011 ISSN 2191-2734 Volume 2, Number 3, July 2011, pp. 48-55." /><meta name="citation_reference" content="https://dataverse.telkomuniversity.ac.id/" />
+                                                <meta name="citation_pdf_url" content="/tr/download/article-file/2507473" />
+                        
+                    <meta id="meta_stats_total_article_view" name="stats_total_article_view" content="181"
+          abbr="181"
+          />
+    <meta id="meta_stats_total_article_download" name="stats_total_article_download" content="571"
+          abbr="571"
+          />
+    <meta id="meta_stats_total_article_favorite" name="stats_total_article_favorite" content="0"
+          abbr="0"
+          />
+    <meta id="meta_stats_updated_at" name="stats_updated_at" content="2026-02-18T17:15:43Z"
+          abbr="" />
+    <meta id="meta_stats_trdizin_citation_updated_at" name="stats_trdizin_citation_updated_at" content="16 Temmuz 2023"
+          abbr="" />
+    <meta id="meta_stats_trdizin_citation_count" name="stats_trdizin_citation_count" content="0"
+          abbr="0"
+          />
+    <meta id="meta_stats_trdizin_url" name="stats_trdizin_url" content=""
+          abbr="" />
+
+                <meta name="Diplab.Event.ArticleView" class="diplab_event" content="https://diplab.dergipark.org.tr/collect?aid=1135868&iid=74186&jid=ecjse&asid=240000&auid=527239%2C522281%2C421022&lang=tr&v=1&t=article_view&z=1771434943"/>
+    
+                            
+                                                                                                                
+            <meta property="og:type" content="website"/>
+            <meta property="fb:app_id" content="DergiPark"/>
+
+            
+            
+            <meta property="og:image" itemprop="image" content="https://dergipark.org.tr/media/cache/journal_croped/5980/c302/7736/65f18d13e1ff5.jpg"/>
+            <meta property="og:image:type" content="image/png">
+            <meta property="og:image:secure_url" itemprop="image" content="https://dergipark.org.tr/media/cache/journal_croped/5980/c302/7736/65f18d13e1ff5.jpg"/>
+            <meta property="twitter:image" itemprop="image" content="https://dergipark.org.tr/media/cache/journal_croped/5980/c302/7736/65f18d13e1ff5.jpg"/>
+            <meta property="twitter:image:secure_url" itemprop="image" content="https://dergipark.org.tr/media/cache/journal_croped/5980/c302/7736/65f18d13e1ff5.jpg"/>
+            <link itemprop="thumbnailUrl" href="https://dergipark.org.tr/media/cache/journal_croped/5980/c302/7736/65f18d13e1ff5.jpg">
+            <span itemprop="thumbnail" itemscope itemtype="http://schema.org/ImageObject">
+            <link itemprop="url" href="https://dergipark.org.tr/media/cache/journal_croped/5980/c302/7736/65f18d13e1ff5.jpg">
+            </span>
+            
+                                <link rel="stylesheet" href="/zollu/css/katex/katex.min.css">
+        <link rel="stylesheet" href="/zollu/css/pages/zollu-backend.css">
+        <link rel="stylesheet" href="/zollu/keen/vendors/custom/fullcalendar/fullcalendar.bundle.css">
+        <link rel="stylesheet" href="/zollu/keen/css/demo3/pages/custom/general/user/profile-v1.css">
+        <link rel="stylesheet" href="/zollu/keen/vendors/global/vendors.bundle.css">
+        <link rel="stylesheet" href="/zollu/keen/css/demo3/style.bundle.css">
+        <link rel="stylesheet" href="/zollu/keen/css/demo3/pages/custom/general/blog/grid-v2.css">
+        <link rel="stylesheet" href="/zollu/keen/css/demo3/pages/custom/general/blog/post.css">
+        <link rel="stylesheet" href="/zollu/keen/css/demo3/pages/custom/general/blog/list.css">
+        <link rel="stylesheet" href="/zollu/keen/vendors/custom/datatables/datatables.bundle.css">
+        <link rel="stylesheet"
+              href="/zollu/js/jbfileuploader/lib/jquery-file-upload/css/jquery.fileupload.css">
+        <link rel="stylesheet"
+              href="/zollu/js/jbfileuploader/lib/jquery-file-upload/css/jquery.fileupload-ui.css">
+        <link rel="stylesheet" href="/zollu/js/jbfileuploader/css/jbfileupload.css">
+        <link rel="stylesheet" href="/zollu/css/site.css">
+        <link rel="stylesheet" href="/zollu/css/pages/home.css">
+        <link rel="stylesheet" href="/zollu/css/select2/select2.min.css">
+        <link rel="stylesheet" href="/zollu/css/select2/select2-bootstrap.min.css">
+        <link rel="stylesheet" href="/zollu/css/pages/feedback.css">
+        <link rel="stylesheet" href="/zollu/css/pages/picker/nano.min.css">
+    
+    <link rel="stylesheet" type="text/css" href="/zollu/css/pages/journal.css">
+
+            <!--suppress CssUnusedSymbol -->
+        <style type="text/css">
+            body.journal, .journal .paint-background {
+                background-color: #194E8B;
+            }
+        </style>
+    
+    <link rel="stylesheet" type="text/css" href="/zollu/css/pages/article-user-card.css">
+    <link rel="stylesheet" type="text/css" href="/zollu/css/pages/fixed-publish-button.css">
+
+
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    <link rel="preconnect" href="https://www.google-analytics.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.google.com">
+    <link rel="preconnect" href="https://www.google.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.google.com.tr">
+    <link rel="preconnect" href="https://www.google.com.tr" crossorigin>
+    <link rel="dns-prefetch" href="https://stats.g.doubleclick.net">
+    <link rel="preconnect" href="https://stats.g.doubleclick.net" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="dns-prefetch" href="http://fonts.googleapis.com">
+    <link rel="preconnect" href="http://fonts.googleapis.com" crossorigin>
+
+    <script type="text/javascript">
+        const current_language = 'tr';
+
+        function changeLocale(langCode) {
+            window.location.href = $('#link-alternate-' + langCode).attr('href');
+        }
+    </script>
+
+    <script type="text/javascript" src="/zollu/js/zollu_user_session_info.js"></script>
+
+    <script type="text/javascript" src="/tr/dp-feature-data.js"></script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-694ZECXSSZ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'G-694ZECXSSZ');
+        let dpUserCookie = getDpUserCookie();
+        if (dpUserCookie !== undefined && dpUserCookie !== null && (userId = dpUserCookie.user_id) !== null) {
+            gtag('set', {'user_id': userId});
+        }
+    </script>
+</head>
+
+    
+<body class="kt-page--fixed kt-subheader--enabled kt-subheader--transparent zollu normalized journal"
+      id="article">
+
+            
+
+
+    
+
+
+<nav id="header"
+     class="navbar fixed-top navbar-fixed-top navbar-expand-lg navbar-light scrolled navbar-expand">
+        <div class="kt-header" style="width: 100%;padding: 8px 0;">
+        <div class="kt-header__top" style="height: inherit;">
+            <div class="kt-container" id="header-container">
+                                <div id="powered-by">
+                                                            <a class="navbar-brand" href="//dergipark.org.tr/tr/">
+                        <img src="/zollu/images/dergipark_header.png"
+                             alt="DergiPark logo"/>
+                    </a>
+                </div>
+
+
+                <a href="/tr/user/notification"
+                   class="no-notification hide d-none  notification--item-set "
+                   id="mobile-notification-count-wrapper">
+                    <i class="flaticon2-notification" id="mobile-notification-icon"></i>
+                    <span class="kt-badge" id="mobile-notification-badge"></span>
+                </a>
+
+                <button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
+                        data-target="#navbarToggler"
+                        aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                    <span>&nbsp;</span>
+                    <span>&nbsp;</span>
+                    <span>&nbsp;</span>
+                </button>
+
+                <div class="collapse navbar-collapse navbar-put-right "
+                     id="navbarToggler">
+                    
+                    <div style="margin-left: auto;">
+                        <ul class="navbar-nav ml-auto">
+                                                            <li class="nav-item hide d-none  d-block "
+                                    id="header-user-notification">
+                                    <a id="user-notification-count" class="nav-link"
+                                       href="/tr/user/notification"><span
+                                                class="flaticon2-notification"></span><label
+                                                id="notification-count-aria-label"></label></a>
+                                </li>
+                                                                                        <li class="nav-item dropdown language_selector">
+                                    <a class="nav-link dropdown-toggle" id="langDropDown" aria-haspopup="true"
+                                       aria-expanded="false" data-toggle="dropdown" href="#" style="color: black">
+                                        Türkçe                                        <span class="caret"></span></a>
+                                    <div class="dropdown-menu rounded-0 dropdown-menu-right"
+                                         aria-labelledby="langDropDown">
+                                                                                                                                <a class="dropdown-item" href="/tr/pub/ecjse/article/1135868">
+                                                Türkçe
+                                            </a>
+                                                                                                                                <a class="dropdown-item" href="/en/pub/ecjse/article/1135868">
+                                                İngilizce
+                                            </a>
+                                                                            </div>
+                                </li>
+                                                                                        <li class="nav-item dropdown hide d-none" id="header-user-box-user-menu">
+                                    <a class="nav-link dropdown-toggle color-black" href="#" id="userDropDown"
+                                       data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+                                        <span id="userDropDown-user-avatar"></span>
+                                        <span id="userDropDown-user-name"></span>
+                                        <span id="userDropDown-user-badge"></span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right rounded-0"
+                                         aria-labelledby="userDropDown">
+                                        <a class="dropdown-item color-dergipark d-none"
+                                           href="//dergipark.org.tr/tr/admin/panel"
+                                           id="header-dashboard-item">
+                                            <i class="icon-wrench symbol flaticon-grid-menu mr-1 mt-1 pr-1 color-dergipark"></i> Yönetici Paneli
+                                        </a>
+
+                                        <a class="dropdown-item"
+                                           href="//dergipark.org.tr/tr/user/panel"
+                                           id="header-user-panel-item">
+                                            <i class="icon-wrench symbol flaticon-grid-menu mr-1 mt-1 pr-1"></i> Kullanıcı Paneli
+                                        </a>
+
+                                        <a class="dropdown-item d-none"
+                                           href="//dergipark.org.tr/tr/user/publisher/panel"
+                                           id="header-user-coordinator-panel-item">
+                                            <i class="icon-wrench symbol flaticon-grid-menu mr-1 mt-1 pr-1"></i> Bilimsel Yayın Koordinatörü Paneli
+                                        </a>
+
+                                        <a class="dropdown-item"
+                                           href="/tr/journal/my">
+                                            <i class="icon-docs symbol flaticon2-open-text-book mr-1 mt-1 pr-1"></i> Dergilerim
+                                        </a>
+
+                                        <a class="dropdown-item d-none"
+                                           href="//dergipark.org.tr/tr/user-project"
+                                           id="header-user-project-item">
+                                            <i class="icon-rocket symbol flaticon-folder-4 mr-1 mt-1 pr-1"></i> Araştırmalarım
+                                        </a>
+
+                                        <a class="dropdown-item d-none" id="menu-follower-item"
+                                           href="//dergipark.org.tr/tr/user/user-followers">
+                                            <i class="symbol flaticon2-speaker mr-1 mt-1 pr-1"></i> Takiplerim
+                                        </a>
+
+                                        <a class="dropdown-item" href="#" id="header-user-box-profile-link">
+                                            <i class="icon-user symbol flaticon2-calendar-3 mr-1 mt-1 pr-1"></i> Profil
+                                        </a>
+
+                                        <div class="dropdown-divider"></div>
+
+                                        <a class="dropdown-item" href="https://dergipark.org.tr/tr/logout">
+                                            <i class="icon-logout symbol flaticon2-lock mr-1 mt-1 pr-1"></i> Çıkış
+                                        </a>
+                                    </div>
+                                </li>
+                                <li class="nav-item hide d-none" id="header-user-box-guest-menu">
+                                    <a class="nav-link color-black"
+                                       href="https://dergipark.org.tr/tr/login">Giriş</a>
+                                </li>
+                                                    </ul>
+                                                    <script type="text/javascript">
+                                function showUserBoxBlock(elemId) {
+                                    document.getElementById(elemId).className =
+                                        document.getElementById(elemId).className.replace(/d-none/, '');
+                                    document.getElementById(elemId).className =
+                                        document.getElementById(elemId).className.replace(/hide/, '');
+                                }
+
+                                if (isUserLoggedIn()) {
+
+                                    // Substitute user data
+                                    let userAvatar = getUserAvatar();
+
+                                    document.getElementById('userDropDown-user-name').innerHTML = getUserFullNameFormatted();
+                                    document.getElementById('header-user-box-profile-link').setAttribute('href', getUserProfileLink());
+
+                                    // user dropdown alanındaki rozet kontrolü
+                                    if (isApproved()) {
+                                        document.getElementById('userDropDown-user-badge').innerHTML = "<img style='margin-top: -2px;' src='/zollu/images/dergipark-verified-badge.svg' width='20' height='20'/>";
+                                    }
+
+                                    if (userAvatar.length === 0) {
+                                        userAvatar = '/zollu/images/default-avatar.png';
+                                    }
+
+                                    document.getElementById('userDropDown-user-avatar').innerHTML = '<img src="' + userAvatar + '" onerror="this.onerror=null;this.src=\'/zollu/images/default-avatar.png\';">';
+
+                                    // User menu ready, it's show time!
+                                    showUserBoxBlock('header-user-box-user-menu');
+                                    showUserBoxBlock('header-user-notification');
+                                    showUserBoxBlock('mobile-notification-count-wrapper');
+
+                                    const userInfo = getUserInfo();
+                                    if (canUseFollowerFeature(userInfo.username)) {
+                                        document.getElementById('menu-follower-item').classList.remove("d-none");
+                                        document.getElementById('header-user-project-item').classList.remove("d-none");
+                                    }
+                                    if (userInfo.is_admin == 1) {
+                                        document.getElementById('header-dashboard-item').classList.remove("d-none");
+                                    }
+                                } else {
+                                    // User is not logged in, display guest block right away!
+                                    showUserBoxBlock('header-user-box-guest-menu');
+                                }
+
+                                var userDropDownElement = document.getElementById("userDropDown");
+                                var userNavbar = document.getElementById("navbarToggler");
+                                userDropDownElement.addEventListener('click', function () {
+                                    if (!document.getElementById('header-user-box-user-menu').classList.contains('show')) {
+                                        userNavbar.classList.add('sensitive-height');
+                                    } else {
+                                        userNavbar.classList.remove('sensitive-height');
+                                    }
+                                });
+                                document.querySelector('[data-target="#navbarToggler"]').addEventListener('click', function () {
+                                    if (document.getElementById('header-user-box-user-menu').classList.contains('show')) {
+                                        userNavbar.classList.remove('sensitive-height');
+                                    }
+                                });
+                            </script>
+                                            </div>
+                </div>
+                            </div>
+        </div>
+    </div>
+    </nav>        <div id="body-push-down">
+            <div class="kt-content kt-grid__item kt-grid__item--fluid" id="kt_content">
+        <div class="kt-container paint-background">
+            <div class="kt-portlet j-title-portlet">
+                <div class="row" aria-label="El-Cezeri">
+                    <div class="col-lg-12" aria-hidden="true">
+                        <div class="kt-heading kt-align-center" style="margin: 1.5rem 0 2.3rem;">
+                                                        <a href="/tr/pub/ecjse">
+                                <h1 id="journal-title">El-Cezeri</h1>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <Content> -->
+                <div style="display:none;">
+    </div>
+<div id="dp-solidless-flash-container"></div>
+
+    <div id="article_page" class="row ">
+        <!-- Main Block -->
+        <div class="col-lg-9 col-md-8">
+            <div class="kt-portlet kt-portlet--tabs" id="article-main-portlet">
+                <div class="kt-portlet__head kt-portlet__head--lg">
+                    <div class="kt-portlet__head-label">
+                        <div class="kt-portlet__head-title">
+                                                                                        <span class="kt-font-bold">Araştırma Makalesi</span>
+                                                                                        
+                        </div>
+                    </div>
+                    <div class="kt-portlet__head-toolbar">
+                        <ul class="nav nav-tabs nav-tabs-line nav-tabs-line-dergipark nav-tabs-line-3x nav-tabs-line-right nav-tabs-bold"
+                            role="tablist">
+                                                                                                                                <li class="nav-item">
+                                        <a class="nav-link lang-event "
+                                                                                                    data-event-url="https://diplab.dergipark.org.tr/collect?aid=1135868&amp;iid=74186&amp;jid=ecjse&amp;asid=240000&amp;auid=527239%2C522281%2C421022&amp;lang=en&amp;v=1&amp;t=article_view&amp;z=1771434943"
+                                                                                           data-toggle="tab" href="#article_en" role="tab">
+                                            EN
+                                        </a>
+                                    </li>
+                                                                                                                                                                <li class="nav-item">
+                                        <a class="nav-link lang-event active"
+                                                                                                    data-event-url=""
+                                                                                           data-toggle="tab" href="#article_tr" role="tab">
+                                            TR
+                                        </a>
+                                    </li>
+                                                                                    </ul>
+                    </div>
+                </div>
+                <div class="kt-portlet__body">
+                    <div id="article-toolbar">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <a href="/tr/download/article-file/2507473"
+                                           style="padding-top: 8px;"
+                                           class="btn btn-sm float-left article-tool pdf d-flex align-items-center"
+                                           title="Makale PDF linki">
+                                            <i class="fa fa-file-pdf fa-2x" aria-hidden="true"></i>
+                                            <span class="d-md-inline" aria-hidden="true">PDF</span>
+                                        </a>
+                                                                                                                                                                            <div class="modal fade user-project-modal text-left " id="user_project_process_modal"
+     tabindex="-1"
+     role="dialog" aria-labelledby="exampleModalBackdropStatic" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered user-project-modal-dialog" role="document">
+        <div class="modal-content user-project-modal-box">
+            <div class="modal-header">
+                <h5 class="modal-title"
+                    id="user_project_process_modal_title">Kütüphaneme Ekle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Kapat">
+                    <span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body p-0 m-0">
+                <div class="kt-scroll" id="kt-scroll-area" data-scroll="true">
+                    <div class="user-project-box" id="user_project_modal_content"></div>
+                </div>
+                <span class="custom-modal-title" id="modal-favorite-action">
+                    <div class="modal-custom-padding" id="user_project_modal_favorite_content"></div>
+                </span>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <span class="text-left modal-create-resarch d-none"><a href="/tr/user-project/new"
+                                                                       id="modal-create-project">Araştırma Oluştur</a></span>
+                <button type="button" data-dismiss="modal" class="btn btn-outline-brand"
+                        data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+                                                                            <a class="btn btn-sm article-tool jats kt-hidden" title="JATS"
+                               href='/tr/pub/ecjse/1135868.xml'>
+                                <img src="/zollu/images/jats-logo.jpg" width="50"/>
+                            </a>
+                            <a href="/tr/download/article-cite-file/1135868/type/2"
+                               title="BibTex" class="btn btn-sm download-link article-tool" aria-label="bibtex">
+                                <img src="/zollu/images/bibtex_logo.png" width="16"/> <span
+                                        class="d-none d-md-inline">BibTex</span>
+                            </a>
+                            <a href="/tr/download/article-cite-file/1135868/type/6"
+                               title="ris" class="btn btn-sm download-link article-tool" aria-label="ris">
+                                <img src="/zollu/images/ris-logo.png" width="20"/> <span
+                                        class="d-none d-md-inline">RIS</span>
+                            </a>
+                            <a href="https://dergipark.org.tr/tr/pub/ecjse/article/1135868#article_cite"
+                               title="Kaynak Göster" class="btn btn-sm article-tool">
+                                <img src="/zollu/images/quote_icon.png" width="16"/> <span
+                                        class="d-none d-md-inline">Kaynak Göster</span>
+                            </a>
+                                            </div>
+
+                    <div class="tab-content">
+                                                                                <div class="tab-pane  "
+                                 id="article_en" role="tabpanel">
+                                <div class="h3 d-flex align-items-baseline">
+                                    <div class="add-to-user-project-band" aria-label="Kütüphaneme Ekle" role="dialog"
+     aria-modal="true">
+               <span class="d-none article-project-actions add-item-block"
+                     data-id="1135868">
+                                          <a href="javascript:" data-toggle="tooltip"
+                                             title="Kütüphaneme Ekle"
+                                             aria-label="Kütüphaneme Ekle"
+                                             class="fetch-user-projects"
+                                             data-href="/tr/user/check/favorite/articles?articleId=1135868"
+                                             data-url="/tr/user-project/list?articleId=1135868">
+                                            <i class="la la-star-o d-none library-star-o" style="color: #b1b1b1;"></i>
+                                            <i class="la la-star d-none library-star" style="color: #fd8d00;"></i>
+                                          </a>
+                                        </span>
+</div>
+<div class="modal fade user-project-modal text-left " id="user_project_process_modal"
+     tabindex="-1"
+     role="dialog" aria-labelledby="exampleModalBackdropStatic" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered user-project-modal-dialog" role="document">
+        <div class="modal-content user-project-modal-box">
+            <div class="modal-header">
+                <h5 class="modal-title"
+                    id="user_project_process_modal_title">Kütüphaneme Ekle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Kapat">
+                    <span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body p-0 m-0">
+                <div class="kt-scroll" id="kt-scroll-area" data-scroll="true">
+                    <div class="user-project-box" id="user_project_modal_content"></div>
+                </div>
+                <span class="custom-modal-title" id="modal-favorite-action">
+                    <div class="modal-custom-padding" id="user_project_modal_favorite_content"></div>
+                </span>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <span class="text-left modal-create-resarch d-none"><a href="/tr/user-project/new"
+                                                                       id="modal-create-project">Araştırma Oluştur</a></span>
+                <button type="button" data-dismiss="modal" class="btn btn-outline-brand"
+                        data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+                                    <h3 class="article-title"
+                                        aria-label="Makale Başlığı: Automatic Classification of Quran Verses Using Genetic Algorithm for Feature Selection">
+                                                                                Automatic Classification of Quran Verses Using Genetic Algorithm for Feature Selection
+                                    </h3>
+                                </div>
+
+                                <span class="article-subtitle">
+                                    <i class="flaticon2-copy"></i>
+                                                                                                                                                                                                                                                                <a href="/tr/pub/ecjse/archive?y=2022#y2022">Yıl 2022</a>,
+                                                                                        Cilt: 9 Sayı: 4,                                                                                                                 1484 - 1494,                                     31.12.2022                                </span>
+
+                                <p class="article-authors">
+                                                                                                                        
+                                                                                                                                                <a class="is-user"
+                                                       href="/tr/pub/@fatih_mert"  data-toggle="tooltip" title="Sorumlu Yazar">
+                                                        Fatih Mert
+                                                                                                                    <span class="fa fa-star-of-life primary-author-icon m-0"></span>
+                                                                                                            </a>
+                                                
+                                                                                                    ,
+                                                
+                                                                                                                                
+                                                                                                                                                <a class="is-user"
+                                                       href="/tr/pub/@aydinmali" >
+                                                        Muhammed Ali Aydın
+                                                                                                            </a>
+                                                
+                                                                                                    ,
+                                                
+                                                                                                                                
+                                                                                                                                                <a class="is-user"
+                                                       href="/tr/pub/@zeynep.orman" >
+                                                        Zeynep Orman
+                                                                                                            </a>
+                                                
+                                                
+                                                                                                                                                                                                                                                                        </p>
+                                                                    <div class="article-doi data-section row-space-between">
+                                        <a class="doi-link"
+                                           href="https://doi.org/10.31202/ecjse.1135868">https://doi.org/10.31202/ecjse.1135868</a>
+                                                                            </div>
+                                                                                                    <div class="article-iz data-section">
+                                        <a class="iz-link"
+                                           href="https://izlik.org/JA35ND22NC">https://izlik.org/JA35ND22NC</a>
+                                    </div>
+                                
+                                
+                                                                    <div class="article-abstract data-section">
+                                        <h3 class="kt-blog-post__title kt-heading kt-heading--md kt-heading--medium dergipark">Öz</h3>
+
+                                        <p>Text classification, also known as text tagging, is the process of dividing a given text into organized groups. Using Natural Language Processing methods, text classifiers can automatically analyze text and then assign a set of predefined tags or categories based on its content. If it is a verse of the Holy Qur'an, the main purpose of labeling is to determine the theme of the verse. However, current approaches to verse tagging depend primarily on the availability of scholars with deep expertise in the Arabic language and Qur'anic exegesis. In this study, it is suggested to automate the task of tagging Qur'anic verses using text classification algorithms. In the experiments we carried out with the classification algorithms, the 15 predefined categories to which the English translations of the verses belong were used as features. Unlike similar studies in the literature, Genetic Algorithm was used in the feature selection stage. Thus, it is aimed that this intermediate step will have a positive effect on the final performance. At the end of the study, the performance values of the classification models are given comparatively by using various performance evaluation metrics.</p>
+                                    </div>
+                                
+                                                                                                    <div class="article-keywords data-section">
+                                        <h3 class="kt-blog-post__title kt-heading kt-heading--md kt-heading--medium dergipark">Anahtar Kelimeler</h3>
+
+                                        <p>
+                                                                                            <a
+                                                href="/tr/search?q=%22Quran%22">Quran</a>                                                <label>,</label>                                                                                             <a
+                                                href="/tr/search?q=%22Text%20Classification%22">Text Classification</a>                                                <label>,</label>                                                                                             <a
+                                                href="/tr/search?q=%22Genetic%20Algorithm%22">Genetic Algorithm</a>                                                <label>,</label>                                                                                             <a
+                                                href="/tr/search?q=%22Machine%20Learning%22">Machine Learning</a>                                                <label>,</label>                                                                                             <a
+                                                href="/tr/search?q=%22Feature%20Selection.%22">Feature Selection.</a>                                                                                    </p>
+                                    </div>
+                                
+                                                                
+                                                                
+                                
+                                                                
+                                                                    <div class="article-citations data-section">
+                                        <h3 class="kt-blog-post__title kt-heading kt-heading--md kt-heading--medium dergipark">Kaynakça</h3>
+                                        <div>
+                                            <ul class="fa-ul">
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Al-Kabi, M. N., Ata, B. M. A., Wahsheh, H. A., & Alsmadi, I. M. (2013, December). A topical classification of Quranic Arabic text. In Proceedings of the 2013 Taibah University International Conference on Advances in Information Technology for the Holy Quran and Its Sciences (pp. 252-257).</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">M.H. Shakir. Al-Quran English Translation.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Adeleke AO, Samsudin NA, Mustapha A & Nawi NM (2017), Comparative Analysis of Text Classification Algorithms for Automated Labelling of Quranic Verses. Int. J. on Advance Science, Engineering and Info. Tech. 7, 1419-1427.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Adeleke AO, Samsudin NA, Mustapha A & Nawi NM (2018), A Group-Based Feature Selection Approach to Improve Classification of Holy Quran Verses. in R. Ghazali et al. (eds.), Recent Advances on Soft Computing and Data Mining, Advances in Intelligent Systems and Computing 700, 549, 282-297</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Goudjil M, Bedda M, Koudil M, & Ghoggali N (2015), Using Active Learning in Text Classification of Quranic Sciences. Int. Conf. on Advances in Information Technology for the Holy Quran and Its Sciences, 209-213</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Ibrahim EAA, Ataelfadiel MAM & Atwel ES (2017), Provisions of Quran Tajweed Ontology (Articulations Points of Letters, UN Vowel Noon and Tanween). Int. J. of Science and Research, 6, 8, 756-761</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Zharmagambetov AS & Pak AA (2015), Sentiment analysis of document using deep learning and decision trees. Twelve IEEE Int. Conf. on Electronics Computer and Computation, 1-4.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Wang JH & Wang HY (2014), Incremental Neural Network Construction for Text Classification. IEEE Int. Symposium on Computer Consumer and Control, 970-973.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Townsend KR, Sun S, Johson T, Attia OG, Jones PH, and Zambreno J (2015), k-NN text classification using an FPGA-based sparse matrix vector multiplication accelerator. IEEE Int. Conf. on Electro/Information Technology, 257-263.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Sabbah T & Selamat A (2014), Support Vector Machine based approach for Quranic words detection in online textual content. 8th IEEE Malaysian Software Engineering Conference, Malaysia, 325- 330.</span></li>
+                                                                                                    <li class="d-none reference-item">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Al-Kabi, M. N., Ata, B. M. A., Wahsheh, H. A., & Alsmadi, I. M. (2013, December). A topical classification of Quranic Arabic text. In Proceedings of the 2013 Taibah University International Conference on Advances in Information Technology for the Holy Quran and Its Sciences (pp. 252-257).</span></li>
+                                                                                                    <li class="d-none reference-item">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">A. Kalousis, J. Prados and M. Hilario, “Stability of Feature Selection Algorithms: a study on high dimensional spaces,” Knowledge and information System, vol. 12, no. 1, 2007, pp. 95-116.
+ 
+Y. Sun, W. Qu, J. Zhou, X.i Tang, Y. Di1 and W. Wu, “An Improved Feature Selection Method in Chinese Text Categorization,” International Journal of Knowledge www.ijklp.org and Language Processing KLP International, 2011 ISSN 2191-2734 Volume 2, Number 3, July 2011, pp. 48-55.</span></li>
+                                                                                                    <li class="d-none reference-item">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">https://dataverse.telkomuniversity.ac.id/</span></li>
+                                                                                            </ul>
+                                        </div>
+                                    </div>
+                                                            </div>
+                                                                                <div class="tab-pane active "
+                                 id="article_tr" role="tabpanel">
+                                <div class="h3 d-flex align-items-baseline">
+                                    <div class="add-to-user-project-band" aria-label="Kütüphaneme Ekle" role="dialog"
+     aria-modal="true">
+               <span class="d-none article-project-actions add-item-block"
+                     data-id="1135868">
+                                          <a href="javascript:" data-toggle="tooltip"
+                                             title="Kütüphaneme Ekle"
+                                             aria-label="Kütüphaneme Ekle"
+                                             class="fetch-user-projects"
+                                             data-href="/tr/user/check/favorite/articles?articleId=1135868"
+                                             data-url="/tr/user-project/list?articleId=1135868">
+                                            <i class="la la-star-o d-none library-star-o" style="color: #b1b1b1;"></i>
+                                            <i class="la la-star d-none library-star" style="color: #fd8d00;"></i>
+                                          </a>
+                                        </span>
+</div>
+<div class="modal fade user-project-modal text-left " id="user_project_process_modal"
+     tabindex="-1"
+     role="dialog" aria-labelledby="exampleModalBackdropStatic" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered user-project-modal-dialog" role="document">
+        <div class="modal-content user-project-modal-box">
+            <div class="modal-header">
+                <h5 class="modal-title"
+                    id="user_project_process_modal_title">Kütüphaneme Ekle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Kapat">
+                    <span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body p-0 m-0">
+                <div class="kt-scroll" id="kt-scroll-area" data-scroll="true">
+                    <div class="user-project-box" id="user_project_modal_content"></div>
+                </div>
+                <span class="custom-modal-title" id="modal-favorite-action">
+                    <div class="modal-custom-padding" id="user_project_modal_favorite_content"></div>
+                </span>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <span class="text-left modal-create-resarch d-none"><a href="/tr/user-project/new"
+                                                                       id="modal-create-project">Araştırma Oluştur</a></span>
+                <button type="button" data-dismiss="modal" class="btn btn-outline-brand"
+                        data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+                                    <h3 class="article-title"
+                                        aria-label="Makale Başlığı: Öznitelik Seçiminde Genetik Algoritma Kullanılarak Kur’an-ı Kerim Ayetlerinin Otomatik Sınıflandırılması">
+                                                                                Öznitelik Seçiminde Genetik Algoritma Kullanılarak Kur’an-ı Kerim Ayetlerinin Otomatik Sınıflandırılması
+                                    </h3>
+                                </div>
+
+                                <span class="article-subtitle">
+                                    <i class="flaticon2-copy"></i>
+                                                                                                                                                                                                                                                                <a href="/tr/pub/ecjse/archive?y=2022#y2022">Yıl 2022</a>,
+                                                                                        Cilt: 9 Sayı: 4,                                                                                                                 1484 - 1494,                                     31.12.2022                                </span>
+
+                                <p class="article-authors">
+                                                                                                                        
+                                                                                                                                                <a class="is-user"
+                                                       href="/tr/pub/@fatih_mert"  data-toggle="tooltip" title="Sorumlu Yazar">
+                                                        Fatih Mert
+                                                                                                                    <span class="fa fa-star-of-life primary-author-icon m-0"></span>
+                                                                                                            </a>
+                                                
+                                                                                                    ,
+                                                
+                                                                                                                                
+                                                                                                                                                <a class="is-user"
+                                                       href="/tr/pub/@aydinmali" >
+                                                        Muhammed Ali Aydın
+                                                                                                            </a>
+                                                
+                                                                                                    ,
+                                                
+                                                                                                                                
+                                                                                                                                                <a class="is-user"
+                                                       href="/tr/pub/@zeynep.orman" >
+                                                        Zeynep Orman
+                                                                                                            </a>
+                                                
+                                                
+                                                                                                                                                                                                                                                                        </p>
+                                                                    <div class="article-doi data-section row-space-between">
+                                        <a class="doi-link"
+                                           href="https://doi.org/10.31202/ecjse.1135868">https://doi.org/10.31202/ecjse.1135868</a>
+                                                                            </div>
+                                                                                                    <div class="article-iz data-section">
+                                        <a class="iz-link"
+                                           href="https://izlik.org/JA35ND22NC">https://izlik.org/JA35ND22NC</a>
+                                    </div>
+                                
+                                
+                                                                    <div class="article-abstract data-section">
+                                        <h3 class="kt-blog-post__title kt-heading kt-heading--md kt-heading--medium dergipark">Öz</h3>
+
+                                        <p>Metin etiketleme olarak da bilinen metin sınıflandırması verilen bir metni organize gruplara ayırma işlemidir. Metin sınıflandırıcılar, Doğal Dil İşleme yöntemlerini kullanarak metni otomatik olarak analiz edebilir ve ardından içeriğine göre bir dizi önceden tanımlanmış etiket veya kategori ataması yapabilir. Söz konusu bir Kur'an ayeti ise, etiketlenmedeki temel amaç ayetin ilgili olduğu temanın belirlenmesidir. Ancak mevcuttaki ayet etiketleme yaklaşımları öncelikli olarak Arapça dilinde ve Kur'an tefsirinde derin uzmanlığa sahip alimlerin mevcudiyetine bağlıdır. Bu çalışmada metin sınıflandırma algoritmalarını kullanarak Kur'an ayetlerinin etiketlenmesi görevinin otomatikleştirilmesi önerilmektedir. Sınıflandırma algoritmaları ile gerçekleştirdiğimiz deneylerde ayetlerin İngilizce çevirilerinin ait oldukları önceden tanımlanmış 15 kategori öznitelik olarak kullanılmıştır. Literatürdeki benzer çalışmalardan farklı olarak öznitelik seçimi aşamasında Genetik Algoritma kullanılmıştır. Böylece gerçekleştirilen bu ara adımın nihai performansa olumlu etki etmesi amaçlanmıştır. Çalışmanın sonunda çeşitli performans değerlendirme metrikleri kullanılarak sınıflandırma modellerinin başarım değerleri karşılaştırılmalı olarak verilmiştir.</p>
+                                    </div>
+                                
+                                                                                                    <div class="article-keywords data-section">
+                                        <h3 class="kt-blog-post__title kt-heading kt-heading--md kt-heading--medium dergipark">Anahtar Kelimeler</h3>
+
+                                        <p>
+                                                                                            <a
+                                                href="/tr/search?q=%22Kur%22">Kur</a>                                                <label>,</label>                                                                                             <a
+                                                href="/tr/search?q=%22Metin%20S%C4%B1n%C4%B1fland%C4%B1rma%22">Metin Sınıflandırma</a>                                                <label>,</label>                                                                                             <a
+                                                href="/tr/search?q=%22Genetik%20Algoritma%22">Genetik Algoritma</a>                                                <label>,</label>                                                                                             <a
+                                                href="/tr/search?q=%22Makine%20%C3%96%C4%9Frenmesi%22">Makine Öğrenmesi</a>                                                <label>,</label>                                                                                             <a
+                                                href="/tr/search?q=%22%C3%96znitelik%20Se%C3%A7imi%22">Öznitelik Seçimi</a>                                                                                    </p>
+                                    </div>
+                                
+                                                                
+                                                                
+                                
+                                                                
+                                                                    <div class="article-citations data-section">
+                                        <h3 class="kt-blog-post__title kt-heading kt-heading--md kt-heading--medium dergipark">Kaynakça</h3>
+                                        <div>
+                                            <ul class="fa-ul">
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Al-Kabi, M. N., Ata, B. M. A., Wahsheh, H. A., & Alsmadi, I. M. (2013, December). A topical classification of Quranic Arabic text. In Proceedings of the 2013 Taibah University International Conference on Advances in Information Technology for the Holy Quran and Its Sciences (pp. 252-257).</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">M.H. Shakir. Al-Quran English Translation.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Adeleke AO, Samsudin NA, Mustapha A & Nawi NM (2017), Comparative Analysis of Text Classification Algorithms for Automated Labelling of Quranic Verses. Int. J. on Advance Science, Engineering and Info. Tech. 7, 1419-1427.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Adeleke AO, Samsudin NA, Mustapha A & Nawi NM (2018), A Group-Based Feature Selection Approach to Improve Classification of Holy Quran Verses. in R. Ghazali et al. (eds.), Recent Advances on Soft Computing and Data Mining, Advances in Intelligent Systems and Computing 700, 549, 282-297</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Goudjil M, Bedda M, Koudil M, & Ghoggali N (2015), Using Active Learning in Text Classification of Quranic Sciences. Int. Conf. on Advances in Information Technology for the Holy Quran and Its Sciences, 209-213</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Ibrahim EAA, Ataelfadiel MAM & Atwel ES (2017), Provisions of Quran Tajweed Ontology (Articulations Points of Letters, UN Vowel Noon and Tanween). Int. J. of Science and Research, 6, 8, 756-761</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Zharmagambetov AS & Pak AA (2015), Sentiment analysis of document using deep learning and decision trees. Twelve IEEE Int. Conf. on Electronics Computer and Computation, 1-4.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Wang JH & Wang HY (2014), Incremental Neural Network Construction for Text Classification. IEEE Int. Symposium on Computer Consumer and Control, 970-973.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Townsend KR, Sun S, Johson T, Attia OG, Jones PH, and Zambreno J (2015), k-NN text classification using an FPGA-based sparse matrix vector multiplication accelerator. IEEE Int. Conf. on Electro/Information Technology, 257-263.</span></li>
+                                                                                                    <li class="">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Sabbah T & Selamat A (2014), Support Vector Machine based approach for Quranic words detection in online textual content. 8th IEEE Malaysian Software Engineering Conference, Malaysia, 325- 330.</span></li>
+                                                                                                    <li class="d-none reference-item">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">Al-Kabi, M. N., Ata, B. M. A., Wahsheh, H. A., & Alsmadi, I. M. (2013, December). A topical classification of Quranic Arabic text. In Proceedings of the 2013 Taibah University International Conference on Advances in Information Technology for the Holy Quran and Its Sciences (pp. 252-257).</span></li>
+                                                                                                    <li class="d-none reference-item">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">A. Kalousis, J. Prados and M. Hilario, “Stability of Feature Selection Algorithms: a study on high dimensional spaces,” Knowledge and information System, vol. 12, no. 1, 2007, pp. 95-116.
+ 
+Y. Sun, W. Qu, J. Zhou, X.i Tang, Y. Di1 and W. Wu, “An Improved Feature Selection Method in Chinese Text Categorization,” International Journal of Knowledge www.ijklp.org and Language Processing KLP International, 2011 ISSN 2191-2734 Volume 2, Number 3, July 2011, pp. 48-55.</span></li>
+                                                                                                    <li class="d-none reference-item">
+                                                        <i class="fa-li fa fa-quote-left"
+                                                           aria-hidden="true"></i><span
+                                                                class="citation-text">https://dataverse.telkomuniversity.ac.id/</span></li>
+                                                                                            </ul>
+                                        </div>
+                                    </div>
+                                                            </div>
+                                                                            <div class="text-center">
+                                <button type="button" id="show-reference"
+                                        class="btn btn-primary btn-sm fw-500 kt-font-md">Tüm Kaynakçayı Göster
+                                    <i class="ml-2 fa fa-chevron-down" style="margin-top: 1px;"></i></button>
+                                <button type="button" id="less-reference"
+                                        class="btn btn-primary btn-sm fw-500 kt-font-md d-none">Daha Az Kaynakça Göster
+                                    <i class="ml-2 fa fa-chevron-up" style="margin-top: 1px;"></i></button>
+                            </div>
+                                                <div class="ml-3">Toplam <span style="font-weight: 600 !important; font-size: 1.3rem;">13</span> adet kaynakça vardır.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kt-portlet article-details">
+                <div class="kt-portlet__body">
+                    <h3 class="kt-blog-post__title kt-heading kt-heading--md kt-heading--medium dergipark">Ayrıntılar</h3>
+                    <table class="record_properties table">
+                                                    <tr>
+                                <th>Birincil Dil</th>
+                                <td>
+                                    Türkçe
+                                </td>
+                            </tr>
+                                                                            <tr>
+                                <th>Konular</th>
+                                <td>
+                                    Mühendislik
+                                </td>
+                            </tr>
+                                                                                                    <tr>
+                                <th>Bölüm</th>
+                                <td>Araştırma Makalesi</td>
+                            </tr>
+                                                                            <tr>
+                                <th>Yazarlar</th>
+                                <td>
+                                    <a name="article-authors-list"></a>
+                                                                            <p id="author2227608">
+                                                                                                                                                                                            <a href="/tr/pub/@fatih_mert"
+                                                       style="font-weight: 600" data-toggle="tooltip"
+                                                       title="Sorumlu Yazar"
+                                                       aria-label="Sorumlu Yazar: Fatih Mert">Fatih Mert
+                                                                                                                    <span class="fa fa-star-of-life primary-author-icon m-0"></span>
+                                                                                                            </a>
+                                                                                                                                        <span class="row no-space-row">
+                                                                                                                                                                                                                                                                                                        <label class="m-0 p-0"
+                                                           aria-label="Kurum : Huawei Türkiye Ar-Ge Merkezi"><label
+                                                                class="m-0 p-0"
+                                                                aria-hidden="true">Huawei Türkiye Ar-Ge Merkezi</label></label>
+                                                                                            </span>
+                                                                                                                                        <span class="row no-space-row">
+                                                  <a class="m-0 p-0" href="https://orcid.org/0000-0002-2896-5475"
+                                                     target="_blank"
+                                                     aria-label="ORCID: 0000-0002-2896-5475">0000-0002-2896-5475</a>
+                                                </span>
+                                                                                                                                                                                    <span class="row no-space-row">
+                                                  <label class="m-0 p-0"
+                                                         aria-label="Ülke : Türkiye"><label
+                                                              class="m-0 p-0"
+                                                              aria-hidden="true">Türkiye</label></label>
+                                                </span>
+                                                                                    </p>
+                                                                                    <hr aria-hidden="true">
+                                                                                                                    <p id="author2227611">
+                                                                                                                                                                                            <a href="/tr/pub/@aydinmali"
+                                                       style="font-weight: 600" data-toggle="tooltip"
+                                                       title="Sorumlu Yazar"
+                                                       aria-label="Sorumlu Yazar: Muhammed Ali Aydın">Muhammed Ali Aydın
+                                                                                                            </a>
+                                                                                                                                        <span class="row no-space-row">
+                                                                                                                                                                                                                                                                                                        <label class="m-0 p-0"
+                                                           aria-label="Kurum : İSTANBUL ÜNİVERSİTESİ-CERRAHPAŞA"><label
+                                                                class="m-0 p-0"
+                                                                aria-hidden="true">İSTANBUL ÜNİVERSİTESİ-CERRAHPAŞA</label></label>
+                                                                                            </span>
+                                                                                                                                        <span class="row no-space-row">
+                                                  <a class="m-0 p-0" href="https://orcid.org/0000-0002-1846-6090"
+                                                     target="_blank"
+                                                     aria-label="ORCID: 0000-0002-1846-6090">0000-0002-1846-6090</a>
+                                                </span>
+                                                                                                                                                                                    <span class="row no-space-row">
+                                                  <label class="m-0 p-0"
+                                                         aria-label="Ülke : Türkiye"><label
+                                                              class="m-0 p-0"
+                                                              aria-hidden="true">Türkiye</label></label>
+                                                </span>
+                                                                                    </p>
+                                                                                    <hr aria-hidden="true">
+                                                                                                                    <p id="author2227613">
+                                                                                                                                                                                            <a href="/tr/pub/@zeynep.orman"
+                                                       style="font-weight: 600" data-toggle="tooltip"
+                                                       title="Sorumlu Yazar"
+                                                       aria-label="Sorumlu Yazar: Zeynep Orman">Zeynep Orman
+                                                                                                            </a>
+                                                                                                                                        <span class="row no-space-row">
+                                                                                                                                                                                                                                                                                                        <label class="m-0 p-0"
+                                                           aria-label="Kurum : İSTANBUL ÜNİVERSİTESİ-CERRAHPAŞA"><label
+                                                                class="m-0 p-0"
+                                                                aria-hidden="true">İSTANBUL ÜNİVERSİTESİ-CERRAHPAŞA</label></label>
+                                                                                            </span>
+                                                                                                                                        <span class="row no-space-row">
+                                                  <a class="m-0 p-0" href="https://orcid.org/0000-0002-0205-4198"
+                                                     target="_blank"
+                                                     aria-label="ORCID: 0000-0002-0205-4198">0000-0002-0205-4198</a>
+                                                </span>
+                                                                                                                                                                                    <span class="row no-space-row">
+                                                  <label class="m-0 p-0"
+                                                         aria-label="Ülke : Türkiye"><label
+                                                              class="m-0 p-0"
+                                                              aria-hidden="true">Türkiye</label></label>
+                                                </span>
+                                                                                    </p>
+                                                                                                            </td>
+                            </tr>
+                                                                                                                        
+                                                                            <tr>
+                                <th>Gönderilme Tarihi</th>
+                                <td>25 Haziran 2022</td>
+                            </tr>
+                                                                            <tr>
+                                <th>Kabul Tarihi</th>
+                                <td>16 Kasım 2022</td>
+                            </tr>
+                                                                                                    <tr>
+                                <th>Yayımlanma Tarihi</th>
+                                <td>31 Aralık 2022</td>
+                            </tr>
+                                                                            <tr>
+                                <th>DOI</th>
+                                <td><a href="https://doi.org/10.31202/ecjse.1135868" target="_blank"
+                                       rel="noopener noreferrer">https://doi.org/10.31202/ecjse.1135868</a></td>
+                            </tr>
+                                                                            <tr>
+                                <th>IZ</th>
+                                <td><a href="https://izlik.org/JA35ND22NC" target="_blank"
+                                       rel="noopener noreferrer">https://izlik.org/JA35ND22NC</a></td>
+                            </tr>
+                        
+                                                                                <tr>
+                                <th>Yayımlandığı Sayı</th>
+                                <td>
+                                                                                                                                                                                                                                            <a href="/tr/pub/ecjse/issue/74186" style="font-weight: 600">
+                                                                                            Yıl 2022
+                                                                                        Cilt: 9 Sayı: 4
+                                        </a>
+                                                                    </td>
+                            </tr>
+                                            </table>
+                </div>
+            </div>
+                                                                    <div class="kt-portlet article-details">
+                    <div class="kt-portlet__body">
+                        <a name="article_cite"></a>
+                        <h3 class="kt-blog-post__title kt-heading kt-heading--md kt-heading--medium dergipark">Kaynak Göster</h3>
+                        <div class="kt-section">
+                            <div class="kt-section__content">
+                                <table class="table table-striped m-table cite-table">
+                                    <tbody>
+                                                                                                                                                                        <tr>
+                                                    <td class="cite-table-item">IEEE</td>
+                                                    <td>
+  [1]F. Mert, M. A. Aydın, ve Z. Orman, “Öznitelik Seçiminde Genetik Algoritma Kullanılarak Kur’an-ı Kerim Ayetlerinin Otomatik Sınıflandırılması”, <i>ECJSE</i>, c. 9, sy 4, ss. 1484–1494, Ara. 2022, doi: 10.31202/ecjse.1135868.
+</td>
+                                                    <td><a href="javascript:" class="cite-copy-button" data-html="true"
+                                                           data-toggle="tooltip" title="Kopyala"
+                                                           aria-label="Kopyala"><span class="fa fa-copy"
+                                                                                                 aria-hidden="true"></span></a>
+                                                    </td>
+                                                </tr>
+                                                                                                                                                            </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+            
+                    </div>
+        <!-- Right Sidebar -->
+        <div class="col-lg-3 col-md-4 journal_panel_menu">
+            <div class="kt-portlet journal_right_portlet">
+                <div class="kt-portlet__body">
+                    <div class="kt-section">
+                        <div class="kt-section__content kt-section__content--x-fit">
+                            <ul class="kt-nav kt-nav--bold kt-nav--lg-space kt-nav--v4" role="tablist">
+
+                                                                    <li class="kt-nav__section kt-margin-t-0">
+                                        <span class="kt-nav__section-bullet kt-nav__section-bullet--dot"><span></span></span>
+                                        <span class="kt-nav__section-text">Makale Dosyaları</span>
+                                    </li>
+
+                                    <ul class="kt-nav__sub" role="list">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <li class="kt-nav__item">
+                                                                                                            <a class="kt-nav__link"
+                                                           href="/tr/download/article-file/2507473">
+                                                                <span class="kt-nav__link-bullet kt-nav__link-bullet--line"
+                                                                      aria-hidden="true"><span></span></span>
+                                                            <span class="kt-nav__link-text">Tam Metin</span>
+                                                            <span class="kt-nav__link-badge" aria-hidden="true">
+                                                                <span class="kt-badge kt-badge--dergipark kt-badge--inline kt-badge--rounded">
+                                                                    <span class="icon flaticon2-arrow-down"></span>
+                                                                </span>
+                                                            </span>
+                                                        </a>
+                                                                                                    </li>
+                                                                                                                                    
+                                        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </ul>
+                                
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="kt-portlet__foot has-section invisible" id="j-stats" style="padding-bottom: 0;">
+                     <span class="j-stat diplab d-none" data-toggle="tooltip" id="j-stat-view-block"
+                           title="Makalelerin Toplam Gösterim Sayısı"><span class="la la-eye"
+                                                                           aria-hidden="true">&nbsp;</span>
+                         <span id="j-stat-article-view" aria-hidden="true"></span></span>
+                    <span class="j-stat diplab d-none" data-toggle="tooltip" id="j-stat-download-block"
+                          title="Makalelerin Toplam İndirilme Sayısı"><span class="la la-download"
+                                                                              aria-hidden="true">&nbsp;</span>
+                            <span id="j-stat-article-download" aria-hidden="true"></span></span>
+                    <span class="j-stat diplab d-none" data-toggle="tooltip" id="j-stat-favorite-block"
+                          title="Makalelerin Toplam Favoriye Eklenme Sayısı"><span class="la la-star-o"
+                                                                              aria-hidden="true">&nbsp;</span>
+                            <span id="j-stat-article-favorite" aria-hidden="true"></span></span>
+                    <span class="j-stat trdizin d-none" id="j-stat-trdizin-block" data-html="true"
+                          data-toggle="tooltip" title="TR Dizin Atıf Sayısı">
+                        <a id="j-stat-trdizin-url" href="javascript:"><span class="fa fa-quote-right"
+                                                                            aria-hidden="true">&nbsp;</span><span
+                                    id="j-stat-trdizin-citation"
+                                    style="color: #3d4465 !important;font-weight: 400 !important;"></span></a>
+                    </span>
+                </div>
+            </div>
+            <div class="kt-portlet journal_right_portlet">
+                <div class="kt-portlet__body">
+                    <div class="kt-section">
+                        <div class="kt-section__content kt-section__content--x-fit">
+                            
+                            <ul class="kt-nav kt-nav--bold kt-nav--lg-space kt-nav--v4" role="tablist">
+                                                                <li class="kt-nav__item">
+                                    <a class="kt-nav__link" href="/tr/pub/ecjse">
+                                        <span class="kt-nav__link-bullet kt-nav__link-bullet--dot"><span></span></span>
+                                        <span class="kt-nav__link-text">Dergi Ana Sayfası</span>
+                                    </a>
+                                </li>
+
+                                <li class="kt-nav__item">
+                                    <a class="kt-nav__link" href="/tr/pub/ecjse/archive">
+                                        <span class="kt-nav__link-bullet kt-nav__link-bullet--dot"><span></span></span>
+                                        <span class="kt-nav__link-text">Arşiv</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                            <div id="fb-root"></div>
+                <div class="kt-portlet journal_right_portlet">
+                    <div class="kt-portlet__body social-media-icon-box">
+                        <div class="kt-section">
+                            <div class="social-media-tabs d-flex justify-content-md-between align-items-center flex-wrap">
+    <div class="social-media-icon" data-href="https://developers.facebook.com/docs/plugins/" data-layout="button"><a
+                href="https://www.facebook.com/sharer/sharer.php?u=https://dergipark.org.tr/tr/pub/ecjse/article/1135868" class="fb-xfbml-parse-ignore"
+                target="_blank" aria-label="Facebook ile paylaş"><span
+                    class="fab fa-facebook-square fa-3x social-media-share social-media-icon-facebook"> </span></a>
+    </div>
+    <div class="social-media-icon">
+        <a href="https://twitter.com/intent/tweet?text=Öznitelik Seçiminde Genetik Algoritma Kullanılarak Kur’an-ı Kerim Ayetlerinin Otomatik Sınıflandırılması &hashtags=DergiPark&url=https://dergipark.org.tr/tr/pub/ecjse/article/1135868%20%40DergiPark"
+           rel="noopener" target="_blank" aria-label="X ile paylaş">
+           <span class="social-media-share">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36.6" height="35" shape-rendering="geometricPrecision"
+                     text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd"
+                     clip-rule="evenodd">
+                    <rect stroke="null" x="0.05" y="-0.3094" width="36.5" height="35.6188" id="svg_3" rx="5"></rect>
+                    <path stroke="null" fill="#fff" fill-rule="nonzero"
+                          d="m25.15793,6.4854l3.65675,0l-7.98876,9.33187l9.39801,12.69735l-7.35906,0l-5.76354,-7.70035l-6.59571,7.70035l-3.65878,0l8.54457,-9.98056l-9.01533,-12.04867l7.54533,0l5.20975,7.03925l6.02676,-7.03925l0.00001,0.00001zm-1.28371,19.79247l2.02681,0l-13.08007,-17.67263l-2.17462,0l13.22788,17.67263z"
+                          id="svg_2"></path>
+                </svg>
+           </span>
+        </a>
+    </div>
+    <div class="social-media-icon"><a href="https://www.linkedin.com/shareArticle?url=https://dergipark.org.tr/tr/pub/ecjse/article/1135868"
+                                      target="_blank" aria-label="Linkedin ile paylaş"> <span
+                    class="fab fa-linkedin fa-3x social-media-share social-media-icon-linkedln"></span></a></div>
+    <div class="social-media-icon"><a href="https://wa.me/?text=Öznitelik Seçiminde Genetik Algoritma Kullanılarak Kur’an-ı Kerim Ayetlerinin Otomatik Sınıflandırılması - https://dergipark.org.tr/tr/pub/ecjse/article/1135868" target="_blank"
+                                      aria-label="WhatsApp ile paylaş"> <span
+                    class="fab fa-whatsapp-square fa-3x social-media-share social-media-icon-whatsapp"></span></a></div>
+    <div class="social-media-icon"><a href="mailto:?subject=Öznitelik Seçiminde Genetik Algoritma Kullanılarak Kur’an-ı Kerim Ayetlerinin Otomatik Sınıflandırılması&amp;body=https://dergipark.org.tr/tr/pub/ecjse/article/1135868"
+                                      aria-label="E-Posta ile paylaş"> <span
+                    class="fa fa-envelope-square fa-3x social-media-share social-media-icon-mail"></span></a></div>
+    <a href="javascript:" class="social-media-icon social-media-copy-link" data-html="true" data-toggle="tooltip"
+       title="Kopyala"><span class="fa fa-copy social-media-share social-media-icon-copy"></span></a>
+</div>
+                        </div>
+                    </div>
+                </div>
+                    </div>
+    </div>
+        <div class="fixed-button-container position-right">
+    
+</div>
+
+
+            <!-- </Content> -->
+
+                            <div class="row">
+                    <div class="col">
+                        <div class="kt-portlet">
+                            <div class="kt-portlet__body overflow-auto">
+                                <p style="text-align:center;"><font color="#6badde"><u><a href="http://www.budapestopenaccessinitiative.org/boai-10-translations/turkish-translation"> Açık Dergi Erişimi</a> (BOAI)</u></font></p><p style="text-align:center;"><font color="#6badde"><u><br /></u></font></p><p style="text-align:center;"><a class="&lt;a rel=" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons Lisansı" style="border-width:0;" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br /></p><p style="text-align:center;"> <span style="color:rgb(70,70,70);font-family:'Source Sans Pro', sans-serif;font-size:10px;">Bu eser </span><a href="http://creativecommons.org/licenses/by-nc/4.0/" style="background-color:rgb(255,255,255);color:rgb(4,156,207);font-family:'Source Sans Pro', sans-serif;font-size:19px;"><span style="font-size:10px;">Creative Commons Atıf-GayriTicari 4.0 Uluslararası Lisansı</span></a><span style="color:rgb(70,70,70);font-family:'Source Sans Pro', sans-serif;font-size:10px;"> ile lisanslanmıştır.</span></p><p><img src="/public/site/images/selamisasmaz/Citeulike_logo1.png" alt="" />  <img src="/public/site/images/selamisasmaz/KUDOS1.png" alt="" /><img src="/public/site/images/selamisasmaz/Index_copernicus2.jpg" alt="" /></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    </div>
+    </div>
+    
+    </div>
+    
+
+
+        
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js"></script>
+    <script>
+        WebFont.load({
+            google: {
+                "families": [
+                    "Poppins:300,400,500,600,700"]
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            }
+        });
+    </script>
+        <script src="/zollu/js/jquery.min.js"></script>
+    <script src="/zollu/keen/vendors/global/vendors.bundle.js"></script>
+    <script src="/zollu/keen/js/demo3/scripts.bundle.js"></script>
+    <script src="/zollu/keen/vendors/custom/datatables/datatables.bundle.js"></script>
+    <script src="/zollu/js/katex/katex.min.js"></script>
+    <script src="/zollu/js/katex/auto-render.min.js"></script>
+    <script src="/zollu/js/flashbag.js"></script>
+    <script src="/zollu/js/navbar-top.js"></script>
+    <script src="/zollu/bundles/fosjsrouting/js/router.js"></script>
+    <script src="/zollu/bundles/jbfileuploader/lib/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+    <script src="/zollu/js/jbfileuploader/lib/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+    <script src="/zollu/js/jbfileuploader/lib/jquery-file-upload/js/jquery.fileupload.js"></script>
+    <script src="/zollu/js/jbfileuploader/js/jbfileupload.js"></script>
+    <script src="/zollu/js/jbfileuploader/lib/jcrop/js/jquery.Jcrop.js"></script>
+    <script src="/zollu/js/jquery-ui.min.js"></script>
+    <script src="/zollu/js/pages/zollu-backend.js"></script>
+    <script src="/zollu/js/select2/select2.min.js"></script>
+    <script src="/zollu/bundles/ojscore/js/select2_sortable.js"></script>
+    <script src="/zollu/bundles/ojscore/js/remote_selection.js"></script>
+    <script src="/zollu/bundles/ojscore/js/ucfirst.js"></script>
+    <script src="/zollu/bundles/bazingajstranslation/js/translator.min.js"></script>
+    <script src="/zollu/js/common.js"></script>
+    <script src="/zollu/js/format-user-name.js"></script>
+    <script src="/zollu/js/diplab.js"></script>
+    <script src="/zollu/bundles/ojscore/js/alert_util.js"></script>
+    <script src="/zollu/js/chartjs-plugin-labels.js"></script>
+    <script src="/zollu/js/multiple_mail.js"></script>
+    <script src="/zollu/bundles/ojscore/js/mask_platforms.js"></script>
+    <script src="/zollu/js/confirmation.js"></script>
+    <script src="/zollu/js/prevent-double-submit.js"></script>
+    <script src="/tr/pub/translations?locale=tr"></script>
+    <script src="/zollu/js/subject/subject_selector.js"></script>
+    <script src="/zollu/js/pages/article/zollu_star.js"></script>
+    <script src="/zollu/js/pages/picker/pickr.min.js"></script>
+    <script src="/pub/js/routing?callback=fos.Router.setData&amp;lang=tr"></script>
+
+    <script type="text/javascript" src="/zollu/js/copy_clipboard.js"></script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                 inlineMath: [['$','$'], ['\\(','\\)']],
+                 ignoreClass: "no-latex",
+                 processClass: "latex"
+            },
+            displayAlign: "center"
+        });
+    </script>
+    <script type="text/javascript" src="/zollu/js/mathjax/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            renderMathInElement(document.body);
+        });
+    </script>
+
+    <script src="/zollu/js/pages/article/reference-linker.js"></script>
+    <script type="text/javascript">
+        function claimOwnerShip(route, confirmationText, type) {
+            if (!isUserLoggedIn()) {
+                route = route + "&isComeLogin=true";
+                let confirmButtonText = "<a href='" + route + "' style='color: white;'>Giriş yapmak için tıklayınız</a>";
+                swal.fire({
+                    title: "Bu Kişi Benim özelliğini kullanabilmek için giriş yapmanız gerekmektedir.",
+                    type: "warning",
+                    confirmButtonText: confirmButtonText,
+                    showCancelButton: true,
+                    cancelButtonText: "Vazgeç"
+                }).then(function (result) {
+                    if (result.value) {
+                        window.location.href = route;
+                    }
+                });
+            } else {
+                swal.fire({
+                    title: "Emin misiniz?",
+                    text: confirmationText,
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: "Evet, onaylıyorum!",
+                    cancelButtonText: "Hayır, iptal et!",
+                }).then(function (result) {
+                    if (result.value) {
+                        swal.fire({
+                            title: "İşleniyor...",
+                            onOpen: function () {
+                                swal.showLoading()
+                            }
+                        });
+                        let text = '';
+                        let errorText = '';
+                        if (type === 'translator') {
+                            text = "Makale çevirmeninin kullanıcı hesabınızla ilişkilendirilmesine ilişkin talebiniz alınmıştır, incelenecek ve uygun bulunması durumunda onaylanacaktır."
+                            errorText = "Makale çevirmenlik isteği oluşturulamadı. Bunun bir hata olduğunu düşünüyorsanız lütfen DergiPark Destek birimine başvurunuz."
+                        } else {
+                            text = "Makale yazarının kullanıcı hesabınızla ilişkilendirilmesine ilişkin talebiniz alınmıştır, incelenecek ve uygun bulunması durumunda onaylanacaktır."
+                            errorText = "Makale yazarlık isteği oluşturulamadı. Bunun bir hata olduğunu düşünüyorsanız lütfen DergiPark Destek birimine başvurunuz."
+                        }
+                        $.ajax({
+                            url: route,
+                            type: "GET",
+                            success: function (data) {
+                                if (data !== undefined) {
+                                    swal.close();
+                                    if (data.status === 2) {
+                                        swal.fire({
+                                            title: "Daha önce istekte bulundunuz. İsteğiniz incelendikten sonra otomatik olarak işlem tamamlanacaktır.",
+                                            type: "info",
+                                            showCancelButton: false,
+                                            confirmButtonText: "Tamam"
+                                        });
+                                    } else if (data.status === -1) {
+                                        swal.fire({
+                                            title: "Hata",
+                                            text: errorText,
+                                            type: "error",
+                                            showCancelButton: false,
+                                            confirmButtonText: "Tamam"
+                                        });
+                                    } else if (data.status === 1) {
+                                        swal.fire({
+                                            title: "Talebiniz alındı!",
+                                            text: text,
+                                            type: "success",
+                                            showCancelButton: false,
+                                            confirmButtonText: "Tamam"
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        let cancelText;
+                        if (type === 'translator') {
+                            cancelText = "Makale çevirmeninin kullanıcı hesabınızla ilişkilendirmesine ilişkin talebiniz iptal edilmiştir."
+                        } else {
+                            cancelText = "Makale yazarının kullanıcı hesabınızla ilişkilendirmesine ilişkin talebiniz iptal edilmiştir."
+                        }
+                        swal.fire({
+                            title: "İşlem İptal Edildi",
+                            text: cancelText,
+                            type: "error",
+                            showCancelButton: false,
+                            confirmButtonText: "Tamam"
+                        });
+                    }
+                });
+            }
+        }
+
+        $(document).ready(function () {
+            const $metaArticleDownload = $('#meta_stats_total_article_download');
+            const $metaArticleView = $('#meta_stats_total_article_view');
+            const $metaArticleFavorite = $('#meta_stats_total_article_favorite');
+            const $metaTrdizinCitationCount = $('#meta_stats_trdizin_citation_count');
+
+            const stats_download_raw = $metaArticleDownload.attr("content");
+            const stats_view_raw = $metaArticleView.attr("content");
+            const stats_favorite_raw = $metaArticleFavorite.attr("content");
+            const stats_trdizin_raw = $metaTrdizinCitationCount.attr("content");
+
+            const stats_download = $metaArticleDownload.attr("abbr");
+            const stats_view = $metaArticleView.attr("abbr");
+            const stats_favorite = $metaArticleFavorite.attr("abbr");
+            const stats_trdizin = $metaTrdizinCitationCount.attr("abbr");
+
+            $('a.lang-event').on('click', function () {
+                let url = $(this).attr('data-event-url').trim();
+                if (url.length > 0) {
+                    $.ajax({url: url, type: "GET"});
+                    $(this).attr('data-event-url', '');
+                }
+            });
+
+            if (stats_view_raw > 0 || stats_download_raw > 0 || stats_favorite_raw > 0 || stats_trdizin_raw > 0) {
+                const $jStatArticleView = $('#j-stat-article-view');
+                $jStatArticleView.html(stats_view);
+                $jStatArticleView.parent().removeClass('d-none');
+
+                const $jStatArticleDownload = $('#j-stat-article-download');
+                $jStatArticleDownload.html(stats_download);
+                $jStatArticleDownload.parent().removeClass('d-none');
+
+                const $jStatArticleFavorite = $('#j-stat-article-favorite');
+                $jStatArticleFavorite.html(stats_favorite);
+                $jStatArticleFavorite.parent().removeClass('d-none');
+
+                const jStatViewElement = $('#j-stat-view-block');
+                jStatViewElement.attr('title', jStatViewElement.attr('title') + ': ' + stats_view_raw);
+                const statsDownloadBlock = $('#j-stat-download-block');
+                statsDownloadBlock.attr('title', statsDownloadBlock.attr('title') + ': ' + stats_download_raw);
+                const statFavoriteElement = $('#j-stat-favorite-block');
+                statFavoriteElement.attr('title', statFavoriteElement.attr('title') + ': ' + stats_favorite_raw);
+
+                if (stats_trdizin_raw > 0) {
+
+                    $("#j-stat-trdizin-url").attr('href', $('#meta_stats_trdizin_url').attr('content'));
+                    const trdizinBlock = $('#j-stat-trdizin-block');
+                    trdizinBlock.attr('title', trdizinBlock.attr('title') + ': ' + stats_trdizin_raw);
+
+                    const $jStatArticleTrdizin = $('#j-stat-trdizin-citation');
+                    $jStatArticleTrdizin.html(stats_trdizin);
+                    $jStatArticleTrdizin.parent().parent().removeClass('d-none');
+                }
+
+                $('#j-stats').removeClass('invisible');
+            }
+
+            // cite kopyalama işlemi yapılıyor...
+            $(".cite-copy-button").click(function () {
+                copyToClipboard($(this).parent().prev().text(), $(this));
+            });
+        });
+
+        $("#show-reference").click(function () {
+            $('.reference-item').each(function () {
+                $(this).removeClass('d-none');
+            });
+            $('#show-reference').addClass('d-none');
+            $('#less-reference').removeClass('d-none');
+        });
+        $("#less-reference").click(function () {
+            $('.reference-item').each(function () {
+                $(this).addClass('d-none');
+            });
+            $('#show-reference').removeClass('d-none');
+            $('#less-reference').addClass('d-none');
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            const publishAgreementAllowed = false;
+            const publishAgreementBlockedText = "Kat\u0131l\u0131m\u0020s\u00F6zle\u015Fmesi\u0020s\u00FCreci\u0020tamamlanmad\u0131\u011F\u0131\u0020i\u00E7in\u0020makale\u0020yay\u0131mlanamaz.\u0020S\u00FCreci\u0020tamamlamak\u0020i\u00E7in\u0020BYK\u0020imzas\u0131,\u0020admin\u0020onay\u0131\u0020ve\u0020ULAKB\u0130M\u0020imzas\u0131\u0020gereklidir.";
+
+            const showAgreementBlocked = function () {
+                swal.fire({
+                    type: 'warning',
+                    text: publishAgreementBlockedText,
+                    confirmButtonText: "Tamam"
+                });
+            };
+
+            // Publish button handler (direct publish to active issue)
+            $('#publish-btn').on('click', function () {
+                if (!publishAgreementAllowed) {
+                    showAgreementBlocked();
+                    return;
+                }
+                swal.fire({
+                    title: "Onayla",
+                    text: "Makale yayımlandıktan sonra düzenleme/güncelleme yapma süresi 5 gündür. Bu süre sonunda değişiklik söz konusu olduğu durumlarda düzeltme makalesi yayımlanmalıdır.",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Evet",
+                    cancelButtonText: "Vazgeç"
+                }).then((result) => {
+                    if (result.value) {
+                                                window.location.href = "/tr/journal/262/article/1135868/publish";
+                                            }
+                });
+            });
+
+            // Publish to Special Issue button handler
+            $('#publish-to-special-issue-btn').on('click', function () {
+                if (!publishAgreementAllowed) {
+                    showAgreementBlocked();
+                    return;
+                }
+                swal.fire({
+                    title: "Onayla",
+                    text: "Bu makale aktif özel sayıda yayımlanacaktır. Devam etmek istediğinizden emin misiniz?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Evet",
+                    cancelButtonText: "Vazgeç"
+                }).then((result) => {
+                    if (result.value) {
+                        window.location.href = "/tr/journal/262/article/1135868/publish/continuous-special";
+                    }
+                });
+            });
+
+            // Early publish button handler
+            $('#early-publish-btn').on('click', function () {
+                if (!publishAgreementAllowed) {
+                    showAgreementBlocked();
+                    return;
+                }
+                swal.fire({
+                    title: "Onayla",
+                    text: "Erken görünümde yer alan makaleler bir sayıya atanabilir. Bu makale bir sayıya atanmadığı sürece erken görünümden kaldırılamaz.",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Evet",
+                    cancelButtonText: "Vazgeç"
+                }).then((result) => {
+                    if (result.value) {
+                        window.location.href = "/tr/journal/262/article/1135868/publish?status=-5";
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="/zollu/js/pages/popup_publish_success.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize with default configuration for article publish success
+            if (typeof initUrlParamSuccessMessage !== 'undefined') {
+                initUrlParamSuccessMessage({
+                    urlParam: 'publishSuccess',
+                    titleTranslationKey: 'article.published.successfully',
+                    type: 'success',
+                    options: {}
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

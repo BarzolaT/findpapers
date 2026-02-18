@@ -1,0 +1,817 @@
+
+
+<!DOCTYPE html>
+<html lang="vi-VN" xml:lang="vi-VN">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>
+		Brain MRI Images Generating Method Based on Cyclegan			| Tạp chí Khoa học và Công nghệ - Đại học Đà Nẵng
+			</title>
+	<meta name="generator" content="Brain MRI Images Generating Method Based on Cyclegan			| Tạp chí Khoa học và Công nghệ - Đại học Đà Nẵng - Academic Free ver 3.2 by openjournaltheme.com">
+	<link rel="icon" href="https://jst-ud.vn/public/journals/1/journalThumbnail_en_US.jpg">
+		
+<link rel="icon" href="https://jst-ud.vn/public/journals/1/favicon_vi_VN.png">
+<meta name="generator" content="Hệ thống tạp chí mở 3.2.1.2">
+<meta name="gs_meta_revision" content="1.1"/>
+<meta name="citation_journal_title" content="Tạp chí Khoa học và Công nghệ - Đại học Đà Nẵng"/>
+<meta name="citation_journal_abbrev" content="UD-JST"/>
+<meta name="citation_issn" content="1859-1531"/> 
+<meta name="citation_author" content="Hinh Van Nguyen"/>
+<meta name="citation_author_institution" content="School of Electrical and Electronic Engineering, Hanoi University of Science and Technology"/>
+<meta name="citation_author" content="Thanh Han Trong"/>
+<meta name="citation_author_institution" content="School of Electrical and Electronic Engineering, Hanoi University of Science and Technology"/>
+<meta name="citation_title" content="Brain MRI Images Generating Method Based on Cyclegan"/>
+<meta name="citation_language" content="en"/>
+<meta name="citation_date" content="2022/12/31"/>
+<meta name="citation_firstpage" content="13"/>
+<meta name="citation_lastpage" content="18"/>
+<meta name="citation_doi" content="10.31130/ud-jst.2022.310ICT"/>
+<meta name="citation_abstract_html_url" content="https://jst-ud.vn/jst-ud/article/view/7963"/>
+<meta name="citation_pdf_url" content="https://jst-ud.vn/jst-ud/article/download/7963/5761"/>
+<meta name="citation_reference" content="&lt;li&gt;Lashkari and Amirehsan, “A neural network based method for brain abnormality detection in mri images using gabor wavelets,” &lt;em&gt;International Journal of Computer Applications&lt;/em&gt;, vol. 4, no. 7, 2010.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;I. Goodfellow et al., “Generative adversarial nets,” &lt;em&gt;Advances in neural information processing systems&lt;/em&gt;, vol. 27, 2014.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;J.-Y. Zhu et al., “Unpaired image-to-image translation using cycle-consistent adversarial networks,” &lt;em&gt;Proceedings of the IEEE international conference on computer vision&lt;/em&gt;, 2017.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;P. Mildenberger, M. Eichelberg, and E. Martin, “Introduction to the dicom standard,” &lt;em&gt;Eur Radiol&lt;/em&gt;, vol. 12, pp. 920–927, 2000.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;K. O’Shea and R. Nash, “An introduction to convolutional neural networks,” &lt;em&gt;arXiv:1511.08458&lt;/em&gt;, 2015.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;P. Isola et al., “Image-to-image translation with conditional adversarial networks,” &lt;em&gt;Proceedings of the IEEE conference on computer vision and pattern recognition&lt;/em&gt;, 2017.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;T. Salimans, I. Goodfellow, W. Zaremba, V. Cheung, A. Radford, and X. Chen, “Improved techniques for training gans,” &lt;em&gt;arXiv:1606.03498&lt;/em&gt;, 2016.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;C. Szegedy, V. Vanhoucke, S. Ioffe, J. Shlens, and Z. Wojna, “Rethinking the inception architecture for computer vision,” &lt;em&gt;In Proceedings of the IEEE conference on computer vision and pattern recognition&lt;/em&gt;, pp. 2818–2826, 2016.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;J. Deng, W. Dong, R. Socher, L. Li, K. Li, and L. Fei-Fei, “Imagenet: A large-scale hierarchical image database,” &lt;em&gt;IEEE conference on computer vision and pattern recognition&lt;/em&gt;, pp. 248–255, 2009.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;M. Heusel, H. Ramsauer, T. Unterthiner, B. Nessler, and S. Hochreiter, “Gans trained by a two time-scale update rule converge to a local nash equilibrium,” &lt;em&gt;arXiv:1706.08500&lt;/em&gt;, 2017.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;T. Kossen et al., “Synthesizing anonymized and labeled tofmra patches for brain vessel segmentation using generative adversarial networks,” &lt;em&gt;Computers in biology and medicine&lt;/em&gt; 131, 2021.&lt;/li&gt;"/>
+<meta name="citation_reference" content="&lt;li&gt;Q. Li et al., “Tumorgan: A multi-modal data augmentation framework for brain tumor segmentation,” &lt;em&gt;Sensors&lt;/em&gt;, 2020.&lt;/li&gt;"/>
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+<meta name="DC.Creator.PersonalName" content="Hinh Van Nguyen"/>
+<meta name="DC.Creator.PersonalName" content="Thanh Han Trong"/>
+<meta name="DC.Date.created" scheme="ISO8601" content="2022-12-31"/>
+<meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="2022-07-13"/>
+<meta name="DC.Date.issued" scheme="ISO8601" content="2022-12-31"/>
+<meta name="DC.Date.modified" scheme="ISO8601" content="2023-01-09"/>
+<meta name="DC.Description" xml:lang="en" content="Generating tumor images on a brain MRI image at random locations can help medical researchers and medical students in predicting possible tumor possibilities. In this study, we propose to apply CycleGan to create MRI images with brain tumors from MRI images without brain tumors, thereby increasing the number of MRI images with brain tumors. With the initial data set of 660 images without brain tumors, the CycleGan model has created a new data set of 660 images with brain tumors, aiming to increase the number of brain MRI images for future studies. The received results will be evaluated and compared to others studied based on FID score."/>
+<meta name="DC.Format" scheme="IMT" content="application/pdf"/>
+<meta name="DC.Identifier" content="7963"/>
+<meta name="DC.Identifier.pageNumber" content="13-18"/>
+<meta name="DC.Identifier.DOI" content="10.31130/ud-jst.2022.310ICT"/>
+<meta name="DC.Identifier.URI" content="https://jst-ud.vn/jst-ud/article/view/7963"/>
+<meta name="DC.Language" scheme="ISO639-1" content="en"/>
+<meta name="DC.Rights" content="Bản quyền (c) 2022 The University of Danang - Journal of Science and Technology"/>
+<meta name="DC.Rights" content=""/>
+<meta name="DC.Source" content="Tạp chí Khoa học và Công nghệ - Đại học Đà Nẵng"/>
+<meta name="DC.Source.ISSN" content="1859-1531"/>
+<meta name="DC.Source.URI" content="https://jst-ud.vn/jst-ud"/>
+<meta name="DC.Title" content="Brain MRI Images Generating Method Based on Cyclegan"/>
+<meta name="DC.Type" content="Text.Serial.Journal"/>
+<meta name="DC.Type.articleType" content="Các bài gửi"/>
+	<link rel="stylesheet" href="https://jst-ud.vn/jst-ud/$$$call$$$/page/page/css?name=bootstrap" type="text/css" /><link rel="stylesheet" href="https://jst-ud.vn/plugins/themes/academic_free/styles/academic_free.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="https://jst-ud.vn/plugins/themes/academic_free/styles/header/blue.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/stylesheet2.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/css/css.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/mmenu-light.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/grid.min.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/style.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/responsive.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/css/slick.min.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/css/slick-theme.min.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/css/animate.min.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/lonely_city.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/page.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/css/orcidProfile.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/styleSheet1.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/slick.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/themes/css/slick-theme.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/css/select2.min.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/css/select2-bootstrap4.min.css?v=3.2.1.2" type="text/css" /><link rel="stylesheet" href="/plugins/themes/academic_free/styles/css/daterangepicker.css?v=3.2.1.2" type="text/css" />
+</head>
+<body class="pkp_page_article pkp_op_view has_site_logo has_site_logo">
+<div id="lightMenu"><a id="openMenu" href="#menu-light">Menu</a><!--original menu location--></div>
+<div style="position: absolute; z-index: 1; right: 15px; top: 10px;">
+			<a href="https://jst-ud.vn/jst-ud/user/setLocale/en_US"><img src="/plugins/themes/academic_free/images/en.png" style="width: 40px;" alt=""></a>
+	</div>
+	<div class="pkp_structure_page">
+
+		<nav id="accessibility-nav" class="sr-only" role="navigation" aria-labelled-by="accessible-menu-label">
+			<div id="accessible-menu-label">
+				Quick jump to page content
+			</div>
+			<ul>
+			  <li><a href="#main-navigation">Main Navigation</a></li>
+			  <li><a href="#main-content">Main Content</a></li>
+			  <li><a href="#sidebar">Sidebar</a></li>
+			</ul>
+		</nav>
+
+	<header class="pkp_structure_head" id="headerNavigationContainer" role="banner">
+		<div class="pkp_head_wrapper">
+			<div class="pkp_site_name_wrapper">
+				<button class="pkp_site_nav_toggle">
+					<span>Open Menu</span>
+				</button>
+				<div class="pkp_site_name">
+											<a href="/" class="is_img">
+							<img src="/plugins/themes/academic_free/images/banner_vi.jpg" width="700" height="124"/>
+						</a>
+									</div>
+			</div>
+			<nav class="pkp_site_nav_menu" aria-label="Site Navigation">
+				<a id="siteNav"></a>
+				<div class="pkp_navigation_primary_row">
+					<div class="pkp_navigation_primary_wrapper">
+						
+				<ul id="navigationPrimary" class="pkp_navigation_primary pkp_nav_list">
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud">
+					Trang chủ
+									</a>
+							</li>
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud/issue/current">
+					Số hiện tại
+									</a>
+							</li>
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud/issue/archive">
+					Các số báo
+									</a>
+							</li>
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud/about/submissions">
+					Gửi bài
+									</a>
+							</li>
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud/announcement">
+					Thông báo
+									</a>
+							</li>
+																					<li class=" dropdown">
+				<a href="https://jst-ud.vn/jst-ud/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					Giới thiệu
+											<span class="caret"></span>
+									</a>
+									<ul class="dropdown-menu ">
+																					<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about">
+										Giới thiệu về Tạp chí
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/editorialTeam">
+										Ban biên tập
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/publication-ethics">
+										Đạo đức xuất bản
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/aim-and-scope">
+										Mục tiêu và phạm vi
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/licence">
+										Giấy phép và Bản quyền
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/openaccess">
+										Chính sách Truy cập mở
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/publication-frequency">
+										Tần suất xuất bản
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/privacy">
+										Cam kết bảo mật
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/contact">
+										Liên hệ
+									</a>
+								</li>
+																		</ul>
+							</li>
+																					<li class=" dropdown">
+				<a href="https://jst-ud.vn/jst-ud/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					Hướng dẫn
+											<span class="caret"></span>
+									</a>
+									<ul class="dropdown-menu ">
+																					<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/author-guideline">
+										Hướng dẫn tác giả gửi bài báo
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/for-reviewers">
+										Hướng dẫn việc phản biện bài báo
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/peer-review-proccess">
+										Quy trình phản biện
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/similatity-check">
+										Kiểm tra trùng lắp
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/paper-processing-fee">
+										Lệ phí bài báo
+									</a>
+								</li>
+																		</ul>
+							</li>
+			</ul>
+		
+													<nav id="nav-menu" class="navbar-collapse collapse"
+								 aria-label="Điều hướng Trang web">
+								
+							</nav>
+																			<form class="pkp_search pkp_search_desktop" method="post" action="https://jst-ud.vn/jst-ud/search/search" role="search" aria-label="Truy vấn tìm kiếm">
+								<input class="form-control" name="query" value="" type="text" aria-label="Truy vấn tìm kiếm" placeholder="">
+								<button type="submit">Tìm kiếm</button>
+								<div class="search_controls" aria-hidden="true">
+									<a href="https://jst-ud.vn/jst-ud/search/search" class="headerSearchPrompt search_prompt" aria-hidden="true">
+										Tìm kiếm
+									</a>
+									<a href="#" class="search_cancel headerSearchCancel" aria-hidden="true"></a>
+									<span class="search_loading" aria-hidden="true"></span>
+								</div>
+							</form>
+											</div>
+				</div>
+				<div class="pkp_navigation_user_wrapper" style="display: flex" id="navigationUserWrapper">
+					
+				<ul id="navigationUser" class="pkp_navigation_user pkp_nav_list">
+														<li class="profile">
+				<a href="https://jst-ud.vn/jst-ud/user/register">
+					Đăng ký
+									</a>
+							</li>
+														<li class="profile">
+				<a href="https://jst-ud.vn/jst-ud/login">
+					Đăng nhập
+									</a>
+							</li>
+										</ul>
+		
+					<div style="margin-top: 8px; margin-left: 10px;">
+													<a href="https://jst-ud.vn/jst-ud/user/setLocale/en_US"><img src="/plugins/themes/academic_free/images/en.png" style="width: 40px;" alt=""></a>
+											</div>
+				</div>
+			</nav>
+		</div>
+	</header>
+	<div class="mm-ocd mm-ocd--left" id="mmMenu">
+		<div class="mm-ocd__content">
+			<nav id="menu-light">
+				
+				<ul id="navigationPrimary" class="pkp_navigation_primary pkp_nav_list">
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud">
+					Trang chủ
+									</a>
+							</li>
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud/issue/current">
+					Số hiện tại
+									</a>
+							</li>
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud/issue/archive">
+					Các số báo
+									</a>
+							</li>
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud/about/submissions">
+					Gửi bài
+									</a>
+							</li>
+														<li class="">
+				<a href="https://jst-ud.vn/jst-ud/announcement">
+					Thông báo
+									</a>
+							</li>
+																					<li class=" dropdown">
+				<a href="https://jst-ud.vn/jst-ud/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					Giới thiệu
+											<span class="caret"></span>
+									</a>
+									<ul class="dropdown-menu ">
+																					<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about">
+										Giới thiệu về Tạp chí
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/editorialTeam">
+										Ban biên tập
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/publication-ethics">
+										Đạo đức xuất bản
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/aim-and-scope">
+										Mục tiêu và phạm vi
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/licence">
+										Giấy phép và Bản quyền
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/openaccess">
+										Chính sách Truy cập mở
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/publication-frequency">
+										Tần suất xuất bản
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/privacy">
+										Cam kết bảo mật
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/about/contact">
+										Liên hệ
+									</a>
+								</li>
+																		</ul>
+							</li>
+																					<li class=" dropdown">
+				<a href="https://jst-ud.vn/jst-ud/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					Hướng dẫn
+											<span class="caret"></span>
+									</a>
+									<ul class="dropdown-menu ">
+																					<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/author-guideline">
+										Hướng dẫn tác giả gửi bài báo
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/for-reviewers">
+										Hướng dẫn việc phản biện bài báo
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/peer-review-proccess">
+										Quy trình phản biện
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/similatity-check">
+										Kiểm tra trùng lắp
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jst-ud.vn/jst-ud/instruction/paper-processing-fee">
+										Lệ phí bài báo
+									</a>
+								</li>
+																		</ul>
+							</li>
+			</ul>
+		
+									<nav id="nav-menu" class="navbar-collapse collapse"
+						 aria-label="Điều hướng Trang web">
+						
+					</nav>
+							</nav>
+			
+				<ul id="navigationUser" class="pkp_navigation_user pkp_nav_list">
+														<li class="profile">
+				<a href="https://jst-ud.vn/jst-ud/user/register">
+					Đăng ký
+									</a>
+							</li>
+														<li class="profile">
+				<a href="https://jst-ud.vn/jst-ud/login">
+					Đăng nhập
+									</a>
+							</li>
+										</ul>
+		
+		</div>
+		<div class="mm-ocd__backdrop"></div>
+	</div>
+				<div class="pkp_structure_content has_sidebar">
+				<main class="pkp_structure_main col-xs-12 col-sm-10  col-md-12  " role="main">
+
+<div class="page page_article">
+			<nav class="cmp_breadcrumbs" role="navigation" aria-label="Bạn đang ở đây:">
+	<ol class="breadcrumb">
+		<li>
+			<a href="https://jst-ud.vn/jst-ud/index">
+				Trang chủ
+			</a>
+		</li>
+		<li>
+			<a href="https://jst-ud.vn/jst-ud/issue/archive">
+				Lưu trữ
+			</a>
+		</li>
+		<li>
+			<a href="https://jst-ud.vn/jst-ud/issue/view/228">
+				Vol. 20, No. 12.2, 2022
+			</a>
+		</li>
+		<li class="active">
+							Các bài gửi
+					</li>
+	</ol>
+</nav>
+	
+		
+
+<article class="obj_article_details">
+
+
+    <div class="row">
+        <section class="article-sidebar col-md-8">
+            <header>
+                <h1 class="page-header">
+                    Brain MRI Images Generating Method Based on Cyclegan
+                                    </h1>
+                <h2>
+                                                                            <div class="list-group-item item doi">
+                        <span class="doi_logo"> </span>
+            <a class="doi_link" href="https://doi.org/10.31130/ud-jst.2022.310ICT">
+                https://doi.org/10.31130/ud-jst.2022.310ICT
+            </a>
+        </div>
+                                                </h2>
+            </header>
+            
+                        <img src="/plugins/themes/academic_free/images/graphic.png"> Tóm tắt: 191
+     <img src="/plugins/themes/academic_free/images/view.png">  
+       | <img src="/plugins/themes/academic_free/images/pdfdownload.png"> PDF: 237 <img src="/plugins/themes/academic_free/images/down.png">
+    
+                        <h2 class="sr-only">##plugins.themes.academic_pro.article.main##</h2>
+            <h2 class="pkp_screen_reader">Author</h2>
+            <section class="item authors">
+                                    <ul class="authors">
+                        <li class="col-6">
+                                                            <div class="author" style="border-bottom: 1px solid #f2f2f2; margin-top: 15px">
+                                    <i class="fa fa-user"> </i>
+                                    <strong>Hinh Van Nguyen</strong>
+                                                                            <div>
+                                            <span class="affiliation">
+                                               School of Electrical and Electronic Engineering, Hanoi University of Science and Technology
+                                            </span>
+                                        </div>
+                                                                                                        </div>
+                                                            <div class="author" style="border-bottom: 1px solid #f2f2f2; margin-top: 15px">
+                                    <i class="fa fa-user"> </i>
+                                    <strong>Thanh Han Trong</strong>
+                                                                            <div>
+                                            <span class="affiliation">
+                                               School of Electrical and Electronic Engineering, Hanoi University of Science and Technology
+                                            </span>
+                                        </div>
+                                                                                                        </div>
+                                                    </li>
+                    </ul>
+                            </section>
+                                        <section class="item keywords">
+                    <h2>Từ khóa:</h2>
+                    <span class="value list_of_keyword">
+                                                    <div>Brain Tumor</div>
+                                                    <div>Artificial Intelligence</div>
+                                                    <div>Convolution Neural Networks</div>
+                                                    <div>Machine Learning</div>
+                                                    <div>Generative Adversarial Network</div>
+                                            </span>
+                </section>
+                        <br>
+                                        <div class="item abstract article-summary" style="padding-left: 0" id="summary">
+                    <h2>Tóm tắt</h2>
+                    <div class="article-abstract">
+                        <p>Generating tumor images on a brain MRI image at random locations can help medical researchers and medical students in predicting possible tumor possibilities. In this study, we propose to apply CycleGan to create MRI images with brain tumors from MRI images without brain tumors, thereby increasing the number of MRI images with brain tumors. With the initial data set of 660 images without brain tumors, the CycleGan model has created a new data set of 660 images with brain tumors, aiming to increase the number of brain MRI images for future studies.<strong> T</strong>he received results will be evaluated and compared to others studied based on FID score.</p>
+                    </div>
+                </div>
+            
+            
+
+                                        <div class="references article-references references_less" id="references">
+                    <h2><i class="fa fa-bookmark-o text-primary"> </i> Tài liệu tham khảo</h2>
+                    <div class="article-references-content">
+                        <ol>
+                                                                                                <span>[1] </span><span>Lashkari and Amirehsan, “A neural network based method for brain abnormality detection in mri images using gabor wavelets,” <em>International Journal of Computer Applications</em>, vol. 4, no. 7, 2010. </span>
+                                    <br>
+                                                                    <span>[2] </span><span>I. Goodfellow et al., “Generative adversarial nets,” <em>Advances in neural information processing systems</em>, vol. 27, 2014. </span>
+                                    <br>
+                                                                    <span>[3] </span><span>J.-Y. Zhu et al., “Unpaired image-to-image translation using cycle-consistent adversarial networks,” <em>Proceedings of the IEEE international conference on computer vision</em>, 2017. </span>
+                                    <br>
+                                                                    <span>[4] </span><span>P. Mildenberger, M. Eichelberg, and E. Martin, “Introduction to the dicom standard,” <em>Eur Radiol</em>, vol. 12, pp. 920–927, 2000. </span>
+                                    <br>
+                                                                    <span>[5] </span><span>K. O’Shea and R. Nash, “An introduction to convolutional neural networks,” <em>arXiv:1511.08458</em>, 2015. </span>
+                                    <br>
+                                                                    <span>[6] </span><span>P. Isola et al., “Image-to-image translation with conditional adversarial networks,” <em>Proceedings of the IEEE conference on computer vision and pattern recognition</em>, 2017. </span>
+                                    <br>
+                                                                    <span>[7] </span><span>T. Salimans, I. Goodfellow, W. Zaremba, V. Cheung, A. Radford, and X. Chen, “Improved techniques for training gans,” <em>arXiv:1606.03498</em>, 2016. </span>
+                                    <br>
+                                                                    <span>[8] </span><span>C. Szegedy, V. Vanhoucke, S. Ioffe, J. Shlens, and Z. Wojna, “Rethinking the inception architecture for computer vision,” <em>In Proceedings of the IEEE conference on computer vision and pattern recognition</em>, pp. 2818–2826, 2016. </span>
+                                    <br>
+                                                                    <span>[9] </span><span>J. Deng, W. Dong, R. Socher, L. Li, K. Li, and L. Fei-Fei, “Imagenet: A large-scale hierarchical image database,” <em>IEEE conference on computer vision and pattern recognition</em>, pp. 248–255, 2009. </span>
+                                    <br>
+                                                                    <span>[10] </span><span>M. Heusel, H. Ramsauer, T. Unterthiner, B. Nessler, and S. Hochreiter, “Gans trained by a two time-scale update rule converge to a local nash equilibrium,” <em>arXiv:1706.08500</em>, 2017. </span>
+                                    <br>
+                                                                    <span>[11] </span><span>T. Kossen et al., “Synthesizing anonymized and labeled tofmra patches for brain vessel segmentation using generative adversarial networks,” <em>Computers in biology and medicine</em> 131, 2021. </span>
+                                    <br>
+                                                                    <span>[12] </span><span>Q. Li et al., “Tumorgan: A multi-modal data augmentation framework for brain tumor segmentation,” <em>Sensors</em>, 2020. </span>
+                                    <br>
+                                                                                    </ol>
+                    </div>
+                </div>
+                <div class="readmore_btn" data-readmore-toggle="rmjs-1" aria-controls="rmjs-1">
+                    <span class="btn btn-xs btn-info" id="readmore_btn">
+                        <i class="fa fa-chevron-circle-down" aria-hidden="true"></i> Xem thêm
+                    </span>
+                    <span class="btn btn-xs btn-info" id="viewLess_btn" style="display: none">
+                        <i class="fa fa-chevron-circle-up" aria-hidden="true"></i> Ẩn bớt
+                    </span>
+                </div>
+                    </section>
+
+        <div class="col-md-4">
+            <section class="article-main">
+                                <h2 class="sr-only">##plugins.themes.academic_pro.article.sidebar##</h2>
+                                                    <div class="item cover-image">
+                                                    <a href="https://jst-ud.vn/jst-ud/issue/view/228">
+                                <img class="img-responsive"
+                                     src="https://jst-ud.vn/public/journals/1/cover_issue_228_vi_VN.jpg">
+                            </a>
+                                            </div>
+                				<div class="item published">
+											<section class="sub_item">
+							<h2>
+																Đã Xuất bản
+							</h2>
+							<div class="value">
+								<span>Dec 31, 2022</span>
+							</div>
+						</section>
+									</div>
+
+                <div class="item panel panel-default galley_list">
+                    <div class="panel-heading">
+                        <i class="fa fa-download"> </i> Download
+                    </div>
+                    <div class="panel-body">
+                                                                            <div class="download">
+                                                                                                            
+	
+		
+
+<a class="obj_galley_link   pdf" href="https://jst-ud.vn/jst-ud/article/view/7963/5761">
+
+		
+	PDF (English)
+
+	</a>
+                                                                                                                                </div>
+                                            </div>
+                </div>
+
+                                                    <div class="item citation panel panel-default how-to-cite">
+                        <div class="panel-heading">
+                            <i class="fa fa-file-text"> </i> Cách trích dẫn
+                        </div>
+                        <div class="panel-body">
+                            <div id="citationOutput" role="region" aria-live="polite">
+                                <div class="csl-bib-body">
+  <div class="csl-entry">Van Nguyen, H., và T. H. Trong. “Brain MRI Images Generating Method Based on Cyclegan”. <i>Tạp Chí Khoa học Và Công nghệ - Đại học Đà Nẵng</i>, vol 20, số p.h 12.2, Tháng Chạp 2022, tr 13-18, doi:10.31130/ud-jst.2022.310ICT.</div>
+</div>
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                        aria-controls="cslCitationFormats">
+                                    Thêm các định dạng trích dẫn khác
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/acm-sig-proceedings?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/acm-sig-proceedings?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                ACM
+                                            </a>
+                                        </li>
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/acs-nano?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/acs-nano?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                ACS
+                                            </a>
+                                        </li>
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/apa?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/apa?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                APA
+                                            </a>
+                                        </li>
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                ABNT
+                                            </a>
+                                        </li>
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/chicago-author-date?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/chicago-author-date?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                Chicago
+                                            </a>
+                                        </li>
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/harvard-cite-them-right?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/harvard-cite-them-right?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                Kiểu Harvard
+                                            </a>
+                                        </li>
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/ieee?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/ieee?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                IEEE
+                                            </a>
+                                        </li>
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/modern-language-association?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/modern-language-association?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                MLA
+                                            </a>
+                                        </li>
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                Kiểu Turabian
+                                            </a>
+                                        </li>
+                                                                            <li>
+                                            <a
+                                                    aria-controls="citationOutput"
+                                                    href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/vancouver?submissionId=7963&amp;publicationId=7957"
+                                                    data-load-citation
+                                                    data-json-href="https://jst-ud.vn/jst-ud/citationstylelanguage/get/vancouver?submissionId=7963&amp;publicationId=7957&amp;return=json"
+                                            >
+                                                Kiểu Vancouver
+                                            </a>
+                                        </li>
+                                                                    </ul>
+                            </div>
+                        </div>
+                    </div>
+                            </section>
+
+            <section class="article-more-details">
+
+                                <h2 class="sr-only">##plugins.themes.academic_pro.article.details##</h2>
+
+
+                                                                    																																										                                
+
+
+                                
+
+
+
+                                
+                                                                                                                                        
+            </section><!-- .article-details -->
+        </div><!-- .col-md-8 -->
+    </div><!-- .row -->
+
+ 
+
+</article>
+
+	<div id="articlesBySameAuthorList">
+						<h3>Các bài báo được đọc nhiều nhất của cùng tác giả</h3>
+
+			<ul>
+																													<li>
+													Thanh Han Trong,
+													Ngo Duc Nam,
+													Tran Van Hung,
+												<a href="https://jst-ud.vn/jst-ud/article/view/7739">
+							DOA Estimation Based on LSTM Neural Network with Uniform Linear Antenna Array
+						</a>
+						<a href="https://jst-ud.vn/jst-ud/issue/view/218">
+							Tạp chí Khoa học và Công nghệ - Đại học Đà Nẵng: Vol. 20, No. 6.2, 2022
+						</a>
+					</li>
+							</ul>
+			<div id="articlesBySameAuthorPages">
+				
+			</div>
+			</div>
+
+
+</div><!-- .page -->
+
+	</main>
+
+			</div><!-- pkp_structure_content -->
+
+<div class="pkp_structure_footer_wrapper" role="contentinfo">
+	<a id="pkp_content_footer"></a>
+	<div class="pkp_structure_footer">
+		<div class="pkp_footer_content">
+							<p><strong>Tạp chí Khoa học và Công nghệ Đại học Đà Nẵng<br /></strong>Cơ quan chủ quản: Đại học Đà Nẵng<br />Giấy phép xuất bản số 510/GP-BHVTT ngày 25/11/2002, số 1487/GP-BTTTT ngày 15/9/2011 và số 07/GP-BTTTT ngày 07/01/2016<br />Tổng biên tập: GS.TSKH. Bùi Văn Ga<br />ISSN: 1859-1531 <br />Địa chỉ: 41 Lê Duẩn, thành phố Đà Nẵng, Việt Nam<br />Số điện thoại: (+84)236. 3817 788 <br />Email:  <a href="mailto:jst-ud@udn.vn">jst-ud@udn.vn</a><br />Website: <a href="https://jst-ud.vn">https://jst-ud.vn</a></p>
+<p><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener"> <img src="https://licensebuttons.net/l/by-nc/3.0/80x15.png" alt="by-nc" width="80" border="0" /></a></p>
+					</div>
+	</div>
+</div>
+</div>
+</div><!-- pkp_structure_page -->
+
+<script src="https://jst-ud.vn/lib/pkp/lib/vendor/components/jquery/jquery.min.js?v=3.2.1.2" type="text/javascript"></script><script src="https://jst-ud.vn/lib/pkp/lib/vendor/components/jqueryui/jquery-ui.min.js?v=3.2.1.2" type="text/javascript"></script><script src="https://jst-ud.vn/lib/pkp/js/lib/jquery/plugins/jquery.tag-it.js?v=3.2.1.2" type="text/javascript"></script><script src="https://jst-ud.vn/plugins/themes/academic_free/bootstrap/js/bootstrap.min.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/themes/js/mmenu-light.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/themes/js/util.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/themes/js/UsageStatsFrontendHandler.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/themes/js/readmore.min.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/themes/js/main.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/themes/js/articleCitation.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/themes/js/jquery.min.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/themes/js/jquery-ui.min.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/js/jquery-2.2.0.min.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/themes/js/slick.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/js/slick.min.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/js/Chart.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/js/util.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/js/jquery.validate.min.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/js/select2.full.min.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/js/moment.min.js?v=3.2.1.2" type="text/javascript"></script><script src="/plugins/themes/academic_free/styles/js/daterangepicker.min.js?v=3.2.1.2" type="text/javascript"></script><script src="https://jst-ud.vn/plugins/generic/citationStyleLanguage/js/articleCitation.js?v=3.2.1.2" type="text/javascript"></script><script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-209748287-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+</body>
+</html>
+
+<script>
+	$('#lightMenu').click(function (){
+		$('#mmMenu').addClass('mm-ocd--open');
+	});
+	$('.mm-ocd__backdrop').click(function (){
+		$('#mmMenu').removeClass('mm-ocd--open');
+	});
+
+	$('.mm-ocd__content ul li ul').removeClass('dropdown-menu').addClass('mmDropdown');
+
+	$( window ).resize(function() {
+		var width = $(window).width();
+		if (width > 768)
+		{
+			$('#mmMenu').removeClass('mm-ocd--open');
+		}
+		else if(width <= 768){
+			$('.mm-ocd__content ul li ul').removeClass('dropdown-menu').addClass('mmDropdown');
+		}
+	});
+
+	$('#readmore_btn').click(function(){
+		$('#references').removeClass('references_less').addClass('references_more');
+		$('#readmore_btn').css('display','none');
+		$('#viewLess_btn').css('display','block');
+	});
+	$('#viewLess_btn').click(function(){
+		$('#references').addClass('references_less').removeClass('references_more');
+		$('#readmore_btn').css('display','block');
+		$('#viewLess_btn').css('display','none');
+	});
+</script>
+<script type="text/javascript">
+	$(document).on('ready', function() {
+
+		$(".regular").slick({
+			dots: true,
+			infinite: true,
+			slidesToShow: 3,
+			slidesToScroll: 3
+		});
+
+	});
+</script>

@@ -1,0 +1,298 @@
+"""Semantic Scholar searcher implementation."""
+
+from __future__ import annotations
+
+import datetime
+import logging
+import time
+from collections.abc import Callable
+from typing import Any, Dict, List, Optional
+
+import requests
+
+from findpapers.core.paper import Paper
+from findpapers.core.publication import Publication
+from findpapers.core.query import Query
+from findpapers.query.builder import QueryBuilder
+from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
+from findpapers.searchers.base import SearcherBase
+
+logger = logging.getLogger(__name__)
+
+_BULK_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search/bulk"
+_PAGE_SIZE = 100  # Semantic Scholar max per request
+
+# Rate limits: 1 req/s without key (use 1.1s to be safe), 10 req/s with key
+_MIN_REQUEST_INTERVAL_DEFAULT = 1.1
+_MIN_REQUEST_INTERVAL_WITH_KEY = 0.11
+
+# Fields to retrieve in each paper record
+_PAPER_FIELDS = (
+    "paperId,externalIds,title,abstract,authors,year,publicationDate,"
+    "journal,venue,citationCount,openAccessPdf,url,fieldsOfStudy"
+)
+
+
+class SemanticScholarSearcher(SearcherBase):
+    """Searcher for the Semantic Scholar research corpus.
+
+    Uses the Bulk Search endpoint:
+    https://api.semanticscholar.org/api-docs/#tag/Paper-Data/operation/bulk_paper_search
+
+    Rate limits:
+    - Without API key: 1 request/second
+    - With API key: 10 requests/second
+    """
+
+    def __init__(
+        self,
+        query_builder: Optional[SemanticScholarQueryBuilder] = None,
+        api_key: Optional[str] = None,
+    ) -> None:
+        """Create a Semantic Scholar searcher.
+
+        Parameters
+        ----------
+        query_builder : SemanticScholarQueryBuilder | None
+            Builder used to validate and convert queries.  When ``None`` a
+            default :class:`SemanticScholarQueryBuilder` is created automatically.
+        api_key : str | None
+            Semantic Scholar API key (increases rate limit from 1 to 10 req/s).
+        """
+        self._query_builder: SemanticScholarQueryBuilder = (
+            query_builder or SemanticScholarQueryBuilder()
+        )
+        self._api_key = api_key
+        self._last_request_time: float = 0.0
+        self._request_interval = (
+            _MIN_REQUEST_INTERVAL_WITH_KEY if api_key else _MIN_REQUEST_INTERVAL_DEFAULT
+        )
+
+    @property
+    def name(self) -> str:
+        """Return the database identifier.
+
+        Returns
+        -------
+        str
+            Database name.
+        """
+        return "Semantic Scholar"
+
+    @property
+    def query_builder(self) -> QueryBuilder:
+        """Return the Semantic Scholar query builder.
+
+        Returns
+        -------
+        QueryBuilder
+            The underlying builder instance.
+        """
+        return self._query_builder
+
+    def _rate_limit(self) -> None:
+        """Enforce minimum interval between HTTP requests."""
+        elapsed = time.monotonic() - self._last_request_time
+        if elapsed < self._request_interval:
+            time.sleep(self._request_interval - elapsed)
+
+    def _get(self, params: dict) -> requests.Response:
+        """Perform a rate-limited GET request to the Semantic Scholar bulk search API.
+
+        Parameters
+        ----------
+        params : dict
+            Query parameters.
+
+        Returns
+        -------
+        requests.Response
+            HTTP response.
+
+        Raises
+        ------
+        requests.HTTPError
+            On non-2xx status codes.
+        """
+        self._rate_limit()
+        headers = {}
+        if self._api_key:
+            headers["x-api-key"] = self._api_key
+        response = requests.get(
+            _BULK_SEARCH_URL,
+            params=params,
+            headers=headers,
+            timeout=30,
+        )
+        self._last_request_time = time.monotonic()
+        response.raise_for_status()
+        return response
+
+    @staticmethod
+    def _parse_paper(item: Dict[str, Any]) -> Optional[Paper]:
+        """Parse a single Semantic Scholar paper record.
+
+        Parameters
+        ----------
+        item : dict
+            Paper metadata dictionary from Semantic Scholar API.
+
+        Returns
+        -------
+        Paper | None
+            Parsed paper or ``None`` when required fields are missing.
+        """
+        title = (item.get("title") or "").strip()
+        if not title:
+            return None
+
+        abstract = (item.get("abstract") or "").strip()
+
+        # Authors
+        authors: list[str] = []
+        for author_entry in item.get("authors", []):
+            name = (author_entry.get("name") or "").strip()
+            if name:
+                authors.append(name)
+
+        # Publication date
+        pub_date: Optional[datetime.date] = None
+        _pub_date_str = (item.get("publicationDate") or "").strip()
+        if _pub_date_str:
+            try:
+                pub_date = datetime.date.fromisoformat(_pub_date_str[:10])
+            except ValueError:
+                pass
+        if pub_date is None and item.get("year"):
+            try:
+                pub_date = datetime.date(int(item["year"]), 1, 1)
+            except (ValueError, TypeError):
+                pass
+
+        # External IDs → DOI
+        external_ids = item.get("externalIds") or {}
+        doi: Optional[str] = (external_ids.get("DOI") or "").strip() or None
+
+        # URL
+        url: Optional[str] = (item.get("url") or "").strip() or None
+
+        # PDF URL
+        pdf_url: Optional[str] = None
+        open_access_pdf = item.get("openAccessPdf")
+        if isinstance(open_access_pdf, dict):
+            pdf_url = (open_access_pdf.get("url") or "").strip() or None
+
+        # Citations
+        citations: Optional[int] = item.get("citationCount")
+
+        # Keywords from fields of study
+        keywords: set[str] = set()
+        for field in item.get("fieldsOfStudy") or []:
+            if isinstance(field, str) and field.strip():
+                keywords.add(field.strip())
+
+        # Publication
+        publication: Optional[Publication] = None
+        journal = item.get("journal") or {}
+        venue = (item.get("venue") or "").strip()
+        pub_title = (journal.get("name") or venue or "").strip()
+        if pub_title:
+            publication = Publication(title=pub_title)
+
+        # Pages from journal info
+        pages: Optional[str] = None
+        if journal:
+            raw_pages = (journal.get("pages") or "").strip()
+            if raw_pages:
+                pages = raw_pages
+
+        try:
+            paper = Paper(
+                title=title,
+                abstract=abstract,
+                authors=authors,
+                publication=publication,
+                publication_date=pub_date,
+                url=url,
+                pdf_url=pdf_url,
+                doi=doi,
+                citations=citations,
+                keywords=keywords if keywords else None,
+                pages=pages,
+                databases={"Semantic Scholar"},
+            )
+        except ValueError:
+            return None
+
+        return paper
+
+    def _fetch_papers(
+        self,
+        query: Query,
+        max_papers: Optional[int],
+        progress_callback: Optional[Callable[[int, Optional[int]], None]],
+    ) -> List[Paper]:
+        """Fetch papers from Semantic Scholar bulk search with pagination.
+
+        Parameters
+        ----------
+        query : Query
+            Validated query object.
+        max_papers : int | None
+            Maximum papers to retrieve.
+        progress_callback : Callable[[int, int | None], None] | None
+            Progress callback.
+
+        Returns
+        -------
+        list[Paper]
+            Retrieved papers.
+        """
+        ss_params = self._query_builder.convert_query(query)
+        papers: List[Paper] = []
+        token: Optional[str] = None  # Semantic Scholar uses token-based pagination
+        total: Optional[int] = None
+
+        while True:
+            remaining = (max_papers - len(papers)) if max_papers is not None else _PAGE_SIZE
+            page_size = min(_PAGE_SIZE, remaining)
+
+            params: dict = {
+                **ss_params,
+                "fields": _PAPER_FIELDS,
+                "limit": page_size,
+                "sort": "publicationDate:desc",
+            }
+            if token:
+                params["token"] = token
+
+            try:
+                response = self._get(params)
+            except Exception:
+                logger.exception("Semantic Scholar request failed (token=%s).", token)
+                break
+
+            data = response.json()
+            if total is None:
+                total = data.get("total")
+
+            items = data.get("data") or []
+            if not items:
+                break
+
+            for item in items:
+                paper = self._parse_paper(item)
+                if paper is not None:
+                    papers.append(paper)
+
+            if progress_callback is not None:
+                progress_callback(len(papers), total)
+
+            if max_papers is not None and len(papers) >= max_papers:
+                break
+
+            token = data.get("token")
+            if not token or len(items) < page_size:
+                break
+
+        return papers[:max_papers] if max_papers is not None else papers
