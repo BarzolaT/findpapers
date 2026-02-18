@@ -1,4 +1,4 @@
-from typing import Any, Callable, Pattern, Type
+from typing import Any, Callable, Pattern, Sequence, Type
 
 class RaisesContext:
     def __enter__(self) -> BaseException: ...
@@ -34,6 +34,22 @@ def fixture(
     ids: Any = ...,
     name: str | None = ...,
 ) -> Any: ...
+
+class _MarkDecorator:
+    def __call__(self, *args: Any, **kwargs: Any) -> Any: ...
+
+class _Mark:
+    def __getattr__(self, name: str) -> _MarkDecorator: ...
+    def parametrize(
+        self,
+        argnames: str | Sequence[str],
+        argvalues: Any,
+        indirect: bool | list[str] = ...,
+        ids: Any = ...,
+        scope: str | None = ...,
+    ) -> _MarkDecorator: ...
+
+mark: _Mark
 
 raises: _RaisesExc
 
