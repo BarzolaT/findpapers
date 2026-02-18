@@ -126,6 +126,7 @@ class DownloadRunner:
             timeout=timeout,
             progress_total=len(self._results),
             progress_unit="paper",
+            progress_desc="Downloading",
             use_progress=True,
             stop_on_timeout=True,
         ):

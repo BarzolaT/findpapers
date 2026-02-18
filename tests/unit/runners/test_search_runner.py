@@ -259,8 +259,8 @@ class TestSearchRunnerExports:
 class TestSearchRunnerParallel:
     """Tests for parallel execution."""
 
-    def test_parallel_true_runs_all_searchers(self):
-        """Parallel mode still returns results from all searchers."""
+    def test_max_workers_runs_all_searchers(self):
+        """Parallel mode (max_workers > 1) still returns results from all searchers."""
         mock_s1 = MagicMock()
         mock_s1.name = "arXiv"
         mock_s1.search.return_value = [_make_paper(title="A")]
@@ -268,7 +268,7 @@ class TestSearchRunnerParallel:
         mock_s2.name = "PubMed"
         mock_s2.search.return_value = [_make_paper(title="B")]
 
-        runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], parallel=True)
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], max_workers=2)
         runner._searchers = [mock_s1, mock_s2]  # noqa: SLF001
         runner.run()
         assert len(runner.get_results()) == 2

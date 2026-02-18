@@ -157,6 +157,7 @@ class EnrichmentRunner:
             timeout=timeout,
             progress_total=len(self._results),
             progress_unit="paper",
+            progress_desc="Enriching",
             use_progress=True,
             stop_on_timeout=True,
         ):

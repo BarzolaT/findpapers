@@ -7,8 +7,6 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from time import perf_counter
 
-from tqdm import tqdm
-
 from findpapers.core.paper import Paper
 from findpapers.core.search import Search
 from findpapers.exceptions import SearchRunnerNotExecutedError
@@ -25,6 +23,7 @@ from findpapers.searchers.scopus import ScopusSearcher
 from findpapers.searchers.semantic_scholar import SemanticScholarSearcher
 from findpapers.utils.parallel import execute_tasks
 from findpapers.utils.predatory import is_predatory_publication
+from findpapers.utils.progress import make_progress_bar
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +79,9 @@ class SearchRunner:
         Contact email for OpenAlex polite pool (recommended).
     semantic_scholar_api_key : str | None
         Semantic Scholar API key (increases rate limit).
-    parallel : bool
-        When ``True`` all searchers run concurrently via threads.
+    max_workers : int | None
+        Maximum number of parallel workers for running database searchers
+        concurrently.  ``None`` runs all searchers sequentially.
 
     Raises
     ------
@@ -111,7 +111,7 @@ class SearchRunner:
         openalex_api_key: str | None = None,
         openalex_email: str | None = None,
         semantic_scholar_api_key: str | None = None,
-        parallel: bool = False,
+        max_workers: int | None = None,
     ) -> None:
         """Initialise search configuration without executing it."""
         self._executed = False
@@ -122,7 +122,7 @@ class SearchRunner:
         self._query_string = query
         self._publication_types = publication_types
         self._max_papers_per_database = max_papers_per_database
-        self._parallel = parallel
+        self._max_workers = max_workers
 
         # Parse and validate the query upfront so errors surface early.
         validator = QueryValidator()
@@ -164,7 +164,7 @@ class SearchRunner:
             logger.info("=== SearchRunner Configuration ===")
             logger.info("Databases: %s", [s.name for s in self._searchers])
             logger.info("Publication types: %s", self._publication_types or "all")
-            logger.info("Parallel: %s", self._parallel)
+            logger.info("Max workers: %s", self._max_workers or "sequential")
             logger.info("Query: %s", self._query_string)
             logger.info("Max papers per database: %s", self._max_papers_per_database or "none")
             logger.info("==================================")
@@ -426,7 +426,7 @@ class SearchRunner:
             list[Paper]
                 Retrieved papers.
             """
-            with tqdm(desc=searcher.name, unit="paper", leave=True) as pbar:
+            with make_progress_bar(desc=searcher.name, unit="paper") as pbar:
 
                 def _cb(current: int, total: int | None) -> None:
                     pbar.total = total
@@ -439,7 +439,7 @@ class SearchRunner:
                     progress_callback=_cb,
                 )
 
-        max_workers = len(self._searchers) if self._parallel and len(self._searchers) > 1 else None
+        max_workers = self._max_workers if isinstance(self._max_workers, int) else None
 
         for searcher, result, error in execute_tasks(
             self._searchers,

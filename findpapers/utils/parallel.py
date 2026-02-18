@@ -9,7 +9,7 @@ from concurrent.futures import as_completed
 from time import perf_counter
 from typing import TypeVar
 
-from tqdm import tqdm
+from findpapers.utils.progress import make_progress_bar
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -25,6 +25,7 @@ def execute_tasks(
     timeout: float | None,
     progress_total: int | None = None,
     progress_unit: str = "item",
+    progress_desc: str | None = None,
     progress_update: ProgressUpdate | None = None,
     use_progress: bool = True,
     stop_on_timeout: bool = True,
@@ -45,6 +46,9 @@ def execute_tasks(
         Total number of progress units for the progress bar.
     progress_unit : str
         Unit label displayed in the progress bar.
+    progress_desc : str | None
+        Short description label shown before the progress bar.  ``None``
+        omits the label.
     progress_update : ProgressUpdate | None
         Optional callback returning the progress increment per completed item.
         When ``None``, each completed item counts as 1.
@@ -70,7 +74,9 @@ def execute_tasks(
         total = len(items)  # type: ignore[arg-type]
 
     progress_bar = (
-        tqdm(total=total, unit=progress_unit) if use_progress and total is not None else None
+        make_progress_bar(desc=progress_desc, total=total, unit=progress_unit)
+        if use_progress and total is not None
+        else None
     )
 
     def _update_progress(item: T, result: R | None, error: Exception | None) -> None:
