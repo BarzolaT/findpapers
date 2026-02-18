@@ -5,14 +5,13 @@ from __future__ import annotations
 import datetime
 import logging
 import os
-import re
-import urllib.parse
 from time import perf_counter
 
 import requests
 
 from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
+from findpapers.utils.download import build_filename, build_proxies, resolve_pdf_url
 from findpapers.utils.parallel import execute_tasks
 
 logger = logging.getLogger(__name__)
@@ -194,10 +193,7 @@ class DownloadRunner:
         dict[str, str] | None
             Proxies mapping, or ``None``.
         """
-        proxy = self._proxy or os.getenv("FINDPAPERS_PROXY")
-        if not proxy:
-            return None
-        return {"http": proxy, "https": proxy}
+        return build_proxies(self._proxy)
 
     def _log_download_error(
         self,
@@ -342,33 +338,13 @@ class DownloadRunner:
         str
             Sanitised ``year-title.pdf`` filename.
         """
-        year = self._paper_year(paper) or "unknown"
-        title = paper.title or "paper"
-        filename = re.sub(r"[^\w\d-]", "_", f"{year}-{title}")
-        return f"{filename}.pdf"
-
-    def _paper_year(self, paper: Paper) -> int | None:
-        """Extract the publication year from a paper.
-
-        Parameters
-        ----------
-        paper : Paper
-            Paper to inspect.
-
-        Returns
-        -------
-        int | None
-            Year if available.
-        """
-        if paper.publication_date is None:
-            return None
-        return getattr(paper.publication_date, "year", None)
+        year = getattr(paper.publication_date, "year", None) if paper.publication_date else None
+        return build_filename(year, paper.title)
 
     def _resolve_pdf_url(self, response_url: str, paper: Paper) -> str | None:
         """Resolve a PDF URL from an HTML landing-page URL.
 
-        Recognises publisher-specific URL patterns for a set of known
-        academic publishers.
+        Delegates to :func:`findpapers.utils.download.resolve_pdf_url`.
 
         Parameters
         ----------
@@ -382,71 +358,4 @@ class DownloadRunner:
         str | None
             Resolved PDF URL, or ``None`` for unknown publishers.
         """
-        parts = urllib.parse.urlsplit(response_url)
-        qs = urllib.parse.parse_qs(urllib.parse.urlparse(response_url).query)
-        path = parts.path.rstrip("/").split("?")[0]
-        host = f"{parts.scheme}://{parts.hostname}"
-
-        if host == "https://dl.acm.org":
-            doi = paper.doi
-            if doi is None and path.startswith("/doi/") and "/doi/pdf/" not in path:
-                doi = path[4:]
-            if doi is None:
-                return None
-            return f"https://dl.acm.org/doi/pdf/{doi}"
-
-        if host == "https://ieeexplore.ieee.org":
-            if path.startswith("/document/"):
-                doc_id = path[10:]
-            elif qs.get("arnumber"):
-                doc_id = qs["arnumber"][0]
-            else:
-                return None
-            return f"{host}/stampPDF/getPDF.jsp?tp=&arnumber={doc_id}"
-
-        if host in ("https://www.sciencedirect.com", "https://linkinghub.elsevier.com"):
-            paper_id = path.split("/")[-1]
-            return (
-                "https://www.sciencedirect.com/science/article/pii/"
-                f"{paper_id}/pdfft?isDTMRedir=true&download=true"
-            )
-
-        if host == "https://pubs.rsc.org":
-            return response_url.replace("/articlelanding/", "/articlepdf/")
-
-        if host in ("https://www.tandfonline.com", "https://www.frontiersin.org"):
-            return response_url.replace("/full", "/pdf")
-
-        if host in (
-            "https://pubs.acs.org",
-            "https://journals.sagepub.com",
-            "https://royalsocietypublishing.org",
-        ):
-            return response_url.replace("/doi", "/doi/pdf")
-
-        if host == "https://link.springer.com":
-            return response_url.replace("/article/", "/content/pdf/").replace("%2F", "/") + ".pdf"
-
-        if host == "https://www.isca-speech.org":
-            return response_url.replace("/abstracts/", "/pdfs/").replace(".html", ".pdf")
-
-        if host == "https://onlinelibrary.wiley.com":
-            return response_url.replace("/full/", "/pdfdirect/").replace("/abs/", "/pdfdirect/")
-
-        if host in ("https://www.jmir.org", "https://www.mdpi.com"):
-            return f"{response_url}/pdf"
-
-        if host == "https://www.pnas.org":
-            return response_url.replace("/content/", "/content/pnas/") + ".full.pdf"
-
-        if host == "https://www.jneurosci.org":
-            return response_url.replace("/content/", "/content/jneuro/") + ".full.pdf"
-
-        if host == "https://www.ijcai.org":
-            paper_id = response_url.split("/")[-1].zfill(4)
-            return "/".join(response_url.split("/")[:-1]) + "/" + paper_id + ".pdf"
-
-        if host == "https://asmp-eurasipjournals.springeropen.com":
-            return response_url.replace("/articles/", "/track/pdf/")
-
-        return None
+        return resolve_pdf_url(response_url, doi=paper.doi)
