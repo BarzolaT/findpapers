@@ -475,7 +475,10 @@ class SearchRunner:
                     progress_callback=_cb,
                 )
 
-        max_workers = self._max_workers if isinstance(self._max_workers, int) else None
+        num_searchers = len(self._searchers)
+        max_workers = (
+            min(self._max_workers, num_searchers) if isinstance(self._max_workers, int) else None
+        )
 
         for searcher, result, error in execute_tasks(
             self._searchers,
