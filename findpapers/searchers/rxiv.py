@@ -13,7 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from findpapers.core.paper import Paper
-from findpapers.core.publication import Publication
+from findpapers.core.publication import Publication, PublicationCategory
 from findpapers.core.query import Query
 from findpapers.query.builders.rxiv import RxivQueryBuilder
 from findpapers.searchers.base import QUERY_COMBINATIONS_WARNING_THRESHOLD, SearcherBase
@@ -228,7 +228,7 @@ class RxivSearcher(SearcherBase):
         category = (meta.get("category") or "").strip()
         publication: Optional[Publication] = None
         if category:
-            publication = Publication(title=category, category="Journal")
+            publication = Publication(title=category, category=PublicationCategory.JOURNAL)
 
         try:
             paper = Paper(

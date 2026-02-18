@@ -5,7 +5,7 @@ from __future__ import annotations
 import itertools
 import logging
 
-from findpapers.core.query import NodeType, Query, QueryNode
+from findpapers.core.query import ConnectorType, FilterCode, NodeType, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
 from findpapers.query.builders.common import (
     get_effective_filter,
@@ -36,7 +36,7 @@ class RxivQueryBuilder(QueryBuilder):
             Validation result.
         """
         for connector in iter_connectors(query.root):
-            if connector == "and not":
+            if connector == ConnectorType.AND_NOT:
                 return QueryValidationResult(
                     is_valid=False,
                     error_message="Operator 'AND NOT' is not supported by Rxiv APIs.",
@@ -72,7 +72,7 @@ class RxivQueryBuilder(QueryBuilder):
         """
         terms = [term.value for term in iter_term_nodes(query.root) if term.value]
         connectors = set(iter_connectors(query.root))
-        if connectors == {"or"}:
+        if connectors == {ConnectorType.OR}:
             return {"field": "abstract_title", "match": "match-any", "terms": terms}
         return {"field": "abstract_title", "match": "match-all", "terms": terms}
 
@@ -91,12 +91,12 @@ class RxivQueryBuilder(QueryBuilder):
         """
         return query
 
-    def supports_filter(self, filter_code: str) -> bool:
+    def supports_filter(self, filter_code: FilterCode) -> bool:
         """Check whether Rxiv supports a filter code.
 
         Parameters
         ----------
-        filter_code : str
+        filter_code : FilterCode
             Filter code.
 
         Returns
@@ -104,7 +104,7 @@ class RxivQueryBuilder(QueryBuilder):
         bool
             True for supported filters.
         """
-        return filter_code == "tiabs"
+        return filter_code == FilterCode.TITLE_ABSTRACT
 
     def expand_query(self, query: Query) -> list[Query]:
         """Expand query into conjunction combinations for Rxiv limitations.
@@ -169,8 +169,8 @@ class RxivQueryBuilder(QueryBuilder):
         operands: list[QueryNode] = [
             child for child in node.children if child.node_type in (NodeType.TERM, NodeType.GROUP)
         ]
-        connectors: list[str] = [
-            child.value
+        connectors_list: list[ConnectorType] = [
+            ConnectorType(child.value)
             for child in node.children
             if child.node_type == NodeType.CONNECTOR and child.value
         ]
@@ -179,9 +179,9 @@ class RxivQueryBuilder(QueryBuilder):
             return [[]]
 
         current = self._to_dnf(operands[0])
-        for index, connector in enumerate(connectors, start=1):
+        for index, connector in enumerate(connectors_list, start=1):
             right = self._to_dnf(operands[index])
-            if connector == "or":
+            if connector == ConnectorType.OR:
                 current = current + right
             else:
                 product = []
@@ -208,7 +208,7 @@ class RxivQueryBuilder(QueryBuilder):
         children: list[QueryNode] = []
         for index, term in enumerate(clause):
             if index > 0:
-                children.append(QueryNode(node_type=NodeType.CONNECTOR, value="and"))
+                children.append(QueryNode(node_type=NodeType.CONNECTOR, value=ConnectorType.AND))
             children.append(QueryNode(node_type=NodeType.TERM, value=term))
         return Query(
             raw_query=raw_query, root=QueryNode(node_type=NodeType.ROOT, children=children)

@@ -12,7 +12,7 @@ from lxml import html
 from lxml.html import HtmlElement
 
 from findpapers.core.paper import Paper
-from findpapers.core.publication import Publication
+from findpapers.core.publication import Publication, PublicationCategory
 
 # Metadata keys searched in priority order for each field.
 TITLE_META_KEYS = [
@@ -503,11 +503,11 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
     if publication_title and publication_title.lower() not in _PREPRINT_SERVERS:
         category = None
         if "citation_journal_title" in metadata:
-            category = "Journal"
+            category = PublicationCategory.JOURNAL
         elif "citation_conference_title" in metadata:
-            category = "Conference Proceedings"
+            category = PublicationCategory.CONFERENCE_PROCEEDINGS
         elif "citation_book_title" in metadata or "citation_inbook_title" in metadata:
-            category = "Book"
+            category = PublicationCategory.BOOK
         publication = Publication(
             title=publication_title,
             issn=_pick_metadata_value(metadata, PUBLICATION_ISSN_KEYS),

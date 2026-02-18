@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import itertools
 
-from findpapers.core.query import NodeType, Query, QueryNode
+from findpapers.core.query import ConnectorType, FilterCode, NodeType, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
 from findpapers.query.builders.common import (
     clone_query,
@@ -18,7 +18,18 @@ from findpapers.query.builders.common import (
 class OpenAlexQueryBuilder(QueryBuilder):
     """Build OpenAlex-compatible query parameter dictionaries."""
 
-    _SUPPORTED_FILTERS = {"ti", "abs", "key", "au", "pu", "af", "tiabs", "tiabskey"}
+    _SUPPORTED_FILTERS = frozenset(
+        {
+            FilterCode.TITLE,
+            FilterCode.ABSTRACT,
+            FilterCode.KEYWORDS,
+            FilterCode.AUTHOR,
+            FilterCode.PUBLICATION,
+            FilterCode.AFFILIATION,
+            FilterCode.TITLE_ABSTRACT,
+            FilterCode.TITLE_ABSTRACT_KEYWORDS,
+        }
+    )
 
     def validate_query(self, query: Query) -> QueryValidationResult:
         """Validate whether OpenAlex supports this query.
@@ -61,7 +72,7 @@ class OpenAlexQueryBuilder(QueryBuilder):
             OpenAlex parameters.
         """
         connectors = set(iter_connectors(query.root))
-        if "or" in connectors or "and not" in connectors:
+        if ConnectorType.OR in connectors or ConnectorType.AND_NOT in connectors:
             return {"search": self._to_openalex_boolean_search(query.root)}
 
         filters: list[str] = []
@@ -86,12 +97,12 @@ class OpenAlexQueryBuilder(QueryBuilder):
         """
         return query
 
-    def supports_filter(self, filter_code: str) -> bool:
+    def supports_filter(self, filter_code: FilterCode) -> bool:
         """Check filter support for OpenAlex.
 
         Parameters
         ----------
-        filter_code : str
+        filter_code : FilterCode
             Filter code.
 
         Returns
@@ -122,7 +133,7 @@ class OpenAlexQueryBuilder(QueryBuilder):
         final_queries: list[Query] = []
         for expanded_query in expanded:
             connectors = set(iter_connectors(expanded_query.root))
-            if "or" in connectors and "and not" not in connectors:
+            if ConnectorType.OR in connectors and ConnectorType.AND_NOT not in connectors:
                 clauses = self._to_dnf_with_filters(expanded_query.root)
                 final_queries.extend(
                     self._build_queries_from_clauses(clauses, expanded_query.raw_query)
@@ -132,12 +143,12 @@ class OpenAlexQueryBuilder(QueryBuilder):
 
         return final_queries
 
-    def _build_filter_fragment(self, filter_code: str, term: str) -> str:
+    def _build_filter_fragment(self, filter_code: FilterCode, term: str) -> str:
         """Build OpenAlex filter fragment for one term.
 
         Parameters
         ----------
-        filter_code : str
+        filter_code : FilterCode
             Effective filter code.
         term : str
             Search term.
@@ -148,19 +159,19 @@ class OpenAlexQueryBuilder(QueryBuilder):
             OpenAlex filter fragment.
         """
         encoded_term = f'"{term}"' if " " in term else term
-        if filter_code == "ti":
+        if filter_code == FilterCode.TITLE:
             return f"title.search.no_stem:{encoded_term}"
-        if filter_code == "abs":
+        if filter_code == FilterCode.ABSTRACT:
             return f"abstract.search.no_stem:{encoded_term}"
-        if filter_code == "key":
+        if filter_code == FilterCode.KEYWORDS:
             return f"concepts.display_name:{encoded_term}"
-        if filter_code == "au":
+        if filter_code == FilterCode.AUTHOR:
             return f"authorships.author.display_name.search:{encoded_term}"
-        if filter_code == "pu":
+        if filter_code == FilterCode.PUBLICATION:
             return f"primary_location.source.display_name.search:{encoded_term}"
-        if filter_code == "af":
+        if filter_code == FilterCode.AFFILIATION:
             return f"authorships.institutions.display_name.search:{encoded_term}"
-        if filter_code == "tiabs":
+        if filter_code == FilterCode.TITLE_ABSTRACT:
             return f"title_and_abstract.search.no_stem:{encoded_term}"
         return f"search:{encoded_term}"
 
@@ -181,11 +192,15 @@ class OpenAlexQueryBuilder(QueryBuilder):
             term = node.value or ""
             return f'"{term}"' if " " in term else term
 
-        connector_map = {"and": "AND", "or": "OR", "and not": "NOT"}
+        connector_map = {
+            ConnectorType.AND: "AND",
+            ConnectorType.OR: "OR",
+            ConnectorType.AND_NOT: "NOT",
+        }
         parts: list[str] = []
         for child in node.children:
             if child.node_type == NodeType.CONNECTOR and child.value:
-                parts.append(connector_map[child.value])
+                parts.append(connector_map[ConnectorType(child.value)])
                 continue
             converted = self._to_openalex_boolean_search(child)
             if child.node_type == NodeType.GROUP:
@@ -219,7 +234,7 @@ class OpenAlexQueryBuilder(QueryBuilder):
                 (
                     index
                     for index, term in enumerate(terms)
-                    if get_effective_filter(term) == "tiabskey"
+                    if get_effective_filter(term) == FilterCode.TITLE_ABSTRACT_KEYWORDS
                 ),
                 None,
             )
@@ -234,14 +249,14 @@ class OpenAlexQueryBuilder(QueryBuilder):
             tiabs_terms = list(iter_term_nodes(tiabs_query.root))
             key_terms = list(iter_term_nodes(key_query.root))
 
-            tiabs_terms[split_index].filter_code = "tiabs"
-            key_terms[split_index].filter_code = "key"
+            tiabs_terms[split_index].filter_code = FilterCode.TITLE_ABSTRACT
+            key_terms[split_index].filter_code = FilterCode.KEYWORDS
 
             pending.extend([tiabs_query, key_query])
 
         return results
 
-    def _to_dnf_with_filters(self, node: QueryNode) -> list[list[tuple[str, str]]]:
+    def _to_dnf_with_filters(self, node: QueryNode) -> list[list[tuple[str, FilterCode]]]:
         """Convert query subtree to DNF preserving effective filters.
 
         Parameters
@@ -251,7 +266,7 @@ class OpenAlexQueryBuilder(QueryBuilder):
 
         Returns
         -------
-        list[list[tuple[str, str]]]
+        list[list[tuple[str, FilterCode]]]
             Clauses of (term, filter_code).
         """
         if node.node_type == NodeType.TERM:
@@ -260,8 +275,8 @@ class OpenAlexQueryBuilder(QueryBuilder):
         operands: list[QueryNode] = [
             child for child in node.children if child.node_type in (NodeType.TERM, NodeType.GROUP)
         ]
-        connectors: list[str] = [
-            child.value
+        connectors_list: list[ConnectorType] = [
+            ConnectorType(child.value)
             for child in node.children
             if child.node_type == NodeType.CONNECTOR and child.value
         ]
@@ -270,14 +285,14 @@ class OpenAlexQueryBuilder(QueryBuilder):
             return [[]]
 
         current = self._to_dnf_with_filters(operands[0])
-        for index, connector in enumerate(connectors, start=1):
+        for index, connector in enumerate(connectors_list, start=1):
             right = self._to_dnf_with_filters(operands[index])
-            if connector == "or":
+            if connector == ConnectorType.OR:
                 current = current + right
-            elif connector == "and":
+            elif connector == ConnectorType.AND:
                 # Cartesian product between left/right clauses keeps all valid
                 # conjunction combinations when collapsing `(A OR B) AND (C OR D)`.
-                product: list[list[tuple[str, str]]] = []
+                product: list[list[tuple[str, FilterCode]]] = []
                 for left_clause, right_clause in itertools.product(current, right):
                     product.append(left_clause + right_clause)
                 current = product
@@ -297,14 +312,14 @@ class OpenAlexQueryBuilder(QueryBuilder):
 
     def _build_queries_from_clauses(
         self,
-        clauses: list[list[tuple[str, str]]],
+        clauses: list[list[tuple[str, FilterCode]]],
         raw_query: str,
     ) -> list[Query]:
         """Build Query objects from DNF clauses.
 
         Parameters
         ----------
-        clauses : list[list[tuple[str, str]]]
+        clauses : list[list[tuple[str, FilterCode]]]
             DNF clauses.
         raw_query : str
             Original query string.
@@ -319,7 +334,9 @@ class OpenAlexQueryBuilder(QueryBuilder):
             children: list[QueryNode] = []
             for index, (term, filter_code) in enumerate(clause):
                 if index > 0:
-                    children.append(QueryNode(node_type=NodeType.CONNECTOR, value="and"))
+                    children.append(
+                        QueryNode(node_type=NodeType.CONNECTOR, value=ConnectorType.AND)
+                    )
                 children.append(
                     QueryNode(node_type=NodeType.TERM, value=term, filter_code=filter_code)
                 )

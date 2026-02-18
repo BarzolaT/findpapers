@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from findpapers.core.query import Query, QueryNode
+from findpapers.core.query import FilterCode, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
 from findpapers.query.builders.common import (
     clone_query,
@@ -17,7 +17,7 @@ from findpapers.query.builders.common import (
 class SemanticScholarQueryBuilder(QueryBuilder):
     """Build Semantic Scholar bulk-search payloads."""
 
-    _SUPPORTED_FILTERS = {"tiabs"}
+    _SUPPORTED_FILTERS = frozenset({FilterCode.TITLE_ABSTRACT})
 
     def validate_query(self, query: Query) -> QueryValidationResult:
         """Validate whether Semantic Scholar supports this query.
@@ -61,12 +61,14 @@ class SemanticScholarQueryBuilder(QueryBuilder):
         dict
             Semantic Scholar request parameters.
         """
+        from findpapers.core.query import ConnectorType
+
         preprocessed = self.preprocess_terms(query)
 
         connector_map = {
-            "and": "+",
-            "or": "|",
-            "and not": "-",
+            ConnectorType.AND: "+",
+            ConnectorType.OR: "|",
+            ConnectorType.AND_NOT: "-",
         }
 
         def convert_term(term_node: QueryNode) -> str:
@@ -102,7 +104,7 @@ class SemanticScholarQueryBuilder(QueryBuilder):
                 term.value = term.value.replace("-", " ")
         return cloned
 
-    def supports_filter(self, filter_code: str) -> bool:
+    def supports_filter(self, filter_code: FilterCode) -> bool:
         """Check filter support for Semantic Scholar.
 
         Parameters

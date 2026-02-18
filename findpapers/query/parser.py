@@ -7,6 +7,8 @@ from typing import Optional
 
 from findpapers.core.query import (
     VALID_FILTER_CODES,
+    ConnectorType,
+    FilterCode,
     NodeType,
     Query,
     QueryNode,
@@ -38,7 +40,7 @@ class QueryParser:
         root = self._parse_query_recursive(raw_query, None)
         return Query(raw_query=raw_query, root=root)
 
-    def _extract_filter_prefix(self, text: str) -> tuple[Optional[str], str]:
+    def _extract_filter_prefix(self, text: str) -> tuple[Optional[FilterCode], str]:
         """Extract filter prefix from the end of a text buffer.
 
         Given text like "something ti", extracts the filter code and returns
@@ -53,7 +55,7 @@ class QueryParser:
 
         Returns
         -------
-        tuple[str | None, str]
+        tuple[FilterCode | None, str]
             Tuple of (filter_code, remaining_text). filter_code is None if no
             valid filter prefix was found. Filter code is normalized to lowercase.
         """
@@ -70,7 +72,7 @@ class QueryParser:
             if filter_code in VALID_FILTER_CODES:
                 # Remove the filter prefix from the stripped text
                 remaining = text_stripped[: match.start()]
-                return filter_code, remaining.rstrip()
+                return FilterCode(filter_code), remaining.rstrip()
         return None, text
 
     def _parse_query_recursive(self, query: str, parent: Optional[QueryNode]) -> QueryNode:
@@ -104,7 +106,7 @@ class QueryParser:
                     parent.children.append(
                         QueryNode(
                             node_type=NodeType.CONNECTOR,
-                            value=remaining_connector.strip().lower(),
+                            value=ConnectorType(remaining_connector.strip().lower()),
                         )
                     )
                 current_connector = ""
@@ -154,7 +156,7 @@ class QueryParser:
                     parent.children.append(
                         QueryNode(
                             node_type=NodeType.CONNECTOR,
-                            value=remaining_connector.strip().lower(),
+                            value=ConnectorType(remaining_connector.strip().lower()),
                         )
                     )
                 current_connector = ""

@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict, List, Union
 
-from findpapers.core.query import Query
+from findpapers.core.query import FilterCode, Query
 
 
 @dataclass(slots=True)
@@ -95,12 +95,12 @@ class QueryBuilder(ABC):
         """
 
     @abstractmethod
-    def supports_filter(self, filter_code: str) -> bool:
+    def supports_filter(self, filter_code: FilterCode) -> bool:
         """Check whether the builder supports a filter code.
 
         Parameters
         ----------
-        filter_code : str
+        filter_code : FilterCode
             Filter code to check.
 
         Returns

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from findpapers.core.paper import Paper
+from findpapers.core.publication import PublicationCategory
 
 if TYPE_CHECKING:
     from findpapers.core.search import Search
@@ -163,11 +164,11 @@ def paper_to_bibtex(paper: Paper) -> str:
     citation_type = "@unpublished"
     publication = paper.publication
     if publication is not None and publication.category is not None:
-        if publication.category == "Journal":
+        if publication.category == PublicationCategory.JOURNAL:
             citation_type = "@article"
-        elif publication.category == "Conference Proceedings":
+        elif publication.category == PublicationCategory.CONFERENCE_PROCEEDINGS:
             citation_type = "@inproceedings"
-        elif publication.category == "Book":
+        elif publication.category == PublicationCategory.BOOK:
             citation_type = "@book"
         else:
             citation_type = "@misc"

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from findpapers.core.query import Query, QueryNode
+from findpapers.core.query import FilterCode, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
 from findpapers.query.builders.common import (
     convert_expression,
@@ -14,7 +14,18 @@ from findpapers.query.builders.common import (
 class PubmedQueryBuilder(QueryBuilder):
     """Build PubMed-compatible query expressions."""
 
-    _SUPPORTED_FILTERS = {"ti", "abs", "key", "au", "pu", "af", "tiabs", "tiabskey"}
+    _SUPPORTED_FILTERS = frozenset(
+        {
+            FilterCode.TITLE,
+            FilterCode.ABSTRACT,
+            FilterCode.KEYWORDS,
+            FilterCode.AUTHOR,
+            FilterCode.PUBLICATION,
+            FilterCode.AFFILIATION,
+            FilterCode.TITLE_ABSTRACT,
+            FilterCode.TITLE_ABSTRACT_KEYWORDS,
+        }
+    )
 
     def validate_query(self, query: Query) -> QueryValidationResult:
         """Validate whether PubMed supports this query.
@@ -65,10 +76,12 @@ class PubmedQueryBuilder(QueryBuilder):
         str
             PubMed query string.
         """
+        from findpapers.core.query import ConnectorType
+
         connector_map = {
-            "and": "AND",
-            "or": "OR",
-            "and not": "NOT",
+            ConnectorType.AND: "AND",
+            ConnectorType.OR: "OR",
+            ConnectorType.AND_NOT: "NOT",
         }
 
         def convert_term(term_node: QueryNode) -> str:
@@ -78,19 +91,19 @@ class PubmedQueryBuilder(QueryBuilder):
             def tagged(tag: str) -> str:
                 return f'"{term}"[{tag}]'
 
-            if filter_code == "ti":
+            if filter_code == FilterCode.TITLE:
                 return tagged("ti")
-            if filter_code == "abs":
+            if filter_code == FilterCode.ABSTRACT:
                 return tagged("ab")
-            if filter_code == "key":
+            if filter_code == FilterCode.KEYWORDS:
                 return tagged("mh")
-            if filter_code == "au":
+            if filter_code == FilterCode.AUTHOR:
                 return tagged("au")
-            if filter_code == "pu":
+            if filter_code == FilterCode.PUBLICATION:
                 return tagged("journal")
-            if filter_code == "af":
+            if filter_code == FilterCode.AFFILIATION:
                 return tagged("ad")
-            if filter_code == "tiabskey":
+            if filter_code == FilterCode.TITLE_ABSTRACT_KEYWORDS:
                 return f"({tagged('tiab')} OR {tagged('mh')})"
             return tagged("tiab")
 
@@ -111,12 +124,12 @@ class PubmedQueryBuilder(QueryBuilder):
         """
         return query
 
-    def supports_filter(self, filter_code: str) -> bool:
+    def supports_filter(self, filter_code: FilterCode) -> bool:
         """Check filter support for PubMed.
 
         Parameters
         ----------
-        filter_code : str
+        filter_code : FilterCode
             Filter code.
 
         Returns

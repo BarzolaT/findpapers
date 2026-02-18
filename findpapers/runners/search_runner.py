@@ -475,7 +475,8 @@ class SearchRunner:
             p
             for p in self._results
             if p.publication is not None
-            and str(p.publication.category or "").strip().lower() in allowed
+            and p.publication.category is not None
+            and p.publication.category.value.strip().lower() in allowed
         ]
 
     def _deduplicate_and_merge(self, metrics: dict[str, int | float]) -> None:

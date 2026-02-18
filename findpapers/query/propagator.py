@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from findpapers.core.query import NodeType, Query, QueryNode
+from findpapers.core.query import FilterCode, NodeType, Query, QueryNode
 
 
 class FilterPropagator:
@@ -34,7 +34,7 @@ class FilterPropagator:
         return query
 
 
-def propagate_filters(node: QueryNode, parent_filter: Optional[str] = None) -> None:
+def propagate_filters(node: QueryNode, parent_filter: Optional[FilterCode] = None) -> None:
     """Propagate filter specifier from parent nodes to children.
 
     This function calculates inherited_filter_code and children_match_filter for all nodes:
@@ -51,7 +51,7 @@ def propagate_filters(node: QueryNode, parent_filter: Optional[str] = None) -> N
     ----------
     node : QueryNode
         The node to propagate filters from.
-    parent_filter : str | None
+    parent_filter : FilterCode | None
         Filter inherited from the parent node.
     """
     # Set inherited filter from parent (regardless of explicit filter)

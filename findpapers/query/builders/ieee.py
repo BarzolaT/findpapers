@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from findpapers.core.query import NodeType, Query, QueryNode
+from findpapers.core.query import FilterCode, NodeType, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
 from findpapers.query.builders.common import (
     convert_expression,
@@ -14,7 +14,18 @@ from findpapers.query.builders.common import (
 class IEEEQueryBuilder(QueryBuilder):
     """Build IEEE Xplore-compatible query payloads."""
 
-    _SUPPORTED_FILTERS = {"ti", "abs", "key", "au", "pu", "af", "tiabs", "tiabskey"}
+    _SUPPORTED_FILTERS = frozenset(
+        {
+            FilterCode.TITLE,
+            FilterCode.ABSTRACT,
+            FilterCode.KEYWORDS,
+            FilterCode.AUTHOR,
+            FilterCode.PUBLICATION,
+            FilterCode.AFFILIATION,
+            FilterCode.TITLE_ABSTRACT,
+            FilterCode.TITLE_ABSTRACT_KEYWORDS,
+        }
+    )
 
     def validate_query(self, query: Query) -> QueryValidationResult:
         """Validate whether IEEE supports this query.
@@ -65,32 +76,34 @@ class IEEEQueryBuilder(QueryBuilder):
         dict
             IEEE query parameters.
         """
+        from findpapers.core.query import ConnectorType
+
         if self._is_simple_single_term(query):
             term_node = query.root.children[0]
             return self._single_term_payload(term_node)
 
         connector_map = {
-            "and": "AND",
-            "or": "OR",
-            "and not": "NOT",
+            ConnectorType.AND: "AND",
+            ConnectorType.OR: "OR",
+            ConnectorType.AND_NOT: "NOT",
         }
 
         def convert_term(term_node: QueryNode) -> str:
             term = term_node.value or ""
             filter_code = get_effective_filter(term_node)
-            if filter_code == "ti":
+            if filter_code == FilterCode.TITLE:
                 return f'"Article Title":{self._quote(term)}'
-            if filter_code == "abs":
+            if filter_code == FilterCode.ABSTRACT:
                 return f'"Abstract":{self._quote(term)}'
-            if filter_code == "key":
+            if filter_code == FilterCode.KEYWORDS:
                 return f'"Index Terms":{self._quote(term)}'
-            if filter_code == "au":
+            if filter_code == FilterCode.AUTHOR:
                 return f'"Authors":{self._quote(term)}'
-            if filter_code == "pu":
+            if filter_code == FilterCode.PUBLICATION:
                 return f'"Publication Title":{self._quote(term)}'
-            if filter_code == "af":
+            if filter_code == FilterCode.AFFILIATION:
                 return f'"Affiliation":{self._quote(term)}'
-            if filter_code == "tiabs":
+            if filter_code == FilterCode.TITLE_ABSTRACT:
                 title_expr = f'"Article Title":{self._quote(term)}'
                 abs_expr = f'"Abstract":{self._quote(term)}'
                 return f"({title_expr} OR {abs_expr})"
@@ -117,12 +130,12 @@ class IEEEQueryBuilder(QueryBuilder):
         """
         return query
 
-    def supports_filter(self, filter_code: str) -> bool:
+    def supports_filter(self, filter_code: FilterCode) -> bool:
         """Check filter support for IEEE.
 
         Parameters
         ----------
-        filter_code : str
+        filter_code : FilterCode
             Filter code.
 
         Returns
@@ -182,16 +195,16 @@ class IEEEQueryBuilder(QueryBuilder):
         term = term_node.value or ""
         filter_code = get_effective_filter(term_node)
         mapping = {
-            "ti": "article_title",
-            "abs": "abstract",
-            "key": "index_terms",
-            "au": "author",
-            "pu": "publication_title",
-            "af": "affiliation",
+            FilterCode.TITLE: "article_title",
+            FilterCode.ABSTRACT: "abstract",
+            FilterCode.KEYWORDS: "index_terms",
+            FilterCode.AUTHOR: "author",
+            FilterCode.PUBLICATION: "publication_title",
+            FilterCode.AFFILIATION: "affiliation",
         }
         if filter_code in mapping:
             return {mapping[filter_code]: term}
-        if filter_code == "tiabs":
+        if filter_code == FilterCode.TITLE_ABSTRACT:
             return {
                 "querytext": (
                     f'("Article Title":{self._quote(term)} OR ' f'"Abstract":{self._quote(term)})'

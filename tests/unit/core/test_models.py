@@ -5,7 +5,7 @@ import datetime
 import pytest
 
 from findpapers.core.paper import Paper
-from findpapers.core.publication import Publication
+from findpapers.core.publication import Publication, PublicationCategory
 from findpapers.core.search import Search
 
 
@@ -13,7 +13,7 @@ def test_publication_category_normalization():
     """Test that publication category is normalized correctly."""
     publication = Publication(title="My Journal")
     publication.category = "journal of tests"
-    assert publication.category == "Journal"
+    assert publication.category == PublicationCategory.JOURNAL
 
 
 def test_publication_merge():

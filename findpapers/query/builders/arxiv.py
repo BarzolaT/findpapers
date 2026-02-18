@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from findpapers.core.query import Query, QueryNode
+from findpapers.core.query import FilterCode, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
 from findpapers.query.builders.common import (
     clone_query,
@@ -17,7 +17,14 @@ from findpapers.query.builders.common import (
 class ArxivQueryBuilder(QueryBuilder):
     """Build arXiv-compatible query expressions."""
 
-    _SUPPORTED_FILTERS = {"ti", "abs", "au", "tiabs"}
+    _SUPPORTED_FILTERS = frozenset(
+        {
+            FilterCode.TITLE,
+            FilterCode.ABSTRACT,
+            FilterCode.AUTHOR,
+            FilterCode.TITLE_ABSTRACT,
+        }
+    )
 
     def validate_query(self, query: Query) -> QueryValidationResult:
         """Validate whether arXiv supports this query.
@@ -56,23 +63,25 @@ class ArxivQueryBuilder(QueryBuilder):
         str
             arXiv query string.
         """
+        from findpapers.core.query import ConnectorType
+
         preprocessed = self.preprocess_terms(query)
 
         connector_map = {
-            "and": "AND",
-            "or": "OR",
-            "and not": "ANDNOT",
+            ConnectorType.AND: "AND",
+            ConnectorType.OR: "OR",
+            ConnectorType.AND_NOT: "ANDNOT",
         }
 
         def convert_term(term_node: QueryNode) -> str:
             term = quote_term(term_node.value or "")
             filter_code = get_effective_filter(term_node)
 
-            if filter_code == "ti":
+            if filter_code == FilterCode.TITLE:
                 return f"ti:{term}"
-            if filter_code == "abs":
+            if filter_code == FilterCode.ABSTRACT:
                 return f"abs:{term}"
-            if filter_code == "au":
+            if filter_code == FilterCode.AUTHOR:
                 return f"au:{term}"
             return f"(ti:{term} OR abs:{term})"
 
@@ -98,12 +107,12 @@ class ArxivQueryBuilder(QueryBuilder):
                 term.value = term.value.replace("-", " ")
         return cloned_query
 
-    def supports_filter(self, filter_code: str) -> bool:
+    def supports_filter(self, filter_code: FilterCode) -> bool:
         """Check filter support for arXiv.
 
         Parameters
         ----------
-        filter_code : str
+        filter_code : FilterCode
             Filter code to check.
 
         Returns

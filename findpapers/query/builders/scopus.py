@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from findpapers.core.query import Query, QueryNode
+from findpapers.core.query import FilterCode, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
 from findpapers.query.builders.common import (
     convert_expression,
@@ -16,7 +16,18 @@ from findpapers.query.builders.common import (
 class ScopusQueryBuilder(QueryBuilder):
     """Build Scopus-compatible query expressions."""
 
-    _SUPPORTED_FILTERS = {"ti", "abs", "key", "au", "pu", "af", "tiabs", "tiabskey"}
+    _SUPPORTED_FILTERS = frozenset(
+        {
+            FilterCode.TITLE,
+            FilterCode.ABSTRACT,
+            FilterCode.KEYWORDS,
+            FilterCode.AUTHOR,
+            FilterCode.PUBLICATION,
+            FilterCode.AFFILIATION,
+            FilterCode.TITLE_ABSTRACT,
+            FilterCode.TITLE_ABSTRACT_KEYWORDS,
+        }
+    )
 
     def validate_query(self, query: Query) -> QueryValidationResult:
         """Validate whether Scopus supports this query.
@@ -73,10 +84,12 @@ class ScopusQueryBuilder(QueryBuilder):
         str
             Scopus query string.
         """
+        from findpapers.core.query import ConnectorType
+
         connector_map = {
-            "and": "AND",
-            "or": "OR",
-            "and not": "AND NOT",
+            ConnectorType.AND: "AND",
+            ConnectorType.OR: "OR",
+            ConnectorType.AND_NOT: "AND NOT",
         }
 
         def convert_term(term_node: QueryNode) -> str:
@@ -84,19 +97,19 @@ class ScopusQueryBuilder(QueryBuilder):
             quoted = f'"{term}"'
             filter_code = get_effective_filter(term_node)
 
-            if filter_code == "ti":
+            if filter_code == FilterCode.TITLE:
                 return f"TITLE({quoted})"
-            if filter_code == "abs":
+            if filter_code == FilterCode.ABSTRACT:
                 return f"ABS({quoted})"
-            if filter_code == "key":
+            if filter_code == FilterCode.KEYWORDS:
                 return f"KEY({quoted})"
-            if filter_code == "au":
+            if filter_code == FilterCode.AUTHOR:
                 return f"AUTH({quoted})"
-            if filter_code == "pu":
+            if filter_code == FilterCode.PUBLICATION:
                 return f"SRCTITLE({quoted})"
-            if filter_code == "af":
+            if filter_code == FilterCode.AFFILIATION:
                 return f"AFFIL({quoted})"
-            if filter_code == "tiabs":
+            if filter_code == FilterCode.TITLE_ABSTRACT:
                 return f"TITLE-ABS({quoted})"
             return f"TITLE-ABS-KEY({quoted})"
 
@@ -117,12 +130,12 @@ class ScopusQueryBuilder(QueryBuilder):
         """
         return query
 
-    def supports_filter(self, filter_code: str) -> bool:
+    def supports_filter(self, filter_code: FilterCode) -> bool:
         """Check filter support for Scopus.
 
         Parameters
         ----------
-        filter_code : str
+        filter_code : FilterCode
             Filter code.
 
         Returns

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from findpapers.core.query import NodeType, Query, QueryNode
+from findpapers.core.query import ConnectorType, FilterCode, NodeType, Query, QueryNode
 
-DEFAULT_FILTER_CODE = "tiabs"
+DEFAULT_FILTER_CODE: FilterCode = FilterCode.TITLE_ABSTRACT
 
 
-def get_effective_filter(node: QueryNode) -> str:
+def get_effective_filter(node: QueryNode) -> FilterCode:
     """Return effective filter code for a query node.
 
     Parameters
@@ -19,7 +19,7 @@ def get_effective_filter(node: QueryNode) -> str:
 
     Returns
     -------
-    str
+    FilterCode
         Explicit filter when present, otherwise inherited filter, otherwise default.
     """
     return node.filter_code or node.inherited_filter_code or DEFAULT_FILTER_CODE
@@ -46,7 +46,7 @@ def iter_term_nodes(node: QueryNode) -> list[QueryNode]:
     return terms
 
 
-def iter_connectors(node: QueryNode) -> list[str]:
+def iter_connectors(node: QueryNode) -> list[ConnectorType]:
     """Return connector values in a subtree.
 
     Parameters
@@ -56,12 +56,12 @@ def iter_connectors(node: QueryNode) -> list[str]:
 
     Returns
     -------
-    list[str]
-        Connector values in lowercase.
+    list[ConnectorType]
+        Connector enum members in tree order.
     """
-    values: list[str] = []
+    values: list[ConnectorType] = []
     if node.node_type == NodeType.CONNECTOR and node.value:
-        values.append(node.value)
+        values.append(ConnectorType(node.value))
     for child in node.children:
         values.extend(iter_connectors(child))
     return values
@@ -104,7 +104,7 @@ def quote_term(term: str) -> str:
 def convert_expression(
     node: QueryNode,
     term_converter: Callable[[QueryNode], str],
-    connector_map: dict[str, str],
+    connector_map: dict[ConnectorType, str],
 ) -> str:
     """Convert query tree node to infix expression.
 
@@ -114,7 +114,7 @@ def convert_expression(
         Node to convert.
     term_converter : Callable[[QueryNode], str]
         Function that converts TERM nodes.
-    connector_map : dict[str, str]
+    connector_map : dict[ConnectorType, str]
         Connector mapping for target database.
 
     Returns
@@ -128,7 +128,7 @@ def convert_expression(
     parts: list[str] = []
     for child in node.children:
         if child.node_type == NodeType.CONNECTOR and child.value:
-            parts.append(connector_map[child.value])
+            parts.append(connector_map[ConnectorType(child.value)])
             continue
 
         converted = convert_expression(child, term_converter, connector_map)
