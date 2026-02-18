@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Set
+from typing import Optional
 
 from ..utils.merge import merge_value
 
@@ -15,10 +15,6 @@ class Publication:
         issn: Optional[str] = None,
         publisher: Optional[str] = None,
         category: Optional[str] = None,
-        cite_score: Optional[float] = None,
-        sjr: Optional[float] = None,
-        snip: Optional[float] = None,
-        subject_areas: Optional[Set[str]] = None,
         is_potentially_predatory: Optional[bool] = False,
     ) -> None:
         """Create a Publication instance.
@@ -35,14 +31,6 @@ class Publication:
             Publication publisher name.
         category : str | None
             Publication category (Journal, Conference Proceedings, Book).
-        cite_score : float | None
-            CiteScore metric.
-        sjr : float | None
-            SJR metric.
-        snip : float | None
-            SNIP metric.
-        subject_areas : set[str] | None
-            Subject areas.
         is_potentially_predatory : bool | None
             Predatory flag.
 
@@ -59,10 +47,6 @@ class Publication:
         self.issn = issn
         self.publisher = publisher
         self.category = category if category is not None else title
-        self.cite_score = cite_score
-        self.sjr = sjr
-        self.snip = snip
-        self.subject_areas = subject_areas if subject_areas is not None else set()
         self.is_potentially_predatory = is_potentially_predatory
 
     @property
@@ -116,10 +100,6 @@ class Publication:
         self.issn = merge_value(self.issn, publication.issn)
         self.publisher = merge_value(self.publisher, publication.publisher)
         self.category = merge_value(self.category, publication.category)
-        self.cite_score = merge_value(self.cite_score, publication.cite_score)
-        self.sjr = merge_value(self.sjr, publication.sjr)
-        self.snip = merge_value(self.snip, publication.snip)
-        self.subject_areas = merge_value(self.subject_areas, publication.subject_areas)
         self.is_potentially_predatory = bool(
             self.is_potentially_predatory or publication.is_potentially_predatory
         )
@@ -152,10 +132,6 @@ class Publication:
             issn=publication_dict.get("issn"),
             publisher=publication_dict.get("publisher"),
             category=publication_dict.get("category"),
-            cite_score=publication_dict.get("cite_score"),
-            sjr=publication_dict.get("sjr"),
-            snip=publication_dict.get("snip"),
-            subject_areas=set(publication_dict.get("subject_areas") or []),
             is_potentially_predatory=publication_dict.get("is_potentially_predatory"),
         )
 
@@ -179,9 +155,5 @@ class Publication:
             "issn": publication.issn,
             "publisher": publication.publisher,
             "category": publication.category,
-            "cite_score": publication.cite_score,
-            "sjr": publication.sjr,
-            "snip": publication.snip,
-            "subject_areas": sorted(publication.subject_areas),
             "is_potentially_predatory": publication.is_potentially_predatory,
         }

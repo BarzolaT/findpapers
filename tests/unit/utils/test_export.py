@@ -38,10 +38,6 @@ def journal_publication() -> Publication:
         issn="2522-5839",
         publisher="Springer Nature",
         category="Journal",
-        cite_score=10.5,
-        sjr=3.2,
-        snip=1.8,
-        subject_areas={"Artificial Intelligence", "Computer Science"},
     )
 
 
@@ -188,12 +184,6 @@ class TestPaperToCsvRow:
         assert row["doi"] is None
         assert row["publication_date"] is None
         assert row["publication_title"] is None
-
-    def test_subject_areas_sorted(self, full_paper: Paper) -> None:
-        """subject_areas are sorted and joined with '; '."""
-        row = paper_to_csv_row(full_paper)
-        # Sorted: Artificial Intelligence, Computer Science
-        assert row["publication_subject_areas"] == "Artificial Intelligence; Computer Science"
 
     def test_no_publication(self, minimal_paper: Paper) -> None:
         """Paper without publication has None for all publication_* fields."""

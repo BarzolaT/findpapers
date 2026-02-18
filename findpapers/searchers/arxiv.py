@@ -190,6 +190,12 @@ class ArxivSearcher(SearcherBase):
         if journal_ref_el is not None and journal_ref_el.text and journal_ref_el.text.strip():
             publication = Publication(title=journal_ref_el.text.strip())
 
+        # Comments — optional free-text note (e.g. "39 pages, 14 figures")
+        comment: Optional[str] = None
+        comment_el = entry.find("arxiv:comment", _NS)
+        if comment_el is not None and comment_el.text and comment_el.text.strip():
+            comment = comment_el.text.strip()
+
         try:
             paper = Paper(
                 title=title,
@@ -200,6 +206,7 @@ class ArxivSearcher(SearcherBase):
                 url=url,
                 pdf_url=pdf_url,
                 doi=doi,
+                comments=comment,
                 databases={"arXiv"},
             )
         except ValueError:

@@ -69,6 +69,52 @@ class TestArxivSearcherParseResponse:
         entry = ET.fromstring(xml_str)
         assert ArxivSearcher._parse_paper(entry) is None
 
+    def test_comments_extracted_from_entry(self):
+        """Comments field is populated when arxiv:comment element is present."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Some Paper</title>
+            <summary>Abstract text here.</summary>
+            <arxiv:comment>39 pages, 14 figures</arxiv:comment>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher._parse_paper(entry)
+        assert paper is not None
+        assert paper.comments == "39 pages, 14 figures"
+
+    def test_comments_none_when_absent(self):
+        """Comments field is None when arxiv:comment element is missing."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Some Paper</title>
+            <summary>Abstract text here.</summary>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher._parse_paper(entry)
+        assert paper is not None
+        assert paper.comments is None
+
+    def test_sample_xml_has_papers_with_comments(self, arxiv_sample_xml):
+        """Parsing the sample XML finds at least one paper with a non-None comment."""
+        from xml.etree import ElementTree as ET
+
+        from findpapers.searchers.arxiv import _NS
+
+        tree = ET.fromstring(arxiv_sample_xml)
+        entries = tree.findall("atom:entry", _NS)
+        papers = [ArxivSearcher._parse_paper(e) for e in entries]
+        valid = [p for p in papers if p is not None]
+        papers_with_comments = [p for p in valid if p.comments is not None]
+        assert len(papers_with_comments) > 0
+
 
 class TestArxivSearcherSearch:
     """Tests for the search() method with mocked HTTP calls."""

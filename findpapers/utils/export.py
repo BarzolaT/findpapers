@@ -101,10 +101,6 @@ def csv_columns() -> list[str]:
         "publication_issn",
         "publication_publisher",
         "publication_category",
-        "publication_cite_score",
-        "publication_sjr",
-        "publication_snip",
-        "publication_subject_areas",
         "publication_is_potentially_predatory",
     ]
     return paper_fields + publication_fields
@@ -143,12 +139,6 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
         "publication_issn": publication.issn if publication else None,
         "publication_publisher": publication.publisher if publication else None,
         "publication_category": publication.category if publication else None,
-        "publication_cite_score": publication.cite_score if publication else None,
-        "publication_sjr": publication.sjr if publication else None,
-        "publication_snip": publication.snip if publication else None,
-        "publication_subject_areas": (
-            "; ".join(sorted(publication.subject_areas)) if publication else None
-        ),
         "publication_is_potentially_predatory": (
             publication.is_potentially_predatory if publication else None
         ),

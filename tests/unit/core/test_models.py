@@ -33,10 +33,6 @@ def test_publication_to_from_dict():
         "issn": "2",
         "publisher": "Pub",
         "category": "Journal",
-        "cite_score": 1.0,
-        "sjr": 2.0,
-        "snip": 3.0,
-        "subject_areas": ["A"],
         "is_potentially_predatory": True,
     }
     publication = Publication.from_dict(data)
