@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.utils.export import (
     bibtex_how_published,
@@ -37,7 +37,6 @@ def journal_publication() -> Publication:
         title="Nature Machine Intelligence",
         issn="2522-5839",
         publisher="Springer Nature",
-        category="Journal",
     )
 
 
@@ -48,7 +47,6 @@ def conference_publication() -> Publication:
         title="NeurIPS 2023",
         isbn="978-0-000-00000-0",
         publisher="Curran Associates",
-        category="Conference Proceedings",
     )
 
 
@@ -82,6 +80,7 @@ def full_paper(journal_publication: Publication) -> Paper:
         number_of_pages=42,
         pages="1-42",
         databases={"arxiv", "semantic_scholar"},
+        paper_type=PaperType.ARTICLE,
     )
 
 
@@ -97,6 +96,7 @@ def conference_paper(conference_publication: Publication) -> Paper:
         url="https://arxiv.org/abs/1706.03762",
         doi="10.48550/arXiv.1706.03762",
         databases={"arxiv"},
+        paper_type=PaperType.INPROCEEDINGS,
     )
 
 
@@ -351,9 +351,9 @@ class TestPaperToBibtex:
         assert entry.startswith("@inproceedings{")
 
     def test_unpublished_type(self, minimal_paper: Paper) -> None:
-        """Paper without publication produces @unpublished entry."""
+        """Paper without a paper_type produces @misc entry."""
         entry = paper_to_bibtex(minimal_paper)
-        assert entry.startswith("@unpublished{")
+        assert entry.startswith("@misc{")
 
     def test_contains_title(self, full_paper: Paper) -> None:
         """Entry contains the paper title."""
@@ -380,21 +380,19 @@ class TestPaperToBibtex:
         entry = paper_to_bibtex(conference_paper)
         assert "booktitle = {NeurIPS 2023}" in entry
 
-    def test_unpublished_for_unknown_category(self) -> None:
-        """Unknown publication category is normalised to None → @unpublished."""
-        # The Publication.category setter maps unrecognised values (e.g. "Workshop")
-        # to None, so the paper falls back to the @unpublished entry type.
-        pub = Publication(title="Workshop", category="Workshop")
-        assert pub.category is None  # verify normalisation
+    def test_unpublished_for_none_paper_type(self) -> None:
+        """A paper with no paper_type falls back to @misc."""
+        pub = Publication(title="Workshop")
         paper = Paper(
             title="W Paper",
             abstract="",
             authors=["X, Y."],
             publication=pub,
             publication_date=datetime.date(2021, 1, 1),
+            paper_type=None,
         )
         entry = paper_to_bibtex(paper)
-        assert entry.startswith("@unpublished{")
+        assert entry.startswith("@misc{")
 
     def test_entry_ends_with_closing_brace(self, full_paper: Paper) -> None:
         """BibTeX entry ends with closing brace."""

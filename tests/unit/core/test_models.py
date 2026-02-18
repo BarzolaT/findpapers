@@ -4,16 +4,25 @@ import datetime
 
 import pytest
 
-from findpapers.core.paper import Paper
-from findpapers.core.publication import Publication, PublicationCategory
+from findpapers.core.paper import Paper, PaperType
+from findpapers.core.publication import Publication
 from findpapers.core.search import Search
 
 
-def test_publication_category_normalization():
-    """Test that publication category is normalized correctly."""
-    publication = Publication(title="My Journal")
-    publication.category = "journal of tests"
-    assert publication.category == PublicationCategory.JOURNAL
+def test_paper_type_normalization():
+    """Test that paper_type is normalized correctly from a string value."""
+    paper = Paper(
+        title="A Paper",
+        abstract="",
+        authors=[],
+        publication=None,
+        publication_date=datetime.date.today(),
+    )
+    paper.paper_type = "ARTICLE"  # mixed-case string
+    assert paper.paper_type == PaperType.ARTICLE
+
+    paper.paper_type = "unknown_type"
+    assert paper.paper_type is None
 
 
 def test_publication_merge():
@@ -32,7 +41,6 @@ def test_publication_to_from_dict():
         "isbn": "1",
         "issn": "2",
         "publisher": "Pub",
-        "category": "Journal",
         "is_potentially_predatory": True,
     }
     publication = Publication.from_dict(data)

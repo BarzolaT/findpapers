@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.query.builder import QueryBuilder
@@ -29,8 +29,48 @@ _MIN_REQUEST_INTERVAL_WITH_KEY = 0.11
 # Fields to retrieve in each paper record
 _PAPER_FIELDS = (
     "paperId,externalIds,title,abstract,authors,year,publicationDate,"
-    "journal,venue,citationCount,openAccessPdf,url,fieldsOfStudy"
+    "journal,venue,citationCount,openAccessPdf,url,fieldsOfStudy,publicationTypes"
 )
+
+
+def _semantic_scholar_types_to_paper_type(
+    publication_types: Optional[list],
+) -> Optional[PaperType]:
+    """Map a Semantic Scholar ``publicationTypes`` list to a :class:`PaperType`.
+
+    The function applies a priority order so the most specific type wins when
+    multiple labels are present.
+
+    Parameters
+    ----------
+    publication_types : list | None
+        List of publication type strings from the Semantic Scholar API.
+
+    Returns
+    -------
+    PaperType | None
+        Matching paper type, or ``None`` when the list is empty / unmappable.
+    """
+    if not publication_types:
+        return None
+
+    # Normalise to lower-case for comparison.
+    types_lower = {t.lower() for t in publication_types if isinstance(t, str)}
+
+    # Priority: specific academic entry types first.
+    if "thesis" in types_lower:
+        return PaperType.PHDTHESIS
+    if "booksection" in types_lower:
+        return PaperType.INCOLLECTION
+    if "book" in types_lower:
+        return PaperType.INBOOK
+    if "conference" in types_lower:
+        return PaperType.INPROCEEDINGS
+    if "journalarticle" in types_lower:
+        return PaperType.ARTICLE
+    if types_lower & {"review", "clinicaltrial", "lettersandcomments"}:
+        return PaperType.ARTICLE
+    return None
 
 
 class SemanticScholarSearcher(SearcherBase):
@@ -206,6 +246,9 @@ class SemanticScholarSearcher(SearcherBase):
             if raw_pages:
                 pages = raw_pages
 
+        # Paper type from publicationTypes list
+        paper_type = _semantic_scholar_types_to_paper_type(item.get("publicationTypes"))
+
         try:
             paper = Paper(
                 title=title,
@@ -220,6 +263,7 @@ class SemanticScholarSearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={"Semantic Scholar"},
+                paper_type=paper_type,
             )
         except ValueError:
             return None

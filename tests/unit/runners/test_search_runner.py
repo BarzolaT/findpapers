@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.search_runner import SearchRunner
@@ -16,16 +16,14 @@ from findpapers.runners.search_runner import SearchRunner
 def _make_paper(
     title: str = "Test Paper",
     doi: str | None = None,
-    category: str | None = "Journal",
+    paper_type: PaperType | None = PaperType.ARTICLE,
     is_predatory: bool = False,
 ) -> Paper:
     """Create a minimal Paper for testing."""
-    pub = None
-    if category:
-        pub = Publication(title="Test Journal", category=category)
-        if is_predatory:
-            # Use a known predatory publisher name to trigger flag
-            pub = Publication(title="OMICS International", category=category)
+    if is_predatory:
+        pub = Publication(title="OMICS International")
+    else:
+        pub = Publication(title="Test Journal")
     return Paper(
         title=title,
         abstract="An abstract.",
@@ -34,6 +32,7 @@ def _make_paper(
         publication_date=date(2023, 1, 1),
         url="http://example.com",
         doi=doi,
+        paper_type=paper_type,
     )
 
 
@@ -142,23 +141,23 @@ class TestSearchRunnerPipeline:
         runner.run()
         assert len(runner.get_results()) == 2
 
-    def test_publication_type_filter(self):
-        """Papers with non-matching publication type are removed."""
-        journal_paper = _make_paper(title="Journal", category="Journal")
-        conf_paper = _make_paper(title="Conference", category="Conference Proceedings")
+    def test_paper_type_filter(self):
+        """Papers with non-matching paper_type are removed."""
+        article_paper = _make_paper(title="Article", paper_type=PaperType.ARTICLE)
+        conf_paper = _make_paper(title="Conference", paper_type=PaperType.INPROCEEDINGS)
         runner = SearchRunner(
             query="[ml]",
             databases=["arxiv"],
-            publication_types=["journal"],
+            paper_types=["article"],
         )
         mock_searcher = MagicMock()
         mock_searcher.name = "arXiv"
-        mock_searcher.search.return_value = [journal_paper, conf_paper]
+        mock_searcher.search.return_value = [article_paper, conf_paper]
         runner._searchers = [mock_searcher]  # noqa: SLF001
         runner.run()
         results = runner.get_results()
         assert len(results) == 1
-        assert results[0].title == "Journal"
+        assert results[0].title == "Article"
 
     def test_run_can_be_called_twice(self):
         """Calling run() twice resets previous results."""

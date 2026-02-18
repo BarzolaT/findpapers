@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.query.builder import QueryBuilder
@@ -23,6 +23,33 @@ _BASE_URL = "https://api.elsevier.com/content/search/scopus"
 _PAGE_SIZE = 25  # Scopus max results per request (in standard view)
 # Conservative interval — actual limit varies by institution
 _MIN_REQUEST_INTERVAL = 0.5
+
+
+def _scopus_aggregation_type_to_paper_type(
+    aggregation_type: Optional[str],
+) -> Optional[PaperType]:
+    """Map a Scopus ``prism:aggregationType`` string to a :class:`PaperType`.
+
+    Parameters
+    ----------
+    aggregation_type : str | None
+        Raw ``prism:aggregationType`` value from the Scopus API.
+
+    Returns
+    -------
+    PaperType | None
+        Matching paper type, or ``None`` when the value cannot be mapped.
+    """
+    if not aggregation_type:
+        return None
+    lowered = aggregation_type.strip().lower()
+    if lowered in {"journal", "trade journal"}:
+        return PaperType.ARTICLE
+    if lowered == "conference proceeding":
+        return PaperType.INPROCEEDINGS
+    if lowered in {"book", "book series"}:
+        return PaperType.INCOLLECTION
+    return None
 
 
 class ScopusSearcher(SearcherBase):
@@ -179,14 +206,15 @@ class ScopusSearcher(SearcherBase):
             else:
                 isbn = (raw_isbn or "").strip() or None
             publisher = (entry.get("dc:publisher") or "").strip() or None
-            pub_type = (entry.get("prism:aggregationType") or "").strip() or None
             publication = Publication(
                 title=pub_title,
                 issn=issn,
                 isbn=isbn,
                 publisher=publisher,
-                category=pub_type,
             )
+
+        # Paper type derived from aggregation type
+        paper_type = _scopus_aggregation_type_to_paper_type(entry.get("prism:aggregationType"))
 
         # Pages
         pages: Optional[str] = (entry.get("prism:pageRange") or "").strip() or None
@@ -203,6 +231,7 @@ class ScopusSearcher(SearcherBase):
                 citations=citations,
                 pages=pages,
                 databases={"Scopus"},
+                paper_type=paper_type,
             )
         except ValueError:
             return None

@@ -11,8 +11,8 @@ import requests
 from lxml import html
 from lxml.html import HtmlElement
 
-from findpapers.core.paper import Paper
-from findpapers.core.publication import Publication, PublicationCategory
+from findpapers.core.paper import Paper, PaperType
+from findpapers.core.publication import Publication
 
 # Metadata keys searched in priority order for each field.
 TITLE_META_KEYS = [
@@ -500,20 +500,21 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
 
     publication_title = _pick_metadata_value(metadata, PUBLICATION_TITLE_KEYS)
     publication = None
+    paper_type: PaperType | None = None
     if publication_title and publication_title.lower() not in _PREPRINT_SERVERS:
-        category = None
         if "citation_journal_title" in metadata:
-            category = PublicationCategory.JOURNAL
+            paper_type = PaperType.ARTICLE
         elif "citation_conference_title" in metadata:
-            category = PublicationCategory.CONFERENCE_PROCEEDINGS
-        elif "citation_book_title" in metadata or "citation_inbook_title" in metadata:
-            category = PublicationCategory.BOOK
+            paper_type = PaperType.INPROCEEDINGS
+        elif "citation_inbook_title" in metadata:
+            paper_type = PaperType.INBOOK
+        elif "citation_book_title" in metadata:
+            paper_type = PaperType.INCOLLECTION
         publication = Publication(
             title=publication_title,
             issn=_pick_metadata_value(metadata, PUBLICATION_ISSN_KEYS),
             isbn=_pick_metadata_value(metadata, PUBLICATION_ISBN_KEYS),
             publisher=_pick_metadata_value(metadata, PUBLICATION_PUBLISHER_KEYS),
-            category=category,
         )
 
     pdf_url_val = _pick_metadata_value(metadata, PDF_URL_KEYS)
@@ -530,6 +531,7 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
         keywords=keywords or None,
         pages=pages,
         number_of_pages=number_of_pages,
+        paper_type=paper_type,
     )
 
 

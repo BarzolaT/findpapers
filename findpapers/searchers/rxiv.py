@@ -12,8 +12,8 @@ from typing import Any, Dict, List, Optional
 import requests
 from bs4 import BeautifulSoup
 
-from findpapers.core.paper import Paper
-from findpapers.core.publication import Publication, PublicationCategory
+from findpapers.core.paper import Paper, PaperType
+from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.query.builders.rxiv import RxivQueryBuilder
 from findpapers.searchers.base import QUERY_COMBINATIONS_WARNING_THRESHOLD, SearcherBase
@@ -224,11 +224,13 @@ class RxivSearcher(SearcherBase):
             except ValueError:
                 pass
 
-        # Category/publication
+        # Category/publication — the API "category" is a subject area (e.g.
+        # "Neuroscience"), not a publication type.  We still use it as the
+        # publication title so the source is identifiable.
         category = (meta.get("category") or "").strip()
         publication: Optional[Publication] = None
         if category:
-            publication = Publication(title=category, category=PublicationCategory.JOURNAL)
+            publication = Publication(title=category)
 
         try:
             paper = Paper(
@@ -241,6 +243,8 @@ class RxivSearcher(SearcherBase):
                 pdf_url=pdf_url,
                 doi=doi,
                 databases={database},
+                # bioRxiv / medRxiv are preprint servers — all output is unpublished.
+                paper_type=PaperType.UNPUBLISHED,
             )
         except ValueError:
             return None

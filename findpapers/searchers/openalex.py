@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.query.builder import QueryBuilder
@@ -24,6 +24,39 @@ _PAGE_SIZE = 200  # OpenAlex max per_page
 # Polite pool: ~10 req/s with email in User-Agent → use 0.1s interval
 _MIN_REQUEST_INTERVAL = 0.15
 _USER_AGENT = "findpapers/1.0 (mailto:findpapers@example.com)"
+
+
+def _openalex_work_type_to_paper_type(work_type: Optional[str]) -> Optional[PaperType]:
+    """Map an OpenAlex ``type`` field to a :class:`PaperType`.
+
+    Parameters
+    ----------
+    work_type : str | None
+        Raw ``type`` value from the OpenAlex works API.
+
+    Returns
+    -------
+    PaperType | None
+        Matching paper type, or ``None`` when the value cannot be mapped.
+    """
+    if not work_type:
+        return None
+    lowered = work_type.strip().lower()
+    if lowered in {"article", "review", "editorial", "letter", "erratum"}:
+        return PaperType.ARTICLE
+    if lowered == "book-chapter":
+        return PaperType.INCOLLECTION
+    if lowered == "book":
+        return PaperType.INBOOK
+    if lowered == "preprint":
+        return PaperType.UNPUBLISHED
+    if lowered == "dissertation":
+        return PaperType.PHDTHESIS
+    if lowered in {"proceedings-article", "proceedings"}:
+        return PaperType.INPROCEEDINGS
+    if lowered in {"report", "standard"}:
+        return PaperType.TECHREPORT
+    return None
 
 
 class OpenAlexSearcher(SearcherBase):
@@ -222,8 +255,10 @@ class OpenAlexSearcher(SearcherBase):
                 if isinstance(issn_list, list) and issn_list
                 else str(issn_list) if issn_list else None
             )
-            pub_type_raw = (source.get("type") or "").strip()
-            publication = Publication(title=pub_title, issn=issn, category=pub_type_raw)
+            publication = Publication(title=pub_title, issn=issn)
+
+        # Paper type derived from the work-level "type" field
+        paper_type = _openalex_work_type_to_paper_type(work.get("type"))
 
         try:
             paper = Paper(
@@ -238,6 +273,7 @@ class OpenAlexSearcher(SearcherBase):
                 citations=citations,
                 keywords=keywords if keywords else None,
                 databases={"OpenAlex"},
+                paper_type=paper_type,
             )
         except ValueError:
             return None
@@ -282,7 +318,7 @@ class OpenAlexSearcher(SearcherBase):
                 "select": (
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
-                    "primary_location,concepts,keywords"
+                    "primary_location,concepts,keywords,type"
                 ),
             }
 

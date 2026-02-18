@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from findpapers.core.paper import Paper
-from findpapers.core.publication import PublicationCategory
 
 if TYPE_CHECKING:
     from findpapers.core.search import Search
@@ -95,13 +94,13 @@ def csv_columns() -> list[str]:
         "number_of_pages",
         "pages",
         "databases",
+        "paper_type",
     ]
     publication_fields = [
         "publication_title",
         "publication_isbn",
         "publication_issn",
         "publication_publisher",
-        "publication_category",
         "publication_is_potentially_predatory",
     ]
     return paper_fields + publication_fields
@@ -135,11 +134,11 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
         "number_of_pages": paper.number_of_pages,
         "pages": paper.pages,
         "databases": "; ".join(sorted(paper.databases)),
+        "paper_type": paper.paper_type.value if paper.paper_type is not None else None,
         "publication_title": publication.title if publication else None,
         "publication_isbn": publication.isbn if publication else None,
         "publication_issn": publication.issn if publication else None,
         "publication_publisher": publication.publisher if publication else None,
-        "publication_category": publication.category if publication else None,
         "publication_is_potentially_predatory": (
             publication.is_potentially_predatory if publication else None
         ),
@@ -149,6 +148,10 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
 
 def paper_to_bibtex(paper: Paper) -> str:
     """Convert a paper into a BibTeX entry.
+
+    The BibTeX entry type is derived directly from :attr:`Paper.paper_type`
+    since the :class:`~findpapers.core.paper_type.PaperType` values align
+    with the standard BibTeX entry type names.
 
     Parameters
     ----------
@@ -161,17 +164,9 @@ def paper_to_bibtex(paper: Paper) -> str:
         BibTeX entry.
     """
     default_tab = " " * 4
-    citation_type = "@unpublished"
+    paper_type = paper.paper_type
+    citation_type = f"@{paper_type.value}" if paper_type is not None else "@misc"
     publication = paper.publication
-    if publication is not None and publication.category is not None:
-        if publication.category == PublicationCategory.JOURNAL:
-            citation_type = "@article"
-        elif publication.category == PublicationCategory.CONFERENCE_PROCEEDINGS:
-            citation_type = "@inproceedings"
-        elif publication.category == PublicationCategory.BOOK:
-            citation_type = "@book"
-        else:
-            citation_type = "@misc"
     citation_key = citation_key_for(paper)
     lines = [f"{citation_type}{{{citation_key},"]
     lines.append(f"{default_tab}title = {{{paper.title}}},")
@@ -180,15 +175,23 @@ def paper_to_bibtex(paper: Paper) -> str:
         authors = " and ".join(paper.authors)
         lines.append(f"{default_tab}author = {{{authors}}},")
 
-    if citation_type == "@unpublished":
+    if citation_type == "@article" and publication is not None:
+        lines.append(f"{default_tab}journal = {{{publication.title}}},")
+    elif (
+        citation_type in {"@inproceedings", "@incollection", "@inbook"} and publication is not None
+    ):
+        lines.append(f"{default_tab}booktitle = {{{publication.title}}},")
+    elif citation_type == "@unpublished":
         note = bibtex_note(paper)
         if note:
             lines.append(f"{default_tab}note = {{{note}}},")
-    elif citation_type == "@article" and publication is not None:
-        lines.append(f"{default_tab}journal = {{{publication.title}}},")
-    elif citation_type == "@inproceedings" and publication is not None:
-        lines.append(f"{default_tab}booktitle = {{{publication.title}}},")
-    elif citation_type == "@misc":
+    elif citation_type in {"@phdthesis", "@mastersthesis"} and publication is not None:
+        lines.append(f"{default_tab}school = {{{publication.title}}},")
+    elif citation_type == "@techreport" and publication is not None:
+        lines.append(f"{default_tab}institution = {{{publication.title}}},")
+    elif citation_type == "@manual" and publication is not None:
+        lines.append(f"{default_tab}organization = {{{publication.title}}},")
+    else:
         how_published = bibtex_how_published(paper)
         if how_published:
             lines.append(f"{default_tab}howpublished = {{{how_published}}},")

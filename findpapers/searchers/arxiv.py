@@ -11,7 +11,7 @@ from xml.etree import ElementTree as ET
 
 import requests
 
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.query.builder import QueryBuilder
@@ -184,11 +184,17 @@ class ArxivSearcher(SearcherBase):
                 pdf_url = href
                 break
 
-        # Journal ref → publication
+        # Journal ref → publication and paper type.
+        # Papers with a journal reference were formally published in a journal;
+        # those without are still preprints (unpublished).
         journal_ref_el = entry.find("arxiv:journal_ref", _NS)
         publication: Optional[Publication] = None
-        if journal_ref_el is not None and journal_ref_el.text and journal_ref_el.text.strip():
-            publication = Publication(title=journal_ref_el.text.strip())
+        has_journal_ref = (
+            journal_ref_el is not None and journal_ref_el.text and journal_ref_el.text.strip()
+        )
+        if has_journal_ref:
+            publication = Publication(title=journal_ref_el.text.strip())  # type: ignore[union-attr]
+        paper_type = PaperType.ARTICLE if has_journal_ref else PaperType.UNPUBLISHED
 
         # Comments — optional free-text note (e.g. "39 pages, 14 figures")
         comment: Optional[str] = None
@@ -208,6 +214,7 @@ class ArxivSearcher(SearcherBase):
                 doi=doi,
                 comments=comment,
                 databases={"arXiv"},
+                paper_type=paper_type,
             )
         except ValueError:
             return None

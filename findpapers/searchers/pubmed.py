@@ -11,7 +11,7 @@ from xml.etree import ElementTree as ET
 
 import requests
 
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.query.builder import QueryBuilder
@@ -283,6 +283,8 @@ class PubmedSearcher(SearcherBase):
                 doi=doi,
                 keywords=keywords if keywords else None,
                 databases={"PubMed"},
+                # PubMed exclusively indexes journal literature.
+                paper_type=PaperType.ARTICLE,
             )
         except ValueError:
             return None

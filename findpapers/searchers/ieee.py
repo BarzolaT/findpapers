@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.query.builder import QueryBuilder
@@ -23,6 +23,33 @@ _BASE_URL = "https://ieeexploreapi.ieee.org/api/v1/search/articles"
 _PAGE_SIZE = 200  # IEEE max per request
 # 200 calls/day limit — use conservative interval
 _MIN_REQUEST_INTERVAL = 0.5
+
+
+def _ieee_content_type_to_paper_type(content_type: Optional[str]) -> Optional[PaperType]:
+    """Map an IEEE ``content_type`` string to a :class:`PaperType`.
+
+    Parameters
+    ----------
+    content_type : str | None
+        Raw ``content_type`` value from the IEEE API.
+
+    Returns
+    -------
+    PaperType | None
+        Matching paper type, or ``None`` when the value cannot be mapped.
+    """
+    if not content_type:
+        return None
+    lowered = content_type.strip().lower()
+    if lowered in {"journals", "early access articles"}:
+        return PaperType.ARTICLE
+    if lowered == "conferences":
+        return PaperType.INPROCEEDINGS
+    if lowered == "books":
+        return PaperType.INCOLLECTION
+    if lowered == "standards":
+        return PaperType.TECHREPORT
+    return None
 
 
 class IEEESearcher(SearcherBase):
@@ -174,14 +201,15 @@ class IEEESearcher(SearcherBase):
             issn = (item.get("issn") or "").strip() or None
             isbn = (item.get("isbn") or "").strip() or None
             publisher = (item.get("publisher") or "").strip() or None
-            pub_type = (item.get("content_type") or "").strip() or None
             publication = Publication(
                 title=publication_title,
                 issn=issn,
                 isbn=isbn,
                 publisher=publisher,
-                category=pub_type,
             )
+
+        # Paper type derived from content_type
+        paper_type = _ieee_content_type_to_paper_type(item.get("content_type"))
 
         # Pages
         start_page = item.get("start_page") or ""
@@ -206,6 +234,7 @@ class IEEESearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={"IEEE"},
+                paper_type=paper_type,
             )
         except ValueError:
             return None
