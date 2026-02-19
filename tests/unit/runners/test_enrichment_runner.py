@@ -99,7 +99,7 @@ class TestEnrichmentRunnerRun:
     def test_parallel_run(self):
         """Parallel run completes and returns metrics."""
         papers = [_make_paper(f"Paper {i}") for i in range(5)]
-        runner = EnrichmentRunner(papers=papers, max_workers=3)
+        runner = EnrichmentRunner(papers=papers, num_workers=3)
         with patch("findpapers.runners.enrichment_runner.enrich_from_sources", return_value=None):
             runner.run()
         assert runner.get_metrics()["total_papers"] == 5

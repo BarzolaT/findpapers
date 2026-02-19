@@ -805,7 +805,7 @@ make test  # TODOS os testes (unit + integration) passando
   - Exemplos de uso com SearchRunner
   - **Interface simples:** Destacar que não é necessário instanciar objetos complexos
   - Lista completa de databases suportados (8 databases)
-  - Exemplos de queries com filtros: `ti[machine learning]`, `abs(covid OR pandemic)`, etc.
+  - Exemplos de queries com filtros: `ti[machine learning]`, `abs([covid] OR [pandemic])`, etc.
   - Instruções de instalação e setup
   - **Documentar parâmetros:**
     - `max_papers_per_database`
@@ -854,9 +854,6 @@ make test  # TODOS os testes (unit + integration) passando
 - [ ] Remover `findpapers_old/`
 - [ ] Remover `tests_0/`
 - [ ] Remover `tests_old/`
-- [ ] Remover arquivos temporários:
-  - `_ignore_*.md` (mover para `docs/planning/` se quiser preservar histórico)
-  - `_ignore_*.py`, `_ignore_*.json`
 
 #### 6.3. Validação Final ⏳
 

@@ -258,8 +258,8 @@ class TestSearchRunnerExports:
 class TestSearchRunnerParallel:
     """Tests for parallel execution."""
 
-    def test_max_workers_runs_all_searchers(self):
-        """Parallel mode (max_workers > 1) still returns results from all searchers."""
+    def test_num_workers_runs_all_searchers(self):
+        """Parallel mode (num_workers > 1) still returns results from all searchers."""
         mock_s1 = MagicMock()
         mock_s1.name = "arXiv"
         mock_s1.search.return_value = [_make_paper(title="A")]
@@ -267,13 +267,13 @@ class TestSearchRunnerParallel:
         mock_s2.name = "PubMed"
         mock_s2.search.return_value = [_make_paper(title="B")]
 
-        runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], max_workers=2)
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], num_workers=2)
         runner._searchers = [mock_s1, mock_s2]  # noqa: SLF001
         runner.run()
         assert len(runner.get_results()) == 2
 
-    def test_max_workers_capped_to_number_of_searchers(self):
-        """max_workers is capped to the number of configured searchers."""
+    def test_num_workers_capped_to_number_of_searchers(self):
+        """num_workers is capped to the number of configured searchers."""
         mock_s1 = MagicMock()
         mock_s1.name = "arXiv"
         mock_s1.search.return_value = [_make_paper(title="A")]
@@ -281,8 +281,8 @@ class TestSearchRunnerParallel:
         mock_s2.name = "PubMed"
         mock_s2.search.return_value = [_make_paper(title="B")]
 
-        # max_workers=10 but only 2 searchers — effective workers must be capped to 2.
-        runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], max_workers=10)
+        # num_workers=10 but only 2 searchers — effective workers must be capped to 2.
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], num_workers=10)
         runner._searchers = [mock_s1, mock_s2]  # noqa: SLF001
 
         captured: list[int | None] = []
@@ -290,9 +290,9 @@ class TestSearchRunnerParallel:
             "findpapers.utils.parallel", fromlist=["execute_tasks"]
         ).execute_tasks
 
-        def _capture_execute(tasks, fn, *, max_workers, **kwargs):
-            captured.append(max_workers)
-            return original_execute(tasks, fn, max_workers=max_workers, **kwargs)
+        def _capture_execute(tasks, fn, *, num_workers, **kwargs):
+            captured.append(num_workers)
+            return original_execute(tasks, fn, num_workers=num_workers, **kwargs)
 
         import findpapers.runners.search_runner as sr_mod
 
@@ -303,5 +303,5 @@ class TestSearchRunnerParallel:
         finally:
             sr_mod.execute_tasks = original
 
-        assert captured == [2], f"Expected max_workers=2, got {captured}"
+        assert captured == [2], f"Expected num_workers=2, got {captured}"
         assert len(runner.get_results()) == 2

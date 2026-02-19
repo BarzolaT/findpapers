@@ -31,8 +31,9 @@ class DownloadRunner:
         Papers to download.
     output_directory : str
         Directory where PDFs and the error log will be written.
-    max_workers : int | None
-        Maximum parallel workers. ``None`` runs sequentially.
+    num_workers : int
+        Number of parallel workers.  Defaults to ``1``, which runs
+        sequentially.  Values greater than ``1`` enable parallel execution.
     timeout : float | None
         Per-request and global timeout in seconds.
     proxy : str | None
@@ -50,7 +51,7 @@ class DownloadRunner:
         self,
         papers: list[Paper],
         output_directory: str,
-        max_workers: int | None = None,
+        num_workers: int = 1,
         timeout: float | None = 10.0,
         proxy: str | None = None,
     ) -> None:
@@ -59,7 +60,7 @@ class DownloadRunner:
         self._results = list(papers)
         self._metrics: dict[str, int | float] = {}
         self._output_directory = output_directory
-        self._max_workers = max_workers
+        self._num_workers = num_workers
         self._timeout = timeout
         self._proxy = proxy
 
@@ -84,7 +85,7 @@ class DownloadRunner:
             logger.info("=== DownloadRunner Configuration ===")
             logger.info("Total papers: %d", len(self._results))
             logger.info("Output directory: %s", self._output_directory)
-            logger.info("Max workers: %s", self._max_workers or "sequential")
+            logger.info("Num workers: %d", self._num_workers)
             logger.info("Timeout: %s", self._timeout or "default")
             logger.info("Proxy: %s", self._proxy or "none")
             logger.info("====================================")
@@ -106,7 +107,7 @@ class DownloadRunner:
                 f"{datetime.datetime.strftime(now, '%Y-%m-%d %H:%M:%S')} \n"
             )
 
-        max_workers = self._max_workers if isinstance(self._max_workers, int) else None
+        num_workers = self._num_workers
         timeout = self._timeout
         proxies = self._build_proxies()
 
@@ -121,7 +122,7 @@ class DownloadRunner:
         for paper, result, error in execute_tasks(
             self._results,
             _download_task,
-            max_workers=max_workers,
+            num_workers=num_workers,
             timeout=timeout,
             progress_total=len(self._results),
             progress_unit="paper",

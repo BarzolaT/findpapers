@@ -21,7 +21,7 @@ def execute_tasks(
     items: Iterable[T],
     task: Callable[[T], R],
     *,
-    max_workers: int | None,
+    num_workers: int | None,
     timeout: float | None,
     progress_total: int | None = None,
     progress_unit: str = "item",
@@ -38,8 +38,8 @@ def execute_tasks(
         Items to process.
     task : Callable[[T], R]
         Task function to execute for each item.
-    max_workers : int | None
-        Maximum number of workers. ``None`` or ``1`` runs sequentially.
+    num_workers : int | None
+        Number of workers. ``None`` or ``1`` runs sequentially.
     timeout : float | None
         Global timeout in seconds. ``None`` means no timeout.
     progress_total : int | None
@@ -88,7 +88,7 @@ def execute_tasks(
 
     start = perf_counter()
     try:
-        if max_workers is None or max_workers <= 1:
+        if num_workers is None or num_workers <= 1:
             # Sequential path.
             for item in items:
                 if timeout is not None and (perf_counter() - start) > timeout:
@@ -108,7 +108,7 @@ def execute_tasks(
                 yield item, result, error
         else:
             # Parallel path: submit all tasks and iterate results as they complete.
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            with ThreadPoolExecutor(max_workers=num_workers) as executor:
                 futures = {executor.submit(task, item): item for item in items}
                 remaining = None if timeout is None else max(timeout - (perf_counter() - start), 0)
                 yielded_futures: set[object] = set()

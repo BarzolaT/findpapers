@@ -25,14 +25,15 @@ class EnrichmentRunner:
     ----------
     papers : list[Paper]
         Papers to enrich.
-    max_workers : int | None
-        Maximum parallel workers. ``None`` runs sequentially.
+    num_workers : int
+        Number of parallel workers.  Defaults to ``1``, which runs
+        sequentially.  Values greater than ``1`` enable parallel execution.
     timeout : float | None
         Per-request and global timeout in seconds.
 
     Examples
     --------
-    >>> runner = EnrichmentRunner(papers=papers, max_workers=4, timeout=15.0)
+    >>> runner = EnrichmentRunner(papers=papers, num_workers=4, timeout=15.0)
     >>> runner.run(verbose=True)
     >>> metrics = runner.get_metrics()
     """
@@ -40,14 +41,14 @@ class EnrichmentRunner:
     def __init__(
         self,
         papers: list[Paper],
-        max_workers: int | None = None,
+        num_workers: int = 1,
         timeout: float | None = 10.0,
     ) -> None:
         """Initialise enrichment configuration without executing it."""
         self._executed = False
         self._results = list(papers)
         self._metrics: dict[str, int | float] = {}
-        self._max_workers = max_workers
+        self._num_workers = num_workers
         self._timeout = timeout
 
     # ------------------------------------------------------------------
@@ -70,7 +71,7 @@ class EnrichmentRunner:
             logging.getLogger().setLevel(logging.INFO)
             logger.info("=== EnrichmentRunner Configuration ===")
             logger.info("Total papers: %d", len(self._results))
-            logger.info("Max workers: %s", self._max_workers or "sequential")
+            logger.info("Num workers: %d", self._num_workers)
             logger.info("Timeout: %s", self._timeout or "default")
             logger.info("======================================")
 
@@ -143,7 +144,7 @@ class EnrichmentRunner:
         if not self._results:
             return
 
-        max_workers = self._max_workers if isinstance(self._max_workers, int) else None
+        num_workers = self._num_workers
         timeout = self._timeout
         enriched = 0
 
@@ -153,7 +154,7 @@ class EnrichmentRunner:
         for _paper, result, error in execute_tasks(
             self._results,
             _enrich_task,
-            max_workers=max_workers,
+            num_workers=num_workers,
             timeout=timeout,
             progress_total=len(self._results),
             progress_unit="paper",

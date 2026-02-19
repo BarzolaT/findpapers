@@ -82,9 +82,10 @@ class SearchRunner:
         Contact email for OpenAlex polite pool (recommended).
     semantic_scholar_api_key : str | None
         Semantic Scholar API key (increases rate limit).
-    max_workers : int | None
-        Maximum number of parallel workers for running database searchers
-        concurrently.  ``None`` runs all searchers sequentially.
+    num_workers : int
+        Number of parallel workers for running database searchers
+        concurrently.  Defaults to ``1``, which runs all searchers
+        sequentially.  Values greater than ``1`` enable parallel execution.
 
     Raises
     ------
@@ -114,7 +115,7 @@ class SearchRunner:
         openalex_api_key: str | None = None,
         openalex_email: str | None = None,
         semantic_scholar_api_key: str | None = None,
-        max_workers: int | None = None,
+        num_workers: int = 1,
     ) -> None:
         """Initialise search configuration without executing it."""
         self._executed = False
@@ -125,7 +126,7 @@ class SearchRunner:
         self._query_string = query
         self._paper_types = self._validate_paper_types(paper_types)
         self._max_papers_per_database = max_papers_per_database
-        self._max_workers = max_workers
+        self._num_workers = num_workers
 
         # Parse and validate the query upfront so errors surface early.
         validator = QueryValidator()
@@ -167,7 +168,7 @@ class SearchRunner:
             logger.info("=== SearchRunner Configuration ===")
             logger.info("Databases: %s", [s.name for s in self._searchers])
             logger.info("Paper types: %s", self._paper_types or "all")
-            logger.info("Max workers: %s", self._max_workers or "sequential")
+            logger.info("Num workers: %d", self._num_workers)
             logger.info("Query: %s", self._query_string)
             logger.info("Max papers per database: %s", self._max_papers_per_database or "none")
             logger.info("==================================")
@@ -476,14 +477,12 @@ class SearchRunner:
                 )
 
         num_searchers = len(self._searchers)
-        max_workers = (
-            min(self._max_workers, num_searchers) if isinstance(self._max_workers, int) else None
-        )
+        num_workers = min(self._num_workers, num_searchers)
 
         for searcher, result, error in execute_tasks(
             self._searchers,
             _run_searcher,
-            max_workers=max_workers,
+            num_workers=num_workers,
             timeout=None,
             use_progress=False,
         ):
