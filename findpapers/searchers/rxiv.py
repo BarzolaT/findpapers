@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import re
 import time
 import urllib.parse
 from collections.abc import Callable
@@ -133,8 +134,40 @@ class RxivSearcher(SearcherBase):
         )
         return _SEARCH_BASE_URL + path
 
-    def _scrape_dois(self, url: str) -> list[str]:
-        """Scrape paper DOIs from a search results page.
+    @staticmethod
+    def _parse_total_from_soup(soup: BeautifulSoup) -> Optional[int]:
+        """Try to extract the total result count from a search results page.
+
+        Attempts several CSS selectors used by the Highwire Press platform
+        (medrxiv.org / biorxiv.org) and falls back to a regex on the full page
+        text.  Returns ``None`` when the count cannot be determined.
+
+        Parameters
+        ----------
+        soup : BeautifulSoup
+            Parsed HTML of the search results page.
+
+        Returns
+        -------
+        int | None
+            Total result count, or ``None`` when unavailable.
+        """
+        # bioRxiv / medRxiv (Highwire Press): the total result count is in
+        # <h1 id="page-title"> inside a .highwire-search-summary wrapper, e.g.
+        #   <h1 id="page-title">26,467 Results</h1>
+        el = soup.select_one(".highwire-search-summary h1#page-title")
+        if el:
+            text = el.get_text(separator=" ")
+            m = re.search(r"([\d,]+)", text)
+            if m:
+                try:
+                    return int(m.group(1).replace(",", ""))
+                except ValueError:
+                    pass
+        return None
+
+    def _scrape_dois(self, url: str) -> tuple[list[str], Optional[int]]:
+        """Scrape paper DOIs and the total result count from a search results page.
 
         Parameters
         ----------
@@ -143,16 +176,18 @@ class RxivSearcher(SearcherBase):
 
         Returns
         -------
-        list[str]
-            DOI strings found on the page.
+        tuple[list[str], int | None]
+            A 2-tuple of (doi_list, total_count).  *total_count* is ``None``
+            when the page does not expose the total number of results.
         """
         try:
             response = self._get(url)
         except Exception:
             logger.exception("Failed to scrape rxiv search page: %s", url)
-            return []
+            return [], None
 
         soup = BeautifulSoup(response.text, "html.parser")
+        total = self._parse_total_from_soup(soup)
         dois: list[str] = []
         for link in soup.select("a.highwire-cite-linked-title"):
             href = link.get("href", "")
@@ -179,7 +214,7 @@ class RxivSearcher(SearcherBase):
                 dois.append(f"10.1101/{suffix}")
             else:
                 dois.append(doi_path)
-        return dois
+        return dois, total
 
     def _fetch_metadata(self, doi: str) -> Optional[Dict[str, Any]]:
         """Fetch paper metadata from the biorxiv.org API.
@@ -291,13 +326,17 @@ class RxivSearcher(SearcherBase):
             Progress callback.
         """
         page = 0
+        total: Optional[int] = None
 
         while True:
             if max_papers is not None and len(papers) >= max_papers:
                 break
 
             url = self._build_search_url(params, page)
-            dois = self._scrape_dois(url)
+            dois, page_total = self._scrape_dois(url)
+            # Use the total from the first page that provides one.
+            if total is None and page_total is not None:
+                total = page_total
             if not dois:
                 break
 
@@ -311,7 +350,7 @@ class RxivSearcher(SearcherBase):
                         papers.append(paper)
 
                 if progress_callback is not None:
-                    progress_callback(len(papers), max_papers)
+                    progress_callback(len(papers), total)
 
             if len(dois) < 10:
                 break

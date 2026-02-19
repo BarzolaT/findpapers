@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from bs4 import BeautifulSoup
+
 from findpapers.query.builders.rxiv import RxivQueryBuilder
 from findpapers.searchers.biorxiv import BiorxivSearcher
 from findpapers.searchers.rxiv import RxivSearcher
@@ -73,6 +75,51 @@ class TestRxivSearcherBuildSearchUrl:
         assert "cursor%3A10" in url_page1
 
 
+class TestRxivSearcherParseTotalFromSoup:
+    """Tests for _parse_total_from_soup."""
+
+    def test_returns_none_when_no_matching_element(self):
+        """Returns None when page has no known result-count elements."""
+        soup = BeautifulSoup("<html><body><p>No results section</p></body></html>", "html.parser")
+        assert RxivSearcher._parse_total_from_soup(soup) is None
+
+    def test_parses_real_biorxiv_structure(self):
+        """Parses total from the real bioRxiv h1#page-title inside .highwire-search-summary."""
+        html = """
+        <div class="highwire-search-summary" id="search-summary-wrapper">
+            <h1 id="page-title">26,467 Results</h1>
+        </div>
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        assert RxivSearcher._parse_total_from_soup(soup) == 26467
+
+    def test_parses_total_without_comma(self):
+        """Parses total when the number has no thousands separator."""
+        html = """
+        <div class="highwire-search-summary" id="search-summary-wrapper">
+            <h1 id="page-title">42 Results</h1>
+        </div>
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        assert RxivSearcher._parse_total_from_soup(soup) == 42
+
+    def test_returns_none_when_h1_not_inside_summary(self):
+        """Returns None when h1#page-title exists but not inside .highwire-search-summary."""
+        html = "<h1 id='page-title'>Some other heading</h1>"
+        soup = BeautifulSoup(html, "html.parser")
+        assert RxivSearcher._parse_total_from_soup(soup) is None
+
+    def test_returns_none_when_h1_has_no_digits(self):
+        """Returns None when the h1 text contains no parseable number."""
+        html = """
+        <div class="highwire-search-summary">
+            <h1 id="page-title">No results found</h1>
+        </div>
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        assert RxivSearcher._parse_total_from_soup(soup) is None
+
+
 class TestRxivSearcherScrapeDois:
     """Tests for _scrape_dois."""
 
@@ -87,19 +134,21 @@ class TestRxivSearcherScrapeDois:
         response.raise_for_status = MagicMock()
 
         with patch.object(searcher, "_get", return_value=response):
-            dois = searcher._scrape_dois("https://example.com/search")
+            dois, total = searcher._scrape_dois("https://example.com/search")
 
         assert len(dois) == 2
         assert "10.1101/2021.01.01.123456v1" in dois
+        assert total is None  # No result-count element in this HTML
 
     def test_returns_empty_on_http_error(self):
-        """Empty list is returned when HTTP request fails."""
+        """Empty list and None total are returned when HTTP request fails."""
         searcher = _make_searcher()
 
         with patch.object(searcher, "_get", side_effect=Exception("network error")):
-            dois = searcher._scrape_dois("https://example.com/search")
+            dois, total = searcher._scrape_dois("https://example.com/search")
 
         assert dois == []
+        assert total is None
 
     def test_returns_empty_when_no_anchors(self, mock_response):
         """Empty list returned when page has no matching anchor elements."""
@@ -108,9 +157,10 @@ class TestRxivSearcherScrapeDois:
         response.raise_for_status = MagicMock()
 
         with patch.object(searcher, "_get", return_value=response):
-            dois = searcher._scrape_dois("https://example.com/search")
+            dois, total = searcher._scrape_dois("https://example.com/search")
 
         assert dois == []
+        assert total is None
 
     def test_handles_href_as_list(self, mock_response):
         """Handles cases where BeautifulSoup returns href as a list."""
@@ -122,7 +172,7 @@ class TestRxivSearcherScrapeDois:
         response.raise_for_status = MagicMock()
 
         with patch.object(searcher, "_get", return_value=response):
-            dois = searcher._scrape_dois("https://example.com")
+            dois, _total = searcher._scrape_dois("https://example.com")
 
         assert len(dois) >= 1
 
@@ -137,7 +187,7 @@ class TestRxivSearcherScrapeDois:
         response.raise_for_status = MagicMock()
 
         with patch.object(searcher, "_get", return_value=response):
-            dois = searcher._scrape_dois("https://example.com/search")
+            dois, _total = searcher._scrape_dois("https://example.com/search")
 
         assert len(dois) == 1
         assert dois[0] == "10.1101/2025.10.31.685841v1"
@@ -155,11 +205,29 @@ class TestRxivSearcherScrapeDois:
         response.raise_for_status = MagicMock()
 
         with patch.object(searcher, "_get", return_value=response):
-            dois = searcher._scrape_dois("https://example.com/search")
+            dois, _total = searcher._scrape_dois("https://example.com/search")
 
         assert len(dois) == 2
         assert "10.1101/2025.10.31.685841v1" in dois
         assert "10.1101/2025.03.18.644029" in dois
+
+    def test_returns_total_when_present(self, mock_response):
+        """Total count is returned when the real bioRxiv result-count element is present."""
+        html = """<html><body>
+            <div class="highwire-search-summary" id="search-summary-wrapper">
+                <h1 id="page-title">999 Results</h1>
+            </div>
+            <a class="highwire-cite-linked-title" href="/content/10.1101/2021.01.01.111v1">P</a>
+        </body></html>"""
+        searcher = _make_searcher()
+        response = mock_response(text=html)
+        response.raise_for_status = MagicMock()
+
+        with patch.object(searcher, "_get", return_value=response):
+            dois, total = searcher._scrape_dois("https://example.com/search")
+
+        assert len(dois) == 1
+        assert total == 999
 
 
 class TestRxivSearcherFetchMetadata:
@@ -278,7 +346,7 @@ class TestRxivSearcherSearchSingle:
         searcher = _make_searcher()
         papers: list = []
 
-        with patch.object(searcher, "_scrape_dois", return_value=[]):
+        with patch.object(searcher, "_scrape_dois", return_value=([], None)):
             searcher._search_single(
                 {"terms": ["x"], "match": "match-all"},
                 max_papers=None,
@@ -296,9 +364,9 @@ class TestRxivSearcherSearchSingle:
 
         meta = {"title": "Paper A", "doi": "10.1101/a", "authors": "X Y"}
 
-        with patch.object(searcher, "_scrape_dois", side_effect=[["10.1101/a"], []]), patch.object(
-            searcher, "_fetch_metadata", return_value=meta
-        ):
+        with patch.object(
+            searcher, "_scrape_dois", side_effect=[(["10.1101/a"], None), ([], None)]
+        ), patch.object(searcher, "_fetch_metadata", return_value=meta):
             searcher._search_single(
                 {"terms": ["x"], "match": "match-all"},
                 max_papers=None,
@@ -307,20 +375,20 @@ class TestRxivSearcherSearchSingle:
             )
 
         callback.assert_called()
-        # When max_papers is None, total passed to callback must also be None.
+        # When max_papers is None and page provides no total, callback receives None.
         callback.assert_called_with(1, None)
 
-    def test_calls_progress_callback_with_max_papers_as_total(self):
-        """progress_callback receives max_papers as the total when it is set."""
+    def test_calls_progress_callback_with_real_total(self):
+        """progress_callback receives the real total scraped from the page."""
         searcher = _make_searcher()
         papers: list = []
         callback = MagicMock()
 
         meta = {"title": "Paper A", "doi": "10.1101/a", "authors": "X Y"}
 
-        with patch.object(searcher, "_scrape_dois", side_effect=[["10.1101/a"], []]), patch.object(
-            searcher, "_fetch_metadata", return_value=meta
-        ):
+        with patch.object(
+            searcher, "_scrape_dois", side_effect=[(["10.1101/a"], 42), ([], None)]
+        ), patch.object(searcher, "_fetch_metadata", return_value=meta):
             searcher._search_single(
                 {"terms": ["x"], "match": "match-all"},
                 max_papers=10,
@@ -328,9 +396,29 @@ class TestRxivSearcherSearchSingle:
                 progress_callback=callback,
             )
 
-        # The second argument (total) must be max_papers so the progress bar
-        # can display a percentage.
-        callback.assert_called_with(1, 10)
+        # The real total (42) from the page must be used, not max_papers (10).
+        callback.assert_called_with(1, 42)
+
+    def test_calls_progress_callback_with_none_when_total_unavailable(self):
+        """progress_callback receives None as total when page gives no count."""
+        searcher = _make_searcher()
+        papers: list = []
+        callback = MagicMock()
+
+        meta = {"title": "Paper A", "doi": "10.1101/a", "authors": "X Y"}
+
+        with patch.object(
+            searcher, "_scrape_dois", side_effect=[(["10.1101/a"], None), ([], None)]
+        ), patch.object(searcher, "_fetch_metadata", return_value=meta):
+            searcher._search_single(
+                {"terms": ["x"], "match": "match-all"},
+                max_papers=10,
+                papers=papers,
+                progress_callback=callback,
+            )
+
+        # No total available from page — callback must receive None, not max_papers.
+        callback.assert_called_with(1, None)
 
     def test_pagination_stops_when_fewer_than_10_dois(self):
         """Pagination stops when a page returns fewer than 10 DOIs."""
@@ -338,9 +426,9 @@ class TestRxivSearcherSearchSingle:
         papers: list = []
 
         meta = {"title": "Paper", "doi": "10.1101/x", "authors": "A B"}
-        with patch.object(searcher, "_scrape_dois", return_value=["10.1101/x"]), patch.object(
-            searcher, "_fetch_metadata", return_value=meta
-        ):
+        with patch.object(
+            searcher, "_scrape_dois", return_value=(["10.1101/x"], None)
+        ), patch.object(searcher, "_fetch_metadata", return_value=meta):
             searcher._search_single(
                 {"terms": ["x"], "match": "match-all"},
                 max_papers=None,
@@ -388,7 +476,9 @@ class TestRxivSearcherFetchPapers:
             "convert_query",
             return_value={"terms": ["x"], "match": "match-all"},
         ), patch.object(
-            searcher, "_scrape_dois", side_effect=[["10.1101/dup"], [], ["10.1101/dup"], []]
+            searcher,
+            "_scrape_dois",
+            side_effect=[(["10.1101/dup"], None), ([], None), (["10.1101/dup"], None), ([], None)],
         ), patch.object(
             searcher, "_fetch_metadata", return_value=meta
         ):
