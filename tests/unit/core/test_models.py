@@ -1,6 +1,8 @@
 """Tests for Paper, Publication, and Search models."""
 
+import csv
 import datetime
+import json
 
 import pytest
 
@@ -122,3 +124,45 @@ def test_search_add_paper():
     search.add_paper(paper)
     assert len(search.papers) == 1
     assert search.papers[0].title == "Title"
+
+
+def _make_search_with_paper() -> Search:
+    """Return a Search with one Article paper for export tests."""
+    paper = Paper(
+        title="Export Test Paper",
+        abstract="Abstract text.",
+        authors=["Author One"],
+        publication=Publication(title="Test Journal"),
+        publication_date=datetime.date(2023, 1, 1),
+    )
+    paper.paper_type = PaperType.ARTICLE
+    search = Search(query="[export]", databases=["arxiv"])
+    search.add_paper(paper)
+    return search
+
+
+def test_search_to_json_creates_file(tmp_path):
+    """Search.to_json() writes a valid JSON file with a 'papers' key."""
+    path = str(tmp_path / "out.json")
+    _make_search_with_paper().to_json(path)
+    with open(path) as f:
+        data = json.load(f)
+    assert "papers" in data
+    assert len(data["papers"]) == 1
+
+
+def test_search_to_csv_creates_file(tmp_path):
+    """Search.to_csv() writes a CSV file with at least one data row."""
+    path = str(tmp_path / "out.csv")
+    _make_search_with_paper().to_csv(path)
+    with open(path, newline="") as f:
+        rows = list(csv.DictReader(f))
+    assert len(rows) >= 1
+
+
+def test_search_to_bibtex_creates_file(tmp_path):
+    """Search.to_bibtex() writes a BibTeX file containing at least one entry."""
+    path = str(tmp_path / "out.bib")
+    _make_search_with_paper().to_bibtex(path)
+    content = open(path).read()
+    assert "@" in content

@@ -270,63 +270,6 @@ class SearchRunner:
         self._ensure_executed()
         return dict(self._metrics)
 
-    def to_json(self, path: str) -> None:
-        """Export results to a JSON file.
-
-        Parameters
-        ----------
-        path : str
-            Output file path.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            If :meth:`run` has not been called yet.
-        """
-        self._ensure_executed()
-        from findpapers.utils.export import export_to_json
-
-        assert self._search is not None  # noqa: S101  (post-run guarantee)
-        export_to_json(self._search, path)
-
-    def to_csv(self, path: str) -> None:
-        """Export results to a CSV file.
-
-        Parameters
-        ----------
-        path : str
-            Output file path.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            If :meth:`run` has not been called yet.
-        """
-        self._ensure_executed()
-        from findpapers.utils.export import export_to_csv
-
-        assert self._search is not None  # noqa: S101
-        export_to_csv(self._search, path)
-
-    def to_bibtex(self, path: str) -> None:
-        """Export results to a BibTeX file.
-
-        Parameters
-        ----------
-        path : str
-            Output file path.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            If :meth:`run` has not been called yet.
-        """
-        self._ensure_executed()
-        from findpapers.utils.export import export_to_bibtex
-
-        assert self._search is not None  # noqa: S101
-        export_to_bibtex(self._search, path)
-
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------

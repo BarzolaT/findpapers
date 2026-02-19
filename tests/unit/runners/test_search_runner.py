@@ -194,67 +194,6 @@ class TestSearchRunnerPipeline:
         assert len(runner.get_results()) == 0
 
 
-class TestSearchRunnerExports:
-    """Tests for export methods."""
-
-    def _ready_runner(self) -> SearchRunner:
-        runner = SearchRunner(query="[ml]", databases=["arxiv"])
-        mock_searcher = MagicMock()
-        mock_searcher.name = "arXiv"
-        mock_searcher.search.return_value = [_make_paper()]
-        runner._searchers = [mock_searcher]  # noqa: SLF001
-        runner.run()
-        return runner
-
-    def test_to_json_before_run_raises(self, tmp_path):
-        """to_json() before run() raises SearchRunnerNotExecutedError."""
-        runner = SearchRunner(query="[ml]", databases=["arxiv"])
-        with pytest.raises(SearchRunnerNotExecutedError):
-            runner.to_json(str(tmp_path / "out.json"))
-
-    def test_to_csv_before_run_raises(self, tmp_path):
-        """to_csv() before run() raises SearchRunnerNotExecutedError."""
-        runner = SearchRunner(query="[ml]", databases=["arxiv"])
-        with pytest.raises(SearchRunnerNotExecutedError):
-            runner.to_csv(str(tmp_path / "out.csv"))
-
-    def test_to_bibtex_before_run_raises(self, tmp_path):
-        """to_bibtex() before run() raises SearchRunnerNotExecutedError."""
-        runner = SearchRunner(query="[ml]", databases=["arxiv"])
-        with pytest.raises(SearchRunnerNotExecutedError):
-            runner.to_bibtex(str(tmp_path / "out.bib"))
-
-    def test_to_json_creates_file(self, tmp_path):
-        """to_json() creates a JSON file after successful run."""
-        runner = self._ready_runner()
-        path = str(tmp_path / "out.json")
-        runner.to_json(path)
-        import json
-
-        with open(path) as f:
-            data = json.load(f)
-        assert "papers" in data
-
-    def test_to_csv_creates_file(self, tmp_path):
-        """to_csv() creates a CSV file after successful run."""
-        runner = self._ready_runner()
-        path = str(tmp_path / "out.csv")
-        runner.to_csv(path)
-        import csv
-
-        with open(path, newline="") as f:
-            rows = list(csv.DictReader(f))
-        assert len(rows) >= 1
-
-    def test_to_bibtex_creates_file(self, tmp_path):
-        """to_bibtex() creates a BibTeX file after successful run."""
-        runner = self._ready_runner()
-        path = str(tmp_path / "out.bib")
-        runner.to_bibtex(path)
-        content = open(path).read()
-        assert "@" in content
-
-
 class TestSearchRunnerParallel:
     """Tests for parallel execution."""
 
