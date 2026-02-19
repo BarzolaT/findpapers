@@ -65,7 +65,3 @@ format:
 	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run ruff check $(TARGET) --fix
 	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run isort $(TARGET)
 	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run black $(TARGET)
-
-publish:
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) config pypi-token.pypi ${FINDPAPERS_PYPI_API_TOKEN}
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) publish --build
