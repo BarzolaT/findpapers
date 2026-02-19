@@ -126,6 +126,41 @@ class TestRxivSearcherScrapeDois:
 
         assert len(dois) >= 1
 
+    def test_handles_absolute_url_href(self, mock_response):
+        """Absolute href URLs are normalised to bare DOIs correctly."""
+        html = """<html><body>
+            <a class="highwire-cite-linked-title"
+               href="https://www.biorxiv.org/content/10.1101/2025.10.31.685841v1">Paper</a>
+        </body></html>"""
+        searcher = _make_searcher()
+        response = mock_response(text=html)
+        response.raise_for_status = MagicMock()
+
+        with patch.object(searcher, "_get", return_value=response):
+            dois = searcher._scrape_dois("https://example.com/search")
+
+        assert len(dois) == 1
+        assert dois[0] == "10.1101/2025.10.31.685841v1"
+
+    def test_handles_early_path_format(self, mock_response):
+        """New biorxiv path format /content/early/YYYY/MM/DD/SUFFIX is handled."""
+        html = """<html><body>
+            <a class="highwire-cite-linked-title"
+               href="/content/early/2026/02/19/2025.10.31.685841v1">Paper A</a>
+            <a class="highwire-cite-linked-title"
+               href="https://biorxiv.org/content/early/2026/01/15/2025.03.18.644029">Paper B</a>
+        </body></html>"""
+        searcher = _make_searcher()
+        response = mock_response(text=html)
+        response.raise_for_status = MagicMock()
+
+        with patch.object(searcher, "_get", return_value=response):
+            dois = searcher._scrape_dois("https://example.com/search")
+
+        assert len(dois) == 2
+        assert "10.1101/2025.10.31.685841v1" in dois
+        assert "10.1101/2025.03.18.644029" in dois
+
 
 class TestRxivSearcherFetchMetadata:
     """Tests for _fetch_metadata."""
@@ -272,6 +307,30 @@ class TestRxivSearcherSearchSingle:
             )
 
         callback.assert_called()
+        # When max_papers is None, total passed to callback must also be None.
+        callback.assert_called_with(1, None)
+
+    def test_calls_progress_callback_with_max_papers_as_total(self):
+        """progress_callback receives max_papers as the total when it is set."""
+        searcher = _make_searcher()
+        papers: list = []
+        callback = MagicMock()
+
+        meta = {"title": "Paper A", "doi": "10.1101/a", "authors": "X Y"}
+
+        with patch.object(searcher, "_scrape_dois", side_effect=[["10.1101/a"], []]), patch.object(
+            searcher, "_fetch_metadata", return_value=meta
+        ):
+            searcher._search_single(
+                {"terms": ["x"], "match": "match-all"},
+                max_papers=10,
+                papers=papers,
+                progress_callback=callback,
+            )
+
+        # The second argument (total) must be max_papers so the progress bar
+        # can display a percentage.
+        callback.assert_called_with(1, 10)
 
     def test_pagination_stops_when_fewer_than_10_dois(self):
         """Pagination stops when a page returns fewer than 10 DOIs."""

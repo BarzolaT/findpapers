@@ -157,11 +157,28 @@ class RxivSearcher(SearcherBase):
         for link in soup.select("a.highwire-cite-linked-title"):
             href = link.get("href", "")
             href_str = href if isinstance(href, str) else (href[0] if href else "")
-            if href_str:
-                # href has form /content/10.1101/2020.01.01.123456v1
-                parts = href_str.strip("/").split("/", maxsplit=1)
-                if len(parts) == 2:
-                    dois.append(parts[1])
+            if not href_str:
+                continue
+            # Normalize: extract the path component so that both relative
+            # (/content/...) and absolute (https://biorxiv.org/content/...)
+            # hrefs are handled uniformly.
+            parsed_href = urllib.parse.urlparse(href_str)
+            path = parsed_href.path
+            if not path:
+                continue
+            # Expected path formats:
+            #   /content/10.1101/2020.01.01.123456v1   (old — DOI embedded)
+            #   /content/early/YYYY/MM/DD/SUFFIX[vN]   (new — DOI suffix last)
+            parts = path.strip("/").split("/", maxsplit=1)
+            if len(parts) != 2:
+                continue
+            doi_path = parts[1]
+            if doi_path.startswith("early/"):
+                # The actual DOI suffix is the last path segment.
+                suffix = doi_path.rstrip("/").rsplit("/", maxsplit=1)[-1]
+                dois.append(f"10.1101/{suffix}")
+            else:
+                dois.append(doi_path)
         return dois
 
     def _fetch_metadata(self, doi: str) -> Optional[Dict[str, Any]]:
@@ -181,7 +198,7 @@ class RxivSearcher(SearcherBase):
         try:
             response = self._get(url)
         except Exception:
-            logger.exception("Failed to fetch metadata for DOI %s.", doi)
+            logger.debug("Failed to fetch metadata for DOI %s.", doi, exc_info=True)
             return None
 
         data = response.json()
@@ -294,7 +311,7 @@ class RxivSearcher(SearcherBase):
                         papers.append(paper)
 
                 if progress_callback is not None:
-                    progress_callback(len(papers), None)
+                    progress_callback(len(papers), max_papers)
 
             if len(dois) < 10:
                 break
