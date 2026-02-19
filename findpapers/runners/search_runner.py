@@ -366,7 +366,17 @@ class SearchRunner:
                 f"Accepted values: {', '.join(sorted(valid_values))}"
             )
 
-        return [all_searchers[Database(db)] for db in raw]
+        searchers = [all_searchers[Database(db)] for db in raw]
+        available = []
+        for searcher in searchers:
+            if searcher.is_available:
+                available.append(searcher)
+            else:
+                logger.warning(
+                    "Skipping '%s': a required API key was not provided.",
+                    searcher.name,
+                )
+        return available
 
     def _fetch_papers(self, metrics: dict[str, int | float], verbose: bool = False) -> None:
         """Fetch papers from all configured searchers.

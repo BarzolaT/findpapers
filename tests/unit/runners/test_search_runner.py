@@ -60,9 +60,47 @@ class TestSearchRunnerInit:
         assert len(runner._searchers) == 2  # noqa: SLF001
 
     def test_all_databases_when_none(self):
-        """All 8 databases are selected when databases=None."""
+        """6 databases are selected when databases=None and no API keys given.
+
+        IEEE and Scopus require API keys; without them they are skipped.
+        """
         runner = SearchRunner(query="[ml]")
+        assert len(runner._searchers) == 6  # noqa: SLF001
+
+    def test_all_databases_when_api_keys_provided(self):
+        """All 8 databases are selected when databases=None and API keys given."""
+        runner = SearchRunner(
+            query="[ml]",
+            ieee_api_key="ieee_key",
+            scopus_api_key="scopus_key",
+        )
         assert len(runner._searchers) == 8  # noqa: SLF001
+
+    def test_ieee_skipped_without_api_key(self):
+        """IEEE is excluded from the searcher list when no API key is given."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])
+        names = [s.name for s in runner._searchers]  # noqa: SLF001
+        assert "IEEE" not in names
+        assert "arXiv" in names
+
+    def test_ieee_included_with_api_key(self):
+        """IEEE is included when its API key is provided."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"], ieee_api_key="key")
+        names = [s.name for s in runner._searchers]  # noqa: SLF001
+        assert "IEEE" in names
+
+    def test_scopus_skipped_without_api_key(self):
+        """Scopus is excluded from the searcher list when no API key is given."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "scopus"])
+        names = [s.name for s in runner._searchers]  # noqa: SLF001
+        assert "Scopus" not in names
+        assert "arXiv" in names
+
+    def test_scopus_included_with_api_key(self):
+        """Scopus is included when its API key is provided."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "scopus"], scopus_api_key="key")
+        names = [s.name for s in runner._searchers]  # noqa: SLF001
+        assert "Scopus" in names
 
     def test_get_results_before_run_raises(self):
         """get_results() before run() raises SearchRunnerNotExecutedError."""

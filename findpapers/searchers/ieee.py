@@ -92,6 +92,20 @@ class IEEESearcher(SearcherBase):
         return "IEEE"
 
     @property
+    def is_available(self) -> bool:
+        """Return ``True`` only when an API key has been provided.
+
+        IEEE Xplore requires an API key for production use.  Without one the
+        searcher is considered unavailable and will be skipped by the runner.
+
+        Returns
+        -------
+        bool
+            ``True`` if an API key is set, ``False`` otherwise.
+        """
+        return self._api_key is not None
+
+    @property
     def query_builder(self) -> QueryBuilder:
         """Return the IEEE query builder.
 

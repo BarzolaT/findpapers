@@ -64,8 +64,10 @@ class OpenAlexSearcher(SearcherBase):
 
     https://docs.openalex.org/how-to-use-the-api
 
-    Rate limit: ~10 req/s (polite pool with email in User-Agent).
-    Max: 100k requests/day with an API key.
+    Rate limit: max 100 req/s for all users.
+    Without an API key the daily budget is $0.01/day (~100 list requests,
+    recommended for testing and demos only).  With a free API key the budget
+    is $10/day (~100,000 list requests/day).  Singleton requests are free.
     """
 
     def __init__(
@@ -82,7 +84,9 @@ class OpenAlexSearcher(SearcherBase):
             Builder used to validate and convert queries.  When ``None`` a
             default :class:`OpenAlexQueryBuilder` is created automatically.
         api_key : str | None
-            OpenAlex API key (increases daily quota and rate limit).
+            OpenAlex API key (optional but highly recommended; free keys
+            available at https://openalex.org/settings/api).  Without a key
+            the daily budget is $0.01/day, suitable for testing only.
         email : str | None
             Contact email for the polite pool (recommended by OpenAlex).
         """

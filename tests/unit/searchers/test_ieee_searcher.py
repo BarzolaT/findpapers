@@ -25,6 +25,14 @@ class TestIEEESearcherInit:
         """Searcher name is 'IEEE'."""
         assert IEEESearcher().name == "IEEE"
 
+    def test_is_available_without_api_key(self):
+        """is_available is False when no API key is provided."""
+        assert IEEESearcher().is_available is False
+
+    def test_is_available_with_api_key(self):
+        """is_available is True when an API key is provided."""
+        assert IEEESearcher(api_key="key").is_available is True
+
 
 class TestIEEESearcherParsePaper:
     """Tests for _parse_paper."""

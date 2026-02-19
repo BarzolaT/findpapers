@@ -22,9 +22,10 @@ logger = logging.getLogger(__name__)
 _BULK_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search/bulk"
 _PAGE_SIZE = 100  # Semantic Scholar max per request
 
-# Rate limits: 1 req/s without key (use 1.1s to be safe), 10 req/s with key
-_MIN_REQUEST_INTERVAL_DEFAULT = 1.1
-_MIN_REQUEST_INTERVAL_WITH_KEY = 0.11
+# Rate limits: 1000 req/s without key (shared among all unauthenticated users),
+# 1 req/s with key (introductory; can be increased upon request)
+_MIN_REQUEST_INTERVAL_DEFAULT = 1.1  # conservative for shared pool
+_MIN_REQUEST_INTERVAL_WITH_KEY = 1.1  # respects 1 RPS introductory limit
 
 # Fields to retrieve in each paper record
 _PAPER_FIELDS = (
@@ -80,8 +81,8 @@ class SemanticScholarSearcher(SearcherBase):
     https://api.semanticscholar.org/api-docs/#tag/Paper-Data/operation/bulk_paper_search
 
     Rate limits:
-    - Without API key: 1 request/second
-    - With API key: 10 requests/second
+    - Without API key: up to 1000 req/s (shared among all unauthenticated users)
+    - With API key: 1 req/s (introductory; can be increased upon request)
     """
 
     def __init__(
@@ -97,7 +98,9 @@ class SemanticScholarSearcher(SearcherBase):
             Builder used to validate and convert queries.  When ``None`` a
             default :class:`SemanticScholarQueryBuilder` is created automatically.
         api_key : str | None
-            Semantic Scholar API key (increases rate limit from 1 to 10 req/s).
+            Semantic Scholar API key (optional; provides a dedicated 1 RPS quota,
+            decoupled from the shared unauthenticated pool, and can be increased
+            upon request).
         """
         self._query_builder: SemanticScholarQueryBuilder = (
             query_builder or SemanticScholarQueryBuilder()

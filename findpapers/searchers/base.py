@@ -85,6 +85,21 @@ class SearcherBase(ABC):
             Implementations may raise on network or parsing failures.
         """
 
+    @property
+    def is_available(self) -> bool:
+        """Return ``True`` if the searcher is properly configured and ready to use.
+
+        Searchers that require an API key override this property to return
+        ``False`` when no key has been provided, so the runner can skip them
+        gracefully instead of failing at query time.
+
+        Returns
+        -------
+        bool
+            ``True`` by default; ``False`` when a required credential is absent.
+        """
+        return True
+
     def search(
         self,
         query: "Query",
