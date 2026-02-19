@@ -1,11 +1,45 @@
 from __future__ import annotations
 
 import datetime
+from enum import Enum
 from typing import List, Optional
 
 from ..utils.export import export_to_bibtex, export_to_csv, export_to_json
 from ..utils.version import package_version
 from .paper import Paper
+
+
+class Database(str, Enum):
+    """Supported academic database identifiers.
+
+    Inheriting from :class:`str` makes each member compare equal to its string
+    value, so code such as ``database == "arxiv"`` continues to work without
+    modification.
+    """
+
+    ARXIV = "arxiv"
+    """arXiv preprint server."""
+
+    BIORXIV = "biorxiv"
+    """bioRxiv preprint server."""
+
+    IEEE = "ieee"
+    """IEEE Xplore digital library."""
+
+    MEDRXIV = "medrxiv"
+    """medRxiv preprint server."""
+
+    OPENALEX = "openalex"
+    """OpenAlex open scholarly graph."""
+
+    PUBMED = "pubmed"
+    """PubMed biomedical literature database."""
+
+    SCOPUS = "scopus"
+    """Elsevier Scopus abstract and citation database."""
+
+    SEMANTIC_SCHOLAR = "semantic_scholar"
+    """Semantic Scholar AI-powered research database."""
 
 
 class Search:

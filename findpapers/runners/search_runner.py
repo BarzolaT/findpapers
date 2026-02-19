@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from time import perf_counter
 
 from findpapers.core.paper import Paper, PaperType
-from findpapers.core.search import Search
+from findpapers.core.search import Database, Search
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.query.parser import QueryParser
 from findpapers.query.validator import QueryValidator
@@ -26,18 +26,6 @@ from findpapers.utils.predatory import is_predatory_publication
 from findpapers.utils.progress import make_progress_bar
 
 logger = logging.getLogger(__name__)
-
-# Canonical database identifiers.
-_ALL_DATABASES = [
-    "arxiv",
-    "biorxiv",
-    "ieee",
-    "medrxiv",
-    "openalex",
-    "pubmed",
-    "scopus",
-    "semantic_scholar",
-]
 
 
 class SearchRunner:
@@ -358,23 +346,27 @@ class SearchRunner:
         ValueError
             When an unknown database identifier is provided.
         """
-        all_searchers: dict[str, SearcherBase] = {
-            "arxiv": ArxivSearcher(),
-            "biorxiv": BiorxivSearcher(),
-            "ieee": IEEESearcher(api_key=ieee_api_key),
-            "medrxiv": MedrxivSearcher(),
-            "openalex": OpenAlexSearcher(api_key=openalex_api_key, email=openalex_email),
-            "pubmed": PubmedSearcher(api_key=pubmed_api_key),
-            "scopus": ScopusSearcher(api_key=scopus_api_key),
-            "semantic_scholar": SemanticScholarSearcher(api_key=semantic_scholar_api_key),
+        all_searchers: dict[Database, SearcherBase] = {
+            Database.ARXIV: ArxivSearcher(),
+            Database.BIORXIV: BiorxivSearcher(),
+            Database.IEEE: IEEESearcher(api_key=ieee_api_key),
+            Database.MEDRXIV: MedrxivSearcher(),
+            Database.OPENALEX: OpenAlexSearcher(api_key=openalex_api_key, email=openalex_email),
+            Database.PUBMED: PubmedSearcher(api_key=pubmed_api_key),
+            Database.SCOPUS: ScopusSearcher(api_key=scopus_api_key),
+            Database.SEMANTIC_SCHOLAR: SemanticScholarSearcher(api_key=semantic_scholar_api_key),
         }
 
-        requested = [db.strip().lower() for db in (databases or _ALL_DATABASES)]
-        unknown = [db for db in requested if db not in all_searchers]
+        valid_values = {db.value for db in Database}
+        raw = [db.strip().lower() for db in (databases or [db.value for db in Database])]
+        unknown = [db for db in raw if db not in valid_values]
         if unknown:
-            raise ValueError(f"Unknown database(s): {', '.join(unknown)}")
+            raise ValueError(
+                f"Unknown database(s): {', '.join(unknown)}. "
+                f"Accepted values: {', '.join(sorted(valid_values))}"
+            )
 
-        return [all_searchers[db] for db in requested]
+        return [all_searchers[Database(db)] for db in raw]
 
     def _fetch_papers(self, metrics: dict[str, int | float], verbose: bool = False) -> None:
         """Fetch papers from all configured searchers.
