@@ -187,6 +187,61 @@ class TestDownloadRunnerRun:
         assert os.path.exists(error_log)
 
 
+class TestDownloadRunnerVerbose:
+    """Tests for the verbose=True logging path."""
+
+    def test_verbose_run_does_not_raise(self, tmp_path):
+        """run(verbose=True) completes without raising."""
+
+        runner = DownloadRunner(papers=[], output_directory=str(tmp_path))
+        # Should not raise.
+        runner.run(verbose=True)
+        assert runner.get_metrics()["total_papers"] == 0
+
+    def test_verbose_true_emits_configuration_header(self, tmp_path, caplog):
+        """verbose=True logs the DownloadRunner configuration header."""
+        import logging
+
+        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        with patch.object(runner, "_download_paper", return_value=(True, ["http://url"])):
+            with caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"):
+                runner.run(verbose=True)
+        assert "DownloadRunner Configuration" in " ".join(caplog.messages)
+
+    def test_verbose_true_emits_download_summary(self, tmp_path, caplog):
+        """verbose=True logs the download summary after execution."""
+        import logging
+
+        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        with patch.object(runner, "_download_paper", return_value=(True, ["http://url"])):
+            with caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"):
+                runner.run(verbose=True)
+        messages = " ".join(caplog.messages)
+        assert "Download Summary" in messages
+        assert "Runtime" in messages
+
+    def test_verbose_true_logs_download_error(self, tmp_path, caplog):
+        """verbose=True logs a WARNING when a paper download fails."""
+        import logging
+
+        paper = _make_paper(title="Failing Paper")
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_download_paper", side_effect=RuntimeError("network error")):
+            with caplog.at_level(logging.WARNING, logger="findpapers.runners.download_runner"):
+                runner.run(verbose=True)
+        warnings = [r.message for r in caplog.records if r.levelno == logging.WARNING]
+        assert any("Failing Paper" in str(w) for w in warnings)
+
+    def test_verbose_false_emits_no_configuration_log(self, tmp_path, caplog):
+        """verbose=False (default) does not log the configuration header."""
+        import logging
+
+        runner = DownloadRunner(papers=[], output_directory=str(tmp_path))
+        with caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"):
+            runner.run(verbose=False)
+        assert "DownloadRunner Configuration" not in " ".join(caplog.messages)
+
+
 class TestDownloadRunnerUrlPriority:
     """Tests that pdf_url is tried before other URLs."""
 

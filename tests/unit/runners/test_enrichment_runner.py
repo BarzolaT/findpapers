@@ -105,6 +105,62 @@ class TestEnrichmentRunnerRun:
         assert runner.get_metrics()["total_papers"] == 5
 
 
+class TestEnrichmentRunnerVerbose:
+    """Tests for the verbose=True logging path."""
+
+    def test_verbose_run_does_not_raise(self):
+        """run(verbose=True) completes without raising."""
+        runner = EnrichmentRunner(papers=[])
+        runner.run(verbose=True)
+        assert runner.get_metrics()["total_papers"] == 0
+
+    def test_verbose_true_emits_configuration_header(self, caplog):
+        """verbose=True logs the EnrichmentRunner configuration header."""
+        import logging
+
+        runner = EnrichmentRunner(papers=[_make_paper()])
+        with patch("findpapers.runners.enrichment_runner.enrich_from_sources", return_value=None):
+            with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
+                runner.run(verbose=True)
+        assert "EnrichmentRunner Configuration" in " ".join(caplog.messages)
+
+    def test_verbose_true_emits_enrichment_summary(self, caplog):
+        """verbose=True logs the enrichment summary after execution."""
+        import logging
+
+        runner = EnrichmentRunner(papers=[_make_paper()])
+        with patch("findpapers.runners.enrichment_runner.enrich_from_sources", return_value=None):
+            with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
+                runner.run(verbose=True)
+        messages = " ".join(caplog.messages)
+        assert "Enrichment Summary" in messages
+        assert "Runtime" in messages
+
+    def test_verbose_true_logs_enrichment_error(self, caplog):
+        """verbose=True logs a WARNING when a paper fails to enrich."""
+        import logging
+
+        runner = EnrichmentRunner(papers=[_make_paper()])
+        with patch(
+            "findpapers.runners.enrichment_runner.enrich_from_sources",
+            side_effect=RuntimeError("network error"),
+        ):
+            with caplog.at_level(logging.WARNING, logger="findpapers.runners.enrichment_runner"):
+                runner.run(verbose=True)
+        warnings = [r.message for r in caplog.records if r.levelno == logging.WARNING]
+        assert len(warnings) >= 1
+
+    def test_verbose_false_emits_no_configuration_log(self, caplog):
+        """verbose=False (default) does not log the configuration header."""
+        import logging
+
+        runner = EnrichmentRunner(papers=[_make_paper()])
+        with patch("findpapers.runners.enrichment_runner.enrich_from_sources", return_value=None):
+            with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
+                runner.run(verbose=False)
+        assert "EnrichmentRunner Configuration" not in " ".join(caplog.messages)
+
+
 class TestEnrichmentRunnerPredatoryReclassification:
     """Tests for predatory flag reclassification after enrichment."""
 

@@ -232,6 +232,59 @@ class TestSearchRunnerPipeline:
         assert len(runner.get_results()) == 0
 
 
+class TestSearchRunnerVerbose:
+    """Tests for the verbose=True logging path."""
+
+    def _make_runner_with_mock_papers(self, papers: list[Paper]) -> SearchRunner:
+        """Create a SearchRunner whose searchers return the provided papers."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = "arXiv"
+        mock_searcher.search.return_value = papers
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+        return runner
+
+    def test_verbose_run_does_not_raise(self, caplog):
+        """run(verbose=True) completes without raising."""
+        import logging
+
+        runner = self._make_runner_with_mock_papers([_make_paper()])
+        with caplog.at_level(logging.INFO):
+            runner.run(verbose=True)
+        # No exception raised; runner should be executed.
+        assert runner.get_metrics()["total_papers"] >= 0
+
+    def test_verbose_true_emits_configuration_header(self, caplog):
+        """verbose=True logs the configuration header."""
+        import logging
+
+        runner = self._make_runner_with_mock_papers([_make_paper()])
+        with caplog.at_level(logging.INFO, logger="findpapers.runners.search_runner"):
+            runner.run(verbose=True)
+        messages = " ".join(caplog.messages)
+        assert "SearchRunner Configuration" in messages
+
+    def test_verbose_true_emits_results_summary(self, caplog):
+        """verbose=True logs the results summary."""
+        import logging
+
+        runner = self._make_runner_with_mock_papers([_make_paper()])
+        with caplog.at_level(logging.INFO, logger="findpapers.runners.search_runner"):
+            runner.run(verbose=True)
+        messages = " ".join(caplog.messages)
+        assert "Results" in messages
+        assert "Runtime" in messages
+
+    def test_verbose_false_emits_no_configuration_log(self, caplog):
+        """verbose=False (default) does not log the configuration header."""
+        import logging
+
+        runner = self._make_runner_with_mock_papers([_make_paper()])
+        with caplog.at_level(logging.INFO, logger="findpapers.runners.search_runner"):
+            runner.run(verbose=False)
+        assert "SearchRunner Configuration" not in " ".join(caplog.messages)
+
+
 class TestSearchRunnerParallel:
     """Tests for parallel execution."""
 
