@@ -29,7 +29,7 @@ class EnrichmentRunner:
         Number of parallel workers.  Defaults to ``1``, which runs
         sequentially.  Values greater than ``1`` enable parallel execution.
     timeout : float | None
-        Per-request and global timeout in seconds.
+        Per-request HTTP timeout in seconds.
 
     Examples
     --------
@@ -155,12 +155,11 @@ class EnrichmentRunner:
             self._results,
             _enrich_task,
             num_workers=num_workers,
-            timeout=timeout,
+            timeout=None,
             progress_total=len(self._results),
             progress_unit="paper",
             progress_desc="Enriching",
             use_progress=True,
-            stop_on_timeout=True,
         ):
             if error is not None:
                 if verbose:

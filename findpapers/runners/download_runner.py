@@ -35,7 +35,7 @@ class DownloadRunner:
         Number of parallel workers.  Defaults to ``1``, which runs
         sequentially.  Values greater than ``1`` enable parallel execution.
     timeout : float | None
-        Per-request and global timeout in seconds.
+        Per-request HTTP timeout in seconds.
     proxy : str | None
         Proxy URL for HTTP/HTTPS requests (also read from
         ``FINDPAPERS_PROXY`` env variable if ``None``).
@@ -123,12 +123,11 @@ class DownloadRunner:
             self._results,
             _download_task,
             num_workers=num_workers,
-            timeout=timeout,
+            timeout=None,
             progress_total=len(self._results),
             progress_unit="paper",
             progress_desc="Downloading",
             use_progress=True,
-            stop_on_timeout=True,
         ):
             if error is not None or result is None:
                 self._log_download_error(error_log_path, paper.title, [])
