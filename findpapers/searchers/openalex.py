@@ -65,9 +65,9 @@ class OpenAlexSearcher(SearcherBase):
     https://docs.openalex.org/how-to-use-the-api
 
     Rate limit: max 100 req/s for all users.
-    Without an API key the daily budget is $0.01/day (~100 list requests,
+    Without an API key the daily budget is $0.01/day (~10 requests,
     recommended for testing and demos only).  With a free API key the budget
-    is $10/day (~100,000 list requests/day).  Singleton requests are free.
+    is $10/day (~10,000 requests/day). Singleton requests are free.
     """
 
     def __init__(
