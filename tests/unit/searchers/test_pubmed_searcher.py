@@ -6,7 +6,33 @@ from unittest.mock import MagicMock, patch
 from xml.etree import ElementTree as ET
 
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
-from findpapers.searchers.pubmed import PubmedSearcher
+from findpapers.searchers.pubmed import PubmedSearcher, _normalize_month
+
+
+class TestNormalizeMonth:
+    """Tests for _normalize_month helper."""
+
+    def test_numeric_month_padded(self):
+        """Numeric month string is zero-padded."""
+        assert _normalize_month("3") == "03"
+        assert _normalize_month("12") == "12"
+
+    def test_abbreviated_name_jan(self):
+        """'Jan' maps to '01'."""
+        assert _normalize_month("Jan") == "01"
+
+    def test_abbreviated_name_dec(self):
+        """'Dec' maps to '12'."""
+        assert _normalize_month("Dec") == "12"
+
+    def test_case_insensitive(self):
+        """Month names are case-insensitive."""
+        assert _normalize_month("JAN") == "01"
+        assert _normalize_month("jan") == "01"
+
+    def test_invalid_returns_01(self):
+        """Non-numeric, non-abbreviated input returns '01'."""
+        assert _normalize_month("Spring") == "01"
 
 
 class TestPubmedSearcherInit:
@@ -25,6 +51,24 @@ class TestPubmedSearcherInit:
     def test_name(self):
         """Searcher name is 'PubMed'."""
         assert PubmedSearcher().name == "PubMed"
+
+    def test_rate_interval_without_key(self):
+        """Default rate interval is used when no API key provided."""
+        from findpapers.searchers.pubmed import _MIN_REQUEST_INTERVAL_DEFAULT
+
+        searcher = PubmedSearcher()
+        assert searcher._request_interval == _MIN_REQUEST_INTERVAL_DEFAULT
+
+    def test_rate_interval_with_key(self):
+        """Faster rate interval used when API key is provided."""
+        from findpapers.searchers.pubmed import (
+            _MIN_REQUEST_INTERVAL_DEFAULT,
+            _MIN_REQUEST_INTERVAL_WITH_KEY,
+        )
+
+        searcher = PubmedSearcher(api_key="key")
+        assert searcher._request_interval == _MIN_REQUEST_INTERVAL_WITH_KEY
+        assert searcher._request_interval < _MIN_REQUEST_INTERVAL_DEFAULT
 
 
 class TestPubmedSearcherParsePaper:
@@ -61,6 +105,125 @@ class TestPubmedSearcherParsePaper:
         """
         el = ET.fromstring(xml_str)
         assert PubmedSearcher._parse_paper(el) is None
+
+    def test_missing_medline_citation_returns_none(self):
+        """Element without MedlineCitation returns None."""
+        xml_str = "<PubmedArticle></PubmedArticle>"
+        el = ET.fromstring(xml_str)
+        assert PubmedSearcher._parse_paper(el) is None
+
+    def test_author_with_initials_only(self):
+        """Author with LastName + Initials (no ForeName) is parsed."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>12345</PMID>
+                <Article>
+                    <ArticleTitle>A Paper</ArticleTitle>
+                    <AuthorList>
+                        <Author>
+                            <LastName>Smith</LastName>
+                            <Initials>J</Initials>
+                        </Author>
+                    </AuthorList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher._parse_paper(el)
+        assert paper is not None
+        assert paper.authors == ["J Smith"]
+
+    def test_keywords_extracted(self):
+        """Keywords and MeSH descriptors are collected."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>99</PMID>
+                <Article>
+                    <ArticleTitle>Test Paper</ArticleTitle>
+                </Article>
+                <KeywordList>
+                    <Keyword>Deep Learning</Keyword>
+                </KeywordList>
+                <MeshHeadingList>
+                    <MeshHeading>
+                        <DescriptorName>Neural Networks, Computer</DescriptorName>
+                    </MeshHeading>
+                </MeshHeadingList>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher._parse_paper(el)
+        assert paper is not None
+        assert paper.keywords is not None
+        assert "Deep Learning" in paper.keywords
+        assert "Neural Networks, Computer" in paper.keywords
+
+    def test_doi_extracted(self):
+        """DOI from ArticleId is extracted."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>55</PMID>
+                <Article>
+                    <ArticleTitle>DOI Paper</ArticleTitle>
+                </Article>
+            </MedlineCitation>
+            <PubmedData>
+                <ArticleIdList>
+                    <ArticleId IdType="doi">10.1234/test</ArticleId>
+                </ArticleIdList>
+            </PubmedData>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher._parse_paper(el)
+        assert paper is not None
+        assert paper.doi == "10.1234/test"
+
+    def test_url_from_pmid(self):
+        """URL is built from the PMID."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>12345</PMID>
+                <Article>
+                    <ArticleTitle>URL Paper</ArticleTitle>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher._parse_paper(el)
+        assert paper is not None
+        assert paper.url == "https://pubmed.ncbi.nlm.nih.gov/12345/"
+
+    def test_publication_from_journal(self):
+        """Publication is built from Journal title and ISSN."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>1</PMID>
+                <Article>
+                    <ArticleTitle>Journal Paper</ArticleTitle>
+                    <Journal>
+                        <ISSN>1234-5678</ISSN>
+                        <Title>Nature</Title>
+                        <ISOAbbreviation>Nature</ISOAbbreviation>
+                    </Journal>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher._parse_paper(el)
+        assert paper is not None
+        assert paper.publication is not None
+        assert paper.publication.title == "Nature"
+        assert paper.publication.issn == "1234-5678"
 
 
 class TestPubmedSearcherSearch:
@@ -125,3 +288,61 @@ class TestPubmedSearcherSearch:
             papers = searcher.search(simple_query, max_papers=2)
 
         assert len(papers) <= 2
+
+    def test_esearch_error_breaks_loop(self, simple_query):
+        """Exception in _search_ids breaks the loop and returns empty list."""
+        searcher = PubmedSearcher()
+
+        with patch.object(searcher, "_search_ids", side_effect=Exception("network error")):
+            papers = searcher.search(simple_query)
+
+        assert papers == []
+
+    def test_efetch_error_breaks_loop(self, simple_query, pubmed_esearch_json, mock_response):
+        """Exception in _fetch_details breaks the loop."""
+        searcher = PubmedSearcher()
+        esearch_mock = mock_response(json_data=pubmed_esearch_json)
+        esearch_mock.raise_for_status = MagicMock()
+
+        with patch(
+            "findpapers.searchers.pubmed.requests.get", return_value=esearch_mock
+        ), patch.object(
+            searcher, "_fetch_details", side_effect=Exception("fetch error")
+        ), patch.object(
+            searcher, "_rate_limit"
+        ):
+            papers = searcher.search(simple_query)
+
+        assert papers == []
+
+    def test_progress_callback_called(
+        self,
+        simple_query,
+        pubmed_esearch_json,
+        pubmed_efetch_xml,
+        mock_response,
+    ):
+        """Progress callback is invoked after each page."""
+        searcher = PubmedSearcher()
+        esearch_mock = mock_response(json_data=pubmed_esearch_json)
+        esearch_mock.raise_for_status = MagicMock()
+        efetch_mock = mock_response(text=pubmed_efetch_xml)
+        efetch_mock.raise_for_status = MagicMock()
+        callback = MagicMock()
+
+        with patch(
+            "findpapers.searchers.pubmed.requests.get",
+            side_effect=[esearch_mock, efetch_mock],
+        ), patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, progress_callback=callback)
+
+        callback.assert_called()
+
+    def test_search_raises_surfaces_via_base(self, simple_query):
+        """Unexpected exception in _fetch_papers returns an empty list."""
+        searcher = PubmedSearcher()
+
+        with patch.object(searcher, "_fetch_papers", side_effect=RuntimeError("boom")):
+            papers = searcher.search(simple_query)
+
+        assert papers == []

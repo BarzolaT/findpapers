@@ -96,3 +96,80 @@ class TestExecuteTasksParallel:
             )
         )
         assert len(results) == 2
+
+    def test_parallel_timeout_yields_remaining_as_timeout_errors(self):
+        """When global timeout fires in parallel mode, remaining items yield TimeoutError."""
+        import time
+
+        def _slow(x):
+            time.sleep(0.5)
+            return x
+
+        items = list(range(4))
+        results = list(execute_tasks(items, _slow, num_workers=4, timeout=0.05))
+        # All items must be yielded (either as timeout errors or fast completions)
+        assert len(results) == len(items)
+        errors = [e for _, _, e in results if e is not None]
+        assert len(errors) > 0
+        for _, _, e in results:
+            if e is not None:
+                assert isinstance(e, TimeoutError)
+
+    def test_parallel_timeout_done_future_yields_result(self):
+        """Done futures not yet yielded are resolved when global timeout fires."""
+        from concurrent.futures import Future
+        from concurrent.futures import TimeoutError as FuturesTimeoutError
+        from unittest.mock import MagicMock, patch
+
+        # Build two futures: one already done (result=99), one not done
+        done_future: Future = Future()
+        done_future.set_result(99)
+        not_done_future: Future = Future()  # never completed
+
+        items = ["a", "b"]
+        item_to_future = {"a": done_future, "b": not_done_future}
+
+        # Make as_completed raise FuturesTimeoutError immediately (no futures yielded)
+        def _fake_as_completed(fs, timeout=None):
+            raise FuturesTimeoutError()
+
+        with patch("findpapers.utils.parallel.as_completed", side_effect=_fake_as_completed), patch(
+            "findpapers.utils.parallel.ThreadPoolExecutor"
+        ) as mock_executor_cls:
+            mock_executor = MagicMock()
+            mock_executor_cls.return_value.__enter__.return_value = mock_executor
+            mock_executor.submit.side_effect = lambda fn, item: item_to_future[item]
+            results = list(
+                execute_tasks(items, lambda x: x, num_workers=2, timeout=0.01, use_progress=False)
+            )
+
+        assert len(results) == 2
+
+    def test_parallel_timeout_done_future_with_exception(self):
+        """Done futures that raise exceptions are surfaced correctly after timeout."""
+        from concurrent.futures import Future
+        from concurrent.futures import TimeoutError as FuturesTimeoutError
+        from unittest.mock import MagicMock, patch
+
+        boom_future: Future = Future()
+        boom_future.set_exception(ValueError("boom"))
+
+        items = ["x"]
+
+        def _fake_as_completed(fs, timeout=None):
+            raise FuturesTimeoutError()
+
+        with patch("findpapers.utils.parallel.as_completed", side_effect=_fake_as_completed), patch(
+            "findpapers.utils.parallel.ThreadPoolExecutor"
+        ) as mock_executor_cls:
+            mock_executor = MagicMock()
+            mock_executor_cls.return_value.__enter__.return_value = mock_executor
+            mock_executor.submit.side_effect = lambda fn, item: boom_future
+            results = list(
+                execute_tasks(items, lambda x: x, num_workers=2, timeout=0.01, use_progress=False)
+            )
+
+        assert len(results) == 1
+        _, result, error = results[0]
+        assert result is None
+        assert isinstance(error, ValueError)
