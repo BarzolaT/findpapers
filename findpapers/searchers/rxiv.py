@@ -126,6 +126,8 @@ class RxivSearcher(SearcherBase):
             f"%20abstract_title_flags%3A{match_flag}"
             f"%20jcode%3A{self._jcode}"
             f"%20numresults%3A10"
+            f"%20sort%3Apublication-date"
+            f"%20direction%3Adescending"
             f"%20format_result%3Astandard"
             f"%20cursor%3A{page * 10}"
         )
