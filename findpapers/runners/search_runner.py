@@ -62,11 +62,11 @@ class SearchRunner:
         ``"semantic_scholar"``.
     paper_types : list[str] | None
         Restrict results to papers of these BibTeX-aligned types.  Accepted
-        values are the string values of :class:`~findpapers.core.paper_type.PaperType`
-        (e.g. ``["article", "inproceedings"]``).  ``None`` means no additional
-        type filtering beyond discarding papers whose type cannot be determined.
-        Papers with an undetermined type are always discarded regardless of this
-        parameter.
+        values: ``"article"``, ``"inbook"``, ``"incollection"``,
+        ``"inproceedings"``, ``"manual"``, ``"mastersthesis"``,
+        ``"phdthesis"``, ``"techreport"``, ``"unpublished"``.
+        ``None`` means no type filtering.  Papers with an undetermined type are
+        always discarded regardless of this parameter.
     max_papers_per_database : int | None
         Maximum papers to retrieve from each database.  ``None`` means
         unlimited.
