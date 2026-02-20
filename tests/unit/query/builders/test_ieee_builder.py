@@ -32,7 +32,7 @@ def test_ieee_single_term_field_payload(parse_and_propagate: Callable[[str], Que
         ("key[quantum]", {"index_terms": "quantum"}),
         ("au[quantum]", {"author": "quantum"}),
         ("src[quantum]", {"publication_title": "quantum"}),
-        ("af[quantum]", {"affiliation": "quantum"}),
+        ("aff[quantum]", {"affiliation": "quantum"}),
     ],
 )
 def test_ieee_supports_direct_field_filters(
@@ -105,7 +105,7 @@ def test_ieee_accepts_long_enough_star_wildcard(
         ("key[a] AND key[b]", '"Index Terms"'),
         ("au[a] AND au[b]", '"Authors"'),
         ("src[a] AND src[b]", '"Publication Title"'),
-        ("af[a] AND af[b]", '"Affiliation"'),
+        ("aff[a] AND aff[b]", '"Affiliation"'),
         ("tiabs[a] AND tiabs[b]", '"Article Title"'),
     ],
 )

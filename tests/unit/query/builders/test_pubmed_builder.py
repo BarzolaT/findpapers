@@ -42,7 +42,7 @@ def test_pubmed_rejects_short_asterisk_wildcard(
         ("key[cancer]", '"cancer"[mh]'),
         ("au[cancer]", '"cancer"[au]'),
         ("src[cancer]", '"cancer"[journal]'),
-        ("af[cancer]", '"cancer"[ad]'),
+        ("aff[cancer]", '"cancer"[ad]'),
         ("tiabs[cancer]", '"cancer"[tiab]'),
         ("tiabskey[cancer]", '("cancer"[tiab] OR "cancer"[mh])'),
     ],

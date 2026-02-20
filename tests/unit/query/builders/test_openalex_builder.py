@@ -68,7 +68,7 @@ def test_openalex_rejects_tiabskey(parse_and_propagate: Callable[[str], Query]) 
         ("ti[cancer]", "title.search:cancer"),
         ("abs[cancer]", "abstract.search:cancer"),
         ("au[cancer]", "raw_author_name.search:cancer"),
-        ("af[cancer]", "raw_affiliation_strings.search:cancer"),
+        ("aff[cancer]", "raw_affiliation_strings.search:cancer"),
         ("tiabs[cancer]", "title_and_abstract.search:cancer"),
     ],
 )

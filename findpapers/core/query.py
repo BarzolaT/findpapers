@@ -47,7 +47,7 @@ class FilterCode(str, Enum):
     SOURCE
         ``src`` — search by source name (journal, conference, etc.).
     AFFILIATION
-        ``af`` — search by institutional affiliation.
+        ``aff`` — search by institutional affiliation.
     TITLE_ABSTRACT
         ``tiabs`` — search in title and abstract (default when unspecified).
     TITLE_ABSTRACT_KEYWORDS
@@ -59,7 +59,7 @@ class FilterCode(str, Enum):
     KEYWORDS = "key"
     AUTHOR = "au"
     SOURCE = "src"
-    AFFILIATION = "af"
+    AFFILIATION = "aff"
     TITLE_ABSTRACT = "tiabs"
     TITLE_ABSTRACT_KEYWORDS = "tiabskey"
 
@@ -89,7 +89,7 @@ class QueryNode:
         Filter specifier explicitly defined in the original query for TERM and GROUP nodes.
         Preserved as-is from the query - not modified during propagation.
         Valid filter codes: ti (title), abs (abstract), key (keywords),
-        au (author), src (source), af (affiliation),
+        au (author), src (source), aff (affiliation),
         tiabs (title + abstract), tiabskey (title + abstract + keywords).
     inherited_filter_code : FilterCode | None
         The effective filter code for this node after inheritance.
@@ -226,7 +226,7 @@ class Query:
     - Filter specifiers can be added before terms or groups:
       - Syntax: filter[term] or filter([group])
       - Valid filter codes: ti (title), abs (abstract), key (keywords),
-        au (author), pu (publication), af (affiliation),
+        au (author), pu (publication), aff (affiliation),
         tiabs (title + abstract), tiabskey (title + abstract + keywords)
       - Filter codes are case-insensitive (normalized to lowercase internally)
       - When omitted, defaults to tiabs (title + abstract)
