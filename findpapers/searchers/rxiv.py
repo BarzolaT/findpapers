@@ -5,12 +5,10 @@ from __future__ import annotations
 import datetime
 import logging
 import re
-import time
 import urllib.parse
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
-import requests
 from bs4 import BeautifulSoup
 
 from findpapers.core.paper import Paper, PaperType
@@ -58,7 +56,6 @@ class RxivSearcher(SearcherBase):
         self._rxiv_server = rxiv_server
         self._jcode = jcode
         self._query_builder: RxivQueryBuilder = query_builder or RxivQueryBuilder()
-        self._last_request_time: float = 0.0
 
     @property
     def query_builder(self) -> RxivQueryBuilder:
@@ -71,38 +68,16 @@ class RxivSearcher(SearcherBase):
         """
         return self._query_builder
 
-    def _rate_limit(self) -> None:
-        """Enforce minimum interval between HTTP requests."""
-        elapsed = time.monotonic() - self._last_request_time
-        if elapsed < _MIN_REQUEST_INTERVAL:
-            time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
-
-    def _get(self, url: str, params: Optional[dict] = None) -> requests.Response:
-        """Perform a rate-limited GET request.
-
-        Parameters
-        ----------
-        url : str
-            Target URL.
-        params : dict | None
-            Optional query parameters.
+    @property
+    def min_request_interval(self) -> float:
+        """Return the minimum seconds between HTTP requests.
 
         Returns
         -------
-        requests.Response
-            HTTP response.
-
-        Raises
-        ------
-        requests.HTTPError
-            On non-2xx status codes.
+        float
+            Interval in seconds.
         """
-        self._rate_limit()
-        self._log_request(url, params)
-        response = requests.get(url, params=params, timeout=30)
-        self._last_request_time = time.monotonic()
-        response.raise_for_status()
-        return response
+        return _MIN_REQUEST_INTERVAL
 
     def _build_search_url(self, params: Dict[str, Any], page: int = 0) -> str:
         """Build query URL for the rxiv search endpoint.

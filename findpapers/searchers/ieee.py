@@ -4,11 +4,8 @@ from __future__ import annotations
 
 import datetime
 import logging
-import time
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
-
-import requests
 
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
@@ -78,7 +75,6 @@ class IEEESearcher(SearcherBase):
         """
         self._query_builder: IEEEQueryBuilder = query_builder or IEEEQueryBuilder()
         self._api_key = api_key
-        self._last_request_time: float = 0.0
 
     @property
     def name(self) -> str:
@@ -116,40 +112,50 @@ class IEEESearcher(SearcherBase):
         """
         return self._query_builder
 
-    def _rate_limit(self) -> None:
-        """Enforce minimum interval between HTTP requests."""
-        elapsed = time.monotonic() - self._last_request_time
-        if elapsed < _MIN_REQUEST_INTERVAL:
-            time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
+    @property
+    def min_request_interval(self) -> float:
+        """Return the minimum seconds between HTTP requests.
 
-    def _get(self, params: dict) -> requests.Response:
-        """Perform a rate-limited GET request to the IEEE API.
+        Returns
+        -------
+        float
+            Interval in seconds.
+        """
+        return _MIN_REQUEST_INTERVAL
+
+    def _prepare_params(self, params: dict) -> dict:
+        """Inject the IEEE API key into query parameters when configured.
 
         Parameters
         ----------
         params : dict
-            Query parameters.
+            Raw query parameters.
 
         Returns
         -------
-        requests.Response
-            HTTP response.
-
-        Raises
-        ------
-        requests.HTTPError
-            On non-2xx status codes.
+        dict
+            Parameters with ``apikey`` added when a key is set.
         """
-        self._rate_limit()
-        headers = {}
         if self._api_key:
-            headers["X-API-Key"] = self._api_key
-            params = {**params, "apikey": self._api_key}
-        self._log_request(_BASE_URL, params)
-        response = requests.get(_BASE_URL, params=params, headers=headers, timeout=30)
-        self._last_request_time = time.monotonic()
-        response.raise_for_status()
-        return response
+            return {**params, "apikey": self._api_key}
+        return params
+
+    def _prepare_headers(self, headers: dict) -> dict:
+        """Inject the IEEE API key header when configured.
+
+        Parameters
+        ----------
+        headers : dict
+            Raw HTTP headers.
+
+        Returns
+        -------
+        dict
+            Headers with ``X-API-Key`` added when a key is set.
+        """
+        if self._api_key:
+            return {**headers, "X-API-Key": self._api_key}
+        return headers
 
     @staticmethod
     def _parse_paper(item: Dict[str, Any]) -> Optional[Paper]:
@@ -297,7 +303,7 @@ class IEEESearcher(SearcherBase):
             }
 
             try:
-                response = self._get(params)
+                response = self._get(_BASE_URL, params)
             except Exception:
                 logger.exception("IEEE request failed (offset=%d).", offset)
                 break

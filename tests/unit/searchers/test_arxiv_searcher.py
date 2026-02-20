@@ -131,7 +131,7 @@ class TestArxivSearcherSearch:
         response = mock_response(text=arxiv_sample_xml)
         response.raise_for_status = MagicMock()
 
-        with patch("findpapers.searchers.arxiv.requests.get", return_value=response), patch.object(
+        with patch("findpapers.searchers.base.requests.get", return_value=response), patch.object(
             searcher, "_rate_limit"
         ):
             papers = searcher.search(simple_query, max_papers=5)
@@ -145,7 +145,7 @@ class TestArxivSearcherSearch:
         response = mock_response(text=arxiv_sample_xml)
         response.raise_for_status = MagicMock()
 
-        with patch("findpapers.searchers.arxiv.requests.get", return_value=response), patch.object(
+        with patch("findpapers.searchers.base.requests.get", return_value=response), patch.object(
             searcher, "_rate_limit"
         ):
             papers = searcher.search(simple_query, max_papers=3)
@@ -162,7 +162,7 @@ class TestArxivSearcherSearch:
         def _callback(current, total):
             callback_calls.append((current, total))
 
-        with patch("findpapers.searchers.arxiv.requests.get", return_value=response), patch.object(
+        with patch("findpapers.searchers.base.requests.get", return_value=response), patch.object(
             searcher, "_rate_limit"
         ):
             searcher.search(simple_query, progress_callback=_callback)
@@ -175,7 +175,7 @@ class TestArxivSearcherSearch:
         import requests as req
 
         with patch(
-            "findpapers.searchers.arxiv.requests.get", side_effect=req.HTTPError("500")
+            "findpapers.searchers.base.requests.get", side_effect=req.HTTPError("500")
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 

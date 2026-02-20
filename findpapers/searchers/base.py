@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import logging
+import time
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import TYPE_CHECKING, List, Optional
 from urllib.parse import urlencode
+
+import requests
 
 if TYPE_CHECKING:
     from findpapers.core.paper import Paper
@@ -42,6 +45,10 @@ class SearcherBase(ABC):
     3. Executing HTTP requests with proper rate limiting.
     4. Parsing the API responses into :class:`~findpapers.core.paper.Paper` objects.
     """
+
+    # Shared rate-limiter state; assignment in _rate_limit creates an instance
+    # attribute that shadows this default, so multiple instances are isolated.
+    _last_request_time: float = 0.0
 
     @property
     @abstractmethod
@@ -102,6 +109,17 @@ class SearcherBase(ABC):
         """
 
     @property
+    @abstractmethod
+    def min_request_interval(self) -> float:
+        """Minimum number of seconds that must elapse between consecutive HTTP requests.
+
+        Returns
+        -------
+        float
+            Interval in seconds.
+        """
+
+    @property
     def is_available(self) -> bool:
         """Return ``True`` if the searcher is properly configured and ready to use.
 
@@ -115,6 +133,100 @@ class SearcherBase(ABC):
             ``True`` by default; ``False`` when a required credential is absent.
         """
         return True
+
+    def _rate_limit(self) -> None:
+        """Enforce the minimum interval between HTTP requests.
+
+        Sleeps only the remaining time needed so that ``min_request_interval``
+        seconds have elapsed since the last request completed.
+        """
+        elapsed = time.monotonic() - self._last_request_time
+        if elapsed < self.min_request_interval:
+            time.sleep(self.min_request_interval - elapsed)
+
+    def _prepare_params(self, params: dict) -> dict:
+        """Augment query parameters before the request is sent.
+
+        The default implementation returns *params* unchanged.  Subclasses
+        override this to inject API keys or other credentials into the query
+        string.
+
+        Parameters
+        ----------
+        params : dict
+            Raw query parameters supplied by the caller.
+
+        Returns
+        -------
+        dict
+            Augmented parameters.
+        """
+        return params
+
+    def _prepare_headers(self, headers: dict) -> dict:
+        """Augment HTTP headers before the request is sent.
+
+        The default implementation returns *headers* unchanged.  Subclasses
+        override this to inject API keys, ``Accept`` values, or custom
+        ``User-Agent`` strings.
+
+        Parameters
+        ----------
+        headers : dict
+            Raw HTTP headers supplied by the caller.
+
+        Returns
+        -------
+        dict
+            Augmented headers.
+        """
+        return headers
+
+    def _get(
+        self,
+        url: str,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None,
+    ) -> requests.Response:
+        """Perform a rate-limited, logged GET request.
+
+        Calls :meth:`_prepare_params` and :meth:`_prepare_headers` so
+        subclasses can inject credentials without duplicating the
+        rate-limiting and logging boilerplate.
+
+        Parameters
+        ----------
+        url : str
+            Target URL.
+        params : dict | None
+            Query parameters (before credential injection).
+        headers : dict | None
+            HTTP headers (before credential injection).
+
+        Returns
+        -------
+        requests.Response
+            HTTP response.
+
+        Raises
+        ------
+        requests.HTTPError
+            On non-2xx status codes.
+        """
+        prepared_params = self._prepare_params(dict(params) if params else {})
+        prepared_headers = self._prepare_headers(dict(headers) if headers else {})
+        self._rate_limit()
+        self._log_request(url, prepared_params or None)
+        response = requests.get(
+            url,
+            params=prepared_params or None,
+            headers=prepared_headers or None,
+            timeout=30,
+        )
+        self._last_request_time = time.monotonic()
+        response.raise_for_status()
+        self._log_response(response)
+        return response
 
     def _log_request(self, url: str, params: Optional[dict] = None) -> None:
         """Log an outgoing HTTP GET request at ``DEBUG`` level.
@@ -139,6 +251,31 @@ class SearcherBase(ABC):
         else:
             full_url = url
         logger.debug("[%s] GET %s", self.name, full_url)
+
+    def _log_response(self, response: requests.Response) -> None:
+        """Log a summary of an HTTP response at ``DEBUG`` level.
+
+        Logs the HTTP status code, content-type header, and body size so that
+        verbose sessions can trace what each request returned without printing
+        the full body.
+
+        Parameters
+        ----------
+        response : requests.Response
+            The completed HTTP response to summarise.
+        """
+        if not logger.isEnabledFor(logging.DEBUG):
+            return
+        status = f"{response.status_code} {response.reason}"
+        content_type = response.headers.get("Content-Type", "unknown").split(";")[0].strip()
+        size = len(response.content)
+        logger.debug(
+            "[%s] <- %s | content-type: %s | %d bytes",
+            self.name,
+            status,
+            content_type,
+            size,
+        )
 
     def search(
         self,

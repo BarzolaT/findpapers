@@ -177,7 +177,7 @@ class TestIEEESearcherSearch:
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
 
-        with patch("findpapers.searchers.ieee.requests.get", return_value=response), patch.object(
+        with patch("findpapers.searchers.base.requests.get", return_value=response), patch.object(
             searcher, "_rate_limit"
         ):
             papers = searcher.search(simple_query)
@@ -191,7 +191,7 @@ class TestIEEESearcherSearch:
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
 
-        with patch("findpapers.searchers.ieee.requests.get", return_value=response), patch.object(
+        with patch("findpapers.searchers.base.requests.get", return_value=response), patch.object(
             searcher, "_rate_limit"
         ):
             papers = searcher.search(simple_query, max_papers=2)
@@ -216,7 +216,7 @@ class TestIEEESearcherSearch:
         response.raise_for_status = MagicMock()
         callback = MagicMock()
 
-        with patch("findpapers.searchers.ieee.requests.get", return_value=response), patch.object(
+        with patch("findpapers.searchers.base.requests.get", return_value=response), patch.object(
             searcher, "_rate_limit"
         ):
             searcher.search(simple_query, progress_callback=callback)

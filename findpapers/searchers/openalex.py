@@ -4,11 +4,8 @@ from __future__ import annotations
 
 import datetime
 import logging
-import time
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
-
-import requests
 
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
@@ -93,7 +90,6 @@ class OpenAlexSearcher(SearcherBase):
         self._query_builder: OpenAlexQueryBuilder = query_builder or OpenAlexQueryBuilder()
         self._api_key = api_key
         self._email = email
-        self._last_request_time: float = 0.0
 
     @property
     def name(self) -> str:
@@ -117,56 +113,51 @@ class OpenAlexSearcher(SearcherBase):
         """
         return self._query_builder
 
-    def _rate_limit(self) -> None:
-        """Enforce minimum interval between HTTP requests."""
-        elapsed = time.monotonic() - self._last_request_time
-        if elapsed < _MIN_REQUEST_INTERVAL:
-            time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
-
-    def _build_headers(self) -> dict:
-        """Build HTTP headers including the User-Agent for polite pool access.
+    @property
+    def min_request_interval(self) -> float:
+        """Return the minimum seconds between HTTP requests.
 
         Returns
         -------
-        dict
-            HTTP headers.
+        float
+            Interval in seconds.
         """
-        user_agent = _USER_AGENT
-        if self._email:
-            user_agent = f"findpapers/1.0 (mailto:{self._email})"
-        return {"User-Agent": user_agent}
+        return _MIN_REQUEST_INTERVAL
 
-    def _get(self, params: dict) -> requests.Response:
-        """Perform a rate-limited GET request to the OpenAlex API.
+    def _prepare_params(self, params: dict) -> dict:
+        """Inject the OpenAlex API key into query parameters when configured.
 
         Parameters
         ----------
         params : dict
-            Query parameters.
+            Raw query parameters.
 
         Returns
         -------
-        requests.Response
-            HTTP response.
-
-        Raises
-        ------
-        requests.HTTPError
-            On non-2xx status codes.
+        dict
+            Parameters with ``api_key`` added when a key is set.
         """
-        self._rate_limit()
         if self._api_key:
-            params = {**params, "api_key": self._api_key}
-        self._log_request(_BASE_URL, params)
-        response = requests.get(
-            _BASE_URL,
-            params=params,
-            headers=self._build_headers(),
-            timeout=30,
-        )
-        self._last_request_time = time.monotonic()
-        response.raise_for_status()
-        return response
+            return {**params, "api_key": self._api_key}
+        return params
+
+    def _prepare_headers(self, headers: dict) -> dict:
+        """Set the User-Agent header for OpenAlex polite pool access.
+
+        Parameters
+        ----------
+        headers : dict
+            Raw HTTP headers.
+
+        Returns
+        -------
+        dict
+            Headers with ``User-Agent`` set.
+        """
+        user_agent = _USER_AGENT
+        if self._email:
+            user_agent = f"findpapers/1.0 (mailto:{self._email})"
+        return {**headers, "User-Agent": user_agent}
 
     @staticmethod
     def _parse_paper(work: Dict[str, Any]) -> Optional[Paper]:
@@ -329,7 +320,7 @@ class OpenAlexSearcher(SearcherBase):
             }
 
             try:
-                response = self._get(params)
+                response = self._get(_BASE_URL, params)
             except Exception:
                 logger.exception("OpenAlex request failed (cursor=%s).", cursor)
                 break

@@ -58,7 +58,7 @@ class TestBiorxivSearcherSearch:
         all_responses += [empty_html] * 20
 
         with patch(
-            "findpapers.searchers.rxiv.requests.get", side_effect=all_responses
+            "findpapers.searchers.base.requests.get", side_effect=all_responses
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 

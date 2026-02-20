@@ -4,11 +4,8 @@ from __future__ import annotations
 
 import datetime
 import logging
-import time
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
-
-import requests
 
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
@@ -106,7 +103,6 @@ class SemanticScholarSearcher(SearcherBase):
             query_builder or SemanticScholarQueryBuilder()
         )
         self._api_key = api_key
-        self._last_request_time: float = 0.0
         self._request_interval = (
             _MIN_REQUEST_INTERVAL_WITH_KEY if api_key else _MIN_REQUEST_INTERVAL_DEFAULT
         )
@@ -133,44 +129,33 @@ class SemanticScholarSearcher(SearcherBase):
         """
         return self._query_builder
 
-    def _rate_limit(self) -> None:
-        """Enforce minimum interval between HTTP requests."""
-        elapsed = time.monotonic() - self._last_request_time
-        if elapsed < self._request_interval:
-            time.sleep(self._request_interval - elapsed)
-
-    def _get(self, params: dict) -> requests.Response:
-        """Perform a rate-limited GET request to the Semantic Scholar bulk search API.
-
-        Parameters
-        ----------
-        params : dict
-            Query parameters.
+    @property
+    def min_request_interval(self) -> float:
+        """Return the minimum seconds between HTTP requests.
 
         Returns
         -------
-        requests.Response
-            HTTP response.
-
-        Raises
-        ------
-        requests.HTTPError
-            On non-2xx status codes.
+        float
+            Interval in seconds (varies with API key).
         """
-        self._rate_limit()
-        headers = {}
+        return self._request_interval
+
+    def _prepare_headers(self, headers: dict) -> dict:
+        """Inject the Semantic Scholar API key header when configured.
+
+        Parameters
+        ----------
+        headers : dict
+            Raw HTTP headers.
+
+        Returns
+        -------
+        dict
+            Headers with ``x-api-key`` added when a key is set.
+        """
         if self._api_key:
-            headers["x-api-key"] = self._api_key
-        self._log_request(_BULK_SEARCH_URL, params)
-        response = requests.get(
-            _BULK_SEARCH_URL,
-            params=params,
-            headers=headers,
-            timeout=30,
-        )
-        self._last_request_time = time.monotonic()
-        response.raise_for_status()
-        return response
+            return {**headers, "x-api-key": self._api_key}
+        return headers
 
     @staticmethod
     def _parse_paper(item: Dict[str, Any]) -> Optional[Paper]:
@@ -315,7 +300,7 @@ class SemanticScholarSearcher(SearcherBase):
                 params["token"] = token
 
             try:
-                response = self._get(params)
+                response = self._get(_BULK_SEARCH_URL, params)
             except Exception:
                 logger.exception("Semantic Scholar request failed (token=%s).", token)
                 break

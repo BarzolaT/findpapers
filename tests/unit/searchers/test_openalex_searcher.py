@@ -92,17 +92,17 @@ class TestOpenAlexSearcherInit:
         assert searcher._api_key == "mykey"
 
 
-class TestOpenAlexBuildHeaders:
-    """Tests for _build_headers."""
+class TestOpenAlexPrepareHeaders:
+    """Tests for _prepare_headers."""
 
     def test_default_user_agent(self):
         """Without email, default User-Agent is used."""
-        headers = OpenAlexSearcher()._build_headers()
+        headers = OpenAlexSearcher()._prepare_headers({})
         assert "findpapers" in headers["User-Agent"]
 
     def test_custom_user_agent_with_email(self):
         """With email, User-Agent contains the email address."""
-        headers = OpenAlexSearcher(email="me@example.com")._build_headers()
+        headers = OpenAlexSearcher(email="me@example.com")._prepare_headers({})
         assert "me@example.com" in headers["User-Agent"]
 
 
@@ -249,7 +249,7 @@ class TestOpenAlexSearcherSearch:
         second_page = self._make_next_page_response(mock_response)
 
         with patch(
-            "findpapers.searchers.openalex.requests.get",
+            "findpapers.searchers.base.requests.get",
             side_effect=[first_page, second_page],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
@@ -265,7 +265,7 @@ class TestOpenAlexSearcherSearch:
         second_page = self._make_next_page_response(mock_response)
 
         with patch(
-            "findpapers.searchers.openalex.requests.get",
+            "findpapers.searchers.base.requests.get",
             side_effect=[first_page, second_page],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=2)
@@ -292,7 +292,7 @@ class TestOpenAlexSearcherSearch:
         callback = MagicMock()
 
         with patch(
-            "findpapers.searchers.openalex.requests.get",
+            "findpapers.searchers.base.requests.get",
             side_effect=[first_page, second_page],
         ), patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=callback)

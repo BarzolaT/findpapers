@@ -4,12 +4,9 @@ from __future__ import annotations
 
 import datetime
 import logging
-import time
 from collections.abc import Callable
 from typing import List, Optional
 from xml.etree import ElementTree as ET
-
-import requests
 
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
@@ -56,7 +53,6 @@ class PubmedSearcher(SearcherBase):
         """
         self._query_builder: PubmedQueryBuilder = query_builder or PubmedQueryBuilder()
         self._api_key = api_key
-        self._last_request_time: float = 0.0
         self._request_interval = (
             _MIN_REQUEST_INTERVAL_WITH_KEY if api_key else _MIN_REQUEST_INTERVAL_DEFAULT
         )
@@ -83,40 +79,33 @@ class PubmedSearcher(SearcherBase):
         """
         return self._query_builder
 
-    def _rate_limit(self) -> None:
-        """Enforce minimum interval between HTTP requests."""
-        elapsed = time.monotonic() - self._last_request_time
-        if elapsed < self._request_interval:
-            time.sleep(self._request_interval - elapsed)
-
-    def _get(self, url: str, params: dict) -> requests.Response:
-        """Perform a rate-limited GET request.
-
-        Parameters
-        ----------
-        url : str
-            Request URL.
-        params : dict
-            Query parameters.
+    @property
+    def min_request_interval(self) -> float:
+        """Return the minimum seconds between HTTP requests.
 
         Returns
         -------
-        requests.Response
-            HTTP response object.
-
-        Raises
-        ------
-        requests.HTTPError
-            On non-2xx status codes.
+        float
+            Interval in seconds (varies with API key).
         """
-        self._rate_limit()
+        return self._request_interval
+
+    def _prepare_params(self, params: dict) -> dict:
+        """Inject the NCBI API key into query parameters when configured.
+
+        Parameters
+        ----------
+        params : dict
+            Raw query parameters.
+
+        Returns
+        -------
+        dict
+            Parameters with ``api_key`` added when an API key is set.
+        """
         if self._api_key:
-            params = {**params, "api_key": self._api_key}
-        self._log_request(url, params)
-        response = requests.get(url, params=params, timeout=30)
-        self._last_request_time = time.monotonic()
-        response.raise_for_status()
-        return response
+            return {**params, "api_key": self._api_key}
+        return params
 
     def _search_ids(self, pubmed_query: str, retstart: int, retmax: int) -> tuple[list[str], int]:
         """Fetch PMIDs via esearch.

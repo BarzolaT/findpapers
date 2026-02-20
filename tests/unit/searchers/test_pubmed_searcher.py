@@ -260,7 +260,7 @@ class TestPubmedSearcherSearch:
         side_effects = [esearch_mock, efetch_mock]
 
         with patch(
-            "findpapers.searchers.pubmed.requests.get", side_effect=side_effects
+            "findpapers.searchers.base.requests.get", side_effect=side_effects
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 
@@ -282,7 +282,7 @@ class TestPubmedSearcherSearch:
         efetch_mock.raise_for_status = MagicMock()
 
         with patch(
-            "findpapers.searchers.pubmed.requests.get",
+            "findpapers.searchers.base.requests.get",
             side_effect=[esearch_mock, efetch_mock],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=2)
@@ -305,7 +305,7 @@ class TestPubmedSearcherSearch:
         esearch_mock.raise_for_status = MagicMock()
 
         with patch(
-            "findpapers.searchers.pubmed.requests.get", return_value=esearch_mock
+            "findpapers.searchers.base.requests.get", return_value=esearch_mock
         ), patch.object(
             searcher, "_fetch_details", side_effect=Exception("fetch error")
         ), patch.object(
@@ -331,7 +331,7 @@ class TestPubmedSearcherSearch:
         callback = MagicMock()
 
         with patch(
-            "findpapers.searchers.pubmed.requests.get",
+            "findpapers.searchers.base.requests.get",
             side_effect=[esearch_mock, efetch_mock],
         ), patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=callback)

@@ -4,11 +4,8 @@ from __future__ import annotations
 
 import datetime
 import logging
-import time
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
-
-import requests
 
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
@@ -78,7 +75,6 @@ class ScopusSearcher(SearcherBase):
         """
         self._query_builder: ScopusQueryBuilder = query_builder or ScopusQueryBuilder()
         self._api_key = api_key
-        self._last_request_time: float = 0.0
 
     @property
     def name(self) -> str:
@@ -116,41 +112,35 @@ class ScopusSearcher(SearcherBase):
         """
         return self._query_builder
 
-    def _rate_limit(self) -> None:
-        """Enforce minimum interval between HTTP requests."""
-        elapsed = time.monotonic() - self._last_request_time
-        if elapsed < _MIN_REQUEST_INTERVAL:
-            time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
-
-    def _get(self, params: dict) -> requests.Response:
-        """Perform a rate-limited GET request to the Scopus API.
-
-        Parameters
-        ----------
-        params : dict
-            Query parameters.
+    @property
+    def min_request_interval(self) -> float:
+        """Return the minimum seconds between HTTP requests.
 
         Returns
         -------
-        requests.Response
-            HTTP response.
-
-        Raises
-        ------
-        requests.HTTPError
-            On non-2xx status codes.
+        float
+            Interval in seconds.
         """
-        self._rate_limit()
-        headers = {
-            "Accept": "application/json",
-        }
+        return _MIN_REQUEST_INTERVAL
+
+    def _prepare_headers(self, headers: dict) -> dict:
+        """Inject Scopus-required HTTP headers including Accept type and API key.
+
+        Parameters
+        ----------
+        headers : dict
+            Raw HTTP headers.
+
+        Returns
+        -------
+        dict
+            Headers with ``Accept`` set to JSON and optionally
+            ``X-ELS-APIKey`` added.
+        """
+        updated = {**headers, "Accept": "application/json"}
         if self._api_key:
-            headers["X-ELS-APIKey"] = self._api_key
-        self._log_request(_BASE_URL, params)
-        response = requests.get(_BASE_URL, params=params, headers=headers, timeout=30)
-        self._last_request_time = time.monotonic()
-        response.raise_for_status()
-        return response
+            updated["X-ELS-APIKey"] = self._api_key
+        return updated
 
     @staticmethod
     def _parse_paper(entry: Dict[str, Any]) -> Optional[Paper]:
@@ -294,7 +284,7 @@ class ScopusSearcher(SearcherBase):
             }
 
             try:
-                response = self._get(params)
+                response = self._get(_BASE_URL, params)
             except Exception:
                 logger.exception("Scopus request failed (offset=%d).", offset)
                 break

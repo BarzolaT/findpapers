@@ -216,7 +216,7 @@ class TestSemanticScholarSearcherSearch:
         second_page = self._empty_page(mock_response)
 
         with patch(
-            "findpapers.searchers.semantic_scholar.requests.get",
+            "findpapers.searchers.base.requests.get",
             side_effect=[first_page, second_page],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
@@ -237,7 +237,7 @@ class TestSemanticScholarSearcherSearch:
         second_page = self._empty_page(mock_response)
 
         with patch(
-            "findpapers.searchers.semantic_scholar.requests.get",
+            "findpapers.searchers.base.requests.get",
             side_effect=[first_page, second_page],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=2)
@@ -269,7 +269,7 @@ class TestSemanticScholarSearcherSearch:
         callback = MagicMock()
 
         with patch(
-            "findpapers.searchers.semantic_scholar.requests.get",
+            "findpapers.searchers.base.requests.get",
             side_effect=[first_page, second_page],
         ), patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=callback)

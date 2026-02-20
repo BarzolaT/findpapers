@@ -4,12 +4,9 @@ from __future__ import annotations
 
 import datetime
 import logging
-import time
 from collections.abc import Callable
 from typing import List, Optional
 from xml.etree import ElementTree as ET
-
-import requests
 
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
@@ -46,7 +43,6 @@ class ArxivSearcher(SearcherBase):
             default :class:`ArxivQueryBuilder` is created automatically.
         """
         self._query_builder: ArxivQueryBuilder = query_builder or ArxivQueryBuilder()
-        self._last_request_time: float = 0.0
 
     @property
     def name(self) -> str:
@@ -70,36 +66,16 @@ class ArxivSearcher(SearcherBase):
         """
         return self._query_builder
 
-    def _rate_limit(self) -> None:
-        """Enforce minimum interval between HTTP requests."""
-        elapsed = time.monotonic() - self._last_request_time
-        if elapsed < _MIN_REQUEST_INTERVAL:
-            time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
-
-    def _get(self, params: dict) -> requests.Response:
-        """Perform a rate-limited GET request to the arXiv API.
-
-        Parameters
-        ----------
-        params : dict
-            Query parameters.
+    @property
+    def min_request_interval(self) -> float:
+        """Return the minimum seconds between HTTP requests.
 
         Returns
         -------
-        requests.Response
-            HTTP response object.
-
-        Raises
-        ------
-        requests.HTTPError
-            On non-2xx status codes.
+        float
+            Interval in seconds.
         """
-        self._rate_limit()
-        self._log_request(_BASE_URL, params)
-        response = requests.get(_BASE_URL, params=params, timeout=30)
-        self._last_request_time = time.monotonic()
-        response.raise_for_status()
-        return response
+        return _MIN_REQUEST_INTERVAL
 
     @staticmethod
     def _parse_date(date_str: Optional[str]) -> Optional[str]:
@@ -262,7 +238,7 @@ class ArxivSearcher(SearcherBase):
             }
 
             try:
-                response = self._get(params)
+                response = self._get(_BASE_URL, params)
             except Exception:
                 logger.exception("arXiv request failed (offset=%d).", offset)
                 break
