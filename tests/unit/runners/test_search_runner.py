@@ -252,6 +252,66 @@ class TestSearchRunnerPipeline:
         runner.run()
         assert len(runner.get_results()) == 2
 
+    def test_deduplication_second_pass_merges_preprints_across_year_boundary(self):
+        """Same preprint on two servers across Dec/Jan boundary is merged into one.
+
+        This is the canonical Zenodo+SSRN cross-year scenario: a preprint
+        deposited to Zenodo on 2025-12-25 and mirrored to SSRN on 2026-01-01
+        receives different DOIs from each platform.  After pass 1 both entries
+        survive (different DOIs).  Pass 2 must detect that (a) both DOIs are
+        preprint DOIs and (b) the years differ by exactly 1, and therefore
+        merge them rather than reporting a duplicate title.
+        """
+        p1 = Paper(
+            title="Attention is All You Need... Unless You Are a CISO",
+            abstract="abstract from zenodo",
+            authors=["Author A"],
+            publication=Publication(title="Zenodo"),
+            publication_date=date(2025, 12, 25),
+            url="https://zenodo.org/records/18056028",
+            doi="10.5281/zenodo.18056028",
+            paper_type=PaperType.UNPUBLISHED,
+        )
+        p2 = Paper(
+            title="Attention is All You Need... Unless You Are a CISO",
+            abstract="abstract from ssrn",
+            authors=["Author A"],
+            publication=Publication(title="SSRN"),
+            publication_date=date(2026, 1, 1),
+            url="https://ssrn.com/abstract=5967774",
+            doi="10.2139/ssrn.5967774",
+            paper_type=PaperType.UNPUBLISHED,
+        )
+        runner = self._make_runner_with_mock_papers([p1, p2])
+        runner.run()
+        assert len(runner.get_results()) == 1
+
+    def test_deduplication_second_pass_keeps_preprints_with_large_year_gap(self):
+        """Preprints with the same title but years >1 apart are kept separate."""
+        p1 = Paper(
+            title="Survey of Transformers",
+            abstract="abstract 2022",
+            authors=["Author A"],
+            publication=Publication(title="Zenodo"),
+            publication_date=date(2022, 1, 1),
+            url="https://zenodo.org/records/1",
+            doi="10.5281/zenodo.1",
+            paper_type=PaperType.UNPUBLISHED,
+        )
+        p2 = Paper(
+            title="Survey of Transformers",
+            abstract="abstract 2024",
+            authors=["Author B"],
+            publication=Publication(title="arXiv"),
+            publication_date=date(2024, 6, 1),
+            url="https://arxiv.org/abs/2406.00001",
+            doi="10.48550/arxiv.2406.00001",
+            paper_type=PaperType.UNPUBLISHED,
+        )
+        runner = self._make_runner_with_mock_papers([p1, p2])
+        runner.run()
+        assert len(runner.get_results()) == 2
+
     def test_paper_type_filter(self):
         """Papers with non-matching paper_type are removed."""
         article_paper = _make_paper(title="Article", paper_type=PaperType.ARTICLE)

@@ -123,6 +123,9 @@ class TestIsPreprintDoi:
     def test_ssrn_doi_recognised_as_preprint(self):
         assert _is_preprint_doi("10.2139/ssrn.3844763") is True
 
+    def test_zenodo_doi_recognised_as_preprint(self):
+        assert _is_preprint_doi("10.5281/zenodo.18056028") is True
+
     def test_publisher_doi_not_preprint(self):
         assert _is_preprint_doi("10.5555/3295222.3295349") is False
 

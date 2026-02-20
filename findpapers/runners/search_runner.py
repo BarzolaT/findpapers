@@ -7,7 +7,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from time import perf_counter
 
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper, PaperType, _is_preprint_doi
 from findpapers.core.search import Database, Search
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.query.parser import QueryParser
@@ -482,9 +482,13 @@ class SearchRunner:
 
         **Pass 2** groups the results of pass 1 by normalised title and
         merges entries whose publication years are *compatible* — i.e. they
-        share the same year, or at least one has no year (incomplete
-        metadata).  Papers with the same title but *different known years*
-        are intentionally kept as separate entries.
+        share the same year, at least one has no year (incomplete metadata),
+        or both entries carry preprint DOIs and their years differ by at most
+        one (to handle the common case of a preprint deposited to two servers
+        across the Dec/Jan calendar boundary, e.g. Zenodo on 2025-12-25 and
+        SSRN on 2026-01-01).  Papers with the same title and *different known
+        years* that are not both preprints are intentionally kept as separate
+        entries.
 
         This correctly handles the common cross-database case where the same
         work is indexed with different DOIs (e.g. an arXiv preprint DOI vs a
@@ -534,7 +538,25 @@ class SearchRunner:
                 for representative in groups:
                     rep_year = getattr(representative.publication_date, "year", None)
                     # Compatible when years are equal OR either is unknown.
-                    if rep_year is None or paper_year is None or rep_year == paper_year:
+                    years_same_or_unknown = (
+                        rep_year is None or paper_year is None or rep_year == paper_year
+                    )
+                    # Also compatible when both entries are preprints and their
+                    # years differ by at most 1 — handles the common case of the
+                    # same preprint deposited to two servers across the Dec/Jan
+                    # calendar boundary (e.g. Zenodo 2025-12-25, SSRN 2026-01-01).
+                    rep_doi = representative.doi or ""
+                    cand_doi = paper.doi or ""
+                    both_preprints_adjacent = (
+                        rep_year is not None
+                        and paper_year is not None
+                        and abs(rep_year - paper_year) == 1
+                        and bool(rep_doi)
+                        and bool(cand_doi)
+                        and _is_preprint_doi(rep_doi)
+                        and _is_preprint_doi(cand_doi)
+                    )
+                    if years_same_or_unknown or both_preprints_adjacent:
                         merged_into = representative
                         break
                 if merged_into is not None:

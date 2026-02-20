@@ -14,6 +14,7 @@ _PREPRINT_DOI_PREFIXES: frozenset[str] = frozenset(
         "10.48550/arxiv.",  # arXiv
         "10.1101/",  # bioRxiv / medRxiv
         "10.2139/ssrn.",  # SSRN
+        "10.5281/zenodo.",  # Zenodo
         "10.20944/preprints",  # Preprints.org
     }
 )
