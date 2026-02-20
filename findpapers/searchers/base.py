@@ -6,6 +6,7 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import TYPE_CHECKING, List, Optional
+from urllib.parse import urlencode
 
 if TYPE_CHECKING:
     from findpapers.core.paper import Paper
@@ -15,6 +16,18 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 QUERY_COMBINATIONS_WARNING_THRESHOLD = 20
+
+# Parameter names (compared case-insensitively) that carry API credentials
+# and must be redacted before logging.
+_SENSITIVE_PARAM_NAMES: frozenset[str] = frozenset(
+    {
+        "api_key",
+        "apikey",
+        "x-api-key",
+        "x-els-apikey",
+        "x-api-key",
+    }
+)
 
 
 class SearcherBase(ABC):
@@ -99,6 +112,30 @@ class SearcherBase(ABC):
             ``True`` by default; ``False`` when a required credential is absent.
         """
         return True
+
+    def _log_request(self, url: str, params: Optional[dict] = None) -> None:
+        """Log an outgoing HTTP GET request at ``DEBUG`` level.
+
+        API keys and other sensitive parameters are replaced with ``"***"``
+        so that credentials are never written to logs.
+
+        Parameters
+        ----------
+        url : str
+            Base request URL (without query string).
+        params : dict | None
+            Query parameters to be sent with the request.
+        """
+        if not logger.isEnabledFor(logging.DEBUG):
+            return
+        if params:
+            safe_params = {
+                k: "***" if k.lower() in _SENSITIVE_PARAM_NAMES else v for k, v in params.items()
+            }
+            full_url = f"{url}?{urlencode(safe_params)}"
+        else:
+            full_url = url
+        logger.debug("[%s] GET %s", self.name, full_url)
 
     def search(
         self,

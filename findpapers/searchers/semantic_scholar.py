@@ -161,6 +161,7 @@ class SemanticScholarSearcher(SearcherBase):
         headers = {}
         if self._api_key:
             headers["x-api-key"] = self._api_key
+        self._log_request(_BULK_SEARCH_URL, params)
         response = requests.get(
             _BULK_SEARCH_URL,
             params=params,

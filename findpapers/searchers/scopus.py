@@ -146,6 +146,7 @@ class ScopusSearcher(SearcherBase):
         }
         if self._api_key:
             headers["X-ELS-APIKey"] = self._api_key
+        self._log_request(_BASE_URL, params)
         response = requests.get(_BASE_URL, params=params, headers=headers, timeout=30)
         self._last_request_time = time.monotonic()
         response.raise_for_status()

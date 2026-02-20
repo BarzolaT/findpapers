@@ -152,7 +152,11 @@ class SearchRunner:
             Search result object containing papers and metadata.
         """
         if verbose:
-            logging.getLogger().setLevel(logging.INFO)
+            logging.getLogger().setLevel(logging.DEBUG)
+            # Suppress verbose output from third-party HTTP libraries so that
+            # only findpapers' own loggers emit debug messages.
+            for _noisy in ("urllib3", "requests", "httpx", "charset_normalizer"):
+                logging.getLogger(_noisy).setLevel(logging.WARNING)
             logger.info("=== SearchRunner Configuration ===")
             logger.info("Databases: %s", [s.name for s in self._searchers])
             logger.info("Paper types: %s", self._paper_types or "all")

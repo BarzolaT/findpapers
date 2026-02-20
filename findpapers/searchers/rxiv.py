@@ -98,6 +98,7 @@ class RxivSearcher(SearcherBase):
             On non-2xx status codes.
         """
         self._rate_limit()
+        self._log_request(url, params)
         response = requests.get(url, params=params, timeout=30)
         self._last_request_time = time.monotonic()
         response.raise_for_status()

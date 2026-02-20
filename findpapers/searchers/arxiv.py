@@ -95,6 +95,7 @@ class ArxivSearcher(SearcherBase):
             On non-2xx status codes.
         """
         self._rate_limit()
+        self._log_request(_BASE_URL, params)
         response = requests.get(_BASE_URL, params=params, timeout=30)
         self._last_request_time = time.monotonic()
         response.raise_for_status()

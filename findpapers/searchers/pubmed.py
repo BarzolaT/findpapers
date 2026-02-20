@@ -112,6 +112,7 @@ class PubmedSearcher(SearcherBase):
         self._rate_limit()
         if self._api_key:
             params = {**params, "api_key": self._api_key}
+        self._log_request(url, params)
         response = requests.get(url, params=params, timeout=30)
         self._last_request_time = time.monotonic()
         response.raise_for_status()

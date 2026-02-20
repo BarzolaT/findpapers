@@ -157,6 +157,7 @@ class OpenAlexSearcher(SearcherBase):
         self._rate_limit()
         if self._api_key:
             params = {**params, "api_key": self._api_key}
+        self._log_request(_BASE_URL, params)
         response = requests.get(
             _BASE_URL,
             params=params,
