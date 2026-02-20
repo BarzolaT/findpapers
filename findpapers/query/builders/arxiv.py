@@ -106,33 +106,3 @@ class ArxivQueryBuilder(QueryBuilder):
             if term.value:
                 term.value = term.value.replace("-", " ")
         return cloned_query
-
-    def supports_filter(self, filter_code: FilterCode) -> bool:
-        """Check filter support for arXiv.
-
-        Parameters
-        ----------
-        filter_code : FilterCode
-            Filter code to check.
-
-        Returns
-        -------
-        bool
-            True when supported.
-        """
-        return filter_code in self._SUPPORTED_FILTERS
-
-    def expand_query(self, query: Query) -> list[Query]:
-        """Return query without expansion for arXiv.
-
-        Parameters
-        ----------
-        query : Query
-            Input query.
-
-        Returns
-        -------
-        list[Query]
-            Single query list.
-        """
-        return [query]

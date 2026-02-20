@@ -78,36 +78,6 @@ class OpenAlexQueryBuilder(QueryBuilder):
             filters.append(self._build_filter_fragment(filter_code, term))
         return {"filter": ",".join(filters)}
 
-    def preprocess_terms(self, query: Query) -> Query:
-        """Return query unchanged for OpenAlex.
-
-        Parameters
-        ----------
-        query : Query
-            Query to preprocess.
-
-        Returns
-        -------
-        Query
-            Unchanged query.
-        """
-        return query
-
-    def supports_filter(self, filter_code: FilterCode) -> bool:
-        """Check filter support for OpenAlex.
-
-        Parameters
-        ----------
-        filter_code : FilterCode
-            Filter code.
-
-        Returns
-        -------
-        bool
-            True when supported.
-        """
-        return filter_code in self._SUPPORTED_FILTERS
-
     def expand_query(self, query: Query) -> list[Query]:
         """Return query without expansion for OpenAlex.
 

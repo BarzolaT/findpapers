@@ -100,33 +100,3 @@ class SemanticScholarQueryBuilder(QueryBuilder):
             if term.value:
                 term.value = term.value.replace("-", " ")
         return cloned
-
-    def supports_filter(self, filter_code: FilterCode) -> bool:
-        """Check filter support for Semantic Scholar.
-
-        Parameters
-        ----------
-        filter_code : str
-            Filter code.
-
-        Returns
-        -------
-        bool
-            True when supported.
-        """
-        return filter_code in self._SUPPORTED_FILTERS
-
-    def expand_query(self, query: Query) -> list[Query]:
-        """Return query without expansion for Semantic Scholar.
-
-        Parameters
-        ----------
-        query : Query
-            Input query.
-
-        Returns
-        -------
-        list[Query]
-            Single query list.
-        """
-        return [query]

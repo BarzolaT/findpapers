@@ -47,7 +47,22 @@ class QueryExecutionPlan:
 
 
 class QueryBuilder(ABC):
-    """Abstract base class for database-specific query builders."""
+    """Abstract base class for database-specific query builders.
+
+    Subclasses must declare the set of supported filter codes by overriding
+    ``_SUPPORTED_FILTERS`` and must implement ``validate_query`` and
+    ``convert_query``.  The remaining methods have sensible defaults that
+    subclasses may override when they need custom behaviour:
+
+    * ``supports_filter`` – returns ``True`` iff ``filter_code`` is in
+      ``_SUPPORTED_FILTERS``.
+    * ``preprocess_terms`` – returns the query unchanged.
+    * ``expand_query`` – returns a single-element list containing the original
+      query.
+    """
+
+    # Override in subclasses to declare which FilterCodes are accepted.
+    _SUPPORTED_FILTERS: frozenset[FilterCode] = frozenset()
 
     @abstractmethod
     def validate_query(self, query: Query) -> QueryValidationResult:
@@ -79,9 +94,12 @@ class QueryBuilder(ABC):
             Query string for URL-based APIs or parameter dictionary for REST APIs.
         """
 
-    @abstractmethod
     def preprocess_terms(self, query: Query) -> Query:
         """Preprocess query terms before conversion.
+
+        The default implementation returns the query unchanged. Override this
+        method when the target database requires term normalisation (e.g.
+        hyphen removal).
 
         Parameters
         ----------
@@ -93,10 +111,13 @@ class QueryBuilder(ABC):
         Query
             Preprocessed query.
         """
+        return query
 
-    @abstractmethod
     def supports_filter(self, filter_code: FilterCode) -> bool:
         """Check whether the builder supports a filter code.
+
+        Returns ``True`` iff ``filter_code`` is present in
+        ``_SUPPORTED_FILTERS``.  Override when more complex logic is needed.
 
         Parameters
         ----------
@@ -108,10 +129,14 @@ class QueryBuilder(ABC):
         bool
             True when the filter is supported.
         """
+        return filter_code in self._SUPPORTED_FILTERS
 
-    @abstractmethod
     def expand_query(self, query: Query) -> List[Query]:
         """Expand query into multiple queries when necessary.
+
+        The default implementation returns a single-element list containing
+        the original query unchanged.  Override this method for databases that
+        require query decomposition (e.g. OpenAlex DNF expansion).
 
         Parameters
         ----------
@@ -123,6 +148,7 @@ class QueryBuilder(ABC):
         list[Query]
             Expanded query list.
         """
+        return [query]
 
     def build_execution_plan(self, query: Query) -> QueryExecutionPlan:
         """Build request payloads and result-combination instructions.

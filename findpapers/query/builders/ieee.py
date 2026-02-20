@@ -115,51 +115,6 @@ class IEEEQueryBuilder(QueryBuilder):
         expression = convert_expression(query.root, convert_term, connector_map)
         return {"querytext": expression}
 
-    def preprocess_terms(self, query: Query) -> Query:
-        """Return query unchanged for IEEE.
-
-        Parameters
-        ----------
-        query : Query
-            Query to preprocess.
-
-        Returns
-        -------
-        Query
-            Unchanged query.
-        """
-        return query
-
-    def supports_filter(self, filter_code: FilterCode) -> bool:
-        """Check filter support for IEEE.
-
-        Parameters
-        ----------
-        filter_code : FilterCode
-            Filter code.
-
-        Returns
-        -------
-        bool
-            True when supported.
-        """
-        return filter_code in self._SUPPORTED_FILTERS
-
-    def expand_query(self, query: Query) -> list[Query]:
-        """Return query without expansion for IEEE.
-
-        Parameters
-        ----------
-        query : Query
-            Input query.
-
-        Returns
-        -------
-        list[Query]
-            Single query list.
-        """
-        return [query]
-
     def _is_simple_single_term(self, query: Query) -> bool:
         """Check whether query has one direct term node.
 
