@@ -202,8 +202,8 @@ class TestPubmedSearcherParsePaper:
         assert paper is not None
         assert paper.url == "https://pubmed.ncbi.nlm.nih.gov/12345/"
 
-    def test_publication_from_journal(self):
-        """Publication is built from Journal title and ISSN."""
+    def test_source_from_journal(self):
+        """Source is built from Journal title and ISSN."""
         xml_str = """
         <PubmedArticle>
             <MedlineCitation>

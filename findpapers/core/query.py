@@ -89,7 +89,7 @@ class QueryNode:
         Filter specifier explicitly defined in the original query for TERM and GROUP nodes.
         Preserved as-is from the query - not modified during propagation.
         Valid filter codes: ti (title), abs (abstract), key (keywords),
-        au (author), pu (publication), af (affiliation),
+        au (author), src (source), af (affiliation),
         tiabs (title + abstract), tiabskey (title + abstract + keywords).
     inherited_filter_code : FilterCode | None
         The effective filter code for this node after inheritance.

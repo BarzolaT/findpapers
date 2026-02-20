@@ -178,8 +178,8 @@ class TestOpenAlexSearcherParsePaper:
         assert "Machine Learning" in paper.keywords
         assert "Deep Learning" in paper.keywords
 
-    def test_publication_from_primary_location_source(self):
-        """Publication is built from primary_location.source."""
+    def test_source_from_primary_location(self):
+        """Source is built from primary_location.source."""
         work = {
             "title": "A Paper",
             "primary_location": {

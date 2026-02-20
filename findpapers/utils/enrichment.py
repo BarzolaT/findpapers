@@ -67,21 +67,21 @@ DATE_META_KEYS = [
     "prism.publicationdate",
     "citation_online_date",  # arXiv and others; used as last-resort fallback
 ]
-PUBLICATION_TITLE_KEYS = [
+SOURCE_TITLE_KEYS = [
     "citation_journal_title",
     "citation_conference_title",
     "citation_book_title",
     "citation_inbook_title",  # Scopus book chapters
 ]
-PUBLICATION_PUBLISHER_KEYS = [
+SOURCE_PUBLISHER_KEYS = [
     "citation_publisher",
     "dc.publisher",
 ]
-PUBLICATION_ISSN_KEYS = [
+SOURCE_ISSN_KEYS = [
     "citation_issn",
     "prism.issn",
 ]
-PUBLICATION_ISBN_KEYS = [
+SOURCE_ISBN_KEYS = [
     "citation_isbn",
     "prism.isbn",
 ]
@@ -94,7 +94,7 @@ _FIRSTPAGE_KEY = "citation_firstpage"
 _LASTPAGE_KEY = "citation_lastpage"
 _NUM_PAGES_KEY = "citation_num_pages"
 
-# Preprint server names to avoid treating them as formal publications.
+# Preprint server names to avoid treating them as formal sources.
 _PREPRINT_SERVERS = {"biorxiv", "medrxiv", "arxiv"}
 
 # doi.org URL prefixes that some databases add before the bare DOI.
@@ -512,7 +512,7 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
         except ValueError:
             pass
 
-    source_title = _pick_metadata_value(metadata, PUBLICATION_TITLE_KEYS)
+    source_title = _pick_metadata_value(metadata, SOURCE_TITLE_KEYS)
     source = None
     paper_type: PaperType | None = None
     if source_title and source_title.lower() not in _PREPRINT_SERVERS:
@@ -526,9 +526,9 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
             paper_type = PaperType.INCOLLECTION
         source = Source(
             title=source_title,
-            issn=_pick_metadata_value(metadata, PUBLICATION_ISSN_KEYS),
-            isbn=_pick_metadata_value(metadata, PUBLICATION_ISBN_KEYS),
-            publisher=_pick_metadata_value(metadata, PUBLICATION_PUBLISHER_KEYS),
+            issn=_pick_metadata_value(metadata, SOURCE_ISSN_KEYS),
+            isbn=_pick_metadata_value(metadata, SOURCE_ISBN_KEYS),
+            publisher=_pick_metadata_value(metadata, SOURCE_PUBLISHER_KEYS),
         )
 
     pdf_url_val = _pick_metadata_value(metadata, PDF_URL_KEYS)

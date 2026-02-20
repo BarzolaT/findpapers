@@ -162,7 +162,7 @@ class TestSearchRunnerPipeline:
         metrics = runner.get_metrics()
         assert "total_papers" in metrics
         assert "runtime_in_seconds" in metrics
-        assert "total_papers_from_predatory_publication" in metrics
+        assert "total_papers_from_predatory_source" in metrics
 
     def test_deduplication_merges_same_doi(self):
         """Two papers with the same DOI are merged into one."""
@@ -393,7 +393,7 @@ class TestSearchRunnerPipeline:
         runner.run()
         metrics = runner.get_metrics()
         # Flagged count >= 0 (may or may not be in the predatory list)
-        assert metrics["total_papers_from_predatory_publication"] >= 0
+        assert metrics["total_papers_from_predatory_source"] >= 0
 
     def test_searcher_error_is_handled_gracefully(self):
         """If a searcher raises an exception, run() still completes."""

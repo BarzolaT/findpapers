@@ -239,7 +239,7 @@ class OpenAlexSearcher(SearcherBase):
             if kw:
                 keywords.add(kw)
 
-        # Publication
+        # Source
         source: Optional[Source] = None
         primary_loc = work.get("primary_location") or {}
         source_data: dict = primary_loc.get("source") or {}

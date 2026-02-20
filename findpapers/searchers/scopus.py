@@ -197,7 +197,7 @@ class ScopusSearcher(SearcherBase):
             except (ValueError, TypeError):
                 pass
 
-        # Publication
+        # Source
         pub_title = (
             entry.get("prism:publicationName") or entry.get("prism:issueName") or ""
         ).strip()

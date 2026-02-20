@@ -220,7 +220,7 @@ class SemanticScholarSearcher(SearcherBase):
             if isinstance(field, str) and field.strip():
                 keywords.add(field.strip())
 
-        # Publication
+        # Source
         source: Optional[Source] = None
         journal = item.get("journal") or {}
         venue = (item.get("venue") or "").strip()

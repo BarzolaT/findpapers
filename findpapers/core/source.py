@@ -27,7 +27,7 @@ class Source:
         issn : str | None
             Source ISSN.
         publisher : str | None
-            Publication publisher name.
+            Source publisher name.
         is_potentially_predatory : bool | None
             Predatory flag.
 

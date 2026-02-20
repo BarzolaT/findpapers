@@ -161,7 +161,7 @@ class ArxivSearcher(SearcherBase):
                 pdf_url = href
                 break
 
-        # Journal ref → publication and paper type.
+        # Journal ref → source and paper type.
         # Papers with a journal reference were formally published in a journal;
         # those without are still preprints (unpublished).
         journal_ref_el = entry.find("arxiv:journal_ref", _NS)

@@ -250,7 +250,7 @@ class PubmedSearcher(SearcherBase):
             if kw:
                 keywords.add(kw)
 
-        # Publication (journal)
+        # Source (journal)
         journal_el = article.find(".//Journal")
         source: Optional[Source] = None
         if journal_el is not None:

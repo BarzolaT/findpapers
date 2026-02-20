@@ -196,7 +196,7 @@ class EnrichmentRunner:
         if enriched is None:
             return False
         paper.merge(enriched)
-        # Re-evaluate the predatory flag: the publication may have been
+        # Re-evaluate the predatory flag: the source may have been
         # populated only after enrichment, so the original flag (set during
         # the search phase) might be stale.
         if paper.source is not None:

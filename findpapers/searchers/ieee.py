@@ -215,15 +215,15 @@ class IEEESearcher(SearcherBase):
             except (ValueError, TypeError):
                 pass
 
-        # Publication
-        publication_title = (item.get("publication_title") or "").strip()
+        # Source
+        source_title = (item.get("publication_title") or "").strip()
         source: Optional[Source] = None
-        if publication_title:
+        if source_title:
             issn = (item.get("issn") or "").strip() or None
             isbn = (item.get("isbn") or "").strip() or None
             publisher = (item.get("publisher") or "").strip() or None
             source = Source(
-                title=publication_title,
+                title=source_title,
                 issn=issn,
                 isbn=isbn,
                 publisher=publisher,
