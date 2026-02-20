@@ -96,6 +96,11 @@ class PubmedQueryBuilder(QueryBuilder):
             if filter_code == FilterCode.ABSTRACT:
                 return tagged("ab")
             if filter_code == FilterCode.KEYWORDS:
+                # The [mh] tag performs exact matching against MeSH vocabulary and
+                # bypasses PubMed's Automatic Term Mapping (ATM). Queries must use
+                # valid MeSH headings (e.g. "neoplasms", not "cancer"), otherwise
+                # PubMed returns zero results silently.
+                # Browse valid MeSH headings at: https://meshb.nlm.nih.gov/
                 return tagged("mh")
             if filter_code == FilterCode.AUTHOR:
                 return tagged("au")
@@ -104,6 +109,7 @@ class PubmedQueryBuilder(QueryBuilder):
             if filter_code == FilterCode.AFFILIATION:
                 return tagged("ad")
             if filter_code == FilterCode.TITLE_ABSTRACT_KEYWORDS:
+                # [mh] part is subject to the same exact-MeSH-heading constraint above.
                 return f"({tagged('tiab')} OR {tagged('mh')})"
             return tagged("tiab")
 
