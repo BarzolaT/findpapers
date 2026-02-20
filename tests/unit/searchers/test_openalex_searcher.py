@@ -308,3 +308,90 @@ class TestOpenAlexSearcherSearch:
             papers = searcher.search(simple_query)
 
         assert papers == []
+
+    def test_or_query_fetches_all_expansion_branches(self, or_query, mock_response):
+        """Each OR clause is queried even when the first clause fills the budget.
+
+        When an OR query is expanded into two sub-queries (one per clause),
+        both HTTP requests must be issued.  Without per-clause budget splitting,
+        the first sub-query can exhaust max_papers and the second is skipped.
+        """
+        searcher = OpenAlexSearcher()
+
+        def _make_page(doi: str, title: str) -> MagicMock:
+            data = {
+                "meta": {"count": 1, "per_page": 1, "next_cursor": None},
+                "results": [
+                    {
+                        "title": title,
+                        "doi": f"https://doi.org/{doi}",
+                        "publication_date": "2024-01-01",
+                        "abstract_inverted_index": None,
+                        "authorships": [],
+                        "cited_by_count": 0,
+                        "open_access": {},
+                        "locations": [],
+                        "primary_location": {},
+                        "concepts": [],
+                        "keywords": [],
+                        "type": "article",
+                    }
+                ],
+            }
+            r = mock_response(json_data=data)
+            r.raise_for_status = MagicMock()
+            return r
+
+        page_ml = _make_page("10.ml/1", "Machine Learning Paper")
+        page_dl = _make_page("10.dl/1", "Deep Learning Paper")
+
+        with patch(
+            "findpapers.searchers.base.requests.get",
+            side_effect=[page_ml, page_dl],
+        ), patch.object(searcher, "_rate_limit"):
+            papers = searcher.search(or_query, max_papers=2)
+
+        # Both OR clauses must have been fetched.
+        assert len(papers) == 2
+        dois = {p.doi for p in papers}
+        assert "10.ml/1" in dois
+        assert "10.dl/1" in dois
+
+    def test_or_query_max_papers_still_respected(self, or_query, mock_response):
+        """Final result is capped at max_papers even when OR expands to multiple clauses."""
+        searcher = OpenAlexSearcher()
+
+        def _make_page(doi: str, title: str) -> MagicMock:
+            data = {
+                "meta": {"count": 1, "per_page": 1, "next_cursor": None},
+                "results": [
+                    {
+                        "title": title,
+                        "doi": f"https://doi.org/{doi}",
+                        "publication_date": "2024-01-01",
+                        "abstract_inverted_index": None,
+                        "authorships": [],
+                        "cited_by_count": 0,
+                        "open_access": {},
+                        "locations": [],
+                        "primary_location": {},
+                        "concepts": [],
+                        "keywords": [],
+                        "type": "article",
+                    }
+                ],
+            }
+            r = mock_response(json_data=data)
+            r.raise_for_status = MagicMock()
+            return r
+
+        page_ml = _make_page("10.ml/1", "Machine Learning Paper")
+        page_dl = _make_page("10.dl/1", "Deep Learning Paper")
+
+        with patch(
+            "findpapers.searchers.base.requests.get",
+            side_effect=[page_ml, page_dl],
+        ), patch.object(searcher, "_rate_limit"):
+            papers = searcher.search(or_query, max_papers=1)
+
+        assert len(papers) <= 1

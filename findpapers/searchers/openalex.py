@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import math
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
@@ -377,14 +378,23 @@ class OpenAlexSearcher(SearcherBase):
         expanded = self._query_builder.expand_query(query)
         papers: List[Paper] = []
         seen_keys: set[str] = set()
+        num_expanded = len(expanded)
 
         for sub_query in expanded:
-            if max_papers is not None and len(papers) >= max_papers:
-                break
+            # Distribute max_papers budget evenly across sub-queries so that
+            # every expansion branch (e.g. each OR clause) is actually queried.
+            # Without this, the first sub-query can exhaust the total budget
+            # and leave subsequent clauses (e.g. the second OR term) never
+            # fetched.
+            if max_papers is not None:
+                per_query_cap = max(1, math.ceil(max_papers / num_expanded))
+                sub_cap = len(papers) + per_query_cap
+            else:
+                sub_cap = None
 
             sub_params = self._query_builder.convert_query(sub_query)
             before = len(papers)
-            self._fetch_single_query(sub_params, max_papers, papers, progress_callback)
+            self._fetch_single_query(sub_params, sub_cap, papers, progress_callback)
 
             # Deduplicate newly appended papers by DOI or title
             deduped: List[Paper] = []
