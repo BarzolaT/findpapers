@@ -173,9 +173,49 @@ class TestSearchRunnerPipeline:
         assert len(runner.get_results()) == 1
 
     def test_deduplication_keeps_different_dois(self):
-        """Papers with different DOIs are kept separately."""
+        """Papers with different DOIs *and* different titles are kept separately."""
         p1 = _make_paper(title="Paper A", doi="10.1234/aaa")
         p2 = _make_paper(title="Paper B", doi="10.1234/bbb")
+        runner = self._make_runner_with_mock_papers([p1, p2])
+        runner.run()
+        assert len(runner.get_results()) == 2
+
+    def test_deduplication_second_pass_merges_same_title_different_doi(self):
+        """Pass 2 merges papers with the same title even when DOIs differ.
+
+        This covers the common cross-database case where the same work is
+        indexed with an arXiv DOI in one database and the publisher DOI in
+        another (e.g. ``10.48550/arxiv.1706.03762`` vs ``10.5555/3295222.3295349``
+        for "Attention is All You Need").
+        """
+        p1 = _make_paper(title="Attention is All You Need", doi="10.48550/arxiv.1706.03762")
+        p2 = _make_paper(title="Attention is All You Need", doi="10.5555/3295222.3295349")
+        runner = self._make_runner_with_mock_papers([p1, p2])
+        runner.run()
+        assert len(runner.get_results()) == 1
+
+    def test_deduplication_second_pass_keeps_same_title_different_year(self):
+        """Papers with the same title but different publication years are kept separate."""
+        p1 = Paper(
+            title="Annual Report on AI",
+            abstract="abstract",
+            authors=["A"],
+            publication=Publication(title="Journal"),
+            publication_date=date(2022, 1, 1),
+            url="http://example.com/2022",
+            doi="10.1234/ai-2022",
+            paper_type=PaperType.ARTICLE,
+        )
+        p2 = Paper(
+            title="Annual Report on AI",
+            abstract="abstract",
+            authors=["A"],
+            publication=Publication(title="Journal"),
+            publication_date=date(2023, 1, 1),
+            url="http://example.com/2023",
+            doi="10.1234/ai-2023",
+            paper_type=PaperType.ARTICLE,
+        )
         runner = self._make_runner_with_mock_papers([p1, p2])
         runner.run()
         assert len(runner.get_results()) == 2

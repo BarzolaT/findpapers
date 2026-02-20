@@ -34,7 +34,10 @@ class SearchRunner:
     1. Parse and validate the query string.
     2. Fetch papers from each configured database searcher.
     3. Filter by publication type (when specified).
-    4. Deduplicate and merge results using DOI / title+year keys.
+    4. Deduplicate and merge results using a two-pass strategy: first by
+       DOI when available, then a second pass by normalised title+year to
+       catch cross-database cases where the same paper carries different DOIs
+       (e.g. arXiv preprint DOI vs. publisher DOI).
     5. Flag papers from potentially predatory publications.
 
     Parameters
@@ -469,9 +472,20 @@ class SearchRunner:
             ]
 
     def _deduplicate_and_merge(self, metrics: dict[str, int | float]) -> None:
-        """Collapse duplicate papers using DOI or title+year as the key.
+        """Collapse duplicate papers in two passes.
 
-        When two papers share the same key, their data is merged using
+        **Pass 1** groups papers by their primary key (DOI when available,
+        otherwise a normalised ``title|year`` string).  This resolves exact
+        duplicates found within the same database or between databases that
+        share the same DOI.
+
+        **Pass 2** groups the results of pass 1 by a normalised
+        ``title|year`` key.  This catches the common cross-database case
+        where the same paper is indexed with different DOIs (e.g. the arXiv
+        DOI ``10.48550/arxiv.*`` vs the publisher-assigned DOI) so that a
+        second pass based on title+year can still merge them.
+
+        When two papers share the same key their data is merged using
         :meth:`~findpapers.core.paper.Paper.merge` (most-complete strategy).
 
         Parameters
@@ -483,6 +497,7 @@ class SearchRunner:
         -------
         None
         """
+        # Pass 1: primary key dedup (DOI > title|year > title).
         merged: dict[str, Paper] = {}
         for paper in self._results:
             key = self._dedupe_key(paper)
@@ -490,7 +505,17 @@ class SearchRunner:
                 merged[key].merge(paper)
             else:
                 merged[key] = paper
-        self._results = list(merged.values())
+
+        # Pass 2: title+year dedup to handle cross-database DOI divergence.
+        merged2: dict[str, Paper] = {}
+        for paper in merged.values():
+            title_key = self._title_year_key(paper)
+            if title_key in merged2:
+                merged2[title_key].merge(paper)
+            else:
+                merged2[title_key] = paper
+
+        self._results = list(merged2.values())
 
     def _flag_predatory(self, metrics: dict[str, int | float]) -> None:
         """Mark papers from potentially predatory publications.
@@ -513,7 +538,7 @@ class SearchRunner:
         metrics["total_papers_from_predatory_publication"] = flagged
 
     def _dedupe_key(self, paper: Paper) -> str:
-        """Build a stable deduplication key for a paper.
+        """Build a stable primary deduplication key for a paper.
 
         Uses the DOI when available; otherwise falls back to a normalised
         ``title|year`` combination.
@@ -530,6 +555,25 @@ class SearchRunner:
         """
         if paper.doi:
             return f"doi:{str(paper.doi).strip().lower()}"
+        return self._title_year_key(paper)
+
+    def _title_year_key(self, paper: Paper) -> str:
+        """Build a normalised ``title|year`` deduplication key for a paper.
+
+        Used as a secondary dedup key in the second pass to catch
+        cross-database duplicates that have divergent DOIs (e.g. an arXiv
+        preprint DOI vs the publisher-assigned DOI for the same work).
+
+        Parameters
+        ----------
+        paper : Paper
+            Paper to key.
+
+        Returns
+        -------
+        str
+            Title/year key string.
+        """
         title = paper.title
         year = getattr(paper.publication_date, "year", None)
         if title and year:
