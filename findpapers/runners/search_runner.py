@@ -122,7 +122,7 @@ class SearchRunner:
         parser = QueryParser()
         self._query = parser.parse(query)
 
-        self._searchers = self._build_searchers(
+        self._searchers, self._skipped_databases = self._build_searchers(
             databases=databases,
             ieee_api_key=ieee_api_key,
             scopus_api_key=scopus_api_key,
@@ -172,6 +172,8 @@ class SearchRunner:
             "runtime_in_seconds": 0.0,
             "total_papers_from_predatory_source": 0,
         }
+        for _skipped in self._skipped_databases:
+            metrics[f"total_papers_from_{_skipped}"] = 0
 
         self._fetch_papers(metrics, verbose)
 
@@ -320,7 +322,7 @@ class SearchRunner:
         openalex_api_key: str | None,
         openalex_email: str | None,
         semantic_scholar_api_key: str | None,
-    ) -> list[SearcherBase]:
+    ) -> tuple[list[SearcherBase], list[str]]:
         """Instantiate the requested searchers.
 
         Parameters
@@ -342,8 +344,8 @@ class SearchRunner:
 
         Returns
         -------
-        list[SearcherBase]
-            Instantiated searchers in the requested order.
+        tuple[list[SearcherBase], list[str]]
+            A pair of (available searchers, names of skipped searchers).
 
         Raises
         ------
@@ -370,15 +372,17 @@ class SearchRunner:
 
         searchers = [all_searchers[Database(db)] for db in raw]
         available = []
+        skipped: list[str] = []
         for searcher in searchers:
             if searcher.is_available:
                 available.append(searcher)
             else:
+                skipped.append(searcher.name)
                 logger.warning(
                     "Skipping '%s': a required API key was not provided.",
                     searcher.name,
                 )
-        return available
+        return available, skipped
 
     def _fetch_papers(self, metrics: dict[str, int | float], verbose: bool = False) -> None:
         """Fetch papers from all configured searchers.

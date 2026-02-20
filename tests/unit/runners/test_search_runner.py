@@ -103,6 +103,23 @@ class TestSearchRunnerInit:
         names = [s.name for s in runner._searchers]  # noqa: SLF001
         assert "scopus" in names
 
+    def test_skipped_databases_recorded_when_no_key(self):
+        """_skipped_databases lists names of databases dropped due to missing keys."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee", "scopus"])
+        assert "ieee" in runner._skipped_databases  # noqa: SLF001
+        assert "scopus" in runner._skipped_databases  # noqa: SLF001
+        assert "arxiv" not in runner._skipped_databases  # noqa: SLF001
+
+    def test_skipped_databases_empty_when_keys_provided(self):
+        """_skipped_databases is empty when all required keys are present."""
+        runner = SearchRunner(
+            query="[ml]",
+            databases=["arxiv", "ieee", "scopus"],
+            ieee_api_key="key",
+            scopus_api_key="key",
+        )
+        assert runner._skipped_databases == []  # noqa: SLF001
+
     def test_get_results_before_run_raises(self):
         """get_results() before run() raises SearchRunnerNotExecutedError."""
         runner = SearchRunner(query="[ml]", databases=["arxiv"])
@@ -163,6 +180,20 @@ class TestSearchRunnerPipeline:
         assert "total_papers" in metrics
         assert "runtime_in_seconds" in metrics
         assert "total_papers_from_predatory_source" in metrics
+
+    def test_metrics_include_zero_for_skipped_databases(self):
+        """Skipped databases (no API key) appear in metrics with count 0."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.return_value = [_make_paper()]
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner.run()
+        metrics = runner.get_metrics()
+        assert "total_papers_from_ieee" in metrics
+        assert metrics["total_papers_from_ieee"] == 0
+        assert "total_papers_from_arxiv" in metrics
+        assert metrics["total_papers_from_arxiv"] == 1
 
     def test_deduplication_merges_same_doi(self):
         """Two papers with the same DOI are merged into one."""
