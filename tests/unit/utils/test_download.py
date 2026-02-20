@@ -40,10 +40,10 @@ class TestResolvePdfUrl:
 
     # IEEE Xplore
     def test_ieee_document_path(self) -> None:
-        """IEEE document path is converted to stampPDF URL."""
+        """IEEE document path is converted to stamp/stamp.jsp URL."""
         url = "https://ieeexplore.ieee.org/document/9999999"
         result = resolve_pdf_url(url)
-        assert result == "https://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=9999999"
+        assert result == "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9999999"
 
     def test_ieee_arnumber_querystring(self) -> None:
         """IEEE URL with arnumber query param is converted."""

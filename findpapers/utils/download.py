@@ -58,7 +58,7 @@ def resolve_pdf_url(response_url: str, doi: str | None = None) -> str | None:
             doc_id = qs["arnumber"][0]
         else:
             return None
-        return f"{host}/stampPDF/getPDF.jsp?tp=&arnumber={doc_id}"
+        return f"{host}/stamp/stamp.jsp?tp=&arnumber={doc_id}"
 
     if host in ("https://www.sciencedirect.com", "https://linkinghub.elsevier.com"):
         paper_id = path.split("/")[-1]
