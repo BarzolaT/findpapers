@@ -313,8 +313,9 @@ class TestOpenAlexSearcherSearch:
         """Each OR clause is queried even when the first clause fills the budget.
 
         When an OR query is expanded into two sub-queries (one per clause),
-        both HTTP requests must be issued.  Without per-clause budget splitting,
-        the first sub-query can exhaust max_papers and the second is skipped.
+        both HTTP requests must be issued.  Each branch uses an independent
+        accumulator so that one clause cannot exhaust max_papers and prevent
+        the remaining clauses from being fetched.
         """
         searcher = OpenAlexSearcher()
 

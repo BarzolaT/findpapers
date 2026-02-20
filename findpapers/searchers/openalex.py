@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import datetime
 import logging
-import math
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
@@ -376,36 +375,27 @@ class OpenAlexSearcher(SearcherBase):
             Retrieved papers, deduplicated by DOI.
         """
         expanded = self._query_builder.expand_query(query)
-        papers: List[Paper] = []
+        all_papers: List[Paper] = []
         seen_keys: set[str] = set()
-        num_expanded = len(expanded)
 
         for sub_query in expanded:
-            # Distribute max_papers budget evenly across sub-queries so that
-            # every expansion branch (e.g. each OR clause) is actually queried.
-            # Without this, the first sub-query can exhaust the total budget
-            # and leave subsequent clauses (e.g. the second OR term) never
-            # fetched.
-            if max_papers is not None:
-                per_query_cap = max(1, math.ceil(max_papers / num_expanded))
-                sub_cap = len(papers) + per_query_cap
-            else:
-                sub_cap = None
-
+            # Use a fresh accumulator per sub-query so that any preceding
+            # branch does not exhaust the budget and prevent later branches
+            # from being fetched.  Each branch is allowed to return up to
+            # max_papers results independently; the combined list is
+            # deduplicated and truncated to max_papers at the very end.
+            sub_papers: List[Paper] = []
             sub_params = self._query_builder.convert_query(sub_query)
-            before = len(papers)
-            self._fetch_single_query(sub_params, sub_cap, papers, progress_callback)
+            self._fetch_single_query(sub_params, max_papers, sub_papers, progress_callback)
 
-            # Deduplicate newly appended papers by DOI or title
-            deduped: List[Paper] = []
-            for paper in papers[before:]:
+            # Merge into the global accumulator, deduplicating across branches.
+            for paper in sub_papers:
                 key = paper.doi or paper.url or paper.title
                 if key and key not in seen_keys:
                     seen_keys.add(key)
-                    deduped.append(paper)
-            papers[before:] = deduped
+                    all_papers.append(paper)
 
-        return papers[:max_papers] if max_papers is not None else papers
+        return all_papers[:max_papers] if max_papers is not None else all_papers
 
 
 def _reconstruct_abstract(inverted_index: dict) -> str:
