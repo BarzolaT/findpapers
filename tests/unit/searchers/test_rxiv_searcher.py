@@ -267,6 +267,25 @@ class TestRxivSearcherFetchMetadata:
 
         assert meta is None
 
+    def test_warns_on_doi_not_recognizable(self, mock_response, caplog):
+        """Logs a warning when the API reports 'DOI not recognizable'."""
+        import logging
+
+        data = {
+            "messages": [{"status": "DOI not recognizable"}],
+            "collection": [],
+        }
+        searcher = _make_searcher()
+        response = mock_response(json_data=data)
+        response.raise_for_status = MagicMock()
+
+        with patch.object(searcher, "_get", return_value=response):
+            with caplog.at_level(logging.WARNING, logger="findpapers.searchers.rxiv"):
+                meta = searcher._fetch_metadata("10.64898/2026.02.17.12345678v1")
+
+        assert meta is None
+        assert any("DOI not recognizable" in r.message for r in caplog.records)
+
 
 class TestRxivSearcherParsePaper:
     """Tests for _parse_paper."""

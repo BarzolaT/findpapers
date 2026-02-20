@@ -239,6 +239,16 @@ class RxivSearcher(SearcherBase):
 
         data = response.json()
         collection = data.get("collection") or []
+        if not collection:
+            messages = data.get("messages") or []
+            for msg in messages:
+                status = msg.get("status", "")
+                if status:
+                    logger.warning(
+                        "biorxiv API did not return metadata for DOI %s: %s",
+                        doi,
+                        status,
+                    )
         return collection[0] if collection else None
 
     @staticmethod
