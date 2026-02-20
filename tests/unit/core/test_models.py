@@ -7,8 +7,8 @@ import json
 import pytest
 
 from findpapers.core.paper import Paper, PaperType, _is_preprint_doi, _merge_doi
-from findpapers.core.publication import Publication
 from findpapers.core.search import Search
+from findpapers.core.source import Source
 
 
 def test_paper_type_normalization():
@@ -17,7 +17,7 @@ def test_paper_type_normalization():
         title="A Paper",
         abstract="",
         authors=[],
-        publication=None,
+        source=None,
         publication_date=datetime.date.today(),
     )
     paper.paper_type = "ARTICLE"  # mixed-case string
@@ -29,15 +29,15 @@ def test_paper_type_normalization():
 
 def test_publication_merge():
     """Test merging two publications."""
-    base = Publication(title="A", publisher=None)
-    incoming = Publication(title="Longer", publisher="Pub")
+    base = Source(title="A", publisher=None)
+    incoming = Source(title="Longer", publisher="Pub")
     base.merge(incoming)
     assert base.title == "Longer"
     assert base.publisher == "Pub"
 
 
 def test_publication_to_from_dict():
-    """Test publication serialization and deserialization."""
+    """Test source serialization and deserialization."""
     data = {
         "title": "T",
         "isbn": "1",
@@ -45,8 +45,8 @@ def test_publication_to_from_dict():
         "publisher": "Pub",
         "is_potentially_predatory": True,
     }
-    publication = Publication.from_dict(data)
-    assert Publication.to_dict(publication)["title"] == "T"
+    source = Source.from_dict(data)
+    assert Source.to_dict(source)["title"] == "T"
 
 
 def test_paper_requires_title():
@@ -56,7 +56,7 @@ def test_paper_requires_title():
             title="",
             abstract="",
             authors=[],
-            publication=None,
+            source=None,
             publication_date=datetime.date.today(),
         )
 
@@ -67,7 +67,7 @@ def test_paper_url_and_pdf_url():
         title="Title",
         abstract="Abstract",
         authors=["A"],
-        publication=None,
+        source=None,
         publication_date=None,
         url="https://example.com/paper",
         pdf_url="https://example.com/paper.pdf",
@@ -80,12 +80,12 @@ def test_paper_url_and_pdf_url():
 
 def test_paper_add_and_merge():
     """Test adding metadata and merging papers."""
-    publication = Publication(title="Journal")
+    publication = Source(title="Journal")
     paper = Paper(
         title="Title",
         abstract="",
         authors=["A"],
-        publication=publication,
+        source=publication,
         publication_date=datetime.date(2020, 1, 1),
         url="https://example.com",
     )
@@ -97,7 +97,7 @@ def test_paper_add_and_merge():
         title="Longer Title",
         abstract="Abstract",
         authors=["A", "B"],
-        publication=Publication(title="Journal", publisher="Pub"),
+        source=Source(title="Journal", publisher="Pub"),
         publication_date=datetime.date(2020, 1, 1),
         url="https://longer-example.com",
         pdf_url="https://example.com/paper.pdf",
@@ -176,7 +176,7 @@ def test_paper_merge_prefers_publisher_doi_over_preprint_doi():
         title="Attention is All You Need",
         abstract="",
         authors=["Vaswani"],
-        publication=None,
+        source=None,
         publication_date=datetime.date(2017, 6, 12),
         doi="10.48550/arxiv.1706.03762",
     )
@@ -184,7 +184,7 @@ def test_paper_merge_prefers_publisher_doi_over_preprint_doi():
         title="Attention is All You Need",
         abstract="The dominant sequence...",
         authors=["Vaswani"],
-        publication=None,
+        source=None,
         publication_date=datetime.date(2017, 6, 12),
         doi="10.5555/3295222.3295349",
     )
@@ -198,7 +198,7 @@ def test_paper_merge_prefers_publisher_doi_when_preprint_is_incoming():
         title="Attention is All You Need",
         abstract="The dominant sequence...",
         authors=["Vaswani"],
-        publication=None,
+        source=None,
         publication_date=datetime.date(2017, 6, 12),
         doi="10.5555/3295222.3295349",
     )
@@ -206,7 +206,7 @@ def test_paper_merge_prefers_publisher_doi_when_preprint_is_incoming():
         title="Attention is All You Need",
         abstract="",
         authors=["Vaswani"],
-        publication=None,
+        source=None,
         publication_date=datetime.date(2017, 6, 12),
         doi="10.48550/arxiv.1706.03762",
     )
@@ -221,7 +221,7 @@ def test_search_add_paper():
         title="Title",
         abstract="Abstract",
         authors=["Author"],
-        publication=None,
+        source=None,
         publication_date=None,
     )
     search.add_paper(paper)
@@ -235,7 +235,7 @@ def _make_search_with_paper() -> Search:
         title="Export Test Paper",
         abstract="Abstract text.",
         authors=["Author One"],
-        publication=Publication(title="Test Journal"),
+        source=Source(title="Test Journal"),
         publication_date=datetime.date(2023, 1, 1),
     )
     paper.paper_type = PaperType.ARTICLE

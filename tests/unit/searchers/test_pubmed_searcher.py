@@ -222,9 +222,9 @@ class TestPubmedSearcherParsePaper:
         el = ET.fromstring(xml_str)
         paper = PubmedSearcher()._parse_paper(el)
         assert paper is not None
-        assert paper.publication is not None
-        assert paper.publication.title == "Nature"
-        assert paper.publication.issn == "1234-5678"
+        assert paper.source is not None
+        assert paper.source.title == "Nature"
+        assert paper.source.issn == "1234-5678"
 
 
 class TestPubmedSearcherSearch:

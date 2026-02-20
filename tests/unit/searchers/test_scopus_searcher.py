@@ -133,8 +133,8 @@ class TestScopusSearcherParsePaper:
         }
         paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
-        assert paper.publication is not None
-        assert paper.publication.isbn == "978-3-16-148410-0"
+        assert paper.source is not None
+        assert paper.source.isbn == "978-3-16-148410-0"
 
     def test_aggregation_type_conference(self):
         """Entry with Conference Proceeding aggregation maps to INPROCEEDINGS."""

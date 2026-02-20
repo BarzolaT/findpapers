@@ -44,8 +44,8 @@ class FilterCode(str, Enum):
         ``key`` — search in the keywords / subject field.
     AUTHOR
         ``au`` — search by author name.
-    PUBLICATION
-        ``pu`` — search by publication / venue name.
+    SOURCE
+        ``src`` — search by source name (journal, conference, etc.).
     AFFILIATION
         ``af`` — search by institutional affiliation.
     TITLE_ABSTRACT
@@ -58,7 +58,7 @@ class FilterCode(str, Enum):
     ABSTRACT = "abs"
     KEYWORDS = "key"
     AUTHOR = "au"
-    PUBLICATION = "pu"
+    SOURCE = "src"
     AFFILIATION = "af"
     TITLE_ABSTRACT = "tiabs"
     TITLE_ABSTRACT_KEYWORDS = "tiabskey"

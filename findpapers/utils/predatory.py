@@ -58,61 +58,61 @@ PREDATORY_PUBLISHER_NAMES: set[str] = _normalized_names(POTENTIAL_PREDATORY_PUBL
 PREDATORY_JOURNAL_NAMES: set[str] = _normalized_names(POTENTIAL_PREDATORY_JOURNALS)
 
 
-def _get_publication_fields(publication: object) -> tuple[str | None, str | None, str | None]:
-    """Extract publication name, publisher name and publisher host.
+def _get_source_fields(source: object) -> tuple[str | None, str | None, str | None]:
+    """Extract source name, publisher name and publisher host.
 
-    Supports both dict-like and attribute-based publication objects.
+    Supports both dict-like and attribute-based source objects.
 
     Parameters
     ----------
-    publication : object
-        Publication object or dict.
+    source : object
+        Source object or dict.
 
     Returns
     -------
     tuple[str | None, str | None, str | None]
-        ``(publication_name, publisher_name, publisher_host)`` normalized.
+        ``(source_name, publisher_name, publisher_host)`` normalized.
     """
-    if isinstance(publication, dict):
-        publication_name = _normalize(publication.get("title"))
-        publisher_name = _normalize(publication.get("publisher"))
-        publisher_host = _normalize(publication.get("publisher_host"))
+    if isinstance(source, dict):
+        source_name = _normalize(source.get("title"))
+        publisher_name = _normalize(source.get("publisher"))
+        publisher_host = _normalize(source.get("publisher_host"))
     else:
-        publication_name = _normalize(getattr(publication, "title", None))
-        publisher_name = _normalize(getattr(publication, "publisher", None))
-        publisher_host = _normalize(getattr(publication, "publisher_host", None))
+        source_name = _normalize(getattr(source, "title", None))
+        publisher_name = _normalize(getattr(source, "publisher", None))
+        publisher_host = _normalize(getattr(source, "publisher_host", None))
 
-    return publication_name, publisher_name, publisher_host
+    return source_name, publisher_name, publisher_host
 
 
-def is_predatory_publication(publication: object | None) -> bool:
-    """Determine whether a publication is potentially predatory.
+def is_predatory_source(source: object | None) -> bool:
+    """Determine whether a source is potentially predatory.
 
-    Checks the publication name against the predatory journals list and the
+    Checks the source name against the predatory journals list and the
     publisher name / host against the predatory publishers list.
 
     Parameters
     ----------
-    publication : object | None
-        Publication object (with ``.title``, ``.publisher``, ``.publisher_host``
+    source : object | None
+        Source object (with ``.title``, ``.publisher``, ``.publisher_host``
         attributes) or dict, or ``None``.
 
     Returns
     -------
     bool
-        ``True`` if the publication matches any predatory list entry.
+        ``True`` if the source matches any predatory list entry.
 
     Examples
     --------
-    >>> is_predatory_publication(None)
+    >>> is_predatory_source(None)
     False
     """
-    if publication is None:
+    if source is None:
         return False
 
-    publication_name, publisher_name, publisher_host = _get_publication_fields(publication)
+    source_name, publisher_name, publisher_host = _get_source_fields(source)
 
-    if publication_name and publication_name in PREDATORY_JOURNAL_NAMES:
+    if source_name and source_name in PREDATORY_JOURNAL_NAMES:
         return True
     if publisher_name and publisher_name in PREDATORY_PUBLISHER_NAMES:
         return True

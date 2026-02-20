@@ -9,9 +9,9 @@ from typing import List, Optional
 from xml.etree import ElementTree as ET
 
 from findpapers.core.paper import Paper, PaperType
-from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.core.search import Database
+from findpapers.core.source import Source
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -252,7 +252,7 @@ class PubmedSearcher(SearcherBase):
 
         # Publication (journal)
         journal_el = article.find(".//Journal")
-        publication: Optional[Publication] = None
+        source: Optional[Source] = None
         if journal_el is not None:
             journal_title = journal_el.findtext("Title") or ""
             abbrev = journal_el.findtext("ISOAbbreviation") or ""
@@ -260,14 +260,14 @@ class PubmedSearcher(SearcherBase):
             issn_el = journal_el.find("ISSN")
             issn = (issn_el.text or "").strip() if issn_el is not None else None
             if pub_title.strip():
-                publication = Publication(title=pub_title.strip(), issn=issn)
+                source = Source(title=pub_title.strip(), issn=issn)
 
         try:
             paper = Paper(
                 title=title,
                 abstract=abstract,
                 authors=authors,
-                publication=publication,
+                source=source,
                 publication_date=pub_date,
                 url=url,
                 doi=doi,

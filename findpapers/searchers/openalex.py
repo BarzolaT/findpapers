@@ -8,9 +8,9 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.paper import Paper, PaperType
-from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.core.search import Database
+from findpapers.core.source import Source
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -240,18 +240,18 @@ class OpenAlexSearcher(SearcherBase):
                 keywords.add(kw)
 
         # Publication
-        publication: Optional[Publication] = None
+        source: Optional[Source] = None
         primary_loc = work.get("primary_location") or {}
-        source = primary_loc.get("source") or {}
-        pub_title = (source.get("display_name") or "").strip()
+        source_data: dict = primary_loc.get("source") or {}
+        pub_title = (source_data.get("display_name") or "").strip()
         if pub_title:
-            issn_list = source.get("issn_l") or source.get("issn") or []
+            issn_list = source_data.get("issn_l") or source_data.get("issn") or []
             issn = (
                 issn_list[0]
                 if isinstance(issn_list, list) and issn_list
                 else str(issn_list) if issn_list else None
             )
-            publication = Publication(title=pub_title, issn=issn)
+            source = Source(title=pub_title, issn=issn)
 
         # Paper type derived from the work-level "type" field
         paper_type = _openalex_work_type_to_paper_type(work.get("type"))
@@ -261,7 +261,7 @@ class OpenAlexSearcher(SearcherBase):
                 title=title,
                 abstract=abstract,
                 authors=authors,
-                publication=publication,
+                source=source,
                 publication_date=pub_date,
                 url=url,
                 pdf_url=pdf_url,

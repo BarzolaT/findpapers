@@ -20,7 +20,7 @@ class PubmedQueryBuilder(QueryBuilder):
             FilterCode.ABSTRACT,
             FilterCode.KEYWORDS,
             FilterCode.AUTHOR,
-            FilterCode.PUBLICATION,
+            FilterCode.SOURCE,
             FilterCode.AFFILIATION,
             FilterCode.TITLE_ABSTRACT,
             FilterCode.TITLE_ABSTRACT_KEYWORDS,
@@ -99,7 +99,7 @@ class PubmedQueryBuilder(QueryBuilder):
                 return tagged("mh")
             if filter_code == FilterCode.AUTHOR:
                 return tagged("au")
-            if filter_code == FilterCode.PUBLICATION:
+            if filter_code == FilterCode.SOURCE:
                 return tagged("journal")
             if filter_code == FilterCode.AFFILIATION:
                 return tagged("ad")

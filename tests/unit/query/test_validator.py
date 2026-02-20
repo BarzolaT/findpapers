@@ -104,7 +104,7 @@ class TestQueryValidator:
         validator.validate("abs[abstract term]")
         validator.validate("key[keyword term]")
         validator.validate("au[author name]")
-        validator.validate("pu[publication name]")
+        validator.validate("src[publication name]")
         validator.validate("af[affiliation name]")
         validator.validate("tiabs[term]")
         validator.validate("tiabskey[term]")

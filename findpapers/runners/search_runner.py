@@ -20,7 +20,7 @@ from findpapers.searchers.pubmed import PubmedSearcher
 from findpapers.searchers.scopus import ScopusSearcher
 from findpapers.searchers.semantic_scholar import SemanticScholarSearcher
 from findpapers.utils.parallel import execute_tasks
-from findpapers.utils.predatory import is_predatory_publication
+from findpapers.utils.predatory import is_predatory_source
 from findpapers.utils.progress import make_progress_bar
 
 logger = logging.getLogger(__name__)
@@ -581,9 +581,9 @@ class SearchRunner:
         """
         flagged = 0
         for paper in self._results:
-            if is_predatory_publication(paper.publication):
-                if paper.publication is not None:
-                    paper.publication.is_potentially_predatory = True
+            if is_predatory_source(paper.source):
+                if paper.source is not None:
+                    paper.source.is_potentially_predatory = True
                 flagged += 1
         metrics["total_papers_from_predatory_publication"] = flagged
 

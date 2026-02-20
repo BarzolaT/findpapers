@@ -9,7 +9,7 @@ from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.utils.enrichment import enrich_from_sources
 from findpapers.utils.parallel import execute_tasks
-from findpapers.utils.predatory import is_predatory_publication
+from findpapers.utils.predatory import is_predatory_source
 
 logger = logging.getLogger(__name__)
 
@@ -199,6 +199,6 @@ class EnrichmentRunner:
         # Re-evaluate the predatory flag: the publication may have been
         # populated only after enrichment, so the original flag (set during
         # the search phase) might be stale.
-        if paper.publication is not None:
-            paper.publication.is_potentially_predatory = is_predatory_publication(paper.publication)
+        if paper.source is not None:
+            paper.source.is_potentially_predatory = is_predatory_source(paper.source)
         return True

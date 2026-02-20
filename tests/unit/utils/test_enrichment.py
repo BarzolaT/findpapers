@@ -417,8 +417,8 @@ class TestBuildPaperFromMetadata:
         }
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
-        assert paper.publication is not None
-        assert paper.publication.title == "Advances in Machine Learning"
+        assert paper.source is not None
+        assert paper.source.title == "Advances in Machine Learning"
         from findpapers.core.paper import PaperType
 
         assert paper.paper_type == PaperType.INBOOK
@@ -549,10 +549,10 @@ class TestBuildPaperFromMetadata:
         }
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
-        assert paper.publication is not None
-        assert paper.publication.title == "Nature"
+        assert paper.source is not None
+        assert paper.source.title == "Nature"
         assert paper.paper_type == PaperType.ARTICLE
-        assert paper.publication.issn == "0028-0836"
+        assert paper.source.issn == "0028-0836"
 
     def test_conference_publication_created(self) -> None:
         """citation_conference_title creates a Publication with paper_type=INPROCEEDINGS."""
@@ -564,7 +564,7 @@ class TestBuildPaperFromMetadata:
         }
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
-        assert paper.publication is not None
+        assert paper.source is not None
         assert paper.paper_type == PaperType.INPROCEEDINGS
 
     def test_preprint_server_publication_not_created(self) -> None:
@@ -576,9 +576,7 @@ class TestBuildPaperFromMetadata:
             }
             paper = build_paper_from_metadata(meta, "http://x.com")
             assert paper is not None, f"Paper should be created for {server}"
-            assert (
-                paper.publication is None
-            ), f"Publication should be None for preprint server {server}"
+            assert paper.source is None, f"Publication should be None for preprint server {server}"
 
     def test_pdf_url_captured(self) -> None:
         """citation_pdf_url is stored on the paper."""
@@ -624,7 +622,7 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "https://arxiv.org/abs/2301.00306v4")
         assert paper is not None
         assert paper.doi is None
-        assert paper.publication is None  # preprint — no journal
+        assert paper.source is None  # preprint — no journal
 
     def test_arxiv_paper_has_pdf_url(self) -> None:
         """arXiv page should populate pdf_url on the built paper."""
@@ -653,9 +651,9 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "https://pubmed.ncbi.nlm.nih.gov/36006759/")
         assert paper is not None
         assert paper.doi is not None and paper.doi.startswith("10.")
-        assert paper.publication is not None
+        assert paper.source is not None
         assert paper.paper_type == PaperType.ARTICLE
-        assert paper.publication.issn is not None
+        assert paper.source.issn is not None
 
     def test_pubmed_paper_has_authors(self) -> None:
         """PubMed pages expose citation_authors (plural, semicolons); authors must be populated."""
@@ -673,7 +671,7 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "https://doi.org/10.1101/19004184")
         assert paper is not None
         assert paper.doi is not None and paper.doi.startswith("10.1101/")
-        assert paper.publication is None
+        assert paper.source is None
 
     def test_medrxiv_paper_has_pdf_url(self) -> None:
         """medRxiv page populates pdf_url."""
@@ -693,7 +691,7 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "http://dx.doi.org/10.3126/nelta.v27i1-2.53203")
         assert paper is not None
         assert paper.doi is not None and paper.doi.startswith("10.")
-        assert paper.publication is not None
+        assert paper.source is not None
         assert paper.paper_type == PaperType.ARTICLE
 
     def test_openalex_paper_has_keywords(self) -> None:
@@ -721,7 +719,7 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "https://ieeexplore.ieee.org/document/9568778/")
         assert paper is not None
         assert paper.doi is not None and paper.doi.startswith("10.")
-        assert paper.publication is not None
+        assert paper.source is not None
         assert paper.paper_type == PaperType.ARTICLE
 
     def test_ieee_paper_has_keywords(self) -> None:
@@ -988,7 +986,7 @@ class TestEnrichFromSources:
 
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.")
-        assert result.publication is not None
+        assert result.source is not None
         assert result.paper_type == PaperType.ARTICLE
 
     def test_real_medrxiv_page_end_to_end(self) -> None:
@@ -1006,7 +1004,7 @@ class TestEnrichFromSources:
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.1101/")
         # medRxiv is a preprint server — no formal publication
-        assert result.publication is None
+        assert result.source is None
         assert result.pdf_url is not None
 
     def test_real_openalex_page_end_to_end(self) -> None:
@@ -1025,7 +1023,7 @@ class TestEnrichFromSources:
 
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.")
-        assert result.publication is not None
+        assert result.source is not None
 
     def test_real_ieee_page_end_to_end(self) -> None:
         """Full end-to-end: mock requests for an IEEE Xplore page and build a Paper."""
@@ -1045,7 +1043,7 @@ class TestEnrichFromSources:
 
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.")
-        assert result.publication is not None
+        assert result.source is not None
         assert result.paper_type == PaperType.ARTICLE
         assert len(result.authors) > 0
         assert result.keywords and len(result.keywords) > 0

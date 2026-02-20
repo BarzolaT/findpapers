@@ -96,14 +96,14 @@ def csv_columns() -> list[str]:
         "databases",
         "paper_type",
     ]
-    publication_fields = [
-        "publication_title",
-        "publication_isbn",
-        "publication_issn",
-        "publication_publisher",
-        "publication_is_potentially_predatory",
+    source_fields = [
+        "source_title",
+        "source_isbn",
+        "source_issn",
+        "source_publisher",
+        "source_is_potentially_predatory",
     ]
-    return paper_fields + publication_fields
+    return paper_fields + source_fields
 
 
 def paper_to_csv_row(paper: Paper) -> dict[str, object]:
@@ -119,7 +119,7 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
     dict[str, object]
         CSV row mapping.
     """
-    publication = paper.publication
+    source = paper.source
     row: dict[str, object] = {
         "title": paper.title,
         "abstract": paper.abstract,
@@ -135,13 +135,11 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
         "pages": paper.pages,
         "databases": "; ".join(sorted(paper.databases)),
         "paper_type": paper.paper_type.value if paper.paper_type is not None else None,
-        "publication_title": publication.title if publication else None,
-        "publication_isbn": publication.isbn if publication else None,
-        "publication_issn": publication.issn if publication else None,
-        "publication_publisher": publication.publisher if publication else None,
-        "publication_is_potentially_predatory": (
-            publication.is_potentially_predatory if publication else None
-        ),
+        "source_title": source.title if source else None,
+        "source_isbn": source.isbn if source else None,
+        "source_issn": source.issn if source else None,
+        "source_publisher": source.publisher if source else None,
+        "source_is_potentially_predatory": (source.is_potentially_predatory if source else None),
     }
     return row
 
@@ -166,7 +164,7 @@ def paper_to_bibtex(paper: Paper) -> str:
     default_tab = " " * 4
     paper_type = paper.paper_type
     citation_type = f"@{paper_type.value}" if paper_type is not None else "@misc"
-    publication = paper.publication
+    source = paper.source
     citation_key = citation_key_for(paper)
     lines = [f"{citation_type}{{{citation_key},"]
     lines.append(f"{default_tab}title = {{{paper.title}}},")
@@ -175,29 +173,27 @@ def paper_to_bibtex(paper: Paper) -> str:
         authors = " and ".join(paper.authors)
         lines.append(f"{default_tab}author = {{{authors}}},")
 
-    if citation_type == "@article" and publication is not None:
-        lines.append(f"{default_tab}journal = {{{publication.title}}},")
-    elif (
-        citation_type in {"@inproceedings", "@incollection", "@inbook"} and publication is not None
-    ):
-        lines.append(f"{default_tab}booktitle = {{{publication.title}}},")
+    if citation_type == "@article" and source is not None:
+        lines.append(f"{default_tab}journal = {{{source.title}}},")
+    elif citation_type in {"@inproceedings", "@incollection", "@inbook"} and source is not None:
+        lines.append(f"{default_tab}booktitle = {{{source.title}}},")
     elif citation_type == "@unpublished":
         note = bibtex_note(paper)
         if note:
             lines.append(f"{default_tab}note = {{{note}}},")
-    elif citation_type in {"@phdthesis", "@mastersthesis"} and publication is not None:
-        lines.append(f"{default_tab}school = {{{publication.title}}},")
-    elif citation_type == "@techreport" and publication is not None:
-        lines.append(f"{default_tab}institution = {{{publication.title}}},")
-    elif citation_type == "@manual" and publication is not None:
-        lines.append(f"{default_tab}organization = {{{publication.title}}},")
+    elif citation_type in {"@phdthesis", "@mastersthesis"} and source is not None:
+        lines.append(f"{default_tab}school = {{{source.title}}},")
+    elif citation_type == "@techreport" and source is not None:
+        lines.append(f"{default_tab}institution = {{{source.title}}},")
+    elif citation_type == "@manual" and source is not None:
+        lines.append(f"{default_tab}organization = {{{source.title}}},")
     else:
         how_published = bibtex_how_published(paper)
         if how_published:
             lines.append(f"{default_tab}howpublished = {{{how_published}}},")
 
-    if publication is not None and publication.publisher is not None:
-        lines.append(f"{default_tab}publisher = {{{publication.publisher}}},")
+    if source is not None and source.publisher is not None:
+        lines.append(f"{default_tab}publisher = {{{source.publisher}}},")
 
     if paper.publication_date is not None:
         lines.append(f"{default_tab}year = {{{paper.publication_date.year}}},")

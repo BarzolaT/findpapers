@@ -9,9 +9,9 @@ from typing import List, Optional
 from xml.etree import ElementTree as ET
 
 from findpapers.core.paper import Paper, PaperType
-from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.core.search import Database
+from findpapers.core.source import Source
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -165,12 +165,12 @@ class ArxivSearcher(SearcherBase):
         # Papers with a journal reference were formally published in a journal;
         # those without are still preprints (unpublished).
         journal_ref_el = entry.find("arxiv:journal_ref", _NS)
-        publication: Optional[Publication] = None
+        source: Optional[Source] = None
         has_journal_ref = (
             journal_ref_el is not None and journal_ref_el.text and journal_ref_el.text.strip()
         )
         if has_journal_ref:
-            publication = Publication(title=journal_ref_el.text.strip())  # type: ignore[union-attr]
+            source = Source(title=journal_ref_el.text.strip())  # type: ignore[union-attr]
         paper_type = PaperType.ARTICLE if has_journal_ref else PaperType.UNPUBLISHED
 
         # Comments — optional free-text note (e.g. "39 pages, 14 figures")
@@ -184,7 +184,7 @@ class ArxivSearcher(SearcherBase):
                 title=title,
                 abstract=abstract,
                 authors=authors,
-                publication=publication,
+                source=source,
                 publication_date=pub_date_str,
                 url=url,
                 pdf_url=pdf_url,

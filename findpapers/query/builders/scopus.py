@@ -22,7 +22,7 @@ class ScopusQueryBuilder(QueryBuilder):
             FilterCode.ABSTRACT,
             FilterCode.KEYWORDS,
             FilterCode.AUTHOR,
-            FilterCode.PUBLICATION,
+            FilterCode.SOURCE,
             FilterCode.AFFILIATION,
             FilterCode.TITLE_ABSTRACT,
             FilterCode.TITLE_ABSTRACT_KEYWORDS,
@@ -105,7 +105,7 @@ class ScopusQueryBuilder(QueryBuilder):
                 return f"KEY({quoted})"
             if filter_code == FilterCode.AUTHOR:
                 return f"AUTH({quoted})"
-            if filter_code == FilterCode.PUBLICATION:
+            if filter_code == FilterCode.SOURCE:
                 return f"SRCTITLE({quoted})"
             if filter_code == FilterCode.AFFILIATION:
                 return f"AFFIL({quoted})"

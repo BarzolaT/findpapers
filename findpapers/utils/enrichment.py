@@ -13,7 +13,7 @@ from lxml import html
 from lxml.html import HtmlElement
 
 from findpapers.core.paper import Paper, PaperType
-from findpapers.core.publication import Publication
+from findpapers.core.source import Source
 from findpapers.utils.http_headers import get_browser_headers
 
 logger = logging.getLogger(__name__)
@@ -512,10 +512,10 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
         except ValueError:
             pass
 
-    publication_title = _pick_metadata_value(metadata, PUBLICATION_TITLE_KEYS)
-    publication = None
+    source_title = _pick_metadata_value(metadata, PUBLICATION_TITLE_KEYS)
+    source = None
     paper_type: PaperType | None = None
-    if publication_title and publication_title.lower() not in _PREPRINT_SERVERS:
+    if source_title and source_title.lower() not in _PREPRINT_SERVERS:
         if "citation_journal_title" in metadata:
             paper_type = PaperType.ARTICLE
         elif "citation_conference_title" in metadata:
@@ -524,8 +524,8 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
             paper_type = PaperType.INBOOK
         elif "citation_book_title" in metadata:
             paper_type = PaperType.INCOLLECTION
-        publication = Publication(
-            title=publication_title,
+        source = Source(
+            title=source_title,
             issn=_pick_metadata_value(metadata, PUBLICATION_ISSN_KEYS),
             isbn=_pick_metadata_value(metadata, PUBLICATION_ISBN_KEYS),
             publisher=_pick_metadata_value(metadata, PUBLICATION_PUBLISHER_KEYS),
@@ -537,7 +537,7 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
         title=title,
         abstract=abstract or "",
         authors=authors,
-        publication=publication,
+        source=source,
         publication_date=publication_date,
         url=page_url,
         pdf_url=pdf_url_val,

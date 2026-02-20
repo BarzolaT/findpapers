@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 
 from findpapers.core.paper import Paper
-from findpapers.core.publication import Publication
+from findpapers.core.source import Source
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.enrichment_runner import EnrichmentRunner
 
@@ -24,7 +24,7 @@ def _make_paper(title: str = "Test Paper", urls: set[str] | None = None) -> Pape
         title=title,
         abstract="An abstract.",
         authors=["Author One"],
-        publication=Publication(title="Test Journal"),
+        source=Source(title="Test Journal"),
         publication_date=date(2023, 1, 1),
         url=url,
     )
@@ -179,18 +179,18 @@ class TestEnrichmentRunnerPredatoryReclassification:
             title="No Pub Paper",
             abstract="Abstract.",
             authors=["Author"],
-            publication=None,
+            source=None,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
         )
-        assert paper.publication is None
+        assert paper.source is None
 
-        predatory_pub = Publication(title="Predatory Journal XYZ")
+        predatory_pub = Source(title="Predatory Journal XYZ")
         enriched_paper = Paper(
             title="No Pub Paper",
             abstract="Abstract.",
             authors=["Author"],
-            publication=predatory_pub,
+            source=predatory_pub,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
         )
@@ -201,7 +201,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
                 return_value=enriched_paper,
             ),
             patch(
-                "findpapers.runners.enrichment_runner.is_predatory_publication",
+                "findpapers.runners.enrichment_runner.is_predatory_source",
                 return_value=True,
             ) as mock_is_predatory,
         ):
@@ -209,18 +209,18 @@ class TestEnrichmentRunnerPredatoryReclassification:
             runner.run()
 
         mock_is_predatory.assert_called_once()
-        assert paper.publication is not None
-        assert paper.publication.is_potentially_predatory is True
+        assert paper.source is not None
+        assert paper.source.is_potentially_predatory is True
 
     def test_predatory_flag_cleared_when_publication_is_safe(self):
         """Paper originally flagged as predatory is cleared if enrichment resolves a safe pub."""
-        safe_pub = Publication(title="Legitimate Journal")
-        original_pub = Publication(title="Unknown", is_potentially_predatory=True)
+        safe_pub = Source(title="Legitimate Journal")
+        original_pub = Source(title="Unknown", is_potentially_predatory=True)
         paper = Paper(
             title="Flagged Paper",
             abstract="Abstract.",
             authors=["Author"],
-            publication=original_pub,
+            source=original_pub,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
         )
@@ -229,7 +229,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
             title="Flagged Paper",
             abstract="Abstract.",
             authors=["Author"],
-            publication=safe_pub,
+            source=safe_pub,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
         )
@@ -240,15 +240,15 @@ class TestEnrichmentRunnerPredatoryReclassification:
                 return_value=enriched_paper,
             ),
             patch(
-                "findpapers.runners.enrichment_runner.is_predatory_publication",
+                "findpapers.runners.enrichment_runner.is_predatory_source",
                 return_value=False,
             ),
         ):
             runner = EnrichmentRunner(papers=[paper])
             runner.run()
 
-        assert paper.publication is not None
-        assert paper.publication.is_potentially_predatory is False
+        assert paper.source is not None
+        assert paper.source.is_potentially_predatory is False
 
     def test_predatory_flag_skipped_when_no_publication_after_enrichment(self):
         """Predatory flag is not changed when enrichment does not provide a publication."""
@@ -256,7 +256,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
             title="No Pub Paper",
             abstract="Abstract.",
             authors=["Author"],
-            publication=None,
+            source=None,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
         )
@@ -265,7 +265,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
             title="No Pub Paper",
             abstract="Abstract.",
             authors=["Author"],
-            publication=None,
+            source=None,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
         )
@@ -276,11 +276,11 @@ class TestEnrichmentRunnerPredatoryReclassification:
                 return_value=enriched_paper,
             ),
             patch(
-                "findpapers.runners.enrichment_runner.is_predatory_publication",
+                "findpapers.runners.enrichment_runner.is_predatory_source",
             ) as mock_is_predatory,
         ):
             runner = EnrichmentRunner(papers=[paper])
             runner.run()
 
         mock_is_predatory.assert_not_called()
-        assert paper.publication is None
+        assert paper.source is None

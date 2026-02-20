@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from findpapers.utils.predatory import is_predatory_publication
+from findpapers.utils.predatory import is_predatory_source
 
 
 class _FakePub:
@@ -22,16 +22,16 @@ class _FakePub:
 
 
 class TestIsPredatoryPublication:
-    """Tests for is_predatory_publication."""
+    """Tests for is_predatory_source."""
 
     def test_none_returns_false(self):
         """None input is not predatory."""
-        assert is_predatory_publication(None) is False
+        assert is_predatory_source(None) is False
 
     def test_unknown_journal_returns_false(self):
         """Unknown publication name is not flagged."""
         pub = _FakePub(title="Nature", publisher="Springer Nature")
-        assert is_predatory_publication(pub) is False
+        assert is_predatory_source(pub) is False
 
     def test_predatory_journal_by_name(self):
         """A journal on the predatory list is flagged."""
@@ -42,7 +42,7 @@ class TestIsPredatoryPublication:
             pytest.skip("No predatory journal names loaded")
         sample_name = next(iter(PREDATORY_JOURNAL_NAMES))
         pub = _FakePub(title=sample_name)
-        assert is_predatory_publication(pub) is True
+        assert is_predatory_source(pub) is True
 
     def test_predatory_publisher_by_name(self):
         """A publisher on the predatory list is flagged."""
@@ -52,12 +52,12 @@ class TestIsPredatoryPublication:
             pytest.skip("No predatory publisher names loaded")
         sample_name = next(iter(PREDATORY_PUBLISHER_NAMES))
         pub = _FakePub(publisher=sample_name)
-        assert is_predatory_publication(pub) is True
+        assert is_predatory_source(pub) is True
 
     def test_dict_publication_supported(self):
         """Dict-style publication objects are supported."""
         # A completely unknown publication should not be flagged.
-        result = is_predatory_publication(
+        result = is_predatory_source(
             {"title": "Totally Legit Journal of Science", "publisher": "Oxford University Press"}
         )
         assert result is False
@@ -65,9 +65,9 @@ class TestIsPredatoryPublication:
     def test_empty_title_and_publisher(self):
         """Publication with empty title and publisher is not flagged."""
         pub = _FakePub(title="", publisher="", publisher_host="")
-        assert is_predatory_publication(pub) is False
+        assert is_predatory_source(pub) is False
 
     def test_whitespace_only_values(self):
         """Whitespace-only values are treated as empty (not matched)."""
         pub = _FakePub(title="   ", publisher="  ")
-        assert is_predatory_publication(pub) is False
+        assert is_predatory_source(pub) is False

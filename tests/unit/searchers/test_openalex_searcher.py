@@ -189,9 +189,9 @@ class TestOpenAlexSearcherParsePaper:
         }
         paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
-        assert paper.publication is not None
-        assert paper.publication.title == "Nature"
-        assert paper.publication.issn == "1234-5678"
+        assert paper.source is not None
+        assert paper.source.title == "Nature"
+        assert paper.source.issn == "1234-5678"
 
     def test_doi_stripped_of_prefix(self):
         """DOI prefix 'https://doi.org/' is stripped."""

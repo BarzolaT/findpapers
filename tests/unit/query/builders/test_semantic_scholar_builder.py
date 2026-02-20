@@ -23,7 +23,7 @@ def test_semantic_scholar_rejects_publication_filter(
     parse_and_propagate: Callable[[str], Query],
 ) -> None:
     """Semantic Scholar builder does not support publication field filter."""
-    query = parse_and_propagate("pu[nature]")
+    query = parse_and_propagate("src[nature]")
     result = SemanticScholarQueryBuilder().validate_query(query)
     assert result.is_valid is False
 

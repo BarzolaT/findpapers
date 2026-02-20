@@ -8,8 +8,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from findpapers.core.paper import Paper, PaperType
-from findpapers.core.publication import Publication
 from findpapers.core.search import Database
+from findpapers.core.source import Source
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.search_runner import SearchRunner
 
@@ -22,14 +22,14 @@ def _make_paper(
 ) -> Paper:
     """Create a minimal Paper for testing."""
     if is_predatory:
-        pub = Publication(title="OMICS International")
+        pub = Source(title="OMICS International")
     else:
-        pub = Publication(title="Test Journal")
+        pub = Source(title="Test Journal")
     return Paper(
         title=title,
         abstract="An abstract.",
         authors=["Author One"],
-        publication=pub,
+        source=pub,
         publication_date=date(2023, 1, 1),
         url="http://example.com",
         doi=doi,
@@ -206,7 +206,7 @@ class TestSearchRunnerPipeline:
             title="Attention is All You Need",
             abstract="abstract with year",
             authors=["Vaswani et al."],
-            publication=Publication(title="arXiv"),
+            source=Source(title="arXiv"),
             publication_date=date(2017, 6, 12),
             url="http://arxiv.org/abs/1706.03762",
             doi="10.48550/arxiv.1706.03762",
@@ -216,7 +216,7 @@ class TestSearchRunnerPipeline:
             title="Attention is All You Need",
             abstract="abstract without year",
             authors=["Vaswani et al."],
-            publication=Publication(title="OpenAlex Source"),
+            source=Source(title="OpenAlex Source"),
             publication_date=None,  # intentionally missing
             url="http://openalex.org/W2963403868",
             doi="10.5555/3295222.3295349",
@@ -232,7 +232,7 @@ class TestSearchRunnerPipeline:
             title="Annual Report on AI",
             abstract="abstract",
             authors=["A"],
-            publication=Publication(title="Journal"),
+            source=Source(title="Journal"),
             publication_date=date(2022, 1, 1),
             url="http://example.com/2022",
             doi="10.1234/ai-2022",
@@ -242,7 +242,7 @@ class TestSearchRunnerPipeline:
             title="Annual Report on AI",
             abstract="abstract",
             authors=["A"],
-            publication=Publication(title="Journal"),
+            source=Source(title="Journal"),
             publication_date=date(2023, 1, 1),
             url="http://example.com/2023",
             doi="10.1234/ai-2023",
@@ -266,7 +266,7 @@ class TestSearchRunnerPipeline:
             title="Attention is All You Need... Unless You Are a CISO",
             abstract="abstract from zenodo",
             authors=["Author A"],
-            publication=Publication(title="Zenodo"),
+            source=Source(title="Zenodo"),
             publication_date=date(2025, 12, 25),
             url="https://zenodo.org/records/18056028",
             doi="10.5281/zenodo.18056028",
@@ -276,7 +276,7 @@ class TestSearchRunnerPipeline:
             title="Attention is All You Need... Unless You Are a CISO",
             abstract="abstract from ssrn",
             authors=["Author A"],
-            publication=Publication(title="SSRN"),
+            source=Source(title="SSRN"),
             publication_date=date(2026, 1, 1),
             url="https://ssrn.com/abstract=5967774",
             doi="10.2139/ssrn.5967774",
@@ -292,7 +292,7 @@ class TestSearchRunnerPipeline:
             title="Survey of Transformers",
             abstract="abstract 2022",
             authors=["Author A"],
-            publication=Publication(title="Zenodo"),
+            source=Source(title="Zenodo"),
             publication_date=date(2022, 1, 1),
             url="https://zenodo.org/records/1",
             doi="10.5281/zenodo.1",
@@ -302,7 +302,7 @@ class TestSearchRunnerPipeline:
             title="Survey of Transformers",
             abstract="abstract 2024",
             authors=["Author B"],
-            publication=Publication(title="arXiv"),
+            source=Source(title="arXiv"),
             publication_date=date(2024, 6, 1),
             url="https://arxiv.org/abs/2406.00001",
             doi="10.48550/arxiv.2406.00001",

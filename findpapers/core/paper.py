@@ -5,7 +5,7 @@ from enum import Enum
 from typing import List, Optional, Set, Union
 
 from ..utils.merge import merge_value
-from .publication import Publication
+from .source import Source
 
 # DOI prefixes that belong to preprint servers and should be deprioritised
 # in favour of a publisher-assigned DOI when merging two copies of the same work.
@@ -119,7 +119,7 @@ class Paper:
         title: str,
         abstract: str,
         authors: List[str],
-        publication: Publication | None,
+        source: Source | None,
         publication_date: datetime.date | None,
         url: Optional[str] = None,
         pdf_url: Optional[str] = None,
@@ -142,8 +142,8 @@ class Paper:
             Paper abstract.
         authors : list[str]
             List of authors.
-        publication : Publication | None
-            Publication where it was published.
+        source : Source | None
+            Source where it was published.
         publication_date : datetime.date | None
             Publication date.
         url : str | None
@@ -180,7 +180,7 @@ class Paper:
         self.title = title
         self.abstract = abstract
         self.authors = authors
-        self.publication = publication
+        self.source = source
         self.publication_date = publication_date
         self.url = url
         self.pdf_url = pdf_url
@@ -275,10 +275,10 @@ class Paper:
         # Prefer the existing type; fall back to the incoming one when absent.
         if self.paper_type is None:
             self.paper_type = paper.paper_type
-        if self.publication is None:
-            self.publication = paper.publication
-        elif paper.publication is not None:
-            self.publication.merge(paper.publication)
+        if self.source is None:
+            self.source = paper.source
+        elif paper.source is not None:
+            self.source.merge(paper.source)
 
     @classmethod
     def from_dict(cls, paper_dict: dict) -> "Paper":
@@ -313,10 +313,8 @@ class Paper:
         else:
             authors = [str(raw_authors)]
 
-        publication_data = paper_dict.get("publication")
-        publication = (
-            Publication.from_dict(publication_data) if isinstance(publication_data, dict) else None
-        )
+        source_data = paper_dict.get("source")
+        source = Source.from_dict(source_data) if isinstance(source_data, dict) else None
         publication_date = paper_dict.get("publication_date")
         if isinstance(publication_date, str):
             try:
@@ -357,7 +355,7 @@ class Paper:
             title=title,
             abstract=abstract,
             authors=authors,
-            publication=publication,
+            source=source,
             publication_date=publication_date,
             url=url,
             pdf_url=pdf_url,
@@ -389,9 +387,7 @@ class Paper:
             "title": paper.title,
             "abstract": paper.abstract,
             "authors": list(paper.authors),
-            "publication": (
-                Publication.to_dict(paper.publication) if paper.publication is not None else None
-            ),
+            "source": (Source.to_dict(paper.source) if paper.source is not None else None),
             "publication_date": (
                 paper.publication_date.isoformat() if paper.publication_date is not None else None
             ),

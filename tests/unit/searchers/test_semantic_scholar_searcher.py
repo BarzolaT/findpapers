@@ -152,8 +152,8 @@ class TestSemanticScholarSearcherParsePaper:
         }
         paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
-        assert paper.publication is not None
-        assert paper.publication.title == "Nature"
+        assert paper.source is not None
+        assert paper.source.title == "Nature"
         assert paper.pages == "1-10"
 
     def test_publication_from_venue_fallback(self):
@@ -165,8 +165,8 @@ class TestSemanticScholarSearcherParsePaper:
         }
         paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
-        assert paper.publication is not None
-        assert paper.publication.title == "ICML"
+        assert paper.source is not None
+        assert paper.source.title == "ICML"
 
     def test_doi_from_external_ids(self):
         """DOI is extracted from externalIds.DOI."""

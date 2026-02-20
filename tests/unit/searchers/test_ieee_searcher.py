@@ -153,8 +153,8 @@ class TestIEEESearcherParsePaper:
         }
         paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
-        assert paper.publication is not None
-        assert paper.publication.title == "IEEE Trans."
+        assert paper.source is not None
+        assert paper.source.title == "IEEE Trans."
 
 
 class TestIEEESearcherSearch:

@@ -8,9 +8,9 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.paper import Paper, PaperType
-from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.core.search import Database
+from findpapers.core.source import Source
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -201,7 +201,7 @@ class ScopusSearcher(SearcherBase):
         pub_title = (
             entry.get("prism:publicationName") or entry.get("prism:issueName") or ""
         ).strip()
-        publication: Optional[Publication] = None
+        source: Optional[Source] = None
         if pub_title:
             issn = (entry.get("prism:issn") or entry.get("prism:eIssn") or "").strip() or None
             # prism:isbn may be a list of dicts in some responses
@@ -211,7 +211,7 @@ class ScopusSearcher(SearcherBase):
             else:
                 isbn = (raw_isbn or "").strip() or None
             publisher = (entry.get("dc:publisher") or "").strip() or None
-            publication = Publication(
+            source = Source(
                 title=pub_title,
                 issn=issn,
                 isbn=isbn,
@@ -229,7 +229,7 @@ class ScopusSearcher(SearcherBase):
                 title=title,
                 abstract=abstract,
                 authors=authors,
-                publication=publication,
+                source=source,
                 publication_date=pub_date,
                 url=url,
                 doi=doi,

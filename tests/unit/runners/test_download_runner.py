@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 
 from findpapers.core.paper import Paper
-from findpapers.core.publication import Publication
+from findpapers.core.source import Source
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.download_runner import DownloadRunner
 
@@ -25,7 +25,7 @@ def _make_paper(
         title=title,
         abstract="An abstract.",
         authors=["Author One"],
-        publication=Publication(title="Test Journal"),
+        source=Source(title="Test Journal"),
         publication_date=date(2023, 1, 1),
         url=url,
         doi=doi,
@@ -498,7 +498,7 @@ class TestDownloadRunnerUrlPriority:
             title="Priority Test",
             abstract="Abstract.",
             authors=["Author"],
-            publication=None,
+            source=None,
             publication_date=date(2023, 1, 1),
             url="http://example.com/landing",
             pdf_url="http://example.com/paper.pdf",
@@ -524,7 +524,7 @@ class TestDownloadRunnerUrlPriority:
             title="Fallback Test",
             abstract="Abstract.",
             authors=["Author"],
-            publication=None,
+            source=None,
             publication_date=date(2023, 1, 1),
             url="http://example.com/landing",
             pdf_url="http://example.com/broken.pdf",
@@ -551,7 +551,7 @@ class TestDownloadRunnerUrlPriority:
             title="No PDF URL",
             abstract="Abstract.",
             authors=["Author"],
-            publication=None,
+            source=None,
             publication_date=date(2023, 1, 1),
             url="http://example.com/landing",
             pdf_url=None,

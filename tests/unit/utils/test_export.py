@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from findpapers.core.paper import Paper, PaperType
-from findpapers.core.publication import Publication
+from findpapers.core.source import Source
 from findpapers.utils.export import (
     bibtex_how_published,
     bibtex_note,
@@ -31,9 +31,9 @@ from findpapers.utils.export import (
 
 
 @pytest.fixture()
-def journal_publication() -> Publication:
+def journal_publication() -> Source:
     """Return a journal publication."""
-    return Publication(
+    return Source(
         title="Nature Machine Intelligence",
         issn="2522-5839",
         publisher="Springer Nature",
@@ -41,9 +41,9 @@ def journal_publication() -> Publication:
 
 
 @pytest.fixture()
-def conference_publication() -> Publication:
+def conference_publication() -> Source:
     """Return a conference proceedings publication."""
-    return Publication(
+    return Source(
         title="NeurIPS 2023",
         isbn="978-0-000-00000-0",
         publisher="Curran Associates",
@@ -57,19 +57,19 @@ def minimal_paper() -> Paper:
         title="Minimal Paper",
         abstract="An abstract.",
         authors=["Alice, A."],
-        publication=None,
+        source=None,
         publication_date=None,
     )
 
 
 @pytest.fixture()
-def full_paper(journal_publication: Publication) -> Paper:
+def full_paper(journal_publication: Source) -> Paper:
     """Return a paper with all fields populated."""
     return Paper(
         title="Deep Learning Survey",
         abstract="A survey on deep learning techniques.",
         authors=["LeCun, Y.", "Bengio, Y.", "Hinton, G."],
-        publication=journal_publication,
+        source=journal_publication,
         publication_date=datetime.date(2022, 6, 15),
         url="https://example.com/paper",
         pdf_url="https://example.com/paper.pdf",
@@ -85,13 +85,13 @@ def full_paper(journal_publication: Publication) -> Paper:
 
 
 @pytest.fixture()
-def conference_paper(conference_publication: Publication) -> Paper:
+def conference_paper(conference_publication: Source) -> Paper:
     """Return a paper in a conference proceedings."""
     return Paper(
         title="Attention is All You Need",
         abstract="Transformers intro.",
         authors=["Vaswani, A."],
-        publication=conference_publication,
+        source=conference_publication,
         publication_date=datetime.date(2017, 12, 1),
         url="https://arxiv.org/abs/1706.03762",
         doi="10.48550/arXiv.1706.03762",
@@ -129,10 +129,10 @@ class TestCsvColumns:
         for field in ("title", "abstract", "authors", "doi", "databases"):
             assert field in cols
 
-    def test_contains_publication_fields(self) -> None:
-        """Publication-prefixed fields are present."""
+    def test_contains_source_fields(self) -> None:
+        """Source-prefixed fields are present."""
         cols = csv_columns()
-        for field in ("publication_title", "publication_issn", "publication_publisher"):
+        for field in ("source_title", "source_issn", "source_publisher"):
             assert field in cols
 
     def test_no_duplicates(self) -> None:
@@ -171,25 +171,25 @@ class TestPaperToCsvRow:
         # Date serialised as ISO
         assert row["publication_date"] == "2022-06-15"
 
-    def test_publication_fields_present(self, full_paper: Paper) -> None:
-        """Publication-prefixed fields carry the publication data."""
+    def test_source_fields_present(self, full_paper: Paper) -> None:
+        """Source-prefixed fields carry the source data."""
         row = paper_to_csv_row(full_paper)
-        assert row["publication_title"] == "Nature Machine Intelligence"
-        assert row["publication_issn"] == "2522-5839"
-        assert row["publication_publisher"] == "Springer Nature"
+        assert row["source_title"] == "Nature Machine Intelligence"
+        assert row["source_issn"] == "2522-5839"
+        assert row["source_publisher"] == "Springer Nature"
 
     def test_minimal_paper_nulls(self, minimal_paper: Paper) -> None:
         """Minimal paper produces None for optional fields."""
         row = paper_to_csv_row(minimal_paper)
         assert row["doi"] is None
         assert row["publication_date"] is None
-        assert row["publication_title"] is None
+        assert row["source_title"] is None
 
-    def test_no_publication(self, minimal_paper: Paper) -> None:
-        """Paper without publication has None for all publication_* fields."""
+    def test_no_source(self, minimal_paper: Paper) -> None:
+        """Paper without source has None for all source_* fields."""
         row = paper_to_csv_row(minimal_paper)
-        pub_fields = [k for k in row if k.startswith("publication_")]
-        assert all(row[f] is None for f in pub_fields)
+        source_fields = [k for k in row if k.startswith("source_")]
+        assert all(row[f] is None for f in source_fields)
 
 
 # ---------------------------------------------------------------------------
@@ -213,7 +213,7 @@ class TestCitationKeyFor:
             title="Some Title",
             abstract="",
             authors=[],
-            publication=None,
+            source=None,
             publication_date=datetime.date(2020, 1, 1),
         )
         key = citation_key_for(paper)
@@ -225,7 +225,7 @@ class TestCitationKeyFor:
             title="Some Title",
             abstract="",
             authors=["Smith, J."],
-            publication=None,
+            source=None,
             publication_date=None,
         )
         key = citation_key_for(paper)
@@ -237,7 +237,7 @@ class TestCitationKeyFor:
             title="A-Title: With, Punctuation!",
             abstract="",
             authors=["O'Brien, T."],
-            publication=None,
+            source=None,
             publication_date=datetime.date(2021, 3, 10),
         )
         key = citation_key_for(paper)
@@ -265,7 +265,7 @@ class TestBibtexNote:
             title="T",
             abstract="",
             authors=[],
-            publication=None,
+            source=None,
             publication_date=datetime.date(2020, 1, 1),
             url=None,
         )
@@ -278,7 +278,7 @@ class TestBibtexNote:
             title="T",
             abstract="",
             authors=[],
-            publication=None,
+            source=None,
             publication_date=None,
             url=None,
         )
@@ -299,7 +299,7 @@ class TestBibtexHowPublished:
             title="T",
             abstract="",
             authors=[],
-            publication=None,
+            source=None,
             publication_date=datetime.date(2023, 5, 20),
             url="https://example.org",
         )
@@ -313,7 +313,7 @@ class TestBibtexHowPublished:
             title="T",
             abstract="",
             authors=[],
-            publication=None,
+            source=None,
             publication_date=datetime.date(2023, 1, 1),
             url=None,
         )
@@ -325,7 +325,7 @@ class TestBibtexHowPublished:
             title="T",
             abstract="",
             authors=[],
-            publication=None,
+            source=None,
             publication_date=None,
             url="https://example.org",
         )
@@ -382,12 +382,12 @@ class TestPaperToBibtex:
 
     def test_unpublished_for_none_paper_type(self) -> None:
         """A paper with no paper_type falls back to @misc."""
-        pub = Publication(title="Workshop")
+        pub = Source(title="Workshop")
         paper = Paper(
             title="W Paper",
             abstract="",
             authors=["X, Y."],
-            publication=pub,
+            source=pub,
             publication_date=datetime.date(2021, 1, 1),
             paper_type=None,
         )

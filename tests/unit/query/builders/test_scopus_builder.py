@@ -33,7 +33,7 @@ def test_scopus_rejects_hyphen_wildcard_combination(
         ("abs[graph]", 'ABS("graph")'),
         ("key[graph]", 'KEY("graph")'),
         ("au[graph]", 'AUTH("graph")'),
-        ("pu[graph]", 'SRCTITLE("graph")'),
+        ("src[graph]", 'SRCTITLE("graph")'),
         ("af[graph]", 'AFFIL("graph")'),
         ("tiabs[graph]", 'TITLE-ABS("graph")'),
         ("tiabskey[graph]", 'TITLE-ABS-KEY("graph")'),

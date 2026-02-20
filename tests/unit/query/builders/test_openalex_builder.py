@@ -140,8 +140,8 @@ def test_openalex_rejects_unsupported_filter() -> None:
     unsupported = FilterCode.TITLE  # supported — confirm via double check
     assert OpenAlexQueryBuilder().supports_filter(unsupported) is True
 
-    # PUBLICATION is not supported by OpenAlex (no text search for source names)
-    assert OpenAlexQueryBuilder().supports_filter(FilterCode.PUBLICATION) is False
+    # SOURCE is not supported by OpenAlex (no text search for source names)
+    assert OpenAlexQueryBuilder().supports_filter(FilterCode.SOURCE) is False
 
     # KEYWORDS is not supported (keyword.search returns 0 results)
     assert OpenAlexQueryBuilder().supports_filter(FilterCode.KEYWORDS) is False

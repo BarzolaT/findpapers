@@ -8,9 +8,9 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.paper import Paper, PaperType
-from findpapers.core.publication import Publication
 from findpapers.core.query import Query
 from findpapers.core.search import Database
+from findpapers.core.source import Source
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -221,12 +221,12 @@ class SemanticScholarSearcher(SearcherBase):
                 keywords.add(field.strip())
 
         # Publication
-        publication: Optional[Publication] = None
+        source: Optional[Source] = None
         journal = item.get("journal") or {}
         venue = (item.get("venue") or "").strip()
         pub_title = (journal.get("name") or venue or "").strip()
         if pub_title:
-            publication = Publication(title=pub_title)
+            source = Source(title=pub_title)
 
         # Pages from journal info
         pages: Optional[str] = None
@@ -243,7 +243,7 @@ class SemanticScholarSearcher(SearcherBase):
                 title=title,
                 abstract=abstract,
                 authors=authors,
-                publication=publication,
+                source=source,
                 publication_date=pub_date,
                 url=url,
                 pdf_url=pdf_url,

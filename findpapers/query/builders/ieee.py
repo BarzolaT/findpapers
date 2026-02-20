@@ -20,7 +20,7 @@ class IEEEQueryBuilder(QueryBuilder):
             FilterCode.ABSTRACT,
             FilterCode.KEYWORDS,
             FilterCode.AUTHOR,
-            FilterCode.PUBLICATION,
+            FilterCode.SOURCE,
             FilterCode.AFFILIATION,
             FilterCode.TITLE_ABSTRACT,
             FilterCode.TITLE_ABSTRACT_KEYWORDS,
@@ -99,7 +99,7 @@ class IEEEQueryBuilder(QueryBuilder):
                 return f'"Index Terms":{self._quote(term)}'
             if filter_code == FilterCode.AUTHOR:
                 return f'"Authors":{self._quote(term)}'
-            if filter_code == FilterCode.PUBLICATION:
+            if filter_code == FilterCode.SOURCE:
                 return f'"Publication Title":{self._quote(term)}'
             if filter_code == FilterCode.AFFILIATION:
                 return f'"Affiliation":{self._quote(term)}'
@@ -154,7 +154,7 @@ class IEEEQueryBuilder(QueryBuilder):
             FilterCode.ABSTRACT: "abstract",
             FilterCode.KEYWORDS: "index_terms",
             FilterCode.AUTHOR: "author",
-            FilterCode.PUBLICATION: "publication_title",
+            FilterCode.SOURCE: "publication_title",
             FilterCode.AFFILIATION: "affiliation",
         }
         if filter_code in mapping:
