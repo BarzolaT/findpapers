@@ -4,7 +4,7 @@ import datetime
 from enum import Enum
 from typing import List, Optional, Set, Union
 
-from ..utils.merge import merge_value
+from ..utils.merge import merge_authors, merge_value
 from .source import Source
 
 # DOI prefixes that belong to preprint servers and should be deprioritised
@@ -267,7 +267,9 @@ class Paper:
         self.pdf_url = merge_value(self.pdf_url, paper.pdf_url)
 
         # Merge authors/keywords as collections while keeping uniqueness.
-        self.authors = merge_value(self.authors, paper.authors)
+        # Authors use a token-aware merge to avoid duplicating the same person
+        # when different sources represent the name as "First Last" vs "Last, First".
+        self.authors = merge_authors(self.authors or [], paper.authors or [])
         self.keywords = merge_value(self.keywords, paper.keywords)
 
         # Always accumulate databases for traceability.

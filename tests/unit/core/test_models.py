@@ -111,6 +111,40 @@ def test_paper_add_and_merge():
     assert paper.pdf_url == "https://example.com/paper.pdf"
 
 
+def test_paper_merge_deduplicates_authors_across_name_formats():
+    """Merging a paper whose authors use 'Last, First' format must not duplicate names.
+
+    This covers the enrichment scenario where arXiv HTML meta tags provide
+    ``citation_author`` in ``"Last, First"`` form while the API returns them
+    as ``"First Last"``.
+    """
+    base = Paper(
+        title="Test Paper",
+        abstract="Abstract",
+        authors=["Asif Hasan Chowdhury", "Md. Fahim Islam", "Md. Golam Rabiul Alam"],
+        source=None,
+        publication_date=None,
+    )
+    incoming = Paper(
+        title="Test Paper",
+        abstract="Abstract",
+        # Same people, Last-First format + one new author
+        authors=["Chowdhury, Asif Hasan", "Islam, Md. Fahim", "New Author"],
+        source=None,
+        publication_date=None,
+    )
+    base.merge(incoming)
+    # Original three names preserved; duplicates dropped; new author appended
+    assert len(base.authors) == 4
+    assert "Asif Hasan Chowdhury" in base.authors
+    assert "Md. Fahim Islam" in base.authors
+    assert "Md. Golam Rabiul Alam" in base.authors
+    assert "New Author" in base.authors
+    # Redundant Last-First forms must NOT appear
+    assert "Chowdhury, Asif Hasan" not in base.authors
+    assert "Islam, Md. Fahim" not in base.authors
+
+
 class TestIsPreprintDoi:
     """Unit tests for the _is_preprint_doi helper."""
 

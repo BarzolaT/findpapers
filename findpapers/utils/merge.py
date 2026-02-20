@@ -2,7 +2,66 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
+
+
+def _author_tokens(name: str) -> frozenset[str]:
+    """Return the normalised word-token set of an author name.
+
+    Splits on whitespace, commas, and trailing dots so that
+    ``"Chowdhury, Asif Hasan"`` and ``"Asif Hasan Chowdhury"`` produce the
+    same token set and are recognised as the same person.
+
+    Parameters
+    ----------
+    name : str
+        Raw author name string.
+
+    Returns
+    -------
+    frozenset[str]
+        Lower-cased tokens with trailing periods stripped.
+    """
+    return frozenset(
+        token.rstrip(".").lower() for token in re.split(r"[\s,]+", name) if token.rstrip(".")
+    )
+
+
+def merge_authors(base: list[str], incoming: list[str]) -> list[str]:
+    """Merge two author lists, deduplicating by name-token set equality.
+
+    Names formatted as ``"First Last"`` and ``"Last, First"`` are treated as
+    the same author.  When a duplicate is detected the existing (base) form
+    is kept, so the canonical representation is determined by whichever
+    source was encountered first.
+
+    Parameters
+    ----------
+    base : list[str]
+        Existing author list.
+    incoming : list[str]
+        New authors to merge in.
+
+    Returns
+    -------
+    list[str]
+        Deduplicated list preserving the original order of *base* and
+        appending only genuinely new authors from *incoming*.
+    """
+    if not base:
+        return list(incoming)
+    if not incoming:
+        return list(base)
+
+    existing_tokens: list[frozenset[str]] = [_author_tokens(a) for a in base]
+    result: list[str] = list(base)
+    for author in incoming:
+        tokens = _author_tokens(author)
+        if tokens not in existing_tokens:
+            result.append(author)
+            existing_tokens.append(tokens)
+    return result
 
 
 def merge_value(base: Any, incoming: Any) -> Any:
