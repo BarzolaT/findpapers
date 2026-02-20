@@ -489,12 +489,12 @@ class SearchRunner:
         **Pass 2** groups the results of pass 1 by normalised title and
         merges entries whose publication years are *compatible* — i.e. they
         share the same year, at least one has no year (incomplete metadata),
-        or both entries carry preprint DOIs and their years differ by at most
-        one (to handle the common case of a preprint deposited to two servers
-        across the Dec/Jan calendar boundary, e.g. Zenodo on 2025-12-25 and
-        SSRN on 2026-01-01).  Papers with the same title and *different known
-        years* that are not both preprints are intentionally kept as separate
-        entries.
+        or at least one entry carries a preprint DOI and their years differ by
+        at most one (to handle both the case of the same preprint deposited to
+        two servers across the Dec/Jan calendar boundary and the common
+        preprint-to-published transition, e.g. Zenodo 2026 + book chapter
+        2025).  Papers with the same title and *different known years* where
+        neither is from a preprint server are intentionally kept separate.
 
         This correctly handles the common cross-database case where the same
         work is indexed with different DOIs (e.g. an arXiv preprint DOI vs a
@@ -547,22 +547,24 @@ class SearchRunner:
                     years_same_or_unknown = (
                         rep_year is None or paper_year is None or rep_year == paper_year
                     )
-                    # Also compatible when both entries are preprints and their
-                    # years differ by at most 1 — handles the common case of the
-                    # same preprint deposited to two servers across the Dec/Jan
-                    # calendar boundary (e.g. Zenodo 2025-12-25, SSRN 2026-01-01).
+                    # Also compatible when at least one entry has a preprint
+                    # DOI and years differ by at most 1.  This covers both:
+                    #   (a) same preprint deposited to two servers across the
+                    #       Dec/Jan calendar boundary (both are preprints), and
+                    #   (b) preprint + published version where the preprint was
+                    #       filed in one year and the formal publication appeared
+                    #       in the adjacent year (only one is a preprint).
                     rep_doi = representative.doi or ""
                     cand_doi = paper.doi or ""
-                    both_preprints_adjacent = (
+                    preprint_adjacent = (
                         rep_year is not None
                         and paper_year is not None
                         and abs(rep_year - paper_year) == 1
                         and bool(rep_doi)
                         and bool(cand_doi)
-                        and _is_preprint_doi(rep_doi)
-                        and _is_preprint_doi(cand_doi)
+                        and (_is_preprint_doi(rep_doi) or _is_preprint_doi(cand_doi))
                     )
-                    if years_same_or_unknown or both_preprints_adjacent:
+                    if years_same_or_unknown or preprint_adjacent:
                         merged_into = representative
                         break
                 if merged_into is not None:

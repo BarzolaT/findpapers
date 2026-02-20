@@ -317,6 +317,70 @@ class TestSearchRunnerPipeline:
         runner.run()
         assert len(runner.get_results()) == 1
 
+    def test_deduplication_second_pass_merges_preprint_with_published_version(self):
+        """Preprint DOI + publisher DOI with adjacent years are merged into one.
+
+        The common "preprint-to-published" case: a Zenodo deposit from 2026
+        and a book chapter from 2025 share the same title.  Only the Zenodo
+        record is a preprint, but that is sufficient for the year-adjacent rule
+        to fire — the old ``both_preprints`` requirement was too strict and
+        left such pairs as false duplicates.
+        """
+        p1 = Paper(
+            title="Attention is All You Need",
+            abstract="preprint version",
+            authors=["Vaswani et al."],
+            source=Source(title="Zenodo"),
+            publication_date=date(2026, 1, 17),
+            url="https://zenodo.org/records/18289747",
+            doi="10.5281/zenodo.18289747",
+            paper_type=PaperType.UNPUBLISHED,
+        )
+        p2 = Paper(
+            title="Attention Is All You Need",
+            abstract="book chapter version",
+            authors=["Vaswani et al."],
+            source=Source(title="Deep Learning Book"),
+            publication_date=date(2025, 10, 31),
+            url="https://doi.org/10.1201/9781003561460-19",
+            doi="10.1201/9781003561460-19",
+            paper_type=PaperType.INBOOK,
+        )
+        runner = self._make_runner_with_mock_papers([p1, p2])
+        runner.run()
+        assert len(runner.get_results()) == 1
+
+    def test_deduplication_second_pass_keeps_non_preprint_adjacent_years(self):
+        """Two non-preprint papers with same title and adjacent years are kept separate.
+
+        If neither DOI is a preprint, the year-adjacent rule must NOT fire —
+        annual reports and series papers with consecutive-year DOIs are
+        intentionally distinct entries.
+        """
+        p1 = Paper(
+            title="Annual Report on AI",
+            abstract="abstract",
+            authors=["A"],
+            source=Source(title="Journal"),
+            publication_date=date(2022, 1, 1),
+            url="http://example.com/2022",
+            doi="10.1234/ai-2022",
+            paper_type=PaperType.ARTICLE,
+        )
+        p2 = Paper(
+            title="Annual Report on AI",
+            abstract="abstract",
+            authors=["A"],
+            source=Source(title="Journal"),
+            publication_date=date(2023, 1, 1),
+            url="http://example.com/2023",
+            doi="10.1234/ai-2023",
+            paper_type=PaperType.ARTICLE,
+        )
+        runner = self._make_runner_with_mock_papers([p1, p2])
+        runner.run()
+        assert len(runner.get_results()) == 2
+
     def test_deduplication_second_pass_keeps_preprints_with_large_year_gap(self):
         """Preprints with the same title but years >1 apart are kept separate."""
         p1 = Paper(
