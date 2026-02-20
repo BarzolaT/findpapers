@@ -69,15 +69,36 @@ class TestEnrichmentRunnerRun:
         assert "runtime_in_seconds" in metrics
 
     def test_enriched_count_incremented_on_success(self):
-        """enriched_papers count increments when enrich succeeds."""
+        """enriched_papers increments only when new data is actually merged.
+
+        The base paper is missing a DOI; the mock enriched paper supplies one,
+        so the merge changes the snapshot and the counter must increment.
+        """
+        base = _make_paper()
+        base.doi = None  # ensure the field is absent before enrichment
         enriched_paper = _make_paper(title="Enriched")
+        enriched_paper.doi = "10.1234/test"
         with patch(
             "findpapers.runners.enrichment_runner.enrich_from_sources",
             return_value=enriched_paper,
         ):
-            runner = EnrichmentRunner(papers=[_make_paper()])
+            runner = EnrichmentRunner(papers=[base])
             runner.run()
         assert runner.get_metrics()["enriched_papers"] == 1
+
+    def test_enriched_count_not_incremented_when_no_change(self):
+        """enriched_papers stays 0 when the merge adds nothing new.
+
+        The base paper already has all the data the scraped paper can offer,
+        so the snapshot is unchanged and the counter must not increment.
+        """
+        with patch(
+            "findpapers.runners.enrichment_runner.enrich_from_sources",
+            return_value=_make_paper(),  # identical data — no improvement
+        ):
+            runner = EnrichmentRunner(papers=[_make_paper()])
+            runner.run()
+        assert runner.get_metrics()["enriched_papers"] == 0
 
     def test_skips_papers_without_urls(self):
         """Papers without URLs are skipped (not enriched)."""

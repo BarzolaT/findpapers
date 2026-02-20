@@ -14,6 +14,40 @@ from findpapers.utils.predatory import is_predatory_source
 logger = logging.getLogger(__name__)
 
 
+def _enrichment_snapshot(paper: Paper) -> tuple:
+    """Return a tuple of enrichable fields for change-detection.
+
+    The tuple covers every field that ``enrich_from_sources`` can populate
+    so that ``_enrich_paper`` can tell whether a merge actually improved the
+    paper rather than just confirming data that was already present.
+
+    Parameters
+    ----------
+    paper : Paper
+        Paper to snapshot.
+
+    Returns
+    -------
+    tuple
+        Immutable snapshot of enrichable fields.
+    """
+    return (
+        paper.abstract,
+        paper.doi,
+        paper.pdf_url,
+        paper.publication_date,
+        paper.pages,
+        paper.number_of_pages,
+        paper.paper_type,
+        frozenset(paper.authors or []),
+        frozenset(paper.keywords or []),
+        paper.source.title if paper.source else None,
+        paper.source.publisher if paper.source else None,
+        paper.source.issn if paper.source else None,
+        paper.source.isbn if paper.source else None,
+    )
+
+
 class EnrichmentRunner:
     """Runner that enriches a provided list of papers using web scraping.
 
@@ -195,10 +229,11 @@ class EnrichmentRunner:
         enriched = enrich_from_sources(urls=all_urls, timeout=timeout)
         if enriched is None:
             return False
+        before = _enrichment_snapshot(paper)
         paper.merge(enriched)
         # Re-evaluate the predatory flag: the source may have been
         # populated only after enrichment, so the original flag (set during
         # the search phase) might be stale.
         if paper.source is not None:
             paper.source.is_potentially_predatory = is_predatory_source(paper.source)
-        return True
+        return _enrichment_snapshot(paper) != before
