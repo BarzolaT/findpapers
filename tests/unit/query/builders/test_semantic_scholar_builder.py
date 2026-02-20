@@ -63,3 +63,12 @@ def test_semantic_scholar_supports_all_filters_in_conversion(
     assert result.is_valid is True
     converted = SemanticScholarQueryBuilder().convert_query(query)
     assert converted == expected_payload
+
+
+def test_semantic_scholar_preserves_boolean_connectors(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """Semantic Scholar conversion keeps + and | operators for bulk syntax."""
+    query = parse_and_propagate("[machine learning] OR [healthcare]")
+    converted = SemanticScholarQueryBuilder().convert_query(query)
+    assert converted == {"query": '"machine learning" | healthcare'}

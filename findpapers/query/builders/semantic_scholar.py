@@ -77,9 +77,6 @@ class SemanticScholarQueryBuilder(QueryBuilder):
 
         expression = convert_expression(preprocessed.root, convert_term, connector_map)
         normalized_query = " ".join(expression.split())
-        normalized_query = normalized_query.replace(" - ", " -")
-        normalized_query = re.sub(r"(^|\s)[+|](?=\s|$)", " ", normalized_query)
-        normalized_query = re.sub(r"(^|\s)-(?=\s|$)", " ", normalized_query)
         normalized_query = re.sub(r"\(\s*\)", "", normalized_query)
         normalized_query = " ".join(normalized_query.split())
 
