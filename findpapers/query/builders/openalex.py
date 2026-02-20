@@ -7,7 +7,6 @@ import itertools
 from findpapers.core.query import ConnectorType, FilterCode, NodeType, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
 from findpapers.query.builders.common import (
-    clone_query,
     get_effective_filter,
     has_wildcard,
     iter_connectors,
@@ -22,12 +21,9 @@ class OpenAlexQueryBuilder(QueryBuilder):
         {
             FilterCode.TITLE,
             FilterCode.ABSTRACT,
-            FilterCode.KEYWORDS,
             FilterCode.AUTHOR,
-            FilterCode.PUBLICATION,
             FilterCode.AFFILIATION,
             FilterCode.TITLE_ABSTRACT,
-            FilterCode.TITLE_ABSTRACT_KEYWORDS,
         }
     )
 
@@ -125,23 +121,14 @@ class OpenAlexQueryBuilder(QueryBuilder):
         list[Query]
             Single query list.
         """
-        # OpenAlex lacks field-aware OR inside `filter` for mixed cases. We first split
-        # `tiabskey` into concrete filters and then decompose pure OR branches into
-        # independent AND-only queries that can be executed separately.
-        expanded = self._expand_tiabskey(query)
+        # OpenAlex lacks field-aware OR inside `filter` for mixed cases.
+        # Decompose pure OR branches into independent AND-only queries.
+        connectors = set(iter_connectors(query.root))
+        if ConnectorType.OR in connectors and ConnectorType.AND_NOT not in connectors:
+            clauses = self._to_dnf_with_filters(query.root)
+            return self._build_queries_from_clauses(clauses, query.raw_query)
 
-        final_queries: list[Query] = []
-        for expanded_query in expanded:
-            connectors = set(iter_connectors(expanded_query.root))
-            if ConnectorType.OR in connectors and ConnectorType.AND_NOT not in connectors:
-                clauses = self._to_dnf_with_filters(expanded_query.root)
-                final_queries.extend(
-                    self._build_queries_from_clauses(clauses, expanded_query.raw_query)
-                )
-            else:
-                final_queries.append(expanded_query)
-
-        return final_queries
+        return [query]
 
     def _build_filter_fragment(self, filter_code: FilterCode, term: str) -> str:
         """Build OpenAlex filter fragment for one term.
@@ -160,20 +147,16 @@ class OpenAlexQueryBuilder(QueryBuilder):
         """
         encoded_term = f'"{term}"' if " " in term else term
         if filter_code == FilterCode.TITLE:
-            return f"title.search.no_stem:{encoded_term}"
+            return f"title.search:{encoded_term}"
         if filter_code == FilterCode.ABSTRACT:
-            return f"abstract.search.no_stem:{encoded_term}"
-        if filter_code == FilterCode.KEYWORDS:
-            return f"concepts.display_name:{encoded_term}"
+            return f"abstract.search:{encoded_term}"
         if filter_code == FilterCode.AUTHOR:
-            return f"authorships.author.display_name.search:{encoded_term}"
-        if filter_code == FilterCode.PUBLICATION:
-            return f"primary_location.source.display_name.search:{encoded_term}"
+            return f"raw_author_name.search:{encoded_term}"
         if filter_code == FilterCode.AFFILIATION:
-            return f"authorships.institutions.display_name.search:{encoded_term}"
+            return f"raw_affiliation_strings.search:{encoded_term}"
         if filter_code == FilterCode.TITLE_ABSTRACT:
-            return f"title_and_abstract.search.no_stem:{encoded_term}"
-        return f"search:{encoded_term}"
+            return f"title_and_abstract.search:{encoded_term}"
+        raise ValueError(f"Unsupported filter code for OpenAlex: {filter_code}")
 
     def _to_openalex_boolean_search(self, node: QueryNode) -> str:
         """Convert query node to OpenAlex boolean search expression.
@@ -208,53 +191,6 @@ class OpenAlexQueryBuilder(QueryBuilder):
             else:
                 parts.append(converted)
         return " ".join(parts)
-
-    def _expand_tiabskey(self, query: Query) -> list[Query]:
-        """Expand terms with tiabskey into tiabs/key alternatives.
-
-        Parameters
-        ----------
-        query : Query
-            Query to expand.
-
-        Returns
-        -------
-        list[Query]
-            Expanded list of queries.
-        """
-        # We iteratively split one `tiabskey` term at a time to avoid recursive tree
-        # mutation complexity and to preserve stable term positions per branch.
-        pending = [clone_query(query)]
-        results: list[Query] = []
-
-        while pending:
-            current = pending.pop()
-            terms = list(iter_term_nodes(current.root))
-            split_index = next(
-                (
-                    index
-                    for index, term in enumerate(terms)
-                    if get_effective_filter(term) == FilterCode.TITLE_ABSTRACT_KEYWORDS
-                ),
-                None,
-            )
-
-            if split_index is None:
-                results.append(current)
-                continue
-
-            tiabs_query = clone_query(current)
-            key_query = clone_query(current)
-
-            tiabs_terms = list(iter_term_nodes(tiabs_query.root))
-            key_terms = list(iter_term_nodes(key_query.root))
-
-            tiabs_terms[split_index].filter_code = FilterCode.TITLE_ABSTRACT
-            key_terms[split_index].filter_code = FilterCode.KEYWORDS
-
-            pending.extend([tiabs_query, key_query])
-
-        return results
 
     def _to_dnf_with_filters(self, node: QueryNode) -> list[list[tuple[str, FilterCode]]]:
         """Convert query subtree to DNF preserving effective filters.

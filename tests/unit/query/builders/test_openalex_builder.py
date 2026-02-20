@@ -39,10 +39,12 @@ def test_openalex_rejects_wildcards(parse_and_propagate: Callable[[str], Query])
 
 
 def test_openalex_default_filter_mapping(parse_and_propagate: Callable[[str], Query]) -> None:
-    """OpenAlex default mapping uses title_and_abstract search field."""
+    """Unqualified terms default to title_and_abstract search."""
     query = parse_and_propagate("[federated learning]")
+    result = OpenAlexQueryBuilder().validate_query(query)
+    assert result.is_valid is True
     converted = OpenAlexQueryBuilder().convert_query(query)
-    assert "title_and_abstract.search.no_stem" in converted["filter"]
+    assert "title_and_abstract.search" in converted["filter"]
 
 
 def test_openalex_or_uses_search_mode(parse_and_propagate: Callable[[str], Query]) -> None:
@@ -53,34 +55,21 @@ def test_openalex_or_uses_search_mode(parse_and_propagate: Callable[[str], Query
     assert "OR" in converted["search"]
 
 
-def test_openalex_expands_tiabskey(parse_and_propagate: Callable[[str], Query]) -> None:
-    """OpenAlex expands tiabskey into multiple queries."""
+def test_openalex_rejects_tiabskey(parse_and_propagate: Callable[[str], Query]) -> None:
+    """OpenAlex rejects tiabskey filter (no keyword search support)."""
     query = parse_and_propagate("tiabskey[cancer]")
-    expanded = OpenAlexQueryBuilder().expand_query(query)
-    assert len(expanded) == 2
-
-
-def test_openalex_build_execution_plan_tracks_combination(
-    parse_and_propagate: Callable[[str], Query],
-) -> None:
-    """OpenAlex execution plan exposes how expanded results must be merged."""
-    query = parse_and_propagate("tiabskey[cancer]")
-    plan = OpenAlexQueryBuilder().build_execution_plan(query)
-    assert len(plan.request_payloads) == 2
-    assert plan.combination_expression == "q0 OR q1"
+    result = OpenAlexQueryBuilder().validate_query(query)
+    assert result.is_valid is False
 
 
 @pytest.mark.parametrize(
     ("query_string", "expected_fragment"),
     [
-        ("ti[cancer]", "title.search.no_stem:cancer"),
-        ("abs[cancer]", "abstract.search.no_stem:cancer"),
-        ("key[cancer]", "concepts.display_name:cancer"),
-        ("au[cancer]", "authorships.author.display_name.search:cancer"),
-        ("pu[cancer]", "primary_location.source.display_name.search:cancer"),
-        ("af[cancer]", "authorships.institutions.display_name.search:cancer"),
-        ("tiabs[cancer]", "title_and_abstract.search.no_stem:cancer"),
-        ("tiabskey[cancer]", "search:cancer"),
+        ("ti[cancer]", "title.search:cancer"),
+        ("abs[cancer]", "abstract.search:cancer"),
+        ("au[cancer]", "raw_author_name.search:cancer"),
+        ("af[cancer]", "raw_affiliation_strings.search:cancer"),
+        ("tiabs[cancer]", "title_and_abstract.search:cancer"),
     ],
 )
 def test_openalex_supports_all_filters_in_conversion(
@@ -145,16 +134,20 @@ def test_openalex_boolean_search_with_group_node() -> None:
 
 def test_openalex_rejects_unsupported_filter() -> None:
     """OpenAlex rejects a term with an unsupported filter code via direct injection."""
-    # FilterCode has no unsupported value; simulate via a query bypassing validator.
     from findpapers.core.query import FilterCode
     from findpapers.query.builders.openalex import OpenAlexQueryBuilder
 
     unsupported = FilterCode.TITLE  # supported — confirm via double check
     assert OpenAlexQueryBuilder().supports_filter(unsupported) is True
 
-    # All FilterCode values should be supported by OpenAlex
-    for fc in FilterCode:
-        assert OpenAlexQueryBuilder().supports_filter(fc) is True
+    # PUBLICATION is not supported by OpenAlex (no text search for source names)
+    assert OpenAlexQueryBuilder().supports_filter(FilterCode.PUBLICATION) is False
+
+    # KEYWORDS is not supported (keyword.search returns 0 results)
+    assert OpenAlexQueryBuilder().supports_filter(FilterCode.KEYWORDS) is False
+
+    # TITLE_ABSTRACT_KEYWORDS is not supported (no keyword search)
+    assert OpenAlexQueryBuilder().supports_filter(FilterCode.TITLE_ABSTRACT_KEYWORDS) is False
 
 
 def test_openalex_dnf_and_not_fallback() -> None:
@@ -208,7 +201,7 @@ def test_openalex_multi_term_with_phrase(parse_and_propagate: Callable[[str], Qu
     """Filter fragments for multi-word terms are quoted."""
     query = parse_and_propagate("ti[neural networks]")
     converted = OpenAlexQueryBuilder().convert_query(query)
-    assert 'title.search.no_stem:"neural networks"' in converted["filter"]
+    assert 'title.search:"neural networks"' in converted["filter"]
 
 
 def test_openalex_rejects_tilde_wildcard(parse_and_propagate: Callable[[str], Query]) -> None:
