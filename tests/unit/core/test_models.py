@@ -111,38 +111,48 @@ def test_paper_add_and_merge():
     assert paper.pdf_url == "https://example.com/paper.pdf"
 
 
-def test_paper_merge_deduplicates_authors_across_name_formats():
-    """Merging a paper whose authors use 'Last, First' format must not duplicate names.
+def test_paper_merge_keeps_larger_author_list():
+    """Paper.merge keeps whichever author list is longer.
 
-    This covers the enrichment scenario where arXiv HTML meta tags provide
-    ``citation_author`` in ``"Last, First"`` form while the API returns them
-    as ``"First Last"``.
+    This covers the enrichment scenario where different sources return
+    different numbers of authors (e.g. one source lists all co-authors while
+    another lists only the first few).
     """
+    # base has fewer authors than incoming → incoming wins
     base = Paper(
         title="Test Paper",
         abstract="Abstract",
-        authors=["Asif Hasan Chowdhury", "Md. Fahim Islam", "Md. Golam Rabiul Alam"],
+        authors=["Alice Smith", "Bob Jones"],
         source=None,
         publication_date=None,
     )
     incoming = Paper(
         title="Test Paper",
         abstract="Abstract",
-        # Same people, Last-First format + one new author
-        authors=["Chowdhury, Asif Hasan", "Islam, Md. Fahim", "New Author"],
+        authors=["Alice Smith", "Bob Jones", "Charlie Brown", "Diana Prince"],
         source=None,
         publication_date=None,
     )
     base.merge(incoming)
-    # Original three names preserved; duplicates dropped; new author appended
-    assert len(base.authors) == 4
-    assert "Asif Hasan Chowdhury" in base.authors
-    assert "Md. Fahim Islam" in base.authors
-    assert "Md. Golam Rabiul Alam" in base.authors
-    assert "New Author" in base.authors
-    # Redundant Last-First forms must NOT appear
-    assert "Chowdhury, Asif Hasan" not in base.authors
-    assert "Islam, Md. Fahim" not in base.authors
+    assert base.authors == ["Alice Smith", "Bob Jones", "Charlie Brown", "Diana Prince"]
+
+    # base has more authors than incoming → base wins
+    base2 = Paper(
+        title="Test Paper",
+        abstract="Abstract",
+        authors=["Alice Smith", "Bob Jones", "Charlie Brown"],
+        source=None,
+        publication_date=None,
+    )
+    incoming2 = Paper(
+        title="Test Paper",
+        abstract="Abstract",
+        authors=["Alice Smith"],
+        source=None,
+        publication_date=None,
+    )
+    base2.merge(incoming2)
+    assert base2.authors == ["Alice Smith", "Bob Jones", "Charlie Brown"]
 
 
 class TestIsPreprintDoi:

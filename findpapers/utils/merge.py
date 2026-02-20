@@ -2,39 +2,16 @@
 
 from __future__ import annotations
 
-import re
 from typing import Any
 
 
-def _author_tokens(name: str) -> frozenset[str]:
-    """Return the normalised word-token set of an author name.
-
-    Splits on whitespace, commas, and trailing dots so that
-    ``"Chowdhury, Asif Hasan"`` and ``"Asif Hasan Chowdhury"`` produce the
-    same token set and are recognised as the same person.
-
-    Parameters
-    ----------
-    name : str
-        Raw author name string.
-
-    Returns
-    -------
-    frozenset[str]
-        Lower-cased tokens with trailing periods stripped.
-    """
-    return frozenset(
-        token.rstrip(".").lower() for token in re.split(r"[\s,]+", name) if token.rstrip(".")
-    )
-
-
 def merge_authors(base: list[str], incoming: list[str]) -> list[str]:
-    """Merge two author lists, deduplicating by name-token set equality.
+    """Merge two author lists by keeping whichever list is larger.
 
-    Names formatted as ``"First Last"`` and ``"Last, First"`` are treated as
-    the same author.  When a duplicate is detected the existing (base) form
-    is kept, so the canonical representation is determined by whichever
-    source was encountered first.
+    This conservative strategy avoids the risk of combining lists that
+    represent the same authors in different string formats (e.g.
+    ``"First Last"`` vs ``"Last, First"``).  The list with more entries is
+    returned as-is; when both have the same length the *base* list is kept.
 
     Parameters
     ----------
@@ -46,22 +23,9 @@ def merge_authors(base: list[str], incoming: list[str]) -> list[str]:
     Returns
     -------
     list[str]
-        Deduplicated list preserving the original order of *base* and
-        appending only genuinely new authors from *incoming*.
+        The larger of the two lists (base wins on a tie).
     """
-    if not base:
-        return list(incoming)
-    if not incoming:
-        return list(base)
-
-    existing_tokens: list[frozenset[str]] = [_author_tokens(a) for a in base]
-    result: list[str] = list(base)
-    for author in incoming:
-        tokens = _author_tokens(author)
-        if tokens not in existing_tokens:
-            result.append(author)
-            existing_tokens.append(tokens)
-    return result
+    return list(incoming) if len(incoming) > len(base) else list(base)
 
 
 def merge_value(base: Any, incoming: Any) -> Any:

@@ -47,34 +47,23 @@ def test_merge_value_combines_dicts():
 class TestMergeAuthors:
     """Unit tests for the merge_authors helper."""
 
-    def test_adds_genuinely_new_author(self):
-        """Authors not present in base are appended."""
-        result = merge_authors(["Alice Smith"], ["Bob Jones"])
-        assert result == ["Alice Smith", "Bob Jones"]
+    def test_returns_incoming_when_larger(self):
+        """Incoming list is returned when it has more authors than base."""
+        base = ["Alice Smith"]
+        incoming = ["Bob Jones", "Charlie Brown", "Diana Prince"]
+        assert merge_authors(base, incoming) == incoming
 
-    def test_deduplicates_last_first_vs_first_last(self):
-        """'Last, First' and 'First Last' forms of the same name are not duplicated."""
-        result = merge_authors(["Asif Hasan Chowdhury"], ["Chowdhury, Asif Hasan"])
-        assert result == ["Asif Hasan Chowdhury"]
+    def test_returns_base_when_larger(self):
+        """Base list is returned when it has more authors than incoming."""
+        base = ["Alice Smith", "Bob Jones", "Charlie Brown"]
+        incoming = ["Diana Prince"]
+        assert merge_authors(base, incoming) == base
 
-    def test_deduplicates_exact_match(self):
-        """Exact duplicate names are not added again."""
-        result = merge_authors(["Alice Smith", "Bob Jones"], ["Alice Smith"])
-        assert result == ["Alice Smith", "Bob Jones"]
-
-    def test_deduplicates_mixed_formats(self):
-        """Mix of 'First Last' base and 'Last, First' incoming are merged correctly."""
+    def test_returns_base_on_tie(self):
+        """Base list is returned when both lists have the same length."""
         base = ["Alice Smith", "Bob Jones"]
-        incoming = ["Smith, Alice", "Charlie Brown"]
-        result = merge_authors(base, incoming)
-        assert result == ["Alice Smith", "Bob Jones", "Charlie Brown"]
-
-    def test_preserves_base_form_of_name(self):
-        """When a duplicate is found the base form (First Last) is kept."""
-        base = ["María García"]
-        incoming = ["García, María"]
-        result = merge_authors(base, incoming)
-        assert result == ["María García"]
+        incoming = ["Charlie Brown", "Diana Prince"]
+        assert merge_authors(base, incoming) == base
 
     def test_empty_base_returns_incoming(self):
         """Empty base returns the incoming list."""
@@ -91,7 +80,11 @@ class TestMergeAuthors:
         result = merge_authors([], [])
         assert result == []
 
-    def test_case_insensitive_token_matching(self):
-        """Token comparison is case-insensitive."""
-        result = merge_authors(["alice smith"], ["SMITH, ALICE"])
-        assert result == ["alice smith"]
+    def test_returns_copy_not_same_object(self):
+        """Returned list is a copy, not the original object."""
+        base = ["Alice Smith", "Bob Jones"]
+        incoming = ["Charlie Brown"]
+        result = merge_authors(base, incoming)
+        assert result is not base
+        result.append("extra")
+        assert "extra" not in base
