@@ -277,6 +277,7 @@ class ScopusSearcher(SearcherBase):
         """
         scopus_query = self._query_builder.convert_query(query)
         papers: List[Paper] = []
+        processed = 0
         offset = 0
         total: Optional[int] = None
 
@@ -317,8 +318,9 @@ class ScopusSearcher(SearcherBase):
                 if paper is not None:
                     papers.append(paper)
 
+            processed += len(entries)
             if progress_callback is not None:
-                progress_callback(len(papers), total)
+                progress_callback(processed, total)
 
             if max_papers is not None and len(papers) >= max_papers:
                 break

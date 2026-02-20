@@ -439,6 +439,29 @@ class TestRxivSearcherSearchSingle:
         # No total available from page — callback must receive None, not max_papers.
         callback.assert_called_with(1, None)
 
+    def test_progress_callback_advances_even_when_paper_fetch_fails(self):
+        """progress_callback advances for every DOI attempted, even when fetch returns None."""
+        searcher = _make_searcher()
+        papers: list = []
+        callback = MagicMock()
+
+        # Two DOIs on the page; metadata fetch always returns None (all fail).
+        with patch.object(
+            searcher, "_scrape_dois", side_effect=[(["10.1101/a", "10.1101/b"], 2), ([], None)]
+        ), patch.object(searcher, "_fetch_metadata", return_value=None):
+            searcher._search_single(
+                {"terms": ["x"], "match": "match-all"},
+                max_papers=None,
+                papers=papers,
+                progress_callback=callback,
+            )
+
+        # No papers were collected, but callback was still called once per DOI.
+        assert papers == []
+        assert callback.call_count == 2
+        callback.assert_any_call(1, 2)
+        callback.assert_any_call(2, 2)
+
     def test_pagination_stops_when_fewer_than_10_dois(self):
         """Pagination stops when a page returns fewer than 10 DOIs."""
         searcher = _make_searcher()

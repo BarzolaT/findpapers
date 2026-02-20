@@ -84,8 +84,11 @@ class SearcherBase(ABC):
         max_papers : int | None
             Maximum papers to retrieve.  ``None`` means unlimited.
         progress_callback : Callable[[int, int | None], None] | None
-            Optional callback invoked after each page with ``(papers_so_far,
-            total_or_none)``.
+            Optional callback invoked after each page / item with
+            ``(items_processed, total_or_none)``.  ``items_processed`` counts
+            every candidate item attempted (regardless of whether it was
+            successfully parsed), so the bar always reaches ``total`` even
+            when some items fail to parse.
 
         Returns
         -------

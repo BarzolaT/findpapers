@@ -307,6 +307,7 @@ class OpenAlexSearcher(SearcherBase):
         """
         cursor = "*"
         total: Optional[int] = None
+        processed = 0
 
         while True:
             if max_papers is not None and len(papers) >= max_papers:
@@ -347,8 +348,9 @@ class OpenAlexSearcher(SearcherBase):
                 if paper is not None:
                     papers.append(paper)
 
+            processed += len(results)
             if progress_callback is not None:
-                progress_callback(len(papers), total)
+                progress_callback(processed, total)
 
             if max_papers is not None and len(papers) >= max_papers:
                 break

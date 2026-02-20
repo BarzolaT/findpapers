@@ -280,6 +280,7 @@ class IEEESearcher(SearcherBase):
         """
         ieee_params = self._query_builder.convert_query(query)
         papers: List[Paper] = []
+        processed = 0
         offset = 1  # IEEE uses 1-based pagination
         total: Optional[int] = None
 
@@ -313,8 +314,9 @@ class IEEESearcher(SearcherBase):
                 if paper is not None:
                     papers.append(paper)
 
+            processed += len(articles)
             if progress_callback is not None:
-                progress_callback(len(papers), total)
+                progress_callback(processed, total)
 
             if max_papers is not None and len(papers) >= max_papers:
                 break
