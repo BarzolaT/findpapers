@@ -60,21 +60,21 @@ class TestSearchRunnerInit:
         assert len(runner._searchers) == 2  # noqa: SLF001
 
     def test_all_databases_when_none(self):
-        """6 databases are selected when databases=None and no API keys given.
+        """4 databases are selected when databases=None and no API keys given.
 
         IEEE and Scopus require API keys; without them they are skipped.
         """
         runner = SearchRunner(query="[ml]")
-        assert len(runner._searchers) == 6  # noqa: SLF001
+        assert len(runner._searchers) == 4  # noqa: SLF001
 
     def test_all_databases_when_api_keys_provided(self):
-        """All 8 databases are selected when databases=None and API keys given."""
+        """All 6 databases are selected when databases=None and API keys given."""
         runner = SearchRunner(
             query="[ml]",
             ieee_api_key="ieee_key",
             scopus_api_key="scopus_key",
         )
-        assert len(runner._searchers) == 8  # noqa: SLF001
+        assert len(runner._searchers) == 6  # noqa: SLF001
 
     def test_ieee_skipped_without_api_key(self):
         """IEEE is excluded from the searcher list when no API key is given."""

@@ -20,14 +20,8 @@ class Database(str, Enum):
     ARXIV = "arxiv"
     """arXiv preprint server."""
 
-    BIORXIV = "biorxiv"
-    """bioRxiv preprint server."""
-
     IEEE = "ieee"
     """IEEE Xplore digital library."""
-
-    MEDRXIV = "medrxiv"
-    """medRxiv preprint server."""
 
     OPENALEX = "openalex"
     """OpenAlex open scholarly graph."""

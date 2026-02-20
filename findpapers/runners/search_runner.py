@@ -14,9 +14,7 @@ from findpapers.query.parser import QueryParser
 from findpapers.query.validator import QueryValidator
 from findpapers.searchers.arxiv import ArxivSearcher
 from findpapers.searchers.base import SearcherBase
-from findpapers.searchers.biorxiv import BiorxivSearcher
 from findpapers.searchers.ieee import IEEESearcher
-from findpapers.searchers.medrxiv import MedrxivSearcher
 from findpapers.searchers.openalex import OpenAlexSearcher
 from findpapers.searchers.pubmed import PubmedSearcher
 from findpapers.searchers.scopus import ScopusSearcher
@@ -45,9 +43,8 @@ class SearchRunner:
         Raw query string (e.g. ``"ti[machine learning] AND abs[deep learning]"``).
     databases : list[str] | None
         Database identifiers to query.  When ``None`` all supported databases
-        are used.  Supported values: ``"arxiv"``, ``"biorxiv"``, ``"ieee"``,
-        ``"medrxiv"``, ``"openalex"``, ``"pubmed"``, ``"scopus"``,
-        ``"semantic_scholar"``.
+        are used.  Supported values: ``"arxiv"``, ``"ieee"``, ``"openalex"``,
+        ``"pubmed"``, ``"scopus"``, ``"semantic_scholar"``.
     paper_types : list[str] | None
         Restrict results to papers of these BibTeX-aligned types.  Accepted
         values: ``"article"``, ``"inbook"``, ``"incollection"``,
@@ -352,9 +349,7 @@ class SearchRunner:
         """
         all_searchers: dict[Database, SearcherBase] = {
             Database.ARXIV: ArxivSearcher(),
-            Database.BIORXIV: BiorxivSearcher(),
             Database.IEEE: IEEESearcher(api_key=ieee_api_key),
-            Database.MEDRXIV: MedrxivSearcher(),
             Database.OPENALEX: OpenAlexSearcher(api_key=openalex_api_key, email=openalex_email),
             Database.PUBMED: PubmedSearcher(api_key=pubmed_api_key),
             Database.SCOPUS: ScopusSearcher(api_key=scopus_api_key),
