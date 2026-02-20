@@ -85,8 +85,7 @@ class ArxivQueryBuilder(QueryBuilder):
                 return f"au:{term}"
             return f"(ti:{term} OR abs:{term})"
 
-        converted = convert_expression(preprocessed.root, convert_term, connector_map)
-        return converted.replace("(", "%28").replace(")", "%29")
+        return convert_expression(preprocessed.root, convert_term, connector_map)
 
     def preprocess_terms(self, query: Query) -> Query:
         """Replace hyphens with spaces for arXiv compatibility.

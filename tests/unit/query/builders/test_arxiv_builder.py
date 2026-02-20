@@ -42,7 +42,7 @@ def test_arxiv_build_execution_plan_single_query(
         ("ti[graph]", "ti:graph"),
         ("abs[graph]", "abs:graph"),
         ("au[smith]", "au:smith"),
-        ("tiabs[graph]", "%28ti:graph OR abs:graph%29"),
+        ("tiabs[graph]", "(ti:graph OR abs:graph)"),
     ],
 )
 def test_arxiv_supports_all_filters_in_conversion(
@@ -56,3 +56,32 @@ def test_arxiv_supports_all_filters_in_conversion(
     assert result.is_valid is True
     converted = ArxivQueryBuilder().convert_query(query)
     assert expected_fragment in converted
+
+
+def test_arxiv_compound_query_no_percent_encoding(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """Parentheses in compound queries are NOT pre-encoded as %28/%29.
+
+    Previously the builder called ``.replace("(", "%28")`` on its output.
+    When that string was then passed to ``requests.get(params=...)`` the HTTP
+    library percent-encoded the ``%`` sign a second time, producing ``%2528``
+    in the final URL.  arXiv decoded once back to ``%28`` (literal characters)
+    and failed to parse the query as boolean groups, silently returning
+    unrelated papers.
+
+    The fix: return the raw expression with literal '(' and ')' characters and
+    let the HTTP library perform the single, correct URL-encoding.
+    """
+    query = parse_and_propagate("[machine learning] AND [healthcare]")
+    converted = ArxivQueryBuilder().convert_query(query)
+    assert "(" in converted, "parentheses must be present as literal characters"
+    assert ")" in converted, "parentheses must be present as literal characters"
+    assert "%28" not in converted, "must not pre-encode '(' — would cause double-encoding"
+    assert "%29" not in converted, "must not pre-encode ')' — would cause double-encoding"
+    # Confirm the boolean structure is preserved
+    assert 'ti:"machine learning"' in converted
+    assert 'abs:"machine learning"' in converted
+    assert "AND" in converted
+    assert "ti:healthcare" in converted
+    assert "abs:healthcare" in converted
