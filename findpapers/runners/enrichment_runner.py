@@ -68,7 +68,11 @@ class EnrichmentRunner:
         None
         """
         if verbose:
-            logging.getLogger().setLevel(logging.INFO)
+            logging.getLogger().setLevel(logging.DEBUG)
+            # Suppress verbose output from third-party HTTP libraries so that
+            # only findpapers' own loggers emit debug messages.
+            for _noisy in ("urllib3", "requests", "httpx", "charset_normalizer"):
+                logging.getLogger(_noisy).setLevel(logging.WARNING)
             logger.info("=== EnrichmentRunner Configuration ===")
             logger.info("Total papers: %d", len(self._results))
             logger.info("Num workers: %d", self._num_workers)

@@ -16,6 +16,8 @@ if TYPE_CHECKING:
     from findpapers.core.query import Query
     from findpapers.query.builder import QueryBuilder, QueryValidationResult
 
+from findpapers.utils.http_headers import get_browser_headers
+
 logger = logging.getLogger(__name__)
 
 QUERY_COMBINATIONS_WARNING_THRESHOLD = 20
@@ -180,7 +182,10 @@ class SearcherBase(ABC):
         dict
             Augmented headers.
         """
-        return headers
+        # Merge browser headers as defaults so every outgoing request carries
+        # a realistic User-Agent even when the subclass does not set one.
+        # Subclass-provided values always take precedence.
+        return {**get_browser_headers(), **headers}
 
     def _get(
         self,
@@ -224,8 +229,8 @@ class SearcherBase(ABC):
             timeout=30,
         )
         self._last_request_time = time.monotonic()
-        response.raise_for_status()
         self._log_response(response)
+        response.raise_for_status()
         return response
 
     def _log_request(self, url: str, params: Optional[dict] = None) -> None:

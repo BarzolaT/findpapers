@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from datetime import date, datetime
 from typing import Any, Iterable
@@ -13,6 +14,9 @@ from lxml.html import HtmlElement
 
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
+from findpapers.utils.http_headers import get_browser_headers
+
+logger = logging.getLogger(__name__)
 
 # Metadata keys searched in priority order for each field.
 TITLE_META_KEYS = [
@@ -128,9 +132,19 @@ def fetch_metadata(url: str, timeout: float | None = None) -> dict[str, Any] | N
     requests.RequestException
         If the HTTP request fails.
     """
-    response = requests.get(url, timeout=timeout, allow_redirects=True)
-    response.raise_for_status()
+    logger.debug("GET %s", url)
+    response = requests.get(
+        url, headers=get_browser_headers(), timeout=timeout, allow_redirects=True
+    )
     content_type = response.headers.get("content-type", "")
+    logger.debug(
+        "<- %s %s | content-type: %s | %d bytes",
+        response.status_code,
+        response.reason,
+        content_type.split(";")[0].strip() or "unknown",
+        len(response.content),
+    )
+    response.raise_for_status()
     if "text/html" not in content_type.lower():
         return None
     return extract_metadata_from_html(response.text)

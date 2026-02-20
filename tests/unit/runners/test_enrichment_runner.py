@@ -160,6 +160,15 @@ class TestEnrichmentRunnerVerbose:
                 runner.run(verbose=False)
         assert "EnrichmentRunner Configuration" not in " ".join(caplog.messages)
 
+    def test_verbose_true_suppresses_third_party_loggers(self):
+        """verbose=True sets noisy third-party loggers to WARNING to avoid credential leaks."""
+        import logging
+
+        runner = EnrichmentRunner(papers=[])
+        runner.run(verbose=True)
+        for lib in ("urllib3", "requests", "httpx", "charset_normalizer"):
+            assert logging.getLogger(lib).level == logging.WARNING
+
 
 class TestEnrichmentRunnerPredatoryReclassification:
     """Tests for predatory flag reclassification after enrichment."""

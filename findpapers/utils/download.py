@@ -7,9 +7,12 @@ filenames, or construct proxy configurations.
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 import urllib.parse
+
+logger = logging.getLogger(__name__)
 
 
 def resolve_pdf_url(response_url: str, doi: str | None = None) -> str | None:
@@ -146,6 +149,12 @@ def build_proxies(proxy: str | None = None) -> dict[str, str] | None:
     The proxy value is taken from the *proxy* parameter first; if that is
     ``None``, the ``FINDPAPERS_PROXY`` environment variable is checked.
 
+    Institutional proxies are almost always plain-HTTP servers.  When the
+    configured URL uses ``https://``, *requests* / urllib3 would try to
+    establish an SSL connection to the proxy itself — which fails with a
+    ``WRONG_VERSION_NUMBER`` SSL error.  To avoid this, the scheme is
+    silently normalised from ``https://`` to ``http://``.
+
     Parameters
     ----------
     proxy : str | None
@@ -162,8 +171,21 @@ def build_proxies(proxy: str | None = None) -> dict[str, str] | None:
     --------
     >>> build_proxies("http://proxy.example.com:8080")
     {'http': 'http://proxy.example.com:8080', 'https': 'http://proxy.example.com:8080'}
+    >>> build_proxies("https://proxy.example.com:8080")
+    {'http': 'http://proxy.example.com:8080', 'https': 'http://proxy.example.com:8080'}
     """
     resolved = proxy or os.getenv("FINDPAPERS_PROXY")
     if not resolved:
         return None
+    if resolved.startswith("https://"):
+        normalized = "http://" + resolved[len("https://") :]
+        logger.warning(
+            "Proxy URL uses 'https://' scheme ('%s'), but institutional proxies "
+            "typically speak plain HTTP.  Normalising to 'http://' to avoid SSL "
+            "handshake failures (WRONG_VERSION_NUMBER).  If your proxy genuinely "
+            "requires HTTPS, this normalisation will break the connection — in that "
+            "case please report an issue.",
+            resolved,
+        )
+        resolved = normalized
     return {"http": resolved, "https": resolved}

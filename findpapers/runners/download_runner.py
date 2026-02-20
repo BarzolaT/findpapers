@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import logging
 import os
+import urllib.parse
 from time import perf_counter
 
 import requests
@@ -12,6 +13,7 @@ import requests
 from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.utils.download import build_filename, build_proxies, resolve_pdf_url
+from findpapers.utils.http_headers import get_browser_headers
 from findpapers.utils.parallel import execute_tasks
 
 logger = logging.getLogger(__name__)
@@ -39,6 +41,10 @@ class DownloadRunner:
     proxy : str | None
         Proxy URL for HTTP/HTTPS requests (also read from
         ``FINDPAPERS_PROXY`` env variable if ``None``).
+    ssl_verify : bool
+        Whether to verify SSL certificates.  Set to ``False`` when using
+        institutional proxies that perform SSL inspection.  Defaults to
+        ``True``.
 
     Examples
     --------
@@ -54,6 +60,7 @@ class DownloadRunner:
         num_workers: int = 1,
         timeout: float | None = 10.0,
         proxy: str | None = None,
+        ssl_verify: bool = True,
     ) -> None:
         """Initialise download configuration without executing it."""
         self._executed = False
@@ -63,6 +70,7 @@ class DownloadRunner:
         self._num_workers = num_workers
         self._timeout = timeout
         self._proxy = proxy
+        self._ssl_verify = ssl_verify
 
     # ------------------------------------------------------------------
     # Public interface
@@ -81,13 +89,18 @@ class DownloadRunner:
         None
         """
         if verbose:
-            logging.getLogger().setLevel(logging.INFO)
+            logging.getLogger().setLevel(logging.DEBUG)
+            # Suppress verbose output from third-party HTTP libraries so that
+            # only findpapers' own loggers emit debug messages.
+            for _noisy in ("urllib3", "requests", "httpx", "charset_normalizer"):
+                logging.getLogger(_noisy).setLevel(logging.WARNING)
             logger.info("=== DownloadRunner Configuration ===")
             logger.info("Total papers: %d", len(self._results))
             logger.info("Output directory: %s", self._output_directory)
             logger.info("Num workers: %d", self._num_workers)
             logger.info("Timeout: %s", self._timeout or "default")
-            logger.info("Proxy: %s", self._proxy or "none")
+            logger.info("Proxy: %s", self._mask_proxy_credentials(self._proxy))
+            logger.info("SSL verify: %s", self._ssl_verify)
             logger.info("====================================")
 
         start = perf_counter()
@@ -110,6 +123,7 @@ class DownloadRunner:
         num_workers = self._num_workers
         timeout = self._timeout
         proxies = self._build_proxies()
+        ssl_verify = self._ssl_verify
 
         def _download_task(paper: Paper) -> tuple[bool, list[str]]:
             return self._download_paper(
@@ -117,6 +131,7 @@ class DownloadRunner:
                 self._output_directory,
                 timeout=timeout,
                 proxies=proxies,
+                ssl_verify=ssl_verify,
             )
 
         for paper, result, error in execute_tasks(
@@ -195,6 +210,53 @@ class DownloadRunner:
         """
         return build_proxies(self._proxy)
 
+    def _log_response(self, response: requests.Response) -> None:
+        """Log a concise summary of an HTTP response at DEBUG level.
+
+        This mirrors the behaviour in SearcherBase._log_response but is
+        local to the runner so downloads always produce a consistent
+        debug message.
+        """
+        if not logger.isEnabledFor(logging.DEBUG):
+            return
+        status = f"{response.status_code} {getattr(response, 'reason', '')}"
+        content_type = response.headers.get("content-type", "unknown").split(";")[0].strip()
+        size = len(getattr(response, "content", b""))
+        logger.debug(
+            "[DownloadRunner] <- %s | content-type: %s | %d bytes", status, content_type, size
+        )
+
+    @staticmethod
+    def _mask_proxy_credentials(proxy: str | None) -> str:
+        """Return a redacted proxy URL safe for logging.
+
+        Credentials embedded in the URL (``user:password@``) are replaced
+        with ``***:***`` so that secrets are never written to log output.
+
+        Parameters
+        ----------
+        proxy : str | None
+            Raw proxy URL, potentially containing embedded credentials.
+
+        Returns
+        -------
+        str
+            Proxy representation with credentials masked, or ``"none"``
+            when *proxy* is ``None``.
+        """
+        if not proxy:
+            return "none"
+        try:
+            parsed = urllib.parse.urlparse(proxy)
+            if parsed.username or parsed.password:
+                masked_netloc = f"***:***@{parsed.hostname or ''}"
+                if parsed.port:
+                    masked_netloc += f":{parsed.port}"
+                return urllib.parse.urlunparse(parsed._replace(netloc=masked_netloc))
+        except Exception:  # noqa: BLE001
+            pass
+        return proxy
+
     def _log_download_error(
         self,
         error_log_path: str,
@@ -230,6 +292,7 @@ class DownloadRunner:
         output_directory: str,
         timeout: float | None,
         proxies: dict[str, str] | None,
+        ssl_verify: bool = True,
     ) -> tuple[bool, list[str]]:
         """Attempt to download the PDF for a single paper.
 
@@ -243,6 +306,8 @@ class DownloadRunner:
             HTTP request timeout.
         proxies : dict[str, str] | None
             Proxy configuration.
+        ssl_verify : bool
+            Whether to verify SSL certificates.
 
         Returns
         -------
@@ -274,19 +339,29 @@ class DownloadRunner:
         for url in candidate_urls:
             attempted_urls.append(url)
             try:
-                logger.info("Fetching: %s", url)
-                response = self._request(url, timeout=timeout, proxies=proxies)
+                response = self._request(
+                    url, timeout=timeout, proxies=proxies, ssl_verify=ssl_verify
+                )
                 if response is None:
+                    logger.debug("No response for %s", url)
                     continue
+                # Log response summary here as well so that callers running
+                # in different execution contexts (threads) always see the
+                # response regardless of _request internals.
+                self._log_response(response)
                 content_type = response.headers.get("content-type", "").lower()
 
                 if "text/html" in content_type:
                     pdf_url = self._resolve_pdf_url(response.url, paper)
                     if pdf_url is not None:
                         attempted_urls.append(pdf_url)
-                        response = self._request(pdf_url, timeout=timeout, proxies=proxies)
+                        response = self._request(
+                            pdf_url, timeout=timeout, proxies=proxies, ssl_verify=ssl_verify
+                        )
                         if response is None:
+                            logger.debug("No response for %s", pdf_url)
                             continue
+                        self._log_response(response)
                         content_type = response.headers.get("content-type", "").lower()
 
                 if "application/pdf" in content_type:
@@ -303,6 +378,7 @@ class DownloadRunner:
         url: str,
         timeout: float | None,
         proxies: dict[str, str] | None,
+        ssl_verify: bool = True,
     ) -> requests.Response | None:
         """Perform a GET request, returning ``None`` on failure.
 
@@ -314,6 +390,9 @@ class DownloadRunner:
             Request timeout in seconds.
         proxies : dict[str, str] | None
             Proxy configuration.
+        ssl_verify : bool
+            Whether to verify SSL certificates.  Set to ``False`` when using
+            proxies that perform SSL inspection.
 
         Returns
         -------
@@ -321,9 +400,38 @@ class DownloadRunner:
             Response object, or ``None`` when the request fails.
         """
         try:
-            return requests.get(url, timeout=timeout, proxies=proxies)
+            logger.debug("GET %s", url)
+            response = requests.get(
+                url,
+                headers=get_browser_headers(),
+                timeout=timeout,
+                proxies=proxies,
+                verify=ssl_verify,
+            )
         except Exception:  # noqa: BLE001
+            logger.debug("Request failed for %s", url, exc_info=True)
             return None
+        content_type = response.headers.get("content-type", "unknown").split(";")[0].strip()
+        logger.debug(
+            "<- %s %s | content-type: %s | %d bytes",
+            response.status_code,
+            response.reason,
+            content_type,
+            len(response.content),
+        )
+        if response.status_code == 418:  # noqa: PLR2004
+            logger.warning(
+                "Server returned 418 (bot-detection) for %s — "
+                "the publisher is blocking automated requests.",
+                url,
+            )
+        elif not response.ok:
+            logger.debug(
+                "Non-success status %s for %s",
+                response.status_code,
+                url,
+            )
+        return response
 
     def _build_filename(self, paper: Paper) -> str:
         """Build a sanitised filename for the paper PDF.

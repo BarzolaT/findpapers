@@ -846,6 +846,67 @@ class TestFetchMetadata:
         assert result is not None
         assert "citation_doi" in result
 
+    def test_request_logged_at_debug(self, caplog) -> None:
+        """fetch_metadata logs the outgoing GET URL at DEBUG level."""
+        import logging
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.reason = "OK"
+        mock_resp.headers = {"content-type": "text/html"}
+        mock_resp.text = "<html><head></head></html>"
+        mock_resp.content = b""
+        mock_resp.raise_for_status = MagicMock()
+
+        url = "https://example.com/paper"
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.enrichment"):
+                fetch_metadata(url)
+
+        assert any("GET" in m and "example.com" in m for m in caplog.messages)
+
+    def test_response_logged_at_debug(self, caplog) -> None:
+        """fetch_metadata logs the response status, content-type, and size at DEBUG level."""
+        import logging
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.reason = "OK"
+        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
+        mock_resp.text = "<html><head></head></html>"
+        mock_resp.content = b"hello"
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.enrichment"):
+                fetch_metadata("https://example.com/paper")
+
+        messages = " ".join(caplog.messages)
+        assert "200" in messages
+        assert "text/html" in messages
+        assert "5" in messages  # len(b"hello") == 5
+
+    def test_response_logged_before_raise_for_status(self, caplog) -> None:
+        """Response is logged even when raise_for_status() subsequently raises (e.g. 404)."""
+        import logging
+
+        import requests as req_lib
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 404
+        mock_resp.reason = "Not Found"
+        mock_resp.headers = {"content-type": "text/html"}
+        mock_resp.content = b"not found"
+        mock_resp.raise_for_status.side_effect = req_lib.HTTPError("404")
+
+        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.enrichment"):
+                with pytest.raises(req_lib.HTTPError):
+                    fetch_metadata("https://example.com/missing")
+
+        messages = " ".join(caplog.messages)
+        assert "404" in messages  # response was logged before the exception was raised
+
 
 # ---------------------------------------------------------------------------
 # enrich_from_sources
