@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from findpapers.core.paper import PaperType
+from findpapers.core.search import Database
 from findpapers.query.builders.ieee import IEEEQueryBuilder
 from findpapers.searchers.ieee import IEEESearcher, _ieee_content_type_to_paper_type
 
@@ -64,7 +65,7 @@ class TestIEEESearcherInit:
 
     def test_name(self):
         """Searcher name is 'IEEE'."""
-        assert IEEESearcher().name == "IEEE"
+        assert IEEESearcher().name == Database.IEEE
 
     def test_is_available_without_api_key(self):
         """is_available is False when no API key is provided."""
@@ -83,20 +84,20 @@ class TestIEEESearcherParsePaper:
         articles = ieee_sample_json.get("articles", [])
         assert len(articles) > 0
 
-        papers = [IEEESearcher._parse_paper(item) for item in articles]
+        papers = [IEEESearcher()._parse_paper(item) for item in articles]
         valid = [p for p in papers if p is not None]
         assert len(valid) > 0
 
     def test_paper_has_database_tag(self, ieee_sample_json):
         """Parsed paper has 'IEEE' in databases set."""
         item = ieee_sample_json["articles"][0]
-        paper = IEEESearcher._parse_paper(item)
+        paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
-        assert "IEEE" in paper.databases
+        assert Database.IEEE in paper.databases
 
     def test_missing_title_returns_none(self):
         """Item with empty title returns None."""
-        paper = IEEESearcher._parse_paper({"title": "  ", "abstract": "some text"})
+        paper = IEEESearcher()._parse_paper({"title": "  ", "abstract": "some text"})
         assert paper is None
 
     def test_parse_with_all_keyword_groups(self):
@@ -108,7 +109,7 @@ class TestIEEESearcherParsePaper:
             "author_terms": {"terms": ["term3"]},
             "mesh_terms": {"terms": ["term4"]},
         }
-        paper = IEEESearcher._parse_paper(item)
+        paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
         assert paper.keywords is not None
         assert len(paper.keywords) == 4
@@ -116,28 +117,28 @@ class TestIEEESearcherParsePaper:
     def test_pages_start_end(self):
         """start_page and end_page are combined into pages field."""
         item = {"title": "A Paper", "start_page": "10", "end_page": "20"}
-        paper = IEEESearcher._parse_paper(item)
+        paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
         assert paper.pages == "10-20"
 
     def test_pages_start_only(self):
         """Only start_page populates pages field."""
         item = {"title": "A Paper", "start_page": "5"}
-        paper = IEEESearcher._parse_paper(item)
+        paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
         assert paper.pages == "5"
 
     def test_citation_count_parsed(self):
         """citing_paper_count is parsed as an integer."""
         item = {"title": "A Paper", "citing_paper_count": "42"}
-        paper = IEEESearcher._parse_paper(item)
+        paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
         assert paper.citations == 42
 
     def test_invalid_citation_count_ignored(self):
         """Non-numeric citing_paper_count is gracefully ignored."""
         item = {"title": "A Paper", "citing_paper_count": "N/A"}
-        paper = IEEESearcher._parse_paper(item)
+        paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
         assert paper.citations is None
 
@@ -150,7 +151,7 @@ class TestIEEESearcherParsePaper:
             "isbn": "978-0-xxx",
             "publisher": "IEEE",
         }
-        paper = IEEESearcher._parse_paper(item)
+        paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
         assert paper.publication is not None
         assert paper.publication.title == "IEEE Trans."
@@ -183,7 +184,7 @@ class TestIEEESearcherSearch:
             papers = searcher.search(simple_query)
 
         assert len(papers) > 0
-        assert all("IEEE" in p.databases for p in papers)
+        assert all(Database.IEEE in p.databases for p in papers)
 
     def test_max_papers_respected(self, simple_query, ieee_sample_json, mock_response):
         """search() returns no more than max_papers papers."""

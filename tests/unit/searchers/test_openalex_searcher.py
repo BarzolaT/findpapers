@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from findpapers.core.paper import PaperType
+from findpapers.core.search import Database
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
 from findpapers.searchers.openalex import (
     OpenAlexSearcher,
@@ -84,7 +85,7 @@ class TestOpenAlexSearcherInit:
 
     def test_name(self):
         """Searcher name is 'OpenAlex'."""
-        assert OpenAlexSearcher().name == "OpenAlex"
+        assert OpenAlexSearcher().name == Database.OPENALEX
 
     def test_api_key_stored(self):
         """API key is stored on the instance."""
@@ -114,20 +115,20 @@ class TestOpenAlexSearcherParsePaper:
         results = openalex_sample_json.get("results", [])
         assert len(results) > 0
 
-        papers = [OpenAlexSearcher._parse_paper(r) for r in results]
+        papers = [OpenAlexSearcher()._parse_paper(r) for r in results]
         valid = [p for p in papers if p is not None]
         assert len(valid) > 0
 
     def test_paper_has_database_tag(self, openalex_sample_json):
         """Parsed paper has 'OpenAlex' in databases set."""
         result = openalex_sample_json["results"][0]
-        paper = OpenAlexSearcher._parse_paper(result)
+        paper = OpenAlexSearcher()._parse_paper(result)
         assert paper is not None
-        assert "OpenAlex" in paper.databases
+        assert Database.OPENALEX in paper.databases
 
     def test_missing_title_returns_none(self):
         """Result with blank title returns None."""
-        paper = OpenAlexSearcher._parse_paper({"title": "  "})
+        paper = OpenAlexSearcher()._parse_paper({"title": "  "})
         assert paper is None
 
     def test_open_access_url_used(self):
@@ -136,7 +137,7 @@ class TestOpenAlexSearcherParsePaper:
             "title": "A Paper",
             "open_access": {"oa_url": "https://example.com/paper.pdf"},
         }
-        paper = OpenAlexSearcher._parse_paper(work)
+        paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
         assert paper.url == "https://example.com/paper.pdf"
 
@@ -147,7 +148,7 @@ class TestOpenAlexSearcherParsePaper:
             "open_access": {},
             "primary_location": {"landing_page_url": "https://example.com/landing"},
         }
-        paper = OpenAlexSearcher._parse_paper(work)
+        paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
         assert paper.url == "https://example.com/landing"
 
@@ -160,7 +161,7 @@ class TestOpenAlexSearcherParsePaper:
                 {"pdf_url": "https://example.com/paper.pdf"},
             ],
         }
-        paper = OpenAlexSearcher._parse_paper(work)
+        paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
         assert paper.pdf_url == "https://example.com/paper.pdf"
 
@@ -171,7 +172,7 @@ class TestOpenAlexSearcherParsePaper:
             "concepts": [{"display_name": "Machine Learning"}],
             "keywords": [{"display_name": "Deep Learning"}],
         }
-        paper = OpenAlexSearcher._parse_paper(work)
+        paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
         assert paper.keywords is not None
         assert "Machine Learning" in paper.keywords
@@ -186,7 +187,7 @@ class TestOpenAlexSearcherParsePaper:
                 "landing_page_url": None,
             },
         }
-        paper = OpenAlexSearcher._parse_paper(work)
+        paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
         assert paper.publication is not None
         assert paper.publication.title == "Nature"
@@ -198,14 +199,14 @@ class TestOpenAlexSearcherParsePaper:
             "title": "A Paper",
             "doi": "https://doi.org/10.1234/test",
         }
-        paper = OpenAlexSearcher._parse_paper(work)
+        paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
         assert paper.doi == "10.1234/test"
 
     def test_paper_type_from_work_type(self):
         """Paper type is derived from the work type field."""
         work = {"title": "A Paper", "type": "book-chapter"}
-        paper = OpenAlexSearcher._parse_paper(work)
+        paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
         assert paper.paper_type == PaperType.INCOLLECTION
 
@@ -255,7 +256,7 @@ class TestOpenAlexSearcherSearch:
             papers = searcher.search(simple_query)
 
         assert len(papers) > 0
-        assert all("OpenAlex" in p.databases for p in papers)
+        assert all(Database.OPENALEX in p.databases for p in papers)
 
     def test_max_papers_respected(self, simple_query, openalex_sample_json, mock_response):
         """search() returns no more than max_papers papers."""

@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
+from findpapers.core.search import Database
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -100,7 +101,7 @@ class OpenAlexSearcher(SearcherBase):
         str
             Database name.
         """
-        return "OpenAlex"
+        return Database.OPENALEX.value
 
     @property
     def query_builder(self) -> QueryBuilder:
@@ -159,8 +160,7 @@ class OpenAlexSearcher(SearcherBase):
             user_agent = f"findpapers/1.0 (mailto:{self._email})"
         return {**headers, "User-Agent": user_agent}
 
-    @staticmethod
-    def _parse_paper(work: Dict[str, Any]) -> Optional[Paper]:
+    def _parse_paper(self, work: Dict[str, Any]) -> Optional[Paper]:
         """Parse a single OpenAlex work object into a :class:`Paper`.
 
         Parameters
@@ -268,7 +268,7 @@ class OpenAlexSearcher(SearcherBase):
                 doi=doi,
                 citations=citations,
                 keywords=keywords if keywords else None,
-                databases={"OpenAlex"},
+                databases={self.name},
                 paper_type=paper_type,
             )
         except ValueError:

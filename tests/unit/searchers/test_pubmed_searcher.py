@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 from xml.etree import ElementTree as ET
 
+from findpapers.core.search import Database
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
 from findpapers.searchers.pubmed import PubmedSearcher, _normalize_month
 
@@ -50,7 +51,7 @@ class TestPubmedSearcherInit:
 
     def test_name(self):
         """Searcher name is 'PubMed'."""
-        assert PubmedSearcher().name == "PubMed"
+        assert PubmedSearcher().name == Database.PUBMED
 
     def test_rate_interval_without_key(self):
         """Default rate interval is used when no API key provided."""
@@ -80,7 +81,7 @@ class TestPubmedSearcherParsePaper:
         articles = tree.findall(".//PubmedArticle")
         assert len(articles) > 0
 
-        papers = [PubmedSearcher._parse_paper(a) for a in articles]
+        papers = [PubmedSearcher()._parse_paper(a) for a in articles]
         valid = [p for p in papers if p is not None]
         assert len(valid) > 0
 
@@ -88,9 +89,9 @@ class TestPubmedSearcherParsePaper:
         """Parsed paper has 'PubMed' in databases set."""
         tree = ET.fromstring(pubmed_efetch_xml)
         articles = tree.findall(".//PubmedArticle")
-        paper = PubmedSearcher._parse_paper(articles[0])
+        paper = PubmedSearcher()._parse_paper(articles[0])
         assert paper is not None
-        assert "PubMed" in paper.databases
+        assert Database.PUBMED in paper.databases
 
     def test_missing_title_returns_none(self):
         """Article element without title returns None."""
@@ -104,13 +105,13 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        assert PubmedSearcher._parse_paper(el) is None
+        assert PubmedSearcher()._parse_paper(el) is None
 
     def test_missing_medline_citation_returns_none(self):
         """Element without MedlineCitation returns None."""
         xml_str = "<PubmedArticle></PubmedArticle>"
         el = ET.fromstring(xml_str)
-        assert PubmedSearcher._parse_paper(el) is None
+        assert PubmedSearcher()._parse_paper(el) is None
 
     def test_author_with_initials_only(self):
         """Author with LastName + Initials (no ForeName) is parsed."""
@@ -131,7 +132,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher._parse_paper(el)
+        paper = PubmedSearcher()._parse_paper(el)
         assert paper is not None
         assert paper.authors == ["J Smith"]
 
@@ -156,7 +157,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher._parse_paper(el)
+        paper = PubmedSearcher()._parse_paper(el)
         assert paper is not None
         assert paper.keywords is not None
         assert "Deep Learning" in paper.keywords
@@ -180,7 +181,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher._parse_paper(el)
+        paper = PubmedSearcher()._parse_paper(el)
         assert paper is not None
         assert paper.doi == "10.1234/test"
 
@@ -197,7 +198,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher._parse_paper(el)
+        paper = PubmedSearcher()._parse_paper(el)
         assert paper is not None
         assert paper.url == "https://pubmed.ncbi.nlm.nih.gov/12345/"
 
@@ -219,7 +220,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher._parse_paper(el)
+        paper = PubmedSearcher()._parse_paper(el)
         assert paper is not None
         assert paper.publication is not None
         assert paper.publication.title == "Nature"
@@ -265,7 +266,7 @@ class TestPubmedSearcherSearch:
             papers = searcher.search(simple_query)
 
         assert len(papers) > 0
-        assert all("PubMed" in p.databases for p in papers)
+        assert all(Database.PUBMED in p.databases for p in papers)
 
     def test_max_papers_respected(
         self,

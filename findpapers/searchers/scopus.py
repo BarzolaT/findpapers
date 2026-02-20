@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
+from findpapers.core.search import Database
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -85,7 +86,7 @@ class ScopusSearcher(SearcherBase):
         str
             Database name.
         """
-        return "Scopus"
+        return Database.SCOPUS.value
 
     @property
     def is_available(self) -> bool:
@@ -142,8 +143,7 @@ class ScopusSearcher(SearcherBase):
             updated["X-ELS-APIKey"] = self._api_key
         return updated
 
-    @staticmethod
-    def _parse_paper(entry: Dict[str, Any]) -> Optional[Paper]:
+    def _parse_paper(self, entry: Dict[str, Any]) -> Optional[Paper]:
         """Parse a single Scopus search result entry.
 
         Parameters
@@ -235,7 +235,7 @@ class ScopusSearcher(SearcherBase):
                 doi=doi,
                 citations=citations,
                 pages=pages,
-                databases={"Scopus"},
+                databases={self.name},
                 paper_type=paper_type,
             )
         except ValueError:

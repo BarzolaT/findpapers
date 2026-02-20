@@ -11,6 +11,7 @@ from xml.etree import ElementTree as ET
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
+from findpapers.core.search import Database
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -53,7 +54,7 @@ class ArxivSearcher(SearcherBase):
         str
             Database name.
         """
-        return "arXiv"
+        return Database.ARXIV.value
 
     @property
     def query_builder(self) -> QueryBuilder:
@@ -95,8 +96,7 @@ class ArxivSearcher(SearcherBase):
             return None
         return date_str[:10]
 
-    @staticmethod
-    def _parse_paper(entry: ET.Element) -> Optional[Paper]:
+    def _parse_paper(self, entry: ET.Element) -> Optional[Paper]:
         """Parse a single Atom entry element into a :class:`Paper`.
 
         Parameters
@@ -190,7 +190,7 @@ class ArxivSearcher(SearcherBase):
                 pdf_url=pdf_url,
                 doi=doi,
                 comments=comment,
-                databases={"arXiv"},
+                databases={self.name},
                 paper_type=paper_type,
             )
         except ValueError:

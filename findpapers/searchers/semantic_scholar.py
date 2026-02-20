@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
+from findpapers.core.search import Database
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -116,7 +117,7 @@ class SemanticScholarSearcher(SearcherBase):
         str
             Database name.
         """
-        return "Semantic Scholar"
+        return Database.SEMANTIC_SCHOLAR.value
 
     @property
     def query_builder(self) -> QueryBuilder:
@@ -157,8 +158,7 @@ class SemanticScholarSearcher(SearcherBase):
             return {**headers, "x-api-key": self._api_key}
         return headers
 
-    @staticmethod
-    def _parse_paper(item: Dict[str, Any]) -> Optional[Paper]:
+    def _parse_paper(self, item: Dict[str, Any]) -> Optional[Paper]:
         """Parse a single Semantic Scholar paper record.
 
         Parameters
@@ -251,7 +251,7 @@ class SemanticScholarSearcher(SearcherBase):
                 citations=citations,
                 keywords=keywords if keywords else None,
                 pages=pages,
-                databases={"Semantic Scholar"},
+                databases={self.name},
                 paper_type=paper_type,
             )
         except ValueError:

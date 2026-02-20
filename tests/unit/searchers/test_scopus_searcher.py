@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from findpapers.core.paper import PaperType
+from findpapers.core.search import Database
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 from findpapers.searchers.scopus import ScopusSearcher, _scopus_aggregation_type_to_paper_type
 
@@ -67,7 +68,7 @@ class TestScopusSearcherInit:
 
     def test_name(self):
         """Searcher name is 'Scopus'."""
-        assert ScopusSearcher().name == "Scopus"
+        assert ScopusSearcher().name == Database.SCOPUS
 
     def test_is_available_without_api_key(self):
         """is_available is False when no API key is provided."""
@@ -86,20 +87,20 @@ class TestScopusSearcherParsePaper:
         entries = scopus_sample_json.get("search-results", {}).get("entry", [])
         assert len(entries) > 0
 
-        papers = [ScopusSearcher._parse_paper(e) for e in entries]
+        papers = [ScopusSearcher()._parse_paper(e) for e in entries]
         valid = [p for p in papers if p is not None]
         assert len(valid) > 0
 
     def test_paper_has_database_tag(self, scopus_sample_json):
         """Parsed paper has 'Scopus' in databases set."""
         entry = scopus_sample_json["search-results"]["entry"][0]
-        paper = ScopusSearcher._parse_paper(entry)
+        paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
-        assert "Scopus" in paper.databases
+        assert Database.SCOPUS in paper.databases
 
     def test_missing_title_returns_none(self):
         """Entry with empty title returns None."""
-        paper = ScopusSearcher._parse_paper({"dc:title": ""})
+        paper = ScopusSearcher()._parse_paper({"dc:title": ""})
         assert paper is None
 
     def test_authors_as_list(self):
@@ -108,7 +109,7 @@ class TestScopusSearcherParsePaper:
             "dc:title": "A Paper",
             "dc:creator": ["Author One", "Author Two"],
         }
-        paper = ScopusSearcher._parse_paper(entry)
+        paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
         assert len(paper.authors) == 2
         assert "Author One" in paper.authors
@@ -119,7 +120,7 @@ class TestScopusSearcherParsePaper:
             "dc:title": "A Paper",
             "prism:teaser": "Teaser text here.",
         }
-        paper = ScopusSearcher._parse_paper(entry)
+        paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
         assert paper.abstract == "Teaser text here."
 
@@ -130,7 +131,7 @@ class TestScopusSearcherParsePaper:
             "prism:publicationName": "Some Book",
             "prism:isbn": [{"$": "978-3-16-148410-0"}, {"$": "978-0-00-000000-0"}],
         }
-        paper = ScopusSearcher._parse_paper(entry)
+        paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
         assert paper.publication is not None
         assert paper.publication.isbn == "978-3-16-148410-0"
@@ -141,21 +142,21 @@ class TestScopusSearcherParsePaper:
             "dc:title": "A Conference Paper",
             "prism:aggregationType": "Conference Proceeding",
         }
-        paper = ScopusSearcher._parse_paper(entry)
+        paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type == PaperType.INPROCEEDINGS
 
     def test_pages_extracted(self):
         """Entry with prism:pageRange populates pages field."""
         entry = {"dc:title": "A Paper", "prism:pageRange": "100-110"}
-        paper = ScopusSearcher._parse_paper(entry)
+        paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
         assert paper.pages == "100-110"
 
     def test_citation_count_parsed(self):
         """citedby-count is parsed as integer."""
         entry = {"dc:title": "A Paper", "citedby-count": "42"}
-        paper = ScopusSearcher._parse_paper(entry)
+        paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
         assert paper.citations == 42
 
@@ -186,7 +187,7 @@ class TestScopusSearcherSearch:
 
         assert mocked_get.call_count == 2
         assert len(papers) > 0
-        assert all("Scopus" in p.databases for p in papers)
+        assert all(Database.SCOPUS in p.databases for p in papers)
 
     def test_max_papers_respected(self, simple_query, scopus_sample_json, mock_response):
         """search() returns no more than max_papers papers."""

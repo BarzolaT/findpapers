@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
+from findpapers.core.search import Database
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.ieee import IEEEQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -85,7 +86,7 @@ class IEEESearcher(SearcherBase):
         str
             Database name.
         """
-        return "IEEE"
+        return Database.IEEE.value
 
     @property
     def is_available(self) -> bool:
@@ -157,8 +158,7 @@ class IEEESearcher(SearcherBase):
             return {**headers, "X-API-Key": self._api_key}
         return headers
 
-    @staticmethod
-    def _parse_paper(item: Dict[str, Any]) -> Optional[Paper]:
+    def _parse_paper(self, item: Dict[str, Any]) -> Optional[Paper]:
         """Parse a single IEEE API result item.
 
         Parameters
@@ -254,7 +254,7 @@ class IEEESearcher(SearcherBase):
                 citations=citations,
                 keywords=keywords if keywords else None,
                 pages=pages,
-                databases={"IEEE"},
+                databases={self.name},
                 paper_type=paper_type,
             )
         except ValueError:

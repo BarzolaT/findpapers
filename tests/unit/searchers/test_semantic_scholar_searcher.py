@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from findpapers.core.paper import PaperType
+from findpapers.core.search import Database
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
 from findpapers.searchers.semantic_scholar import (
     SemanticScholarSearcher,
@@ -80,7 +81,7 @@ class TestSemanticScholarSearcherInit:
 
     def test_name(self):
         """Searcher name is 'Semantic Scholar'."""
-        assert SemanticScholarSearcher().name == "Semantic Scholar"
+        assert SemanticScholarSearcher().name == Database.SEMANTIC_SCHOLAR
 
     def test_rate_interval_without_key(self):
         """Default rate interval used when no API key provided."""
@@ -105,20 +106,20 @@ class TestSemanticScholarSearcherParsePaper:
         data = semantic_scholar_sample_json.get("data", [])
         assert len(data) > 0
 
-        papers = [SemanticScholarSearcher._parse_paper(item) for item in data]
+        papers = [SemanticScholarSearcher()._parse_paper(item) for item in data]
         valid = [p for p in papers if p is not None]
         assert len(valid) > 0
 
     def test_paper_has_database_tag(self, semantic_scholar_sample_json):
         """Parsed paper has 'Semantic Scholar' in databases set."""
         item = semantic_scholar_sample_json["data"][0]
-        paper = SemanticScholarSearcher._parse_paper(item)
+        paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
-        assert "Semantic Scholar" in paper.databases
+        assert Database.SEMANTIC_SCHOLAR in paper.databases
 
     def test_missing_title_returns_none(self):
         """Item with blank title returns None."""
-        paper = SemanticScholarSearcher._parse_paper({"title": "", "abstract": "a"})
+        paper = SemanticScholarSearcher()._parse_paper({"title": "", "abstract": "a"})
         assert paper is None
 
     def test_pdf_url_extracted(self):
@@ -127,7 +128,7 @@ class TestSemanticScholarSearcherParsePaper:
             "title": "A Paper",
             "openAccessPdf": {"url": "https://example.com/paper.pdf"},
         }
-        paper = SemanticScholarSearcher._parse_paper(item)
+        paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
         assert paper.pdf_url == "https://example.com/paper.pdf"
 
@@ -137,7 +138,7 @@ class TestSemanticScholarSearcherParsePaper:
             "title": "A Paper",
             "fieldsOfStudy": ["Computer Science", "Biology"],
         }
-        paper = SemanticScholarSearcher._parse_paper(item)
+        paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
         assert paper.keywords is not None
         assert "Computer Science" in paper.keywords
@@ -149,7 +150,7 @@ class TestSemanticScholarSearcherParsePaper:
             "journal": {"name": "Nature", "pages": "1-10"},
             "venue": "",
         }
-        paper = SemanticScholarSearcher._parse_paper(item)
+        paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
         assert paper.publication is not None
         assert paper.publication.title == "Nature"
@@ -162,7 +163,7 @@ class TestSemanticScholarSearcherParsePaper:
             "journal": {},
             "venue": "ICML",
         }
-        paper = SemanticScholarSearcher._parse_paper(item)
+        paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
         assert paper.publication is not None
         assert paper.publication.title == "ICML"
@@ -173,14 +174,14 @@ class TestSemanticScholarSearcherParsePaper:
             "title": "A Paper",
             "externalIds": {"DOI": "10.1234/test"},
         }
-        paper = SemanticScholarSearcher._parse_paper(item)
+        paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
         assert paper.doi == "10.1234/test"
 
     def test_year_fallback_for_pub_date(self):
         """Year field is used as fallback when publicationDate is absent."""
         item = {"title": "A Paper", "year": 2020}
-        paper = SemanticScholarSearcher._parse_paper(item)
+        paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
         assert paper.publication_date is not None
         assert paper.publication_date.year == 2020
@@ -188,7 +189,7 @@ class TestSemanticScholarSearcherParsePaper:
     def test_paper_type_thesis(self):
         """publicationTypes with 'Thesis' maps to PHDTHESIS."""
         item = {"title": "A Thesis", "publicationTypes": ["Thesis"]}
-        paper = SemanticScholarSearcher._parse_paper(item)
+        paper = SemanticScholarSearcher()._parse_paper(item)
         assert paper is not None
         assert paper.paper_type == PaperType.PHDTHESIS
 
@@ -222,7 +223,7 @@ class TestSemanticScholarSearcherSearch:
             papers = searcher.search(simple_query)
 
         assert len(papers) > 0
-        assert all("Semantic Scholar" in p.databases for p in papers)
+        assert all(Database.SEMANTIC_SCHOLAR in p.databases for p in papers)
 
     def test_max_papers_respected(
         self,

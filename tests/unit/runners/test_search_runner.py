@@ -9,6 +9,7 @@ import pytest
 
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
+from findpapers.core.search import Database
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.search_runner import SearchRunner
 
@@ -80,27 +81,27 @@ class TestSearchRunnerInit:
         """IEEE is excluded from the searcher list when no API key is given."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])
         names = [s.name for s in runner._searchers]  # noqa: SLF001
-        assert "IEEE" not in names
-        assert "arXiv" in names
+        assert "ieee" not in names
+        assert "arxiv" in names
 
     def test_ieee_included_with_api_key(self):
         """IEEE is included when its API key is provided."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"], ieee_api_key="key")
         names = [s.name for s in runner._searchers]  # noqa: SLF001
-        assert "IEEE" in names
+        assert "ieee" in names
 
     def test_scopus_skipped_without_api_key(self):
         """Scopus is excluded from the searcher list when no API key is given."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "scopus"])
         names = [s.name for s in runner._searchers]  # noqa: SLF001
-        assert "Scopus" not in names
-        assert "arXiv" in names
+        assert "scopus" not in names
+        assert "arxiv" in names
 
     def test_scopus_included_with_api_key(self):
         """Scopus is included when its API key is provided."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "scopus"], scopus_api_key="key")
         names = [s.name for s in runner._searchers]  # noqa: SLF001
-        assert "Scopus" in names
+        assert "scopus" in names
 
     def test_get_results_before_run_raises(self):
         """get_results() before run() raises SearchRunnerNotExecutedError."""
@@ -122,7 +123,7 @@ class TestSearchRunnerPipeline:
         """Create a SearchRunner whose searchers return the provided papers."""
         runner = SearchRunner(query="[ml]", databases=["arxiv"])
         mock_searcher = MagicMock()
-        mock_searcher.name = "arXiv"
+        mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = papers
         runner._searchers = [mock_searcher]  # noqa: SLF001
         return runner
@@ -189,7 +190,7 @@ class TestSearchRunnerPipeline:
             paper_types=["article"],
         )
         mock_searcher = MagicMock()
-        mock_searcher.name = "arXiv"
+        mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = [article_paper, conf_paper]
         runner._searchers = [mock_searcher]  # noqa: SLF001
         runner.run()
@@ -206,7 +207,7 @@ class TestSearchRunnerPipeline:
 
         # Replace mock to return different papers on second call.
         mock_searcher = MagicMock()
-        mock_searcher.name = "arXiv"
+        mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = [_make_paper(title="A"), _make_paper(title="B")]
         runner._searchers = [mock_searcher]  # noqa: SLF001
         runner.run()
@@ -225,7 +226,7 @@ class TestSearchRunnerPipeline:
         """If a searcher raises an exception, run() still completes."""
         runner = SearchRunner(query="[ml]", databases=["arxiv"])
         mock_searcher = MagicMock()
-        mock_searcher.name = "arXiv"
+        mock_searcher.name = Database.ARXIV
         mock_searcher.search.side_effect = RuntimeError("network error")
         runner._searchers = [mock_searcher]  # noqa: SLF001
         runner.run()
@@ -239,7 +240,7 @@ class TestSearchRunnerVerbose:
         """Create a SearchRunner whose searchers return the provided papers."""
         runner = SearchRunner(query="[ml]", databases=["arxiv"])
         mock_searcher = MagicMock()
-        mock_searcher.name = "arXiv"
+        mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = papers
         runner._searchers = [mock_searcher]  # noqa: SLF001
         return runner

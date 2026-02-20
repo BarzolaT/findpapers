@@ -55,12 +55,12 @@ class SearcherBase(ABC):
     @property
     @abstractmethod
     def name(self) -> str:
-        """Human-friendly database name used in logs and metrics.
+        """Database identifier matching the :class:`~findpapers.core.search.Database` enum value.
 
         Returns
         -------
         str
-            Database identifier.
+            Database identifier (e.g. ``Database.ARXIV``).
         """
 
     @property

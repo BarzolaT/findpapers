@@ -11,6 +11,7 @@ from xml.etree import ElementTree as ET
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.publication import Publication
 from findpapers.core.query import Query
+from findpapers.core.search import Database
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -66,7 +67,7 @@ class PubmedSearcher(SearcherBase):
         str
             Database name.
         """
-        return "PubMed"
+        return Database.PUBMED.value
 
     @property
     def query_builder(self) -> QueryBuilder:
@@ -164,8 +165,7 @@ class PubmedSearcher(SearcherBase):
         tree = ET.fromstring(response.text)
         return tree.findall(".//PubmedArticle")
 
-    @staticmethod
-    def _parse_paper(article_el: ET.Element) -> Optional[Paper]:
+    def _parse_paper(self, article_el: ET.Element) -> Optional[Paper]:
         """Parse a PubmedArticle element into a :class:`Paper`.
 
         Parameters
@@ -272,7 +272,7 @@ class PubmedSearcher(SearcherBase):
                 url=url,
                 doi=doi,
                 keywords=keywords if keywords else None,
-                databases={"PubMed"},
+                databases={self.name},
                 # PubMed exclusively indexes journal literature.
                 paper_type=PaperType.ARTICLE,
             )

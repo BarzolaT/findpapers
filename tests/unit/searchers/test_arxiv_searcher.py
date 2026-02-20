@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from findpapers.core.search import Database
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
 from findpapers.searchers.arxiv import ArxivSearcher
 
@@ -24,7 +25,7 @@ class TestArxivSearcherInit:
 
     def test_name(self):
         """Searcher name is 'arXiv'."""
-        assert ArxivSearcher().name == "arXiv"
+        assert ArxivSearcher().name == Database.ARXIV
 
 
 class TestArxivSearcherParseResponse:
@@ -40,7 +41,7 @@ class TestArxivSearcherParseResponse:
         entries = tree.findall("atom:entry", _NS)
         assert len(entries) > 0
 
-        papers = [ArxivSearcher._parse_paper(e) for e in entries]
+        papers = [ArxivSearcher()._parse_paper(e) for e in entries]
         valid_papers = [p for p in papers if p is not None]
         assert len(valid_papers) > 0
 
@@ -52,9 +53,9 @@ class TestArxivSearcherParseResponse:
 
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
-        paper = ArxivSearcher._parse_paper(entries[0])
+        paper = ArxivSearcher()._parse_paper(entries[0])
         assert paper is not None
-        assert "arXiv" in paper.databases
+        assert Database.ARXIV in paper.databases
 
     def test_missing_title_returns_none(self):
         """Entry without title returns None."""
@@ -67,7 +68,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        assert ArxivSearcher._parse_paper(entry) is None
+        assert ArxivSearcher()._parse_paper(entry) is None
 
     def test_comments_extracted_from_entry(self):
         """Comments field is populated when arxiv:comment element is present."""
@@ -82,7 +83,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher._parse_paper(entry)
+        paper = ArxivSearcher()._parse_paper(entry)
         assert paper is not None
         assert paper.comments == "39 pages, 14 figures"
 
@@ -98,7 +99,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher._parse_paper(entry)
+        paper = ArxivSearcher()._parse_paper(entry)
         assert paper is not None
         assert paper.comments is None
 
@@ -110,7 +111,7 @@ class TestArxivSearcherParseResponse:
 
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
-        papers = [ArxivSearcher._parse_paper(e) for e in entries]
+        papers = [ArxivSearcher()._parse_paper(e) for e in entries]
         valid = [p for p in papers if p is not None]
         papers_with_comments = [p for p in valid if p.comments is not None]
         assert len(papers_with_comments) > 0
@@ -137,7 +138,7 @@ class TestArxivSearcherSearch:
             papers = searcher.search(simple_query, max_papers=5)
 
         assert len(papers) <= 5
-        assert all("arXiv" in p.databases for p in papers)
+        assert all(Database.ARXIV in p.databases for p in papers)
 
     def test_max_papers_respected(self, simple_query, arxiv_sample_xml, mock_response):
         """search() returns no more than max_papers papers."""
