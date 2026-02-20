@@ -17,13 +17,16 @@ from findpapers.searchers.base import SearcherBase
 class _StubSearcher(SearcherBase):
     """Minimal concrete SearcherBase for testing _get and logging helpers."""
 
+    def __init__(self, query_builder=None):
+        self._query_builder = query_builder if query_builder is not None else MagicMock()
+
     @property
     def name(self) -> str:
         return "Stub"
 
     @property
     def query_builder(self):
-        return MagicMock()
+        return self._query_builder
 
     @property
     def min_request_interval(self) -> float:
@@ -162,3 +165,53 @@ class TestSearcherBasePrepareHeaders:
         assert captured, "requests.get was not called"
         ua = captured[0].get("User-Agent", "")
         assert "Mozilla" in ua
+
+
+class TestSearcherBaseSearch:
+    """Tests for SearcherBase.search() validation and error handling."""
+
+    def _make_searcher_with_validation(self, is_valid: bool, error_message: str | None = None):
+        """Build a _StubSearcher whose query_builder returns the given validation result."""
+        from findpapers.query.builder import QueryValidationResult
+
+        mock_builder = MagicMock()
+        mock_builder.validate_query.return_value = QueryValidationResult(
+            is_valid=is_valid,
+            error_message=error_message,
+        )
+        return _StubSearcher(query_builder=mock_builder)
+
+    def test_raises_unsupported_query_error_when_query_invalid(self) -> None:
+        """search() raises UnsupportedQueryError when query fails validation."""
+        import pytest
+
+        from findpapers.exceptions import UnsupportedQueryError
+
+        searcher = self._make_searcher_with_validation(
+            is_valid=False, error_message="Filter 'key' is not supported."
+        )
+        mock_query = MagicMock()
+        with pytest.raises(UnsupportedQueryError, match="Filter 'key' is not supported"):
+            searcher.search(mock_query)
+
+    def test_error_message_included_in_exception(self) -> None:
+        """UnsupportedQueryError message contains the searcher name and detail."""
+        import pytest
+
+        from findpapers.exceptions import UnsupportedQueryError
+
+        searcher = self._make_searcher_with_validation(
+            is_valid=False, error_message="Wildcard '?' not supported."
+        )
+        mock_query = MagicMock()
+        with pytest.raises(UnsupportedQueryError, match=r"Stub.*Wildcard"):
+            searcher.search(mock_query)
+
+    def test_fetch_papers_exception_returns_empty_list(self) -> None:
+        """Unexpected exception in _fetch_papers is caught and returns empty list."""
+        searcher = self._make_searcher_with_validation(is_valid=True)
+        mock_query = MagicMock()
+        with patch.object(searcher, "_fetch_papers", side_effect=RuntimeError("boom")):
+            papers = searcher.search(mock_query)
+
+        assert papers == []

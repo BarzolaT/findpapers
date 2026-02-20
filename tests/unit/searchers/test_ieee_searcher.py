@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
+from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.ieee import IEEEQueryBuilder
 from findpapers.searchers.ieee import IEEESearcher, _ieee_content_type_to_paper_type
 
@@ -160,8 +163,8 @@ class TestIEEESearcherParsePaper:
 class TestIEEESearcherSearch:
     """Tests for search() with mocked HTTP calls."""
 
-    def test_search_skipped_on_invalid_query(self, wildcard_query):
-        """Search is aborted for '?' wildcard (not supported by IEEE)."""
+    def test_search_raises_on_invalid_query(self, wildcard_query):
+        """Search raises UnsupportedQueryError for '?' wildcard (not supported by IEEE)."""
         from findpapers.query.parser import QueryParser
         from findpapers.query.propagator import FilterPropagator
 
@@ -169,8 +172,8 @@ class TestIEEESearcherSearch:
         propagator = FilterPropagator()
         q = propagator.propagate(parser.parse("[mach?]"))
         searcher = IEEESearcher()
-        papers = searcher.search(q)
-        assert papers == []
+        with pytest.raises(UnsupportedQueryError):
+            searcher.search(q)
 
     def test_search_returns_papers(self, simple_query, ieee_sample_json, mock_response):
         """search() returns papers from IEEE JSON response."""

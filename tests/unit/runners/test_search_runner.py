@@ -405,6 +405,45 @@ class TestSearchRunnerPipeline:
         runner.run()
         assert len(runner.get_results()) == 0
 
+    def test_unsupported_query_error_emits_warning(self, caplog):
+        """UnsupportedQueryError from a searcher emits a warning regardless of verbose."""
+        import logging
+
+        from findpapers.exceptions import UnsupportedQueryError
+
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.side_effect = UnsupportedQueryError(
+            "Search on 'arXiv' aborted: incompatible query."
+        )
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+
+        with caplog.at_level(logging.WARNING, logger="findpapers.runners.search_runner"):
+            runner.run(verbose=False)  # verbose=False: warning must still appear
+
+        assert any(
+            "arXiv" in m or "Skipping" in m for m in caplog.messages
+        ), f"Expected warning not found in: {caplog.messages}"
+
+    def test_regular_error_warning_requires_verbose(self, caplog):
+        """A generic searcher error only emits a warning when verbose=True."""
+        import logging
+
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.side_effect = RuntimeError("network timeout")
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+
+        with caplog.at_level(logging.WARNING, logger="findpapers.runners.search_runner"):
+            runner.run(verbose=False)
+
+        warning_messages = [
+            m for m in caplog.messages if "network timeout" in m or "Error fetching" in m
+        ]
+        assert warning_messages == [], "Generic error should not warn when verbose=False"
+
 
 class TestSearchRunnerVerbose:
     """Tests for the verbose=True logging path."""

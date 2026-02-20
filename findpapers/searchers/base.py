@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from findpapers.core.query import Query
     from findpapers.query.builder import QueryBuilder, QueryValidationResult
 
+from findpapers.exceptions import UnsupportedQueryError
 from findpapers.utils.http_headers import get_browser_headers
 
 logger = logging.getLogger(__name__)
@@ -310,12 +311,10 @@ class SearcherBase(ABC):
         validation: QueryValidationResult = self.query_builder.validate_query(query)
 
         if not validation.is_valid:
-            logger.warning(
-                "Search on '%s' aborted: incompatible query. %s",
-                self.name,
-                validation.error_message or "",
+            raise UnsupportedQueryError(
+                f"Search on '{self.name}' aborted: incompatible query. "
+                + (validation.error_message or "")
             )
-            return []
 
         try:
             return self._fetch_papers(query, max_papers, progress_callback)

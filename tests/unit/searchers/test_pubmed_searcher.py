@@ -5,7 +5,10 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 from xml.etree import ElementTree as ET
 
+import pytest
+
 from findpapers.core.search import Database
+from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
 from findpapers.searchers.pubmed import PubmedSearcher, _normalize_month
 
@@ -230,8 +233,8 @@ class TestPubmedSearcherParsePaper:
 class TestPubmedSearcherSearch:
     """Tests for search() with mocked HTTP calls."""
 
-    def test_search_skipped_for_question_mark_wildcard(self, wildcard_query):
-        """Search is skipped when query contains '?' wildcard (not supported by PubMed)."""
+    def test_search_raises_for_question_mark_wildcard(self, wildcard_query):
+        """Search raises UnsupportedQueryError for '?' wildcard (not supported by PubMed)."""
         # The wildcard_query uses 'machine*' which is valid (>= 4 chars).
         # Override with '?' test via a custom query.
         from findpapers.query.parser import QueryParser
@@ -241,8 +244,8 @@ class TestPubmedSearcherSearch:
         propagator = FilterPropagator()
         q = propagator.propagate(parser.parse("[mac?]"))
         searcher = PubmedSearcher()
-        papers = searcher.search(q)
-        assert papers == []
+        with pytest.raises(UnsupportedQueryError):
+            searcher.search(q)
 
     def test_search_returns_papers(
         self,

@@ -9,7 +9,7 @@ from time import perf_counter
 
 from findpapers.core.paper import Paper, PaperType, _is_preprint_doi
 from findpapers.core.search import Database, Search
-from findpapers.exceptions import SearchRunnerNotExecutedError
+from findpapers.exceptions import SearchRunnerNotExecutedError, UnsupportedQueryError
 from findpapers.query.parser import QueryParser
 from findpapers.query.validator import QueryValidator
 from findpapers.searchers.arxiv import ArxivSearcher
@@ -435,7 +435,9 @@ class SearchRunner:
         ):
             if error is not None or result is None:
                 metrics[f"total_papers_from_{searcher.name}"] = 0
-                if verbose:
+                if isinstance(error, UnsupportedQueryError):
+                    logger.warning("Skipping '%s': %s", searcher.name, error)
+                elif verbose:
                     logger.warning("Error fetching from %s: %s", searcher.name, error)
                 continue
             metrics[f"total_papers_from_{searcher.name}"] = len(result)

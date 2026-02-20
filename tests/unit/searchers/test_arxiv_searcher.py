@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from findpapers.core.search import Database
+from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
 from findpapers.searchers.arxiv import ArxivSearcher
 
@@ -120,11 +123,11 @@ class TestArxivSearcherParseResponse:
 class TestArxivSearcherSearch:
     """Tests for the search() method with mocked HTTP calls."""
 
-    def test_search_skipped_on_invalid_query(self, key_query):
-        """Search returns empty list when query uses unsupported filter (key)."""
+    def test_search_raises_on_invalid_query(self, key_query):
+        """Search raises UnsupportedQueryError when query uses unsupported filter (key)."""
         searcher = ArxivSearcher()
-        papers = searcher.search(key_query)
-        assert papers == []
+        with pytest.raises(UnsupportedQueryError):
+            searcher.search(key_query)
 
     def test_search_returns_papers_from_xml(self, simple_query, arxiv_sample_xml, mock_response):
         """Search parses XML response and returns papers."""
