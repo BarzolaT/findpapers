@@ -442,13 +442,18 @@ class SearchRunner:
             self._results.extend(result)
 
     def _filter_by_paper_types(self, metrics: dict[str, int | float]) -> None:
-        """Discard papers without a recognisable type and optionally restrict
-        to the allowed type set.
+        """Optionally restrict results to the requested paper type set.
 
-        Papers whose :attr:`~findpapers.core.paper.Paper.paper_type` is
-        ``None`` are always removed because they could not be classified.  When
-        ``paper_types`` was supplied at construction time, only papers whose
-        type matches one of those values are kept.
+        When ``paper_types`` was supplied at construction time, only papers
+        whose :attr:`~findpapers.core.paper.Paper.paper_type` matches one of
+        those values are kept; papers with an undetermined type
+        (``paper_type is None``) are also discarded in this case because they
+        cannot be confirmed to belong to the requested category.
+
+        When no ``paper_types`` filter was requested, all papers are kept
+        regardless of whether their type could be determined — callers that
+        want "all papers" should receive even those whose BibTeX type is
+        unknown.
 
         Parameters
         ----------
@@ -459,10 +464,6 @@ class SearchRunner:
         -------
         None
         """
-        # Always discard papers whose type could not be determined.
-        self._results = [p for p in self._results if p.paper_type is not None]
-
-        # If the caller requested specific types, apply that secondary filter.
         if self._paper_types:
             allowed = {pt.strip().lower() for pt in self._paper_types}
             self._results = [

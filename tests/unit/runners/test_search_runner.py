@@ -238,6 +238,47 @@ class TestSearchRunnerPipeline:
         assert len(results) == 1
         assert results[0].title == "Article"
 
+    def test_untyped_paper_kept_when_no_type_filter(self):
+        """Papers with paper_type=None are retained when no type filter is requested.
+
+        Callers that ask for 'all papers' (paper_types=None) should receive
+        every paper regardless of whether its BibTeX type could be determined.
+        Silently discarding untyped papers caused AND queries to return more
+        results than OR queries when the two sub-query result sets happened to
+        contain different numbers of untyped papers (i.e. AND > OR violation).
+        """
+        typed_paper = _make_paper(title="Typed", paper_type=PaperType.ARTICLE)
+        untyped_paper = _make_paper(title="Untyped", paper_type=None)
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])  # no paper_types
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.return_value = [typed_paper, untyped_paper]
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner.run()
+        results = runner.get_results()
+        assert len(results) == 2
+        titles = {r.title for r in results}
+        assert "Typed" in titles
+        assert "Untyped" in titles
+
+    def test_untyped_paper_removed_when_type_filter_requested(self):
+        """Papers with paper_type=None are removed when a type filter is active.
+
+        When the caller requests specific types, untyped papers cannot be
+        confirmed to belong to the allowed set and must therefore be excluded.
+        """
+        typed_paper = _make_paper(title="Typed", paper_type=PaperType.ARTICLE)
+        untyped_paper = _make_paper(title="Untyped", paper_type=None)
+        runner = SearchRunner(query="[ml]", databases=["arxiv"], paper_types=["article"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.return_value = [typed_paper, untyped_paper]
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner.run()
+        results = runner.get_results()
+        assert len(results) == 1
+        assert results[0].title == "Typed"
+
     def test_run_can_be_called_twice(self):
         """Calling run() twice resets previous results."""
         papers1 = [_make_paper(title="First")]
