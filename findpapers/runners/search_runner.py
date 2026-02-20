@@ -480,13 +480,18 @@ class SearchRunner:
         duplicates found within the same database or between databases that
         share the same DOI.
 
-        **Pass 2** groups the results of pass 1 by a normalised
-        ``title|year`` key.  This catches the common cross-database case
-        where the same paper is indexed with different DOIs (e.g. the arXiv
-        DOI ``10.48550/arxiv.*`` vs the publisher-assigned DOI) so that a
-        second pass based on title+year can still merge them.
+        **Pass 2** groups the results of pass 1 by normalised title and
+        merges entries whose publication years are *compatible* — i.e. they
+        share the same year, or at least one has no year (incomplete
+        metadata).  Papers with the same title but *different known years*
+        are intentionally kept as separate entries.
 
-        When two papers share the same key their data is merged using
+        This correctly handles the common cross-database case where the same
+        work is indexed with different DOIs (e.g. an arXiv preprint DOI vs a
+        publisher DOI) and one of the database records lacks a publication
+        date.
+
+        When two papers are deemed duplicates their data is merged using
         :meth:`~findpapers.core.paper.Paper.merge` (most-complete strategy).
 
         Parameters
@@ -499,24 +504,46 @@ class SearchRunner:
         None
         """
         # Pass 1: primary key dedup (DOI > title|year > title).
-        merged: dict[str, Paper] = {}
+        pass1: dict[str, Paper] = {}
         for paper in self._results:
             key = self._dedupe_key(paper)
-            if key in merged:
-                merged[key].merge(paper)
+            if key in pass1:
+                pass1[key].merge(paper)
             else:
-                merged[key] = paper
+                pass1[key] = paper
 
-        # Pass 2: title+year dedup to handle cross-database DOI divergence.
-        merged2: dict[str, Paper] = {}
-        for paper in merged.values():
-            title_key = self._title_year_key(paper)
-            if title_key in merged2:
-                merged2[title_key].merge(paper)
+        # Pass 2: title-based dedup that handles missing year metadata.
+        # Group survivors from pass 1 by normalised title, then within each
+        # title group greedily merge papers whose years are compatible.
+        by_title: dict[str, list[Paper]] = {}
+        untitled: list[Paper] = []
+        for paper in pass1.values():
+            norm_title = paper.title.strip().lower() if paper.title else ""
+            if norm_title:
+                by_title.setdefault(norm_title, []).append(paper)
             else:
-                merged2[title_key] = paper
+                untitled.append(paper)
 
-        self._results = list(merged2.values())
+        result: list[Paper] = list(untitled)
+        for candidates in by_title.values():
+            # Greedily merge into the first compatible representative.
+            groups: list[Paper] = []
+            for paper in candidates:
+                paper_year = getattr(paper.publication_date, "year", None)
+                merged_into: Paper | None = None
+                for representative in groups:
+                    rep_year = getattr(representative.publication_date, "year", None)
+                    # Compatible when years are equal OR either is unknown.
+                    if rep_year is None or paper_year is None or rep_year == paper_year:
+                        merged_into = representative
+                        break
+                if merged_into is not None:
+                    merged_into.merge(paper)
+                else:
+                    groups.append(paper)
+            result.extend(groups)
+
+        self._results = result
 
     def _flag_predatory(self, metrics: dict[str, int | float]) -> None:
         """Mark papers from potentially predatory publications.
@@ -561,9 +588,9 @@ class SearchRunner:
     def _title_year_key(self, paper: Paper) -> str:
         """Build a normalised ``title|year`` deduplication key for a paper.
 
-        Used as a secondary dedup key in the second pass to catch
-        cross-database duplicates that have divergent DOIs (e.g. an arXiv
-        preprint DOI vs the publisher-assigned DOI for the same work).
+        Used as the pass-1 fallback dedup key when no DOI is available.
+        Two records without a DOI but with the same title and the same year
+        are considered identical and are merged in pass 1.
 
         Parameters
         ----------

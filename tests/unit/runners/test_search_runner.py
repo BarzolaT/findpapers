@@ -194,6 +194,38 @@ class TestSearchRunnerPipeline:
         runner.run()
         assert len(runner.get_results()) == 1
 
+    def test_deduplication_second_pass_merges_same_title_one_without_year(self):
+        """Pass 2 merges same-title papers when one lacks a publication date.
+
+        This is the canonical cross-database case: a preprint indexed by
+        arXiv may carry a publication date while the same work indexed by
+        OpenAlex (or another database) has no publication_date in its record.
+        The two copies must be merged rather than kept as separate duplicates.
+        """
+        p1 = Paper(
+            title="Attention is All You Need",
+            abstract="abstract with year",
+            authors=["Vaswani et al."],
+            publication=Publication(title="arXiv"),
+            publication_date=date(2017, 6, 12),
+            url="http://arxiv.org/abs/1706.03762",
+            doi="10.48550/arxiv.1706.03762",
+            paper_type=PaperType.UNPUBLISHED,
+        )
+        p2 = Paper(
+            title="Attention is All You Need",
+            abstract="abstract without year",
+            authors=["Vaswani et al."],
+            publication=Publication(title="OpenAlex Source"),
+            publication_date=None,  # intentionally missing
+            url="http://openalex.org/W2963403868",
+            doi="10.5555/3295222.3295349",
+            paper_type=PaperType.INPROCEEDINGS,
+        )
+        runner = self._make_runner_with_mock_papers([p1, p2])
+        runner.run()
+        assert len(runner.get_results()) == 1
+
     def test_deduplication_second_pass_keeps_same_title_different_year(self):
         """Papers with the same title but different publication years are kept separate."""
         p1 = Paper(
