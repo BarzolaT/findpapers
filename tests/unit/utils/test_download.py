@@ -52,6 +52,20 @@ class TestResolvePdfUrl:
         assert result is not None
         assert "arnumber=8888888" in result
 
+    def test_ieee_stamp_url_resolves_to_get_pdf(self) -> None:
+        """IEEE stamp.jsp URL is resolved to the stampPDF/getPDF.jsp endpoint."""
+        url = "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10000095"
+        result = resolve_pdf_url(url)
+        assert (
+            result == "https://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=10000095&ref="
+        )
+
+    def test_ieee_stamp_url_without_arnumber_returns_none(self) -> None:
+        """IEEE stamp.jsp URL without arnumber returns None."""
+        url = "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp="
+        result = resolve_pdf_url(url)
+        assert result is None
+
     def test_ieee_unknown_path_returns_none(self) -> None:
         """IEEE URL without document path or arnumber returns None."""
         url = "https://ieeexplore.ieee.org/search/searchresult.jsp"
