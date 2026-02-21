@@ -7,7 +7,7 @@ from time import perf_counter
 
 from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
-from findpapers.utils.enrichment import enrich_from_sources
+from findpapers.utils.enrichment import build_paper_from_metadata, fetch_metadata
 from findpapers.utils.parallel import execute_tasks
 from findpapers.utils.predatory import is_predatory_source
 
@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 def _enrichment_snapshot(paper: Paper) -> tuple:
     """Return a tuple of enrichable fields for change-detection.
 
-    The tuple covers every field that ``enrich_from_sources`` can populate
-    so that ``_enrich_paper`` can tell whether a merge actually improved the
+    The tuple covers every field that :func:`~findpapers.utils.enrichment.fetch_metadata`
+    can populate so that ``_enrich_paper`` can tell whether a merge actually improved the
     paper rather than just confirming data that was already present.
 
     Parameters
@@ -118,6 +118,10 @@ class EnrichmentRunner:
             "total_papers": len(self._results),
             "runtime_in_seconds": 0.0,
             "enriched_papers": 0,
+            "fetch_error_papers": 0,
+            "no_metadata_papers": 0,
+            "no_change_papers": 0,
+            "no_urls_papers": 0,
         }
 
         self._enrich_results(metrics, verbose)
@@ -130,6 +134,10 @@ class EnrichmentRunner:
             logger.info("=== Enrichment Summary ===")
             logger.info("Total papers: %d", int(metrics["total_papers"]))
             logger.info("Enriched: %d", int(metrics["enriched_papers"]))
+            logger.info("Fetch errors: %d", int(metrics["fetch_error_papers"]))
+            logger.info("No metadata: %d", int(metrics["no_metadata_papers"]))
+            logger.info("No change: %d", int(metrics["no_change_papers"]))
+            logger.info("No URLs: %d", int(metrics["no_urls_papers"]))
             logger.info("Runtime: %.2f s", metrics["runtime_in_seconds"])
             logger.info("==========================")
 
@@ -185,8 +193,12 @@ class EnrichmentRunner:
         num_workers = self._num_workers
         timeout = self._timeout
         enriched = 0
+        fetch_errors = 0
+        no_metadata = 0
+        no_change = 0
+        no_urls = 0
 
-        def _enrich_task(paper: Paper) -> bool:
+        def _enrich_task(paper: Paper) -> str:
             return self._enrich_paper(paper, timeout=timeout)
 
         for _paper, result, error in execute_tasks(
@@ -202,14 +214,33 @@ class EnrichmentRunner:
             if error is not None:
                 if verbose:
                     logger.warning("Error enriching paper: %s", error)
+                fetch_errors += 1
                 continue
-            if result:
+            if result == "enriched":
                 enriched += 1
+            elif result == "fetch_error":
+                fetch_errors += 1
+            elif result == "no_metadata":
+                no_metadata += 1
+            elif result == "no_change":
+                no_change += 1
+            elif result == "no_urls":
+                no_urls += 1
 
         metrics["enriched_papers"] = enriched
+        metrics["fetch_error_papers"] = fetch_errors
+        metrics["no_metadata_papers"] = no_metadata
+        metrics["no_change_papers"] = no_change
+        metrics["no_urls_papers"] = no_urls
 
-    def _enrich_paper(self, paper: Paper, timeout: float | None = None) -> bool:
+    def _enrich_paper(self, paper: Paper, timeout: float | None = None) -> str:
         """Attempt to enrich a single paper using its known URLs.
+
+        The method builds a prioritised list of candidate landing-page URLs,
+        including a ``doi.org`` redirect when the paper has a DOI, because
+        that redirect typically leads to a publisher page with rich HTML
+        meta tags even when the primary stored URL is a JS-rendered SPA or
+        an inaccessible repository page.
 
         Parameters
         ----------
@@ -220,20 +251,58 @@ class EnrichmentRunner:
 
         Returns
         -------
-        bool
-            ``True`` if the paper was successfully enriched.
+        str
+            One of:
+            * ``"enriched"``   — at least one field was updated.
+            * ``"no_change"``  — metadata was fetched but mirrored existing data.
+            * ``"no_metadata"`` — URLs were reachable but returned no parseable
+              metadata (non-HTML or missing title tag).
+            * ``"fetch_error"`` — all candidate URLs raised HTTP/network errors.
+            * ``"no_urls"``    — paper has no usable non-PDF landing-page URL.
         """
-        all_urls = [u for u in [paper.url, paper.pdf_url] if u]
-        if not all_urls:
-            return False
-        enriched = enrich_from_sources(urls=all_urls, timeout=timeout)
-        if enriched is None:
-            return False
-        before = _enrichment_snapshot(paper)
-        paper.merge(enriched)
-        # Re-evaluate the predatory flag: the source may have been
-        # populated only after enrichment, so the original flag (set during
-        # the search phase) might be stale.
-        if paper.source is not None:
-            paper.source.is_potentially_predatory = is_predatory_source(paper.source)
-        return _enrichment_snapshot(paper) != before
+        # Build a deduplicated list of non-PDF candidate URLs.
+        # Priority: stored landing page → DOI redirect → any other non-PDF URL.
+        candidate_urls: list[str] = []
+        if paper.url and "pdf" not in paper.url.lower():
+            candidate_urls.append(paper.url)
+        if paper.doi:
+            candidate_urls.append(f"https://doi.org/{paper.doi}")
+        # Include pdf_url only when it is not actually served as PDF (rare but
+        # some repositories use that field for HTML landing pages).
+        if paper.pdf_url and "pdf" not in paper.pdf_url.lower():
+            candidate_urls.append(paper.pdf_url)
+
+        # Deduplicate while preserving insertion order.
+        seen: set[str] = set()
+        deduped: list[str] = []
+        for u in candidate_urls:
+            if u not in seen:
+                seen.add(u)
+                deduped.append(u)
+
+        if not deduped:
+            return "no_urls"
+
+        had_fetch_error = False
+        for url in deduped:
+            try:
+                metadata = fetch_metadata(url, timeout=timeout)
+            except Exception:  # noqa: BLE001
+                had_fetch_error = True
+                logger.debug("Fetch error for enrichment URL: %s", url)
+                continue
+            if not metadata:
+                continue
+            enriched_paper = build_paper_from_metadata(metadata, url)
+            if enriched_paper is None:
+                continue
+            before = _enrichment_snapshot(paper)
+            paper.merge(enriched_paper)
+            # Re-evaluate the predatory flag: the source may have been
+            # populated only after enrichment, so the original flag (set during
+            # the search phase) might be stale.
+            if paper.source is not None:
+                paper.source.is_potentially_predatory = is_predatory_source(paper.source)
+            return "enriched" if _enrichment_snapshot(paper) != before else "no_change"
+
+        return "fetch_error" if had_fetch_error else "no_metadata"
