@@ -11,6 +11,7 @@ from findpapers.core.paper import Paper, PaperType, _is_preprint_doi
 from findpapers.core.search import Database, Search
 from findpapers.exceptions import SearchRunnerNotExecutedError, UnsupportedQueryError
 from findpapers.query.parser import QueryParser
+from findpapers.query.propagator import FilterPropagator
 from findpapers.query.validator import QueryValidator
 from findpapers.searchers.arxiv import ArxivSearcher
 from findpapers.searchers.base import SearcherBase
@@ -121,6 +122,11 @@ class SearchRunner:
         validator.validate(query)
         parser = QueryParser()
         self._query = parser.parse(query)
+
+        # Propagate filter specifiers (e.g. ti, abs) through the query tree
+        # so that group-level filters reach child term nodes.
+        propagator = FilterPropagator()
+        propagator.propagate(self._query)
 
         self._searchers, self._skipped_databases = self._build_searchers(
             databases=databases,

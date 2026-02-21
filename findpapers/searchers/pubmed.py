@@ -186,11 +186,11 @@ class PubmedSearcher(SearcherBase):
         if article is None:
             return None
 
-        # Title
+        # Title – use itertext() to handle inline markup (e.g. <i>, <sub>)
         title_el = article.find("ArticleTitle")
-        if title_el is None or not (title_el.text or "").strip():
+        title = "".join(title_el.itertext()).strip() if title_el is not None else ""
+        if not title:
             return None
-        title = "".join(title_el.itertext()).strip()
 
         # Abstract
         abstract_parts = [
@@ -310,8 +310,10 @@ class PubmedSearcher(SearcherBase):
         total: Optional[int] = None
 
         while True:
-            remaining = (max_papers - len(papers)) if max_papers is not None else _PAGE_SIZE
+            remaining = (max_papers - processed) if max_papers is not None else _PAGE_SIZE
             page_size = min(_PAGE_SIZE, remaining)
+            if page_size <= 0:
+                break
 
             try:
                 ids, total = self._search_ids(pubmed_query, offset, page_size)

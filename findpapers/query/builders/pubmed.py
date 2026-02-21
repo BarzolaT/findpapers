@@ -96,12 +96,13 @@ class PubmedQueryBuilder(QueryBuilder):
             if filter_code == FilterCode.ABSTRACT:
                 return tagged("ab")
             if filter_code == FilterCode.KEYWORDS:
-                # The [mh] tag performs exact matching against MeSH vocabulary and
-                # bypasses PubMed's Automatic Term Mapping (ATM). Queries must use
-                # valid MeSH headings (e.g. "neoplasms", not "cancer"), otherwise
-                # PubMed returns zero results silently.
-                # Browse valid MeSH headings at: https://meshb.nlm.nih.gov/
-                return tagged("mh")
+                # The [ot] tag searches the "Other Term" field which contains
+                # the author-supplied keywords of the article.  Unlike [mh]
+                # (MeSH headings assigned by NLM indexers), [ot] reflects the
+                # actual keywords chosen by the paper's authors.
+                # Note: not all articles have author keywords; older records
+                # may only have MeSH terms.
+                return tagged("ot")
             if filter_code == FilterCode.AUTHOR:
                 return tagged("au")
             if filter_code == FilterCode.SOURCE:
@@ -109,8 +110,7 @@ class PubmedQueryBuilder(QueryBuilder):
             if filter_code == FilterCode.AFFILIATION:
                 return tagged("ad")
             if filter_code == FilterCode.TITLE_ABSTRACT_KEYWORDS:
-                # [mh] part is subject to the same exact-MeSH-heading constraint above.
-                return f"({tagged('tiab')} OR {tagged('mh')})"
+                return f"({tagged('tiab')} OR {tagged('ot')})"
             return tagged("tiab")
 
         return convert_expression(query.root, convert_term, connector_map)

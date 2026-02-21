@@ -18,11 +18,11 @@ def test_pubmed_rejects_question_wildcard(parse_and_propagate: Callable[[str], Q
 
 
 def test_pubmed_converts_tiabskey(parse_and_propagate: Callable[[str], Query]) -> None:
-    """PubMed expands tiabskey into tiab OR mh."""
+    """PubMed expands tiabskey into tiab OR ot."""
     query = parse_and_propagate("tiabskey[heart attack]")
     converted = PubmedQueryBuilder().convert_query(query)
     assert '"heart attack"[tiab]' in converted
-    assert '"heart attack"[mh]' in converted
+    assert '"heart attack"[ot]' in converted
 
 
 def test_pubmed_rejects_short_asterisk_wildcard(
@@ -39,12 +39,12 @@ def test_pubmed_rejects_short_asterisk_wildcard(
     [
         ("ti[cancer]", '"cancer"[ti]'),
         ("abs[cancer]", '"cancer"[ab]'),
-        ("key[cancer]", '"cancer"[mh]'),
+        ("key[cancer]", '"cancer"[ot]'),
         ("au[cancer]", '"cancer"[au]'),
         ("src[cancer]", '"cancer"[journal]'),
         ("aff[cancer]", '"cancer"[ad]'),
         ("tiabs[cancer]", '"cancer"[tiab]'),
-        ("tiabskey[cancer]", '("cancer"[tiab] OR "cancer"[mh])'),
+        ("tiabskey[cancer]", '("cancer"[tiab] OR "cancer"[ot])'),
     ],
 )
 def test_pubmed_supports_all_filters_in_conversion(
