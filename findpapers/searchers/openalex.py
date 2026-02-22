@@ -239,19 +239,24 @@ class OpenAlexSearcher(SearcherBase):
             if kw:
                 keywords.add(kw)
 
-        # Source
+        # Source – prefer a journal or conference venue over a repository.
+        # OpenAlex ``source.type`` may be "journal", "conference", "repository",
+        # "ebook platform", or "book series".  Repository sources (e.g.
+        # institutional repos, Zenodo) should not be used as the paper's
+        # publication source since they represent the *hosting location*, not
+        # the actual venue.
         source: Optional[Source] = None
-        primary_loc = work.get("primary_location") or {}
-        source_data: dict = primary_loc.get("source") or {}
-        pub_title = (source_data.get("display_name") or "").strip()
-        if pub_title:
-            issn_list = source_data.get("issn_l") or source_data.get("issn") or []
-            issn = (
-                issn_list[0]
-                if isinstance(issn_list, list) and issn_list
-                else str(issn_list) if issn_list else None
-            )
-            source = Source(title=pub_title, issn=issn)
+        source_data = _find_best_source(work)
+        if source_data:
+            pub_title = (source_data.get("display_name") or "").strip()
+            if pub_title:
+                issn_list = source_data.get("issn_l") or source_data.get("issn") or []
+                issn = (
+                    issn_list[0]
+                    if isinstance(issn_list, list) and issn_list
+                    else str(issn_list) if issn_list else None
+                )
+                source = Source(title=pub_title, issn=issn)
 
         # Paper type derived from the work-level "type" field
         paper_type = _openalex_work_type_to_paper_type(work.get("type"))
@@ -408,6 +413,57 @@ class OpenAlexSearcher(SearcherBase):
                     all_papers.append(paper)
 
         return all_papers[:max_papers] if max_papers is not None else all_papers
+
+
+def _find_best_source(work: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Select the best publication source from an OpenAlex work.
+
+    OpenAlex distinguishes several source types (``journal``, ``conference``,
+    ``repository``, ``ebook platform``, ``book series``).  Repository sources
+    represent hosting locations (institutional repos, Zenodo, etc.) rather than
+    the actual publication venue and should be avoided when a proper venue is
+    available.
+
+    The function scans all locations — starting with the primary one — and
+    returns the first source whose type is **not** ``repository``.  If every
+    source is a repository (or no source is present at all) it returns
+    ``None``.
+
+    Parameters
+    ----------
+    work : dict
+        OpenAlex work metadata dictionary.
+
+    Returns
+    -------
+    dict | None
+        The chosen source dict, or ``None`` when no suitable source exists.
+    """
+    _EXCLUDED_SOURCE_TYPES = {"repository"}
+
+    # Collect all candidate locations, primary first.
+    locations: list[dict] = []
+    primary = work.get("primary_location")
+    if isinstance(primary, dict):
+        locations.append(primary)
+
+    for loc in work.get("locations") or []:
+        if isinstance(loc, dict) and loc is not primary:
+            locations.append(loc)
+
+    for loc in locations:
+        src = loc.get("source")
+        if not isinstance(src, dict):
+            continue
+        src_type = (src.get("type") or "").strip().lower()
+        if src_type and src_type in _EXCLUDED_SOURCE_TYPES:
+            continue
+        # Accept sources with a known non-repository type or no type at all
+        # (missing type still beats a confirmed repository).
+        if (src.get("display_name") or "").strip():
+            return src
+
+    return None
 
 
 def _reconstruct_abstract(inverted_index: dict) -> str:

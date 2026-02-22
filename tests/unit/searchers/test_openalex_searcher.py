@@ -179,7 +179,72 @@ class TestOpenAlexSearcherParsePaper:
         assert "Deep Learning" in paper.keywords
 
     def test_source_from_primary_location(self):
-        """Source is built from primary_location.source."""
+        """Source is built from primary_location.source when it is a journal."""
+        work = {
+            "title": "A Paper",
+            "primary_location": {
+                "source": {
+                    "display_name": "Nature",
+                    "issn_l": ["1234-5678"],
+                    "type": "journal",
+                },
+                "landing_page_url": None,
+            },
+        }
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.title == "Nature"
+        assert paper.source.issn == "1234-5678"
+
+    def test_source_skipped_when_repository(self):
+        """Repository sources should not be used as the paper source."""
+        work = {
+            "title": "A Dissertation",
+            "primary_location": {
+                "source": {
+                    "display_name": "University of Liverpool",
+                    "type": "repository",
+                },
+            },
+        }
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.source is None
+
+    def test_source_prefers_journal_over_repository(self):
+        """When primary location is a repository, journal from other locations is used."""
+        work = {
+            "title": "A Paper",
+            "primary_location": {
+                "source": {
+                    "display_name": "Zenodo",
+                    "type": "repository",
+                },
+            },
+            "locations": [
+                {
+                    "source": {
+                        "display_name": "Zenodo",
+                        "type": "repository",
+                    },
+                },
+                {
+                    "source": {
+                        "display_name": "Nature Physics",
+                        "issn_l": ["1745-2473"],
+                        "type": "journal",
+                    },
+                },
+            ],
+        }
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.title == "Nature Physics"
+
+    def test_source_without_type_is_accepted(self):
+        """Sources without a type field are accepted (fallback)."""
         work = {
             "title": "A Paper",
             "primary_location": {
@@ -191,7 +256,6 @@ class TestOpenAlexSearcherParsePaper:
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Nature"
-        assert paper.source.issn == "1234-5678"
 
     def test_doi_stripped_of_prefix(self):
         """DOI prefix 'https://doi.org/' is stripped."""
