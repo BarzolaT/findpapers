@@ -74,6 +74,10 @@ class ScopusQueryBuilder(QueryBuilder):
     def convert_query(self, query: Query) -> str:
         """Convert query into Scopus syntax.
 
+        When a GROUP node's ``children_match_filter`` is ``True`` the filter is
+        applied once at the group level (e.g. ``TITLE("a" OR "b")``), avoiding
+        redundant per-term wrapping.
+
         Parameters
         ----------
         query : Query
@@ -113,4 +117,47 @@ class ScopusQueryBuilder(QueryBuilder):
                 return f"TITLE-ABS({quoted})"
             return f"TITLE-ABS-KEY({quoted})"
 
-        return convert_expression(query.root, convert_term, connector_map)
+        def plain_term(term_node: QueryNode) -> str:
+            """Convert term without filter prefix."""
+            return f'"{term_node.value or ""}"'
+
+        def group_wrapper(group_node: QueryNode, inner: str) -> str | None:
+            """Wrap a plain group expression with the Scopus field operator."""
+            return _scopus_field_wrap(get_effective_filter(group_node), inner)
+
+        return convert_expression(
+            query.root,
+            convert_term,
+            connector_map,
+            plain_term_converter=plain_term,
+            optimized_group_converter=group_wrapper,
+        )
+
+
+def _scopus_field_wrap(filter_code: FilterCode, inner: str) -> str:
+    """Wrap an inner expression with the Scopus field operator.
+
+    Parameters
+    ----------
+    filter_code : FilterCode
+        Effective filter code for the group.
+    inner : str
+        Plain inner expression (terms without individual filter prefixes).
+
+    Returns
+    -------
+    str
+        Expression wrapped in the appropriate Scopus field function.
+    """
+    field_map: dict[FilterCode, str] = {
+        FilterCode.TITLE: "TITLE",
+        FilterCode.ABSTRACT: "ABS",
+        FilterCode.KEYWORDS: "KEY",
+        FilterCode.AUTHOR: "AUTH",
+        FilterCode.SOURCE: "SRCTITLE",
+        FilterCode.AFFILIATION: "AFFIL",
+        FilterCode.TITLE_ABSTRACT: "TITLE-ABS",
+        FilterCode.TITLE_ABSTRACT_KEYWORDS: "TITLE-ABS-KEY",
+    }
+    field = field_map.get(filter_code, "TITLE-ABS-KEY")
+    return f"{field}({inner})"

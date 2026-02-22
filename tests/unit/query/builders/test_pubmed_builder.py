@@ -58,3 +58,52 @@ def test_pubmed_supports_all_filters_in_conversion(
     assert result.is_valid is True
     converted = PubmedQueryBuilder().convert_query(query)
     assert expected_fragment in converted
+
+
+def test_pubmed_group_filter_optimization(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """PubMed wraps group at tag level when all children share the filter."""
+    query = parse_and_propagate("ti([cancer] OR [tumor])")
+    converted = PubmedQueryBuilder().convert_query(query)
+    assert converted == '("cancer" OR "tumor")[ti]'
+
+
+def test_pubmed_group_filter_optimization_tiabs(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """PubMed optimises tiabs group with native [tiab] postfix tag."""
+    query = parse_and_propagate("tiabs([a] OR [b])")
+    converted = PubmedQueryBuilder().convert_query(query)
+    assert converted == '("a" OR "b")[tiab]'
+
+
+def test_pubmed_group_filter_no_optimization_on_tiabskey(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """PubMed falls back to per-term for tiabskey (compound: tiab + ot)."""
+    query = parse_and_propagate("tiabskey([a] OR [b])")
+    converted = PubmedQueryBuilder().convert_query(query)
+    # Per-term expansion: each term gets (tiab OR ot)
+    assert '"a"[tiab]' in converted
+    assert '"b"[tiab]' in converted
+
+
+def test_pubmed_group_filter_no_optimization_on_mixed(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """PubMed falls back to per-term when children use different filters."""
+    query = parse_and_propagate("ti([a] OR abs[b])")
+    converted = PubmedQueryBuilder().convert_query(query)
+    assert '"a"[ti]' in converted
+    assert '"b"[ab]' in converted
+
+
+def test_pubmed_nested_group_optimization(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """PubMed optimises nested groups independently."""
+    query = parse_and_propagate("ti([a] AND abs([b] OR [c]))")
+    converted = PubmedQueryBuilder().convert_query(query)
+    assert '"a"[ti]' in converted
+    assert '("b" OR "c")[ab]' in converted

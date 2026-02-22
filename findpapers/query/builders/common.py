@@ -105,17 +105,34 @@ def convert_expression(
     node: QueryNode,
     term_converter: Callable[[QueryNode], str],
     connector_map: dict[ConnectorType, str],
+    *,
+    plain_term_converter: Callable[[QueryNode], str] | None = None,
+    optimized_group_converter: Callable[[QueryNode, str], str | None] | None = None,
 ) -> str:
     """Convert query tree node to infix expression.
+
+    When ``plain_term_converter`` and ``optimized_group_converter`` are provided,
+    GROUP nodes whose ``children_match_filter`` is ``True`` are converted in a
+    compact form: the children are rendered without per-term filter prefixes and
+    the whole group is wrapped by a single filter call via
+    ``optimized_group_converter``.  If that callback returns ``None`` the group
+    falls back to the standard per-term conversion.
 
     Parameters
     ----------
     node : QueryNode
         Node to convert.
     term_converter : Callable[[QueryNode], str]
-        Function that converts TERM nodes.
+        Function that converts TERM nodes (including filter prefix).
     connector_map : dict[ConnectorType, str]
         Connector mapping for target database.
+    plain_term_converter : Callable[[QueryNode], str] | None
+        Function that converts TERM nodes **without** a filter prefix.
+        Required for the group-level filter optimisation.
+    optimized_group_converter : Callable[[QueryNode, str], str | None] | None
+        Receives ``(group_node, plain_inner_expression)`` and returns a
+        compact expression with the filter applied at the group level, or
+        ``None`` to fall back to per-term conversion.
 
     Returns
     -------
@@ -131,7 +148,27 @@ def convert_expression(
             parts.append(connector_map[ConnectorType(child.value)])
             continue
 
-        converted = convert_expression(child, term_converter, connector_map)
+        # Optimisation: apply filter at group level when all children share it
+        if (
+            child.node_type == NodeType.GROUP
+            and child.children_match_filter
+            and plain_term_converter is not None
+            and optimized_group_converter is not None
+        ):
+            inner_plain = convert_expression(child, plain_term_converter, connector_map)
+            optimized = optimized_group_converter(child, inner_plain)
+            if optimized is not None:
+                parts.append(optimized)
+                continue
+            # Fall back to per-term conversion below
+
+        converted = convert_expression(
+            child,
+            term_converter,
+            connector_map,
+            plain_term_converter=plain_term_converter,
+            optimized_group_converter=optimized_group_converter,
+        )
         if child.node_type == NodeType.GROUP:
             parts.append(f"({converted})")
         else:

@@ -112,7 +112,37 @@ class IEEEQueryBuilder(QueryBuilder):
             key_expr = f'"Index Terms":{self._quote(term)}'
             return f"({title_expr} OR {abs_expr} OR {key_expr})"
 
-        expression = convert_expression(query.root, convert_term, connector_map)
+        def plain_term(term_node: QueryNode) -> str:
+            """Convert term without filter prefix."""
+            return self._quote(term_node.value or "")
+
+        def group_wrapper(group_node: QueryNode, inner: str) -> str | None:
+            """Wrap a plain group expression with IEEE field prefix.
+
+            Only single-field filters can be wrapped at the group level.
+            Compound filters (tiabs, tiabskey) fall back to per-term.
+            """
+            filter_code = get_effective_filter(group_node)
+            field_map: dict[FilterCode, str] = {
+                FilterCode.TITLE: '"Article Title"',
+                FilterCode.ABSTRACT: '"Abstract"',
+                FilterCode.KEYWORDS: '"Index Terms"',
+                FilterCode.AUTHOR: '"Authors"',
+                FilterCode.SOURCE: '"Publication Title"',
+                FilterCode.AFFILIATION: '"Affiliation"',
+            }
+            field = field_map.get(filter_code)
+            if field is None:
+                return None  # compound filters fall back to per-term
+            return f"{field}:({inner})"
+
+        expression = convert_expression(
+            query.root,
+            convert_term,
+            connector_map,
+            plain_term_converter=plain_term,
+            optimized_group_converter=group_wrapper,
+        )
         return {"querytext": expression}
 
     def _is_simple_single_term(self, query: Query) -> bool:

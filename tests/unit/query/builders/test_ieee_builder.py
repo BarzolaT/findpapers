@@ -153,3 +153,47 @@ def test_ieee_single_term_tiabs_payload(parse_and_propagate: Callable[[str], Que
     assert '"Abstract"' in converted["querytext"]
     # Should NOT contain Index Terms for tiabs
     assert '"Index Terms"' not in converted["querytext"]
+
+
+def test_ieee_group_filter_optimization(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """IEEE wraps group at field level when all children share a single-field filter."""
+    query = parse_and_propagate("ti([neural] OR [networks])")
+    converted = IEEEQueryBuilder().convert_query(query)
+    assert "querytext" in converted
+    assert converted["querytext"] == '"Article Title":("neural" OR "networks")'
+
+
+def test_ieee_group_filter_no_optimization_on_compound(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """IEEE falls back to per-term for compound filters like tiabs."""
+    query = parse_and_propagate("tiabs([a] OR [b])")
+    converted = IEEEQueryBuilder().convert_query(query)
+    assert "querytext" in converted
+    # Compound filter: per-term expansion, not group-level
+    assert '"Article Title"' in converted["querytext"]
+    assert '"Abstract"' in converted["querytext"]
+
+
+def test_ieee_group_filter_no_optimization_on_mixed(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """IEEE falls back to per-term when children use different filters."""
+    query = parse_and_propagate("ti([a] OR abs[b])")
+    converted = IEEEQueryBuilder().convert_query(query)
+    assert "querytext" in converted
+    assert '"Article Title":"a"' in converted["querytext"]
+    assert '"Abstract":"b"' in converted["querytext"]
+
+
+def test_ieee_nested_group_optimization(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """IEEE optimises nested groups independently."""
+    query = parse_and_propagate("ti([a] AND abs([b] OR [c]))")
+    converted = IEEEQueryBuilder().convert_query(query)
+    assert "querytext" in converted
+    assert '"Article Title":"a"' in converted["querytext"]
+    assert '"Abstract":("b" OR "c")' in converted["querytext"]

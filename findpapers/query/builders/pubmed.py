@@ -113,4 +113,35 @@ class PubmedQueryBuilder(QueryBuilder):
                 return f"({tagged('tiab')} OR {tagged('ot')})"
             return tagged("tiab")
 
-        return convert_expression(query.root, convert_term, connector_map)
+        def plain_term(term_node: QueryNode) -> str:
+            """Convert term without filter prefix."""
+            return f'"{ term_node.value or ""}"'
+
+        def group_wrapper(group_node: QueryNode, inner: str) -> str | None:
+            """Wrap a plain group expression with PubMed postfix tag.
+
+            Compound filters that expand to multiple tags (e.g. tiabskey)
+            fall back to per-term conversion.
+            """
+            filter_code = get_effective_filter(group_node)
+            tag_map: dict[FilterCode, str] = {
+                FilterCode.TITLE: "ti",
+                FilterCode.ABSTRACT: "ab",
+                FilterCode.KEYWORDS: "ot",
+                FilterCode.AUTHOR: "au",
+                FilterCode.SOURCE: "journal",
+                FilterCode.AFFILIATION: "ad",
+                FilterCode.TITLE_ABSTRACT: "tiab",
+            }
+            tag = tag_map.get(filter_code)
+            if tag is None:
+                return None  # compound filters fall back to per-term
+            return f"({inner})[{tag}]"
+
+        return convert_expression(
+            query.root,
+            convert_term,
+            connector_map,
+            plain_term_converter=plain_term,
+            optimized_group_converter=group_wrapper,
+        )
