@@ -300,6 +300,10 @@ class OpenAlexSearcher(SearcherBase):
         total: Optional[int] = None
         processed = 0
 
+        # Cap results to at most 1 year in the future to avoid placeholder
+        # dates (e.g. 2050-01-01) that some upstream metadata sources produce.
+        _max_pub_date = (datetime.date.today() + datetime.timedelta(days=365)).isoformat()
+
         while True:
             if max_papers is not None and len(papers) >= max_papers:
                 break
@@ -318,6 +322,14 @@ class OpenAlexSearcher(SearcherBase):
                     "primary_location,concepts,keywords,type"
                 ),
             }
+
+            # Inject the date cap into the existing filter string.
+            existing_filter = params.get("filter", "")
+            date_cap = f"to_publication_date:{_max_pub_date}"
+            if existing_filter:
+                params["filter"] = f"{existing_filter},{date_cap}"
+            else:
+                params["filter"] = date_cap
 
             try:
                 response = self._get(_BASE_URL, params)

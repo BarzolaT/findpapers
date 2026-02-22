@@ -1,11 +1,19 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from enum import Enum
 from typing import List, Optional, Set, Union
 
 from ..utils.merge import merge_authors, merge_value
 from .source import Source
+
+logger = logging.getLogger(__name__)
+
+# Maximum number of days into the future that a publication date is considered
+# plausible.  Dates beyond this threshold are treated as data-quality errors
+# from upstream APIs and silently replaced with ``None``.
+_MAX_FUTURE_DAYS: int = 365
 
 # DOI prefixes that belong to preprint servers and should be deprioritised
 # in favour of a publisher-assigned DOI when merging two copies of the same work.
@@ -181,7 +189,7 @@ class Paper:
         self.abstract = abstract
         self.authors = authors
         self.source = source
-        self.publication_date = publication_date
+        self.publication_date = self._sanitize_date(publication_date)
         self.url = url
         self.pdf_url = pdf_url
         self.doi = doi
@@ -192,6 +200,39 @@ class Paper:
         self.pages = pages
         self.databases = databases if databases is not None else set()
         self.paper_type = paper_type  # type: ignore[assignment]
+
+    @staticmethod
+    def _sanitize_date(
+        value: datetime.date | None,
+    ) -> datetime.date | None:
+        """Return *value* unchanged when plausible, otherwise ``None``.
+
+        Dates more than :data:`_MAX_FUTURE_DAYS` in the future are considered
+        data-quality errors from upstream APIs (e.g. OpenAlex placeholder
+        dates like 2050-01-01) and are replaced with ``None``.
+
+        Parameters
+        ----------
+        value : datetime.date | None
+            The publication date to validate.
+
+        Returns
+        -------
+        datetime.date | None
+            The original date if plausible, otherwise ``None``.
+        """
+        if value is None:
+            return None
+        max_allowed = datetime.date.today() + datetime.timedelta(days=_MAX_FUTURE_DAYS)
+        if value > max_allowed:
+            logger.debug(
+                "Discarding implausible future publication date %s "
+                "(more than %d days from today).",
+                value.isoformat(),
+                _MAX_FUTURE_DAYS,
+            )
+            return None
+        return value
 
     @property
     def paper_type(self) -> Optional[PaperType]:

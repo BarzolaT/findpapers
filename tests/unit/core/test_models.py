@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from findpapers.core.paper import Paper, PaperType, _is_preprint_doi, _merge_doi
+from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, PaperType, _is_preprint_doi, _merge_doi
 from findpapers.core.search import Search
 from findpapers.core.source import Source
 
@@ -59,6 +59,57 @@ def test_paper_requires_title():
             source=None,
             publication_date=datetime.date.today(),
         )
+
+
+def test_paper_sanitize_date_nullifies_far_future():
+    """Publication dates more than _MAX_FUTURE_DAYS in the future are set to None."""
+    far_future = datetime.date.today() + datetime.timedelta(days=_MAX_FUTURE_DAYS + 100)
+    paper = Paper(
+        title="Future Paper",
+        abstract="",
+        authors=[],
+        source=None,
+        publication_date=far_future,
+    )
+    assert paper.publication_date is None
+
+
+def test_paper_sanitize_date_keeps_near_future():
+    """Dates within the grace window are preserved."""
+    near_future = datetime.date.today() + datetime.timedelta(days=30)
+    paper = Paper(
+        title="Near Future Paper",
+        abstract="",
+        authors=[],
+        source=None,
+        publication_date=near_future,
+    )
+    assert paper.publication_date == near_future
+
+
+def test_paper_sanitize_date_keeps_past():
+    """Past dates are preserved."""
+    past = datetime.date(2020, 6, 15)
+    paper = Paper(
+        title="Past Paper",
+        abstract="",
+        authors=[],
+        source=None,
+        publication_date=past,
+    )
+    assert paper.publication_date == past
+
+
+def test_paper_sanitize_date_keeps_none():
+    """None publication date stays None."""
+    paper = Paper(
+        title="No Date Paper",
+        abstract="",
+        authors=[],
+        source=None,
+        publication_date=None,
+    )
+    assert paper.publication_date is None
 
 
 def test_paper_url_and_pdf_url():
