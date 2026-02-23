@@ -121,7 +121,9 @@ class QueryNode:
         """
         result: dict = {"node_type": self.node_type.value}
         if self.value is not None:
-            result["value"] = self.value
+            result["value"] = (
+                self.value.value if isinstance(self.value, ConnectorType) else self.value
+            )
         if self.filter_code is not None:
             result["filter_code"] = self.filter_code.value
         if self.inherited_filter_code is not None:
