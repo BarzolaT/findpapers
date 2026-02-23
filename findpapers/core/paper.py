@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+from enum import Enum
 from typing import Optional, Set
 
 from ..utils.merge import merge_authors, merge_value
@@ -9,6 +10,49 @@ from .author import Author
 from .source import Source
 
 logger = logging.getLogger(__name__)
+
+
+class PaperType(str, Enum):
+    """BibTeX-aligned classification of a paper.
+
+    Each value corresponds directly to a standard BibTeX entry type,
+    enabling accurate bibliography generation.
+
+    Attributes
+    ----------
+    ARTICLE : str
+        Journal article (``@article``).
+    INPROCEEDINGS : str
+        Paper published in conference proceedings (``@inproceedings``).
+    INBOOK : str
+        Chapter or section in a book (``@inbook``).
+    INCOLLECTION : str
+        A self-contained part of a book with its own title (``@incollection``).
+    BOOK : str
+        A complete book (``@book``).
+    PHDTHESIS : str
+        PhD thesis or doctoral dissertation (``@phdthesis``).
+    MASTERSTHESIS : str
+        Master's thesis (``@mastersthesis``).
+    TECHREPORT : str
+        Technical report issued by an institution (``@techreport``).
+    UNPUBLISHED : str
+        Work not formally published, such as preprints (``@unpublished``).
+    MISC : str
+        Anything that does not fit the other categories (``@misc``).
+    """
+
+    ARTICLE = "article"
+    INPROCEEDINGS = "inproceedings"
+    INBOOK = "inbook"
+    INCOLLECTION = "incollection"
+    BOOK = "book"
+    PHDTHESIS = "phdthesis"
+    MASTERSTHESIS = "mastersthesis"
+    TECHREPORT = "techreport"
+    UNPUBLISHED = "unpublished"
+    MISC = "misc"
+
 
 # Maximum number of days into the future that a publication date is considered
 # plausible.  Dates beyond this threshold are treated as data-quality errors
@@ -100,6 +144,7 @@ class Paper:
         number_of_pages: Optional[int] = None,
         pages: Optional[str] = None,
         databases: Optional[Set[str]] = None,
+        paper_type: Optional[PaperType] = None,
     ) -> None:
         """Create a Paper instance.
 
@@ -133,6 +178,8 @@ class Paper:
             Page range.
         databases : set[str] | None
             Databases where found.
+        paper_type : PaperType | None
+            BibTeX-aligned paper type (informational, not used for filtering).
 
         Raises
         ------
@@ -156,6 +203,7 @@ class Paper:
         self.number_of_pages = number_of_pages
         self.pages = pages
         self.databases = databases if databases is not None else set()
+        self.paper_type = paper_type
 
     @staticmethod
     def _sanitize_date(
@@ -245,6 +293,8 @@ class Paper:
         elif paper.source is not None:
             self.source.merge(paper.source)
 
+        self.paper_type = merge_value(self.paper_type, paper.paper_type)
+
     @classmethod
     def from_dict(cls, paper_dict: dict) -> "Paper":
         """Create a paper from a dict.
@@ -313,6 +363,14 @@ class Paper:
         else:
             databases = {str(raw_databases)} if raw_databases else set()
 
+        raw_paper_type = paper_dict.get("paper_type")
+        paper_type: PaperType | None = None
+        if isinstance(raw_paper_type, str):
+            try:
+                paper_type = PaperType(raw_paper_type)
+            except ValueError:
+                pass
+
         return cls(
             title=title,
             abstract=abstract,
@@ -328,6 +386,7 @@ class Paper:
             number_of_pages=number_of_pages,
             pages=pages,
             databases=databases,
+            paper_type=paper_type,
         )
 
     @staticmethod
@@ -361,4 +420,5 @@ class Paper:
             "number_of_pages": paper.number_of_pages,
             "pages": paper.pages,
             "databases": sorted(paper.databases),
+            "paper_type": paper.paper_type.value if paper.paper_type else None,
         }

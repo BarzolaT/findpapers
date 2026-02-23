@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import SourceType
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
 from findpapers.searchers.semantic_scholar import SemanticScholarSearcher
 
@@ -188,6 +189,97 @@ class TestSemanticScholarSearcherParsePaper:
         assert paper is not None
         assert paper.publication_date is not None
         assert paper.publication_date.year == 2020
+
+    def test_paper_type_article_from_journal_article(self):
+        """publicationTypes 'JournalArticle' maps to PaperType.ARTICLE."""
+        item = {"title": "P", "publicationTypes": ["JournalArticle"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_article_from_case_report(self):
+        """publicationTypes 'CaseReport' maps to PaperType.ARTICLE."""
+        item = {"title": "P", "publicationTypes": ["CaseReport"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_article_from_clinical_trial(self):
+        """publicationTypes 'ClinicalTrial' maps to PaperType.ARTICLE."""
+        item = {"title": "P", "publicationTypes": ["ClinicalTrial"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_article_from_editorial(self):
+        """publicationTypes 'Editorial' maps to PaperType.ARTICLE."""
+        item = {"title": "P", "publicationTypes": ["Editorial"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_article_from_letters_and_comments(self):
+        """publicationTypes 'LettersAndComments' maps to PaperType.ARTICLE."""
+        item = {"title": "P", "publicationTypes": ["LettersAndComments"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_article_from_meta_analysis(self):
+        """publicationTypes 'MetaAnalysis' maps to PaperType.ARTICLE."""
+        item = {"title": "P", "publicationTypes": ["MetaAnalysis"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_article_from_study(self):
+        """publicationTypes 'Study' maps to PaperType.ARTICLE."""
+        item = {"title": "P", "publicationTypes": ["Study"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_inproceedings_from_conference(self):
+        """publicationTypes 'Conference' maps to PaperType.INPROCEEDINGS."""
+        item = {"title": "P", "publicationTypes": ["Conference"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INPROCEEDINGS
+
+    def test_paper_type_book_from_book(self):
+        """publicationTypes 'Book' maps to PaperType.BOOK."""
+        item = {"title": "P", "publicationTypes": ["Book"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.BOOK
+
+    def test_paper_type_inbook_from_book_section(self):
+        """publicationTypes 'BookSection' maps to PaperType.INBOOK."""
+        item = {"title": "P", "publicationTypes": ["BookSection"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INBOOK
+
+    def test_paper_type_misc_from_dataset(self):
+        """publicationTypes 'Dataset' maps to PaperType.MISC."""
+        item = {"title": "P", "publicationTypes": ["Dataset"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.MISC
+
+    def test_paper_type_misc_from_news(self):
+        """publicationTypes 'News' maps to PaperType.MISC."""
+        item = {"title": "P", "publicationTypes": ["News"]}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.MISC
+
+    def test_paper_type_none_when_missing(self):
+        """Missing publicationTypes results in paper_type being None."""
+        item = {"title": "P"}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is None
 
 
 class TestSemanticScholarSearcherSearch:

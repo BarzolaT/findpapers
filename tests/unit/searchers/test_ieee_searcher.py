@@ -6,8 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.ieee import IEEEQueryBuilder
 from findpapers.searchers.ieee import IEEESearcher
@@ -194,6 +195,41 @@ class TestIEEESearcherParsePaper:
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.OTHER
+
+    def test_paper_type_article_from_journals(self):
+        """content_type 'Journals' maps to PaperType.ARTICLE."""
+        item = {"title": "P", "content_type": "Journals"}
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_inproceedings_from_conferences(self):
+        """content_type 'Conferences' maps to PaperType.INPROCEEDINGS."""
+        item = {"title": "P", "content_type": "Conferences"}
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INPROCEEDINGS
+
+    def test_paper_type_inbook_from_books(self):
+        """content_type 'Books' maps to PaperType.INBOOK."""
+        item = {"title": "P", "content_type": "Books"}
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INBOOK
+
+    def test_paper_type_techreport_from_standards(self):
+        """content_type 'Standards' maps to PaperType.TECHREPORT."""
+        item = {"title": "P", "content_type": "Standards"}
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is PaperType.TECHREPORT
+
+    def test_paper_type_none_when_unknown(self):
+        """Unknown content_type results in paper_type being None."""
+        item = {"title": "P", "content_type": "UnknownType"}
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.paper_type is None
 
 
 class TestIEEESearcherSearch:

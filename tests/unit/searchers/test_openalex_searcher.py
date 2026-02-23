@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import SourceType
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
 from findpapers.searchers.openalex import (
     OpenAlexSearcher,
@@ -295,6 +296,71 @@ class TestOpenAlexSearcherParsePaper:
         assert paper is not None
         assert paper.pages is not None
         assert "\u2013" in paper.pages  # en-dash separator
+
+    def test_paper_type_article_from_work_type(self):
+        """work.type 'article' maps to PaperType.ARTICLE."""
+        work = {"title": "P", "type": "article"}
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_book_chapter(self):
+        """work.type 'book-chapter' maps to PaperType.INBOOK."""
+        work = {"title": "P", "type": "book-chapter"}
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INBOOK
+
+    def test_paper_type_dissertation(self):
+        """work.type 'dissertation' maps to PaperType.PHDTHESIS."""
+        work = {"title": "P", "type": "dissertation"}
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.paper_type is PaperType.PHDTHESIS
+
+    def test_paper_type_preprint(self):
+        """work.type 'preprint' maps to PaperType.UNPUBLISHED."""
+        work = {"title": "P", "type": "preprint"}
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.paper_type is PaperType.UNPUBLISHED
+
+    def test_paper_type_report(self):
+        """work.type 'report' maps to PaperType.TECHREPORT."""
+        work = {"title": "P", "type": "report"}
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.paper_type is PaperType.TECHREPORT
+
+    def test_paper_type_book(self):
+        """work.type 'book' maps to PaperType.BOOK."""
+        work = {"title": "P", "type": "book"}
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.paper_type is PaperType.BOOK
+
+    def test_paper_type_inproceedings_when_article_in_conference_source(self):
+        """work.type 'article' with conference source promotes to INPROCEEDINGS."""
+        work = {
+            "title": "P",
+            "type": "article",
+            "primary_location": {
+                "source": {
+                    "display_name": "NeurIPS 2023",
+                    "type": "conference",
+                },
+            },
+        }
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INPROCEEDINGS
+
+    def test_paper_type_none_when_unknown(self):
+        """Unknown work.type results in paper_type being None."""
+        work = {"title": "P", "type": "unknownxyz"}
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.paper_type is None
 
 
 class TestOpenAlexSearcherReconstructAbstract:

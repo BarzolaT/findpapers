@@ -9,11 +9,10 @@ from typing import List, Optional
 from xml.etree import ElementTree as ET
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
-from findpapers.core.source import Source
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -38,6 +37,20 @@ class PubmedSearcher(SearcherBase):
     - Without API key: 3 requests/second
     - With API key: 10 requests/second
     """
+
+    # Ordered list of (PubMed PublicationType UI prefix, PaperType) pairs.
+    # Checked in priority order; first match wins.
+    _PUBMED_PAPER_TYPE_RULES: list[tuple[str, PaperType]] = [
+        ("congress", PaperType.INPROCEEDINGS),
+        ("meeting abstract", PaperType.INPROCEEDINGS),
+        ("academic dissertation", PaperType.PHDTHESIS),
+        ("technical report", PaperType.TECHREPORT),
+        ("preprint", PaperType.UNPUBLISHED),
+        ("journal article", PaperType.ARTICLE),
+        ("review", PaperType.ARTICLE),
+        ("systematic review", PaperType.ARTICLE),
+        ("meta-analysis", PaperType.ARTICLE),
+    ]
 
     def __init__(
         self,
@@ -293,6 +306,18 @@ class PubmedSearcher(SearcherBase):
                     source_type=SourceType.JOURNAL,
                 )
 
+        # Publication type (paper_type)
+        pub_type_texts = [
+            (pt_el.text or "").strip().lower()
+            for pt_el in article.findall(".//PublicationTypeList/PublicationType")
+            if pt_el.text
+        ]
+        paper_type: Optional[PaperType] = None
+        for rule_key, rule_type in self._PUBMED_PAPER_TYPE_RULES:
+            if any(rule_key in pt for pt in pub_type_texts):
+                paper_type = rule_type
+                break
+
         try:
             paper = Paper(
                 title=title,
@@ -305,6 +330,7 @@ class PubmedSearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={self.name},
+                paper_type=paper_type,
             )
         except ValueError:
             return None

@@ -8,11 +8,10 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
-from findpapers.core.source import Source
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -267,8 +266,40 @@ class OpenAlexSearcher(SearcherBase):
         elif first_page:
             pages = first_page
 
-        # Paper type derived from the work-level "type" field
-        # (kept for reference but no longer stored on the Paper)
+        # Infer paper_type from the work-level "type" field.
+        _OPENALEX_PAPER_TYPE_MAP: dict[str, PaperType] = {
+            "article": PaperType.ARTICLE,
+            "review": PaperType.ARTICLE,
+            "letter": PaperType.ARTICLE,
+            "editorial": PaperType.ARTICLE,
+            "erratum": PaperType.ARTICLE,
+            "book-chapter": PaperType.INBOOK,
+            "book": PaperType.BOOK,
+            "dissertation": PaperType.PHDTHESIS,
+            "preprint": PaperType.UNPUBLISHED,
+            "report": PaperType.TECHREPORT,
+            "standard": PaperType.TECHREPORT,
+            "peer-review": PaperType.MISC,
+            "other": PaperType.MISC,
+            "paratext": PaperType.MISC,
+            "reference-entry": PaperType.INCOLLECTION,
+            "dataset": PaperType.MISC,
+            "component": PaperType.MISC,
+            "grant": PaperType.MISC,
+            "supplementary-materials": PaperType.MISC,
+            "libguides": PaperType.MISC,
+        }
+        raw_work_type = (work.get("type") or "").strip().lower()
+        paper_type = _OPENALEX_PAPER_TYPE_MAP.get(raw_work_type)
+
+        # OpenAlex classifies conference papers as work.type "article".
+        # When the source is a conference venue, promote to INPROCEEDINGS.
+        if (
+            paper_type is PaperType.ARTICLE
+            and source is not None
+            and source.source_type is SourceType.CONFERENCE
+        ):
+            paper_type = PaperType.INPROCEEDINGS
 
         try:
             paper = Paper(
@@ -284,6 +315,7 @@ class OpenAlexSearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={self.name},
+                paper_type=paper_type,
             )
         except ValueError:
             return None

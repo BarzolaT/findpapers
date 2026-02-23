@@ -8,11 +8,10 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
-from findpapers.core.source import Source
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -217,8 +216,30 @@ class ScopusSearcher(SearcherBase):
                 source_type=source_type,
             )
 
-        # Paper type derived from aggregation type
-        # (kept for reference but no longer stored on the Paper)
+        # Infer paper_type from subtypeDescription.
+        # Full Scopus subtypeDescription values:
+        # Article, Abstract Report, Book, Book Chapter, Business Article,
+        # Conference Paper, Conference Review, Data Paper, Editorial,
+        # Erratum, Letter, Note, Press Release, Report, Retracted, Review,
+        # Short Survey, Undefined
+        _SCOPUS_PAPER_TYPE_MAP: dict[str, PaperType] = {
+            "article": PaperType.ARTICLE,
+            "review": PaperType.ARTICLE,
+            "short survey": PaperType.ARTICLE,
+            "letter": PaperType.ARTICLE,
+            "note": PaperType.ARTICLE,
+            "editorial": PaperType.ARTICLE,
+            "erratum": PaperType.ARTICLE,
+            "business article": PaperType.ARTICLE,
+            "conference paper": PaperType.INPROCEEDINGS,
+            "conference review": PaperType.INPROCEEDINGS,
+            "book": PaperType.BOOK,
+            "book chapter": PaperType.INBOOK,
+            "report": PaperType.TECHREPORT,
+            "data paper": PaperType.MISC,
+        }
+        raw_subtype = (entry.get("subtypeDescription") or "").strip().lower()
+        paper_type = _SCOPUS_PAPER_TYPE_MAP.get(raw_subtype)
 
         # Pages
         pages: Optional[str] = (entry.get("prism:pageRange") or "").strip() or None
@@ -235,6 +256,7 @@ class ScopusSearcher(SearcherBase):
                 citations=citations,
                 pages=pages,
                 databases={self.name},
+                paper_type=paper_type,
             )
         except ValueError:
             return None

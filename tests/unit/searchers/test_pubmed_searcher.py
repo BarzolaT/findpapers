@@ -8,8 +8,9 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from findpapers.core.author import Author
+from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
 from findpapers.searchers.pubmed import PubmedSearcher, _normalize_month
@@ -303,6 +304,194 @@ class TestPubmedSearcherParsePaper:
         assert paper is not None
         assert paper.pages is not None
         assert "1148" in paper.pages
+
+    def test_paper_type_journal_article(self):
+        """Journal Article publication type maps to PaperType.ARTICLE."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <PublicationTypeList>
+                        <PublicationType>Journal Article</PublicationType>
+                    </PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_congress(self):
+        """Congress publication type maps to PaperType.INPROCEEDINGS."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <PublicationTypeList>
+                        <PublicationType>Congress</PublicationType>
+                    </PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INPROCEEDINGS
+
+    def test_paper_type_meeting_abstract(self):
+        """Meeting Abstract publication type maps to PaperType.INPROCEEDINGS."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <PublicationTypeList>
+                        <PublicationType>Meeting Abstract</PublicationType>
+                    </PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INPROCEEDINGS
+
+    def test_paper_type_academic_dissertation(self):
+        """Academic Dissertation maps to PaperType.PHDTHESIS."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <PublicationTypeList>
+                        <PublicationType>Academic Dissertation</PublicationType>
+                    </PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is PaperType.PHDTHESIS
+
+    def test_paper_type_technical_report(self):
+        """Technical Report maps to PaperType.TECHREPORT."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <PublicationTypeList>
+                        <PublicationType>Technical Report</PublicationType>
+                    </PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is PaperType.TECHREPORT
+
+    def test_paper_type_preprint(self):
+        """Preprint publication type maps to PaperType.UNPUBLISHED."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <PublicationTypeList>
+                        <PublicationType>Preprint</PublicationType>
+                    </PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is PaperType.UNPUBLISHED
+
+    def test_paper_type_review_maps_to_article(self):
+        """Review publication type maps to PaperType.ARTICLE."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <PublicationTypeList>
+                        <PublicationType>Review</PublicationType>
+                    </PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_congress_takes_priority_over_journal_article(self):
+        """When multiple pub types, more specific type wins by priority order."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <PublicationTypeList>
+                        <PublicationType>Journal Article</PublicationType>
+                        <PublicationType>Congress</PublicationType>
+                    </PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INPROCEEDINGS
+
+    def test_paper_type_none_when_no_publication_type(self):
+        """No PublicationTypeList results in paper_type being None."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is None
+
+    def test_paper_type_none_for_unrecognised_type(self):
+        """Unrecognised publication type results in paper_type being None."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <PublicationTypeList>
+                        <PublicationType>Letter</PublicationType>
+                    </PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.paper_type is None
 
 
 class TestPubmedSearcherSearch:

@@ -7,7 +7,7 @@ import json
 import pytest
 
 from findpapers.core.author import Author
-from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, _is_preprint_doi, _merge_doi
+from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, PaperType, _is_preprint_doi, _merge_doi
 from findpapers.core.search import Search
 from findpapers.core.source import Source
 
@@ -366,3 +366,149 @@ def test_search_to_bibtex_creates_file(tmp_path):
     _make_search_with_paper().to_bibtex(path)
     content = open(path).read()
     assert "@" in content
+
+
+# ---------------------------------------------------------------------------
+# PaperType on Paper
+# ---------------------------------------------------------------------------
+
+
+class TestPaperType:
+    """Tests for the paper_type attribute on Paper."""
+
+    def test_paper_type_defaults_to_none(self) -> None:
+        """Paper without explicit paper_type has None."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        assert paper.paper_type is None
+
+    def test_paper_type_set_at_construction(self) -> None:
+        """Paper can be constructed with a paper_type."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            paper_type=PaperType.ARTICLE,
+        )
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_serialized_in_to_dict(self) -> None:
+        """to_dict includes paper_type when set."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            paper_type=PaperType.INPROCEEDINGS,
+        )
+        d = Paper.to_dict(paper)
+        assert d["paper_type"] == "inproceedings"
+
+    def test_paper_type_none_serialized_as_none(self) -> None:
+        """to_dict serializes missing paper_type as None."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        d = Paper.to_dict(paper)
+        assert d["paper_type"] is None
+
+    def test_paper_type_deserialized_from_dict(self) -> None:
+        """from_dict restores paper_type from string value."""
+        d = {"title": "T", "paper_type": "phdthesis"}
+        paper = Paper.from_dict(d)
+        assert paper.paper_type is PaperType.PHDTHESIS
+
+    def test_paper_type_invalid_string_ignored(self) -> None:
+        """from_dict ignores invalid paper_type strings."""
+        d = {"title": "T", "paper_type": "not_a_type"}
+        paper = Paper.from_dict(d)
+        assert paper.paper_type is None
+
+    def test_paper_type_none_in_dict(self) -> None:
+        """from_dict handles paper_type being None."""
+        d = {"title": "T", "paper_type": None}
+        paper = Paper.from_dict(d)
+        assert paper.paper_type is None
+
+    def test_paper_type_missing_from_dict(self) -> None:
+        """from_dict handles paper_type key missing."""
+        d = {"title": "T"}
+        paper = Paper.from_dict(d)
+        assert paper.paper_type is None
+
+    def test_paper_type_merge_fills_none(self) -> None:
+        """Merge fills paper_type when base is None."""
+        base = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            paper_type=PaperType.ARTICLE,
+        )
+        base.merge(incoming)
+        assert base.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_merge_keeps_existing(self) -> None:
+        """Merge preserves existing paper_type when incoming also has one."""
+        base = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            paper_type=PaperType.INPROCEEDINGS,
+        )
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            paper_type=PaperType.ARTICLE,
+        )
+        base.merge(incoming)
+        assert base.paper_type is PaperType.INPROCEEDINGS
+
+    def test_all_bibtex_types_present(self) -> None:
+        """PaperType enum covers the agreed BibTeX entry types."""
+        expected = {
+            "article",
+            "inproceedings",
+            "inbook",
+            "incollection",
+            "book",
+            "phdthesis",
+            "mastersthesis",
+            "techreport",
+            "unpublished",
+            "misc",
+        }
+        actual = {pt.value for pt in PaperType}
+        assert actual == expected
+
+    def test_paper_type_round_trip(self) -> None:
+        """to_dict → from_dict preserves paper_type."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            paper_type=PaperType.TECHREPORT,
+        )
+        restored = Paper.from_dict(Paper.to_dict(paper))
+        assert restored.paper_type is PaperType.TECHREPORT

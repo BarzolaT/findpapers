@@ -6,8 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
 from findpapers.searchers.arxiv import ArxivSearcher, _infer_source_type_from_journal_ref
@@ -229,6 +230,73 @@ class TestArxivSearcherParseResponse:
         assert paper.source is not None
         assert paper.source.title == "Nature 580, 321 (2020)"
         assert paper.source.source_type is None
+
+    def test_paper_type_unpublished_for_preprint(self):
+        """arXiv preprint without journal_ref gets PaperType.UNPUBLISHED."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Preprint Paper</title>
+            <summary>Abstract.</summary>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.UNPUBLISHED
+
+    def test_paper_type_article_for_journal_ref(self):
+        """arXiv paper with journal source_type gets PaperType.ARTICLE."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Published Paper</title>
+            <summary>Abstract.</summary>
+            <arxiv:journal_ref>Phys. Rev. Lett. 123 (2020)</arxiv:journal_ref>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_inproceedings_for_conference_ref(self):
+        """arXiv paper with conference source_type gets PaperType.INPROCEEDINGS."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Conf Paper</title>
+            <summary>Abstract.</summary>
+            <arxiv:journal_ref>Proceedings of NeurIPS 2023</arxiv:journal_ref>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INPROCEEDINGS
+
+    def test_paper_type_inbook_for_book_ref(self):
+        """arXiv paper with book source_type gets PaperType.INBOOK."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>LN Paper</title>
+            <summary>Abstract.</summary>
+            <arxiv:journal_ref>Lecture Notes in Computer Science vol. 1234</arxiv:journal_ref>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INBOOK
 
 
 class TestInferSourceTypeFromJournalRef:

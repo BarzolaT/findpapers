@@ -12,9 +12,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper
-from findpapers.core.source import Source
-from findpapers.core.source_type import SourceType
+from findpapers.core.paper import Paper, PaperType
+from findpapers.core.source import Source, SourceType
 from findpapers.utils.export import (
     bibtex_how_published,
     bibtex_note,
@@ -217,6 +216,36 @@ class TestPaperToCsvRow:
         source_fields = [k for k in row if k.startswith("source_")]
         assert all(row[f] is None for f in source_fields)
 
+    def test_paper_type_in_csv_row(self) -> None:
+        """paper_type is serialised as its value string in CSV row."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            paper_type=PaperType.ARTICLE,
+        )
+        row = paper_to_csv_row(paper)
+        assert row["paper_type"] == "article"
+
+    def test_paper_type_none_in_csv_row(self) -> None:
+        """paper_type is None when not set."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        row = paper_to_csv_row(paper)
+        assert row["paper_type"] is None
+
+    def test_paper_type_in_csv_columns(self) -> None:
+        """paper_type is included in csv_columns output."""
+        columns = csv_columns()
+        assert "paper_type" in columns
+
 
 # ---------------------------------------------------------------------------
 # citation_key_for
@@ -366,8 +395,8 @@ class TestBibtexHowPublished:
 class TestPaperToBibtex:
     """Tests for paper_to_bibtex()."""
 
-    def test_article_type_from_journal_source(self) -> None:
-        """Paper with JOURNAL source_type produces @article entry."""
+    def test_article_type_from_journal_source_without_paper_type(self) -> None:
+        """Paper with JOURNAL source but no paper_type falls back to @misc."""
         pub = Source(title="Nature", source_type=SourceType.JOURNAL)
         paper = Paper(
             title="T",
@@ -377,10 +406,10 @@ class TestPaperToBibtex:
             publication_date=datetime.date(2021, 1, 1),
         )
         entry = paper_to_bibtex(paper)
-        assert entry.startswith("@article{")
+        assert entry.startswith("@misc{")
 
-    def test_inproceedings_type_from_conference_source(self) -> None:
-        """Paper with CONFERENCE source_type produces @inproceedings entry."""
+    def test_inproceedings_type_from_conference_source_without_paper_type(self) -> None:
+        """Paper with CONFERENCE source but no paper_type falls back to @misc."""
         pub = Source(title="NeurIPS", source_type=SourceType.CONFERENCE)
         paper = Paper(
             title="T",
@@ -390,10 +419,10 @@ class TestPaperToBibtex:
             publication_date=datetime.date(2021, 1, 1),
         )
         entry = paper_to_bibtex(paper)
-        assert entry.startswith("@inproceedings{")
+        assert entry.startswith("@misc{")
 
-    def test_inbook_type_from_book_source(self) -> None:
-        """Paper with BOOK source_type produces @inbook entry."""
+    def test_inbook_type_from_book_source_without_paper_type(self) -> None:
+        """Paper with BOOK source but no paper_type falls back to @misc."""
         pub = Source(title="Advances", source_type=SourceType.BOOK)
         paper = Paper(
             title="T",
@@ -403,7 +432,7 @@ class TestPaperToBibtex:
             publication_date=datetime.date(2021, 1, 1),
         )
         entry = paper_to_bibtex(paper)
-        assert entry.startswith("@inbook{")
+        assert entry.startswith("@misc{")
 
     def test_misc_type_without_source_type(self, full_paper: Paper) -> None:
         """Paper without source_type still produces @misc entry."""
@@ -459,6 +488,59 @@ class TestPaperToBibtex:
         """BibTeX entry ends with closing brace."""
         entry = paper_to_bibtex(full_paper)
         assert entry.rstrip().endswith("}")
+
+    def test_paper_type_overrides_source_type(self) -> None:
+        """paper_type takes precedence over source_type for BibTeX entry type."""
+        pub = Source(title="Nature", source_type=SourceType.JOURNAL)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.TECHREPORT,
+        )
+        entry = paper_to_bibtex(paper)
+        assert entry.startswith("@techreport{")
+
+    def test_paper_type_article_produces_at_article(self) -> None:
+        """Paper with ARTICLE paper_type produces @article entry."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.ARTICLE,
+        )
+        entry = paper_to_bibtex(paper)
+        assert entry.startswith("@article{")
+
+    def test_paper_type_unpublished_produces_at_unpublished(self) -> None:
+        """Paper with UNPUBLISHED paper_type produces @unpublished entry."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.UNPUBLISHED,
+        )
+        entry = paper_to_bibtex(paper)
+        assert entry.startswith("@unpublished{")
+
+    def test_paper_type_none_falls_back_to_misc(self) -> None:
+        """Without paper_type, BibTeX type defaults to @misc."""
+        pub = Source(title="NeurIPS", source_type=SourceType.CONFERENCE)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
+        assert entry.startswith("@misc{")
 
 
 # ---------------------------------------------------------------------------

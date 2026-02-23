@@ -8,11 +8,10 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
-from findpapers.core.source import Source
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.ieee import IEEEQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -206,13 +205,13 @@ class IEEESearcher(SearcherBase):
 
         # Source
         source_title = (item.get("publication_title") or "").strip()
+        raw_content_type = (item.get("content_type") or "").strip().lower()
         source: Optional[Source] = None
         if source_title:
             issn = (item.get("issn") or "").strip() or None
             isbn = (item.get("isbn") or "").strip() or None
             publisher = (item.get("publisher") or "").strip() or None
             # Map content_type to SourceType.
-            raw_content_type = (item.get("content_type") or "").strip().lower()
             source_type = _IEEE_CONTENT_TYPE_MAP.get(raw_content_type)
             source = Source(
                 title=source_title,
@@ -222,8 +221,18 @@ class IEEESearcher(SearcherBase):
                 source_type=source_type,
             )
 
-        # Paper type derived from content_type
-        # (kept for reference but no longer stored on the Paper)
+        # Infer paper_type from content_type.
+        _IEEE_PAPER_TYPE_MAP: dict[str, PaperType] = {
+            "journals": PaperType.ARTICLE,
+            "magazines": PaperType.ARTICLE,
+            "conferences": PaperType.INPROCEEDINGS,
+            "books": PaperType.INBOOK,
+            "ebooks": PaperType.INBOOK,
+            "standards": PaperType.TECHREPORT,
+            "courses": PaperType.MISC,
+            "early access": PaperType.ARTICLE,
+        }
+        paper_type = _IEEE_PAPER_TYPE_MAP.get(raw_content_type)
 
         # Pages
         start_page = item.get("start_page") or ""
@@ -248,6 +257,7 @@ class IEEESearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={self.name},
+                paper_type=paper_type,
             )
         except ValueError:
             return None

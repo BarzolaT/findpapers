@@ -10,11 +10,10 @@ from typing import List, Optional
 from xml.etree import ElementTree as ET
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
-from findpapers.core.source import Source
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -194,6 +193,17 @@ class ArxivSearcher(SearcherBase):
         if comment_el is not None and comment_el.text and comment_el.text.strip():
             comment = comment_el.text.strip()
 
+        # Infer paper_type from source_type.
+        _ARXIV_PAPER_TYPE_MAP: dict[SourceType, PaperType] = {
+            SourceType.JOURNAL: PaperType.ARTICLE,
+            SourceType.CONFERENCE: PaperType.INPROCEEDINGS,
+            SourceType.BOOK: PaperType.INBOOK,
+            SourceType.REPOSITORY: PaperType.UNPUBLISHED,
+        }
+        paper_type: PaperType | None = None
+        if source is not None and source.source_type is not None:
+            paper_type = _ARXIV_PAPER_TYPE_MAP.get(source.source_type)
+
         try:
             paper = Paper(
                 title=title,
@@ -206,6 +216,7 @@ class ArxivSearcher(SearcherBase):
                 doi=doi,
                 comments=comment,
                 databases={self.name},
+                paper_type=paper_type,
             )
         except ValueError:
             return None

@@ -5,8 +5,9 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from findpapers.core.author import Author
+from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import SourceType
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 from findpapers.searchers.scopus import ScopusSearcher
 
@@ -214,6 +215,62 @@ class TestScopusSearcherParsePaper:
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type is None
+
+    def test_paper_type_article_from_subtype(self):
+        """subtypeDescription 'Article' maps to PaperType.ARTICLE."""
+        entry = {"dc:title": "P", "subtypeDescription": "Article"}
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_inproceedings_from_conference_paper(self):
+        """subtypeDescription 'Conference Paper' maps to PaperType.INPROCEEDINGS."""
+        entry = {"dc:title": "P", "subtypeDescription": "Conference Paper"}
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INPROCEEDINGS
+
+    def test_paper_type_book_from_subtype(self):
+        """subtypeDescription 'Book' maps to PaperType.BOOK."""
+        entry = {"dc:title": "P", "subtypeDescription": "Book"}
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.BOOK
+
+    def test_paper_type_inbook_from_book_chapter(self):
+        """subtypeDescription 'Book Chapter' maps to PaperType.INBOOK."""
+        entry = {"dc:title": "P", "subtypeDescription": "Book Chapter"}
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.INBOOK
+
+    def test_paper_type_techreport_from_report(self):
+        """subtypeDescription 'Report' maps to PaperType.TECHREPORT."""
+        entry = {"dc:title": "P", "subtypeDescription": "Report"}
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.TECHREPORT
+
+    def test_paper_type_misc_from_data_paper(self):
+        """subtypeDescription 'Data Paper' maps to PaperType.MISC."""
+        entry = {"dc:title": "P", "subtypeDescription": "Data Paper"}
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.MISC
+
+    def test_paper_type_article_from_business_article(self):
+        """subtypeDescription 'Business Article' maps to PaperType.ARTICLE."""
+        entry = {"dc:title": "P", "subtypeDescription": "Business Article"}
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is PaperType.ARTICLE
+
+    def test_paper_type_none_when_missing(self):
+        """Missing subtypeDescription results in paper_type being None."""
+        entry = {"dc:title": "P"}
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.paper_type is None
 
 
 class TestScopusSearcherSearch:

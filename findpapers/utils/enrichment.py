@@ -14,8 +14,7 @@ from lxml.html import HtmlElement
 
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
-from findpapers.core.source import Source
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import Source, SourceType
 from findpapers.utils.http_headers import get_browser_headers
 
 logger = logging.getLogger(__name__)

@@ -8,11 +8,10 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
-from findpapers.core.source import Source
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -236,8 +235,32 @@ class SemanticScholarSearcher(SearcherBase):
             if raw_pages:
                 pages = raw_pages
 
-        # Paper type from publicationTypes list
-        # (kept for reference but no longer stored on the Paper)
+        # Infer paper_type from publicationTypes list.
+        # Full list from the Semantic Scholar API docs:
+        # Review, JournalArticle, CaseReport, ClinicalTrial, Conference,
+        # Dataset, Editorial, LettersAndComments, MetaAnalysis, News,
+        # Study, Book, BookSection
+        _SS_PAPER_TYPE_MAP: dict[str, PaperType] = {
+            "JournalArticle": PaperType.ARTICLE,
+            "Review": PaperType.ARTICLE,
+            "CaseReport": PaperType.ARTICLE,
+            "ClinicalTrial": PaperType.ARTICLE,
+            "Editorial": PaperType.ARTICLE,
+            "LettersAndComments": PaperType.ARTICLE,
+            "MetaAnalysis": PaperType.ARTICLE,
+            "Study": PaperType.ARTICLE,
+            "Conference": PaperType.INPROCEEDINGS,
+            "Book": PaperType.BOOK,
+            "BookSection": PaperType.INBOOK,
+            "Dataset": PaperType.MISC,
+            "News": PaperType.MISC,
+        }
+        paper_type: PaperType | None = None
+        pub_types = item.get("publicationTypes") or []
+        for pt in pub_types:
+            if isinstance(pt, str) and pt in _SS_PAPER_TYPE_MAP:
+                paper_type = _SS_PAPER_TYPE_MAP[pt]
+                break
 
         try:
             paper = Paper(
@@ -253,6 +276,7 @@ class SemanticScholarSearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={self.name},
+                paper_type=paper_type,
             )
         except ValueError:
             return None

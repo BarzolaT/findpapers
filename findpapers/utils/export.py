@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from findpapers.core.paper import Paper
-from findpapers.core.source_type import SourceType
 
 if TYPE_CHECKING:
     from findpapers.core.search import Search
@@ -96,6 +95,7 @@ def csv_columns() -> list[str]:
         "number_of_pages",
         "pages",
         "databases",
+        "paper_type",
     ]
     source_fields = [
         "source_title",
@@ -139,6 +139,7 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
         "number_of_pages": paper.number_of_pages,
         "pages": paper.pages,
         "databases": "; ".join(sorted(paper.databases)),
+        "paper_type": paper.paper_type.value if paper.paper_type else None,
         "source_title": source.title if source else None,
         "source_type": source.source_type.value if source and source.source_type else None,
         "source_isbn": source.isbn if source else None,
@@ -152,9 +153,9 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
 def paper_to_bibtex(paper: Paper) -> str:
     """Convert a paper into a BibTeX entry.
 
-    The BibTeX entry type is determined from the source type when available:
-    ``@article`` for journals, ``@inproceedings`` for conferences,
-    ``@inbook`` for books, and ``@misc`` as the fallback.
+    The BibTeX entry type is taken directly from ``paper.paper_type``
+    (whose values are already BibTeX-aligned).  When ``paper_type`` is
+    ``None``, the entry falls back to ``@misc``.
 
     Parameters
     ----------
@@ -167,16 +168,9 @@ def paper_to_bibtex(paper: Paper) -> str:
         BibTeX entry.
     """
     default_tab = " " * 4
-    # Map source_type to BibTeX entry type.
-    _BIBTEX_TYPE_MAP: dict[SourceType, str] = {
-        SourceType.JOURNAL: "@article",
-        SourceType.CONFERENCE: "@inproceedings",
-        SourceType.BOOK: "@inbook",
-    }
     source = paper.source
-    citation_type = "@misc"
-    if source and source.source_type:
-        citation_type = _BIBTEX_TYPE_MAP.get(source.source_type, "@misc")
+    # paper_type values are already BibTeX entry types; fall back to @misc.
+    citation_type = f"@{paper.paper_type.value}" if paper.paper_type is not None else "@misc"
     citation_key = citation_key_for(paper)
     lines = [f"{citation_type}{{{citation_key},"]
     lines.append(f"{default_tab}title = {{{paper.title}}},")

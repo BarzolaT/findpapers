@@ -1,8 +1,9 @@
 """Findpapers - Academic paper search and management tool."""
 
 from findpapers.core.author import Author
+from findpapers.core.paper import PaperType
 from findpapers.core.query import ConnectorType, FilterCode
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import SourceType
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
@@ -16,5 +17,6 @@ __all__ = [
     "SearchRunnerNotExecutedError",
     "FilterCode",
     "ConnectorType",
+    "PaperType",
     "SourceType",
 ]

@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from findpapers.core.author import Author
-from findpapers.core.source_type import SourceType
+from findpapers.core.source import SourceType
 from findpapers.utils.enrichment import (
     _parse_authors,
     _parse_keywords,
