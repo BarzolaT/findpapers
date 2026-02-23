@@ -234,8 +234,58 @@ class SearcherBase(ABC):
         response.raise_for_status()
         return response
 
-    def _log_request(self, url: str, params: Optional[dict] = None) -> None:
-        """Log an outgoing HTTP GET request at ``DEBUG`` level.
+    def _post(
+        self,
+        url: str,
+        json_body: Optional[dict | list] = None,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None,
+    ) -> requests.Response:
+        """Perform a rate-limited, logged POST request.
+
+        Mirrors :meth:`_get` but sends a JSON body via ``requests.post``.
+        Calls :meth:`_prepare_params` and :meth:`_prepare_headers` for
+        credential injection and browser-header defaults.
+
+        Parameters
+        ----------
+        url : str
+            Target URL.
+        json_body : dict | list | None
+            JSON-serialisable payload for the request body.
+        params : dict | None
+            Query parameters (before credential injection).
+        headers : dict | None
+            HTTP headers (before credential injection).
+
+        Returns
+        -------
+        requests.Response
+            HTTP response.
+
+        Raises
+        ------
+        requests.HTTPError
+            On non-2xx status codes.
+        """
+        prepared_params = self._prepare_params(dict(params) if params else {})
+        prepared_headers = self._prepare_headers(dict(headers) if headers else {})
+        self._rate_limit()
+        self._log_request(url, prepared_params or None, method="POST")
+        response = requests.post(
+            url,
+            json=json_body,
+            params=prepared_params or None,
+            headers=prepared_headers or None,
+            timeout=30,
+        )
+        self._last_request_time = time.monotonic()
+        self._log_response(response)
+        response.raise_for_status()
+        return response
+
+    def _log_request(self, url: str, params: Optional[dict] = None, method: str = "GET") -> None:
+        """Log an outgoing HTTP request at ``DEBUG`` level.
 
         API keys and other sensitive parameters are replaced with ``"***"``
         so that credentials are never written to logs.
@@ -246,6 +296,8 @@ class SearcherBase(ABC):
             Base request URL (without query string).
         params : dict | None
             Query parameters to be sent with the request.
+        method : str
+            HTTP method (e.g. ``"GET"`` or ``"POST"``).
         """
         if not logger.isEnabledFor(logging.DEBUG):
             return
@@ -256,7 +308,7 @@ class SearcherBase(ABC):
             full_url = f"{url}?{urlencode(safe_params)}"
         else:
             full_url = url
-        logger.debug("[%s] GET %s", self.name, full_url)
+        logger.debug("[%s] %s %s", self.name, method, full_url)
 
     def _log_response(self, response: requests.Response) -> None:
         """Log a summary of an HTTP response at ``DEBUG`` level.

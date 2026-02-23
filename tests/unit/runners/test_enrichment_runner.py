@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.source import Source
 from findpapers.exceptions import SearchRunnerNotExecutedError
@@ -26,7 +27,7 @@ def _make_paper(title: str = "Test Paper", urls: set[str] | None = None) -> Pape
     return Paper(
         title=title,
         abstract="An abstract.",
-        authors=["Author One"],
+        authors=[Author(name="Author One")],
         source=Source(title="Test Journal"),
         publication_date=date(2023, 1, 1),
         url=url,
@@ -273,7 +274,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
         paper = Paper(
             title="No Pub Paper",
             abstract="Abstract.",
-            authors=["Author"],
+            authors=[Author(name="Author")],
             source=None,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
@@ -284,7 +285,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
         enriched_paper = Paper(
             title="No Pub Paper",
             abstract="Abstract.",
-            authors=["Author"],
+            authors=[Author(name="Author")],
             source=predatory_pub,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
@@ -318,7 +319,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
         paper = Paper(
             title="Flagged Paper",
             abstract="Abstract.",
-            authors=["Author"],
+            authors=[Author(name="Author")],
             source=original_pub,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
@@ -327,7 +328,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
         enriched_paper = Paper(
             title="Flagged Paper",
             abstract="Abstract.",
-            authors=["Author"],
+            authors=[Author(name="Author")],
             source=safe_pub,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
@@ -358,7 +359,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
         paper = Paper(
             title="No Pub Paper",
             abstract="Abstract.",
-            authors=["Author"],
+            authors=[Author(name="Author")],
             source=None,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",
@@ -367,7 +368,7 @@ class TestEnrichmentRunnerPredatoryReclassification:
         enriched_paper = Paper(
             title="No Pub Paper",
             abstract="Abstract.",
-            authors=["Author"],
+            authors=[Author(name="Author")],
             source=None,
             publication_date=date(2023, 1, 1),
             url="http://example.com/paper",

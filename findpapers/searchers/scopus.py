@@ -7,6 +7,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
@@ -162,14 +163,25 @@ class ScopusSearcher(SearcherBase):
 
         abstract = (entry.get("dc:description") or entry.get("prism:teaser") or "").strip()
 
-        # Authors — Scopus provides a string or list
+        # Authors — Scopus search API returns only the first author in dc:creator.
         raw_creator = entry.get("dc:creator") or ""
         if isinstance(raw_creator, list):
-            authors = [a.strip() for a in raw_creator if (a or "").strip()]
+            authors: list[Author] = [
+                Author(name=a.strip()) for a in raw_creator if (a or "").strip()
+            ]
         elif raw_creator:
-            authors = [raw_creator.strip()]
+            authors = [Author(name=raw_creator.strip())]
         else:
             authors = []
+
+        # Affiliation — Scopus provides entry-level affiliations. When a single
+        # author is returned we assign the first affiliation to that author.
+        if len(authors) == 1:
+            raw_affiliation = entry.get("affiliation")
+            if isinstance(raw_affiliation, list) and raw_affiliation:
+                affilname = (raw_affiliation[0].get("affilname") or "").strip()
+                if affilname:
+                    authors[0] = Author(name=authors[0].name, affiliation=affilname)
 
         # Publication date
         cover_date = (entry.get("prism:coverDate") or "").strip()

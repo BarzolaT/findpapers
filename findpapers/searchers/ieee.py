@@ -7,6 +7,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
@@ -178,11 +179,12 @@ class IEEESearcher(SearcherBase):
         abstract = (item.get("abstract") or "").strip()
 
         # Authors
-        authors: list[str] = []
+        authors: list[Author] = []
         for author_entry in item.get("authors", {}).get("authors", []):
             full_name = (author_entry.get("full_name") or "").strip()
             if full_name:
-                authors.append(full_name)
+                affiliation = (author_entry.get("affiliation") or "").strip() or None
+                authors.append(Author(name=full_name, affiliation=affiliation))
 
         # Publication date
         pub_date: Optional[datetime.date] = None
@@ -198,10 +200,11 @@ class IEEESearcher(SearcherBase):
         url: Optional[str] = (item.get("html_url") or item.get("pdf_url") or "").strip() or None
         pdf_url: Optional[str] = (item.get("pdf_url") or "").strip() or None
 
-        # Keywords
+        # Keywords — ieee_terms, author_terms, etc. are nested inside index_terms
         keywords: set[str] = set()
-        for kw_group in ["index_terms", "ieee_terms", "author_terms", "mesh_terms"]:
-            for kw_el in item.get(kw_group, {}).get("terms", []):
+        index_terms = item.get("index_terms", {})
+        for kw_group in ["ieee_terms", "author_terms", "mesh_terms"]:
+            for kw_el in index_terms.get(kw_group, {}).get("terms", []):
                 kw = kw_el.strip()
                 if kw:
                     keywords.add(kw)

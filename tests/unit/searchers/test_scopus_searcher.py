@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from findpapers.core.author import Author
 from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
 from findpapers.query.builders.scopus import ScopusQueryBuilder
@@ -112,7 +113,7 @@ class TestScopusSearcherParsePaper:
         paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
         assert len(paper.authors) == 2
-        assert "Author One" in paper.authors
+        assert Author(name="Author One") in paper.authors
 
     def test_abstract_from_teaser_fallback(self):
         """Entry without dc:description uses prism:teaser for abstract."""
@@ -159,6 +160,66 @@ class TestScopusSearcherParsePaper:
         paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
         assert paper.citations == 42
+
+    def test_single_author_gets_affiliation(self):
+        """Single author receives the first affiliation from the entry."""
+        entry = {
+            "dc:title": "A Paper",
+            "dc:creator": "Smith, J.",
+            "affiliation": [
+                {
+                    "@_fa": "true",
+                    "affilname": "MIT",
+                    "affiliation-city": "Cambridge",
+                    "affiliation-country": "United States",
+                }
+            ],
+        }
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert len(paper.authors) == 1
+        assert paper.authors[0].name == "Smith, J."
+        assert paper.authors[0].affiliation == "MIT"
+
+    def test_multiple_authors_skip_affiliation(self):
+        """Multiple authors do not get entry-level affiliation assigned."""
+        entry = {
+            "dc:title": "A Paper",
+            "dc:creator": ["Author One", "Author Two"],
+            "affiliation": [
+                {
+                    "@_fa": "true",
+                    "affilname": "Harvard",
+                    "affiliation-city": "Boston",
+                    "affiliation-country": "United States",
+                }
+            ],
+        }
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert len(paper.authors) == 2
+        assert paper.authors[0].affiliation is None
+        assert paper.authors[1].affiliation is None
+
+    def test_empty_affiliation_list_ignored(self):
+        """Empty affiliation list does not set affiliation on author."""
+        entry = {
+            "dc:title": "A Paper",
+            "dc:creator": "Solo Author",
+            "affiliation": [],
+        }
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.authors[0].affiliation is None
+
+    def test_affiliation_from_sample_response(self, scopus_sample_json):
+        """First entry in sample response has affiliation extracted."""
+        entry = scopus_sample_json["search-results"]["entry"][0]
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert len(paper.authors) == 1
+        assert paper.authors[0].name == "Sumithra M.G."
+        assert paper.authors[0].affiliation == "Dr. N.G.P. Institute of Technology"
 
 
 class TestScopusSearcherSearch:

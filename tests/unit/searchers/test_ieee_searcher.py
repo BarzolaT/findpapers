@@ -104,18 +104,19 @@ class TestIEEESearcherParsePaper:
         assert paper is None
 
     def test_parse_with_all_keyword_groups(self):
-        """Keywords from all four keyword groups are collected."""
+        """Keywords from ieee_terms, author_terms and mesh_terms (nested in index_terms)."""
         item = {
             "title": "A Paper",
-            "index_terms": {"terms": ["term1"]},
-            "ieee_terms": {"terms": ["term2"]},
-            "author_terms": {"terms": ["term3"]},
-            "mesh_terms": {"terms": ["term4"]},
+            "index_terms": {
+                "ieee_terms": {"terms": ["term1"]},
+                "author_terms": {"terms": ["term2"]},
+                "mesh_terms": {"terms": ["term3"]},
+            },
         }
         paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
         assert paper.keywords is not None
-        assert len(paper.keywords) == 4
+        assert len(paper.keywords) == 3
 
     def test_pages_start_end(self):
         """start_page and end_page are combined into pages field."""
@@ -158,6 +159,17 @@ class TestIEEESearcherParsePaper:
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "IEEE Trans."
+
+    def test_keywords_from_sample_data(self, ieee_sample_json):
+        """Keywords are extracted from nested index_terms in real sample data."""
+        articles = ieee_sample_json["articles"]
+        # articles[2] is the first entry with index_terms (ieee_terms + author_terms)
+        paper = IEEESearcher()._parse_paper(articles[2])
+        assert paper is not None
+        assert paper.keywords is not None
+        assert len(paper.keywords) > 0
+        # Verify a known IEEE term from the sample
+        assert "Natural language processing" in paper.keywords
 
 
 class TestIEEESearcherSearch:

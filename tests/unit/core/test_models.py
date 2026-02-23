@@ -6,6 +6,7 @@ import json
 
 import pytest
 
+from findpapers.core.author import Author
 from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, PaperType, _is_preprint_doi, _merge_doi
 from findpapers.core.search import Search
 from findpapers.core.source import Source
@@ -117,7 +118,7 @@ def test_paper_url_and_pdf_url():
     paper = Paper(
         title="Title",
         abstract="Abstract",
-        authors=["A"],
+        authors=[Author(name="A")],
         source=None,
         publication_date=None,
         url="https://example.com/paper",
@@ -135,7 +136,7 @@ def test_paper_add_and_merge():
     paper = Paper(
         title="Title",
         abstract="",
-        authors=["A"],
+        authors=[Author(name="A")],
         source=publication,
         publication_date=datetime.date(2020, 1, 1),
         url="https://example.com",
@@ -147,7 +148,7 @@ def test_paper_add_and_merge():
     incoming = Paper(
         title="Longer Title",
         abstract="Abstract",
-        authors=["A", "B"],
+        authors=[Author(name="A"), Author(name="B")],
         source=Source(title="Journal", publisher="Pub"),
         publication_date=datetime.date(2020, 1, 1),
         url="https://longer-example.com",
@@ -173,37 +174,55 @@ def test_paper_merge_keeps_larger_author_list():
     base = Paper(
         title="Test Paper",
         abstract="Abstract",
-        authors=["Alice Smith", "Bob Jones"],
+        authors=[Author(name="Alice Smith"), Author(name="Bob Jones")],
         source=None,
         publication_date=None,
     )
     incoming = Paper(
         title="Test Paper",
         abstract="Abstract",
-        authors=["Alice Smith", "Bob Jones", "Charlie Brown", "Diana Prince"],
+        authors=[
+            Author(name="Alice Smith"),
+            Author(name="Bob Jones"),
+            Author(name="Charlie Brown"),
+            Author(name="Diana Prince"),
+        ],
         source=None,
         publication_date=None,
     )
     base.merge(incoming)
-    assert base.authors == ["Alice Smith", "Bob Jones", "Charlie Brown", "Diana Prince"]
+    assert base.authors == [
+        Author(name="Alice Smith"),
+        Author(name="Bob Jones"),
+        Author(name="Charlie Brown"),
+        Author(name="Diana Prince"),
+    ]
 
     # base has more authors than incoming → base wins
     base2 = Paper(
         title="Test Paper",
         abstract="Abstract",
-        authors=["Alice Smith", "Bob Jones", "Charlie Brown"],
+        authors=[
+            Author(name="Alice Smith"),
+            Author(name="Bob Jones"),
+            Author(name="Charlie Brown"),
+        ],
         source=None,
         publication_date=None,
     )
     incoming2 = Paper(
         title="Test Paper",
         abstract="Abstract",
-        authors=["Alice Smith"],
+        authors=[Author(name="Alice Smith")],
         source=None,
         publication_date=None,
     )
     base2.merge(incoming2)
-    assert base2.authors == ["Alice Smith", "Bob Jones", "Charlie Brown"]
+    assert base2.authors == [
+        Author(name="Alice Smith"),
+        Author(name="Bob Jones"),
+        Author(name="Charlie Brown"),
+    ]
 
 
 class TestIsPreprintDoi:
@@ -270,7 +289,7 @@ def test_paper_merge_prefers_publisher_doi_over_preprint_doi():
     base = Paper(
         title="Attention is All You Need",
         abstract="",
-        authors=["Vaswani"],
+        authors=[Author(name="Vaswani")],
         source=None,
         publication_date=datetime.date(2017, 6, 12),
         doi="10.48550/arxiv.1706.03762",
@@ -278,7 +297,7 @@ def test_paper_merge_prefers_publisher_doi_over_preprint_doi():
     incoming = Paper(
         title="Attention is All You Need",
         abstract="The dominant sequence...",
-        authors=["Vaswani"],
+        authors=[Author(name="Vaswani")],
         source=None,
         publication_date=datetime.date(2017, 6, 12),
         doi="10.5555/3295222.3295349",
@@ -292,7 +311,7 @@ def test_paper_merge_prefers_publisher_doi_when_preprint_is_incoming():
     base = Paper(
         title="Attention is All You Need",
         abstract="The dominant sequence...",
-        authors=["Vaswani"],
+        authors=[Author(name="Vaswani")],
         source=None,
         publication_date=datetime.date(2017, 6, 12),
         doi="10.5555/3295222.3295349",
@@ -300,7 +319,7 @@ def test_paper_merge_prefers_publisher_doi_when_preprint_is_incoming():
     incoming = Paper(
         title="Attention is All You Need",
         abstract="",
-        authors=["Vaswani"],
+        authors=[Author(name="Vaswani")],
         source=None,
         publication_date=datetime.date(2017, 6, 12),
         doi="10.48550/arxiv.1706.03762",
@@ -315,7 +334,7 @@ def test_search_add_paper():
     paper = Paper(
         title="Title",
         abstract="Abstract",
-        authors=["Author"],
+        authors=[Author(name="Author")],
         source=None,
         publication_date=None,
     )
@@ -329,7 +348,7 @@ def _make_search_with_paper() -> Search:
     paper = Paper(
         title="Export Test Paper",
         abstract="Abstract text.",
-        authors=["Author One"],
+        authors=[Author(name="Author One")],
         source=Source(title="Test Journal"),
         publication_date=datetime.date(2023, 1, 1),
     )

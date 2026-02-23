@@ -12,6 +12,7 @@ import requests
 from lxml import html
 from lxml.html import HtmlElement
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.source import Source
 from findpapers.utils.http_headers import get_browser_headers
@@ -42,6 +43,10 @@ AUTHOR_META_KEYS = [
     "dc.creator.personalname",  # OpenAlex, Scopus, SemanticScholar
     "dc.contributor",
     "author",
+]
+AUTHOR_AFFILIATION_META_KEYS = [
+    "citation_author_institution",
+    "citation_author_affiliation",
 ]
 DOI_META_KEYS = [
     "citation_doi",
@@ -252,6 +257,24 @@ def _merge_ieee_metadata(content: str, metadata: dict[str, Any]) -> None:
     if authors:
         _set_if_absent("citation_author", authors if len(authors) > 1 else authors[0])
 
+    # Affiliations — IEEE embeds per-author affiliation in the authors list.
+    # The affiliation field may be a string or a list of strings.
+    affiliations: list[str] = []
+    for a in data.get("authors", []):
+        if not a.get("name"):
+            continue
+        raw_aff = a.get("affiliation") or ""
+        if isinstance(raw_aff, list):
+            aff_str = "; ".join(s.strip() for s in raw_aff if isinstance(s, str) and s.strip())
+        else:
+            aff_str = str(raw_aff).strip()
+        affiliations.append(aff_str)
+    if affiliations and any(affiliations):
+        _set_if_absent(
+            "citation_author_institution",
+            affiliations if len(affiliations) > 1 else affiliations[0],
+        )
+
     _set_if_absent("citation_doi", data.get("doi"))
     _set_if_absent("citation_title", data.get("title") or data.get("displayDocTitle"))
     _set_if_absent("citation_abstract", data.get("abstract"))
@@ -443,6 +466,70 @@ def _parse_authors(value: Any) -> list[str]:
     return [part.strip() for part in str(value).split(";") if part.strip()]
 
 
+def _parse_affiliations(value: Any) -> list[str]:
+    """Normalise affiliation metadata into a flat list of strings.
+
+    Works similarly to :func:`_parse_authors`: handles ``list``, semicolon-
+    separated ``str``, and single-string forms.
+
+    Parameters
+    ----------
+    value : Any
+        Raw affiliation data (str, list, or ``None``).
+
+    Returns
+    -------
+    list[str]
+        Stripped affiliation strings in original order.
+    """
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return [part.strip() for part in str(value).split(";") if part.strip()]
+
+
+def _build_authors_from_metadata(metadata: dict[str, Any]) -> list[Author]:
+    """Build :class:`Author` objects pairing names with affiliations.
+
+    Author names are resolved from :data:`AUTHOR_META_KEYS`, and affiliations
+    from :data:`AUTHOR_AFFILIATION_META_KEYS`.  When both lists are present
+    they are paired positionally (one affiliation per author); surplus names
+    receive no affiliation.
+
+    Parameters
+    ----------
+    metadata : dict[str, Any]
+        Extracted HTML metadata.
+
+    Returns
+    -------
+    list[Author]
+        Author objects with affiliations where available.
+    """
+    names: list[str] = []
+    for key in AUTHOR_META_KEYS:
+        raw = metadata.get(key)
+        if raw:
+            names = _parse_authors(raw)
+            if names:
+                break
+
+    affiliations: list[str] = []
+    for key in AUTHOR_AFFILIATION_META_KEYS:
+        raw = metadata.get(key)
+        if raw:
+            affiliations = _parse_affiliations(raw)
+            if affiliations:
+                break
+
+    authors: list[Author] = []
+    for idx, name in enumerate(names):
+        affiliation = affiliations[idx] if idx < len(affiliations) else None
+        authors.append(Author(name=name, affiliation=affiliation))
+    return authors
+
+
 def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper | None:
     """Build a :class:`~findpapers.core.paper.Paper` from extracted metadata.
 
@@ -475,14 +562,8 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
             if doi:
                 break
 
-    # Authors — iterate key priority order and stop at the first non-empty hit.
-    authors: list[str] = []
-    for author_key in AUTHOR_META_KEYS:
-        val = metadata.get(author_key)
-        if val:
-            authors = _parse_authors(val)
-            if authors:
-                break
+    # Authors — build Author objects with affiliations when available.
+    authors: list[Author] = _build_authors_from_metadata(metadata)
 
     # Keywords — accumulate from all matching keys.
     keywords: set[str] = set()

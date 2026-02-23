@@ -7,6 +7,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
@@ -184,12 +185,20 @@ class OpenAlexSearcher(SearcherBase):
             abstract = _reconstruct_abstract(inverted_index)
 
         # Authors
-        authors: list[str] = []
+        authors: list[Author] = []
         for authorship in work.get("authorships", []):
             author_info = authorship.get("author") or {}
             name = (author_info.get("display_name") or "").strip()
             if name:
-                authors.append(name)
+                # OpenAlex provides institutions per authorship entry.
+                institutions = authorship.get("institutions") or []
+                affiliation_parts = [
+                    (inst.get("display_name") or "").strip()
+                    for inst in institutions
+                    if isinstance(inst, dict) and (inst.get("display_name") or "").strip()
+                ]
+                affiliation = "; ".join(affiliation_parts) if affiliation_parts else None
+                authors.append(Author(name=name, affiliation=affiliation))
 
         # Publication date
         pub_date: Optional[datetime.date] = None
@@ -258,6 +267,16 @@ class OpenAlexSearcher(SearcherBase):
                 )
                 source = Source(title=pub_title, issn=issn)
 
+        # Pages from biblio
+        pages: Optional[str] = None
+        biblio = work.get("biblio") or {}
+        first_page = (biblio.get("first_page") or "").strip()
+        last_page = (biblio.get("last_page") or "").strip()
+        if first_page and last_page:
+            pages = f"{first_page}\u2013{last_page}"
+        elif first_page:
+            pages = first_page
+
         # Paper type derived from the work-level "type" field
         paper_type = _openalex_work_type_to_paper_type(work.get("type"))
 
@@ -273,6 +292,7 @@ class OpenAlexSearcher(SearcherBase):
                 doi=doi,
                 citations=citations,
                 keywords=keywords if keywords else None,
+                pages=pages,
                 databases={self.name},
                 paper_type=paper_type,
             )
@@ -324,7 +344,7 @@ class OpenAlexSearcher(SearcherBase):
                 "select": (
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
-                    "primary_location,concepts,keywords,type"
+                    "primary_location,concepts,keywords,type,biblio"
                 ),
             }
 

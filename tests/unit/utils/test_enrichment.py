@@ -13,6 +13,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from findpapers.core.author import Author
 from findpapers.utils.enrichment import (
     _parse_authors,
     _parse_keywords,
@@ -372,8 +373,8 @@ class TestBuildPaperFromMetadata:
         }
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
-        assert "Wang Y" in paper.authors
-        assert "Tian J" in paper.authors
+        assert Author(name="Wang Y") in paper.authors
+        assert Author(name="Tian J") in paper.authors
         assert len(paper.authors) == 3
 
     def test_dc_subject_used_as_keywords(self) -> None:
@@ -476,7 +477,7 @@ class TestBuildPaperFromMetadata:
         }
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
-        assert "Smith, J" in paper.authors
+        assert Author(name="Smith, J") in paper.authors
 
     def test_dc_date_issued_used_for_date(self) -> None:
         """dc.date.issued is used as publication date when other date keys are absent."""
@@ -536,7 +537,7 @@ class TestBuildPaperFromMetadata:
         }
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
-        assert "Smith, J" in paper.authors
+        assert Author(name="Smith, J") in paper.authors
 
     def test_journal_publication_created(self) -> None:
         """citation_journal_title creates a Publication and sets paper_type=ARTICLE."""

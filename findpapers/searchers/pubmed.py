@@ -8,6 +8,7 @@ from collections.abc import Callable
 from typing import List, Optional
 from xml.etree import ElementTree as ET
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
@@ -199,17 +200,27 @@ class PubmedSearcher(SearcherBase):
         abstract = " ".join(filter(None, abstract_parts))
 
         # Authors
-        authors: list[str] = []
+        authors: list[Author] = []
         for author_el in article.findall(".//Author"):
             last = (author_el.findtext("LastName") or "").strip()
             fore = (author_el.findtext("ForeName") or "").strip()
             initials = (author_el.findtext("Initials") or "").strip()
             if last and fore:
-                authors.append(f"{fore} {last}")
+                name = f"{fore} {last}"
             elif last and initials:
-                authors.append(f"{initials} {last}")
+                name = f"{initials} {last}"
             elif last:
-                authors.append(last)
+                name = last
+            else:
+                continue
+            # PubMed provides affiliation info inside AffiliationInfo.
+            aff_parts = [
+                (aff_el.text or "").strip()
+                for aff_el in author_el.findall(".//AffiliationInfo/Affiliation")
+                if aff_el is not None and (aff_el.text or "").strip()
+            ]
+            affiliation = "; ".join(aff_parts) if aff_parts else None
+            authors.append(Author(name=name, affiliation=affiliation))
 
         # Publication date
         pub_date_el = article.find(".//PubDate")
@@ -250,6 +261,21 @@ class PubmedSearcher(SearcherBase):
             if kw:
                 keywords.add(kw)
 
+        # Pages
+        pages: Optional[str] = None
+        pagination_el = article.find(".//Pagination")
+        if pagination_el is not None:
+            medline_pgn = (pagination_el.findtext("MedlinePgn") or "").strip()
+            if medline_pgn:
+                pages = medline_pgn
+            else:
+                start_pg = (pagination_el.findtext("StartPage") or "").strip()
+                end_pg = (pagination_el.findtext("EndPage") or "").strip()
+                if start_pg and end_pg:
+                    pages = f"{start_pg}\u2013{end_pg}"
+                elif start_pg:
+                    pages = start_pg
+
         # Source (journal)
         journal_el = article.find(".//Journal")
         source: Optional[Source] = None
@@ -272,6 +298,7 @@ class PubmedSearcher(SearcherBase):
                 url=url,
                 doi=doi,
                 keywords=keywords if keywords else None,
+                pages=pages,
                 databases={self.name},
                 # PubMed exclusively indexes journal literature.
                 paper_type=PaperType.ARTICLE,

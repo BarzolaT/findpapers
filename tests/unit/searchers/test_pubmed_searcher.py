@@ -7,6 +7,7 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
+from findpapers.core.author import Author
 from findpapers.core.search import Database
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
@@ -137,7 +138,7 @@ class TestPubmedSearcherParsePaper:
         el = ET.fromstring(xml_str)
         paper = PubmedSearcher()._parse_paper(el)
         assert paper is not None
-        assert paper.authors == ["J Smith"]
+        assert paper.authors == [Author(name="J Smith")]
 
     def test_keywords_extracted(self):
         """Keywords and MeSH descriptors are collected."""
@@ -228,6 +229,58 @@ class TestPubmedSearcherParsePaper:
         assert paper.source is not None
         assert paper.source.title == "Nature"
         assert paper.source.issn == "1234-5678"
+
+    def test_pages_from_medline_pgn(self):
+        """Pages are extracted from MedlinePgn in Pagination element."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>1</PMID>
+                <Article>
+                    <ArticleTitle>Test</ArticleTitle>
+                    <Pagination>
+                        <StartPage>100</StartPage>
+                        <EndPage>115</EndPage>
+                        <MedlinePgn>100-115</MedlinePgn>
+                    </Pagination>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.pages == "100-115"
+
+    def test_pages_from_start_end_when_no_medline_pgn(self):
+        """Pages are built from StartPage\u2013EndPage when MedlinePgn is absent."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>1</PMID>
+                <Article>
+                    <ArticleTitle>Test</ArticleTitle>
+                    <Pagination>
+                        <StartPage>200</StartPage>
+                        <EndPage>210</EndPage>
+                    </Pagination>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.pages == "200\u2013210"
+
+    def test_pages_from_sample_data(self, pubmed_efetch_xml):
+        """Pages are extracted from the real PubMed sample data."""
+        tree = ET.fromstring(pubmed_efetch_xml)
+        articles = tree.findall(".//PubmedArticle")
+        paper = PubmedSearcher()._parse_paper(articles[0])
+        assert paper is not None
+        assert paper.pages is not None
+        assert "1148" in paper.pages
 
 
 class TestPubmedSearcherSearch:

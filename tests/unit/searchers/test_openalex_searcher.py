@@ -274,6 +274,41 @@ class TestOpenAlexSearcherParsePaper:
         assert paper is not None
         assert paper.paper_type == PaperType.INCOLLECTION
 
+    def test_pages_from_biblio(self):
+        """Pages are extracted from biblio.first_page and last_page."""
+        work = {
+            "title": "A Paper",
+            "biblio": {"first_page": "100", "last_page": "115"},
+        }
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.pages == "100\u2013115"
+
+    def test_pages_first_only(self):
+        """Only first_page is stored when last_page is absent."""
+        work = {
+            "title": "A Paper",
+            "biblio": {"first_page": "42", "last_page": None},
+        }
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.pages == "42"
+
+    def test_pages_none_when_biblio_absent(self):
+        """Pages are None when biblio is not present."""
+        work = {"title": "A Paper"}
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.pages is None
+
+    def test_pages_from_sample_data(self, openalex_sample_json):
+        """Pages are extracted from real sample data."""
+        results = openalex_sample_json["results"]
+        paper = OpenAlexSearcher()._parse_paper(results[0])
+        assert paper is not None
+        assert paper.pages is not None
+        assert "\u2013" in paper.pages  # en-dash separator
+
 
 class TestOpenAlexSearcherReconstructAbstract:
     """Tests for _reconstruct_abstract helper."""

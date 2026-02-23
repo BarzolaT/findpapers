@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.search import Database
 from findpapers.core.source import Source
@@ -28,7 +29,7 @@ def _make_paper(
     return Paper(
         title=title,
         abstract="An abstract.",
-        authors=["Author One"],
+        authors=[Author(name="Author One")],
         source=pub,
         publication_date=date(2023, 1, 1),
         url="http://example.com",
@@ -236,7 +237,7 @@ class TestSearchRunnerPipeline:
         p1 = Paper(
             title="Attention is All You Need",
             abstract="abstract with year",
-            authors=["Vaswani et al."],
+            authors=[Author(name="Vaswani et al.")],
             source=Source(title="arXiv"),
             publication_date=date(2017, 6, 12),
             url="http://arxiv.org/abs/1706.03762",
@@ -246,7 +247,7 @@ class TestSearchRunnerPipeline:
         p2 = Paper(
             title="Attention is All You Need",
             abstract="abstract without year",
-            authors=["Vaswani et al."],
+            authors=[Author(name="Vaswani et al.")],
             source=Source(title="OpenAlex Source"),
             publication_date=None,  # intentionally missing
             url="http://openalex.org/W2963403868",
@@ -262,7 +263,7 @@ class TestSearchRunnerPipeline:
         p1 = Paper(
             title="Annual Report on AI",
             abstract="abstract",
-            authors=["A"],
+            authors=[Author(name="A")],
             source=Source(title="Journal"),
             publication_date=date(2022, 1, 1),
             url="http://example.com/2022",
@@ -272,7 +273,7 @@ class TestSearchRunnerPipeline:
         p2 = Paper(
             title="Annual Report on AI",
             abstract="abstract",
-            authors=["A"],
+            authors=[Author(name="A")],
             source=Source(title="Journal"),
             publication_date=date(2023, 1, 1),
             url="http://example.com/2023",
@@ -296,7 +297,7 @@ class TestSearchRunnerPipeline:
         p1 = Paper(
             title="Attention is All You Need... Unless You Are a CISO",
             abstract="abstract from zenodo",
-            authors=["Author A"],
+            authors=[Author(name="Author A")],
             source=Source(title="Zenodo"),
             publication_date=date(2025, 12, 25),
             url="https://zenodo.org/records/18056028",
@@ -306,7 +307,7 @@ class TestSearchRunnerPipeline:
         p2 = Paper(
             title="Attention is All You Need... Unless You Are a CISO",
             abstract="abstract from ssrn",
-            authors=["Author A"],
+            authors=[Author(name="Author A")],
             source=Source(title="SSRN"),
             publication_date=date(2026, 1, 1),
             url="https://ssrn.com/abstract=5967774",
@@ -329,7 +330,7 @@ class TestSearchRunnerPipeline:
         p1 = Paper(
             title="Attention is All You Need",
             abstract="preprint version",
-            authors=["Vaswani et al."],
+            authors=[Author(name="Vaswani et al.")],
             source=Source(title="Zenodo"),
             publication_date=date(2026, 1, 17),
             url="https://zenodo.org/records/18289747",
@@ -339,7 +340,7 @@ class TestSearchRunnerPipeline:
         p2 = Paper(
             title="Attention Is All You Need",
             abstract="book chapter version",
-            authors=["Vaswani et al."],
+            authors=[Author(name="Vaswani et al.")],
             source=Source(title="Deep Learning Book"),
             publication_date=date(2025, 10, 31),
             url="https://doi.org/10.1201/9781003561460-19",
@@ -360,7 +361,7 @@ class TestSearchRunnerPipeline:
         p1 = Paper(
             title="Annual Report on AI",
             abstract="abstract",
-            authors=["A"],
+            authors=[Author(name="A")],
             source=Source(title="Journal"),
             publication_date=date(2022, 1, 1),
             url="http://example.com/2022",
@@ -370,7 +371,7 @@ class TestSearchRunnerPipeline:
         p2 = Paper(
             title="Annual Report on AI",
             abstract="abstract",
-            authors=["A"],
+            authors=[Author(name="A")],
             source=Source(title="Journal"),
             publication_date=date(2023, 1, 1),
             url="http://example.com/2023",
@@ -386,7 +387,7 @@ class TestSearchRunnerPipeline:
         p1 = Paper(
             title="Survey of Transformers",
             abstract="abstract 2022",
-            authors=["Author A"],
+            authors=[Author(name="Author A")],
             source=Source(title="Zenodo"),
             publication_date=date(2022, 1, 1),
             url="https://zenodo.org/records/1",
@@ -396,7 +397,7 @@ class TestSearchRunnerPipeline:
         p2 = Paper(
             title="Survey of Transformers",
             abstract="abstract 2024",
-            authors=["Author B"],
+            authors=[Author(name="Author B")],
             source=Source(title="arXiv"),
             publication_date=date(2024, 6, 1),
             url="https://arxiv.org/abs/2406.00001",

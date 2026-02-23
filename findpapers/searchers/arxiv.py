@@ -8,6 +8,7 @@ from collections.abc import Callable
 from typing import List, Optional
 from xml.etree import ElementTree as ET
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
@@ -120,12 +121,19 @@ class ArxivSearcher(SearcherBase):
         )
 
         # Authors
-        authors = [
-            (name_el.text or "").strip()
-            for author_el in entry.findall("atom:author", _NS)
-            for name_el in [author_el.find("atom:name", _NS)]
-            if name_el is not None and (name_el.text or "").strip()
-        ]
+        authors: list[Author] = []
+        for author_el in entry.findall("atom:author", _NS):
+            name_el = author_el.find("atom:name", _NS)
+            if name_el is None or not (name_el.text or "").strip():
+                continue
+            name = (name_el.text or "").strip()
+            affiliation_parts = [
+                (aff_el.text or "").strip()
+                for aff_el in author_el.findall("arxiv:affiliation", _NS)
+                if aff_el is not None and (aff_el.text or "").strip()
+            ]
+            affiliation = "; ".join(affiliation_parts) if affiliation_parts else None
+            authors.append(Author(name=name, affiliation=affiliation))
 
         # Published date
         published_el = entry.find("atom:published", _NS)

@@ -11,6 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.source import Source
 from findpapers.utils.export import (
@@ -56,7 +57,7 @@ def minimal_paper() -> Paper:
     return Paper(
         title="Minimal Paper",
         abstract="An abstract.",
-        authors=["Alice, A."],
+        authors=[Author(name="Alice, A.")],
         source=None,
         publication_date=None,
     )
@@ -68,7 +69,7 @@ def full_paper(journal_publication: Source) -> Paper:
     return Paper(
         title="Deep Learning Survey",
         abstract="A survey on deep learning techniques.",
-        authors=["LeCun, Y.", "Bengio, Y.", "Hinton, G."],
+        authors=[Author(name="LeCun, Y."), Author(name="Bengio, Y."), Author(name="Hinton, G.")],
         source=journal_publication,
         publication_date=datetime.date(2022, 6, 15),
         url="https://example.com/paper",
@@ -90,7 +91,7 @@ def conference_paper(conference_publication: Source) -> Paper:
     return Paper(
         title="Attention is All You Need",
         abstract="Transformers intro.",
-        authors=["Vaswani, A."],
+        authors=[Author(name="Vaswani, A.")],
         source=conference_publication,
         publication_date=datetime.date(2017, 12, 1),
         url="https://arxiv.org/abs/1706.03762",
@@ -224,7 +225,7 @@ class TestCitationKeyFor:
         paper = Paper(
             title="Some Title",
             abstract="",
-            authors=["Smith, J."],
+            authors=[Author(name="Smith, J.")],
             source=None,
             publication_date=None,
         )
@@ -236,7 +237,7 @@ class TestCitationKeyFor:
         paper = Paper(
             title="A-Title: With, Punctuation!",
             abstract="",
-            authors=["O'Brien, T."],
+            authors=[Author(name="O'Brien, T.")],
             source=None,
             publication_date=datetime.date(2021, 3, 10),
         )
@@ -386,7 +387,7 @@ class TestPaperToBibtex:
         paper = Paper(
             title="W Paper",
             abstract="",
-            authors=["X, Y."],
+            authors=[Author(name="X, Y.")],
             source=pub,
             publication_date=datetime.date(2021, 1, 1),
             paper_type=None,

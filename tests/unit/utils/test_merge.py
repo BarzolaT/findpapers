@@ -1,6 +1,12 @@
 """Tests for merge utilities."""
 
+from findpapers.core.author import Author
 from findpapers.utils.merge import merge_authors, merge_value
+
+
+def _a(name: str) -> Author:
+    """Shortcut to create an Author with the given name."""
+    return Author(name=name)
 
 
 def test_merge_value_prefers_non_null():
@@ -49,31 +55,31 @@ class TestMergeAuthors:
 
     def test_returns_incoming_when_larger(self):
         """Incoming list is returned when it has more authors than base."""
-        base = ["Alice Smith"]
-        incoming = ["Bob Jones", "Charlie Brown", "Diana Prince"]
+        base = [_a("Alice Smith")]
+        incoming = [_a("Bob Jones"), _a("Charlie Brown"), _a("Diana Prince")]
         assert merge_authors(base, incoming) == incoming
 
     def test_returns_base_when_larger(self):
         """Base list is returned when it has more authors than incoming."""
-        base = ["Alice Smith", "Bob Jones", "Charlie Brown"]
-        incoming = ["Diana Prince"]
+        base = [_a("Alice Smith"), _a("Bob Jones"), _a("Charlie Brown")]
+        incoming = [_a("Diana Prince")]
         assert merge_authors(base, incoming) == base
 
     def test_returns_base_on_tie(self):
         """Base list is returned when both lists have the same length."""
-        base = ["Alice Smith", "Bob Jones"]
-        incoming = ["Charlie Brown", "Diana Prince"]
+        base = [_a("Alice Smith"), _a("Bob Jones")]
+        incoming = [_a("Charlie Brown"), _a("Diana Prince")]
         assert merge_authors(base, incoming) == base
 
     def test_empty_base_returns_incoming(self):
         """Empty base returns the incoming list."""
-        result = merge_authors([], ["Alice Smith"])
-        assert result == ["Alice Smith"]
+        result = merge_authors([], [_a("Alice Smith")])
+        assert result == [_a("Alice Smith")]
 
     def test_empty_incoming_returns_base(self):
         """Empty incoming returns the base list."""
-        result = merge_authors(["Alice Smith"], [])
-        assert result == ["Alice Smith"]
+        result = merge_authors([_a("Alice Smith")], [])
+        assert result == [_a("Alice Smith")]
 
     def test_both_empty(self):
         """Both empty returns empty list."""
@@ -82,9 +88,9 @@ class TestMergeAuthors:
 
     def test_returns_copy_not_same_object(self):
         """Returned list is a copy, not the original object."""
-        base = ["Alice Smith", "Bob Jones"]
-        incoming = ["Charlie Brown"]
+        base = [_a("Alice Smith"), _a("Bob Jones")]
+        incoming = [_a("Charlie Brown")]
         result = merge_authors(base, incoming)
         assert result is not base
-        result.append("extra")
-        assert "extra" not in base
+        result.append(_a("extra"))
+        assert _a("extra") not in base

@@ -84,6 +84,7 @@ def csv_columns() -> list[str]:
         "title",
         "abstract",
         "authors",
+        "author_affiliations",
         "publication_date",
         "url",
         "pdf_url",
@@ -123,7 +124,10 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
     row: dict[str, object] = {
         "title": paper.title,
         "abstract": paper.abstract,
-        "authors": "; ".join(paper.authors),
+        "authors": "; ".join(author.name for author in paper.authors),
+        "author_affiliations": "; ".join(
+            author.affiliation for author in paper.authors if author.affiliation
+        ),
         "publication_date": paper.publication_date.isoformat() if paper.publication_date else None,
         "url": paper.url,
         "pdf_url": paper.pdf_url,
@@ -170,7 +174,7 @@ def paper_to_bibtex(paper: Paper) -> str:
     lines.append(f"{default_tab}title = {{{paper.title}}},")
 
     if paper.authors:
-        authors = " and ".join(paper.authors)
+        authors = " and ".join(author.name for author in paper.authors)
         lines.append(f"{default_tab}author = {{{authors}}},")
 
     if citation_type == "@article" and source is not None:
@@ -221,7 +225,7 @@ def citation_key_for(paper: Paper) -> str:
     """
     author_key = "unknown"
     if paper.authors:
-        author_key = paper.authors[0].lower().replace(" ", "").replace(",", "")
+        author_key = paper.authors[0].name.lower().replace(" ", "").replace(",", "")
     year_key = "XXXX"
     if paper.publication_date is not None:
         year_key = str(paper.publication_date.year)

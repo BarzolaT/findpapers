@@ -3,9 +3,10 @@ from __future__ import annotations
 import datetime
 import logging
 from enum import Enum
-from typing import List, Optional, Set, Union
+from typing import Optional, Set, Union
 
 from ..utils.merge import merge_authors, merge_value
+from .author import Author
 from .source import Source
 
 logger = logging.getLogger(__name__)
@@ -126,7 +127,7 @@ class Paper:
         self,
         title: str,
         abstract: str,
-        authors: List[str],
+        authors: list[Author],
         source: Source | None,
         publication_date: datetime.date | None,
         url: Optional[str] = None,
@@ -148,7 +149,7 @@ class Paper:
             Paper title.
         abstract : str
             Paper abstract.
-        authors : list[str]
+        authors : list[Author]
             List of authors.
         source : Source | None
             Source where it was published.
@@ -187,7 +188,7 @@ class Paper:
 
         self.title = title
         self.abstract = abstract
-        self.authors = authors
+        self.authors: list[Author] = list(authors or [])
         self.source = source
         self.publication_date = self._sanitize_date(publication_date)
         self.url = url
@@ -352,9 +353,9 @@ class Paper:
 
         raw_authors = paper_dict.get("authors") or []
         if isinstance(raw_authors, (list, set, tuple)):
-            authors = [str(author) for author in raw_authors]
+            authors = [Author.from_dict(author) for author in raw_authors]
         else:
-            authors = [str(raw_authors)]
+            authors = [Author.from_dict(raw_authors)]
 
         source_data = paper_dict.get("source")
         source = Source.from_dict(source_data) if isinstance(source_data, dict) else None
@@ -429,7 +430,7 @@ class Paper:
         return {
             "title": paper.title,
             "abstract": paper.abstract,
-            "authors": list(paper.authors),
+            "authors": [author.to_dict() for author in paper.authors],
             "source": (Source.to_dict(paper.source) if paper.source is not None else None),
             "publication_date": (
                 paper.publication_date.isoformat() if paper.publication_date is not None else None

@@ -7,6 +7,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search import Database
@@ -18,7 +19,9 @@ from findpapers.searchers.base import SearcherBase
 logger = logging.getLogger(__name__)
 
 _BULK_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search/bulk"
+_AUTHOR_BATCH_URL = "https://api.semanticscholar.org/graph/v1/author/batch"
 _PAGE_SIZE = 100  # Semantic Scholar max per request
+_AUTHOR_BATCH_SIZE = 1000  # Max authors per batch request
 
 # Rate limits: 1000 req/s without key (shared among all unauthenticated users),
 # 1 req/s with key (introductory; can be increased upon request)
@@ -177,12 +180,12 @@ class SemanticScholarSearcher(SearcherBase):
 
         abstract = (item.get("abstract") or "").strip()
 
-        # Authors
-        authors: list[str] = []
+        # Authors — affiliations are fetched in a batch request after the search.
+        authors: list[Author] = []
         for author_entry in item.get("authors", []):
             name = (author_entry.get("name") or "").strip()
             if name:
-                authors.append(name)
+                authors.append(Author(name=name))
 
         # Publication date
         pub_date: Optional[datetime.date] = None
@@ -259,6 +262,56 @@ class SemanticScholarSearcher(SearcherBase):
 
         return paper
 
+    def _enrich_author_affiliations(
+        self,
+        author_id_to_authors: dict[str, list[Author]],
+    ) -> None:
+        """Batch-fetch affiliations from the Semantic Scholar Author API.
+
+        Uses ``POST /author/batch?fields=affiliations`` to retrieve
+        affiliation data for up to 1,000 authors per request, then
+        updates the corresponding :class:`Author` objects in-place.
+
+        Parameters
+        ----------
+        author_id_to_authors : dict[str, list[Author]]
+            Mapping from Semantic Scholar author ID to :class:`Author`
+            instances that share that ID across the retrieved papers.
+        """
+        all_ids = list(author_id_to_authors.keys())
+        logger.info(
+            "Fetching affiliations for %d unique authors from Semantic Scholar.",
+            len(all_ids),
+        )
+
+        for start in range(0, len(all_ids), _AUTHOR_BATCH_SIZE):
+            batch_ids = all_ids[start : start + _AUTHOR_BATCH_SIZE]
+            try:
+                response = self._post(
+                    _AUTHOR_BATCH_URL,
+                    json_body={"ids": batch_ids},
+                    params={"fields": "affiliations"},
+                )
+            except Exception:
+                logger.warning(
+                    "Failed to fetch author affiliations batch (offset=%d).",
+                    start,
+                )
+                continue
+
+            results = response.json()
+            for author_data in results:
+                if not isinstance(author_data, dict):
+                    continue
+                author_id = author_data.get("authorId")
+                affiliations = author_data.get("affiliations") or []
+                if not author_id or not affiliations:
+                    continue
+                affiliation_str = "; ".join(affiliations)
+                for author in author_id_to_authors.get(author_id, []):
+                    if not author.affiliation:
+                        author.affiliation = affiliation_str
+
     def _fetch_papers(
         self,
         query: Query,
@@ -283,6 +336,7 @@ class SemanticScholarSearcher(SearcherBase):
         """
         ss_params = self._query_builder.convert_query(query)
         papers: List[Paper] = []
+        author_id_to_authors: dict[str, list[Author]] = {}
         token: Optional[str] = None  # Semantic Scholar uses token-based pagination
         total: Optional[int] = None
 
@@ -317,6 +371,14 @@ class SemanticScholarSearcher(SearcherBase):
                 paper = self._parse_paper(item)
                 if paper is not None:
                     papers.append(paper)
+                    # Collect author-ID → Author mapping for batch affiliation fetch
+                    raw_authors = item.get("authors", [])
+                    for idx, author_entry in enumerate(raw_authors):
+                        author_id = author_entry.get("authorId")
+                        if author_id and idx < len(paper.authors):
+                            author_id_to_authors.setdefault(author_id, []).append(
+                                paper.authors[idx]
+                            )
 
             if progress_callback is not None:
                 progress_callback(len(papers), total)
@@ -328,4 +390,10 @@ class SemanticScholarSearcher(SearcherBase):
             if not token or len(items) < page_size:
                 break
 
-        return papers[:max_papers] if max_papers is not None else papers
+        result = papers[:max_papers] if max_papers is not None else papers
+
+        # Batch-fetch author affiliations after paper retrieval
+        if author_id_to_authors:
+            self._enrich_author_affiliations(author_id_to_authors)
+
+        return result

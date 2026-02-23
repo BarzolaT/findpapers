@@ -2,30 +2,62 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from findpapers.core.author import Author
 
 
-def merge_authors(base: list[str], incoming: list[str]) -> list[str]:
+def merge_authors(base: list[Author], incoming: list[Author]) -> list[Author]:
     """Merge two author lists by keeping whichever list is larger.
+
+    When both lists have the same length, the list with more affiliations
+    is preferred.  If still tied, the *base* list is kept.
 
     This conservative strategy avoids the risk of combining lists that
     represent the same authors in different string formats (e.g.
-    ``"First Last"`` vs ``"Last, First"``).  The list with more entries is
-    returned as-is; when both have the same length the *base* list is kept.
+    ``"First Last"`` vs ``"Last, First"``).
+
+    When the winning list is chosen, affiliations from the losing list are
+    back-filled onto authors that share the same name but lack an affiliation
+    in the winning list.
 
     Parameters
     ----------
-    base : list[str]
+    base : list[Author]
         Existing author list.
-    incoming : list[str]
+    incoming : list[Author]
         New authors to merge in.
 
     Returns
     -------
-    list[str]
-        The larger of the two lists (base wins on a tie).
+    list[Author]
+        The merged author list.
     """
-    return list(incoming) if len(incoming) > len(base) else list(base)
+    if not incoming:
+        return list(base)
+    if not base:
+        return list(incoming)
+
+    base_affiliations = sum(1 for a in base if a.affiliation)
+    incoming_affiliations = sum(1 for a in incoming if a.affiliation)
+
+    if len(incoming) > len(base):
+        winner, loser = list(incoming), base
+    elif len(base) > len(incoming):
+        winner, loser = list(base), incoming
+    elif incoming_affiliations > base_affiliations:
+        winner, loser = list(incoming), base
+    else:
+        winner, loser = list(base), incoming
+
+    # Back-fill affiliations from the loser list.
+    loser_map = {a.name.lower(): a.affiliation for a in loser if a.affiliation}
+    for author in winner:
+        if not author.affiliation and author.name.lower() in loser_map:
+            author.affiliation = loser_map[author.name.lower()]
+
+    return winner
 
 
 def merge_value(base: Any, incoming: Any) -> Any:
