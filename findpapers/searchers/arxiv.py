@@ -26,6 +26,10 @@ _PAGE_SIZE = 100
 _MIN_REQUEST_INTERVAL = 3.0
 _NS = {"atom": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas/atom"}
 
+# Regex to extract the arXiv paper ID from the Atom <id> element.
+# Example: http://arxiv.org/abs/1706.03762v5 → 1706.03762
+_ARXIV_ID_RE = re.compile(r"arxiv\.org/abs/([\d.]+)", re.IGNORECASE)
+
 
 class ArxivSearcher(SearcherBase):
     """Searcher for the arXiv preprint database.
@@ -142,7 +146,8 @@ class ArxivSearcher(SearcherBase):
             (published_el.text or "").strip() if published_el is not None else None
         )
 
-        # DOI
+        # DOI — prefer the explicit <arxiv:doi> element (publisher DOI).
+        # When absent, derive the canonical arXiv DOI from the entry ID.
         doi: Optional[str] = None
         doi_el = entry.find("arxiv:doi", _NS)
         if doi_el is not None and doi_el.text:
@@ -160,6 +165,14 @@ class ArxivSearcher(SearcherBase):
             id_el = entry.find("atom:id", _NS)
             if id_el is not None and id_el.text:
                 url = id_el.text.strip()
+
+        # Derive arXiv DOI when none was provided by the API.
+        # The canonical DOI format is 10.48550/arXiv.<id>, e.g.
+        # http://arxiv.org/abs/1706.03762v5 → 10.48550/arXiv.1706.03762
+        if doi is None and url:
+            m = _ARXIV_ID_RE.search(url)
+            if m:
+                doi = f"10.48550/arXiv.{m.group(1)}"
 
         # PDF URL
         pdf_url: Optional[str] = None

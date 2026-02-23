@@ -298,6 +298,57 @@ class TestArxivSearcherParseResponse:
         assert paper is not None
         assert paper.paper_type is PaperType.INBOOK
 
+    def test_doi_derived_from_entry_id_when_absent(self):
+        """When <arxiv:doi> is absent, DOI is derived from <id> as 10.48550/arXiv.<id>."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Attention Is All You Need</title>
+            <summary>Abstract text here.</summary>
+            <id>http://arxiv.org/abs/1706.03762v5</id>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.doi == "10.48550/arXiv.1706.03762"
+
+    def test_explicit_doi_takes_priority_over_derived(self):
+        """When <arxiv:doi> is present, it is used instead of deriving from <id>."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Published Paper</title>
+            <summary>Abstract text here.</summary>
+            <id>http://arxiv.org/abs/2301.12345v1</id>
+            <arxiv:doi>10.1145/3531146.3533206</arxiv:doi>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.doi == "10.1145/3531146.3533206"
+
+    def test_doi_none_when_no_id_and_no_explicit_doi(self):
+        """DOI is None when neither <arxiv:doi> nor a parseable <id> is present."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Minimal Paper</title>
+            <summary>Abstract text here.</summary>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.doi is None
+
 
 class TestInferSourceTypeFromJournalRef:
     """Tests for _infer_source_type_from_journal_ref heuristic."""

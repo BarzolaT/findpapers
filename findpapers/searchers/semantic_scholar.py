@@ -179,9 +179,15 @@ class SemanticScholarSearcher(SearcherBase):
             except (ValueError, TypeError):
                 pass
 
-        # External IDs → DOI
+        # External IDs → DOI.
+        # Prefer the explicit DOI field; fall back to deriving a canonical
+        # arXiv DOI (10.48550/arXiv.<id>) when only the ArXivId is available.
         external_ids = item.get("externalIds") or {}
         doi: Optional[str] = (external_ids.get("DOI") or "").strip() or None
+        if doi is None:
+            arxiv_id = (external_ids.get("ArXivId") or "").strip()
+            if arxiv_id:
+                doi = f"10.48550/arXiv.{arxiv_id}"
 
         # URL
         url: Optional[str] = (item.get("url") or "").strip() or None

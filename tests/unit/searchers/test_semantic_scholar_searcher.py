@@ -182,6 +182,36 @@ class TestSemanticScholarSearcherParsePaper:
         assert paper is not None
         assert paper.doi == "10.1234/test"
 
+    def test_doi_derived_from_arxiv_id_when_doi_absent(self):
+        """DOI is derived from ArXivId when externalIds.DOI is absent."""
+        item = {
+            "title": "A Paper",
+            "externalIds": {"ArXivId": "1706.03762"},
+        }
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.doi == "10.48550/arXiv.1706.03762"
+
+    def test_explicit_doi_takes_priority_over_arxiv_id(self):
+        """externalIds.DOI takes priority over ArXivId derivation."""
+        item = {
+            "title": "A Paper",
+            "externalIds": {
+                "DOI": "10.1145/3531146.3533206",
+                "ArXivId": "2301.12345",
+            },
+        }
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.doi == "10.1145/3531146.3533206"
+
+    def test_doi_none_when_no_external_ids(self):
+        """DOI is None when externalIds has neither DOI nor ArXivId."""
+        item = {"title": "A Paper", "externalIds": {}}
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.doi is None
+
     def test_year_fallback_for_pub_date(self):
         """Year field is used as fallback when publicationDate is absent."""
         item = {"title": "A Paper", "year": 2020}
