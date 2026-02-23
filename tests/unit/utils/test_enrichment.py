@@ -14,6 +14,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from findpapers.core.author import Author
+from findpapers.core.source_type import SourceType
 from findpapers.utils.enrichment import (
     _parse_authors,
     _parse_keywords,
@@ -410,8 +411,8 @@ class TestBuildPaperFromMetadata:
         assert paper.keywords is not None
         assert {"AI", "ML", "NLP"}.issubset(paper.keywords)
 
-    def test_citation_inbook_title_creates_inbook_paper_type(self) -> None:
-        """citation_inbook_title (Scopus book chapters) sets paper_type=INBOOK."""
+    def test_citation_inbook_title_creates_source(self) -> None:
+        """citation_inbook_title (Scopus book chapters) creates a source."""
         meta = {
             "citation_title": "Chapter Title",
             "citation_inbook_title": "Advances in Machine Learning",
@@ -420,9 +421,6 @@ class TestBuildPaperFromMetadata:
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Advances in Machine Learning"
-        from findpapers.core.paper import PaperType
-
-        assert paper.paper_type == PaperType.INBOOK
 
     def test_pages_built_from_firstpage_and_lastpage(self) -> None:
         """citation_firstpage + citation_lastpage are combined into paper.pages."""
@@ -540,9 +538,7 @@ class TestBuildPaperFromMetadata:
         assert Author(name="Smith, J") in paper.authors
 
     def test_journal_publication_created(self) -> None:
-        """citation_journal_title creates a Publication and sets paper_type=ARTICLE."""
-        from findpapers.core.paper import PaperType
-
+        """citation_journal_title creates a Publication."""
         meta = {
             "citation_title": "Paper",
             "citation_journal_title": "Nature",
@@ -552,13 +548,21 @@ class TestBuildPaperFromMetadata:
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Nature"
-        assert paper.paper_type == PaperType.ARTICLE
         assert paper.source.issn == "0028-0836"
 
-    def test_conference_publication_created(self) -> None:
-        """citation_conference_title creates a Publication with paper_type=INPROCEEDINGS."""
-        from findpapers.core.paper import PaperType
+    def test_journal_source_type_assigned(self) -> None:
+        """citation_journal_title sets source_type=JOURNAL."""
+        meta = {
+            "citation_title": "Paper",
+            "citation_journal_title": "Nature",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.JOURNAL
 
+    def test_conference_source_type_assigned(self) -> None:
+        """citation_conference_title sets source_type=CONFERENCE."""
         meta = {
             "citation_title": "A Conference Paper",
             "citation_conference_title": "NeurIPS",
@@ -566,7 +570,39 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
         assert paper.source is not None
-        assert paper.paper_type == PaperType.INPROCEEDINGS
+        assert paper.source.source_type == SourceType.CONFERENCE
+
+    def test_book_source_type_from_inbook_title(self) -> None:
+        """citation_inbook_title sets source_type=BOOK."""
+        meta = {
+            "citation_title": "Chapter Title",
+            "citation_inbook_title": "Advances in ML",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.BOOK
+
+    def test_book_source_type_from_book_title(self) -> None:
+        """citation_book_title sets source_type=BOOK."""
+        meta = {
+            "citation_title": "Chapter Title",
+            "citation_book_title": "My Book",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.BOOK
+
+    def test_conference_publication_created(self) -> None:
+        """citation_conference_title creates a Publication."""
+        meta = {
+            "citation_title": "A Conference Paper",
+            "citation_conference_title": "NeurIPS",
+        }
+        paper = build_paper_from_metadata(meta, "http://x.com")
+        assert paper is not None
+        assert paper.source is not None
 
     def test_preprint_server_publication_not_created(self) -> None:
         """Preprint server names (arxiv, biorxiv, medrxiv) are not treated as publications."""
@@ -645,15 +681,12 @@ class TestBuildPaperFromMetadata:
 
     def test_pubmed_paper_has_doi_and_journal(self) -> None:
         """PubMed page produces a paper with a DOI and a journal publication."""
-        from findpapers.core.paper import PaperType
-
         _skip_if_missing(PUBMED_HTML)
         meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://pubmed.ncbi.nlm.nih.gov/36006759/")
         assert paper is not None
         assert paper.doi is not None and paper.doi.startswith("10.")
         assert paper.source is not None
-        assert paper.paper_type == PaperType.ARTICLE
         assert paper.source.issn is not None
 
     def test_pubmed_paper_has_authors(self) -> None:
@@ -685,15 +718,12 @@ class TestBuildPaperFromMetadata:
 
     def test_openalex_paper_has_doi_and_journal(self) -> None:
         """OpenAlex landing page produces a paper with DOI and journal publication."""
-        from findpapers.core.paper import PaperType
-
         _skip_if_missing(OPENALEX_HTML)
         meta = extract_metadata_from_html(OPENALEX_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "http://dx.doi.org/10.3126/nelta.v27i1-2.53203")
         assert paper is not None
         assert paper.doi is not None and paper.doi.startswith("10.")
         assert paper.source is not None
-        assert paper.paper_type == PaperType.ARTICLE
 
     def test_openalex_paper_has_keywords(self) -> None:
         """OpenAlex landing page exposes at least one keyword on the paper."""
@@ -713,15 +743,12 @@ class TestBuildPaperFromMetadata:
 
     def test_ieee_paper_has_doi_and_journal(self) -> None:
         """IEEE Xplore page (JS blob) produces a paper with a DOI and journal."""
-        from findpapers.core.paper import PaperType
-
         _skip_if_missing(IEEE_HTML)
         meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://ieeexplore.ieee.org/document/9568778/")
         assert paper is not None
         assert paper.doi is not None and paper.doi.startswith("10.")
         assert paper.source is not None
-        assert paper.paper_type == PaperType.ARTICLE
 
     def test_ieee_paper_has_keywords(self) -> None:
         """IEEE Xplore page (JS blob) produces a paper with keywords."""
@@ -973,8 +1000,6 @@ class TestEnrichFromSources:
 
     def test_real_pubmed_page_end_to_end(self) -> None:
         """Full end-to-end: mock requests for a PubMed HTML page and build a Paper."""
-        from findpapers.core.paper import PaperType
-
         _skip_if_missing(PUBMED_HTML)
         mock_resp = MagicMock()
         mock_resp.status_code = 200
@@ -988,7 +1013,6 @@ class TestEnrichFromSources:
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.")
         assert result.source is not None
-        assert result.paper_type == PaperType.ARTICLE
 
     def test_real_medrxiv_page_end_to_end(self) -> None:
         """Full end-to-end: mock requests for a medRxiv HTML page and build a Paper."""
@@ -1028,8 +1052,6 @@ class TestEnrichFromSources:
 
     def test_real_ieee_page_end_to_end(self) -> None:
         """Full end-to-end: mock requests for an IEEE Xplore page and build a Paper."""
-        from findpapers.core.paper import PaperType
-
         _skip_if_missing(IEEE_HTML)
         mock_resp = MagicMock()
         mock_resp.status_code = 200
@@ -1045,6 +1067,5 @@ class TestEnrichFromSources:
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.")
         assert result.source is not None
-        assert result.paper_type == PaperType.ARTICLE
         assert len(result.authors) > 0
         assert result.keywords and len(result.keywords) > 0

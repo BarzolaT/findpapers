@@ -47,7 +47,6 @@ class Search:
         max_papers_per_database: Optional[int] = None,
         processed_at: Optional[datetime.datetime] = None,
         databases: Optional[List[str]] = None,
-        paper_types: Optional[List[str]] = None,
         papers: Optional[List[Paper]] = None,
         runtime_seconds: Optional[float] = None,
         runtime_seconds_per_database: Optional[dict[str, float]] = None,
@@ -68,8 +67,6 @@ class Search:
             Processing timestamp.
         databases : list[str] | None
             Database identifiers.
-        paper_types : list[str] | None
-            Paper types filter (BibTeX-aligned, see :class:`PaperType`).
         papers : list[Paper] | None
             Initial papers.
         runtime_seconds : float | None
@@ -90,7 +87,6 @@ class Search:
             processed_at = processed_at.replace(tzinfo=datetime.timezone.utc)
         self.processed_at = processed_at
         self.databases = databases
-        self.paper_types = paper_types
         self.papers: List[Paper] = papers or []
         self.runtime_seconds = runtime_seconds
         self.runtime_seconds_per_database: dict[str, float] = dict(

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from ..utils.merge import merge_value
+from .source_type import SourceType
 
 
 class Source:
@@ -15,6 +16,7 @@ class Source:
         issn: Optional[str] = None,
         publisher: Optional[str] = None,
         is_potentially_predatory: Optional[bool] = False,
+        source_type: Optional[SourceType] = None,
     ) -> None:
         """Create a Source instance.
 
@@ -30,6 +32,8 @@ class Source:
             Source publisher name.
         is_potentially_predatory : bool | None
             Predatory flag.
+        source_type : SourceType | None
+            Type of the source (journal, conference, book, repository, other).
 
         Raises
         ------
@@ -44,6 +48,7 @@ class Source:
         self.issn = issn
         self.publisher = publisher
         self.is_potentially_predatory = is_potentially_predatory
+        self.source_type = source_type
 
     def merge(self, source: Source) -> None:
         """Merge another source into this one.
@@ -65,6 +70,8 @@ class Source:
         self.is_potentially_predatory = bool(
             self.is_potentially_predatory or source.is_potentially_predatory
         )
+        if self.source_type is None:
+            self.source_type = source.source_type
 
     @classmethod
     def from_dict(cls, source_dict: dict) -> Source:
@@ -88,12 +95,21 @@ class Source:
         title = source_dict.get("title")
         if not isinstance(title, str) or not title:
             raise ValueError("Source's title cannot be null")
+        raw_source_type = source_dict.get("source_type")
+        source_type: SourceType | None = None
+        if raw_source_type is not None:
+            try:
+                source_type = SourceType(raw_source_type)
+            except ValueError:
+                pass
+
         return cls(
             title=title,
             isbn=source_dict.get("isbn"),
             issn=source_dict.get("issn"),
             publisher=source_dict.get("publisher"),
             is_potentially_predatory=source_dict.get("is_potentially_predatory"),
+            source_type=source_type,
         )
 
     @staticmethod
@@ -116,4 +132,5 @@ class Source:
             "issn": source.issn,
             "publisher": source.publisher,
             "is_potentially_predatory": source.is_potentially_predatory,
+            "source_type": source.source_type.value if source.source_type else None,
         }

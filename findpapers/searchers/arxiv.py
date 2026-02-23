@@ -4,15 +4,17 @@ from __future__ import annotations
 
 import datetime
 import logging
+import re
 from collections.abc import Callable
 from typing import List, Optional
 from xml.etree import ElementTree as ET
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.core.query import Query
 from findpapers.core.search import Database
 from findpapers.core.source import Source
+from findpapers.core.source_type import SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -169,17 +171,22 @@ class ArxivSearcher(SearcherBase):
                 pdf_url = href
                 break
 
-        # Journal ref → source and paper type.
-        # Papers with a journal reference were formally published in a journal;
-        # those without are still preprints (unpublished).
+        # Journal ref → source.
+        # Papers with a journal reference were formally published in a journal.
         journal_ref_el = entry.find("arxiv:journal_ref", _NS)
         source: Optional[Source] = None
         has_journal_ref = (
             journal_ref_el is not None and journal_ref_el.text and journal_ref_el.text.strip()
         )
         if has_journal_ref:
-            source = Source(title=journal_ref_el.text.strip())  # type: ignore[union-attr]
-        paper_type = PaperType.ARTICLE if has_journal_ref else PaperType.UNPUBLISHED
+            ref_text = journal_ref_el.text.strip()  # type: ignore[union-attr]
+            source = Source(
+                title=ref_text,
+                source_type=_infer_source_type_from_journal_ref(ref_text),
+            )
+        else:
+            # Paper is an arXiv preprint without a formal publication venue.
+            source = Source(title="arXiv", source_type=SourceType.REPOSITORY)
 
         # Comments — optional free-text note (e.g. "39 pages, 14 figures")
         comment: Optional[str] = None
@@ -199,7 +206,6 @@ class ArxivSearcher(SearcherBase):
                 doi=doi,
                 comments=comment,
                 databases={self.name},
-                paper_type=paper_type,
             )
         except ValueError:
             return None
@@ -283,6 +289,69 @@ class ArxivSearcher(SearcherBase):
             offset += len(entries)
 
         return papers[:max_papers] if max_papers is not None else papers
+
+
+# ---------------------------------------------------------------------------
+# Heuristic patterns to infer source type from arXiv journal_ref text
+# ---------------------------------------------------------------------------
+
+_CONFERENCE_RE = re.compile(
+    r"\b(?:proceedings?|conference|workshop|symposium)\b" r"|\b(?:proc|conf|symp)\.",
+    re.IGNORECASE,
+)
+
+_BOOK_RE = re.compile(
+    r"\b(?:lecture\s+notes|book|chapter)\b",
+    re.IGNORECASE,
+)
+
+_JOURNAL_RE = re.compile(
+    r"\b(?:"
+    r"journal|review[s]?|letters?|transactions?|annals?|bulletin"
+    r"|magazine"
+    r")\b"
+    r"|\bj\."
+    r"|\brev\."
+    r"|\blett\."
+    r"|\btrans\."
+    r"|\bann\."
+    r"|\bbull\."
+    r"|\bmag\.",
+    re.IGNORECASE,
+)
+
+
+def _infer_source_type_from_journal_ref(text: str) -> Optional[SourceType]:
+    """Infer a :class:`SourceType` from a free-text ``journal_ref`` string.
+
+    The function applies keyword heuristics in priority order:
+
+    1. **CONFERENCE** – contains words like *proceedings*, *conference*,
+       *workshop*, or *symposium*.
+    2. **BOOK** – contains *lecture notes*, *book*, or *chapter*.
+    3. **JOURNAL** – contains common journal indicators such as *journal*,
+       *review*, *letters*, *transactions*, abbreviated forms like
+       *J.*, *Rev.*, *Lett.*, etc.
+
+    If no pattern matches the text is left unclassified (``None``).
+
+    Parameters
+    ----------
+    text : str
+        The ``journal_ref`` value from an arXiv entry.
+
+    Returns
+    -------
+    SourceType | None
+        Inferred source type or ``None`` when no rule matches.
+    """
+    if _CONFERENCE_RE.search(text):
+        return SourceType.CONFERENCE
+    if _BOOK_RE.search(text):
+        return SourceType.BOOK
+    if _JOURNAL_RE.search(text):
+        return SourceType.JOURNAL
+    return None
 
 
 def _parse_date_from_str(date_str: Optional[str]) -> Optional[datetime.date]:

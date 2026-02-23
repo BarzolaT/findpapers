@@ -4,70 +4,13 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
+from findpapers.core.source_type import SourceType
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
 from findpapers.searchers.openalex import (
     OpenAlexSearcher,
-    _openalex_work_type_to_paper_type,
     _reconstruct_abstract,
 )
-
-
-class TestOpenAlexWorkTypeMapping:
-    """Tests for _openalex_work_type_to_paper_type helper."""
-
-    def test_none_returns_none(self):
-        """None input returns None."""
-        assert _openalex_work_type_to_paper_type(None) is None
-
-    def test_empty_string_returns_none(self):
-        """Empty string returns None."""
-        assert _openalex_work_type_to_paper_type("") is None
-
-    def test_article_maps_to_article(self):
-        """'article' maps to PaperType.ARTICLE."""
-        assert _openalex_work_type_to_paper_type("article") == PaperType.ARTICLE
-
-    def test_review_maps_to_article(self):
-        """'review' maps to PaperType.ARTICLE."""
-        assert _openalex_work_type_to_paper_type("review") == PaperType.ARTICLE
-
-    def test_book_chapter_maps_to_incollection(self):
-        """'book-chapter' maps to PaperType.INCOLLECTION."""
-        assert _openalex_work_type_to_paper_type("book-chapter") == PaperType.INCOLLECTION
-
-    def test_book_maps_to_inbook(self):
-        """'book' maps to PaperType.INBOOK."""
-        assert _openalex_work_type_to_paper_type("book") == PaperType.INBOOK
-
-    def test_preprint_maps_to_unpublished(self):
-        """'preprint' maps to PaperType.UNPUBLISHED."""
-        assert _openalex_work_type_to_paper_type("preprint") == PaperType.UNPUBLISHED
-
-    def test_dissertation_maps_to_phdthesis(self):
-        """'dissertation' maps to PaperType.PHDTHESIS."""
-        assert _openalex_work_type_to_paper_type("dissertation") == PaperType.PHDTHESIS
-
-    def test_proceedings_article_maps_to_inproceedings(self):
-        """'proceedings-article' maps to PaperType.INPROCEEDINGS."""
-        assert _openalex_work_type_to_paper_type("proceedings-article") == PaperType.INPROCEEDINGS
-
-    def test_report_maps_to_techreport(self):
-        """'report' maps to PaperType.TECHREPORT."""
-        assert _openalex_work_type_to_paper_type("report") == PaperType.TECHREPORT
-
-    def test_standard_maps_to_techreport(self):
-        """'standard' maps to PaperType.TECHREPORT."""
-        assert _openalex_work_type_to_paper_type("standard") == PaperType.TECHREPORT
-
-    def test_unknown_returns_none(self):
-        """Unknown work type returns None."""
-        assert _openalex_work_type_to_paper_type("dataset") is None
-
-    def test_case_insensitive(self):
-        """Mapping is case-insensitive."""
-        assert _openalex_work_type_to_paper_type("ARTICLE") == PaperType.ARTICLE
 
 
 class TestOpenAlexSearcherInit:
@@ -198,7 +141,7 @@ class TestOpenAlexSearcherParsePaper:
         assert paper.source.issn == "1234-5678"
 
     def test_source_skipped_when_repository(self):
-        """Repository sources should not be used as the paper source."""
+        """Repository-only sources should produce a repository-type source."""
         work = {
             "title": "A Dissertation",
             "primary_location": {
@@ -210,7 +153,9 @@ class TestOpenAlexSearcherParsePaper:
         }
         paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
-        assert paper.source is None
+        assert paper.source is not None
+        assert paper.source.title == "University of Liverpool"
+        assert paper.source.source_type == SourceType.REPOSITORY
 
     def test_source_prefers_journal_over_repository(self):
         """When primary location is a repository, journal from other locations is used."""
@@ -242,6 +187,55 @@ class TestOpenAlexSearcherParsePaper:
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Nature Physics"
+        assert paper.source.source_type == SourceType.JOURNAL
+
+    def test_source_type_conference(self):
+        """Conference source type is mapped to SourceType.CONFERENCE."""
+        work = {
+            "title": "A Paper",
+            "primary_location": {
+                "source": {
+                    "display_name": "NeurIPS",
+                    "type": "conference",
+                },
+            },
+        }
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.CONFERENCE
+
+    def test_source_type_book_series(self):
+        """'book series' source type is mapped to SourceType.BOOK."""
+        work = {
+            "title": "A Paper",
+            "primary_location": {
+                "source": {
+                    "display_name": "Lecture Notes in CS",
+                    "type": "book series",
+                },
+            },
+        }
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.BOOK
+
+    def test_source_type_ebook_platform(self):
+        """'ebook platform' source type is mapped to SourceType.BOOK."""
+        work = {
+            "title": "A Paper",
+            "primary_location": {
+                "source": {
+                    "display_name": "Springer eBooks",
+                    "type": "ebook platform",
+                },
+            },
+        }
+        paper = OpenAlexSearcher()._parse_paper(work)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.BOOK
 
     def test_source_without_type_is_accepted(self):
         """Sources without a type field are accepted (fallback)."""
@@ -266,13 +260,6 @@ class TestOpenAlexSearcherParsePaper:
         paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
         assert paper.doi == "10.1234/test"
-
-    def test_paper_type_from_work_type(self):
-        """Paper type is derived from the work type field."""
-        work = {"title": "A Paper", "type": "book-chapter"}
-        paper = OpenAlexSearcher()._parse_paper(work)
-        assert paper is not None
-        assert paper.paper_type == PaperType.INCOLLECTION
 
     def test_pages_from_biblio(self):
         """Pages are extracted from biblio.first_page and last_page."""

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
-from enum import Enum
-from typing import Optional, Set, Union
+from typing import Optional, Set
 
 from ..utils.merge import merge_authors, merge_value
 from .author import Author
@@ -82,44 +81,6 @@ def _merge_doi(base: str | None, incoming: str | None) -> str | None:
     return merge_value(base, incoming)
 
 
-class PaperType(str, Enum):
-    """Recognized paper types aligned with BibTeX entry types.
-
-    Inheriting from :class:`str` makes each member compare equal to its string
-    value, so code such as ``paper_type == "article"`` continues to work
-    without modification.
-
-    Each value matches the corresponding BibTeX entry type (lower-case).
-    """
-
-    ARTICLE = "article"
-    """An article from a journal or magazine."""
-
-    INBOOK = "inbook"
-    """A chapter or section from a book."""
-
-    INCOLLECTION = "incollection"
-    """An article in a collection (e.g., book chapter with its own title)."""
-
-    INPROCEEDINGS = "inproceedings"
-    """A paper published in conference proceedings."""
-
-    MANUAL = "manual"
-    """Technical documentation or a manual."""
-
-    MASTERSTHESIS = "mastersthesis"
-    """A Masters thesis."""
-
-    PHDTHESIS = "phdthesis"
-    """A PhD thesis."""
-
-    TECHREPORT = "techreport"
-    """A technical report."""
-
-    UNPUBLISHED = "unpublished"
-    """A document that has not yet been formally published (e.g., preprint)."""
-
-
 class Paper:
     """Represents a paper instance."""
 
@@ -139,7 +100,6 @@ class Paper:
         number_of_pages: Optional[int] = None,
         pages: Optional[str] = None,
         databases: Optional[Set[str]] = None,
-        paper_type: Optional[Union[str, "PaperType"]] = None,
     ) -> None:
         """Create a Paper instance.
 
@@ -173,10 +133,6 @@ class Paper:
             Page range.
         databases : set[str] | None
             Databases where found.
-        paper_type : str | PaperType | None
-            BibTeX-aligned paper type (e.g. ``"article"``, ``"inproceedings"``).
-            When a string is provided it is normalized to the matching
-            :class:`PaperType` member; ``None`` means the type is unknown.
 
         Raises
         ------
@@ -200,7 +156,6 @@ class Paper:
         self.number_of_pages = number_of_pages
         self.pages = pages
         self.databases = databases if databases is not None else set()
-        self.paper_type = paper_type  # type: ignore[assignment]
 
     @staticmethod
     def _sanitize_date(
@@ -234,37 +189,6 @@ class Paper:
             )
             return None
         return value
-
-    @property
-    def paper_type(self) -> Optional[PaperType]:
-        """Return the paper BibTeX type.
-
-        Returns
-        -------
-        PaperType | None
-            Normalized :class:`PaperType` member or ``None`` when unknown.
-        """
-        return self._paper_type
-
-    @paper_type.setter
-    def paper_type(self, value: Optional[Union[str, PaperType]]) -> None:
-        """Normalize and set the paper type.
-
-        Parameters
-        ----------
-        value : str | PaperType | None
-            Raw type string or enum member to normalize.
-        """
-        if isinstance(value, PaperType):
-            self._paper_type: Optional[PaperType] = value
-        elif isinstance(value, str):
-            lowered = value.strip().lower()
-            try:
-                self._paper_type = PaperType(lowered)
-            except ValueError:
-                self._paper_type = None
-        else:
-            self._paper_type = None
 
     def add_database(self, database_name: str) -> None:
         """Add a database name where the paper was found.
@@ -316,9 +240,6 @@ class Paper:
 
         # Always accumulate databases for traceability.
         self.databases |= paper.databases
-        # Prefer the existing type; fall back to the incoming one when absent.
-        if self.paper_type is None:
-            self.paper_type = paper.paper_type
         if self.source is None:
             self.source = paper.source
         elif paper.source is not None:
@@ -392,9 +313,6 @@ class Paper:
         else:
             databases = {str(raw_databases)} if raw_databases else set()
 
-        raw_paper_type = paper_dict.get("paper_type")
-        paper_type = raw_paper_type if isinstance(raw_paper_type, str) else None
-
         return cls(
             title=title,
             abstract=abstract,
@@ -410,7 +328,6 @@ class Paper:
             number_of_pages=number_of_pages,
             pages=pages,
             databases=databases,
-            paper_type=paper_type,
         )
 
     @staticmethod
@@ -444,5 +361,4 @@ class Paper:
             "number_of_pages": paper.number_of_pages,
             "pages": paper.pages,
             "databases": sorted(paper.databases),
-            "paper_type": paper.paper_type.value if paper.paper_type is not None else None,
         }

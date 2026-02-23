@@ -8,10 +8,11 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.core.query import Query
 from findpapers.core.search import Database
 from findpapers.core.source import Source
+from findpapers.core.source_type import SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -24,38 +25,16 @@ _PAGE_SIZE = 200  # OpenAlex max per_page
 _MIN_REQUEST_INTERVAL = 0.15
 _USER_AGENT = "findpapers/1.0 (mailto:findpapers@example.com)"
 
-
-def _openalex_work_type_to_paper_type(work_type: Optional[str]) -> Optional[PaperType]:
-    """Map an OpenAlex ``type`` field to a :class:`PaperType`.
-
-    Parameters
-    ----------
-    work_type : str | None
-        Raw ``type`` value from the OpenAlex works API.
-
-    Returns
-    -------
-    PaperType | None
-        Matching paper type, or ``None`` when the value cannot be mapped.
-    """
-    if not work_type:
-        return None
-    lowered = work_type.strip().lower()
-    if lowered in {"article", "review", "editorial", "letter", "erratum"}:
-        return PaperType.ARTICLE
-    if lowered == "book-chapter":
-        return PaperType.INCOLLECTION
-    if lowered == "book":
-        return PaperType.INBOOK
-    if lowered == "preprint":
-        return PaperType.UNPUBLISHED
-    if lowered == "dissertation":
-        return PaperType.PHDTHESIS
-    if lowered in {"proceedings-article", "proceedings"}:
-        return PaperType.INPROCEEDINGS
-    if lowered in {"report", "standard"}:
-        return PaperType.TECHREPORT
-    return None
+# Mapping from OpenAlex source.type values to SourceType.
+_OPENALEX_SOURCE_TYPE_MAP: dict[str, SourceType] = {
+    "journal": SourceType.JOURNAL,
+    "conference": SourceType.CONFERENCE,
+    "repository": SourceType.REPOSITORY,
+    "book series": SourceType.BOOK,
+    "ebook platform": SourceType.BOOK,
+    "metadata": SourceType.OTHER,
+    "other": SourceType.OTHER,
+}
 
 
 class OpenAlexSearcher(SearcherBase):
@@ -265,7 +244,18 @@ class OpenAlexSearcher(SearcherBase):
                     if isinstance(issn_list, list) and issn_list
                     else str(issn_list) if issn_list else None
                 )
-                source = Source(title=pub_title, issn=issn)
+                raw_src_type = (source_data.get("type") or "").strip().lower()
+                source_type = _OPENALEX_SOURCE_TYPE_MAP.get(raw_src_type)
+                source = Source(title=pub_title, issn=issn, source_type=source_type)
+
+        # When no formal source was found and the work is a preprint,
+        # create a repository-type source from the repository location.
+        if source is None:
+            repo_source = _find_repository_source(work)
+            if repo_source:
+                repo_name = (repo_source.get("display_name") or "").strip()
+                if repo_name:
+                    source = Source(title=repo_name, source_type=SourceType.REPOSITORY)
 
         # Pages from biblio
         pages: Optional[str] = None
@@ -278,7 +268,7 @@ class OpenAlexSearcher(SearcherBase):
             pages = first_page
 
         # Paper type derived from the work-level "type" field
-        paper_type = _openalex_work_type_to_paper_type(work.get("type"))
+        # (kept for reference but no longer stored on the Paper)
 
         try:
             paper = Paper(
@@ -294,7 +284,6 @@ class OpenAlexSearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={self.name},
-                paper_type=paper_type,
             )
         except ValueError:
             return None
@@ -481,6 +470,43 @@ def _find_best_source(work: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         # Accept sources with a known non-repository type or no type at all
         # (missing type still beats a confirmed repository).
         if (src.get("display_name") or "").strip():
+            return src
+
+    return None
+
+
+def _find_repository_source(work: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Find a repository-type source when no formal venue is available.
+
+    When ``_find_best_source`` yields ``None`` (i.e. the work is only hosted
+    on repository platforms), this helper returns the first repository source
+    so the caller can create a ``Source`` with ``source_type=REPOSITORY``.
+
+    Parameters
+    ----------
+    work : dict
+        OpenAlex work metadata dictionary.
+
+    Returns
+    -------
+    dict | None
+        A repository source dict, or ``None`` when none exists.
+    """
+    locations: list[dict] = []
+    primary = work.get("primary_location")
+    if isinstance(primary, dict):
+        locations.append(primary)
+
+    for loc in work.get("locations") or []:
+        if isinstance(loc, dict) and loc is not primary:
+            locations.append(loc)
+
+    for loc in locations:
+        src = loc.get("source")
+        if not isinstance(src, dict):
+            continue
+        src_type = (src.get("type") or "").strip().lower()
+        if src_type == "repository" and (src.get("display_name") or "").strip():
             return src
 
     return None

@@ -7,7 +7,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from time import perf_counter
 
-from findpapers.core.paper import Paper, PaperType, _is_preprint_doi
+from findpapers.core.paper import Paper, _is_preprint_doi
 from findpapers.core.search import Database, Search
 from findpapers.exceptions import SearchRunnerNotExecutedError, UnsupportedQueryError
 from findpapers.query.parser import QueryParser
@@ -49,13 +49,6 @@ class SearchRunner:
         Database identifiers to query.  When ``None`` all supported databases
         are used.  Supported values: ``"arxiv"``, ``"ieee"``, ``"openalex"``,
         ``"pubmed"``, ``"scopus"``, ``"semantic_scholar"``.
-    paper_types : list[str] | None
-        Restrict results to papers of these BibTeX-aligned types.  Accepted
-        values: ``"article"``, ``"inbook"``, ``"incollection"``,
-        ``"inproceedings"``, ``"manual"``, ``"mastersthesis"``,
-        ``"phdthesis"``, ``"techreport"``, ``"unpublished"``.
-        ``None`` means no type filtering.  Papers with an undetermined type are
-        always discarded regardless of this parameter.
     max_papers_per_database : int | None
         Maximum papers to retrieve from each database.  ``None`` means
         unlimited.
@@ -96,7 +89,6 @@ class SearchRunner:
         self,
         query: str,
         databases: list[str] | None = None,
-        paper_types: list[str] | None = None,
         max_papers_per_database: int | None = None,
         ieee_api_key: str | None = None,
         scopus_api_key: str | None = None,
@@ -113,7 +105,6 @@ class SearchRunner:
         self._search: Search | None = None
 
         self._query_string = query
-        self._paper_types = self._validate_paper_types(paper_types)
         self._max_papers_per_database = max_papers_per_database
         self._num_workers = num_workers
 
@@ -165,7 +156,6 @@ class SearchRunner:
                 logging.getLogger(_noisy).setLevel(logging.WARNING)
             logger.info("=== SearchRunner Configuration ===")
             logger.info("Databases: %s", [s.name for s in self._searchers])
-            logger.info("Paper types: %s", self._paper_types or "all")
             logger.info("Num workers: %d", self._num_workers)
             logger.info("Query: %s", self._query_string)
             logger.info("Max papers per database: %s", self._max_papers_per_database or "none")
@@ -182,17 +172,6 @@ class SearchRunner:
             metrics[f"total_papers_from_{_skipped}"] = 0
 
         self._fetch_papers(metrics, verbose)
-
-        before_filter = len(self._results)
-        self._filter_by_paper_types(metrics)
-        if verbose:
-            removed = before_filter - len(self._results)
-            logger.info(
-                "Filter: %d -> %d papers (%d removed)",
-                before_filter,
-                len(self._results),
-                removed,
-            )
 
         before_dedupe = len(self._results)
         self._deduplicate_and_merge(metrics)
@@ -230,7 +209,6 @@ class SearchRunner:
             max_papers_per_database=self._max_papers_per_database,
             processed_at=datetime.now(timezone.utc),
             databases=[s.name for s in self._searchers],
-            paper_types=self._paper_types,
             papers=list(self._results),
             runtime_seconds=self._metrics.get("runtime_in_seconds"),
         )
@@ -273,39 +251,6 @@ class SearchRunner:
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
-
-    @staticmethod
-    def _validate_paper_types(
-        paper_types: list[str] | None,
-    ) -> list[str] | None:
-        """Validate that each entry in *paper_types* is a known :class:`PaperType`.
-
-        Parameters
-        ----------
-        paper_types : list[str] | None
-            User-provided list of paper type strings.
-
-        Returns
-        -------
-        list[str] | None
-            The same list if all values are valid, or ``None`` when the input
-            is ``None``.
-
-        Raises
-        ------
-        ValueError
-            When any value is not a recognised :class:`PaperType` member.
-        """
-        if paper_types is None:
-            return None
-        valid_values = {pt.value for pt in PaperType}
-        invalid = [pt for pt in paper_types if pt.strip().lower() not in valid_values]
-        if invalid:
-            raise ValueError(
-                f"Unknown paper type(s): {', '.join(invalid)}. "
-                f"Accepted values: {', '.join(sorted(valid_values))}"
-            )
-        return [pt.strip().lower() for pt in paper_types]
 
     def _ensure_executed(self) -> None:
         """Raise if the runner has not been executed yet.
@@ -452,37 +397,6 @@ class SearchRunner:
                 continue
             metrics[f"total_papers_from_{searcher.name}"] = len(result)
             self._results.extend(result)
-
-    def _filter_by_paper_types(self, metrics: dict[str, int | float]) -> None:
-        """Optionally restrict results to the requested paper type set.
-
-        When ``paper_types`` was supplied at construction time, only papers
-        whose :attr:`~findpapers.core.paper.Paper.paper_type` matches one of
-        those values are kept; papers with an undetermined type
-        (``paper_type is None``) are also discarded in this case because they
-        cannot be confirmed to belong to the requested category.
-
-        When no ``paper_types`` filter was requested, all papers are kept
-        regardless of whether their type could be determined — callers that
-        want "all papers" should receive even those whose BibTeX type is
-        unknown.
-
-        Parameters
-        ----------
-        metrics : dict[str, int | float]
-            Metrics dict (currently unused; reserved for future statistics).
-
-        Returns
-        -------
-        None
-        """
-        if self._paper_types:
-            allowed = {pt.strip().lower() for pt in self._paper_types}
-            self._results = [
-                p
-                for p in self._results
-                if p.paper_type is not None and p.paper_type.value in allowed
-            ]
 
     def _deduplicate_and_merge(self, metrics: dict[str, int | float]) -> None:
         """Collapse duplicate papers in two passes.

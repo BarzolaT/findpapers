@@ -7,9 +7,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from findpapers.core.search import Database
+from findpapers.core.source_type import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
-from findpapers.searchers.arxiv import ArxivSearcher
+from findpapers.searchers.arxiv import ArxivSearcher, _infer_source_type_from_journal_ref
 
 
 class TestArxivSearcherInit:
@@ -118,6 +119,185 @@ class TestArxivSearcherParseResponse:
         valid = [p for p in papers if p is not None]
         papers_with_comments = [p for p in valid if p.comments is not None]
         assert len(papers_with_comments) > 0
+
+    def test_preprint_without_journal_ref_gets_repository_source(self):
+        """Paper without journal_ref gets Source(title='arXiv', type=REPOSITORY)."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Some Preprint</title>
+            <summary>Abstract text here.</summary>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.title == "arXiv"
+        assert paper.source.source_type == SourceType.REPOSITORY
+
+    def test_paper_with_journal_ref_infers_source_type(self):
+        """Paper with journal_ref containing 'Physics' has source_type inferred."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Published Paper</title>
+            <summary>Abstract text here.</summary>
+            <arxiv:journal_ref>Phys. Rev. Lett. 123, 456 (2020)</arxiv:journal_ref>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.title == "Phys. Rev. Lett. 123, 456 (2020)"
+        assert paper.source.source_type == SourceType.JOURNAL
+
+    def test_journal_ref_conference_inferred(self):
+        """journal_ref with 'Proceedings' is classified as CONFERENCE."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Conf Paper</title>
+            <summary>Abstract.</summary>
+            <arxiv:journal_ref>Proceedings of NeurIPS 2023</arxiv:journal_ref>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.CONFERENCE
+
+    def test_journal_ref_workshop_inferred(self):
+        """journal_ref with 'Workshop' is classified as CONFERENCE."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>WS Paper</title>
+            <summary>Abstract.</summary>
+            <arxiv:journal_ref>Workshop on ML 2022</arxiv:journal_ref>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.CONFERENCE
+
+    def test_journal_ref_book_inferred(self):
+        """journal_ref with 'Lecture Notes' is classified as BOOK."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>LN Paper</title>
+            <summary>Abstract.</summary>
+            <arxiv:journal_ref>Lecture Notes in Computer Science vol. 1234</arxiv:journal_ref>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.BOOK
+
+    def test_journal_ref_no_match_leaves_none(self):
+        """journal_ref that doesn't match any heuristic leaves source_type None."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>Published Paper</title>
+            <summary>Abstract text here.</summary>
+            <arxiv:journal_ref>Nature 580, 321 (2020)</arxiv:journal_ref>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.title == "Nature 580, 321 (2020)"
+        assert paper.source.source_type is None
+
+
+class TestInferSourceTypeFromJournalRef:
+    """Tests for _infer_source_type_from_journal_ref heuristic."""
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Phys. Rev. Lett. 123, 456 (2020)",
+            "J. High Energy Phys. 2021 (2021) 042",
+            "Astrophysical Journal Letters 900, L1 (2020)",
+            "IEEE Transactions on Neural Networks 32 (2021)",
+            "Annals of Mathematics 192 (2020)",
+            "Physical Review D 101, 054001 (2020)",
+            "Bulletin of the AMS 57 (2020)",
+        ],
+    )
+    def test_journal_patterns(self, text: str) -> None:
+        """Common journal reference formats are classified as JOURNAL."""
+        assert _infer_source_type_from_journal_ref(text) == SourceType.JOURNAL
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Proceedings of NeurIPS 2023",
+            "Proc. IEEE CVPR 2022",
+            "International Conference on Machine Learning (ICML 2021)",
+            "Conf. on Computer Vision 2019",
+            "Workshop on Representation Learning 2023",
+            "Symposium on Foundations of Computer Science 2020",
+            "Symp. on Theory of Computing 2019",
+        ],
+    )
+    def test_conference_patterns(self, text: str) -> None:
+        """Conference-related journal_ref formats are classified as CONFERENCE."""
+        assert _infer_source_type_from_journal_ref(text) == SourceType.CONFERENCE
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Lecture Notes in Computer Science vol. 12345",
+            "Lecture Notes in Mathematics 2456, Springer",
+            "Chapter 5 in Advances in Neural Information Processing",
+            "In: Book of Abstracts (unlikely but tests the pattern)",
+        ],
+    )
+    def test_book_patterns(self, text: str) -> None:
+        """Book-related journal_ref formats are classified as BOOK."""
+        assert _infer_source_type_from_journal_ref(text) == SourceType.BOOK
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Nature 580, 321 (2020)",
+            "Science 370, 1234 (2020)",
+            "JHEP 05 (2021) 123",
+            "Commun. Math. Phys. 380, 1 (2020)",
+            "Nuclear Physics B 960 (2020) 115190",
+            "Monthly Notices of the Royal Astronomical Society 500 (2021)",
+        ],
+    )
+    def test_no_match_returns_none(self, text: str) -> None:
+        """Refs that don't match any heuristic return None."""
+        assert _infer_source_type_from_journal_ref(text) is None
+
+    def test_conference_takes_priority_over_journal(self) -> None:
+        """When text contains both conference and journal keywords, CONFERENCE wins."""
+        text = "Proceedings of the Annual Review Conference 2022"
+        assert _infer_source_type_from_journal_ref(text) == SourceType.CONFERENCE
 
 
 class TestArxivSearcherSearch:

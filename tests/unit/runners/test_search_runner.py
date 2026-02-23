@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.core.search import Database
 from findpapers.core.source import Source
 from findpapers.exceptions import SearchRunnerNotExecutedError
@@ -18,7 +18,6 @@ from findpapers.runners.search_runner import SearchRunner
 def _make_paper(
     title: str = "Test Paper",
     doi: str | None = None,
-    paper_type: PaperType | None = PaperType.ARTICLE,
     is_predatory: bool = False,
 ) -> Paper:
     """Create a minimal Paper for testing."""
@@ -34,7 +33,6 @@ def _make_paper(
         publication_date=date(2023, 1, 1),
         url="http://example.com",
         doi=doi,
-        paper_type=paper_type,
     )
 
 
@@ -242,7 +240,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2017, 6, 12),
             url="http://arxiv.org/abs/1706.03762",
             doi="10.48550/arxiv.1706.03762",
-            paper_type=PaperType.UNPUBLISHED,
         )
         p2 = Paper(
             title="Attention is All You Need",
@@ -252,7 +249,6 @@ class TestSearchRunnerPipeline:
             publication_date=None,  # intentionally missing
             url="http://openalex.org/W2963403868",
             doi="10.5555/3295222.3295349",
-            paper_type=PaperType.INPROCEEDINGS,
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
         runner.run()
@@ -268,7 +264,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2022, 1, 1),
             url="http://example.com/2022",
             doi="10.1234/ai-2022",
-            paper_type=PaperType.ARTICLE,
         )
         p2 = Paper(
             title="Annual Report on AI",
@@ -278,7 +273,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2023, 1, 1),
             url="http://example.com/2023",
             doi="10.1234/ai-2023",
-            paper_type=PaperType.ARTICLE,
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
         runner.run()
@@ -302,7 +296,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2025, 12, 25),
             url="https://zenodo.org/records/18056028",
             doi="10.5281/zenodo.18056028",
-            paper_type=PaperType.UNPUBLISHED,
         )
         p2 = Paper(
             title="Attention is All You Need... Unless You Are a CISO",
@@ -312,7 +305,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2026, 1, 1),
             url="https://ssrn.com/abstract=5967774",
             doi="10.2139/ssrn.5967774",
-            paper_type=PaperType.UNPUBLISHED,
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
         runner.run()
@@ -335,7 +327,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2026, 1, 17),
             url="https://zenodo.org/records/18289747",
             doi="10.5281/zenodo.18289747",
-            paper_type=PaperType.UNPUBLISHED,
         )
         p2 = Paper(
             title="Attention Is All You Need",
@@ -345,7 +336,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2025, 10, 31),
             url="https://doi.org/10.1201/9781003561460-19",
             doi="10.1201/9781003561460-19",
-            paper_type=PaperType.INBOOK,
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
         runner.run()
@@ -366,7 +356,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2022, 1, 1),
             url="http://example.com/2022",
             doi="10.1234/ai-2022",
-            paper_type=PaperType.ARTICLE,
         )
         p2 = Paper(
             title="Annual Report on AI",
@@ -376,7 +365,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2023, 1, 1),
             url="http://example.com/2023",
             doi="10.1234/ai-2023",
-            paper_type=PaperType.ARTICLE,
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
         runner.run()
@@ -392,7 +380,6 @@ class TestSearchRunnerPipeline:
             publication_date=date(2022, 1, 1),
             url="https://zenodo.org/records/1",
             doi="10.5281/zenodo.1",
-            paper_type=PaperType.UNPUBLISHED,
         )
         p2 = Paper(
             title="Survey of Transformers",
@@ -402,70 +389,10 @@ class TestSearchRunnerPipeline:
             publication_date=date(2024, 6, 1),
             url="https://arxiv.org/abs/2406.00001",
             doi="10.48550/arxiv.2406.00001",
-            paper_type=PaperType.UNPUBLISHED,
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
         runner.run()
         assert len(runner.get_results()) == 2
-
-    def test_paper_type_filter(self):
-        """Papers with non-matching paper_type are removed."""
-        article_paper = _make_paper(title="Article", paper_type=PaperType.ARTICLE)
-        conf_paper = _make_paper(title="Conference", paper_type=PaperType.INPROCEEDINGS)
-        runner = SearchRunner(
-            query="[ml]",
-            databases=["arxiv"],
-            paper_types=["article"],
-        )
-        mock_searcher = MagicMock()
-        mock_searcher.name = Database.ARXIV
-        mock_searcher.search.return_value = [article_paper, conf_paper]
-        runner._searchers = [mock_searcher]  # noqa: SLF001
-        runner.run()
-        results = runner.get_results()
-        assert len(results) == 1
-        assert results[0].title == "Article"
-
-    def test_untyped_paper_kept_when_no_type_filter(self):
-        """Papers with paper_type=None are retained when no type filter is requested.
-
-        Callers that ask for 'all papers' (paper_types=None) should receive
-        every paper regardless of whether its BibTeX type could be determined.
-        Silently discarding untyped papers caused AND queries to return more
-        results than OR queries when the two sub-query result sets happened to
-        contain different numbers of untyped papers (i.e. AND > OR violation).
-        """
-        typed_paper = _make_paper(title="Typed", paper_type=PaperType.ARTICLE)
-        untyped_paper = _make_paper(title="Untyped", paper_type=None)
-        runner = SearchRunner(query="[ml]", databases=["arxiv"])  # no paper_types
-        mock_searcher = MagicMock()
-        mock_searcher.name = Database.ARXIV
-        mock_searcher.search.return_value = [typed_paper, untyped_paper]
-        runner._searchers = [mock_searcher]  # noqa: SLF001
-        runner.run()
-        results = runner.get_results()
-        assert len(results) == 2
-        titles = {r.title for r in results}
-        assert "Typed" in titles
-        assert "Untyped" in titles
-
-    def test_untyped_paper_removed_when_type_filter_requested(self):
-        """Papers with paper_type=None are removed when a type filter is active.
-
-        When the caller requests specific types, untyped papers cannot be
-        confirmed to belong to the allowed set and must therefore be excluded.
-        """
-        typed_paper = _make_paper(title="Typed", paper_type=PaperType.ARTICLE)
-        untyped_paper = _make_paper(title="Untyped", paper_type=None)
-        runner = SearchRunner(query="[ml]", databases=["arxiv"], paper_types=["article"])
-        mock_searcher = MagicMock()
-        mock_searcher.name = Database.ARXIV
-        mock_searcher.search.return_value = [typed_paper, untyped_paper]
-        runner._searchers = [mock_searcher]  # noqa: SLF001
-        runner.run()
-        results = runner.get_results()
-        assert len(results) == 1
-        assert results[0].title == "Typed"
 
     def test_run_can_be_called_twice(self):
         """Calling run() twice resets previous results."""

@@ -12,8 +12,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.core.source import Source
+from findpapers.core.source_type import SourceType
 from findpapers.utils.export import (
     bibtex_how_published,
     bibtex_note,
@@ -81,7 +82,6 @@ def full_paper(journal_publication: Source) -> Paper:
         number_of_pages=42,
         pages="1-42",
         databases={"arxiv", "semantic_scholar"},
-        paper_type=PaperType.ARTICLE,
     )
 
 
@@ -97,7 +97,6 @@ def conference_paper(conference_publication: Source) -> Paper:
         url="https://arxiv.org/abs/1706.03762",
         doi="10.48550/arXiv.1706.03762",
         databases={"arxiv"},
-        paper_type=PaperType.INPROCEEDINGS,
     )
 
 
@@ -133,7 +132,7 @@ class TestCsvColumns:
     def test_contains_source_fields(self) -> None:
         """Source-prefixed fields are present."""
         cols = csv_columns()
-        for field in ("source_title", "source_issn", "source_publisher"):
+        for field in ("source_title", "source_type", "source_issn", "source_publisher"):
             assert field in cols
 
     def test_no_duplicates(self) -> None:
@@ -178,6 +177,32 @@ class TestPaperToCsvRow:
         assert row["source_title"] == "Nature Machine Intelligence"
         assert row["source_issn"] == "2522-5839"
         assert row["source_publisher"] == "Springer Nature"
+
+    def test_source_type_in_csv_row(self) -> None:
+        """source_type is serialised as its value string in CSV row."""
+        pub = Source(title="Nature", source_type=SourceType.JOURNAL)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=pub,
+            publication_date=None,
+        )
+        row = paper_to_csv_row(paper)
+        assert row["source_type"] == "journal"
+
+    def test_source_type_none_in_csv_row(self) -> None:
+        """source_type is None when source has no source_type."""
+        pub = Source(title="Nature")
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=pub,
+            publication_date=None,
+        )
+        row = paper_to_csv_row(paper)
+        assert row["source_type"] is None
 
     def test_minimal_paper_nulls(self, minimal_paper: Paper) -> None:
         """Minimal paper produces None for optional fields."""
@@ -341,18 +366,54 @@ class TestBibtexHowPublished:
 class TestPaperToBibtex:
     """Tests for paper_to_bibtex()."""
 
-    def test_article_type(self, full_paper: Paper) -> None:
-        """Journal paper produces @article entry."""
-        entry = paper_to_bibtex(full_paper)
+    def test_article_type_from_journal_source(self) -> None:
+        """Paper with JOURNAL source_type produces @article entry."""
+        pub = Source(title="Nature", source_type=SourceType.JOURNAL)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
         assert entry.startswith("@article{")
 
-    def test_inproceedings_type(self, conference_paper: Paper) -> None:
-        """Conference paper produces @inproceedings entry."""
-        entry = paper_to_bibtex(conference_paper)
+    def test_inproceedings_type_from_conference_source(self) -> None:
+        """Paper with CONFERENCE source_type produces @inproceedings entry."""
+        pub = Source(title="NeurIPS", source_type=SourceType.CONFERENCE)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
         assert entry.startswith("@inproceedings{")
 
-    def test_unpublished_type(self, minimal_paper: Paper) -> None:
-        """Paper without a paper_type produces @misc entry."""
+    def test_inbook_type_from_book_source(self) -> None:
+        """Paper with BOOK source_type produces @inbook entry."""
+        pub = Source(title="Advances", source_type=SourceType.BOOK)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
+        assert entry.startswith("@inbook{")
+
+    def test_misc_type_without_source_type(self, full_paper: Paper) -> None:
+        """Paper without source_type still produces @misc entry."""
+        assert full_paper.source is not None
+        full_paper.source.source_type = None
+        entry = paper_to_bibtex(full_paper)
+        assert entry.startswith("@misc{")
+
+    def test_misc_type_without_source(self, minimal_paper: Paper) -> None:
+        """Paper without source produces @misc entry."""
         entry = paper_to_bibtex(minimal_paper)
         assert entry.startswith("@misc{")
 
@@ -371,26 +432,25 @@ class TestPaperToBibtex:
         entry = paper_to_bibtex(full_paper)
         assert "year = {2022}" in entry
 
-    def test_contains_journal(self, full_paper: Paper) -> None:
-        """Journal entry contains journal field."""
+    def test_contains_publisher(self, full_paper: Paper) -> None:
+        """Entry contains publisher field when available."""
         entry = paper_to_bibtex(full_paper)
-        assert "journal = {Nature Machine Intelligence}" in entry
+        assert "publisher = {Springer Nature}" in entry
 
-    def test_contains_booktitle(self, conference_paper: Paper) -> None:
-        """Conference entry contains booktitle field."""
+    def test_contains_howpublished(self, conference_paper: Paper) -> None:
+        """Entry contains howpublished field when URL and date are present."""
         entry = paper_to_bibtex(conference_paper)
-        assert "booktitle = {NeurIPS 2023}" in entry
+        assert "howpublished" in entry
 
-    def test_unpublished_for_none_paper_type(self) -> None:
-        """A paper with no paper_type falls back to @misc."""
-        pub = Source(title="Workshop")
+    def test_repository_source_type_falls_back_to_misc(self) -> None:
+        """A paper with REPOSITORY source_type falls back to @misc."""
+        pub = Source(title="arXiv", source_type=SourceType.REPOSITORY)
         paper = Paper(
             title="W Paper",
             abstract="",
             authors=[Author(name="X, Y.")],
             source=pub,
             publication_date=datetime.date(2021, 1, 1),
-            paper_type=None,
         )
         entry = paper_to_bibtex(paper)
         assert entry.startswith("@misc{")

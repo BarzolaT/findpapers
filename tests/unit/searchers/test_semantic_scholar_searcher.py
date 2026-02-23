@@ -4,66 +4,10 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
+from findpapers.core.source_type import SourceType
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
-from findpapers.searchers.semantic_scholar import (
-    SemanticScholarSearcher,
-    _semantic_scholar_types_to_paper_type,
-)
-
-
-class TestSemanticScholarTypesToPaperType:
-    """Tests for _semantic_scholar_types_to_paper_type helper."""
-
-    def test_none_returns_none(self):
-        """None input returns None."""
-        assert _semantic_scholar_types_to_paper_type(None) is None
-
-    def test_empty_list_returns_none(self):
-        """Empty list returns None."""
-        assert _semantic_scholar_types_to_paper_type([]) is None
-
-    def test_thesis_maps_to_phdthesis(self):
-        """'Thesis' maps to PaperType.PHDTHESIS."""
-        assert _semantic_scholar_types_to_paper_type(["Thesis"]) == PaperType.PHDTHESIS
-
-    def test_booksection_maps_to_incollection(self):
-        """'BookSection' maps to PaperType.INCOLLECTION."""
-        assert _semantic_scholar_types_to_paper_type(["BookSection"]) == PaperType.INCOLLECTION
-
-    def test_book_maps_to_inbook(self):
-        """'Book' maps to PaperType.INBOOK."""
-        assert _semantic_scholar_types_to_paper_type(["Book"]) == PaperType.INBOOK
-
-    def test_conference_maps_to_inproceedings(self):
-        """'Conference' maps to PaperType.INPROCEEDINGS."""
-        assert _semantic_scholar_types_to_paper_type(["Conference"]) == PaperType.INPROCEEDINGS
-
-    def test_journal_article_maps_to_article(self):
-        """'JournalArticle' maps to PaperType.ARTICLE."""
-        assert _semantic_scholar_types_to_paper_type(["JournalArticle"]) == PaperType.ARTICLE
-
-    def test_review_maps_to_article(self):
-        """'Review' maps to PaperType.ARTICLE."""
-        assert _semantic_scholar_types_to_paper_type(["Review"]) == PaperType.ARTICLE
-
-    def test_clinical_trial_maps_to_article(self):
-        """'ClinicalTrial' maps to PaperType.ARTICLE."""
-        assert _semantic_scholar_types_to_paper_type(["ClinicalTrial"]) == PaperType.ARTICLE
-
-    def test_unknown_returns_none(self):
-        """Unknown type returns None."""
-        assert _semantic_scholar_types_to_paper_type(["Unknown"]) is None
-
-    def test_priority_thesis_over_journal(self):
-        """Thesis takes priority over JournalArticle when both present."""
-        result = _semantic_scholar_types_to_paper_type(["JournalArticle", "Thesis"])
-        assert result == PaperType.PHDTHESIS
-
-    def test_case_insensitive(self):
-        """Type matching is case-insensitive."""
-        assert _semantic_scholar_types_to_paper_type(["thesis"]) == PaperType.PHDTHESIS
+from findpapers.searchers.semantic_scholar import SemanticScholarSearcher
 
 
 class TestSemanticScholarSearcherInit:
@@ -168,6 +112,65 @@ class TestSemanticScholarSearcherParsePaper:
         assert paper.source is not None
         assert paper.source.title == "ICML"
 
+    def test_source_type_from_publication_venue_journal(self):
+        """publicationVenue.type 'journal' maps to SourceType.JOURNAL."""
+        item = {
+            "title": "A Paper",
+            "journal": {"name": "Nature"},
+            "publicationVenue": {"type": "journal"},
+        }
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.JOURNAL
+
+    def test_source_type_from_publication_venue_conference(self):
+        """publicationVenue.type 'conference' maps to SourceType.CONFERENCE."""
+        item = {
+            "title": "A Paper",
+            "journal": {"name": "NeurIPS"},
+            "publicationVenue": {"type": "conference"},
+        }
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.CONFERENCE
+
+    def test_source_type_fallback_to_publication_types(self):
+        """publicationTypes list is used when publicationVenue is absent."""
+        item = {
+            "title": "A Paper",
+            "journal": {"name": "Some Journal"},
+            "publicationTypes": ["JournalArticle"],
+        }
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.JOURNAL
+
+    def test_source_type_conference_from_publication_types(self):
+        """publicationTypes 'Conference' maps to SourceType.CONFERENCE."""
+        item = {
+            "title": "A Paper",
+            "journal": {"name": "Workshop"},
+            "publicationTypes": ["Conference"],
+        }
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.CONFERENCE
+
+    def test_source_type_none_when_no_venue_or_types(self):
+        """source_type is None when neither publicationVenue nor publicationTypes is present."""
+        item = {
+            "title": "A Paper",
+            "journal": {"name": "Unknown"},
+        }
+        paper = SemanticScholarSearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type is None
+
     def test_doi_from_external_ids(self):
         """DOI is extracted from externalIds.DOI."""
         item = {
@@ -185,13 +188,6 @@ class TestSemanticScholarSearcherParsePaper:
         assert paper is not None
         assert paper.publication_date is not None
         assert paper.publication_date.year == 2020
-
-    def test_paper_type_thesis(self):
-        """publicationTypes with 'Thesis' maps to PHDTHESIS."""
-        item = {"title": "A Thesis", "publicationTypes": ["Thesis"]}
-        paper = SemanticScholarSearcher()._parse_paper(item)
-        assert paper is not None
-        assert paper.paper_type == PaperType.PHDTHESIS
 
 
 class TestSemanticScholarSearcherSearch:

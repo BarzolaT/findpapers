@@ -8,10 +8,11 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.core.query import Query
 from findpapers.core.search import Database
 from findpapers.core.source import Source
+from findpapers.core.source_type import SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.ieee import IEEEQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -23,32 +24,17 @@ _PAGE_SIZE = 200  # IEEE max per request
 # 200 calls/day limit — use conservative interval
 _MIN_REQUEST_INTERVAL = 0.5
 
-
-def _ieee_content_type_to_paper_type(content_type: Optional[str]) -> Optional[PaperType]:
-    """Map an IEEE ``content_type`` string to a :class:`PaperType`.
-
-    Parameters
-    ----------
-    content_type : str | None
-        Raw ``content_type`` value from the IEEE API.
-
-    Returns
-    -------
-    PaperType | None
-        Matching paper type, or ``None`` when the value cannot be mapped.
-    """
-    if not content_type:
-        return None
-    lowered = content_type.strip().lower()
-    if lowered in {"journals", "early access articles"}:
-        return PaperType.ARTICLE
-    if lowered == "conferences":
-        return PaperType.INPROCEEDINGS
-    if lowered == "books":
-        return PaperType.INCOLLECTION
-    if lowered == "standards":
-        return PaperType.TECHREPORT
-    return None
+# Mapping from IEEE content_type values to SourceType.
+_IEEE_CONTENT_TYPE_MAP: dict[str, SourceType] = {
+    "journals": SourceType.JOURNAL,
+    "magazines": SourceType.JOURNAL,
+    "conferences": SourceType.CONFERENCE,
+    "books": SourceType.BOOK,
+    "ebooks": SourceType.BOOK,
+    "standards": SourceType.OTHER,
+    "courses": SourceType.OTHER,
+    "early access": SourceType.OTHER,
+}
 
 
 class IEEESearcher(SearcherBase):
@@ -225,15 +211,19 @@ class IEEESearcher(SearcherBase):
             issn = (item.get("issn") or "").strip() or None
             isbn = (item.get("isbn") or "").strip() or None
             publisher = (item.get("publisher") or "").strip() or None
+            # Map content_type to SourceType.
+            raw_content_type = (item.get("content_type") or "").strip().lower()
+            source_type = _IEEE_CONTENT_TYPE_MAP.get(raw_content_type)
             source = Source(
                 title=source_title,
                 issn=issn,
                 isbn=isbn,
                 publisher=publisher,
+                source_type=source_type,
             )
 
         # Paper type derived from content_type
-        paper_type = _ieee_content_type_to_paper_type(item.get("content_type"))
+        # (kept for reference but no longer stored on the Paper)
 
         # Pages
         start_page = item.get("start_page") or ""
@@ -258,7 +248,6 @@ class IEEESearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={self.name},
-                paper_type=paper_type,
             )
         except ValueError:
             return None

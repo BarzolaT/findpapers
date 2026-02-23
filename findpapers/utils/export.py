@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from findpapers.core.paper import Paper
+from findpapers.core.source_type import SourceType
 
 if TYPE_CHECKING:
     from findpapers.core.search import Search
@@ -95,10 +96,10 @@ def csv_columns() -> list[str]:
         "number_of_pages",
         "pages",
         "databases",
-        "paper_type",
     ]
     source_fields = [
         "source_title",
+        "source_type",
         "source_isbn",
         "source_issn",
         "source_publisher",
@@ -138,8 +139,8 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
         "number_of_pages": paper.number_of_pages,
         "pages": paper.pages,
         "databases": "; ".join(sorted(paper.databases)),
-        "paper_type": paper.paper_type.value if paper.paper_type is not None else None,
         "source_title": source.title if source else None,
+        "source_type": source.source_type.value if source and source.source_type else None,
         "source_isbn": source.isbn if source else None,
         "source_issn": source.issn if source else None,
         "source_publisher": source.publisher if source else None,
@@ -151,9 +152,9 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
 def paper_to_bibtex(paper: Paper) -> str:
     """Convert a paper into a BibTeX entry.
 
-    The BibTeX entry type is derived directly from :attr:`Paper.paper_type`
-    since the :class:`~findpapers.core.paper_type.PaperType` values align
-    with the standard BibTeX entry type names.
+    The BibTeX entry type is determined from the source type when available:
+    ``@article`` for journals, ``@inproceedings`` for conferences,
+    ``@inbook`` for books, and ``@misc`` as the fallback.
 
     Parameters
     ----------
@@ -166,9 +167,16 @@ def paper_to_bibtex(paper: Paper) -> str:
         BibTeX entry.
     """
     default_tab = " " * 4
-    paper_type = paper.paper_type
-    citation_type = f"@{paper_type.value}" if paper_type is not None else "@misc"
+    # Map source_type to BibTeX entry type.
+    _BIBTEX_TYPE_MAP: dict[SourceType, str] = {
+        SourceType.JOURNAL: "@article",
+        SourceType.CONFERENCE: "@inproceedings",
+        SourceType.BOOK: "@inbook",
+    }
     source = paper.source
+    citation_type = "@misc"
+    if source and source.source_type:
+        citation_type = _BIBTEX_TYPE_MAP.get(source.source_type, "@misc")
     citation_key = citation_key_for(paper)
     lines = [f"{citation_type}{{{citation_key},"]
     lines.append(f"{default_tab}title = {{{paper.title}}},")
@@ -177,24 +185,9 @@ def paper_to_bibtex(paper: Paper) -> str:
         authors = " and ".join(author.name for author in paper.authors)
         lines.append(f"{default_tab}author = {{{authors}}},")
 
-    if citation_type == "@article" and source is not None:
-        lines.append(f"{default_tab}journal = {{{source.title}}},")
-    elif citation_type in {"@inproceedings", "@incollection", "@inbook"} and source is not None:
-        lines.append(f"{default_tab}booktitle = {{{source.title}}},")
-    elif citation_type == "@unpublished":
-        note = bibtex_note(paper)
-        if note:
-            lines.append(f"{default_tab}note = {{{note}}},")
-    elif citation_type in {"@phdthesis", "@mastersthesis"} and source is not None:
-        lines.append(f"{default_tab}school = {{{source.title}}},")
-    elif citation_type == "@techreport" and source is not None:
-        lines.append(f"{default_tab}institution = {{{source.title}}},")
-    elif citation_type == "@manual" and source is not None:
-        lines.append(f"{default_tab}organization = {{{source.title}}},")
-    else:
-        how_published = bibtex_how_published(paper)
-        if how_published:
-            lines.append(f"{default_tab}howpublished = {{{how_published}}},")
+    how_published = bibtex_how_published(paper)
+    if how_published:
+        lines.append(f"{default_tab}howpublished = {{{how_published}}},")
 
     if source is not None and source.publisher is not None:
         lines.append(f"{default_tab}publisher = {{{source.publisher}}},")

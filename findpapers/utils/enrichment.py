@@ -13,8 +13,9 @@ from lxml import html
 from lxml.html import HtmlElement
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.core.source import Source
+from findpapers.core.source_type import SourceType
 from findpapers.utils.http_headers import get_browser_headers
 
 logger = logging.getLogger(__name__)
@@ -90,6 +91,14 @@ SOURCE_ISBN_KEYS = [
     "citation_isbn",
     "prism.isbn",
 ]
+
+# Mapping from meta key names to SourceType for source classification.
+_SOURCE_KEY_TYPE_MAP: dict[str, SourceType] = {
+    "citation_journal_title": SourceType.JOURNAL,
+    "citation_conference_title": SourceType.CONFERENCE,
+    "citation_book_title": SourceType.BOOK,
+    "citation_inbook_title": SourceType.BOOK,
+}
 PDF_URL_KEYS = [
     "citation_pdf_url",
 ]
@@ -595,21 +604,22 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
 
     source_title = _pick_metadata_value(metadata, SOURCE_TITLE_KEYS)
     source = None
-    paper_type: PaperType | None = None
+    source_type: SourceType | None = None
     if source_title and source_title.lower() not in _PREPRINT_SERVERS:
-        if "citation_journal_title" in metadata:
-            paper_type = PaperType.ARTICLE
-        elif "citation_conference_title" in metadata:
-            paper_type = PaperType.INPROCEEDINGS
-        elif "citation_inbook_title" in metadata:
-            paper_type = PaperType.INBOOK
-        elif "citation_book_title" in metadata:
-            paper_type = PaperType.INCOLLECTION
+        # Determine source_type based on which meta key matched.
+        for key in SOURCE_TITLE_KEYS:
+            raw = metadata.get(key)
+            if raw:
+                val = raw[0].strip() if isinstance(raw, list) else str(raw).strip()
+                if val:
+                    source_type = _SOURCE_KEY_TYPE_MAP.get(key)
+                    break
         source = Source(
             title=source_title,
             issn=_pick_metadata_value(metadata, SOURCE_ISSN_KEYS),
             isbn=_pick_metadata_value(metadata, SOURCE_ISBN_KEYS),
             publisher=_pick_metadata_value(metadata, SOURCE_PUBLISHER_KEYS),
+            source_type=source_type,
         )
 
     pdf_url_val = _pick_metadata_value(metadata, PDF_URL_KEYS)
@@ -626,7 +636,6 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
         keywords=keywords or None,
         pages=pages,
         number_of_pages=number_of_pages,
-        paper_type=paper_type,
     )
 
 

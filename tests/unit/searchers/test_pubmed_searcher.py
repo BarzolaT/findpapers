@@ -9,6 +9,7 @@ import pytest
 
 from findpapers.core.author import Author
 from findpapers.core.search import Database
+from findpapers.core.source_type import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
 from findpapers.searchers.pubmed import PubmedSearcher, _normalize_month
@@ -229,6 +230,27 @@ class TestPubmedSearcherParsePaper:
         assert paper.source is not None
         assert paper.source.title == "Nature"
         assert paper.source.issn == "1234-5678"
+
+    def test_source_type_is_always_journal(self):
+        """PubMed sources always have source_type=JOURNAL."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>1</PMID>
+                <Article>
+                    <ArticleTitle>Journal Paper</ArticleTitle>
+                    <Journal>
+                        <Title>Some Journal</Title>
+                    </Journal>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedSearcher()._parse_paper(el)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.JOURNAL
 
     def test_pages_from_medline_pgn(self):
         """Pages are extracted from MedlinePgn in Pagination element."""

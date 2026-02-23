@@ -7,25 +7,9 @@ import json
 import pytest
 
 from findpapers.core.author import Author
-from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, PaperType, _is_preprint_doi, _merge_doi
+from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, _is_preprint_doi, _merge_doi
 from findpapers.core.search import Search
 from findpapers.core.source import Source
-
-
-def test_paper_type_normalization():
-    """Test that paper_type is normalized correctly from a string value."""
-    paper = Paper(
-        title="A Paper",
-        abstract="",
-        authors=[],
-        source=None,
-        publication_date=datetime.date.today(),
-    )
-    paper.paper_type = "ARTICLE"  # mixed-case string
-    assert paper.paper_type == PaperType.ARTICLE
-
-    paper.paper_type = "unknown_type"
-    assert paper.paper_type is None
 
 
 def test_publication_merge():
@@ -352,7 +336,6 @@ def _make_search_with_paper() -> Search:
         source=Source(title="Test Journal"),
         publication_date=datetime.date(2023, 1, 1),
     )
-    paper.paper_type = PaperType.ARTICLE
     search = Search(query="[export]", databases=["arxiv"])
     search.add_paper(paper)
     return search

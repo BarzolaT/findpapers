@@ -6,51 +6,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
+from findpapers.core.source_type import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.ieee import IEEEQueryBuilder
-from findpapers.searchers.ieee import IEEESearcher, _ieee_content_type_to_paper_type
-
-
-class TestIEEEContentTypeMapping:
-    """Tests for _ieee_content_type_to_paper_type helper."""
-
-    def test_none_returns_none(self):
-        """None input returns None."""
-        assert _ieee_content_type_to_paper_type(None) is None
-
-    def test_empty_string_returns_none(self):
-        """Empty string returns None."""
-        assert _ieee_content_type_to_paper_type("") is None
-
-    def test_journals_maps_to_article(self):
-        """'Journals' maps to PaperType.ARTICLE."""
-        assert _ieee_content_type_to_paper_type("Journals") == PaperType.ARTICLE
-
-    def test_early_access_maps_to_article(self):
-        """'Early Access Articles' maps to PaperType.ARTICLE."""
-        assert _ieee_content_type_to_paper_type("Early Access Articles") == PaperType.ARTICLE
-
-    def test_conferences_maps_to_inproceedings(self):
-        """'Conferences' maps to PaperType.INPROCEEDINGS."""
-        assert _ieee_content_type_to_paper_type("Conferences") == PaperType.INPROCEEDINGS
-
-    def test_books_maps_to_incollection(self):
-        """'Books' maps to PaperType.INCOLLECTION."""
-        assert _ieee_content_type_to_paper_type("Books") == PaperType.INCOLLECTION
-
-    def test_standards_maps_to_techreport(self):
-        """'Standards' maps to PaperType.TECHREPORT."""
-        assert _ieee_content_type_to_paper_type("Standards") == PaperType.TECHREPORT
-
-    def test_unknown_type_returns_none(self):
-        """Unknown content type returns None."""
-        assert _ieee_content_type_to_paper_type("Unknown Type") is None
-
-    def test_case_insensitive(self):
-        """Mapping is case-insensitive."""
-        assert _ieee_content_type_to_paper_type("CONFERENCES") == PaperType.INPROCEEDINGS
+from findpapers.searchers.ieee import IEEESearcher
 
 
 class TestIEEESearcherInit:
@@ -170,6 +130,70 @@ class TestIEEESearcherParsePaper:
         assert len(paper.keywords) > 0
         # Verify a known IEEE term from the sample
         assert "Natural language processing" in paper.keywords
+
+    def test_source_type_journal(self):
+        """content_type 'Journals' maps to SourceType.JOURNAL."""
+        item = {"title": "A Paper", "publication_title": "IEEE Trans.", "content_type": "Journals"}
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.JOURNAL
+
+    def test_source_type_conference(self):
+        """content_type 'Conferences' maps to SourceType.CONFERENCE."""
+        item = {
+            "title": "A Paper",
+            "publication_title": "Proc. ICML",
+            "content_type": "Conferences",
+        }
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.CONFERENCE
+
+    def test_source_type_book(self):
+        """content_type 'Books' maps to SourceType.BOOK."""
+        item = {"title": "A Paper", "publication_title": "A Book Title", "content_type": "Books"}
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.BOOK
+
+    def test_source_type_magazine(self):
+        """content_type 'Magazines' maps to SourceType.JOURNAL."""
+        item = {
+            "title": "A Paper",
+            "publication_title": "IEEE Spectrum",
+            "content_type": "Magazines",
+        }
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.JOURNAL
+
+    def test_source_type_none_when_unknown(self):
+        """Unknown content_type results in source_type being None."""
+        item = {
+            "title": "A Paper",
+            "publication_title": "Something",
+            "content_type": "UnknownType",
+        }
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type is None
+
+    def test_source_type_standards_maps_to_other(self):
+        """content_type 'Standards' maps to SourceType.OTHER."""
+        item = {
+            "title": "A Paper",
+            "publication_title": "IEEE Standard",
+            "content_type": "Standards",
+        }
+        paper = IEEESearcher()._parse_paper(item)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.OTHER
 
 
 class TestIEEESearcherSearch:

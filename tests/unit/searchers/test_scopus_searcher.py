@@ -5,53 +5,10 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from findpapers.core.author import Author
-from findpapers.core.paper import PaperType
 from findpapers.core.search import Database
+from findpapers.core.source_type import SourceType
 from findpapers.query.builders.scopus import ScopusQueryBuilder
-from findpapers.searchers.scopus import ScopusSearcher, _scopus_aggregation_type_to_paper_type
-
-
-class TestScopusAggregationTypeMapping:
-    """Tests for _scopus_aggregation_type_to_paper_type helper."""
-
-    def test_none_returns_none(self):
-        """None input returns None."""
-        assert _scopus_aggregation_type_to_paper_type(None) is None
-
-    def test_empty_string_returns_none(self):
-        """Empty string returns None."""
-        assert _scopus_aggregation_type_to_paper_type("") is None
-
-    def test_journal_maps_to_article(self):
-        """'Journal' maps to PaperType.ARTICLE."""
-        assert _scopus_aggregation_type_to_paper_type("Journal") == PaperType.ARTICLE
-
-    def test_trade_journal_maps_to_article(self):
-        """'Trade Journal' maps to PaperType.ARTICLE."""
-        assert _scopus_aggregation_type_to_paper_type("Trade Journal") == PaperType.ARTICLE
-
-    def test_conference_proceeding_maps_to_inproceedings(self):
-        """'Conference Proceeding' maps to PaperType.INPROCEEDINGS."""
-        assert (
-            _scopus_aggregation_type_to_paper_type("Conference Proceeding")
-            == PaperType.INPROCEEDINGS
-        )
-
-    def test_book_maps_to_incollection(self):
-        """'Book' maps to PaperType.INCOLLECTION."""
-        assert _scopus_aggregation_type_to_paper_type("Book") == PaperType.INCOLLECTION
-
-    def test_book_series_maps_to_incollection(self):
-        """'Book Series' maps to PaperType.INCOLLECTION."""
-        assert _scopus_aggregation_type_to_paper_type("Book Series") == PaperType.INCOLLECTION
-
-    def test_unknown_type_returns_none(self):
-        """Unknown aggregation type returns None."""
-        assert _scopus_aggregation_type_to_paper_type("Unknown") is None
-
-    def test_case_insensitive(self):
-        """Mapping is case-insensitive."""
-        assert _scopus_aggregation_type_to_paper_type("JOURNAL") == PaperType.ARTICLE
+from findpapers.searchers.scopus import ScopusSearcher
 
 
 class TestScopusSearcherInit:
@@ -137,16 +94,6 @@ class TestScopusSearcherParsePaper:
         assert paper.source is not None
         assert paper.source.isbn == "978-3-16-148410-0"
 
-    def test_aggregation_type_conference(self):
-        """Entry with Conference Proceeding aggregation maps to INPROCEEDINGS."""
-        entry = {
-            "dc:title": "A Conference Paper",
-            "prism:aggregationType": "Conference Proceeding",
-        }
-        paper = ScopusSearcher()._parse_paper(entry)
-        assert paper is not None
-        assert paper.paper_type == PaperType.INPROCEEDINGS
-
     def test_pages_extracted(self):
         """Entry with prism:pageRange populates pages field."""
         entry = {"dc:title": "A Paper", "prism:pageRange": "100-110"}
@@ -220,6 +167,53 @@ class TestScopusSearcherParsePaper:
         assert len(paper.authors) == 1
         assert paper.authors[0].name == "Sumithra M.G."
         assert paper.authors[0].affiliation == "Dr. N.G.P. Institute of Technology"
+
+    def test_source_type_journal(self):
+        """aggregationType 'Journal' maps to SourceType.JOURNAL."""
+        entry = {
+            "dc:title": "A Paper",
+            "prism:publicationName": "Nature",
+            "prism:aggregationType": "Journal",
+        }
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.JOURNAL
+
+    def test_source_type_conference(self):
+        """aggregationType 'Conference Proceeding' maps to SourceType.CONFERENCE."""
+        entry = {
+            "dc:title": "A Paper",
+            "prism:publicationName": "ICML 2021",
+            "prism:aggregationType": "Conference Proceeding",
+        }
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.CONFERENCE
+
+    def test_source_type_book(self):
+        """aggregationType 'Book' maps to SourceType.BOOK."""
+        entry = {
+            "dc:title": "A Chapter",
+            "prism:publicationName": "Advances in AI",
+            "prism:aggregationType": "Book",
+        }
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type == SourceType.BOOK
+
+    def test_source_type_none_when_missing(self):
+        """Missing aggregationType results in source_type being None."""
+        entry = {
+            "dc:title": "A Paper",
+            "prism:publicationName": "Something",
+        }
+        paper = ScopusSearcher()._parse_paper(entry)
+        assert paper is not None
+        assert paper.source is not None
+        assert paper.source.source_type is None
 
 
 class TestScopusSearcherSearch:

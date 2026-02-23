@@ -9,10 +9,11 @@ from typing import List, Optional
 from xml.etree import ElementTree as ET
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.core.query import Query
 from findpapers.core.search import Database
 from findpapers.core.source import Source
+from findpapers.core.source_type import SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -286,7 +287,11 @@ class PubmedSearcher(SearcherBase):
             issn_el = journal_el.find("ISSN")
             issn = (issn_el.text or "").strip() if issn_el is not None else None
             if pub_title.strip():
-                source = Source(title=pub_title.strip(), issn=issn)
+                source = Source(
+                    title=pub_title.strip(),
+                    issn=issn,
+                    source_type=SourceType.JOURNAL,
+                )
 
         try:
             paper = Paper(
@@ -300,8 +305,6 @@ class PubmedSearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={self.name},
-                # PubMed exclusively indexes journal literature.
-                paper_type=PaperType.ARTICLE,
             )
         except ValueError:
             return None

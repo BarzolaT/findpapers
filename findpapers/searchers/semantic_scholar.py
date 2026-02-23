@@ -8,10 +8,11 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.core.query import Query
 from findpapers.core.search import Database
 from findpapers.core.source import Source
+from findpapers.core.source_type import SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -31,48 +32,26 @@ _MIN_REQUEST_INTERVAL_WITH_KEY = 1.1  # respects 1 RPS introductory limit
 # Fields to retrieve in each paper record
 _PAPER_FIELDS = (
     "paperId,externalIds,title,abstract,authors,year,publicationDate,"
-    "journal,venue,citationCount,openAccessPdf,url,fieldsOfStudy,publicationTypes"
+    "journal,venue,citationCount,openAccessPdf,url,fieldsOfStudy,"
+    "publicationTypes,publicationVenue"
 )
 
+# Mapping from Semantic Scholar publicationVenue.type to SourceType.
+_SS_VENUE_TYPE_MAP: dict[str, SourceType] = {
+    "journal": SourceType.JOURNAL,
+    "conference": SourceType.CONFERENCE,
+    "book": SourceType.BOOK,
+    "repository": SourceType.REPOSITORY,
+}
 
-def _semantic_scholar_types_to_paper_type(
-    publication_types: Optional[list],
-) -> Optional[PaperType]:
-    """Map a Semantic Scholar ``publicationTypes`` list to a :class:`PaperType`.
-
-    The function applies a priority order so the most specific type wins when
-    multiple labels are present.
-
-    Parameters
-    ----------
-    publication_types : list | None
-        List of publication type strings from the Semantic Scholar API.
-
-    Returns
-    -------
-    PaperType | None
-        Matching paper type, or ``None`` when the list is empty / unmappable.
-    """
-    if not publication_types:
-        return None
-
-    # Normalise to lower-case for comparison.
-    types_lower = {t.lower() for t in publication_types if isinstance(t, str)}
-
-    # Priority: specific academic entry types first.
-    if "thesis" in types_lower:
-        return PaperType.PHDTHESIS
-    if "booksection" in types_lower:
-        return PaperType.INCOLLECTION
-    if "book" in types_lower:
-        return PaperType.INBOOK
-    if "conference" in types_lower:
-        return PaperType.INPROCEEDINGS
-    if "journalarticle" in types_lower:
-        return PaperType.ARTICLE
-    if types_lower & {"review", "clinicaltrial", "lettersandcomments"}:
-        return PaperType.ARTICLE
-    return None
+# Mapping from publicationTypes list entries to SourceType (fallback).
+_SS_PUB_TYPE_MAP: dict[str, SourceType] = {
+    "JournalArticle": SourceType.JOURNAL,
+    "Review": SourceType.JOURNAL,
+    "Conference": SourceType.CONFERENCE,
+    "Book": SourceType.BOOK,
+    "BookSection": SourceType.BOOK,
+}
 
 
 class SemanticScholarSearcher(SearcherBase):
@@ -228,8 +207,27 @@ class SemanticScholarSearcher(SearcherBase):
         journal = item.get("journal") or {}
         venue = (item.get("venue") or "").strip()
         pub_title = (journal.get("name") or venue or "").strip()
+
+        # Determine source_type from publicationVenue.type (preferred),
+        # falling back to publicationTypes list.
+        source_type: Optional[SourceType] = None
+        pub_venue = item.get("publicationVenue") or {}
+        venue_type = (pub_venue.get("type") or "").strip().lower()
+        if venue_type:
+            source_type = _SS_VENUE_TYPE_MAP.get(venue_type)
+
+        if source_type is None:
+            pub_types = item.get("publicationTypes") or []
+            for pt in pub_types:
+                if isinstance(pt, str) and pt in _SS_PUB_TYPE_MAP:
+                    source_type = _SS_PUB_TYPE_MAP[pt]
+                    break
+
         if pub_title:
-            source = Source(title=pub_title)
+            source = Source(title=pub_title, source_type=source_type)
+        elif venue:
+            # Venue name present but not a formal journal — use as-is.
+            source = Source(title=venue, source_type=source_type)
 
         # Pages from journal info
         pages: Optional[str] = None
@@ -239,7 +237,7 @@ class SemanticScholarSearcher(SearcherBase):
                 pages = raw_pages
 
         # Paper type from publicationTypes list
-        paper_type = _semantic_scholar_types_to_paper_type(item.get("publicationTypes"))
+        # (kept for reference but no longer stored on the Paper)
 
         try:
             paper = Paper(
@@ -255,7 +253,6 @@ class SemanticScholarSearcher(SearcherBase):
                 keywords=keywords if keywords else None,
                 pages=pages,
                 databases={self.name},
-                paper_type=paper_type,
             )
         except ValueError:
             return None

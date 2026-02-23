@@ -8,10 +8,11 @@ from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.core.query import Query
 from findpapers.core.search import Database
 from findpapers.core.source import Source
+from findpapers.core.source_type import SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 from findpapers.searchers.base import SearcherBase
@@ -23,32 +24,14 @@ _PAGE_SIZE = 25  # Scopus max results per request (in standard view)
 # Conservative interval — actual limit varies by institution
 _MIN_REQUEST_INTERVAL = 0.5
 
-
-def _scopus_aggregation_type_to_paper_type(
-    aggregation_type: Optional[str],
-) -> Optional[PaperType]:
-    """Map a Scopus ``prism:aggregationType`` string to a :class:`PaperType`.
-
-    Parameters
-    ----------
-    aggregation_type : str | None
-        Raw ``prism:aggregationType`` value from the Scopus API.
-
-    Returns
-    -------
-    PaperType | None
-        Matching paper type, or ``None`` when the value cannot be mapped.
-    """
-    if not aggregation_type:
-        return None
-    lowered = aggregation_type.strip().lower()
-    if lowered in {"journal", "trade journal"}:
-        return PaperType.ARTICLE
-    if lowered == "conference proceeding":
-        return PaperType.INPROCEEDINGS
-    if lowered in {"book", "book series"}:
-        return PaperType.INCOLLECTION
-    return None
+# Mapping from Scopus prism:aggregationType values to SourceType.
+_SCOPUS_AGGREGATION_TYPE_MAP: dict[str, SourceType] = {
+    "journal": SourceType.JOURNAL,
+    "conference proceeding": SourceType.CONFERENCE,
+    "book": SourceType.BOOK,
+    "book series": SourceType.BOOK,
+    "trade journal": SourceType.JOURNAL,
+}
 
 
 class ScopusSearcher(SearcherBase):
@@ -223,15 +206,19 @@ class ScopusSearcher(SearcherBase):
             else:
                 isbn = (raw_isbn or "").strip() or None
             publisher = (entry.get("dc:publisher") or "").strip() or None
+            # Map aggregationType to SourceType.
+            raw_agg_type = (entry.get("prism:aggregationType") or "").strip().lower()
+            source_type = _SCOPUS_AGGREGATION_TYPE_MAP.get(raw_agg_type)
             source = Source(
                 title=pub_title,
                 issn=issn,
                 isbn=isbn,
                 publisher=publisher,
+                source_type=source_type,
             )
 
         # Paper type derived from aggregation type
-        paper_type = _scopus_aggregation_type_to_paper_type(entry.get("prism:aggregationType"))
+        # (kept for reference but no longer stored on the Paper)
 
         # Pages
         pages: Optional[str] = (entry.get("prism:pageRange") or "").strip() or None
@@ -248,7 +235,6 @@ class ScopusSearcher(SearcherBase):
                 citations=citations,
                 pages=pages,
                 databases={self.name},
-                paper_type=paper_type,
             )
         except ValueError:
             return None

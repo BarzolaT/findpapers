@@ -38,13 +38,13 @@ def _enrichment_snapshot(paper: Paper) -> tuple:
         paper.publication_date,
         paper.pages,
         paper.number_of_pages,
-        paper.paper_type,
         frozenset(paper.authors or []),
         frozenset(paper.keywords or []),
         paper.source.title if paper.source else None,
         paper.source.publisher if paper.source else None,
         paper.source.issn if paper.source else None,
         paper.source.isbn if paper.source else None,
+        paper.source.source_type if paper.source else None,
     )
 
 
