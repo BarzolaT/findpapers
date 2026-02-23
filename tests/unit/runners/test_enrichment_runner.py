@@ -65,11 +65,15 @@ class TestEnrichmentRunnerRun:
     def test_metrics_populated_after_run(self):
         """Metrics contain all expected keys after run()."""
         runner = EnrichmentRunner(papers=[_make_paper()])
-        with patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None):
+        with (
+            patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
+            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+        ):
             runner.run()
         metrics = runner.get_metrics()
         assert "total_papers" in metrics
         assert "enriched_papers" in metrics
+        assert "doi_enriched_papers" in metrics
         assert "fetch_error_papers" in metrics
         assert "no_metadata_papers" in metrics
         assert "no_change_papers" in metrics
@@ -95,6 +99,10 @@ class TestEnrichmentRunnerRun:
                 "findpapers.runners.enrichment_runner.build_paper_from_metadata",
                 return_value=enriched_paper,
             ),
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                return_value=None,
+            ),
         ):
             runner = EnrichmentRunner(papers=[base])
             runner.run()
@@ -116,6 +124,10 @@ class TestEnrichmentRunnerRun:
                 "findpapers.runners.enrichment_runner.build_paper_from_metadata",
                 return_value=same_paper,  # identical data — no improvement
             ),
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                return_value=None,
+            ),
         ):
             runner = EnrichmentRunner(papers=[_make_paper()])
             runner.run()
@@ -126,9 +138,13 @@ class TestEnrichmentRunnerRun:
         paper = _make_paper(urls=set())  # url=None
         paper.doi = None  # ensure no DOI fallback URL either
         runner = EnrichmentRunner(papers=[paper])
-        with patch("findpapers.runners.enrichment_runner.fetch_metadata") as mock_fetch:
+        with (
+            patch("findpapers.runners.enrichment_runner.fetch_metadata") as mock_fetch,
+            patch("findpapers.runners.enrichment_runner.fetch_crossref_work") as mock_crossref,
+        ):
             runner.run()
         mock_fetch.assert_not_called()
+        mock_crossref.assert_not_called()
         metrics = runner.get_metrics()
         assert metrics["enriched_papers"] == 0
         assert metrics["no_urls_papers"] == 1
@@ -136,7 +152,10 @@ class TestEnrichmentRunnerRun:
     def test_run_twice_resets(self):
         """run() can be called multiple times; metrics are fresh each time."""
         runner = EnrichmentRunner(papers=[_make_paper()])
-        with patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None):
+        with (
+            patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
+            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+        ):
             runner.run()
             runner.run()
         assert runner.get_metrics()["enriched_papers"] == 0
@@ -145,13 +164,18 @@ class TestEnrichmentRunnerRun:
         """Parallel run completes and returns metrics."""
         papers = [_make_paper(f"Paper {i}") for i in range(5)]
         runner = EnrichmentRunner(papers=papers, num_workers=3)
-        with patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None):
+        with (
+            patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
+            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+        ):
             runner.run()
         assert runner.get_metrics()["total_papers"] == 5
 
     def test_fetch_error_counted_when_url_raises(self):
         """fetch_error_papers counts papers whose URL fetch raised an HTTP/network error."""
-        runner = EnrichmentRunner(papers=[_make_paper()])
+        paper = _make_paper()
+        paper.doi = None  # no DOI so CrossRef is skipped
+        runner = EnrichmentRunner(papers=[paper])
         with patch(
             "findpapers.runners.enrichment_runner.fetch_metadata",
             side_effect=RuntimeError("network error"),
@@ -162,7 +186,9 @@ class TestEnrichmentRunnerRun:
 
     def test_no_metadata_counted_when_fetch_returns_none(self):
         """no_metadata_papers counts papers whose URL returned non-HTML content."""
-        runner = EnrichmentRunner(papers=[_make_paper()])
+        paper = _make_paper()
+        paper.doi = None  # no DOI so CrossRef is skipped
+        runner = EnrichmentRunner(papers=[paper])
         with patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None):
             runner.run()
         assert runner.get_metrics()["no_metadata_papers"] == 1
@@ -180,6 +206,10 @@ class TestEnrichmentRunnerRun:
                 "findpapers.runners.enrichment_runner.build_paper_from_metadata",
                 return_value=same_paper,
             ),
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                return_value=None,
+            ),
         ):
             runner = EnrichmentRunner(papers=[_make_paper()])
             runner.run()
@@ -196,9 +226,15 @@ class TestEnrichmentRunnerRun:
             fetched_urls.append(url)
             return None  # simulate non-HTML / no-metadata response
 
-        with patch(
-            "findpapers.runners.enrichment_runner.fetch_metadata",
-            side_effect=_record_fetch,
+        with (
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_metadata",
+                side_effect=_record_fetch,
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                return_value=None,
+            ),
         ):
             runner = EnrichmentRunner(papers=[paper])
             runner.run()
@@ -219,7 +255,10 @@ class TestEnrichmentRunnerVerbose:
         import logging
 
         runner = EnrichmentRunner(papers=[_make_paper()])
-        with patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None):
+        with (
+            patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
+            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+        ):
             with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
                 runner.run(verbose=True)
         assert "EnrichmentRunner Configuration" in " ".join(caplog.messages)
@@ -229,7 +268,10 @@ class TestEnrichmentRunnerVerbose:
         import logging
 
         runner = EnrichmentRunner(papers=[_make_paper()])
-        with patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None):
+        with (
+            patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
+            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+        ):
             with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
                 runner.run(verbose=True)
         messages = " ".join(caplog.messages)
@@ -238,7 +280,9 @@ class TestEnrichmentRunnerVerbose:
 
     def test_verbose_true_tracks_fetch_errors(self):
         """Fetch errors are counted in fetch_error_papers when URLs raise."""
-        runner = EnrichmentRunner(papers=[_make_paper()])
+        paper = _make_paper()
+        paper.doi = None  # no DOI so CrossRef is skipped
+        runner = EnrichmentRunner(papers=[paper])
         with patch(
             "findpapers.runners.enrichment_runner.fetch_metadata",
             side_effect=RuntimeError("network error"),
@@ -251,7 +295,10 @@ class TestEnrichmentRunnerVerbose:
         import logging
 
         runner = EnrichmentRunner(papers=[_make_paper()])
-        with patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None):
+        with (
+            patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
+            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+        ):
             with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
                 runner.run(verbose=False)
         assert "EnrichmentRunner Configuration" not in " ".join(caplog.messages)
@@ -264,3 +311,163 @@ class TestEnrichmentRunnerVerbose:
         runner.run(verbose=True)
         for lib in ("urllib3", "requests", "httpx", "charset_normalizer"):
             assert logging.getLogger(lib).level == logging.WARNING
+
+
+class TestEnrichmentRunnerCrossRef:
+    """Tests for DOI-based enrichment via the CrossRef API."""
+
+    def test_crossref_enriches_paper_with_doi(self):
+        """Papers with a DOI attempt CrossRef API enrichment."""
+        paper = _make_paper()
+        paper.doi = "10.1234/test"
+        paper.citations = None  # missing data that CrossRef will fill
+
+        crossref_paper = _make_paper(title="CrossRef Paper")
+        crossref_paper.citations = 42
+
+        with (
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                return_value={"title": ["CrossRef Paper"]},
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.build_paper_from_crossref",
+                return_value=crossref_paper,
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_metadata",
+                return_value=None,
+            ),
+        ):
+            runner = EnrichmentRunner(papers=[paper])
+            runner.run()
+
+        metrics = runner.get_metrics()
+        assert metrics["enriched_papers"] == 1
+        assert metrics["doi_enriched_papers"] == 1
+        assert paper.citations == 42
+
+    def test_crossref_not_called_without_doi(self):
+        """Papers without DOI skip CrossRef entirely."""
+        paper = _make_paper()
+        paper.doi = None
+
+        with (
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+            ) as mock_crossref,
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_metadata",
+                return_value=None,
+            ),
+        ):
+            runner = EnrichmentRunner(papers=[paper])
+            runner.run()
+
+        mock_crossref.assert_not_called()
+
+    def test_crossref_error_falls_back_to_url_scraping(self):
+        """CrossRef error does not prevent URL-based enrichment."""
+        paper = _make_paper()
+        paper.doi = "10.1234/test"
+        paper.citations = None
+
+        enriched_paper = _make_paper(title="Scraped")
+        enriched_paper.citations = 10
+
+        with (
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                side_effect=RuntimeError("CrossRef timeout"),
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_metadata",
+                return_value=_FAKE_METADATA,
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.build_paper_from_metadata",
+                return_value=enriched_paper,
+            ),
+        ):
+            runner = EnrichmentRunner(papers=[paper])
+            runner.run()
+
+        metrics = runner.get_metrics()
+        assert metrics["enriched_papers"] == 1
+        assert metrics["doi_enriched_papers"] == 0
+        assert paper.citations == 10
+
+    def test_crossref_and_scraping_both_contribute(self):
+        """Both CrossRef and URL scraping can contribute data to the same paper."""
+        paper = _make_paper()
+        paper.doi = "10.1234/test"
+        paper.citations = None
+        paper.pdf_url = None
+
+        # CrossRef provides citations but not pdf_url
+        crossref_paper = _make_paper(title="CrossRef")
+        crossref_paper.citations = 100
+        crossref_paper.pdf_url = None
+
+        # URL scraping provides pdf_url
+        scraped_paper = _make_paper(title="Scraped")
+        scraped_paper.pdf_url = "https://example.com/paper.pdf"
+        scraped_paper.citations = None
+
+        with (
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                return_value={"title": ["CrossRef"]},
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.build_paper_from_crossref",
+                return_value=crossref_paper,
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_metadata",
+                return_value=_FAKE_METADATA,
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.build_paper_from_metadata",
+                return_value=scraped_paper,
+            ),
+        ):
+            runner = EnrichmentRunner(papers=[paper])
+            runner.run()
+
+        metrics = runner.get_metrics()
+        assert metrics["enriched_papers"] == 1
+        assert metrics["doi_enriched_papers"] == 1
+        assert paper.citations == 100
+        assert paper.pdf_url == "https://example.com/paper.pdf"
+
+    def test_doi_only_paper_no_urls_enriches_via_crossref(self):
+        """Paper with DOI but no URL can still be enriched via CrossRef."""
+        paper = _make_paper(urls=set())
+        paper.doi = "10.1234/test"
+        paper.citations = None
+
+        crossref_paper = _make_paper(title="CrossRef Only")
+        crossref_paper.citations = 55
+
+        with (
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                return_value={"title": ["CrossRef Only"]},
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.build_paper_from_crossref",
+                return_value=crossref_paper,
+            ),
+            patch(
+                "findpapers.runners.enrichment_runner.fetch_metadata",
+                return_value=None,
+            ),
+        ):
+            runner = EnrichmentRunner(papers=[paper])
+            runner.run()
+
+        metrics = runner.get_metrics()
+        assert metrics["enriched_papers"] == 1
+        assert metrics["doi_enriched_papers"] == 1
+        assert metrics["no_urls_papers"] == 0

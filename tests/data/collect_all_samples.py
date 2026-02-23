@@ -30,6 +30,7 @@ from pathlib import Path
 COLLECTORS = {
     "arxiv": "arxiv/collect_sample.py",
     "biorxiv": "biorxiv/collect_sample.py",
+    "crossref": "crossref/collect_sample.py",
     "medrxiv": "medrxiv/collect_sample.py",
     "ieee": "ieee/collect_sample.py",
     "pubmed": "pubmed/collect_sample.py",

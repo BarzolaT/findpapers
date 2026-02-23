@@ -1,0 +1,27 @@
+{
+  "collected_at": "2026-02-23T14:06:03.007490",
+  "api_url": "https://api.crossref.org/works",
+  "total_dois_requested": 8,
+  "successful": 8,
+  "failed": 0,
+  "dois": [
+    "10.1038/nature12373",
+    "10.1145/3292500.3330648",
+    "10.1007/978-3-030-58452-8_13",
+    "10.1371/journal.pone.0185542",
+    "10.1109/CVPR.2016.90",
+    "10.1109/ACCESS.2021.3119621",
+    "10.3758/s13428-022-02028-7",
+    "10.1016/j.apenergy.2023.121323"
+  ],
+  "descriptions": {
+    "10.1038/nature12373": "Nature journal article \u2014 rich metadata, multiple authors",
+    "10.1145/3292500.3330648": "ACM conference proceedings article (KDD 2019)",
+    "10.1007/978-3-030-58452-8_13": "Springer book chapter (ECCV 2020)",
+    "10.1371/journal.pone.0185542": "PLOS ONE open-access journal article \u2014 has abstract",
+    "10.1109/CVPR.2016.90": "IEEE CVPR proceedings article (ResNet) \u2014 highly cited conference paper",
+    "10.1109/ACCESS.2021.3119621": "IEEE Access journal article",
+    "10.3758/s13428-022-02028-7": "Springer Psychonomic Bulletin \u2014 has keywords/subjects",
+    "10.1016/j.apenergy.2023.121323": "Elsevier Applied Energy \u2014 publisher-DOI with ISSN and page range"
+  }
+}

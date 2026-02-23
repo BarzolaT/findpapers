@@ -7,6 +7,7 @@ from time import perf_counter
 
 from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
+from findpapers.utils.crossref import build_paper_from_crossref, fetch_crossref_work
 from findpapers.utils.enrichment import build_paper_from_metadata, fetch_metadata
 from findpapers.utils.parallel import execute_tasks
 
@@ -37,6 +38,7 @@ def _enrichment_snapshot(paper: Paper) -> tuple:
         paper.publication_date,
         paper.pages,
         paper.number_of_pages,
+        paper.citations,
         frozenset(paper.authors or []),
         frozenset(paper.keywords or []),
         paper.source.title if paper.source else None,
@@ -117,6 +119,7 @@ class EnrichmentRunner:
             "total_papers": len(self._results),
             "runtime_in_seconds": 0.0,
             "enriched_papers": 0,
+            "doi_enriched_papers": 0,
             "fetch_error_papers": 0,
             "no_metadata_papers": 0,
             "no_change_papers": 0,
@@ -133,6 +136,7 @@ class EnrichmentRunner:
             logger.info("=== Enrichment Summary ===")
             logger.info("Total papers: %d", int(metrics["total_papers"]))
             logger.info("Enriched: %d", int(metrics["enriched_papers"]))
+            logger.info("  via DOI (CrossRef): %d", int(metrics["doi_enriched_papers"]))
             logger.info("Fetch errors: %d", int(metrics["fetch_error_papers"]))
             logger.info("No metadata: %d", int(metrics["no_metadata_papers"]))
             logger.info("No change: %d", int(metrics["no_change_papers"]))
@@ -192,6 +196,7 @@ class EnrichmentRunner:
         num_workers = self._num_workers
         timeout = self._timeout
         enriched = 0
+        doi_enriched = 0
         fetch_errors = 0
         no_metadata = 0
         no_change = 0
@@ -215,8 +220,10 @@ class EnrichmentRunner:
                     logger.warning("Error enriching paper: %s", error)
                 fetch_errors += 1
                 continue
-            if result == "enriched":
+            if isinstance(result, str) and result.startswith("enriched"):
                 enriched += 1
+                if "doi" in result:
+                    doi_enriched += 1
             elif result == "fetch_error":
                 fetch_errors += 1
             elif result == "no_metadata":
@@ -227,19 +234,19 @@ class EnrichmentRunner:
                 no_urls += 1
 
         metrics["enriched_papers"] = enriched
+        metrics["doi_enriched_papers"] = doi_enriched
         metrics["fetch_error_papers"] = fetch_errors
         metrics["no_metadata_papers"] = no_metadata
         metrics["no_change_papers"] = no_change
         metrics["no_urls_papers"] = no_urls
 
     def _enrich_paper(self, paper: Paper, timeout: float | None = None) -> str:
-        """Attempt to enrich a single paper using its known URLs.
+        """Attempt to enrich a single paper using the CrossRef API and URL scraping.
 
-        The method builds a prioritised list of candidate landing-page URLs,
-        including a ``doi.org`` redirect when the paper has a DOI, because
-        that redirect typically leads to a publisher page with rich HTML
-        meta tags even when the primary stored URL is a JS-rendered SPA or
-        an inaccessible repository page.
+        The method first queries the CrossRef API when the paper has a DOI,
+        since the API returns reliable structured metadata.  It then also
+        tries URL-based HTML scraping to fill in any remaining gaps (e.g.
+        PDF links, extra keywords).  Both results are merged into the paper.
 
         Parameters
         ----------
@@ -252,22 +259,42 @@ class EnrichmentRunner:
         -------
         str
             One of:
-            * ``"enriched"``   — at least one field was updated.
-            * ``"no_change"``  — metadata was fetched but mirrored existing data.
-            * ``"no_metadata"`` — URLs were reachable but returned no parseable
+            * ``"enriched+doi"`` — at least one field was updated, with CrossRef
+              contributing data.
+            * ``"enriched"``     — at least one field was updated via URL scraping.
+            * ``"no_change"``    — metadata was fetched but mirrored existing data.
+            * ``"no_metadata"``  — URLs were reachable but returned no parseable
               metadata (non-HTML or missing title tag).
-            * ``"fetch_error"`` — all candidate URLs raised HTTP/network errors.
-            * ``"no_urls"``    — paper has no usable non-PDF landing-page URL.
+            * ``"fetch_error"``  — all sources raised HTTP/network errors.
+            * ``"no_urls"``      — paper has no usable URL and no DOI.
         """
-        # Build a deduplicated list of non-PDF candidate URLs.
-        # Priority: stored landing page → DOI redirect → any other non-PDF URL.
+        before = _enrichment_snapshot(paper)
+        doi_contributed = False
+
+        # ------------------------------------------------------------------
+        # Phase 1: CrossRef API (structured metadata via DOI)
+        # ------------------------------------------------------------------
+        if paper.doi:
+            try:
+                work = fetch_crossref_work(paper.doi, timeout=timeout)
+                if work:
+                    crossref_paper = build_paper_from_crossref(work)
+                    if crossref_paper is not None:
+                        mid = _enrichment_snapshot(paper)
+                        paper.merge(crossref_paper)
+                        if _enrichment_snapshot(paper) != mid:
+                            doi_contributed = True
+            except Exception:  # noqa: BLE001
+                logger.debug("CrossRef fetch error for DOI: %s", paper.doi)
+
+        # ------------------------------------------------------------------
+        # Phase 2: URL-based HTML scraping
+        # ------------------------------------------------------------------
         candidate_urls: list[str] = []
         if paper.url and "pdf" not in paper.url.lower():
             candidate_urls.append(paper.url)
         if paper.doi:
             candidate_urls.append(f"https://doi.org/{paper.doi}")
-        # Include pdf_url only when it is not actually served as PDF (rare but
-        # some repositories use that field for HTML landing pages).
         if paper.pdf_url and "pdf" not in paper.pdf_url.lower():
             candidate_urls.append(paper.pdf_url)
 
@@ -279,10 +306,8 @@ class EnrichmentRunner:
                 seen.add(u)
                 deduped.append(u)
 
-        if not deduped:
-            return "no_urls"
-
         had_fetch_error = False
+        had_url_metadata = False
         for url in deduped:
             try:
                 metadata = fetch_metadata(url, timeout=timeout)
@@ -295,8 +320,26 @@ class EnrichmentRunner:
             enriched_paper = build_paper_from_metadata(metadata, url)
             if enriched_paper is None:
                 continue
-            before = _enrichment_snapshot(paper)
+            had_url_metadata = True
             paper.merge(enriched_paper)
-            return "enriched" if _enrichment_snapshot(paper) != before else "no_change"
+            break  # first successful URL scrape is sufficient
 
-        return "fetch_error" if had_fetch_error else "no_metadata"
+        # ------------------------------------------------------------------
+        # Determine overall result
+        # ------------------------------------------------------------------
+        changed = _enrichment_snapshot(paper) != before
+
+        if not paper.doi and not deduped:
+            return "no_urls"
+        if changed:
+            return "enriched+doi" if doi_contributed else "enriched"
+        # Nothing changed from here on — classify the reason.
+        if had_url_metadata or doi_contributed:
+            # Sources returned data but it mirrored what we already had.
+            return "no_change"
+        if had_fetch_error and not paper.doi:
+            return "fetch_error"
+        if deduped and not had_fetch_error and not had_url_metadata:
+            # URLs were reachable but returned no parseable metadata.
+            return "no_metadata"
+        return "no_change"
