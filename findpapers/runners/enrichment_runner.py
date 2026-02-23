@@ -9,7 +9,6 @@ from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.utils.enrichment import build_paper_from_metadata, fetch_metadata
 from findpapers.utils.parallel import execute_tasks
-from findpapers.utils.predatory import is_predatory_source
 
 logger = logging.getLogger(__name__)
 
@@ -298,11 +297,6 @@ class EnrichmentRunner:
                 continue
             before = _enrichment_snapshot(paper)
             paper.merge(enriched_paper)
-            # Re-evaluate the predatory flag: the source may have been
-            # populated only after enrichment, so the original flag (set during
-            # the search phase) might be stale.
-            if paper.source is not None:
-                paper.source.is_potentially_predatory = is_predatory_source(paper.source)
             return "enriched" if _enrichment_snapshot(paper) != before else "no_change"
 
         return "fetch_error" if had_fetch_error else "no_metadata"

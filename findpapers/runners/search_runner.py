@@ -21,7 +21,6 @@ from findpapers.searchers.pubmed import PubmedSearcher
 from findpapers.searchers.scopus import ScopusSearcher
 from findpapers.searchers.semantic_scholar import SemanticScholarSearcher
 from findpapers.utils.parallel import execute_tasks
-from findpapers.utils.predatory import is_predatory_source
 from findpapers.utils.progress import make_progress_bar
 
 logger = logging.getLogger(__name__)
@@ -39,7 +38,6 @@ class SearchRunner:
        DOI when available, then a second pass by normalised title+year to
        catch cross-database cases where the same paper carries different DOIs
        (e.g. arXiv preprint DOI vs. publisher DOI).
-    5. Flag papers from potentially predatory sources.
 
     Parameters
     ----------
@@ -166,7 +164,6 @@ class SearchRunner:
         metrics: dict[str, int | float] = {
             "total_papers": 0,
             "runtime_in_seconds": 0.0,
-            "total_papers_from_predatory_source": 0,
         }
         for _skipped in self._skipped_databases:
             metrics[f"total_papers_from_{_skipped}"] = 0
@@ -182,13 +179,6 @@ class SearchRunner:
                 before_dedupe,
                 len(self._results),
                 merged,
-            )
-
-        self._flag_predatory(metrics)
-        if verbose:
-            logger.info(
-                "Predatory flagging: %d papers flagged",
-                int(metrics["total_papers_from_predatory_source"]),
             )
 
         metrics["total_papers"] = len(self._results)
@@ -236,9 +226,8 @@ class SearchRunner:
         Returns
         -------
         dict[str, int | float]
-            Metrics dictionary with at least ``total_papers``,
-            ``runtime_in_seconds``, and
-            ``total_papers_from_predatory_source``.
+            Metrics dictionary with at least ``total_papers`` and
+            ``runtime_in_seconds``.
 
         Raises
         ------
@@ -494,26 +483,6 @@ class SearchRunner:
             result.extend(groups)
 
         self._results = result
-
-    def _flag_predatory(self, metrics: dict[str, int | float]) -> None:
-        """Mark papers from potentially predatory sources.
-
-        Parameters
-        ----------
-        metrics : dict[str, int | float]
-            Updated with ``total_papers_from_predatory_source``.
-
-        Returns
-        -------
-        None
-        """
-        flagged = 0
-        for paper in self._results:
-            if is_predatory_source(paper.source):
-                if paper.source is not None:
-                    paper.source.is_potentially_predatory = True
-                flagged += 1
-        metrics["total_papers_from_predatory_source"] = flagged
 
     def _dedupe_key(self, paper: Paper) -> str:
         """Build a stable primary deduplication key for a paper.

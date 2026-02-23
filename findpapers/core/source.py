@@ -47,7 +47,6 @@ class Source:
         isbn: Optional[str] = None,
         issn: Optional[str] = None,
         publisher: Optional[str] = None,
-        is_potentially_predatory: Optional[bool] = False,
         source_type: Optional[SourceType] = None,
     ) -> None:
         """Create a Source instance.
@@ -62,8 +61,6 @@ class Source:
             Source ISSN.
         publisher : str | None
             Source publisher name.
-        is_potentially_predatory : bool | None
-            Predatory flag.
         source_type : SourceType | None
             Type of the source (journal, conference, book, repository, other).
 
@@ -79,7 +76,6 @@ class Source:
         self.isbn = isbn
         self.issn = issn
         self.publisher = publisher
-        self.is_potentially_predatory = is_potentially_predatory
         self.source_type = source_type
 
     def merge(self, source: Source) -> None:
@@ -99,9 +95,6 @@ class Source:
         self.isbn = merge_value(self.isbn, source.isbn)
         self.issn = merge_value(self.issn, source.issn)
         self.publisher = merge_value(self.publisher, source.publisher)
-        self.is_potentially_predatory = bool(
-            self.is_potentially_predatory or source.is_potentially_predatory
-        )
         if self.source_type is None:
             self.source_type = source.source_type
 
@@ -140,7 +133,6 @@ class Source:
             isbn=source_dict.get("isbn"),
             issn=source_dict.get("issn"),
             publisher=source_dict.get("publisher"),
-            is_potentially_predatory=source_dict.get("is_potentially_predatory"),
             source_type=source_type,
         )
 
@@ -163,6 +155,5 @@ class Source:
             "isbn": source.isbn,
             "issn": source.issn,
             "publisher": source.publisher,
-            "is_potentially_predatory": source.is_potentially_predatory,
             "source_type": source.source_type.value if source.source_type else None,
         }

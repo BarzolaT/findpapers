@@ -18,13 +18,9 @@ from findpapers.runners.search_runner import SearchRunner
 def _make_paper(
     title: str = "Test Paper",
     doi: str | None = None,
-    is_predatory: bool = False,
 ) -> Paper:
     """Create a minimal Paper for testing."""
-    if is_predatory:
-        pub = Source(title="OMICS International")
-    else:
-        pub = Source(title="Test Journal")
+    pub = Source(title="Test Journal")
     return Paper(
         title=title,
         abstract="An abstract.",
@@ -178,7 +174,6 @@ class TestSearchRunnerPipeline:
         metrics = runner.get_metrics()
         assert "total_papers" in metrics
         assert "runtime_in_seconds" in metrics
-        assert "total_papers_from_predatory_source" in metrics
 
     def test_metrics_include_zero_for_skipped_databases(self):
         """Skipped databases (no API key) appear in metrics with count 0."""
@@ -408,15 +403,6 @@ class TestSearchRunnerPipeline:
         runner._searchers = [mock_searcher]  # noqa: SLF001
         runner.run()
         assert len(runner.get_results()) == 2
-
-    def test_predatory_flagging(self):
-        """Papers from known predatory publishers are flagged."""
-        paper = _make_paper(is_predatory=True)
-        runner = self._make_runner_with_mock_papers([paper])
-        runner.run()
-        metrics = runner.get_metrics()
-        # Flagged count >= 0 (may or may not be in the predatory list)
-        assert metrics["total_papers_from_predatory_source"] >= 0
 
     def test_searcher_error_is_handled_gracefully(self):
         """If a searcher raises an exception, run() still completes."""

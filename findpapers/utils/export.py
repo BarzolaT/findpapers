@@ -103,7 +103,6 @@ def csv_columns() -> list[str]:
         "source_isbn",
         "source_issn",
         "source_publisher",
-        "source_is_potentially_predatory",
     ]
     return paper_fields + source_fields
 
@@ -145,7 +144,6 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
         "source_isbn": source.isbn if source else None,
         "source_issn": source.issn if source else None,
         "source_publisher": source.publisher if source else None,
-        "source_is_potentially_predatory": (source.is_potentially_predatory if source else None),
     }
     return row
 

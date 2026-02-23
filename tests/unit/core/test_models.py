@@ -28,7 +28,6 @@ def test_publication_to_from_dict():
         "isbn": "1",
         "issn": "2",
         "publisher": "Pub",
-        "is_potentially_predatory": True,
     }
     source = Source.from_dict(data)
     assert Source.to_dict(source)["title"] == "T"
