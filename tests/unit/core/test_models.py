@@ -511,3 +511,112 @@ class TestPaperType:
         )
         restored = Paper.from_dict(Paper.to_dict(paper))
         assert restored.paper_type is PaperType.TECHREPORT
+
+
+class TestInferPageCount:
+    """Tests for Paper._infer_page_count and its integration."""
+
+    def test_simple_range(self) -> None:
+        """A valid page range like '223-230' yields 8 pages."""
+        assert Paper._infer_page_count("223-230") == 8
+
+    def test_single_page(self) -> None:
+        """When start equals end (e.g. '5-5'), the result is 1."""
+        assert Paper._infer_page_count("5-5") == 1
+
+    def test_none_input(self) -> None:
+        """None page_range returns None."""
+        assert Paper._infer_page_count(None) is None
+
+    def test_empty_string(self) -> None:
+        """Empty string returns None."""
+        assert Paper._infer_page_count("") is None
+
+    def test_non_numeric(self) -> None:
+        """Non-numeric page_range (e.g. 'e123') return None."""
+        assert Paper._infer_page_count("e123") is None
+
+    def test_non_numeric_range(self) -> None:
+        """Non-numeric range (e.g. 'A1-B2') returns None."""
+        assert Paper._infer_page_count("A1-B2") is None
+
+    def test_reversed_range(self) -> None:
+        """Reversed range (end < start) returns None."""
+        assert Paper._infer_page_count("230-223") is None
+
+    def test_single_number_no_hyphen(self) -> None:
+        """A single number without hyphen returns None (not a range)."""
+        assert Paper._infer_page_count("56") is None
+
+    def test_multiple_hyphens(self) -> None:
+        """More than one hyphen returns None."""
+        assert Paper._infer_page_count("1-2-3") is None
+
+    def test_spaces_around_numbers(self) -> None:
+        """Spaces around numbers are trimmed correctly."""
+        assert Paper._infer_page_count(" 10 - 20 ") == 11
+
+    def test_init_infers_when_absent(self) -> None:
+        """Paper.__init__ auto-fills page_count from page_range when absent."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            page_range="100-110",
+        )
+        assert paper.page_count == 11
+
+    def test_init_preserves_explicit_value(self) -> None:
+        """Explicit page_count is never overridden by inference."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            page_count=5,
+            page_range="100-110",
+        )
+        assert paper.page_count == 5
+
+    def test_merge_infers_after_page_range_acquired(self) -> None:
+        """Merging fills page_count if page_range becomes available."""
+        paper_a = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        paper_b = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            page_range="50-60",
+        )
+        # paper_b already has inferred page_count, but test merge path
+        # by resetting it to None to force inference in merge.
+        paper_b.page_count = None
+        paper_a.merge(paper_b)
+        assert paper_a.page_count == 11
+
+    def test_from_dict_infers(self) -> None:
+        """from_dict auto-fills page_count when absent."""
+        data = Paper.to_dict(
+            Paper(
+                title="T",
+                abstract="",
+                authors=[],
+                source=None,
+                publication_date=None,
+                page_range="1-15",
+            )
+        )
+        # Force page_count to None to test inference via from_dict.
+        data["page_count"] = None
+        restored = Paper.from_dict(data)
+        assert restored.page_count == 15

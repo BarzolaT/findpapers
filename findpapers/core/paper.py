@@ -141,8 +141,8 @@ class Paper:
         citations: Optional[int] = None,
         keywords: Optional[Set[str]] = None,
         comments: Optional[str] = None,
-        number_of_pages: Optional[int] = None,
-        pages: Optional[str] = None,
+        page_count: Optional[int] = None,
+        page_range: Optional[str] = None,
         databases: Optional[Set[str]] = None,
         paper_type: Optional[PaperType] = None,
     ) -> None:
@@ -172,10 +172,10 @@ class Paper:
             Keywords.
         comments : str | None
             Comments.
-        number_of_pages : int | None
+        page_count : int | None
             Page count.
-        pages : str | None
-            Page range.
+        page_range : str | None
+            Page range (e.g. ``"223-230"``).
         databases : set[str] | None
             Databases where found.
         paper_type : PaperType | None
@@ -200,8 +200,10 @@ class Paper:
         self.citations = citations
         self.keywords = keywords if keywords is not None else set()
         self.comments = comments
-        self.number_of_pages = number_of_pages
-        self.pages = pages
+        self.page_count = (
+            page_count if page_count is not None else self._infer_page_count(page_range)
+        )
+        self.page_range = page_range
         self.databases = databases if databases is not None else set()
         self.paper_type = paper_type
 
@@ -237,6 +239,43 @@ class Paper:
             )
             return None
         return value
+
+    @staticmethod
+    def _infer_page_count(page_range: str | None) -> int | None:
+        """Try to compute a page count from a hyphen-separated page range.
+
+        If *page_range* matches the pattern ``"<start>-<end>"`` where both
+        parts are non-negative integers and ``end >= start``, the page count
+        is ``end - start + 1``.  Otherwise ``None`` is returned.
+
+        Parameters
+        ----------
+        page_range : str | None
+            Page range string (e.g. ``"223-230"``).
+
+        Returns
+        -------
+        int | None
+            The computed page count, or ``None`` when *page_range* cannot
+            be parsed.
+        """
+        if not page_range:
+            return None
+
+        parts = page_range.split("-")
+        if len(parts) != 2:
+            return None
+
+        try:
+            start = int(parts[0].strip())
+            end = int(parts[1].strip())
+        except ValueError:
+            return None
+
+        if end < start or start < 0:
+            return None
+
+        return end - start + 1
 
     def add_database(self, database_name: str) -> None:
         """Add a database name where the paper was found.
@@ -275,8 +314,13 @@ class Paper:
         self.abstract = merge_value(self.abstract, paper.abstract)
         self.citations = merge_value(self.citations, paper.citations)
         self.comments = merge_value(self.comments, paper.comments)
-        self.number_of_pages = merge_value(self.number_of_pages, paper.number_of_pages)
-        self.pages = merge_value(self.pages, paper.pages)
+        self.page_count = merge_value(self.page_count, paper.page_count)
+        self.page_range = merge_value(self.page_range, paper.page_range)
+
+        # If page_count is still unknown, try to infer it from page_range.
+        if self.page_count is None:
+            self.page_count = self._infer_page_count(self.page_range)
+
         self.url = merge_value(self.url, paper.url)
         self.pdf_url = merge_value(self.pdf_url, paper.pdf_url)
 
@@ -355,8 +399,8 @@ class Paper:
         else:
             keywords = {str(raw_keywords)} if raw_keywords else set()
         comments = paper_dict.get("comments")
-        number_of_pages = paper_dict.get("number_of_pages")
-        pages = paper_dict.get("pages")
+        page_count = paper_dict.get("page_count")
+        page_range = paper_dict.get("page_range")
         raw_databases = paper_dict.get("databases") or []
         if isinstance(raw_databases, (list, set, tuple)):
             databases = {str(database) for database in raw_databases}
@@ -383,8 +427,8 @@ class Paper:
             citations=citations,
             keywords=keywords,
             comments=comments,
-            number_of_pages=number_of_pages,
-            pages=pages,
+            page_count=page_count,
+            page_range=page_range,
             databases=databases,
             paper_type=paper_type,
         )
@@ -417,8 +461,8 @@ class Paper:
             "citations": paper.citations,
             "keywords": sorted(paper.keywords),
             "comments": paper.comments,
-            "number_of_pages": paper.number_of_pages,
-            "pages": paper.pages,
+            "page_count": paper.page_count,
+            "page_range": paper.page_range,
             "databases": sorted(paper.databases),
             "paper_type": paper.paper_type.value if paper.paper_type else None,
         }

@@ -96,11 +96,11 @@ class TestScopusSearcherParsePaper:
         assert paper.source.isbn == "978-3-16-148410-0"
 
     def test_pages_extracted(self):
-        """Entry with prism:pageRange populates pages field."""
+        """Entry with prism:pageRange populates page_range field."""
         entry = {"dc:title": "A Paper", "prism:pageRange": "100-110"}
         paper = ScopusSearcher()._parse_paper(entry)
         assert paper is not None
-        assert paper.pages == "100-110"
+        assert paper.page_range == "100-110"
 
     def test_citation_count_parsed(self):
         """citedby-count is parsed as integer."""

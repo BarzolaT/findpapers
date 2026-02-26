@@ -78,8 +78,8 @@ def full_paper(journal_publication: Source) -> Paper:
         citations=500,
         keywords={"neural networks", "deep learning", "AI"},
         comments="Highly cited review.",
-        number_of_pages=42,
-        pages="1-42",
+        page_count=42,
+        page_range="1-42",
         databases={"arxiv", "semantic_scholar"},
     )
 

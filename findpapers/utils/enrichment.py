@@ -593,11 +593,11 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
         pages = None
 
     # Number of pages — parse as int when the key is present.
-    number_of_pages: int | None = None
+    page_count: int | None = None
     num_pages_raw = metadata.get(_NUM_PAGES_KEY)
     if num_pages_raw:
         try:
-            number_of_pages = int(str(num_pages_raw).strip())
+            page_count = int(str(num_pages_raw).strip())
         except ValueError:
             pass
 
@@ -633,8 +633,8 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
         pdf_url=pdf_url_val,
         doi=doi,
         keywords=keywords or None,
-        pages=pages,
-        number_of_pages=number_of_pages,
+        page_range=pages,
+        page_count=page_count,
     )
 
 

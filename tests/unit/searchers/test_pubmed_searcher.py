@@ -273,7 +273,7 @@ class TestPubmedSearcherParsePaper:
         el = ET.fromstring(xml_str)
         paper = PubmedSearcher()._parse_paper(el)
         assert paper is not None
-        assert paper.pages == "100-115"
+        assert paper.page_range == "100-115"
 
     def test_pages_from_start_end_when_no_medline_pgn(self):
         """Pages are built from StartPage\u2013EndPage when MedlinePgn is absent."""
@@ -294,7 +294,7 @@ class TestPubmedSearcherParsePaper:
         el = ET.fromstring(xml_str)
         paper = PubmedSearcher()._parse_paper(el)
         assert paper is not None
-        assert paper.pages == "200\u2013210"
+        assert paper.page_range == "200\u2013210"
 
     def test_pages_from_sample_data(self, pubmed_efetch_xml):
         """Pages are extracted from the real PubMed sample data."""
@@ -302,8 +302,8 @@ class TestPubmedSearcherParsePaper:
         articles = tree.findall(".//PubmedArticle")
         paper = PubmedSearcher()._parse_paper(articles[0])
         assert paper is not None
-        assert paper.pages is not None
-        assert "1148" in paper.pages
+        assert paper.page_range is not None
+        assert "1148" in paper.page_range
 
     def test_paper_type_journal_article(self):
         """Journal Article publication type maps to PaperType.ARTICLE."""

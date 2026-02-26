@@ -328,7 +328,7 @@ class PubmedSearcher(SearcherBase):
                 url=url,
                 doi=doi,
                 keywords=keywords if keywords else None,
-                pages=pages,
+                page_range=pages,
                 databases={self.name},
                 paper_type=paper_type,
             )

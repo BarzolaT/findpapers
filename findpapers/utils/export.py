@@ -92,8 +92,8 @@ def csv_columns() -> list[str]:
         "citations",
         "keywords",
         "comments",
-        "number_of_pages",
-        "pages",
+        "page_count",
+        "page_range",
         "databases",
         "paper_type",
     ]
@@ -135,8 +135,8 @@ def paper_to_csv_row(paper: Paper) -> dict[str, object]:
         "citations": paper.citations,
         "keywords": "; ".join(sorted(paper.keywords)),
         "comments": paper.comments,
-        "number_of_pages": paper.number_of_pages,
-        "pages": paper.pages,
+        "page_count": paper.page_count,
+        "page_range": paper.page_range,
         "databases": "; ".join(sorted(paper.databases)),
         "paper_type": paper.paper_type.value if paper.paper_type else None,
         "source_title": source.title if source else None,
@@ -187,8 +187,8 @@ def paper_to_bibtex(paper: Paper) -> str:
     if paper.publication_date is not None:
         lines.append(f"{default_tab}year = {{{paper.publication_date.year}}},")
 
-    if paper.pages is not None:
-        lines.append(f"{default_tab}pages = {{{paper.pages}}},")
+    if paper.page_range is not None:
+        lines.append(f"{default_tab}pages = {{{paper.page_range}}},")
 
     entry = "\n".join(lines)
     entry = entry.rstrip(",") + "\n" if entry.endswith(",") else entry

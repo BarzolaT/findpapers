@@ -313,7 +313,7 @@ class OpenAlexSearcher(SearcherBase):
                 doi=doi,
                 citations=citations,
                 keywords=keywords if keywords else None,
-                pages=pages,
+                page_range=pages,
                 databases={self.name},
                 paper_type=paper_type,
             )

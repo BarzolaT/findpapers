@@ -423,7 +423,7 @@ class TestBuildPaperFromMetadata:
         assert paper.source.title == "Advances in Machine Learning"
 
     def test_pages_built_from_firstpage_and_lastpage(self) -> None:
-        """citation_firstpage + citation_lastpage are combined into paper.pages."""
+        """citation_firstpage + citation_lastpage are combined into paper.page_range."""
         meta = {
             "citation_title": "Paper",
             "citation_firstpage": "100",
@@ -431,21 +431,21 @@ class TestBuildPaperFromMetadata:
         }
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
-        assert paper.pages == "100\u2013115"  # en-dash
+        assert paper.page_range == "100\u2013115"  # en-dash
 
     def test_pages_only_firstpage(self) -> None:
-        """When only citation_firstpage is present, it is stored as pages."""
+        """When only citation_firstpage is present, it is stored as page_range."""
         meta = {"citation_title": "Paper", "citation_firstpage": "42"}
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
-        assert paper.pages == "42"
+        assert paper.page_range == "42"
 
-    def test_number_of_pages_extracted(self) -> None:
-        """citation_num_pages is parsed and stored as paper.number_of_pages."""
+    def test_page_count_extracted(self) -> None:
+        """citation_num_pages is parsed and stored as paper.page_count."""
         meta = {"citation_title": "Paper", "citation_num_pages": "26"}
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
-        assert paper.number_of_pages == 26
+        assert paper.page_count == 26
 
     def test_doi_url_prefix_stripped(self) -> None:
         """A doi.org URL prefix is stripped from the DOI value."""
@@ -774,14 +774,14 @@ class TestBuildPaperFromMetadata:
         assert paper is not None
         assert paper.keywords and len(paper.keywords) > 0
 
-    def test_medrxiv_paper_has_number_of_pages(self) -> None:
-        """medRxiv pages expose citation_num_pages; it must populate number_of_pages."""
+    def test_medrxiv_paper_has_page_count(self) -> None:
+        """medRxiv pages expose citation_num_pages; it must populate page_count."""
         _skip_if_missing(MEDRXIV_HTML)
         meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://doi.org/10.1101/19004184")
         assert paper is not None
-        assert paper.number_of_pages is not None
-        assert paper.number_of_pages > 0
+        assert paper.page_count is not None
+        assert paper.page_count > 0
 
 
 # ---------------------------------------------------------------------------

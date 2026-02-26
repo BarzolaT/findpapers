@@ -270,7 +270,7 @@ class TestOpenAlexSearcherParsePaper:
         }
         paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
-        assert paper.pages == "100\u2013115"
+        assert paper.page_range == "100\u2013115"
 
     def test_pages_first_only(self):
         """Only first_page is stored when last_page is absent."""
@@ -280,22 +280,22 @@ class TestOpenAlexSearcherParsePaper:
         }
         paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
-        assert paper.pages == "42"
+        assert paper.page_range == "42"
 
     def test_pages_none_when_biblio_absent(self):
         """Pages are None when biblio is not present."""
         work = {"title": "A Paper"}
         paper = OpenAlexSearcher()._parse_paper(work)
         assert paper is not None
-        assert paper.pages is None
+        assert paper.page_range is None
 
     def test_pages_from_sample_data(self, openalex_sample_json):
         """Pages are extracted from real sample data."""
         results = openalex_sample_json["results"]
         paper = OpenAlexSearcher()._parse_paper(results[0])
         assert paper is not None
-        assert paper.pages is not None
-        assert "\u2013" in paper.pages  # en-dash separator
+        assert paper.page_range is not None
+        assert "\u2013" in paper.page_range  # en-dash separator
 
     def test_paper_type_article_from_work_type(self):
         """work.type 'article' maps to PaperType.ARTICLE."""

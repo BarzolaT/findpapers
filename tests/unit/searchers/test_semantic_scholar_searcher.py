@@ -99,7 +99,7 @@ class TestSemanticScholarSearcherParsePaper:
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Nature"
-        assert paper.pages == "1-10"
+        assert paper.page_range == "1-10"
 
     def test_publication_from_venue_fallback(self):
         """venue is used as publication title when journal.name is absent."""

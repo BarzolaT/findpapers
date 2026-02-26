@@ -80,18 +80,18 @@ class TestIEEESearcherParsePaper:
         assert len(paper.keywords) == 3
 
     def test_pages_start_end(self):
-        """start_page and end_page are combined into pages field."""
+        """start_page and end_page are combined into page_range field."""
         item = {"title": "A Paper", "start_page": "10", "end_page": "20"}
         paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
-        assert paper.pages == "10-20"
+        assert paper.page_range == "10-20"
 
     def test_pages_start_only(self):
-        """Only start_page populates pages field."""
+        """Only start_page populates page_range field."""
         item = {"title": "A Paper", "start_page": "5"}
         paper = IEEESearcher()._parse_paper(item)
         assert paper is not None
-        assert paper.pages == "5"
+        assert paper.page_range == "5"
 
     def test_citation_count_parsed(self):
         """citing_paper_count is parsed as an integer."""

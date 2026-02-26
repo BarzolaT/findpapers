@@ -342,7 +342,7 @@ class TestBuildPaperFromCrossref:
         """Page range is extracted."""
         paper = build_paper_from_crossref(_FULL_WORK)
         assert paper is not None
-        assert paper.pages == "529-533"
+        assert paper.page_range == "529-533"
 
     def test_full_work_keywords(self) -> None:
         """Keywords/subjects are extracted."""
@@ -507,7 +507,7 @@ class TestBuildPaperFromRealData:
         """Nature article has a page range."""
         paper = build_paper_from_crossref(self.data["10.1038/nature12373"])
         assert paper is not None
-        assert paper.pages is not None
+        assert paper.page_range is not None
 
     def test_nature_has_publication_date(self) -> None:
         """Nature article has a publication date."""
@@ -551,7 +551,7 @@ class TestBuildPaperFromRealData:
         """Book chapter has page numbers."""
         paper = build_paper_from_crossref(self.data["10.1007/978-3-030-58452-8_13"])
         assert paper is not None
-        assert paper.pages is not None
+        assert paper.page_range is not None
 
     # -- ResNet CVPR proceedings article (10.1109/CVPR.2016.90) -------------
 
@@ -625,7 +625,7 @@ class TestBuildPaperFromRealData:
         """Elsevier article has page field."""
         paper = build_paper_from_crossref(self.data["10.1016/j.apenergy.2023.121323"])
         assert paper is not None
-        assert paper.pages is not None
+        assert paper.page_range is not None
 
     # -- Generic checks across ALL collected records ------------------------
 

@@ -254,7 +254,7 @@ class ScopusSearcher(SearcherBase):
                 url=url,
                 doi=doi,
                 citations=citations,
-                pages=pages,
+                page_range=pages,
                 databases={self.name},
                 paper_type=paper_type,
             )

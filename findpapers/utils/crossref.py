@@ -293,7 +293,7 @@ def build_paper_from_crossref(work: dict[str, Any]) -> Paper | None:
 
     # Number of pages — not directly available, but can be inferred from
     # page range when it's in "first-last" format.
-    number_of_pages: Optional[int] = None
+    page_count: Optional[int] = None
 
     # PDF URL
     pdf_url = _parse_crossref_pdf_url(work)
@@ -344,6 +344,6 @@ def build_paper_from_crossref(work: dict[str, Any]) -> Paper | None:
         doi=doi,
         citations=citations,
         keywords=keywords or None,
-        pages=pages,
-        number_of_pages=number_of_pages,
+        page_range=pages,
+        page_count=page_count,
     )
