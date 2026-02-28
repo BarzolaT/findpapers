@@ -1,129 +1,20 @@
 # Copilot Instructions
 
-## Environment Guidelines
-
-* To set up the development environment for the first time, run `make setup` in the project root folder.
-* We use [Poetry](https://python-poetry.org/) for dependency management and packaging. To install the dependencies, run `venv/bin/poetry install` in the project root folder.
-* All poetry commands should be run inside the venv, e.g., `venv/bin/poetry <command>`.
-* To format the code automatically, use the command `make format`.
-* To run the tests, use the command `make test`.
-* To run the linter and code formatter checks, use the command `make lint`.
-
-### Running Commands on Specific Files or Tests
-
-The `make test`, `make lint`, and `make format` commands support targeting specific files, directories, or test cases:
-
-**Test specific files or cases:**
-```bash
-make test PYTEST_ARGS='-k test_name'                          # Run tests matching pattern
-make test PYTEST_ARGS='tests/unit/test_query.py'              # Run all tests in file
-make test PYTEST_ARGS='tests/unit/test_query.py::TestClass'   # Run specific test class
-make test PYTEST_ARGS='tests/unit/test_query.py -v --tb=short' # Multiple pytest args
-```
-
-**Lint specific files or directories:**
-```bash
-make lint TARGET='findpapers/models/query.py'     # Lint single file
-make lint TARGET='findpapers/models'              # Lint entire directory
-make lint                                         # Lint entire project (default)
-```
-
-**Format specific files or directories:**
-```bash
-make format TARGET='tests/unit/test_query.py'     # Format single file
-make format TARGET='findpapers/models'            # Format directory
-make format                                       # Format entire project (default)
-```
-
-## Code Guidelines (extracted from CONTRIBUTING.md)
-
-To ensure consistency throughout the source code, keep these rules in mind as you are working:
-
 * Write code in English.
 * Write comments in English.
 * You must write comments to explain non-trivial parts of the code.
 * All features or bug fixes must be tested by one or more specs (unit-tests).
-* All methods must have type hints.
+* Public methods must include parameters, returns, and possible exceptions.
 * All methods must have docstrings.
+* All methods must have type hints.
 * The names of variables, functions, classes, files and modules should be descriptive.
 * Keep functions and methods focused on a single task; avoid large monolithic functions.
-* Line length should not exceed 100 characters.
+* Whenever possible, use the Makefile to run commands. This ensures that the commands are run with the correct environment and settings.
 * If you changed any code, run `make format`, `make lint` and `make test` before committing.
 * Aim to keep test coverage as close to 100% as possible.
-* public methods must include parameters, returns, and possible exceptions.
-* We follow the [PEP8 Style Guide][pep8-style-guide] for general coding.
-* We follow the [Numpy Docstirng Style Guide][numpy-docstring-style-guide] for code documentation.
-* Use type hints as much as possible. We use [mypy](http://mypy-lang.org/) for static type checking.
-* Follow the [isort](https://pycqa.github.io/isort/) rules for import sorting.
-* Follow the [black](https://black.readthedocs.io/en/stable/) rules for code formatting.
-* Follow the [ruff](https://ruff.rs/) rules for linting.
 * When adding new dependencies, add them to the `pyproject.toml` file using Poetry.
-* PRs can only be merged if the code is formatted properly and all tests are passing.
 * No secret keys, passwords, or sensitive information should be committed to the repository.
 * Use environment variables or configuration files (e.g., `.env`) to manage sensitive data.
-
-
-## Commit Message Guidelines
-
-Each commit message consists of a **header** and a **body**.  The header has a special
-format that includes a **type**, an optional **scope**, and a **subject**:
-
-```
-<type>(<scope>): <subject>
-<BLANK LINE>
-<body>
-```
-
-- The **header** is mandatory. The **body** is optional.
-
-Any line of the commit message cannot be longer 100 characters! This allows the message to be easier
-to read in various git tools.
-
-Examples:
-
-```
-docs: update changelog to 0.2
-```
-
-```
-fix: error when exporting to CSV with empty paper list
-
-When the paper list was empty, exporting to CSV raised an unhandled exception.
-
-```
-
-```
-feat(runners): add verbose logging and numeric metrics
-```
-
-### Type
-
-We use a concise set of commit types. Use one of the following in the commit header:
-
-* **feat**: A new feature
-* **fix**: A bug fix
-* **perf**: Performance improvements
-* **docs**: Documentation changes
-* **test**: Tests and related changes
-* **chore**: Maintenance, build, CI, or refactor tasks
-
-## Scope
-
-Scope is optional and should be a short lowercase identifier (no spaces). The scope could be
-the name of the module, package being changed or a broader category that the change falls under.
-There is no strict list of scopes, but here are some examples to guide you: `runners`,
-`utils`, `search`, `export`...
-
-### Subject
-
-The subject contains a succinct description of the change:
-
-* use the imperative, present tense: "change" not "changed" nor "changes"
-* don't capitalize the first letter
-* no dot (.) at the end
-
-### Body
-
-Just as in the **subject**, use the imperative, present tense: "change" not "changed" nor "changes".
-The body should include the motivation for the change and contrast this with previous behavior.
-
+* We follow the [PEP8 Style Guide][https://peps.python.org/pep-0008/] for general coding.
+* We follow the [Numpy Docstring Style Guide](https://numpydoc.readthedocs.io/en/latest/format.html) for code documentation.
+* Always make sure you're following the guidelines described in the CONTRIBUTING.md file.

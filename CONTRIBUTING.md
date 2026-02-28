@@ -136,10 +136,10 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 * Line length should not exceed 100 characters.
 * If you changed any code, run `make format`, `make lint` and `make test` before committing.
 * Aim to keep test coverage as close to 100% as possible.
-* public methods must include parameters, returns, and possible exceptions.
-* We follow the [PEP8 Style Guide][pep8-style-guide] for general coding.
-* We follow the [Numpy Docstirng Style Guide][numpy-docstring-style-guide] for code documentation.
-* Use type hints as much as possible. We use [mypy](http://mypy-lang.org/) for static type checking.
+* Public methods must include parameters, returns, and possible exceptions.
+* We follow the [PEP8 Style Guide][https://peps.python.org/pep-0008/] for general coding.
+* We follow the [Numpy Docstring Style Guide][https://numpydoc.readthedocs.io/en/latest/format.html] for code documentation.
+* We use [mypy](http://mypy-lang.org/) for static type checking.
 * Follow the [isort](https://pycqa.github.io/isort/) rules for import sorting.
 * Follow the [black](https://black.readthedocs.io/en/stable/) rules for code formatting.
 * Follow the [ruff](https://ruff.rs/) rules for linting.
