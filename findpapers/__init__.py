@@ -1,5 +1,6 @@
 """Findpapers - Academic paper search and management tool."""
 
+from findpapers.api import download, enrich, search
 from findpapers.core.author import Author
 from findpapers.core.paper import PaperType
 from findpapers.core.query import ConnectorType, FilterCode
@@ -11,12 +12,15 @@ from findpapers.runners.search_runner import SearchRunner
 
 __all__ = [
     "Author",
-    "SearchRunner",
-    "EnrichmentRunner",
+    "download",
     "DownloadRunner",
-    "SearchRunnerNotExecutedError",
+    "enrich",
+    "EnrichmentRunner",
     "FilterCode",
     "ConnectorType",
     "PaperType",
+    "search",
+    "SearchRunner",
+    "SearchRunnerNotExecutedError",
     "SourceType",
 ]
