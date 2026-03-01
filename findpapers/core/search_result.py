@@ -36,7 +36,7 @@ class Database(str, Enum):
     """Semantic Scholar AI-powered research database."""
 
 
-class Search:
+class SearchResult:
     """Represents a search configuration and results."""
 
     def __init__(
@@ -51,7 +51,7 @@ class Search:
         runtime_seconds: Optional[float] = None,
         runtime_seconds_per_database: Optional[dict[str, float]] = None,
     ) -> None:
-        """Create a Search instance.
+        """Create a SearchResult instance.
 
         Parameters
         ----------

@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from time import perf_counter
 
 from findpapers.core.paper import Paper, _is_preprint_doi
-from findpapers.core.search import Database, Search
+from findpapers.core.search_result import Database, SearchResult
 from findpapers.exceptions import SearchRunnerNotExecutedError, UnsupportedQueryError
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
@@ -100,7 +100,7 @@ class SearchRunner:
         self._executed = False
         self._results: list[Paper] = []
         self._metrics: dict[str, int | float] = {}
-        self._search: Search | None = None
+        self._search: SearchResult | None = None
 
         self._query_string = query
         self._max_papers_per_database = max_papers_per_database
@@ -131,7 +131,7 @@ class SearchRunner:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, verbose: bool = False) -> Search:
+    def run(self, verbose: bool = False) -> SearchResult:
         """Execute the configured pipeline and return the results.
 
         Can be called multiple times; each call resets previous results.
@@ -143,7 +143,7 @@ class SearchRunner:
 
         Returns
         -------
-        Search
+        SearchResult
             Search result object containing papers and metadata.
         """
         if verbose:
@@ -194,7 +194,7 @@ class SearchRunner:
                 count = int(metrics.get(f"total_papers_from_{searcher.name}", 0))
                 logger.info("  %s: %d papers", searcher.name, count)
 
-        self._search = Search(
+        self._search = SearchResult(
             query=self._query_string,
             max_papers_per_database=self._max_papers_per_database,
             processed_at=datetime.now(timezone.utc),

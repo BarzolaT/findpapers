@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from findpapers.core.paper import PaperType
-from findpapers.core.search import Database
+from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.ieee import IEEEQueryBuilder

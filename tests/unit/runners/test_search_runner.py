@@ -9,7 +9,7 @@ import pytest
 
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
-from findpapers.core.search import Database
+from findpapers.core.search_result import Database
 from findpapers.core.source import Source
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.search_runner import SearchRunner
@@ -141,12 +141,12 @@ class TestSearchRunnerPipeline:
         return runner
 
     def test_run_returns_search_object(self):
-        """run() returns a Search instance."""
-        from findpapers.core.search import Search
+        """run() returns a SearchResult instance."""
+        from findpapers.core.search_result import SearchResult
 
         runner = self._make_runner_with_mock_papers([_make_paper()])
         result = runner.run()
-        assert isinstance(result, Search)
+        assert isinstance(result, SearchResult)
 
     def test_get_results_after_run(self):
         """get_results() returns the collected papers after run()."""

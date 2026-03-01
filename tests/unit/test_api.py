@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 from findpapers.api import download, enrich, fetch_paper_by_doi, search
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
-from findpapers.core.search import Search
+from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source
 
 
@@ -38,8 +38,8 @@ class TestSearchConvenience:
     """Tests for the ``search()`` convenience function."""
 
     def test_search_delegates_to_runner(self):
-        """search() creates a SearchRunner, calls run(), and returns the Search object."""
-        fake_search = MagicMock(spec=Search)
+        """search() creates a SearchRunner, calls run(), and returns the SearchResult object."""
+        fake_search = MagicMock(spec=SearchResult)
         with patch("findpapers.api.SearchRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = fake_search
@@ -72,7 +72,7 @@ class TestSearchConvenience:
         """All API-key parameters are forwarded to SearchRunner."""
         with patch("findpapers.api.SearchRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.run.return_value = MagicMock(spec=Search)
+            mock_runner.run.return_value = MagicMock(spec=SearchResult)
             mock_cls.return_value = mock_runner
 
             search(
@@ -97,7 +97,7 @@ class TestSearchConvenience:
         """verbose defaults to False when not specified."""
         with patch("findpapers.api.SearchRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.run.return_value = MagicMock(spec=Search)
+            mock_runner.run.return_value = MagicMock(spec=SearchResult)
             mock_cls.return_value = mock_runner
 
             search("[ml]")

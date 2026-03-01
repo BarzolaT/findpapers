@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from findpapers.core.paper import PaperType
-from findpapers.core.search import Database
+from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
 from findpapers.searchers.semantic_scholar import SemanticScholarSearcher

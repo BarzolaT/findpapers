@@ -9,16 +9,16 @@ from typing import TYPE_CHECKING
 from findpapers.core.paper import Paper
 
 if TYPE_CHECKING:
-    from findpapers.core.search import Search
+    from findpapers.core.search_result import SearchResult
 
 
-def export_to_json(search: Search, path: str) -> None:
+def export_to_json(search: SearchResult, path: str) -> None:
     """Write search results to a JSON file.
 
     Parameters
     ----------
-    search : Search
-        Search instance with results and metadata.
+    search : SearchResult
+        SearchResult instance with results and metadata.
     path : str
         Output file path.
 
@@ -31,13 +31,13 @@ def export_to_json(search: Search, path: str) -> None:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
 
 
-def export_to_csv(search: Search, path: str) -> None:
+def export_to_csv(search: SearchResult, path: str) -> None:
     """Write search results to a CSV file using the standard column order.
 
     Parameters
     ----------
-    search : Search
-        Search instance with papers to export.
+    search : SearchResult
+        SearchResult instance with papers to export.
     path : str
         Output file path.
 
@@ -53,13 +53,13 @@ def export_to_csv(search: Search, path: str) -> None:
             writer.writerow(paper_to_csv_row(paper))
 
 
-def export_to_bibtex(search: Search, path: str) -> None:
+def export_to_bibtex(search: SearchResult, path: str) -> None:
     """Write search results to a BibTeX file.
 
     Parameters
     ----------
-    search : Search
-        Search instance with papers to export.
+    search : SearchResult
+        SearchResult instance with papers to export.
     path : str
         Output file path.
 

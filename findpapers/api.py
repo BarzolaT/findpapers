@@ -12,7 +12,7 @@ reusing a pre-configured runner), use the underlying runner classes in
 from __future__ import annotations
 
 from findpapers.core.paper import Paper
-from findpapers.core.search import Search
+from findpapers.core.search_result import SearchResult
 from findpapers.runners.doi_lookup_runner import DOILookupRunner
 from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
@@ -32,11 +32,11 @@ def search(
     semantic_scholar_api_key: str | None = None,
     num_workers: int = 1,
     verbose: bool = False,
-) -> Search:
+) -> SearchResult:
     """Search for academic papers across multiple databases.
 
     Queries one or more academic databases and returns a
-    :class:`~findpapers.core.search.Search` object with the collected papers
+    :class:`~findpapers.core.search_result.SearchResult` object with the collected papers
     already deduplicated and merged.
 
     Query syntax
@@ -100,8 +100,8 @@ def search(
 
     Returns
     -------
-    Search
-        A :class:`~findpapers.core.search.Search` object whose ``papers``
+    SearchResult
+        A :class:`~findpapers.core.search_result.SearchResult` object whose ``papers``
         attribute contains the collected :class:`~findpapers.core.paper.Paper`
         instances.  The result can be exported directly via
         ``result.to_json()``, ``result.to_csv()``, or ``result.to_bibtex()``.

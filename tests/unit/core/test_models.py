@@ -1,4 +1,4 @@
-"""Tests for Paper, Publication, and Search models."""
+"""Tests for Paper, Publication, and SearchResult models."""
 
 import csv
 import datetime
@@ -8,7 +8,7 @@ import pytest
 
 from findpapers.core.author import Author
 from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, PaperType, _is_preprint_doi, _merge_doi
-from findpapers.core.search import Search
+from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source
 
 
@@ -313,7 +313,7 @@ def test_paper_merge_prefers_publisher_doi_when_preprint_is_incoming():
 
 def test_search_add_paper():
     """Test adding paper to search results."""
-    search = Search(query="q", databases=["arxiv"])
+    search = SearchResult(query="q", databases=["arxiv"])
     paper = Paper(
         title="Title",
         abstract="Abstract",
@@ -326,8 +326,8 @@ def test_search_add_paper():
     assert search.papers[0].title == "Title"
 
 
-def _make_search_with_paper() -> Search:
-    """Return a Search with one Article paper for export tests."""
+def _make_search_with_paper() -> SearchResult:
+    """Return a SearchResult with one Article paper for export tests."""
     paper = Paper(
         title="Export Test Paper",
         abstract="Abstract text.",
@@ -335,13 +335,13 @@ def _make_search_with_paper() -> Search:
         source=Source(title="Test Journal"),
         publication_date=datetime.date(2023, 1, 1),
     )
-    search = Search(query="[export]", databases=["arxiv"])
+    search = SearchResult(query="[export]", databases=["arxiv"])
     search.add_paper(paper)
     return search
 
 
 def test_search_to_json_creates_file(tmp_path):
-    """Search.to_json() writes a valid JSON file with a 'papers' key."""
+    """SearchResult.to_json() writes a valid JSON file with a 'papers' key."""
     path = str(tmp_path / "out.json")
     _make_search_with_paper().to_json(path)
     with open(path) as f:
@@ -351,7 +351,7 @@ def test_search_to_json_creates_file(tmp_path):
 
 
 def test_search_to_csv_creates_file(tmp_path):
-    """Search.to_csv() writes a CSV file with at least one data row."""
+    """SearchResult.to_csv() writes a CSV file with at least one data row."""
     path = str(tmp_path / "out.csv")
     _make_search_with_paper().to_csv(path)
     with open(path, newline="") as f:
@@ -360,7 +360,7 @@ def test_search_to_csv_creates_file(tmp_path):
 
 
 def test_search_to_bibtex_creates_file(tmp_path):
-    """Search.to_bibtex() writes a BibTeX file containing at least one entry."""
+    """SearchResult.to_bibtex() writes a BibTeX file containing at least one entry."""
     path = str(tmp_path / "out.bib")
     _make_search_with_paper().to_bibtex(path)
     content = open(path).read()

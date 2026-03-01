@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 from findpapers.core.author import Author
 from findpapers.core.paper import PaperType
-from findpapers.core.search import Database
+from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 from findpapers.searchers.scopus import ScopusSearcher

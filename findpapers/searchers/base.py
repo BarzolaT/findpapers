@@ -56,7 +56,7 @@ class SearcherBase(ABC):
     @property
     @abstractmethod
     def name(self) -> str:
-        """Database identifier matching the :class:`~findpapers.core.search.Database` enum value.
+        """Database identifier matching the :class:`~findpapers.core.search_result.Database` enum value.
 
         Returns
         -------
