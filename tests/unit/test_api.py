@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from unittest.mock import MagicMock, patch
 
-from findpapers.api import download, enrich, search
+from findpapers.api import download, enrich, fetch_paper_by_doi, search
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.search import Search
@@ -208,6 +208,60 @@ class TestEnrichConvenience:
 
 
 # ---------------------------------------------------------------------------
+# fetch_paper_by_doi()
+# ---------------------------------------------------------------------------
+
+
+class TestFetchPaperByDoiConvenience:
+    """Tests for the ``fetch_paper_by_doi()`` convenience function."""
+
+    def test_fetch_delegates_to_runner(self):
+        """fetch_paper_by_doi() creates a DOILookupRunner and returns run() result."""
+        fake_paper = MagicMock(spec=Paper)
+        with patch("findpapers.api.DOILookupRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = fake_paper
+            mock_cls.return_value = mock_runner
+
+            result = fetch_paper_by_doi(
+                "10.1234/test",
+                timeout=20.0,
+                verbose=True,
+            )
+
+        mock_cls.assert_called_once_with(
+            doi="10.1234/test",
+            timeout=20.0,
+        )
+        mock_runner.run.assert_called_once_with(verbose=True)
+        assert result is fake_paper
+
+    def test_fetch_default_parameters(self):
+        """Default values are forwarded correctly."""
+        with patch("findpapers.api.DOILookupRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = None
+            mock_cls.return_value = mock_runner
+
+            fetch_paper_by_doi("10.1234/test")
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs["timeout"] == 10.0
+        mock_runner.run.assert_called_once_with(verbose=False)
+
+    def test_fetch_returns_none_when_not_found(self):
+        """fetch_paper_by_doi() returns None when DOI is not found."""
+        with patch("findpapers.api.DOILookupRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = None
+            mock_cls.return_value = mock_runner
+
+            result = fetch_paper_by_doi("10.9999/nonexistent")
+
+        assert result is None
+
+
+# ---------------------------------------------------------------------------
 # Top-level imports
 # ---------------------------------------------------------------------------
 
@@ -232,3 +286,9 @@ class TestTopLevelImports:
         import findpapers
 
         assert callable(findpapers.enrich)
+
+    def test_fetch_paper_by_doi_importable(self):
+        """findpapers.fetch_paper_by_doi is the convenience function."""
+        import findpapers
+
+        assert callable(findpapers.fetch_paper_by_doi)

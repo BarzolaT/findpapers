@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from findpapers.core.paper import Paper
 from findpapers.core.search import Search
+from findpapers.runners.doi_lookup_runner import DOILookupRunner
 from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
 from findpapers.runners.search_runner import SearchRunner
@@ -243,8 +244,8 @@ def enrich(
     """Enrich papers with additional metadata from web sources.
 
     For each paper, metadata is fetched from the CrossRef API (when a DOI is
-    available) and by scraping the paper's known URLs.  Found data — such as
-    abstracts, keywords, PDF links, citation counts, and source details — is
+    available) and by scraping the paper's known URLs.  Found data - such as
+    abstracts, keywords, PDF links, citation counts, and source details - is
     merged into the existing paper objects.
 
     .. note::
@@ -308,3 +309,70 @@ def enrich(
     )
     runner.run(verbose=verbose)
     return runner.get_metrics()
+
+
+def fetch_paper_by_doi(
+    doi: str,
+    *,
+    timeout: float | None = 10.0,
+    verbose: bool = False,
+) -> Paper | None:
+    """Fetch a single paper by its DOI from CrossRef.
+
+    Queries the CrossRef API for the given DOI and returns a
+    :class:`~findpapers.core.paper.Paper` populated with the available
+    metadata (title, authors, abstract, source, publication date, etc.).
+
+    The DOI can be provided as a bare identifier (e.g.
+    ``"10.1038/nature12373"``) or as a full URL (e.g.
+    ``"https://doi.org/10.1038/nature12373"``); the URL prefix is stripped
+    automatically.
+
+    Parameters
+    ----------
+    doi : str
+        DOI identifier or DOI URL of the paper to look up.
+    timeout : float | None
+        HTTP request timeout in seconds.  ``None`` uses the ``requests``
+        default.  Defaults to ``10.0``.
+    verbose : bool
+        When ``True``, emit detailed log messages at DEBUG level.
+        Defaults to ``False``.
+
+    Returns
+    -------
+    Paper | None
+        A :class:`~findpapers.core.paper.Paper` with CrossRef metadata, or
+        ``None`` when the DOI is not found or the response cannot be parsed
+        into a valid paper.
+
+    Raises
+    ------
+    ValueError
+        If *doi* is empty or blank after stripping whitespace and URL
+        prefixes.
+
+    See Also
+    --------
+    findpapers.runners.doi_lookup_runner.DOILookupRunner :
+        Lower-level class for when you need access to runtime metrics or
+        want to separate configuration from execution.
+
+    Examples
+    --------
+    Look up a single paper:
+
+    >>> import findpapers
+    >>> paper = findpapers.fetch_paper_by_doi("10.1038/nature12373")
+    >>> print(paper.title)
+    Experimental ...
+
+    Using a full DOI URL:
+
+    >>> paper = findpapers.fetch_paper_by_doi("https://doi.org/10.1038/nature12373")
+    """
+    runner = DOILookupRunner(
+        doi=doi,
+        timeout=timeout,
+    )
+    return runner.run(verbose=verbose)
