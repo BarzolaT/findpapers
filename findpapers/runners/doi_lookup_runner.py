@@ -22,6 +22,9 @@ class DOILookupRunner:
     doi : str
         A bare DOI identifier (e.g. ``"10.1038/nature12373"``).  Leading
         ``"https://doi.org/"`` prefixes are stripped automatically.
+    email : str | None
+        Contact email for CrossRef polite-pool access.  When provided
+        CrossRef grants higher rate-limits.
     timeout : float | None
         HTTP request timeout in seconds.  ``None`` uses the ``requests``
         default.
@@ -51,6 +54,7 @@ class DOILookupRunner:
     def __init__(
         self,
         doi: str,
+        email: str | None = None,
         timeout: float | None = 10.0,
     ) -> None:
         """Initialise DOI lookup configuration.
@@ -59,6 +63,8 @@ class DOILookupRunner:
         ----------
         doi : str
             A bare DOI identifier or full DOI URL.
+        email : str | None
+            Contact email for CrossRef polite-pool access.
         timeout : float | None
             HTTP request timeout in seconds.
 
@@ -69,7 +75,7 @@ class DOILookupRunner:
         """
         self._doi = self._sanitize_doi(doi)
         self._timeout = timeout
-        self._connector = CrossRefConnector()
+        self._connector = CrossRefConnector(email=email)
         self._result: Paper | None = None
         self._executed = False
         self._runtime: float = 0.0

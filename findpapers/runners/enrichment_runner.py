@@ -60,6 +60,9 @@ class EnrichmentRunner:
     ----------
     papers : list[Paper]
         Papers to enrich.
+    email : str | None
+        Contact email for polite-pool access on CrossRef.  When provided
+        CrossRef grants higher rate-limits.
     num_workers : int
         Number of parallel workers.  Defaults to ``1``, which runs
         sequentially.  Values greater than ``1`` enable parallel execution.
@@ -76,6 +79,7 @@ class EnrichmentRunner:
     def __init__(
         self,
         papers: list[Paper],
+        email: str | None = None,
         num_workers: int = 1,
         timeout: float | None = 10.0,
     ) -> None:
@@ -85,7 +89,7 @@ class EnrichmentRunner:
         self._metrics: dict[str, int | float] = {}
         self._num_workers = num_workers
         self._timeout = timeout
-        self._crossref = CrossRefConnector()
+        self._crossref = CrossRefConnector(email=email)
 
     # ------------------------------------------------------------------
     # Public interface

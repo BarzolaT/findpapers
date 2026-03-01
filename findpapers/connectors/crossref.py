@@ -29,12 +29,9 @@ logger = logging.getLogger(__name__)
 
 _CROSSREF_API_URL = "https://api.crossref.org/works"
 
-# Polite-pool header — CrossRef grants higher rate-limits when a contact
-# e-mail is provided via the ``mailto`` query parameter or ``User-Agent``.
-_CROSSREF_USER_AGENT = (
-    "findpapers/1.0 (https://github.com/jonatasgrosman/findpapers; "
-    "mailto:findpapers@users.noreply.github.com)"
-)
+# Default User-Agent used when no contact email has been provided.
+# CrossRef grants higher rate-limits when a ``mailto`` is present.
+_CROSSREF_USER_AGENT_DEFAULT = "findpapers/1.0 (https://github.com/jonatasgrosman/findpapers)"
 
 # Minimum interval between requests — CrossRef polite pool recommends
 # keeping traffic moderate; 0.1 s (10 req/s) is well within limits.
@@ -72,8 +69,25 @@ class CrossRefConnector(ConnectorBase):
     It inherits rate limiting, request/response logging, and header
     management from :class:`~findpapers.connectors.connector_base.ConnectorBase`.
 
+    Parameters
+    ----------
+    email : str | None
+        Contact email for CrossRef polite-pool access.  When provided the
+        ``User-Agent`` header includes a ``mailto:`` clause which grants
+        higher rate-limits.
+
     API documentation: https://api.crossref.org/swagger-ui/index.html
     """
+
+    def __init__(self, email: str | None = None) -> None:
+        """Create a CrossRef connector.
+
+        Parameters
+        ----------
+        email : str | None
+            Contact email for the CrossRef polite pool.
+        """
+        self._email = email
 
     @property
     def name(self) -> str:
@@ -111,7 +125,14 @@ class CrossRefConnector(ConnectorBase):
             Headers with the CrossRef ``User-Agent`` set.
         """
         merged = super()._prepare_headers(headers)
-        merged["User-Agent"] = _CROSSREF_USER_AGENT
+        if self._email:
+            user_agent = (
+                "findpapers/1.0 (https://github.com/jonatasgrosman/findpapers; "
+                f"mailto:{self._email})"
+            )
+        else:
+            user_agent = _CROSSREF_USER_AGENT_DEFAULT
+        merged["User-Agent"] = user_agent
         return merged
 
     # ------------------------------------------------------------------

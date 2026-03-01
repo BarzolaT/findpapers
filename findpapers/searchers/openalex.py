@@ -7,7 +7,6 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
-from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -15,6 +14,7 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
+from findpapers.searchers.base import SearcherBase
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +37,8 @@ _OPENALEX_SOURCE_TYPE_MAP: dict[str, SourceType] = {
 }
 
 
-class OpenAlexConnector(SearchConnectorBase):
-    """Connector for the OpenAlex open catalog of academic works.
+class OpenAlexSearcher(SearcherBase):
+    """Searcher for the OpenAlex open catalog of academic works.
 
     https://docs.openalex.org/how-to-use-the-api
 

@@ -58,8 +58,8 @@ class SearchRunner:
         NCBI PubMed API key (increases rate limit).
     openalex_api_key : str | None
         OpenAlex API key.
-    openalex_email : str | None
-        Contact email for OpenAlex polite pool (recommended).
+    email : str | None
+        Contact email for polite-pool access (OpenAlex, CrossRef).
     semantic_scholar_api_key : str | None
         Semantic Scholar API key (increases rate limit).
     num_workers : int
@@ -92,7 +92,7 @@ class SearchRunner:
         scopus_api_key: str | None = None,
         pubmed_api_key: str | None = None,
         openalex_api_key: str | None = None,
-        openalex_email: str | None = None,
+        email: str | None = None,
         semantic_scholar_api_key: str | None = None,
         num_workers: int = 1,
     ) -> None:
@@ -123,7 +123,7 @@ class SearchRunner:
             scopus_api_key=scopus_api_key,
             pubmed_api_key=pubmed_api_key,
             openalex_api_key=openalex_api_key,
-            openalex_email=openalex_email,
+            email=email,
             semantic_scholar_api_key=semantic_scholar_api_key,
         )
 
@@ -260,7 +260,7 @@ class SearchRunner:
         scopus_api_key: str | None,
         pubmed_api_key: str | None,
         openalex_api_key: str | None,
-        openalex_email: str | None,
+        email: str | None,
         semantic_scholar_api_key: str | None,
     ) -> tuple[list[SearchConnectorBase], list[str]]:
         """Instantiate the requested searchers.
@@ -277,8 +277,8 @@ class SearchRunner:
             PubMed API key.
         openalex_api_key : str | None
             OpenAlex API key.
-        openalex_email : str | None
-            OpenAlex polite-pool email.
+        email : str | None
+            Polite-pool email.
         semantic_scholar_api_key : str | None
             Semantic Scholar API key.
 
@@ -295,7 +295,7 @@ class SearchRunner:
         all_searchers: dict[Database, SearchConnectorBase] = {
             Database.ARXIV: ArxivConnector(),
             Database.IEEE: IEEEConnector(api_key=ieee_api_key),
-            Database.OPENALEX: OpenAlexConnector(api_key=openalex_api_key, email=openalex_email),
+            Database.OPENALEX: OpenAlexConnector(api_key=openalex_api_key, email=email),
             Database.PUBMED: PubmedConnector(api_key=pubmed_api_key),
             Database.SCOPUS: ScopusConnector(api_key=scopus_api_key),
             Database.SEMANTIC_SCHOLAR: SemanticScholarConnector(api_key=semantic_scholar_api_key),
