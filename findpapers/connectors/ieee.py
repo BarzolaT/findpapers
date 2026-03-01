@@ -7,6 +7,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
+from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -14,7 +15,6 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.ieee import IEEEQueryBuilder
-from findpapers.searchers.base import SearcherBase
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +36,8 @@ _IEEE_CONTENT_TYPE_MAP: dict[str, SourceType] = {
 }
 
 
-class IEEESearcher(SearcherBase):
-    """Searcher for the IEEE Xplore database.
+class IEEEConnector(SearchConnectorBase):
+    """Connector for the IEEE Xplore database.
 
     Requires an IEEE API key:
     https://developer.ieee.org/docs/read/Metadata_API_details

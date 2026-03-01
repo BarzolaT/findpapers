@@ -9,6 +9,7 @@ from collections.abc import Callable
 from typing import List, Optional
 from xml.etree import ElementTree as ET
 
+from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -16,7 +17,6 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
-from findpapers.searchers.base import SearcherBase
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +31,8 @@ _NS = {"atom": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas
 _ARXIV_ID_RE = re.compile(r"arxiv\.org/abs/([\d.]+)", re.IGNORECASE)
 
 
-class ArxivSearcher(SearcherBase):
-    """Searcher for the arXiv preprint database.
+class ArxivConnector(SearchConnectorBase):
+    """Connector for the arXiv preprint database.
 
     Uses the arXiv Atom Feed API:
     https://info.arxiv.org/help/api/user-manual.html

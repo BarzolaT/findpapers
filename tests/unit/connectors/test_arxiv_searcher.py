@@ -1,4 +1,4 @@
-"""Unit tests for ArxivSearcher."""
+"""Unit tests for ArxivConnector."""
 
 from __future__ import annotations
 
@@ -6,47 +6,47 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from findpapers.connectors.arxiv import ArxivConnector, _infer_source_type_from_journal_ref
 from findpapers.core.paper import PaperType
 from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
-from findpapers.searchers.arxiv import ArxivSearcher, _infer_source_type_from_journal_ref
 
 
-class TestArxivSearcherInit:
-    """Tests for ArxivSearcher initialisation."""
+class TestArxivConnectorInit:
+    """Tests for ArxivConnector initialisation."""
 
     def test_default_builder_created(self):
-        """Searcher creates ArxivQueryBuilder when none provided."""
-        searcher = ArxivSearcher()
+        """Connector creates ArxivQueryBuilder when none provided."""
+        searcher = ArxivConnector()
         assert isinstance(searcher.query_builder, ArxivQueryBuilder)
 
     def test_custom_builder_used(self):
-        """Searcher uses the provided builder."""
+        """Connector uses the provided builder."""
         builder = ArxivQueryBuilder()
-        searcher = ArxivSearcher(query_builder=builder)
+        searcher = ArxivConnector(query_builder=builder)
         assert searcher.query_builder is builder
 
     def test_name(self):
-        """Searcher name is 'arXiv'."""
-        assert ArxivSearcher().name == Database.ARXIV
+        """Connector name is 'arXiv'."""
+        assert ArxivConnector().name == Database.ARXIV
 
 
-class TestArxivSearcherParseResponse:
+class TestArxivConnectorParseResponse:
     """Tests for response parsing."""
 
     def test_parse_sample_xml(self, arxiv_sample_xml, simple_query):
         """Parsing sample XML returns non-empty list of papers."""
         from xml.etree import ElementTree as ET
 
-        from findpapers.searchers.arxiv import _NS
+        from findpapers.connectors.arxiv import _NS
 
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
         assert len(entries) > 0
 
-        papers = [ArxivSearcher()._parse_paper(e) for e in entries]
+        papers = [ArxivConnector()._parse_paper(e) for e in entries]
         valid_papers = [p for p in papers if p is not None]
         assert len(valid_papers) > 0
 
@@ -54,11 +54,11 @@ class TestArxivSearcherParseResponse:
         """Papers parsed from arXiv have 'arXiv' in databases set."""
         from xml.etree import ElementTree as ET
 
-        from findpapers.searchers.arxiv import _NS
+        from findpapers.connectors.arxiv import _NS
 
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
-        paper = ArxivSearcher()._parse_paper(entries[0])
+        paper = ArxivConnector()._parse_paper(entries[0])
         assert paper is not None
         assert Database.ARXIV in paper.databases
 
@@ -73,7 +73,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        assert ArxivSearcher()._parse_paper(entry) is None
+        assert ArxivConnector()._parse_paper(entry) is None
 
     def test_comments_extracted_from_entry(self):
         """Comments field is populated when arxiv:comment element is present."""
@@ -88,7 +88,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.comments == "39 pages, 14 figures"
 
@@ -104,7 +104,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.comments is None
 
@@ -112,11 +112,11 @@ class TestArxivSearcherParseResponse:
         """Parsing the sample XML finds at least one paper with a non-None comment."""
         from xml.etree import ElementTree as ET
 
-        from findpapers.searchers.arxiv import _NS
+        from findpapers.connectors.arxiv import _NS
 
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
-        papers = [ArxivSearcher()._parse_paper(e) for e in entries]
+        papers = [ArxivConnector()._parse_paper(e) for e in entries]
         valid = [p for p in papers if p is not None]
         papers_with_comments = [p for p in valid if p.comments is not None]
         assert len(papers_with_comments) > 0
@@ -133,7 +133,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "arXiv"
@@ -152,7 +152,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Phys. Rev. Lett. 123, 456 (2020)"
@@ -171,7 +171,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.CONFERENCE
@@ -189,7 +189,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.CONFERENCE
@@ -207,7 +207,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.BOOK
@@ -225,7 +225,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Nature 580, 321 (2020)"
@@ -243,7 +243,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.UNPUBLISHED
 
@@ -260,7 +260,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.ARTICLE
 
@@ -277,7 +277,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.INPROCEEDINGS
 
@@ -294,7 +294,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.INBOOK
 
@@ -311,7 +311,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.doi == "10.48550/arXiv.1706.03762"
 
@@ -329,7 +329,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.doi == "10.1145/3531146.3533206"
 
@@ -345,7 +345,7 @@ class TestArxivSearcherParseResponse:
         </entry>
         """
         entry = ET.fromstring(xml_str)
-        paper = ArxivSearcher()._parse_paper(entry)
+        paper = ArxivConnector()._parse_paper(entry)
         assert paper is not None
         assert paper.doi is None
 
@@ -419,24 +419,24 @@ class TestInferSourceTypeFromJournalRef:
         assert _infer_source_type_from_journal_ref(text) == SourceType.CONFERENCE
 
 
-class TestArxivSearcherSearch:
+class TestArxivConnectorSearch:
     """Tests for the search() method with mocked HTTP calls."""
 
     def test_search_raises_on_invalid_query(self, key_query):
         """Search raises UnsupportedQueryError when query uses unsupported filter (key)."""
-        searcher = ArxivSearcher()
+        searcher = ArxivConnector()
         with pytest.raises(UnsupportedQueryError):
             searcher.search(key_query)
 
     def test_search_returns_papers_from_xml(self, simple_query, arxiv_sample_xml, mock_response):
         """Search parses XML response and returns papers."""
-        searcher = ArxivSearcher()
+        searcher = ArxivConnector()
         response = mock_response(text=arxiv_sample_xml)
         response.raise_for_status = MagicMock()
 
-        with patch("findpapers.searchers.base.requests.get", return_value=response), patch.object(
-            searcher, "_rate_limit"
-        ):
+        with patch(
+            "findpapers.connectors.connector_base.requests.get", return_value=response
+        ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=5)
 
         assert len(papers) <= 5
@@ -444,20 +444,20 @@ class TestArxivSearcherSearch:
 
     def test_max_papers_respected(self, simple_query, arxiv_sample_xml, mock_response):
         """search() returns no more than max_papers papers."""
-        searcher = ArxivSearcher()
+        searcher = ArxivConnector()
         response = mock_response(text=arxiv_sample_xml)
         response.raise_for_status = MagicMock()
 
-        with patch("findpapers.searchers.base.requests.get", return_value=response), patch.object(
-            searcher, "_rate_limit"
-        ):
+        with patch(
+            "findpapers.connectors.connector_base.requests.get", return_value=response
+        ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=3)
 
         assert len(papers) <= 3
 
     def test_progress_callback_called(self, simple_query, arxiv_sample_xml, mock_response):
         """search() invokes progress_callback during pagination."""
-        searcher = ArxivSearcher()
+        searcher = ArxivConnector()
         response = mock_response(text=arxiv_sample_xml)
         response.raise_for_status = MagicMock()
         callback_calls = []
@@ -465,20 +465,20 @@ class TestArxivSearcherSearch:
         def _callback(current, total):
             callback_calls.append((current, total))
 
-        with patch("findpapers.searchers.base.requests.get", return_value=response), patch.object(
-            searcher, "_rate_limit"
-        ):
+        with patch(
+            "findpapers.connectors.connector_base.requests.get", return_value=response
+        ), patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=_callback)
 
         assert len(callback_calls) > 0
 
     def test_http_error_returns_empty(self, simple_query, mock_response):
         """search() returns empty list when HTTP request fails."""
-        searcher = ArxivSearcher()
+        searcher = ArxivConnector()
         import requests as req
 
         with patch(
-            "findpapers.searchers.base.requests.get", side_effect=req.HTTPError("500")
+            "findpapers.connectors.connector_base.requests.get", side_effect=req.HTTPError("500")
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 

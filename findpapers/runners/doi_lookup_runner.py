@@ -5,8 +5,8 @@ from __future__ import annotations
 import logging
 from time import perf_counter
 
+from findpapers.connectors.crossref import build_paper_from_crossref, fetch_crossref_work
 from findpapers.core.paper import Paper
-from findpapers.utils.crossref import build_paper_from_crossref, fetch_crossref_work
 
 logger = logging.getLogger(__name__)
 

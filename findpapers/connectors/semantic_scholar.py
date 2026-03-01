@@ -7,6 +7,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
+from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -14,7 +15,6 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
-from findpapers.searchers.base import SearcherBase
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +53,8 @@ _SS_PUB_TYPE_MAP: dict[str, SourceType] = {
 }
 
 
-class SemanticScholarSearcher(SearcherBase):
-    """Searcher for the Semantic Scholar research corpus.
+class SemanticScholarConnector(SearchConnectorBase):
+    """Connector for the Semantic Scholar research corpus.
 
     Uses the Bulk Search endpoint:
     https://api.semanticscholar.org/api-docs/#tag/Paper-Data/operation/bulk_paper_search

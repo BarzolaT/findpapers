@@ -7,6 +7,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
+from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -14,7 +15,6 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.scopus import ScopusQueryBuilder
-from findpapers.searchers.base import SearcherBase
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,8 @@ _SCOPUS_AGGREGATION_TYPE_MAP: dict[str, SourceType] = {
 }
 
 
-class ScopusSearcher(SearcherBase):
-    """Searcher for the Elsevier Scopus database.
+class ScopusConnector(SearchConnectorBase):
+    """Connector for the Elsevier Scopus database.
 
     Requires a Scopus API key:
     https://dev.elsevier.com/sc_search_tips.html

@@ -1,4 +1,4 @@
-"""Unit tests for PubmedSearcher."""
+"""Unit tests for PubmedConnector."""
 
 from __future__ import annotations
 
@@ -7,13 +7,13 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
+from findpapers.connectors.pubmed import PubmedConnector, _normalize_month
 from findpapers.core.author import Author
 from findpapers.core.paper import PaperType
 from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
-from findpapers.searchers.pubmed import PubmedSearcher, _normalize_month
 
 
 class TestNormalizeMonth:
@@ -42,43 +42,43 @@ class TestNormalizeMonth:
         assert _normalize_month("Spring") == "01"
 
 
-class TestPubmedSearcherInit:
-    """Tests for PubmedSearcher initialisation."""
+class TestPubmedConnectorInit:
+    """Tests for PubmedConnector initialisation."""
 
     def test_default_builder_created(self):
-        """Searcher creates PubmedQueryBuilder when none provided."""
-        searcher = PubmedSearcher()
+        """Connector creates PubmedQueryBuilder when none provided."""
+        searcher = PubmedConnector()
         assert isinstance(searcher.query_builder, PubmedQueryBuilder)
 
     def test_api_key_stored(self):
         """API key is stored on the instance."""
-        searcher = PubmedSearcher(api_key="test_key")
+        searcher = PubmedConnector(api_key="test_key")
         assert searcher._api_key == "test_key"
 
     def test_name(self):
-        """Searcher name is 'PubMed'."""
-        assert PubmedSearcher().name == Database.PUBMED
+        """Connector name is 'PubMed'."""
+        assert PubmedConnector().name == Database.PUBMED
 
     def test_rate_interval_without_key(self):
         """Default rate interval is used when no API key provided."""
-        from findpapers.searchers.pubmed import _MIN_REQUEST_INTERVAL_DEFAULT
+        from findpapers.connectors.pubmed import _MIN_REQUEST_INTERVAL_DEFAULT
 
-        searcher = PubmedSearcher()
+        searcher = PubmedConnector()
         assert searcher._request_interval == _MIN_REQUEST_INTERVAL_DEFAULT
 
     def test_rate_interval_with_key(self):
         """Faster rate interval used when API key is provided."""
-        from findpapers.searchers.pubmed import (
+        from findpapers.connectors.pubmed import (
             _MIN_REQUEST_INTERVAL_DEFAULT,
             _MIN_REQUEST_INTERVAL_WITH_KEY,
         )
 
-        searcher = PubmedSearcher(api_key="key")
+        searcher = PubmedConnector(api_key="key")
         assert searcher._request_interval == _MIN_REQUEST_INTERVAL_WITH_KEY
         assert searcher._request_interval < _MIN_REQUEST_INTERVAL_DEFAULT
 
 
-class TestPubmedSearcherParsePaper:
+class TestPubmedConnectorParsePaper:
     """Tests for _parse_paper using real efetch XML data."""
 
     def test_parse_sample_xml(self, pubmed_efetch_xml):
@@ -87,7 +87,7 @@ class TestPubmedSearcherParsePaper:
         articles = tree.findall(".//PubmedArticle")
         assert len(articles) > 0
 
-        papers = [PubmedSearcher()._parse_paper(a) for a in articles]
+        papers = [PubmedConnector()._parse_paper(a) for a in articles]
         valid = [p for p in papers if p is not None]
         assert len(valid) > 0
 
@@ -95,7 +95,7 @@ class TestPubmedSearcherParsePaper:
         """Parsed paper has 'PubMed' in databases set."""
         tree = ET.fromstring(pubmed_efetch_xml)
         articles = tree.findall(".//PubmedArticle")
-        paper = PubmedSearcher()._parse_paper(articles[0])
+        paper = PubmedConnector()._parse_paper(articles[0])
         assert paper is not None
         assert Database.PUBMED in paper.databases
 
@@ -111,13 +111,13 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        assert PubmedSearcher()._parse_paper(el) is None
+        assert PubmedConnector()._parse_paper(el) is None
 
     def test_missing_medline_citation_returns_none(self):
         """Element without MedlineCitation returns None."""
         xml_str = "<PubmedArticle></PubmedArticle>"
         el = ET.fromstring(xml_str)
-        assert PubmedSearcher()._parse_paper(el) is None
+        assert PubmedConnector()._parse_paper(el) is None
 
     def test_author_with_initials_only(self):
         """Author with LastName + Initials (no ForeName) is parsed."""
@@ -138,7 +138,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.authors == [Author(name="J Smith")]
 
@@ -163,7 +163,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.keywords is not None
         assert "Deep Learning" in paper.keywords
@@ -187,7 +187,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.doi == "10.1234/test"
 
@@ -204,7 +204,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.url == "https://pubmed.ncbi.nlm.nih.gov/12345/"
 
@@ -226,7 +226,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Nature"
@@ -248,7 +248,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.JOURNAL
@@ -271,7 +271,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.page_range == "100-115"
 
@@ -292,7 +292,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.page_range == "200\u2013210"
 
@@ -300,7 +300,7 @@ class TestPubmedSearcherParsePaper:
         """Pages are extracted from the real PubMed sample data."""
         tree = ET.fromstring(pubmed_efetch_xml)
         articles = tree.findall(".//PubmedArticle")
-        paper = PubmedSearcher()._parse_paper(articles[0])
+        paper = PubmedConnector()._parse_paper(articles[0])
         assert paper is not None
         assert paper.page_range is not None
         assert "1148" in paper.page_range
@@ -320,7 +320,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is PaperType.ARTICLE
 
@@ -339,7 +339,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is PaperType.INPROCEEDINGS
 
@@ -358,7 +358,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is PaperType.INPROCEEDINGS
 
@@ -377,7 +377,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is PaperType.PHDTHESIS
 
@@ -396,7 +396,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is PaperType.TECHREPORT
 
@@ -415,7 +415,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is PaperType.UNPUBLISHED
 
@@ -434,7 +434,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is PaperType.ARTICLE
 
@@ -454,7 +454,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is PaperType.INPROCEEDINGS
 
@@ -470,7 +470,7 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is None
 
@@ -489,12 +489,12 @@ class TestPubmedSearcherParsePaper:
         </PubmedArticle>
         """
         el = ET.fromstring(xml_str)
-        paper = PubmedSearcher()._parse_paper(el)
+        paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is None
 
 
-class TestPubmedSearcherSearch:
+class TestPubmedConnectorSearch:
     """Tests for search() with mocked HTTP calls."""
 
     def test_search_raises_for_question_mark_wildcard(self, wildcard_query):
@@ -507,7 +507,7 @@ class TestPubmedSearcherSearch:
         parser = QueryParser()
         propagator = FilterPropagator()
         q = propagator.propagate(parser.parse("[mac?]"))
-        searcher = PubmedSearcher()
+        searcher = PubmedConnector()
         with pytest.raises(UnsupportedQueryError):
             searcher.search(q)
 
@@ -519,7 +519,7 @@ class TestPubmedSearcherSearch:
         mock_response,
     ):
         """search() returns papers parsed from esearch + efetch responses."""
-        searcher = PubmedSearcher()
+        searcher = PubmedConnector()
         esearch_mock = mock_response(json_data=pubmed_esearch_json)
         esearch_mock.raise_for_status = MagicMock()
         efetch_mock = mock_response(text=pubmed_efetch_xml)
@@ -528,7 +528,7 @@ class TestPubmedSearcherSearch:
         side_effects = [esearch_mock, efetch_mock]
 
         with patch(
-            "findpapers.searchers.base.requests.get", side_effect=side_effects
+            "findpapers.connectors.connector_base.requests.get", side_effect=side_effects
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 
@@ -543,14 +543,14 @@ class TestPubmedSearcherSearch:
         mock_response,
     ):
         """search() returns no more than max_papers papers."""
-        searcher = PubmedSearcher()
+        searcher = PubmedConnector()
         esearch_mock = mock_response(json_data=pubmed_esearch_json)
         esearch_mock.raise_for_status = MagicMock()
         efetch_mock = mock_response(text=pubmed_efetch_xml)
         efetch_mock.raise_for_status = MagicMock()
 
         with patch(
-            "findpapers.searchers.base.requests.get",
+            "findpapers.connectors.connector_base.requests.get",
             side_effect=[esearch_mock, efetch_mock],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=2)
@@ -559,7 +559,7 @@ class TestPubmedSearcherSearch:
 
     def test_esearch_error_breaks_loop(self, simple_query):
         """Exception in _search_ids breaks the loop and returns empty list."""
-        searcher = PubmedSearcher()
+        searcher = PubmedConnector()
 
         with patch.object(searcher, "_search_ids", side_effect=Exception("network error")):
             papers = searcher.search(simple_query)
@@ -568,12 +568,12 @@ class TestPubmedSearcherSearch:
 
     def test_efetch_error_breaks_loop(self, simple_query, pubmed_esearch_json, mock_response):
         """Exception in _fetch_details breaks the loop."""
-        searcher = PubmedSearcher()
+        searcher = PubmedConnector()
         esearch_mock = mock_response(json_data=pubmed_esearch_json)
         esearch_mock.raise_for_status = MagicMock()
 
         with patch(
-            "findpapers.searchers.base.requests.get", return_value=esearch_mock
+            "findpapers.connectors.connector_base.requests.get", return_value=esearch_mock
         ), patch.object(
             searcher, "_fetch_details", side_effect=Exception("fetch error")
         ), patch.object(
@@ -591,7 +591,7 @@ class TestPubmedSearcherSearch:
         mock_response,
     ):
         """Progress callback is invoked after each page."""
-        searcher = PubmedSearcher()
+        searcher = PubmedConnector()
         esearch_mock = mock_response(json_data=pubmed_esearch_json)
         esearch_mock.raise_for_status = MagicMock()
         efetch_mock = mock_response(text=pubmed_efetch_xml)
@@ -599,7 +599,7 @@ class TestPubmedSearcherSearch:
         callback = MagicMock()
 
         with patch(
-            "findpapers.searchers.base.requests.get",
+            "findpapers.connectors.connector_base.requests.get",
             side_effect=[esearch_mock, efetch_mock],
         ), patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=callback)
@@ -608,7 +608,7 @@ class TestPubmedSearcherSearch:
 
     def test_search_raises_surfaces_via_base(self, simple_query):
         """Unexpected exception in _fetch_papers returns an empty list."""
-        searcher = PubmedSearcher()
+        searcher = PubmedConnector()
 
         with patch.object(searcher, "_fetch_papers", side_effect=RuntimeError("boom")):
             papers = searcher.search(simple_query)

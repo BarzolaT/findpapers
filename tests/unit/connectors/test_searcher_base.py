@@ -1,4 +1,4 @@
-"""Unit tests for SearcherBase._get logging and response ordering."""
+"""Unit tests for SearchConnectorBase._get logging and response ordering."""
 
 from __future__ import annotations
 
@@ -7,15 +7,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from findpapers.searchers.base import SearcherBase
+from findpapers.connectors.search_base import SearchConnectorBase
 
 # ---------------------------------------------------------------------------
 # Minimal concrete subclass for testing
 # ---------------------------------------------------------------------------
 
 
-class _StubSearcher(SearcherBase):
-    """Minimal concrete SearcherBase for testing _get and logging helpers."""
+class _StubConnector(SearchConnectorBase):
+    """Minimal concrete SearchConnectorBase for testing _get and logging helpers."""
 
     def __init__(self, query_builder=None):
         self._query_builder = query_builder if query_builder is not None else MagicMock()
@@ -57,18 +57,18 @@ def _make_response(status: int = 200, reason: str = "OK", content: bytes = b"bod
     return resp
 
 
-class TestSearcherBaseGetLogging:
-    """Tests for logging inside SearcherBase._get."""
+class TestSearchConnectorBaseGetLogging:
+    """Tests for logging inside SearchConnectorBase._get."""
 
     def test_request_logged_at_debug(self, caplog) -> None:
         """_get logs the outgoing GET URL at DEBUG level."""
         import logging
 
-        searcher = _StubSearcher()
+        searcher = _StubConnector()
         resp = _make_response()
 
-        with patch("findpapers.searchers.base.requests.get", return_value=resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.searchers.base"):
+        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
                 searcher._get("https://api.example.com/search", params={"q": "ml"})  # noqa: SLF001
 
         assert any("GET" in m and "example.com" in m for m in caplog.messages)
@@ -77,11 +77,11 @@ class TestSearcherBaseGetLogging:
         """API key values are replaced with *** in the request log."""
         import logging
 
-        searcher = _StubSearcher()
+        searcher = _StubConnector()
         resp = _make_response()
 
-        with patch("findpapers.searchers.base.requests.get", return_value=resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.searchers.base"):
+        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
                 searcher._get(  # noqa: SLF001
                     "https://api.example.com/search",
                     params={"q": "ml", "api_key": "top-secret"},
@@ -96,11 +96,11 @@ class TestSearcherBaseGetLogging:
         """_get logs the response status, content-type, and size at DEBUG level."""
         import logging
 
-        searcher = _StubSearcher()
+        searcher = _StubConnector()
         resp = _make_response(status=200, content=b"hello")
 
-        with patch("findpapers.searchers.base.requests.get", return_value=resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.searchers.base"):
+        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
                 searcher._get("https://api.example.com/search")  # noqa: SLF001
 
         messages = " ".join(caplog.messages)
@@ -117,12 +117,12 @@ class TestSearcherBaseGetLogging:
 
         import requests as req_lib
 
-        searcher = _StubSearcher()
+        searcher = _StubConnector()
         resp = _make_response(status=404, reason="Not Found", content=b"not found")
         resp.raise_for_status.side_effect = req_lib.HTTPError("404")
 
-        with patch("findpapers.searchers.base.requests.get", return_value=resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.searchers.base"):
+        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
                 with pytest.raises(req_lib.HTTPError):
                     searcher._get("https://api.example.com/missing")  # noqa: SLF001
 
@@ -130,12 +130,12 @@ class TestSearcherBaseGetLogging:
         assert "404" in messages  # response was logged before the exception was raised
 
 
-class TestSearcherBasePrepareHeaders:
-    """Tests for the browser-header injection in SearcherBase._prepare_headers."""
+class TestSearchConnectorBasePrepareHeaders:
+    """Tests for the browser-header injection in SearchConnectorBase._prepare_headers."""
 
     def test_browser_headers_injected_by_default(self) -> None:
         """_prepare_headers always includes a browser-like User-Agent."""
-        searcher = _StubSearcher()
+        searcher = _StubConnector()
         result = searcher._prepare_headers({})  # noqa: SLF001
         assert "User-Agent" in result
         assert "Mozilla" in result["User-Agent"]
@@ -143,7 +143,7 @@ class TestSearcherBasePrepareHeaders:
 
     def test_subclass_headers_take_precedence(self) -> None:
         """Caller-supplied headers override the browser defaults."""
-        searcher = _StubSearcher()
+        searcher = _StubConnector()
         custom = {"User-Agent": "CustomAgent/1.0", "X-Api-Key": "secret"}
         result = searcher._prepare_headers(custom)  # noqa: SLF001
         assert result["User-Agent"] == "CustomAgent/1.0"
@@ -151,7 +151,7 @@ class TestSearcherBasePrepareHeaders:
 
     def test_browser_headers_sent_in_get_request(self) -> None:
         """requests.get receives a headers dict with a browser User-Agent."""
-        searcher = _StubSearcher()
+        searcher = _StubConnector()
         resp = _make_response()
         captured: list[dict] = []
 
@@ -159,7 +159,7 @@ class TestSearcherBasePrepareHeaders:
             captured.append(kwargs.get("headers") or {})
             return resp
 
-        with patch("findpapers.searchers.base.requests.get", side_effect=_fake_get):
+        with patch("findpapers.connectors.connector_base.requests.get", side_effect=_fake_get):
             searcher._get("https://api.example.com/search")  # noqa: SLF001
 
         assert captured, "requests.get was not called"
@@ -167,11 +167,11 @@ class TestSearcherBasePrepareHeaders:
         assert "Mozilla" in ua
 
 
-class TestSearcherBaseSearch:
-    """Tests for SearcherBase.search() validation and error handling."""
+class TestSearchConnectorBaseSearch:
+    """Tests for SearchConnectorBase.search() validation and error handling."""
 
     def _make_searcher_with_validation(self, is_valid: bool, error_message: str | None = None):
-        """Build a _StubSearcher whose query_builder returns the given validation result."""
+        """Build a _StubConnector whose query_builder returns the given validation result."""
         from findpapers.query.builder import QueryValidationResult
 
         mock_builder = MagicMock()
@@ -179,7 +179,7 @@ class TestSearcherBaseSearch:
             is_valid=is_valid,
             error_message=error_message,
         )
-        return _StubSearcher(query_builder=mock_builder)
+        return _StubConnector(query_builder=mock_builder)
 
     def test_raises_unsupported_query_error_when_query_invalid(self) -> None:
         """search() raises UnsupportedQueryError when query fails validation."""

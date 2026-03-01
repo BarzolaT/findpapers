@@ -7,19 +7,19 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from time import perf_counter
 
+from findpapers.connectors.arxiv import ArxivConnector
+from findpapers.connectors.ieee import IEEEConnector
+from findpapers.connectors.openalex import OpenAlexConnector
+from findpapers.connectors.pubmed import PubmedConnector
+from findpapers.connectors.scopus import ScopusConnector
+from findpapers.connectors.search_base import SearchConnectorBase
+from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.core.paper import Paper, _is_preprint_doi
 from findpapers.core.search_result import Database, SearchResult
 from findpapers.exceptions import SearchRunnerNotExecutedError, UnsupportedQueryError
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
 from findpapers.query.validator import QueryValidator
-from findpapers.searchers.arxiv import ArxivSearcher
-from findpapers.searchers.base import SearcherBase
-from findpapers.searchers.ieee import IEEESearcher
-from findpapers.searchers.openalex import OpenAlexSearcher
-from findpapers.searchers.pubmed import PubmedSearcher
-from findpapers.searchers.scopus import ScopusSearcher
-from findpapers.searchers.semantic_scholar import SemanticScholarSearcher
 from findpapers.utils.parallel import execute_tasks
 from findpapers.utils.progress import make_progress_bar
 
@@ -262,7 +262,7 @@ class SearchRunner:
         openalex_api_key: str | None,
         openalex_email: str | None,
         semantic_scholar_api_key: str | None,
-    ) -> tuple[list[SearcherBase], list[str]]:
+    ) -> tuple[list[SearchConnectorBase], list[str]]:
         """Instantiate the requested searchers.
 
         Parameters
@@ -284,7 +284,7 @@ class SearchRunner:
 
         Returns
         -------
-        tuple[list[SearcherBase], list[str]]
+        tuple[list[SearchConnectorBase], list[str]]
             A pair of (available searchers, names of skipped searchers).
 
         Raises
@@ -292,13 +292,13 @@ class SearchRunner:
         ValueError
             When an unknown database identifier is provided.
         """
-        all_searchers: dict[Database, SearcherBase] = {
-            Database.ARXIV: ArxivSearcher(),
-            Database.IEEE: IEEESearcher(api_key=ieee_api_key),
-            Database.OPENALEX: OpenAlexSearcher(api_key=openalex_api_key, email=openalex_email),
-            Database.PUBMED: PubmedSearcher(api_key=pubmed_api_key),
-            Database.SCOPUS: ScopusSearcher(api_key=scopus_api_key),
-            Database.SEMANTIC_SCHOLAR: SemanticScholarSearcher(api_key=semantic_scholar_api_key),
+        all_searchers: dict[Database, SearchConnectorBase] = {
+            Database.ARXIV: ArxivConnector(),
+            Database.IEEE: IEEEConnector(api_key=ieee_api_key),
+            Database.OPENALEX: OpenAlexConnector(api_key=openalex_api_key, email=openalex_email),
+            Database.PUBMED: PubmedConnector(api_key=pubmed_api_key),
+            Database.SCOPUS: ScopusConnector(api_key=scopus_api_key),
+            Database.SEMANTIC_SCHOLAR: SemanticScholarConnector(api_key=semantic_scholar_api_key),
         }
 
         valid_values = {db.value for db in Database}
@@ -341,13 +341,13 @@ class SearchRunner:
         None
         """
 
-        def _run_searcher(searcher: SearcherBase) -> list[Paper]:
+        def _run_searcher(searcher: SearchConnectorBase) -> list[Paper]:
             """Run a single searcher with a per-database tqdm bar.
 
             Parameters
             ----------
-            searcher : SearcherBase
-                Searcher to execute.
+            searcher : SearchConnectorBase
+                Connector to execute.
 
             Returns
             -------

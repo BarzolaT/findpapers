@@ -8,6 +8,7 @@ from collections.abc import Callable
 from typing import List, Optional
 from xml.etree import ElementTree as ET
 
+from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -15,7 +16,6 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
-from findpapers.searchers.base import SearcherBase
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +27,8 @@ _MIN_REQUEST_INTERVAL_DEFAULT = 0.34  # ~3 req/s
 _MIN_REQUEST_INTERVAL_WITH_KEY = 0.11  # ~10 req/s
 
 
-class PubmedSearcher(SearcherBase):
-    """Searcher for the PubMed / NCBI database.
+class PubmedConnector(SearchConnectorBase):
+    """Connector for the PubMed / NCBI database.
 
     Uses NCBI E-utilities (esearch + efetch):
     https://www.ncbi.nlm.nih.gov/books/NBK25500/

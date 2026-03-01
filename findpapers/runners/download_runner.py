@@ -213,7 +213,7 @@ class DownloadRunner:
     def _log_response(self, response: requests.Response) -> None:
         """Log a concise summary of an HTTP response at DEBUG level.
 
-        This mirrors the behaviour in SearcherBase._log_response but is
+        This mirrors the behaviour in SearchConnectorBase._log_response but is
         local to the runner so downloads always produce a consistent
         debug message.
         """

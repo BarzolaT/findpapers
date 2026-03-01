@@ -1,4 +1,4 @@
-"""Unit tests for findpapers.utils.crossref."""
+"""Unit tests for findpapers.connectors.crossref."""
 
 from __future__ import annotations
 
@@ -9,8 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from findpapers.core.source import SourceType
-from findpapers.utils.crossref import (
+from findpapers.connectors.crossref import (
     _parse_crossref_authors,
     _parse_crossref_date,
     _parse_crossref_keywords,
@@ -19,6 +18,7 @@ from findpapers.utils.crossref import (
     build_paper_from_crossref,
     fetch_crossref_work,
 )
+from findpapers.core.source import SourceType
 
 # ---------------------------------------------------------------------------
 # Load real CrossRef API fixtures collected via collect_sample.py
@@ -405,7 +405,9 @@ class TestFetchCrossrefWork:
         }
         mock_response.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.crossref.requests.get", return_value=mock_response) as mock:
+        with patch(
+            "findpapers.connectors.crossref.requests.get", return_value=mock_response
+        ) as mock:
             result = fetch_crossref_work("10.1038/nature12373", timeout=5.0)
 
         assert result == _FULL_WORK
@@ -418,7 +420,7 @@ class TestFetchCrossrefWork:
         mock_response = MagicMock()
         mock_response.status_code = 404
 
-        with patch("findpapers.utils.crossref.requests.get", return_value=mock_response):
+        with patch("findpapers.connectors.crossref.requests.get", return_value=mock_response):
             result = fetch_crossref_work("10.9999/nonexistent")
 
         assert result is None
@@ -430,7 +432,7 @@ class TestFetchCrossrefWork:
         mock_response.raise_for_status.side_effect = Exception("Server error")
 
         with (
-            patch("findpapers.utils.crossref.requests.get", return_value=mock_response),
+            patch("findpapers.connectors.crossref.requests.get", return_value=mock_response),
             pytest.raises(Exception, match="Server error"),
         ):
             fetch_crossref_work("10.1234/error")
@@ -442,7 +444,9 @@ class TestFetchCrossrefWork:
         mock_response.json.return_value = {"status": "ok", "message": {}}
         mock_response.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.crossref.requests.get", return_value=mock_response) as mock:
+        with patch(
+            "findpapers.connectors.crossref.requests.get", return_value=mock_response
+        ) as mock:
             fetch_crossref_work("10.1234/test")
 
         headers = mock.call_args[1].get("headers", {})

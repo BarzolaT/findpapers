@@ -5,9 +5,9 @@ from __future__ import annotations
 import logging
 from time import perf_counter
 
+from findpapers.connectors.crossref import build_paper_from_crossref, fetch_crossref_work
 from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
-from findpapers.utils.crossref import build_paper_from_crossref, fetch_crossref_work
 from findpapers.utils.enrichment import build_paper_from_metadata, fetch_metadata
 from findpapers.utils.parallel import execute_tasks
 

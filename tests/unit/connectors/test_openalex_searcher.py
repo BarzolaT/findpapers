@@ -1,39 +1,39 @@
-"""Unit tests for OpenAlexSearcher."""
+"""Unit tests for OpenAlexConnector."""
 
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from findpapers.connectors.openalex import (
+    OpenAlexConnector,
+    _reconstruct_abstract,
+)
 from findpapers.core.paper import PaperType
 from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
-from findpapers.searchers.openalex import (
-    OpenAlexSearcher,
-    _reconstruct_abstract,
-)
 
 
-class TestOpenAlexSearcherInit:
-    """Tests for OpenAlexSearcher initialisation."""
+class TestOpenAlexConnectorInit:
+    """Tests for OpenAlexConnector initialisation."""
 
     def test_default_builder_created(self):
-        """Searcher creates OpenAlexQueryBuilder when none provided."""
-        searcher = OpenAlexSearcher()
+        """Connector creates OpenAlexQueryBuilder when none provided."""
+        searcher = OpenAlexConnector()
         assert isinstance(searcher.query_builder, OpenAlexQueryBuilder)
 
     def test_email_stored(self):
         """Email is stored for polite pool requests."""
-        searcher = OpenAlexSearcher(email="test@example.com")
+        searcher = OpenAlexConnector(email="test@example.com")
         assert searcher._email == "test@example.com"
 
     def test_name(self):
-        """Searcher name is 'OpenAlex'."""
-        assert OpenAlexSearcher().name == Database.OPENALEX
+        """Connector name is 'OpenAlex'."""
+        assert OpenAlexConnector().name == Database.OPENALEX
 
     def test_api_key_stored(self):
         """API key is stored on the instance."""
-        searcher = OpenAlexSearcher(api_key="mykey")
+        searcher = OpenAlexConnector(api_key="mykey")
         assert searcher._api_key == "mykey"
 
 
@@ -42,16 +42,16 @@ class TestOpenAlexPrepareHeaders:
 
     def test_default_user_agent(self):
         """Without email, default User-Agent is used."""
-        headers = OpenAlexSearcher()._prepare_headers({})
+        headers = OpenAlexConnector()._prepare_headers({})
         assert "findpapers" in headers["User-Agent"]
 
     def test_custom_user_agent_with_email(self):
         """With email, User-Agent contains the email address."""
-        headers = OpenAlexSearcher(email="me@example.com")._prepare_headers({})
+        headers = OpenAlexConnector(email="me@example.com")._prepare_headers({})
         assert "me@example.com" in headers["User-Agent"]
 
 
-class TestOpenAlexSearcherParsePaper:
+class TestOpenAlexConnectorParsePaper:
     """Tests for _parse_paper."""
 
     def test_parse_sample_json(self, openalex_sample_json):
@@ -59,20 +59,20 @@ class TestOpenAlexSearcherParsePaper:
         results = openalex_sample_json.get("results", [])
         assert len(results) > 0
 
-        papers = [OpenAlexSearcher()._parse_paper(r) for r in results]
+        papers = [OpenAlexConnector()._parse_paper(r) for r in results]
         valid = [p for p in papers if p is not None]
         assert len(valid) > 0
 
     def test_paper_has_database_tag(self, openalex_sample_json):
         """Parsed paper has 'OpenAlex' in databases set."""
         result = openalex_sample_json["results"][0]
-        paper = OpenAlexSearcher()._parse_paper(result)
+        paper = OpenAlexConnector()._parse_paper(result)
         assert paper is not None
         assert Database.OPENALEX in paper.databases
 
     def test_missing_title_returns_none(self):
         """Result with blank title returns None."""
-        paper = OpenAlexSearcher()._parse_paper({"title": "  "})
+        paper = OpenAlexConnector()._parse_paper({"title": "  "})
         assert paper is None
 
     def test_open_access_url_used(self):
@@ -81,7 +81,7 @@ class TestOpenAlexSearcherParsePaper:
             "title": "A Paper",
             "open_access": {"oa_url": "https://example.com/paper.pdf"},
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.url == "https://example.com/paper.pdf"
 
@@ -92,7 +92,7 @@ class TestOpenAlexSearcherParsePaper:
             "open_access": {},
             "primary_location": {"landing_page_url": "https://example.com/landing"},
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.url == "https://example.com/landing"
 
@@ -105,7 +105,7 @@ class TestOpenAlexSearcherParsePaper:
                 {"pdf_url": "https://example.com/paper.pdf"},
             ],
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.pdf_url == "https://example.com/paper.pdf"
 
@@ -116,7 +116,7 @@ class TestOpenAlexSearcherParsePaper:
             "concepts": [{"display_name": "Machine Learning"}],
             "keywords": [{"display_name": "Deep Learning"}],
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.keywords is not None
         assert "Machine Learning" in paper.keywords
@@ -135,7 +135,7 @@ class TestOpenAlexSearcherParsePaper:
                 "landing_page_url": None,
             },
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Nature"
@@ -152,7 +152,7 @@ class TestOpenAlexSearcherParsePaper:
                 },
             },
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "University of Liverpool"
@@ -184,7 +184,7 @@ class TestOpenAlexSearcherParsePaper:
                 },
             ],
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Nature Physics"
@@ -201,7 +201,7 @@ class TestOpenAlexSearcherParsePaper:
                 },
             },
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.CONFERENCE
@@ -217,7 +217,7 @@ class TestOpenAlexSearcherParsePaper:
                 },
             },
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.BOOK
@@ -233,7 +233,7 @@ class TestOpenAlexSearcherParsePaper:
                 },
             },
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.BOOK
@@ -247,7 +247,7 @@ class TestOpenAlexSearcherParsePaper:
                 "landing_page_url": None,
             },
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "Nature"
@@ -258,7 +258,7 @@ class TestOpenAlexSearcherParsePaper:
             "title": "A Paper",
             "doi": "https://doi.org/10.1234/test",
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.doi == "10.1234/test"
 
@@ -268,7 +268,7 @@ class TestOpenAlexSearcherParsePaper:
             "title": "A Paper",
             "biblio": {"first_page": "100", "last_page": "115"},
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.page_range == "100\u2013115"
 
@@ -278,21 +278,21 @@ class TestOpenAlexSearcherParsePaper:
             "title": "A Paper",
             "biblio": {"first_page": "42", "last_page": None},
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.page_range == "42"
 
     def test_pages_none_when_biblio_absent(self):
         """Pages are None when biblio is not present."""
         work = {"title": "A Paper"}
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.page_range is None
 
     def test_pages_from_sample_data(self, openalex_sample_json):
         """Pages are extracted from real sample data."""
         results = openalex_sample_json["results"]
-        paper = OpenAlexSearcher()._parse_paper(results[0])
+        paper = OpenAlexConnector()._parse_paper(results[0])
         assert paper is not None
         assert paper.page_range is not None
         assert "\u2013" in paper.page_range  # en-dash separator
@@ -300,42 +300,42 @@ class TestOpenAlexSearcherParsePaper:
     def test_paper_type_article_from_work_type(self):
         """work.type 'article' maps to PaperType.ARTICLE."""
         work = {"title": "P", "type": "article"}
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.paper_type is PaperType.ARTICLE
 
     def test_paper_type_book_chapter(self):
         """work.type 'book-chapter' maps to PaperType.INBOOK."""
         work = {"title": "P", "type": "book-chapter"}
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.paper_type is PaperType.INBOOK
 
     def test_paper_type_dissertation(self):
         """work.type 'dissertation' maps to PaperType.PHDTHESIS."""
         work = {"title": "P", "type": "dissertation"}
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.paper_type is PaperType.PHDTHESIS
 
     def test_paper_type_preprint(self):
         """work.type 'preprint' maps to PaperType.UNPUBLISHED."""
         work = {"title": "P", "type": "preprint"}
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.paper_type is PaperType.UNPUBLISHED
 
     def test_paper_type_report(self):
         """work.type 'report' maps to PaperType.TECHREPORT."""
         work = {"title": "P", "type": "report"}
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.paper_type is PaperType.TECHREPORT
 
     def test_paper_type_book(self):
         """work.type 'book' maps to PaperType.BOOK."""
         work = {"title": "P", "type": "book"}
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.paper_type is PaperType.BOOK
 
@@ -351,19 +351,19 @@ class TestOpenAlexSearcherParsePaper:
                 },
             },
         }
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.paper_type is PaperType.INPROCEEDINGS
 
     def test_paper_type_none_when_unknown(self):
         """Unknown work.type results in paper_type being None."""
         work = {"title": "P", "type": "unknownxyz"}
-        paper = OpenAlexSearcher()._parse_paper(work)
+        paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.paper_type is None
 
 
-class TestOpenAlexSearcherReconstructAbstract:
+class TestOpenAlexConnectorReconstructAbstract:
     """Tests for _reconstruct_abstract helper."""
 
     def test_reconstruct_basic(self):
@@ -381,7 +381,7 @@ class TestOpenAlexSearcherReconstructAbstract:
         assert _reconstruct_abstract({}) == ""
 
 
-class TestOpenAlexSearcherSearch:
+class TestOpenAlexConnectorSearch:
     """Tests for search() with mocked HTTP calls."""
 
     def _make_next_page_response(self, mock_response, empty: bool = False):
@@ -396,13 +396,13 @@ class TestOpenAlexSearcherSearch:
 
     def test_search_returns_papers(self, simple_query, openalex_sample_json, mock_response):
         """search() returns papers from OpenAlex JSON response."""
-        searcher = OpenAlexSearcher()
+        searcher = OpenAlexConnector()
         first_page = mock_response(json_data=openalex_sample_json)
         first_page.raise_for_status = MagicMock()
         second_page = self._make_next_page_response(mock_response)
 
         with patch(
-            "findpapers.searchers.base.requests.get",
+            "findpapers.connectors.connector_base.requests.get",
             side_effect=[first_page, second_page],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
@@ -412,13 +412,13 @@ class TestOpenAlexSearcherSearch:
 
     def test_max_papers_respected(self, simple_query, openalex_sample_json, mock_response):
         """search() returns no more than max_papers papers."""
-        searcher = OpenAlexSearcher()
+        searcher = OpenAlexConnector()
         first_page = mock_response(json_data=openalex_sample_json)
         first_page.raise_for_status = MagicMock()
         second_page = self._make_next_page_response(mock_response)
 
         with patch(
-            "findpapers.searchers.base.requests.get",
+            "findpapers.connectors.connector_base.requests.get",
             side_effect=[first_page, second_page],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=2)
@@ -427,7 +427,7 @@ class TestOpenAlexSearcherSearch:
 
     def test_http_error_breaks_loop(self, simple_query):
         """Exception in _get breaks the loop and returns what was gathered."""
-        searcher = OpenAlexSearcher()
+        searcher = OpenAlexConnector()
 
         with patch.object(searcher, "_get", side_effect=Exception("timeout")), patch.object(
             searcher, "_rate_limit"
@@ -438,14 +438,14 @@ class TestOpenAlexSearcherSearch:
 
     def test_progress_callback_called(self, simple_query, openalex_sample_json, mock_response):
         """Progress callback is called after processing results."""
-        searcher = OpenAlexSearcher()
+        searcher = OpenAlexConnector()
         first_page = mock_response(json_data=openalex_sample_json)
         first_page.raise_for_status = MagicMock()
         second_page = self._make_next_page_response(mock_response)
         callback = MagicMock()
 
         with patch(
-            "findpapers.searchers.base.requests.get",
+            "findpapers.connectors.connector_base.requests.get",
             side_effect=[first_page, second_page],
         ), patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=callback)
@@ -454,7 +454,7 @@ class TestOpenAlexSearcherSearch:
 
     def test_search_raises_surfaces_via_base(self, simple_query):
         """Unexpected exception in _fetch_papers returns an empty list."""
-        searcher = OpenAlexSearcher()
+        searcher = OpenAlexConnector()
 
         with patch.object(searcher, "_fetch_papers", side_effect=RuntimeError("boom")):
             papers = searcher.search(simple_query)
@@ -469,7 +469,7 @@ class TestOpenAlexSearcherSearch:
         accumulator so that one clause cannot exhaust max_papers and prevent
         the remaining clauses from being fetched.
         """
-        searcher = OpenAlexSearcher()
+        searcher = OpenAlexConnector()
 
         def _make_page(doi: str, title: str) -> MagicMock:
             data = {
@@ -499,7 +499,7 @@ class TestOpenAlexSearcherSearch:
         page_dl = _make_page("10.dl/1", "Deep Learning Paper")
 
         with patch(
-            "findpapers.searchers.base.requests.get",
+            "findpapers.connectors.connector_base.requests.get",
             side_effect=[page_ml, page_dl],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(or_query, max_papers=2)
@@ -512,7 +512,7 @@ class TestOpenAlexSearcherSearch:
 
     def test_or_query_max_papers_still_respected(self, or_query, mock_response):
         """Final result is capped at max_papers even when OR expands to multiple clauses."""
-        searcher = OpenAlexSearcher()
+        searcher = OpenAlexConnector()
 
         def _make_page(doi: str, title: str) -> MagicMock:
             data = {
@@ -542,7 +542,7 @@ class TestOpenAlexSearcherSearch:
         page_dl = _make_page("10.dl/1", "Deep Learning Paper")
 
         with patch(
-            "findpapers.searchers.base.requests.get",
+            "findpapers.connectors.connector_base.requests.get",
             side_effect=[page_ml, page_dl],
         ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(or_query, max_papers=1)
