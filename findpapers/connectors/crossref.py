@@ -20,7 +20,7 @@ from urllib.parse import quote as _url_quote
 
 import requests as _requests_lib
 
-from findpapers.connectors.connector_base import ConnectorBase
+from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.source import Source, SourceType
@@ -61,13 +61,19 @@ _CROSSREF_TYPE_MAP: dict[str, SourceType] = {
 _TAG_RE = re.compile(r"<[^>]+>")
 
 
-class CrossRefConnector(ConnectorBase):
+class CrossRefConnector(CitationConnectorBase):
     """Connector for the CrossRef REST API (DOI-based metadata lookup).
 
     Unlike search connectors this class does **not** support free-text
     searches — it only resolves DOIs via the ``/works/{doi}`` endpoint.
     It inherits rate limiting, request/response logging, and header
     management from :class:`~findpapers.connectors.connector_base.ConnectorBase`.
+
+    For citation snowballing it provides **backward** lookups only: the
+    ``reference`` list embedded in each work record is parsed for DOIs,
+    and each referenced work is fetched individually.  Forward lookups
+    (papers that cite a given DOI) are not supported by the CrossRef API
+    and return an empty list.
 
     Parameters
     ----------
@@ -196,6 +202,84 @@ class CrossRefConnector(ConnectorBase):
             missing.
         """
         return self._build_paper(work)
+
+    # ------------------------------------------------------------------
+    # Citation interface (CitationConnectorBase)
+    # ------------------------------------------------------------------
+
+    def fetch_references(self, paper: Paper) -> list[Paper]:
+        """Fetch papers referenced by *paper* via the CrossRef ``reference`` list.
+
+        Each CrossRef work record may contain a ``reference`` array whose
+        entries occasionally carry a ``DOI`` field.  This method extracts
+        those DOIs, fetches each one through :meth:`fetch_work`, and
+        converts the result to a :class:`~findpapers.core.paper.Paper`.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper whose references should be retrieved.
+
+        Returns
+        -------
+        list[Paper]
+            Papers corresponding to the DOIs found in the reference list.
+            References without a DOI or that fail to resolve are silently
+            skipped.
+        """
+        if not paper.doi:
+            return []
+
+        try:
+            work = self.fetch_work(paper.doi)
+        except Exception:
+            logger.warning("CrossRef: failed to fetch work for DOI %s", paper.doi)
+            return []
+
+        if not work:
+            return []
+
+        raw_refs = work.get("reference") or []
+        ref_dois: list[str] = []
+        for entry in raw_refs:
+            if isinstance(entry, dict):
+                doi_val = (entry.get("DOI") or "").strip()
+                if doi_val:
+                    ref_dois.append(doi_val)
+
+        papers: list[Paper] = []
+        for ref_doi in ref_dois:
+            try:
+                ref_work = self.fetch_work(ref_doi)
+            except Exception:
+                logger.debug("CrossRef: could not fetch reference DOI %s", ref_doi)
+                continue
+            if ref_work:
+                ref_paper = self.build_paper(ref_work)
+                if ref_paper:
+                    papers.append(ref_paper)
+
+        return papers
+
+    def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+        """Return papers that cite *paper*.
+
+        The CrossRef REST API does not provide a direct endpoint for
+        forward citation lookups, so this method always returns an empty
+        list.  Forward snowballing is handled by other connectors
+        (OpenAlex, Semantic Scholar).
+
+        Parameters
+        ----------
+        paper : Paper
+            Ignored.
+
+        Returns
+        -------
+        list[Paper]
+            Always an empty list.
+        """
+        return []
 
     # ------------------------------------------------------------------
     # Static helpers — pure parsing, no instance state needed

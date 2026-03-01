@@ -7,6 +7,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
+from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
@@ -37,7 +38,12 @@ _OPENALEX_SOURCE_TYPE_MAP: dict[str, SourceType] = {
 }
 
 
-class OpenAlexConnector(SearchConnectorBase):
+# Maximum number of OpenAlex IDs to fetch in a single filter request
+# (the API supports pipe-separated ID filters).
+_REFERENCES_BATCH_SIZE = 50
+
+
+class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
     """Connector for the OpenAlex open catalog of academic works.
 
     https://docs.openalex.org/how-to-use-the-api
@@ -139,6 +145,215 @@ class OpenAlexConnector(SearchConnectorBase):
         if self._email:
             user_agent = f"findpapers/1.0 (mailto:{self._email})"
         return {**headers, "User-Agent": user_agent}
+
+    # ------------------------------------------------------------------
+    # Citation methods (CitationConnectorBase)
+    # ------------------------------------------------------------------
+
+    def _resolve_openalex_id(self, paper: Paper) -> str | None:
+        """Resolve a paper's OpenAlex ID via the DOI.
+
+        Queries ``GET /works/doi:{doi}`` which returns the full work record
+        whose ``id`` field is the canonical OpenAlex ID.
+
+        Parameters
+        ----------
+        paper : Paper
+            Paper with a DOI.
+
+        Returns
+        -------
+        str | None
+            The OpenAlex ID (e.g. ``"https://openalex.org/W123456"``), or
+            ``None`` when the DOI cannot be resolved.
+        """
+        if not paper.doi:
+            return None
+
+        url = f"{_BASE_URL}/doi:{paper.doi}"
+        try:
+            response = self._get(url, params={"select": "id"})
+            data = response.json()
+            return (data.get("id") or "").strip() or None
+        except Exception:
+            logger.debug("Failed to resolve OpenAlex ID for DOI %s.", paper.doi)
+            return None
+
+    def _fetch_works_by_ids(self, openalex_ids: list[str]) -> list[Paper]:
+        """Fetch full work records for a list of OpenAlex IDs.
+
+        Uses the pipe-separated ID filter (``openalex:{id1}|{id2}|...``) to
+        batch-fetch works in chunks of :data:`_REFERENCES_BATCH_SIZE`.
+
+        Parameters
+        ----------
+        openalex_ids : list[str]
+            OpenAlex work IDs (full URLs like
+            ``https://openalex.org/W123``).
+
+        Returns
+        -------
+        list[Paper]
+            Parsed papers.
+        """
+        papers: list[Paper] = []
+        if not openalex_ids:
+            return papers
+
+        for start in range(0, len(openalex_ids), _REFERENCES_BATCH_SIZE):
+            batch = openalex_ids[start : start + _REFERENCES_BATCH_SIZE]
+            id_filter = "|".join(batch)
+            params: dict[str, Any] = {
+                "filter": f"openalex:{id_filter}",
+                "per-page": _PAGE_SIZE,
+                "select": (
+                    "id,doi,title,display_name,publication_date,authorships,"
+                    "abstract_inverted_index,cited_by_count,open_access,locations,"
+                    "primary_location,concepts,keywords,type,biblio"
+                ),
+            }
+            try:
+                response = self._get(_BASE_URL, params)
+                data = response.json()
+                for work in data.get("results") or []:
+                    paper = self._parse_paper(work)
+                    if paper is not None:
+                        papers.append(paper)
+            except Exception:
+                logger.warning(
+                    "Failed to fetch OpenAlex works batch (offset=%d, count=%d).",
+                    start,
+                    len(batch),
+                )
+        return papers
+
+    def _fetch_cited_by_page(
+        self,
+        openalex_id: str,
+        cursor: str,
+    ) -> tuple[list[Paper], str | None]:
+        """Fetch one page of papers that cite the given work.
+
+        Parameters
+        ----------
+        openalex_id : str
+            OpenAlex ID of the cited work.
+        cursor : str
+            Pagination cursor (``"*"`` for the first page).
+
+        Returns
+        -------
+        tuple[list[Paper], str | None]
+            Papers from this page and the next cursor (``None`` when done).
+        """
+        params: dict[str, Any] = {
+            "filter": f"cites:{openalex_id}",
+            "per-page": _PAGE_SIZE,
+            "cursor": cursor,
+            "select": (
+                "id,doi,title,display_name,publication_date,authorships,"
+                "abstract_inverted_index,cited_by_count,open_access,locations,"
+                "primary_location,concepts,keywords,type,biblio"
+            ),
+        }
+        try:
+            response = self._get(_BASE_URL, params)
+        except Exception:
+            logger.warning(
+                "Failed to fetch cited-by page for %s (cursor=%s).",
+                openalex_id,
+                cursor,
+            )
+            return [], None
+
+        data = response.json()
+        papers: list[Paper] = []
+        for work in data.get("results") or []:
+            paper = self._parse_paper(work)
+            if paper is not None:
+                papers.append(paper)
+
+        meta = data.get("meta") or {}
+        next_cursor = meta.get("next_cursor")
+        results = data.get("results") or []
+        if not next_cursor or len(results) < _PAGE_SIZE:
+            next_cursor = None
+
+        return papers, next_cursor
+
+    def fetch_references(self, paper: Paper) -> list[Paper]:
+        """Return papers cited *by* the given paper (backward snowballing).
+
+        Queries OpenAlex for the full work record (which includes the
+        ``referenced_works`` field) and then batch-fetches the referenced
+        works to build full :class:`Paper` objects.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper whose references should be fetched.  Must have a DOI.
+
+        Returns
+        -------
+        list[Paper]
+            Papers referenced by *paper*, or an empty list on failure.
+        """
+        if not paper.doi:
+            return []
+
+        # Fetch the full work record to get referenced_works.
+        url = f"{_BASE_URL}/doi:{paper.doi}"
+        try:
+            response = self._get(url, params={"select": "id,referenced_works"})
+            data = response.json()
+        except Exception:
+            logger.warning("Failed to fetch OpenAlex work for DOI %s.", paper.doi)
+            return []
+
+        referenced_ids = data.get("referenced_works") or []
+        if not referenced_ids:
+            return []
+
+        logger.debug(
+            "OpenAlex: fetching %d references for DOI %s.",
+            len(referenced_ids),
+            paper.doi,
+        )
+        return self._fetch_works_by_ids(referenced_ids)
+
+    def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+        """Return papers that cite the given paper (forward snowballing).
+
+        Uses the OpenAlex ``cites`` filter to paginate through all papers
+        that cite the given work.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper whose citing papers should be fetched.  Must have a DOI.
+
+        Returns
+        -------
+        list[Paper]
+            Papers that cite *paper*, or an empty list on failure.
+        """
+        if not paper.doi:
+            return []
+
+        openalex_id = self._resolve_openalex_id(paper)
+        if not openalex_id:
+            return []
+
+        logger.debug("OpenAlex: fetching cited-by for %s.", openalex_id)
+
+        all_papers: list[Paper] = []
+        cursor: str | None = "*"
+
+        while cursor is not None:
+            page_papers, cursor = self._fetch_cited_by_page(openalex_id, cursor)
+            all_papers.extend(page_papers)
+
+        return all_papers
 
     def _parse_paper(self, work: Dict[str, Any]) -> Optional[Paper]:
         """Parse a single OpenAlex work object into a :class:`Paper`.

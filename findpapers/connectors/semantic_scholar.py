@@ -7,6 +7,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, Dict, List, Optional
 
+from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
@@ -19,8 +20,10 @@ from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuild
 logger = logging.getLogger(__name__)
 
 _BULK_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search/bulk"
+_PAPER_URL = "https://api.semanticscholar.org/graph/v1/paper"
 _AUTHOR_BATCH_URL = "https://api.semanticscholar.org/graph/v1/author/batch"
 _PAGE_SIZE = 100  # Semantic Scholar max per request
+_CITATION_PAGE_SIZE = 1000  # Max per page for citations/references endpoints
 _AUTHOR_BATCH_SIZE = 1000  # Max authors per batch request
 
 # Rate limits: 1000 req/s without key (shared among all unauthenticated users),
@@ -53,7 +56,7 @@ _SS_PUB_TYPE_MAP: dict[str, SourceType] = {
 }
 
 
-class SemanticScholarConnector(SearchConnectorBase):
+class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
     """Connector for the Semantic Scholar research corpus.
 
     Uses the Bulk Search endpoint:
@@ -138,6 +141,135 @@ class SemanticScholarConnector(SearchConnectorBase):
         if self._api_key:
             return {**headers, "x-api-key": self._api_key}
         return headers
+
+    # ------------------------------------------------------------------
+    # Citation methods (CitationConnectorBase)
+    # ------------------------------------------------------------------
+
+    def _fetch_citation_page(
+        self,
+        doi: str,
+        endpoint: str,
+        offset: int,
+    ) -> tuple[list[Paper], int]:
+        """Fetch one page of references or citations for a paper.
+
+        Parameters
+        ----------
+        doi : str
+            DOI of the paper.
+        endpoint : str
+            ``"references"`` or ``"citations"``.
+        offset : int
+            Pagination offset.
+
+        Returns
+        -------
+        tuple[list[Paper], int]
+            Parsed papers from this page and the total ``next`` offset
+            (``-1`` when there are no more pages).
+        """
+        url = f"{_PAPER_URL}/DOI:{doi}/{endpoint}"
+        params: dict[str, Any] = {
+            "fields": _PAPER_FIELDS,
+            "limit": _CITATION_PAGE_SIZE,
+            "offset": offset,
+        }
+        try:
+            response = self._get(url, params)
+        except Exception:
+            logger.warning(
+                "Semantic Scholar: failed to fetch %s for DOI %s (offset=%d).",
+                endpoint,
+                doi,
+                offset,
+            )
+            return [], -1
+
+        data = response.json()
+        items = data.get("data") or []
+        papers: list[Paper] = []
+        for item in items:
+            # The citations/references endpoints wrap each paper in
+            # {"citedPaper": {...}} or {"citingPaper": {...}}.
+            nested_key = "citedPaper" if endpoint == "references" else "citingPaper"
+            paper_data = item.get(nested_key) or item
+            paper = self._parse_paper(paper_data)
+            if paper is not None:
+                papers.append(paper)
+
+        next_offset = data.get("next")
+        if next_offset is None or len(items) < _CITATION_PAGE_SIZE:
+            next_offset = -1
+
+        return papers, next_offset
+
+    def _fetch_all_citation_pages(self, doi: str, endpoint: str) -> list[Paper]:
+        """Paginate through all references or citations for a paper.
+
+        Parameters
+        ----------
+        doi : str
+            DOI of the paper.
+        endpoint : str
+            ``"references"`` or ``"citations"``.
+
+        Returns
+        -------
+        list[Paper]
+            All papers from the paginated endpoint.
+        """
+        all_papers: list[Paper] = []
+        offset = 0
+
+        while offset >= 0:
+            page_papers, next_offset = self._fetch_citation_page(doi, endpoint, offset)
+            all_papers.extend(page_papers)
+            offset = next_offset
+
+        return all_papers
+
+    def fetch_references(self, paper: Paper) -> list[Paper]:
+        """Return papers cited *by* the given paper (backward snowballing).
+
+        Uses the Semantic Scholar ``/paper/{id}/references`` endpoint.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper whose references should be fetched.  Must have a DOI.
+
+        Returns
+        -------
+        list[Paper]
+            Papers referenced by *paper*, or empty list on failure.
+        """
+        if not paper.doi:
+            return []
+
+        logger.debug("Semantic Scholar: fetching references for DOI %s.", paper.doi)
+        return self._fetch_all_citation_pages(paper.doi, "references")
+
+    def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+        """Return papers that cite the given paper (forward snowballing).
+
+        Uses the Semantic Scholar ``/paper/{id}/citations`` endpoint.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper whose citing papers should be fetched.  Must have a DOI.
+
+        Returns
+        -------
+        list[Paper]
+            Papers that cite *paper*, or empty list on failure.
+        """
+        if not paper.doi:
+            return []
+
+        logger.debug("Semantic Scholar: fetching citations for DOI %s.", paper.doi)
+        return self._fetch_all_citation_pages(paper.doi, "citations")
 
     def _parse_paper(self, item: Dict[str, Any]) -> Optional[Paper]:
         """Parse a single Semantic Scholar paper record.

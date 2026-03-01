@@ -20,13 +20,16 @@ Example
 from __future__ import annotations
 
 import os
+from typing import Literal
 
+from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import SearchResult
 from findpapers.runners.doi_lookup_runner import DOILookupRunner
 from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
 from findpapers.runners.search_runner import SearchRunner
+from findpapers.runners.snowball_runner import SnowballRunner
 
 
 class Engine:
@@ -476,5 +479,94 @@ class Engine:
             doi=doi,
             email=self._email,
             timeout=timeout,
+        )
+        return runner.run(verbose=verbose)
+
+    def snowball(
+        self,
+        papers: list[Paper] | Paper,
+        *,
+        depth: int = 1,
+        direction: Literal["both", "backward", "forward"] = "both",
+        num_workers: int = 1,
+        verbose: bool = False,
+    ) -> CitationGraph:
+        """Build a citation graph around seed papers via snowballing.
+
+        Starting from one or more seed papers, iteratively fetches their
+        references (backward) and/or citing papers (forward) using all
+        available citation-capable connectors (OpenAlex, Semantic Scholar,
+        CrossRef).  The result is a directed
+        :class:`~findpapers.core.citation_graph.CitationGraph` where each
+        edge means "source cites target".
+
+        Papers without a DOI are silently skipped since they cannot be
+        resolved by the upstream APIs.
+
+        Parameters
+        ----------
+        papers : list[Paper] | Paper
+            One or more seed papers from which the snowball starts.
+            Typically obtained from ``engine.search(...).papers`` or
+            ``engine.fetch_paper_by_doi(...)``.
+        depth : int
+            Number of snowball iterations.  ``1`` (default) retrieves
+            only the immediate neighbours.  ``2`` also expands papers
+            found at level 1, and so on.
+        direction : Literal["both", "backward", "forward"]
+            ``"backward"`` fetches references (papers cited *by* the seed),
+            ``"forward"`` fetches citing papers, ``"both"`` does both.
+        num_workers : int
+            Maximum number of connectors to query in parallel for each
+            paper.  Defaults to ``1`` (sequential).  The effective
+            parallelism is capped at the number of available connectors.
+        verbose : bool
+            When ``True``, emit detailed log messages at DEBUG level.
+
+        Returns
+        -------
+        CitationGraph
+            A directed citation graph with all discovered papers as nodes
+            and citation relationships as edges.  The graph can be exported
+            via ``graph.to_json(path)`` or serialized via ``graph.to_dict()``.
+
+        See Also
+        --------
+        findpapers.runners.snowball_runner.SnowballRunner :
+            Lower-level class for when you need access to per-run metrics
+            or want to separate configuration from execution.
+
+        Examples
+        --------
+        Snowball from a single paper found by DOI:
+
+        >>> from findpapers import Engine
+        >>> engine = Engine()
+        >>> seed = engine.fetch_paper_by_doi("10.1038/nature12373")
+        >>> graph = engine.snowball(seed, depth=1)
+        >>> print(f"{graph.paper_count} papers, {graph.edge_count} edges")
+        42 papers, 65 edges
+
+        Export the graph to JSON:
+
+        >>> graph.to_json("citation_graph.json")
+
+        Snowball from search results with only backward direction:
+
+        >>> result = engine.search("[deep learning]")
+        >>> graph = engine.snowball(
+        ...     result.papers[:5],
+        ...     depth=2,
+        ...     direction="backward",
+        ... )
+        """
+        runner = SnowballRunner(
+            seed_papers=papers,
+            depth=depth,
+            direction=direction,
+            openalex_api_key=self._openalex_api_key,
+            email=self._email,
+            semantic_scholar_api_key=self._semantic_scholar_api_key,
+            num_workers=num_workers,
         )
         return runner.run(verbose=verbose)

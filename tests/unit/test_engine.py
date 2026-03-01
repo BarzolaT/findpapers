@@ -376,3 +376,91 @@ class TestEngineImport:
         import findpapers
 
         assert findpapers.Engine is Engine
+
+
+# ---------------------------------------------------------------------------
+# Snowball
+# ---------------------------------------------------------------------------
+
+
+class TestEngineSnowball:
+    """Tests for Engine.snowball()."""
+
+    def test_snowball_delegates_to_runner(self):
+        """snowball() creates a SnowballRunner and calls run()."""
+        engine = Engine()
+        seed = _make_paper("Seed", doi="10.1000/seed")
+
+        with patch("findpapers.engine.SnowballRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_graph = MagicMock()
+            mock_runner.run.return_value = mock_graph
+            mock_cls.return_value = mock_runner
+
+            result = engine.snowball(seed)
+
+        mock_cls.assert_called_once()
+        mock_runner.run.assert_called_once_with(verbose=False)
+        assert result is mock_graph
+
+    def test_snowball_passes_parameters(self):
+        """snowball() passes configuration to SnowballRunner."""
+        engine = Engine(openalex_api_key="oakey", email="me@test.com")
+        seed = _make_paper("Seed", doi="10.1000/seed")
+
+        with patch("findpapers.engine.SnowballRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = MagicMock()
+            mock_cls.return_value = mock_runner
+
+            engine.snowball(
+                seed,
+                depth=2,
+                direction="backward",
+                num_workers=3,
+                verbose=True,
+            )
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs["depth"] == 2
+        assert kwargs["direction"] == "backward"
+        assert kwargs["num_workers"] == 3
+        assert kwargs["openalex_api_key"] == "oakey"
+        assert kwargs["email"] == "me@test.com"
+        mock_runner.run.assert_called_once_with(verbose=True)
+
+    def test_snowball_accepts_list_of_papers(self):
+        """snowball() accepts a list of papers."""
+        engine = Engine()
+        seeds = [
+            _make_paper("Seed 1", doi="10.1000/s1"),
+            _make_paper("Seed 2", doi="10.1000/s2"),
+        ]
+
+        with patch("findpapers.engine.SnowballRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = MagicMock()
+            mock_cls.return_value = mock_runner
+
+            engine.snowball(seeds)
+
+        call_args = mock_cls.call_args
+        assert call_args[1]["seed_papers"] is seeds
+
+
+class TestSnowballImport:
+    """Verify snowball-related classes are accessible from findpapers namespace."""
+
+    def test_citation_graph_importable(self):
+        """findpapers.CitationGraph is accessible."""
+        import findpapers
+        from findpapers.core.citation_graph import CitationGraph
+
+        assert findpapers.CitationGraph is CitationGraph
+
+    def test_snowball_runner_importable(self):
+        """findpapers.SnowballRunner is accessible."""
+        import findpapers
+        from findpapers.runners.snowball_runner import SnowballRunner
+
+        assert findpapers.SnowballRunner is SnowballRunner
