@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from time import perf_counter
 
-from findpapers.connectors.crossref import build_paper_from_crossref, fetch_crossref_work
+from findpapers.connectors.crossref import CrossRefConnector
 from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.utils.enrichment import build_paper_from_metadata, fetch_metadata
@@ -85,6 +85,7 @@ class EnrichmentRunner:
         self._metrics: dict[str, int | float] = {}
         self._num_workers = num_workers
         self._timeout = timeout
+        self._crossref = CrossRefConnector()
 
     # ------------------------------------------------------------------
     # Public interface
@@ -276,9 +277,9 @@ class EnrichmentRunner:
         # ------------------------------------------------------------------
         if paper.doi:
             try:
-                work = fetch_crossref_work(paper.doi, timeout=timeout)
+                work = self._crossref.fetch_work(paper.doi)
                 if work:
-                    crossref_paper = build_paper_from_crossref(work)
+                    crossref_paper = self._crossref.build_paper(work)
                     if crossref_paper is not None:
                         mid = _enrichment_snapshot(paper)
                         paper.merge(crossref_paper)

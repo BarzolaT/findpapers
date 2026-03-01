@@ -67,7 +67,7 @@ class TestEnrichmentRunnerRun:
         runner = EnrichmentRunner(papers=[_make_paper()])
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
-            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+            patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
         ):
             runner.run()
         metrics = runner.get_metrics()
@@ -100,7 +100,7 @@ class TestEnrichmentRunnerRun:
                 return_value=enriched_paper,
             ),
             patch(
-                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=None,
             ),
         ):
@@ -125,7 +125,7 @@ class TestEnrichmentRunnerRun:
                 return_value=same_paper,  # identical data — no improvement
             ),
             patch(
-                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=None,
             ),
         ):
@@ -140,7 +140,7 @@ class TestEnrichmentRunnerRun:
         runner = EnrichmentRunner(papers=[paper])
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata") as mock_fetch,
-            patch("findpapers.runners.enrichment_runner.fetch_crossref_work") as mock_crossref,
+            patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work") as mock_crossref,
         ):
             runner.run()
         mock_fetch.assert_not_called()
@@ -154,7 +154,7 @@ class TestEnrichmentRunnerRun:
         runner = EnrichmentRunner(papers=[_make_paper()])
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
-            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+            patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
         ):
             runner.run()
             runner.run()
@@ -166,7 +166,7 @@ class TestEnrichmentRunnerRun:
         runner = EnrichmentRunner(papers=papers, num_workers=3)
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
-            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+            patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
         ):
             runner.run()
         assert runner.get_metrics()["total_papers"] == 5
@@ -207,7 +207,7 @@ class TestEnrichmentRunnerRun:
                 return_value=same_paper,
             ),
             patch(
-                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=None,
             ),
         ):
@@ -232,7 +232,7 @@ class TestEnrichmentRunnerRun:
                 side_effect=_record_fetch,
             ),
             patch(
-                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=None,
             ),
         ):
@@ -257,7 +257,7 @@ class TestEnrichmentRunnerVerbose:
         runner = EnrichmentRunner(papers=[_make_paper()])
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
-            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+            patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
         ):
             with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
                 runner.run(verbose=True)
@@ -270,7 +270,7 @@ class TestEnrichmentRunnerVerbose:
         runner = EnrichmentRunner(papers=[_make_paper()])
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
-            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+            patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
         ):
             with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
                 runner.run(verbose=True)
@@ -297,7 +297,7 @@ class TestEnrichmentRunnerVerbose:
         runner = EnrichmentRunner(papers=[_make_paper()])
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
-            patch("findpapers.runners.enrichment_runner.fetch_crossref_work", return_value=None),
+            patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
         ):
             with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
                 runner.run(verbose=False)
@@ -327,11 +327,11 @@ class TestEnrichmentRunnerCrossRef:
 
         with (
             patch(
-                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value={"title": ["CrossRef Paper"]},
             ),
             patch(
-                "findpapers.runners.enrichment_runner.build_paper_from_crossref",
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=crossref_paper,
             ),
             patch(
@@ -354,7 +354,7 @@ class TestEnrichmentRunnerCrossRef:
 
         with (
             patch(
-                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             ) as mock_crossref,
             patch(
                 "findpapers.runners.enrichment_runner.fetch_metadata",
@@ -377,7 +377,7 @@ class TestEnrichmentRunnerCrossRef:
 
         with (
             patch(
-                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 side_effect=RuntimeError("CrossRef timeout"),
             ),
             patch(
@@ -416,11 +416,11 @@ class TestEnrichmentRunnerCrossRef:
 
         with (
             patch(
-                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value={"title": ["CrossRef"]},
             ),
             patch(
-                "findpapers.runners.enrichment_runner.build_paper_from_crossref",
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=crossref_paper,
             ),
             patch(
@@ -452,11 +452,11 @@ class TestEnrichmentRunnerCrossRef:
 
         with (
             patch(
-                "findpapers.runners.enrichment_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value={"title": ["CrossRef Only"]},
             ),
             patch(
-                "findpapers.runners.enrichment_runner.build_paper_from_crossref",
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=crossref_paper,
             ),
             patch(

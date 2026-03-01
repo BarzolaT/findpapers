@@ -1,11 +1,11 @@
-"""DOILookupRunner: fetches a single paper by its DOI via crossref."""
+"""DOILookupRunner: fetches a single paper by its DOI via CrossRef."""
 
 from __future__ import annotations
 
 import logging
 from time import perf_counter
 
-from findpapers.connectors.crossref import build_paper_from_crossref, fetch_crossref_work
+from findpapers.connectors.crossref import CrossRefConnector
 from findpapers.core.paper import Paper
 
 logger = logging.getLogger(__name__)
@@ -69,6 +69,7 @@ class DOILookupRunner:
         """
         self._doi = self._sanitize_doi(doi)
         self._timeout = timeout
+        self._connector = CrossRefConnector()
         self._result: Paper | None = None
         self._executed = False
         self._runtime: float = 0.0
@@ -103,9 +104,9 @@ class DOILookupRunner:
 
         start = perf_counter()
 
-        work = fetch_crossref_work(self._doi, timeout=self._timeout)
+        work = self._connector.fetch_work(self._doi)
         if work is not None:
-            self._result = build_paper_from_crossref(work)
+            self._result = self._connector.build_paper(work)
         else:
             self._result = None
 

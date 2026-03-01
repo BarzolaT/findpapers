@@ -1,4 +1,4 @@
-"""Utilities for fetching paper metadata from the CrossRef API.
+"""CrossRef connector for fetching paper metadata by DOI.
 
 CrossRef is the authoritative DOI registration agency and provides a free,
 key-less REST API that returns rich structured metadata for most academic
@@ -14,11 +14,13 @@ from __future__ import annotations
 import datetime
 import logging
 import re
+import time
 from typing import Any, Optional
 from urllib.parse import quote as _url_quote
 
-import requests
+import requests as _requests_lib
 
+from findpapers.connectors.connector_base import ConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.source import Source, SourceType
@@ -33,6 +35,10 @@ _CROSSREF_USER_AGENT = (
     "findpapers/1.0 (https://github.com/jonatasgrosman/findpapers; "
     "mailto:findpapers@users.noreply.github.com)"
 )
+
+# Minimum interval between requests — CrossRef polite pool recommends
+# keeping traffic moderate; 0.1 s (10 req/s) is well within limits.
+_MIN_REQUEST_INTERVAL = 0.1
 
 # Mapping from CrossRef ``type`` values to :class:`SourceType`.
 _CROSSREF_TYPE_MAP: dict[str, SourceType] = {
@@ -58,292 +64,374 @@ _CROSSREF_TYPE_MAP: dict[str, SourceType] = {
 _TAG_RE = re.compile(r"<[^>]+>")
 
 
-def fetch_crossref_work(doi: str, timeout: float | None = None) -> dict[str, Any] | None:
-    """Fetch the CrossRef ``/works/{doi}`` record.
+class CrossRefConnector(ConnectorBase):
+    """Connector for the CrossRef REST API (DOI-based metadata lookup).
 
-    Parameters
-    ----------
-    doi : str
-        Bare DOI (without ``https://doi.org/`` prefix), e.g. ``10.1038/nature12373``.
-    timeout : float | None
-        HTTP request timeout in seconds.  ``None`` uses the ``requests`` default.
+    Unlike search connectors this class does **not** support free-text
+    searches — it only resolves DOIs via the ``/works/{doi}`` endpoint.
+    It inherits rate limiting, request/response logging, and header
+    management from :class:`~findpapers.connectors.connector_base.ConnectorBase`.
 
-    Returns
-    -------
-    dict[str, Any] | None
-        The ``message`` portion of the CrossRef response, or ``None`` when the
-        DOI is not found or the request fails.
-
-    Raises
-    ------
-    requests.RequestException
-        On non-404 HTTP errors (propagated so the caller can decide on retries).
+    API documentation: https://api.crossref.org/swagger-ui/index.html
     """
-    url = f"{_CROSSREF_API_URL}/{_url_quote(doi, safe='')}"
-    logger.debug("CrossRef GET %s", url)
-    response = requests.get(
-        url,
-        headers={"User-Agent": _CROSSREF_USER_AGENT},
-        timeout=timeout,
-    )
-    if response.status_code == 404:
-        logger.debug("CrossRef: DOI %s not found (404)", doi)
-        return None
-    response.raise_for_status()
-    data = response.json()
-    return data.get("message")
 
+    @property
+    def name(self) -> str:
+        """Return the connector identifier.
 
-def _parse_crossref_date(work: dict[str, Any]) -> datetime.date | None:
-    """Extract the best publication date from a CrossRef work record.
+        Returns
+        -------
+        str
+            ``"crossref"``.
+        """
+        return "crossref"
 
-    CrossRef stores dates in several fields, each as
-    ``{"date-parts": [[year, month, day]]}``.  Not all parts are always
-    present, so missing month/day default to 1.
+    @property
+    def min_request_interval(self) -> float:
+        """Return the minimum seconds between HTTP requests.
 
-    Priority order: ``published-print`` → ``published-online`` →
-    ``published`` → ``issued`` → ``created``.
+        Returns
+        -------
+        float
+            Interval in seconds.
+        """
+        return _MIN_REQUEST_INTERVAL
 
-    Parameters
-    ----------
-    work : dict[str, Any]
-        CrossRef work JSON (the ``message`` dict).
+    def _prepare_headers(self, headers: dict) -> dict:
+        """Inject the CrossRef polite-pool ``User-Agent`` header.
 
-    Returns
-    -------
-    datetime.date | None
-        Parsed date, or ``None`` when no usable date field is available.
-    """
-    for field in (
-        "published-print",
-        "published-online",
-        "published",
-        "issued",
-        "created",
-    ):
-        date_obj = work.get(field)
-        if not date_obj or not isinstance(date_obj, dict):
-            continue
-        parts = date_obj.get("date-parts")
-        if not parts or not isinstance(parts, list) or not parts[0]:
-            continue
-        nums = parts[0]
-        if not isinstance(nums, list) or not nums:
-            continue
-        try:
-            year = int(nums[0])
-            month = int(nums[1]) if len(nums) > 1 else 1
-            day = int(nums[2]) if len(nums) > 2 else 1
-            return datetime.date(year, month, day)
-        except (ValueError, TypeError):
-            continue
-    return None
+        Parameters
+        ----------
+        headers : dict
+            Raw HTTP headers.
 
+        Returns
+        -------
+        dict
+            Headers with the CrossRef ``User-Agent`` set.
+        """
+        merged = super()._prepare_headers(headers)
+        merged["User-Agent"] = _CROSSREF_USER_AGENT
+        return merged
 
-def _parse_crossref_authors(work: dict[str, Any]) -> list[Author]:
-    """Parse authors from a CrossRef work record.
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
 
-    Each author entry contains ``given`` and ``family`` name fields, and
-    optionally an ``affiliation`` list.
+    def fetch_work(self, doi: str) -> dict[str, Any] | None:
+        """Fetch the CrossRef ``/works/{doi}`` record.
 
-    Parameters
-    ----------
-    work : dict[str, Any]
-        CrossRef work JSON.
+        Uses the inherited rate-limiting and logging infrastructure.  A 404
+        response is treated as a normal "not found" case and returns ``None``.
 
-    Returns
-    -------
-    list[Author]
-        Author objects with affiliations when available.
-    """
-    authors: list[Author] = []
-    for entry in work.get("author", []):
-        if not isinstance(entry, dict):
-            continue
-        given = (entry.get("given") or "").strip()
-        family = (entry.get("family") or "").strip()
-        if not family:
-            # Some records have only ``name`` (e.g. organisational authors).
-            name = (entry.get("name") or "").strip()
-        else:
-            name = f"{given} {family}".strip() if given else family
+        Parameters
+        ----------
+        doi : str
+            Bare DOI (without ``https://doi.org/`` prefix),
+            e.g. ``10.1038/nature12373``.
 
-        if not name:
-            continue
+        Returns
+        -------
+        dict[str, Any] | None
+            The ``message`` portion of the CrossRef response, or ``None``
+            when the DOI is not found (404).
 
-        # Affiliations — CrossRef stores them as [{"name": "..."}].
-        aff_parts: list[str] = []
-        for aff in entry.get("affiliation", []):
-            if isinstance(aff, dict):
-                aff_name = (aff.get("name") or "").strip()
-                if aff_name:
-                    aff_parts.append(aff_name)
-        affiliation = "; ".join(aff_parts) if aff_parts else None
-        authors.append(Author(name=name, affiliation=affiliation))
-    return authors
+        Raises
+        ------
+        requests.HTTPError
+            On non-404 HTTP errors (propagated so the caller can decide
+            on retries).
+        """
+        url = f"{_CROSSREF_API_URL}/{_url_quote(doi, safe='')}"
+        prepared_headers = self._prepare_headers({})
 
+        self._rate_limit()
+        self._log_request(url)
+        response = _requests_lib.get(url, headers=prepared_headers, timeout=30)
+        self._last_request_time = time.monotonic()
+        self._log_response(response)
 
-def _strip_jats_tags(text: str) -> str:
-    """Remove JATS/HTML markup from CrossRef abstract text.
+        if response.status_code == 404:
+            logger.debug("CrossRef: DOI %s not found (404)", doi)
+            return None
+        response.raise_for_status()
+        data = response.json()
+        return data.get("message")
 
-    CrossRef often returns abstracts wrapped in JATS XML tags such as
-    ``<jats:p>`` or ``<jats:title>``.
+    def build_paper(self, work: dict[str, Any]) -> Paper | None:
+        """Build a :class:`~findpapers.core.paper.Paper` from a CrossRef work record.
 
-    Parameters
-    ----------
-    text : str
-        Raw abstract text potentially containing XML tags.
+        Delegates to :meth:`_build_paper`.
 
-    Returns
-    -------
-    str
-        Plain text with tags removed.
-    """
-    return _TAG_RE.sub("", text).strip()
+        Parameters
+        ----------
+        work : dict[str, Any]
+            The ``message`` dict returned by :meth:`fetch_work`.
 
+        Returns
+        -------
+        Paper | None
+            Populated paper, or ``None`` when required fields (title) are
+            missing.
+        """
+        return self._build_paper(work)
 
-def _parse_crossref_keywords(work: dict[str, Any]) -> set[str]:
-    """Extract keywords/subjects from a CrossRef work record.
+    # ------------------------------------------------------------------
+    # Static helpers — pure parsing, no instance state needed
+    # ------------------------------------------------------------------
 
-    CrossRef stores keywords in the ``subject`` field (list of strings).
+    @staticmethod
+    def _parse_date(work: dict[str, Any]) -> datetime.date | None:
+        """Extract the best publication date from a CrossRef work record.
 
-    Parameters
-    ----------
-    work : dict[str, Any]
-        CrossRef work JSON.
+        CrossRef stores dates in several fields, each as
+        ``{"date-parts": [[year, month, day]]}``.  Not all parts are always
+        present, so missing month/day default to 1.
 
-    Returns
-    -------
-    set[str]
-        Keyword set, possibly empty.
-    """
-    keywords: set[str] = set()
-    for subj in work.get("subject", []):
-        if isinstance(subj, str) and subj.strip():
-            keywords.add(subj.strip())
-    return keywords
+        Priority order: ``published-print`` → ``published-online`` →
+        ``published`` → ``issued`` → ``created``.
 
+        Parameters
+        ----------
+        work : dict[str, Any]
+            CrossRef work JSON (the ``message`` dict).
 
-def _parse_crossref_pdf_url(work: dict[str, Any]) -> str | None:
-    """Extract a direct PDF link from CrossRef ``link`` entries.
-
-    Parameters
-    ----------
-    work : dict[str, Any]
-        CrossRef work JSON.
-
-    Returns
-    -------
-    str | None
-        PDF URL, or ``None`` when no PDF link is available.
-    """
-    for link in work.get("link", []):
-        if not isinstance(link, dict):
-            continue
-        content_type = (link.get("content-type") or "").lower()
-        url = (link.get("URL") or "").strip()
-        if "pdf" in content_type and url:
-            return url
-    return None
-
-
-def build_paper_from_crossref(work: dict[str, Any]) -> Paper | None:
-    """Build a :class:`~findpapers.core.paper.Paper` from a CrossRef work record.
-
-    Parameters
-    ----------
-    work : dict[str, Any]
-        The ``message`` dict returned by :func:`fetch_crossref_work`.
-
-    Returns
-    -------
-    Paper | None
-        Populated paper, or ``None`` when required fields (title) are missing.
-    """
-    if not work:
+        Returns
+        -------
+        datetime.date | None
+            Parsed date, or ``None`` when no usable date field is available.
+        """
+        for field in (
+            "published-print",
+            "published-online",
+            "published",
+            "issued",
+            "created",
+        ):
+            date_obj = work.get(field)
+            if not date_obj or not isinstance(date_obj, dict):
+                continue
+            parts = date_obj.get("date-parts")
+            if not parts or not isinstance(parts, list) or not parts[0]:
+                continue
+            nums = parts[0]
+            if not isinstance(nums, list) or not nums:
+                continue
+            try:
+                year = int(nums[0])
+                month = int(nums[1]) if len(nums) > 1 else 1
+                day = int(nums[2]) if len(nums) > 2 else 1
+                return datetime.date(year, month, day)
+            except (ValueError, TypeError):
+                continue
         return None
 
-    # Title — CrossRef returns it as a list of strings.
-    titles = work.get("title") or []
-    title = titles[0].strip() if isinstance(titles, list) and titles else ""
-    if not title:
+    @staticmethod
+    def _parse_authors(work: dict[str, Any]) -> list[Author]:
+        """Parse authors from a CrossRef work record.
+
+        Each author entry contains ``given`` and ``family`` name fields, and
+        optionally an ``affiliation`` list.
+
+        Parameters
+        ----------
+        work : dict[str, Any]
+            CrossRef work JSON.
+
+        Returns
+        -------
+        list[Author]
+            Author objects with affiliations when available.
+        """
+        authors: list[Author] = []
+        for entry in work.get("author", []):
+            if not isinstance(entry, dict):
+                continue
+            given = (entry.get("given") or "").strip()
+            family = (entry.get("family") or "").strip()
+            if not family:
+                # Some records have only ``name`` (e.g. organisational authors).
+                name = (entry.get("name") or "").strip()
+            else:
+                name = f"{given} {family}".strip() if given else family
+
+            if not name:
+                continue
+
+            # Affiliations — CrossRef stores them as [{"name": "..."}].
+            aff_parts: list[str] = []
+            for aff in entry.get("affiliation", []):
+                if isinstance(aff, dict):
+                    aff_name = (aff.get("name") or "").strip()
+                    if aff_name:
+                        aff_parts.append(aff_name)
+            affiliation = "; ".join(aff_parts) if aff_parts else None
+            authors.append(Author(name=name, affiliation=affiliation))
+        return authors
+
+    @staticmethod
+    def _strip_jats_tags(text: str) -> str:
+        """Remove JATS/HTML markup from CrossRef abstract text.
+
+        CrossRef often returns abstracts wrapped in JATS XML tags such as
+        ``<jats:p>`` or ``<jats:title>``.
+
+        Parameters
+        ----------
+        text : str
+            Raw abstract text potentially containing XML tags.
+
+        Returns
+        -------
+        str
+            Plain text with tags removed.
+        """
+        return _TAG_RE.sub("", text).strip()
+
+    @staticmethod
+    def _parse_keywords(work: dict[str, Any]) -> set[str]:
+        """Extract keywords/subjects from a CrossRef work record.
+
+        CrossRef stores keywords in the ``subject`` field (list of strings).
+
+        Parameters
+        ----------
+        work : dict[str, Any]
+            CrossRef work JSON.
+
+        Returns
+        -------
+        set[str]
+            Keyword set, possibly empty.
+        """
+        keywords: set[str] = set()
+        for subj in work.get("subject", []):
+            if isinstance(subj, str) and subj.strip():
+                keywords.add(subj.strip())
+        return keywords
+
+    @staticmethod
+    def _parse_pdf_url(work: dict[str, Any]) -> str | None:
+        """Extract a direct PDF link from CrossRef ``link`` entries.
+
+        Parameters
+        ----------
+        work : dict[str, Any]
+            CrossRef work JSON.
+
+        Returns
+        -------
+        str | None
+            PDF URL, or ``None`` when no PDF link is available.
+        """
+        for link in work.get("link", []):
+            if not isinstance(link, dict):
+                continue
+            content_type = (link.get("content-type") or "").lower()
+            url = (link.get("URL") or "").strip()
+            if "pdf" in content_type and url:
+                return url
         return None
 
-    # Abstract
-    raw_abstract = (work.get("abstract") or "").strip()
-    abstract = _strip_jats_tags(raw_abstract) if raw_abstract else ""
+    @staticmethod
+    def _build_paper(work: dict[str, Any]) -> Paper | None:
+        """Build a :class:`~findpapers.core.paper.Paper` from a CrossRef work record.
 
-    # DOI
-    doi: Optional[str] = (work.get("DOI") or "").strip() or None
+        Parameters
+        ----------
+        work : dict[str, Any]
+            The ``message`` dict returned by :meth:`fetch_work`.
 
-    # Authors
-    authors = _parse_crossref_authors(work)
+        Returns
+        -------
+        Paper | None
+            Populated paper, or ``None`` when required fields (title) are
+            missing.
+        """
+        if not work:
+            return None
 
-    # Publication date
-    publication_date = _parse_crossref_date(work)
+        # Title — CrossRef returns it as a list of strings.
+        titles = work.get("title") or []
+        title = titles[0].strip() if isinstance(titles, list) and titles else ""
+        if not title:
+            return None
 
-    # Keywords / subjects
-    keywords = _parse_crossref_keywords(work)
+        # Abstract
+        raw_abstract = (work.get("abstract") or "").strip()
+        abstract = CrossRefConnector._strip_jats_tags(raw_abstract) if raw_abstract else ""
 
-    # Citations count
-    citations: Optional[int] = work.get("is-referenced-by-count")
+        # DOI
+        doi: Optional[str] = (work.get("DOI") or "").strip() or None
 
-    # Page range
-    pages: Optional[str] = (work.get("page") or "").strip() or None
+        # Authors
+        authors = CrossRefConnector._parse_authors(work)
 
-    # Number of pages — not directly available, but can be inferred from
-    # page range when it's in "first-last" format.
-    page_count: Optional[int] = None
+        # Publication date
+        publication_date = CrossRefConnector._parse_date(work)
 
-    # PDF URL
-    pdf_url = _parse_crossref_pdf_url(work)
+        # Keywords / subjects
+        keywords = CrossRefConnector._parse_keywords(work)
 
-    # URL — use the DOI URL as landing page.
-    url: Optional[str] = (work.get("URL") or "").strip() or None
+        # Citations count
+        citations: Optional[int] = work.get("is-referenced-by-count")
 
-    # Source (journal, conference, book, etc.)
-    source: Optional[Source] = None
-    container_titles = work.get("container-title") or []
-    source_title = (
-        container_titles[0].strip()
-        if isinstance(container_titles, list) and container_titles
-        else ""
-    )
-    if source_title:
-        # ISSN — CrossRef returns a list of ISSNs.
-        issn_list = work.get("ISSN") or []
-        issn = issn_list[0] if isinstance(issn_list, list) and issn_list else None
+        # Page range
+        pages: Optional[str] = (work.get("page") or "").strip() or None
 
-        # ISBN
-        isbn_list = work.get("ISBN") or []
-        isbn = isbn_list[0] if isinstance(isbn_list, list) and isbn_list else None
+        # Number of pages — not directly available, but can be inferred from
+        # page range when it's in "first-last" format.
+        page_count: Optional[int] = None
 
-        # Publisher
-        publisher = (work.get("publisher") or "").strip() or None
+        # PDF URL
+        pdf_url = CrossRefConnector._parse_pdf_url(work)
 
-        # Source type
-        crossref_type = (work.get("type") or "").strip().lower()
-        source_type = _CROSSREF_TYPE_MAP.get(crossref_type)
+        # URL — use the DOI URL as landing page.
+        url: Optional[str] = (work.get("URL") or "").strip() or None
 
-        source = Source(
-            title=source_title,
-            issn=issn,
-            isbn=isbn,
-            publisher=publisher,
-            source_type=source_type,
+        # Source (journal, conference, book, etc.)
+        source: Optional[Source] = None
+        container_titles = work.get("container-title") or []
+        source_title = (
+            container_titles[0].strip()
+            if isinstance(container_titles, list) and container_titles
+            else ""
         )
+        if source_title:
+            # ISSN — CrossRef returns a list of ISSNs.
+            issn_list = work.get("ISSN") or []
+            issn = issn_list[0] if isinstance(issn_list, list) and issn_list else None
 
-    return Paper(
-        title=title,
-        abstract=abstract,
-        authors=authors,
-        source=source,
-        publication_date=publication_date,
-        url=url,
-        pdf_url=pdf_url,
-        doi=doi,
-        citations=citations,
-        keywords=keywords or None,
-        page_range=pages,
-        page_count=page_count,
-    )
+            # ISBN
+            isbn_list = work.get("ISBN") or []
+            isbn = isbn_list[0] if isinstance(isbn_list, list) and isbn_list else None
+
+            # Publisher
+            publisher = (work.get("publisher") or "").strip() or None
+
+            # Source type
+            crossref_type = (work.get("type") or "").strip().lower()
+            source_type = _CROSSREF_TYPE_MAP.get(crossref_type)
+
+            source = Source(
+                title=source_title,
+                issn=issn,
+                isbn=isbn,
+                publisher=publisher,
+                source_type=source_type,
+            )
+
+        return Paper(
+            title=title,
+            abstract=abstract,
+            authors=authors,
+            source=source,
+            publication_date=publication_date,
+            url=url,
+            pdf_url=pdf_url,
+            doi=doi,
+            citations=citations,
+            keywords=keywords or None,
+            page_range=pages,
+            page_count=page_count,
+        )

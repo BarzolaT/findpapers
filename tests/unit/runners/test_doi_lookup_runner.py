@@ -148,11 +148,11 @@ class TestDOILookupRunnerRun:
         fake_paper = _fake_paper()
         with (
             patch(
-                "findpapers.runners.doi_lookup_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=fake_work,
             ),
             patch(
-                "findpapers.runners.doi_lookup_runner.build_paper_from_crossref",
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=fake_paper,
             ),
         ):
@@ -164,7 +164,7 @@ class TestDOILookupRunnerRun:
     def test_run_returns_none_when_doi_not_found(self):
         """run() returns None when CrossRef returns 404."""
         with patch(
-            "findpapers.runners.doi_lookup_runner.fetch_crossref_work",
+            "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             return_value=None,
         ):
             runner = DOILookupRunner(doi="10.9999/nonexistent")
@@ -173,14 +173,14 @@ class TestDOILookupRunnerRun:
         assert result is None
 
     def test_run_returns_none_when_paper_cannot_be_built(self):
-        """run() returns None when build_paper_from_crossref returns None."""
+        """run() returns None when build_paper returns None."""
         with (
             patch(
-                "findpapers.runners.doi_lookup_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value={"title": []},
             ),
             patch(
-                "findpapers.runners.doi_lookup_runner.build_paper_from_crossref",
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=None,
             ),
         ):
@@ -189,27 +189,27 @@ class TestDOILookupRunnerRun:
 
         assert result is None
 
-    def test_run_passes_timeout_to_fetch(self):
-        """run() forwards the timeout parameter to fetch_crossref_work."""
+    def test_run_passes_doi_to_fetch_work(self):
+        """run() forwards the DOI to the connector's fetch_work method."""
         with patch(
-            "findpapers.runners.doi_lookup_runner.fetch_crossref_work",
+            "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             return_value=None,
         ) as mock_fetch:
             runner = DOILookupRunner(doi="10.1234/test", timeout=25.0)
             runner.run()
 
-        mock_fetch.assert_called_once_with("10.1234/test", timeout=25.0)
+        mock_fetch.assert_called_once_with("10.1234/test")
 
     def test_get_result_after_run(self):
         """get_result() returns the same object as run()."""
         fake_paper = _fake_paper()
         with (
             patch(
-                "findpapers.runners.doi_lookup_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=_fake_crossref_work(),
             ),
             patch(
-                "findpapers.runners.doi_lookup_runner.build_paper_from_crossref",
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=fake_paper,
             ),
         ):
@@ -222,7 +222,7 @@ class TestDOILookupRunnerRun:
     def test_get_runtime_after_run(self):
         """get_runtime() returns a non-negative float after run()."""
         with patch(
-            "findpapers.runners.doi_lookup_runner.fetch_crossref_work",
+            "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             return_value=None,
         ):
             runner = DOILookupRunner(doi="10.1234/test")
@@ -233,7 +233,7 @@ class TestDOILookupRunnerRun:
     def test_run_verbose_mode(self):
         """run() with verbose=True does not raise."""
         with patch(
-            "findpapers.runners.doi_lookup_runner.fetch_crossref_work",
+            "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             return_value=None,
         ):
             runner = DOILookupRunner(doi="10.1234/test")
@@ -244,7 +244,7 @@ class TestDOILookupRunnerRun:
     def test_run_can_be_called_multiple_times(self):
         """Calling run() twice updates the result."""
         with patch(
-            "findpapers.runners.doi_lookup_runner.fetch_crossref_work",
+            "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             return_value=None,
         ):
             runner = DOILookupRunner(doi="10.1234/test")
@@ -253,11 +253,11 @@ class TestDOILookupRunnerRun:
         fake_paper = _fake_paper()
         with (
             patch(
-                "findpapers.runners.doi_lookup_runner.fetch_crossref_work",
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=_fake_crossref_work(),
             ),
             patch(
-                "findpapers.runners.doi_lookup_runner.build_paper_from_crossref",
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=fake_paper,
             ),
         ):
