@@ -464,3 +464,104 @@ class TestSnowballImport:
         from findpapers.runners.snowball_runner import SnowballRunner
 
         assert findpapers.SnowballRunner is SnowballRunner
+
+
+# ---------------------------------------------------------------------------
+# Export / Load
+# ---------------------------------------------------------------------------
+
+
+class TestEngineExportJson:
+    """Tests for Engine.export_to_json static method."""
+
+    def test_export_search_result(self, tmp_path):
+        """SearchResult is exported to a JSON file."""
+        search = SearchResult(query="[test]", databases=["arxiv"])
+        search.add_paper(_make_paper(doi="10.1/a"))
+        path = str(tmp_path / "search.json")
+        Engine.export_to_json(search, path)
+        assert os.path.exists(path)
+
+    def test_export_paper_list(self, tmp_path):
+        """A plain list of papers is exported to a JSON file."""
+        papers = [_make_paper(doi="10.1/a"), _make_paper(title="Paper B", doi="10.1/b")]
+        path = str(tmp_path / "papers.json")
+        Engine.export_to_json(papers, path)
+        assert os.path.exists(path)
+
+    def test_export_citation_graph(self, tmp_path):
+        """A CitationGraph is exported to a JSON file."""
+        from findpapers.core.citation_graph import CitationGraph
+
+        seed = _make_paper(doi="10.1/seed")
+        graph = CitationGraph(seed_papers=[seed], depth=1, direction="backward")
+        path = str(tmp_path / "graph.json")
+        Engine.export_to_json(graph, path)
+        assert os.path.exists(path)
+
+
+class TestEngineExportBibtex:
+    """Tests for Engine.export_to_bibtex static method."""
+
+    def test_export_search_result(self, tmp_path):
+        """SearchResult is exported to a BibTeX file."""
+        search = SearchResult(query="[test]", databases=["arxiv"])
+        search.add_paper(_make_paper(doi="10.1/a"))
+        path = str(tmp_path / "refs.bib")
+        Engine.export_to_bibtex(search, path)
+        content = open(path, encoding="utf-8").read()
+        assert "@" in content
+
+    def test_export_paper_list(self, tmp_path):
+        """A plain list of papers is exported to a BibTeX file."""
+        papers = [_make_paper(doi="10.1/a")]
+        path = str(tmp_path / "refs.bib")
+        Engine.export_to_bibtex(papers, path)
+        content = open(path, encoding="utf-8").read()
+        assert "@" in content
+
+    def test_empty_list_produces_empty_file(self, tmp_path):
+        """An empty paper list creates an empty file."""
+        path = str(tmp_path / "empty.bib")
+        Engine.export_to_bibtex([], path)
+        content = open(path, encoding="utf-8").read()
+        assert content == ""
+
+
+class TestEngineLoadFromJson:
+    """Tests for Engine.load_from_json static method."""
+
+    def test_round_trip_search_result(self, tmp_path):
+        """SearchResult survives export -> load round-trip via Engine."""
+        search = SearchResult(query="[test]", databases=["arxiv"])
+        search.add_paper(_make_paper(doi="10.1/a"))
+        path = str(tmp_path / "search.json")
+        Engine.export_to_json(search, path)
+
+        loaded = Engine.load_from_json(path)
+        assert isinstance(loaded, SearchResult)
+        assert len(loaded.papers) == 1
+
+    def test_round_trip_paper_list(self, tmp_path):
+        """Paper list survives export -> load round-trip via Engine."""
+        papers = [_make_paper(doi="10.1/a")]
+        path = str(tmp_path / "papers.json")
+        Engine.export_to_json(papers, path)
+
+        loaded = Engine.load_from_json(path)
+        assert isinstance(loaded, list)
+        assert len(loaded) == 1
+        assert loaded[0].title == "Test Paper"
+
+    def test_round_trip_citation_graph(self, tmp_path):
+        """CitationGraph survives export -> load round-trip via Engine."""
+        from findpapers.core.citation_graph import CitationGraph
+
+        seed = _make_paper(doi="10.1/seed")
+        graph = CitationGraph(seed_papers=[seed], depth=1, direction="backward")
+        path = str(tmp_path / "graph.json")
+        Engine.export_to_json(graph, path)
+
+        loaded = Engine.load_from_json(path)
+        assert isinstance(loaded, CitationGraph)
+        assert loaded.paper_count == 1

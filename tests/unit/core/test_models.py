@@ -1,8 +1,6 @@
 """Tests for Paper, Publication, and SearchResult models."""
 
-import csv
 import datetime
-import json
 
 import pytest
 
@@ -335,36 +333,49 @@ def _make_search_with_paper() -> SearchResult:
         source=Source(title="Test Journal"),
         publication_date=datetime.date(2023, 1, 1),
     )
-    search = SearchResult(query="[export]", databases=["arxiv"])
+    search = SearchResult(
+        query="[export]",
+        databases=["arxiv"],
+        since=datetime.date(2022, 1, 1),
+        until=datetime.date(2023, 12, 31),
+    )
     search.add_paper(paper)
     return search
 
 
-def test_search_to_json_creates_file(tmp_path):
-    """SearchResult.to_json() writes a valid JSON file with a 'papers' key."""
-    path = str(tmp_path / "out.json")
-    _make_search_with_paper().to_json(path)
-    with open(path) as f:
-        data = json.load(f)
+def test_search_to_dict_contains_papers():
+    """SearchResult.to_dict() returns a dict with 'papers' key."""
+    data = _make_search_with_paper().to_dict()
     assert "papers" in data
     assert len(data["papers"]) == 1
 
 
-def test_search_to_csv_creates_file(tmp_path):
-    """SearchResult.to_csv() writes a CSV file with at least one data row."""
-    path = str(tmp_path / "out.csv")
-    _make_search_with_paper().to_csv(path)
-    with open(path, newline="") as f:
-        rows = list(csv.DictReader(f))
-    assert len(rows) >= 1
+def test_search_to_dict_contains_since_until():
+    """SearchResult.to_dict() serializes since/until in metadata."""
+    data = _make_search_with_paper().to_dict()
+    assert data["metadata"]["since"] == "2022-01-01"
+    assert data["metadata"]["until"] == "2023-12-31"
 
 
-def test_search_to_bibtex_creates_file(tmp_path):
-    """SearchResult.to_bibtex() writes a BibTeX file containing at least one entry."""
-    path = str(tmp_path / "out.bib")
-    _make_search_with_paper().to_bibtex(path)
-    content = open(path).read()
-    assert "@" in content
+def test_search_to_dict_since_until_none():
+    """SearchResult.to_dict() serializes None when since/until not set."""
+    search = SearchResult(query="[test]", databases=["arxiv"])
+    data = search.to_dict()
+    assert data["metadata"]["since"] is None
+    assert data["metadata"]["until"] is None
+
+
+def test_search_from_dict_round_trip():
+    """SearchResult.from_dict(to_dict()) preserves all fields."""
+    original = _make_search_with_paper()
+    data = original.to_dict()
+    restored = SearchResult.from_dict(data)
+    assert len(restored.papers) == 1
+    assert restored.papers[0].title == "Export Test Paper"
+    assert restored.query == "[export]"
+    assert restored.since == datetime.date(2022, 1, 1)
+    assert restored.until == datetime.date(2023, 12, 31)
+    assert restored.databases == ["arxiv"]
 
 
 # ---------------------------------------------------------------------------

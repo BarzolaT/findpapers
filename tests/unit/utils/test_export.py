@@ -1,29 +1,29 @@
-"""Unit tests for search-result export utilities."""
+"""Unit tests for export utilities."""
 
 from __future__ import annotations
 
-import csv
 import datetime
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
 from findpapers.core.author import Author
+from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper, PaperType
+from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source, SourceType
 from findpapers.utils.export import (
+    _extract_papers,
+    _serialize_to_dict,
     bibtex_how_published,
     bibtex_note,
     citation_key_for,
-    csv_columns,
     export_to_bibtex,
-    export_to_csv,
     export_to_json,
+    load_from_json,
     paper_to_bibtex,
-    paper_to_csv_row,
 )
 
 # ---------------------------------------------------------------------------
@@ -100,151 +100,84 @@ def conference_paper(conference_publication: Source) -> Paper:
 
 
 @pytest.fixture()
-def mock_search(full_paper: Paper, minimal_paper: Paper) -> MagicMock:
-    """Return a mock Search with two papers."""
-    search = MagicMock()
-    search.papers = [full_paper, minimal_paper]
-    search.to_dict.return_value = {"papers": [{"title": "Deep Learning Survey"}]}
+def sample_search(full_paper: Paper, minimal_paper: Paper) -> SearchResult:
+    """Return a SearchResult with two papers."""
+    search = SearchResult(query="[deep learning]", databases=["arxiv"])
+    search.add_paper(full_paper)
+    search.add_paper(minimal_paper)
     return search
 
 
-# ---------------------------------------------------------------------------
-# csv_columns
-# ---------------------------------------------------------------------------
-
-
-class TestCsvColumns:
-    """Tests for csv_columns()."""
-
-    def test_returns_list_of_strings(self) -> None:
-        """Result is a list of non-empty strings."""
-        cols = csv_columns()
-        assert isinstance(cols, list)
-        assert all(isinstance(c, str) and c for c in cols)
-
-    def test_contains_key_paper_fields(self) -> None:
-        """Key paper fields are present."""
-        cols = csv_columns()
-        for field in ("title", "abstract", "authors", "doi", "databases"):
-            assert field in cols
-
-    def test_contains_source_fields(self) -> None:
-        """Source-prefixed fields are present."""
-        cols = csv_columns()
-        for field in ("source_title", "source_type", "source_issn", "source_publisher"):
-            assert field in cols
-
-    def test_no_duplicates(self) -> None:
-        """Column list has no duplicate names."""
-        cols = csv_columns()
-        assert len(cols) == len(set(cols))
+@pytest.fixture()
+def sample_graph(full_paper: Paper, minimal_paper: Paper) -> CitationGraph:
+    """Return a CitationGraph with two papers and one edge."""
+    full_paper.doi = "10.1000/full"
+    minimal_paper.doi = "10.1000/minimal"
+    graph = CitationGraph(seed_papers=[full_paper], depth=1, direction="backward")
+    graph.add_paper(minimal_paper, depth=1)
+    graph.add_edge(full_paper, minimal_paper)
+    return graph
 
 
 # ---------------------------------------------------------------------------
-# paper_to_csv_row
+# _extract_papers
 # ---------------------------------------------------------------------------
 
 
-class TestPaperToCsvRow:
-    """Tests for paper_to_csv_row()."""
+class TestExtractPapers:
+    """Tests for _extract_papers()."""
 
-    def test_full_paper_row_keys_match_columns(self, full_paper: Paper) -> None:
-        """Row keys match csv_columns output."""
-        row = paper_to_csv_row(full_paper)
-        assert set(row.keys()) == set(csv_columns())
+    def test_from_list(self, full_paper: Paper, minimal_paper: Paper) -> None:
+        """Extracts papers from a plain list."""
+        papers = [full_paper, minimal_paper]
+        assert _extract_papers(papers) is papers
 
-    def test_full_paper_values(self, full_paper: Paper) -> None:
-        """Core values are correctly serialised."""
-        row = paper_to_csv_row(full_paper)
-        assert row["title"] == "Deep Learning Survey"
-        assert row["doi"] == "10.1234/example.doi"
-        assert row["citations"] == 500
-        # Authors joined with '; '
-        authors_str = str(row["authors"])
-        assert "LeCun, Y." in authors_str
-        assert "; " in authors_str
-        # Keywords are sorted and ; separated
-        assert row["keywords"] == "AI; deep learning; neural networks"
-        # Databases sorted
-        assert row["databases"] == "arxiv; semantic_scholar"
-        # Date serialised as ISO
-        assert row["publication_date"] == "2022-06-15"
+    def test_from_search_result(self, sample_search: SearchResult) -> None:
+        """Extracts papers from a SearchResult."""
+        papers = _extract_papers(sample_search)
+        assert len(papers) == 2
 
-    def test_source_fields_present(self, full_paper: Paper) -> None:
-        """Source-prefixed fields carry the source data."""
-        row = paper_to_csv_row(full_paper)
-        assert row["source_title"] == "Nature Machine Intelligence"
-        assert row["source_issn"] == "2522-5839"
-        assert row["source_publisher"] == "Springer Nature"
+    def test_from_citation_graph(self, sample_graph: CitationGraph) -> None:
+        """Extracts papers from a CitationGraph."""
+        papers = _extract_papers(sample_graph)
+        assert len(papers) == 2
 
-    def test_source_type_in_csv_row(self) -> None:
-        """source_type is serialised as its value string in CSV row."""
-        pub = Source(title="Nature", source_type=SourceType.JOURNAL)
-        paper = Paper(
-            title="T",
-            abstract="",
-            authors=[],
-            source=pub,
-            publication_date=None,
-        )
-        row = paper_to_csv_row(paper)
-        assert row["source_type"] == "journal"
+    def test_raises_for_unsupported_type(self) -> None:
+        """Raises TypeError for unsupported input."""
+        with pytest.raises(TypeError, match="Expected"):
+            _extract_papers("not a valid input")  # type: ignore[arg-type]
 
-    def test_source_type_none_in_csv_row(self) -> None:
-        """source_type is None when source has no source_type."""
-        pub = Source(title="Nature")
-        paper = Paper(
-            title="T",
-            abstract="",
-            authors=[],
-            source=pub,
-            publication_date=None,
-        )
-        row = paper_to_csv_row(paper)
-        assert row["source_type"] is None
 
-    def test_minimal_paper_nulls(self, minimal_paper: Paper) -> None:
-        """Minimal paper produces None for optional fields."""
-        row = paper_to_csv_row(minimal_paper)
-        assert row["doi"] is None
-        assert row["publication_date"] is None
-        assert row["source_title"] is None
+# ---------------------------------------------------------------------------
+# _serialize_to_dict
+# ---------------------------------------------------------------------------
 
-    def test_no_source(self, minimal_paper: Paper) -> None:
-        """Paper without source has None for all source_* fields."""
-        row = paper_to_csv_row(minimal_paper)
-        source_fields = [k for k in row if k.startswith("source_")]
-        assert all(row[f] is None for f in source_fields)
 
-    def test_paper_type_in_csv_row(self) -> None:
-        """paper_type is serialised as its value string in CSV row."""
-        paper = Paper(
-            title="T",
-            abstract="",
-            authors=[],
-            source=None,
-            publication_date=None,
-            paper_type=PaperType.ARTICLE,
-        )
-        row = paper_to_csv_row(paper)
-        assert row["paper_type"] == "article"
+class TestSerializeToDict:
+    """Tests for _serialize_to_dict()."""
 
-    def test_paper_type_none_in_csv_row(self) -> None:
-        """paper_type is None when not set."""
-        paper = Paper(
-            title="T",
-            abstract="",
-            authors=[],
-            source=None,
-            publication_date=None,
-        )
-        row = paper_to_csv_row(paper)
-        assert row["paper_type"] is None
+    def test_search_result_has_type(self, sample_search: SearchResult) -> None:
+        """SearchResult serialization includes type discriminator."""
+        result = _serialize_to_dict(sample_search)
+        assert result["type"] == "search_result"
+        assert "papers" in result
 
-    def test_paper_type_in_csv_columns(self) -> None:
-        """paper_type is included in csv_columns output."""
-        columns = csv_columns()
-        assert "paper_type" in columns
+    def test_citation_graph_has_type(self, sample_graph: CitationGraph) -> None:
+        """CitationGraph serialization includes type discriminator."""
+        result = _serialize_to_dict(sample_graph)
+        assert result["type"] == "citation_graph"
+        assert "nodes" in result
+
+    def test_paper_list_has_type(self, full_paper: Paper) -> None:
+        """Paper list serialization includes type discriminator."""
+        result = _serialize_to_dict([full_paper])
+        assert result["type"] == "paper_list"
+        assert len(result["papers"]) == 1
+
+    def test_raises_for_unsupported_type(self) -> None:
+        """Raises TypeError for unsupported input."""
+        with pytest.raises(TypeError, match="Expected"):
+            _serialize_to_dict("not valid")  # type: ignore[arg-type]
 
 
 # ---------------------------------------------------------------------------
@@ -551,73 +484,46 @@ class TestPaperToBibtex:
 class TestExportToJson:
     """Tests for export_to_json()."""
 
-    def test_creates_file(self, mock_search: MagicMock) -> None:
-        """File is created at the specified path."""
+    def test_creates_file_from_search(self, sample_search: SearchResult) -> None:
+        """File is created from a SearchResult."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.json")
-            export_to_json(mock_search, path)
+            export_to_json(sample_search, path)
             assert Path(path).exists()
 
-    def test_valid_json(self, mock_search: MagicMock) -> None:
-        """Created file contains valid JSON."""
+    def test_creates_file_from_graph(self, sample_graph: CitationGraph) -> None:
+        """File is created from a CitationGraph."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.json")
-            export_to_json(mock_search, path)
+            export_to_json(sample_graph, path)
+            assert Path(path).exists()
+
+    def test_creates_file_from_paper_list(self, full_paper: Paper) -> None:
+        """File is created from a list of papers."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.json")
+            export_to_json([full_paper], path)
+            assert Path(path).exists()
+
+    def test_search_result_valid_json(self, sample_search: SearchResult) -> None:
+        """SearchResult export creates valid JSON with type discriminator."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.json")
+            export_to_json(sample_search, path)
             with open(path, encoding="utf-8") as fh:
                 data = json.load(fh)
-            assert isinstance(data, dict)
+            assert data["type"] == "search_result"
+            assert len(data["papers"]) == 2
 
-    def test_delegates_to_search_to_dict(self, mock_search: MagicMock) -> None:
-        """search.to_dict() is called to serialise the search."""
+    def test_paper_list_valid_json(self, full_paper: Paper, minimal_paper: Paper) -> None:
+        """Paper list export creates valid JSON with type discriminator."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.json")
-            export_to_json(mock_search, path)
-            mock_search.to_dict.assert_called_once()
-
-
-# ---------------------------------------------------------------------------
-# export_to_csv
-# ---------------------------------------------------------------------------
-
-
-class TestExportToCsv:
-    """Tests for export_to_csv()."""
-
-    def test_creates_file(self, mock_search: MagicMock) -> None:
-        """File is created at the specified path."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            path = str(Path(tmpdir) / "out.csv")
-            export_to_csv(mock_search, path)
-            assert Path(path).exists()
-
-    def test_header_matches_columns(self, mock_search: MagicMock) -> None:
-        """CSV header matches csv_columns() output."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            path = str(Path(tmpdir) / "out.csv")
-            export_to_csv(mock_search, path)
-            with open(path, encoding="utf-8", newline="") as fh:
-                reader = csv.DictReader(fh)
-                assert list(reader.fieldnames or []) == csv_columns()
-
-    def test_row_count(self, mock_search: MagicMock) -> None:
-        """CSV has one data row per paper."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            path = str(Path(tmpdir) / "out.csv")
-            export_to_csv(mock_search, path)
-            with open(path, encoding="utf-8", newline="") as fh:
-                rows = list(csv.DictReader(fh))
-            assert len(rows) == len(mock_search.papers)
-
-    def test_empty_paper_list(self) -> None:
-        """Empty paper list produces only header row."""
-        search = MagicMock()
-        search.papers = []
-        with tempfile.TemporaryDirectory() as tmpdir:
-            path = str(Path(tmpdir) / "out.csv")
-            export_to_csv(search, path)
-            with open(path, encoding="utf-8", newline="") as fh:
-                rows = list(csv.DictReader(fh))
-            assert rows == []
+            export_to_json([full_paper, minimal_paper], path)
+            with open(path, encoding="utf-8") as fh:
+                data = json.load(fh)
+            assert data["type"] == "paper_list"
+            assert len(data["papers"]) == 2
 
 
 # ---------------------------------------------------------------------------
@@ -628,36 +534,115 @@ class TestExportToCsv:
 class TestExportToBibtex:
     """Tests for export_to_bibtex()."""
 
-    def test_creates_file(self, mock_search: MagicMock) -> None:
-        """File is created at the specified path."""
+    def test_creates_file_from_search(self, sample_search: SearchResult) -> None:
+        """File is created from a SearchResult."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_to_bibtex(mock_search, path)
+            export_to_bibtex(sample_search, path)
             assert Path(path).exists()
-
-    def test_file_contains_bibtex_entries(self, mock_search: MagicMock) -> None:
-        """File starts with a BibTeX entry marker."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            path = str(Path(tmpdir) / "out.bib")
-            export_to_bibtex(mock_search, path)
             content = Path(path).read_text(encoding="utf-8")
             assert "@" in content
 
-    def test_entry_count(self, mock_search: MagicMock) -> None:
+    def test_creates_file_from_paper_list(self, full_paper: Paper) -> None:
+        """File is created from a list of papers."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.bib")
+            export_to_bibtex([full_paper], path)
+            content = Path(path).read_text(encoding="utf-8")
+            assert "@" in content
+
+    def test_entry_count_from_search(self, sample_search: SearchResult) -> None:
         """Number of '@' entry markers equals the number of papers."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_to_bibtex(mock_search, path)
+            export_to_bibtex(sample_search, path)
             content = Path(path).read_text(encoding="utf-8")
             entries = [line for line in content.splitlines() if line.startswith("@")]
-            assert len(entries) == len(mock_search.papers)
+            assert len(entries) == len(sample_search.papers)
 
     def test_empty_paper_list(self) -> None:
         """Empty paper list produces an empty file."""
-        search = MagicMock()
-        search.papers = []
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_to_bibtex(search, path)
+            export_to_bibtex([], path)
             content = Path(path).read_text(encoding="utf-8")
             assert content == ""
+
+
+# ---------------------------------------------------------------------------
+# load_from_json
+# ---------------------------------------------------------------------------
+
+
+class TestLoadFromJson:
+    """Tests for load_from_json()."""
+
+    def test_round_trip_search_result(self, sample_search: SearchResult) -> None:
+        """SearchResult survives export -> load round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "search.json")
+            export_to_json(sample_search, path)
+            loaded = load_from_json(path)
+
+        assert isinstance(loaded, SearchResult)
+        assert len(loaded.papers) == 2
+        assert loaded.query == "[deep learning]"
+
+    def test_round_trip_citation_graph(self, sample_graph: CitationGraph) -> None:
+        """CitationGraph survives export -> load round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "graph.json")
+            export_to_json(sample_graph, path)
+            loaded = load_from_json(path)
+
+        assert isinstance(loaded, CitationGraph)
+        assert loaded.paper_count == 2
+        assert loaded.edge_count == 1
+
+    def test_round_trip_paper_list(self, full_paper: Paper, minimal_paper: Paper) -> None:
+        """Paper list survives export -> load round-trip."""
+        papers = [full_paper, minimal_paper]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "papers.json")
+            export_to_json(papers, path)
+            loaded = load_from_json(path)
+
+        assert isinstance(loaded, list)
+        assert len(loaded) == 2
+        assert loaded[0].title == full_paper.title
+
+    def test_legacy_search_result_auto_detection(self, sample_search: SearchResult) -> None:
+        """Files without 'type' but with 'papers' are loaded as SearchResult."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "legacy.json")
+            # Write a payload without "type" key.
+            payload = sample_search.to_dict()
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump(payload, fh)
+
+            loaded = load_from_json(path)
+
+        assert isinstance(loaded, SearchResult)
+        assert len(loaded.papers) == 2
+
+    def test_legacy_citation_graph_auto_detection(self, sample_graph: CitationGraph) -> None:
+        """Files without 'type' but with 'nodes'/'edges' are loaded as CitationGraph."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "legacy.json")
+            payload = sample_graph.to_dict()
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump(payload, fh)
+
+            loaded = load_from_json(path)
+
+        assert isinstance(loaded, CitationGraph)
+
+    def test_unrecognised_format_raises(self) -> None:
+        """Files with unrecognised structure cause ValueError."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "bad.json")
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump({"foo": "bar"}, fh)
+
+            with pytest.raises(ValueError, match="Unrecognised"):
+                load_from_json(path)

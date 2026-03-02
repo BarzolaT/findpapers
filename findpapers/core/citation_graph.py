@@ -8,9 +8,6 @@ one paper cites another.
 
 from __future__ import annotations
 
-import csv
-import json
-from pathlib import Path
 from typing import Literal
 
 from findpapers.core.paper import Paper
@@ -330,105 +327,60 @@ class CitationGraph:
             "edges": [edge.to_dict() for edge in self._edges],
         }
 
-    def to_json(self, path: str) -> None:
-        """Export the citation graph to a JSON file.
+    @classmethod
+    def from_dict(cls, data: dict) -> "CitationGraph":
+        """Reconstruct a CitationGraph from a dictionary.
+
+        Accepts the format produced by :meth:`to_dict` (and by
+        :func:`~findpapers.utils.export.export_to_json`).
 
         Parameters
         ----------
-        path : str
-            Output file path.
+        data : dict
+            Dictionary with ``"metadata"``, ``"nodes"`` and ``"edges"``
+            keys.
 
         Returns
         -------
-        None
+        CitationGraph
+            Reconstructed instance.
         """
-        payload = self.to_dict()
-        with Path(path).open("w", encoding="utf-8") as handle:
-            json.dump(payload, handle, ensure_ascii=False, indent=2)
+        metadata = data.get("metadata", {})
+        direction = metadata.get("direction", "both")
+        depth = metadata.get("depth", 0)
 
-    def to_csv(self, path: str) -> tuple[str, str]:
-        """Export the citation graph to two CSV files (papers and edges).
+        # Rebuild papers keyed by DOI / title.
+        papers: dict[str, Paper] = {}
+        paper_depths: dict[str, int] = {}
+        for node in data.get("nodes", []):
+            paper = Paper.from_dict(node)
+            key = (paper.doi or "").strip().lower() or (paper.title or "").strip().lower()
+            if not key:
+                continue
+            papers[key] = paper
+            paper_depths[key] = node.get("snowball_depth", -1)
 
-        Given a *path* like ``"output/graph.csv"`` this produces:
+        # Identify seeds (depth == 0).
+        seed_papers = [p for k, p in papers.items() if paper_depths.get(k) == 0]
 
-        - ``output/graph_papers.csv`` — one row per paper with columns for
-          DOI, title, depth, abstract, authors, publication date, URL, PDF
-          URL, citations count and keywords.
-        - ``output/graph_edges.csv`` — one row per citation edge with
-          ``source_doi``, ``source_title``, ``target_doi`` and
-          ``target_title`` columns.
+        graph = cls(seed_papers=[], depth=depth, direction=direction)
+        graph._papers = papers
+        graph._paper_depths = paper_depths
+        graph.seed_papers = seed_papers
 
-        Parameters
-        ----------
-        path : str
-            Base output file path.  The stem is used to derive the two
-            file names (``{stem}_papers.csv``, ``{stem}_edges.csv``).
+        # Rebuild edges.
+        for edge_dict in data.get("edges", []):
+            src_doi = (edge_dict.get("source_doi") or "").strip().lower()
+            src_title = (edge_dict.get("source_title") or "").strip().lower()
+            tgt_doi = (edge_dict.get("target_doi") or "").strip().lower()
+            tgt_title = (edge_dict.get("target_title") or "").strip().lower()
 
-        Returns
-        -------
-        tuple[str, str]
-            A ``(papers_path, edges_path)`` tuple with the absolute paths
-            of the two files written.
-        """
-        base = Path(path)
-        parent = base.parent
-        stem = base.stem
-        parent.mkdir(parents=True, exist_ok=True)
+            src_key = src_doi or src_title
+            tgt_key = tgt_doi or tgt_title
+            if src_key in papers and tgt_key in papers:
+                graph._edges.append(CitationEdge(source=papers[src_key], target=papers[tgt_key]))
 
-        papers_path = parent / f"{stem}_papers.csv"
-        edges_path = parent / f"{stem}_edges.csv"
-
-        # -- Papers CSV --------------------------------------------------
-        paper_columns = [
-            "doi",
-            "title",
-            "snowball_depth",
-            "abstract",
-            "authors",
-            "publication_date",
-            "url",
-            "pdf_url",
-            "citations",
-            "keywords",
-        ]
-
-        with papers_path.open("w", encoding="utf-8", newline="") as fh:
-            writer = csv.DictWriter(fh, fieldnames=paper_columns)
-            writer.writeheader()
-            for paper in self._papers.values():
-                key = self._paper_key(paper)
-                writer.writerow(
-                    {
-                        "doi": paper.doi or "",
-                        "title": paper.title,
-                        "snowball_depth": self._paper_depths.get(key, -1),  # type: ignore[arg-type]
-                        "abstract": paper.abstract or "",
-                        "authors": "; ".join(a.name for a in paper.authors),
-                        "publication_date": (
-                            paper.publication_date.isoformat() if paper.publication_date else ""
-                        ),
-                        "url": paper.url or "",
-                        "pdf_url": paper.pdf_url or "",
-                        "citations": paper.citations if paper.citations is not None else "",
-                        "keywords": "; ".join(sorted(paper.keywords)) if paper.keywords else "",
-                    }
-                )
-
-        # -- Edges CSV ---------------------------------------------------
-        edge_columns = [
-            "source_doi",
-            "source_title",
-            "target_doi",
-            "target_title",
-        ]
-
-        with edges_path.open("w", encoding="utf-8", newline="") as fh:
-            writer = csv.DictWriter(fh, fieldnames=edge_columns)
-            writer.writeheader()
-            for edge in self._edges:
-                writer.writerow(edge.to_dict())
-
-        return str(papers_path), str(edges_path)
+        return graph
 
     @property
     def paper_count(self) -> int:

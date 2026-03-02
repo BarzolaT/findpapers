@@ -4,7 +4,6 @@ import datetime
 from enum import Enum
 from typing import List, Optional
 
-from ..utils.export import export_to_bibtex, export_to_csv, export_to_json
 from ..utils.version import package_version
 from .paper import Paper
 
@@ -124,6 +123,8 @@ class SearchResult:
         """
         metadata = {
             "query": self.query,
+            "since": self.since.isoformat() if self.since else None,
+            "until": self.until.isoformat() if self.until else None,
             "databases": self.databases,
             "max_papers_per_database": self.max_papers_per_database,
             "timestamp": self.processed_at.astimezone(datetime.timezone.utc).isoformat(),
@@ -136,44 +137,58 @@ class SearchResult:
             "papers": [Paper.to_dict(paper) for paper in self.papers],
         }
 
-    def to_json(self, path: str) -> None:
-        """Export search results to a JSON file.
+    @classmethod
+    def from_dict(cls, data: dict) -> "SearchResult":
+        """Reconstruct a SearchResult from a dictionary.
+
+        Accepts the format produced by :meth:`to_dict` (and by
+        :func:`~findpapers.utils.export.export_to_json`).
 
         Parameters
         ----------
-        path : str
-            Output path for JSON export.
+        data : dict
+            Dictionary with ``"metadata"`` and ``"papers"`` keys.
 
         Returns
         -------
-        None
+        SearchResult
+            Reconstructed instance.
         """
-        export_to_json(self, path)
+        metadata = data.get("metadata", {})
+        raw_papers = data.get("papers", [])
 
-    def to_csv(self, path: str) -> None:
-        """Export search results to a CSV file.
+        processed_at: datetime.datetime | None = None
+        ts = metadata.get("timestamp")
+        if isinstance(ts, str):
+            try:
+                processed_at = datetime.datetime.fromisoformat(ts)
+            except ValueError:
+                pass
 
-        Parameters
-        ----------
-        path : str
-            Output path for CSV export.
+        since: datetime.date | None = None
+        since_str = metadata.get("since")
+        if isinstance(since_str, str):
+            try:
+                since = datetime.date.fromisoformat(since_str)
+            except ValueError:
+                pass
 
-        Returns
-        -------
-        None
-        """
-        export_to_csv(self, path)
+        until: datetime.date | None = None
+        until_str = metadata.get("until")
+        if isinstance(until_str, str):
+            try:
+                until = datetime.date.fromisoformat(until_str)
+            except ValueError:
+                pass
 
-    def to_bibtex(self, path: str) -> None:
-        """Export search results to a BibTeX file.
-
-        Parameters
-        ----------
-        path : str
-            Output path for BibTeX export.
-
-        Returns
-        -------
-        None
-        """
-        export_to_bibtex(self, path)
+        return cls(
+            query=metadata.get("query", ""),
+            since=since,
+            until=until,
+            databases=metadata.get("databases"),
+            max_papers_per_database=metadata.get("max_papers_per_database"),
+            processed_at=processed_at,
+            papers=[Paper.from_dict(p) for p in raw_papers],
+            runtime_seconds=metadata.get("runtime_seconds"),
+            runtime_seconds_per_database=metadata.get("runtime_seconds_per_database"),
+        )

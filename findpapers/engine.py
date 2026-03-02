@@ -200,9 +200,9 @@ class Engine:
         SearchResult
             A :class:`~findpapers.core.search_result.SearchResult` object
             whose ``papers`` attribute contains the collected
-            :class:`~findpapers.core.paper.Paper` instances.  The result can
-            be exported directly via ``result.to_json()``,
-            ``result.to_csv()``, or ``result.to_bibtex()``.
+            :class:`~findpapers.core.paper.Paper` instances.  Export via
+            ``engine.export_to_json(result, path)`` or
+            ``engine.export_to_bibtex(result, path)``.
 
         Raises
         ------
@@ -239,8 +239,8 @@ class Engine:
 
         Export results to a file:
 
-        >>> result.to_json("my_search.json")
-        >>> result.to_csv("my_search.csv")
+        >>> Engine.export_to_json(result, "my_search.json")
+        >>> Engine.export_to_bibtex(result, "my_search.bib")
         """
         runner = SearchRunner(
             query=query,
@@ -402,7 +402,7 @@ class Engine:
         >>> engine = Engine()
         >>> result = engine.search("[transformers]")
         >>> engine.enrich(result.papers)
-        >>> result.to_json("enriched_results.json")
+        >>> Engine.export_to_json(result, "enriched_results.json")
         """
         runner = EnrichmentRunner(
             papers=papers,
@@ -549,7 +549,7 @@ class Engine:
 
         Export the graph to JSON:
 
-        >>> graph.to_json("citation_graph.json")
+        >>> Engine.export_to_json(graph, "citation_graph.json")
 
         Snowball from search results with only backward direction:
 
@@ -570,3 +570,148 @@ class Engine:
             num_workers=num_workers,
         )
         return runner.run(verbose=verbose)
+
+    # ------------------------------------------------------------------
+    # Export / Import
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def export_to_json(
+        data: SearchResult | CitationGraph | list[Paper],
+        path: str,
+    ) -> None:
+        """Export data to a JSON file.
+
+        Accepts a :class:`~findpapers.core.search_result.SearchResult`,
+        a :class:`~findpapers.core.citation_graph.CitationGraph`, or a
+        plain ``list[Paper]``.  A ``"type"`` discriminator is embedded in
+        the JSON so that :meth:`load_from_json` can reconstruct the
+        original object.
+
+        Parameters
+        ----------
+        data : SearchResult | CitationGraph | list[Paper]
+            Data to export.
+        path : str
+            Output file path.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If *data* is not a supported type.
+
+        Examples
+        --------
+        Export an entire search result:
+
+        >>> Engine.export_to_json(result, "search.json")
+
+        Export only a filtered subset of papers:
+
+        >>> recent = [p for p in result.papers if p.citations and p.citations > 10]
+        >>> Engine.export_to_json(recent, "top_cited.json")
+
+        Export a citation graph:
+
+        >>> graph = engine.snowball(seed, depth=1)
+        >>> Engine.export_to_json(graph, "graph.json")
+        """
+        from findpapers.utils.export import export_to_json
+
+        export_to_json(data, path)
+
+    @staticmethod
+    def export_to_bibtex(
+        data: SearchResult | CitationGraph | list[Paper],
+        path: str,
+    ) -> None:
+        """Export data to a BibTeX file.
+
+        Accepts a :class:`~findpapers.core.search_result.SearchResult`,
+        a :class:`~findpapers.core.citation_graph.CitationGraph`, or a
+        plain ``list[Paper]``.
+
+        Parameters
+        ----------
+        data : SearchResult | CitationGraph | list[Paper]
+            Data to export.
+        path : str
+            Output file path.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If *data* is not a supported type.
+
+        Examples
+        --------
+        Export search results:
+
+        >>> Engine.export_to_bibtex(result, "refs.bib")
+
+        Export a filtered list:
+
+        >>> filtered = [p for p in result.papers if "deep learning" in (p.title or "")]
+        >>> Engine.export_to_bibtex(filtered, "filtered.bib")
+        """
+        from findpapers.utils.export import export_to_bibtex
+
+        export_to_bibtex(data, path)
+
+    @staticmethod
+    def load_from_json(
+        path: str,
+    ) -> SearchResult | CitationGraph | list[Paper]:
+        """Load data previously exported with :meth:`export_to_json`.
+
+        The ``"type"`` key embedded in the JSON payload determines which
+        Python type is returned:
+
+        * ``"search_result"`` → :class:`~findpapers.core.search_result.SearchResult`
+        * ``"citation_graph"`` → :class:`~findpapers.core.citation_graph.CitationGraph`
+        * ``"paper_list"`` → ``list[Paper]``
+
+        Files exported before the ``"type"`` key was introduced are
+        auto-detected by structure.
+
+        Parameters
+        ----------
+        path : str
+            Path to a JSON file created by :meth:`export_to_json`.
+
+        Returns
+        -------
+        SearchResult | CitationGraph | list[Paper]
+            The reconstructed object.
+
+        Raises
+        ------
+        ValueError
+            If the file format cannot be identified.
+
+        Examples
+        --------
+        Round-trip a search result:
+
+        >>> Engine.export_to_json(result, "search.json")
+        >>> loaded = Engine.load_from_json("search.json")
+        >>> isinstance(loaded, SearchResult)
+        True
+
+        Load a previously saved paper list:
+
+        >>> papers = Engine.load_from_json("top_cited.json")
+        >>> isinstance(papers, list)
+        True
+        """
+        from findpapers.utils.export import load_from_json
+
+        return load_from_json(path)

@@ -1,10 +1,6 @@
 """Tests for CitationGraph and CitationEdge models."""
 
-import csv
 import datetime
-import json
-import os
-import tempfile
 
 from findpapers.core.author import Author
 from findpapers.core.citation_graph import CitationEdge, CitationGraph
@@ -255,20 +251,22 @@ class TestCitationGraph:
         assert depths["10.1000/seed"] == 0
         assert depths["10.1000/ref"] == 1
 
-    def test_to_json(self, tmp_path: str) -> None:
-        """to_json writes valid JSON to disk."""
-        seed = _make_paper("Seed Paper", doi="10.1000/seed")
-        graph = CitationGraph(seed_papers=[seed], depth=1, direction="both")
+    def test_from_dict_round_trip(self) -> None:
+        """from_dict(to_dict()) preserves papers or edges."""
+        seed = _make_paper("Seed", doi="10.1000/seed")
+        ref = _make_paper("Ref", doi="10.1000/ref")
+        graph = CitationGraph(seed_papers=[seed], depth=1, direction="backward")
+        graph.add_paper(ref, depth=1)
+        graph.add_edge(seed, ref)
 
-        output_path = os.path.join(str(tmp_path), "graph.json")
-        graph.to_json(output_path)
+        restored = CitationGraph.from_dict(graph.to_dict())
 
-        with open(output_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        assert data["metadata"]["total_papers"] == 1
-        assert len(data["nodes"]) == 1
-        assert data["nodes"][0]["title"] == "Seed Paper"
+        assert restored.paper_count == 2
+        assert restored.edge_count == 1
+        assert restored.depth == 1
+        assert restored.direction == "backward"
+        assert restored.get_paper_depth(seed) == 0
+        assert restored.get_paper_depth(ref) == 1
 
     def test_multiple_seeds(self) -> None:
         """Graph correctly handles multiple seed papers."""
@@ -307,111 +305,3 @@ class TestCitationGraph:
         assert graph.get_references(center)[0] is ref
         assert len(graph.get_cited_by(center)) == 1
         assert graph.get_cited_by(center)[0] is citing
-
-
-class TestCitationGraphToCsv:
-    """Tests for CitationGraph.to_csv export."""
-
-    def test_creates_two_csv_files(self) -> None:
-        """to_csv produces a papers CSV and an edges CSV."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref = _make_paper("Ref", doi="10.1000/ref")
-        graph = CitationGraph(seed_papers=[seed], depth=1, direction="backward")
-        graph.add_paper(ref, depth=1)
-        graph.add_edge(seed, ref)
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            base_path = os.path.join(tmpdir, "graph.csv")
-            papers_path, edges_path = graph.to_csv(base_path)
-
-            assert os.path.exists(papers_path)
-            assert os.path.exists(edges_path)
-            assert papers_path.endswith("graph_papers.csv")
-            assert edges_path.endswith("graph_edges.csv")
-
-    def test_papers_csv_content(self) -> None:
-        """Papers CSV contains one row per paper with correct columns."""
-        seed = _make_paper("Seed Paper", doi="10.1000/seed")
-        ref = _make_paper("Ref Paper", doi="10.1000/ref")
-        graph = CitationGraph(seed_papers=[seed], depth=1, direction="backward")
-        graph.add_paper(ref, depth=1)
-        graph.add_edge(seed, ref)
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            papers_path, _ = graph.to_csv(os.path.join(tmpdir, "g.csv"))
-
-            with open(papers_path, encoding="utf-8") as fh:
-                reader = csv.DictReader(fh)
-                rows = list(reader)
-
-        assert len(rows) == 2
-        # Check column names
-        expected_columns = {
-            "doi",
-            "title",
-            "snowball_depth",
-            "abstract",
-            "authors",
-            "publication_date",
-            "url",
-            "pdf_url",
-            "citations",
-            "keywords",
-        }
-        assert set(rows[0].keys()) == expected_columns
-
-        # Check seed paper data
-        seed_row = next(r for r in rows if r["doi"] == "10.1000/seed")
-        assert seed_row["title"] == "Seed Paper"
-        assert seed_row["snowball_depth"] == "0"
-
-        ref_row = next(r for r in rows if r["doi"] == "10.1000/ref")
-        assert ref_row["snowball_depth"] == "1"
-
-    def test_edges_csv_content(self) -> None:
-        """Edges CSV contains one row per edge with source/target info."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref = _make_paper("Ref", doi="10.1000/ref")
-        graph = CitationGraph(seed_papers=[seed], depth=1, direction="backward")
-        graph.add_paper(ref, depth=1)
-        graph.add_edge(seed, ref)
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            _, edges_path = graph.to_csv(os.path.join(tmpdir, "g.csv"))
-
-            with open(edges_path, encoding="utf-8") as fh:
-                reader = csv.DictReader(fh)
-                rows = list(reader)
-
-        assert len(rows) == 1
-        assert rows[0]["source_doi"] == "10.1000/seed"
-        assert rows[0]["target_doi"] == "10.1000/ref"
-        assert rows[0]["source_title"] == "Seed"
-        assert rows[0]["target_title"] == "Ref"
-
-    def test_empty_graph_creates_header_only_files(self) -> None:
-        """An empty graph (no seeds with DOI) produces header-only CSVs."""
-        graph = CitationGraph(seed_papers=[], depth=0, direction="both")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            papers_path, edges_path = graph.to_csv(os.path.join(tmpdir, "empty.csv"))
-
-            with open(papers_path, encoding="utf-8") as fh:
-                rows = list(csv.DictReader(fh))
-            assert rows == []
-
-            with open(edges_path, encoding="utf-8") as fh:
-                rows = list(csv.DictReader(fh))
-            assert rows == []
-
-    def test_creates_parent_directories(self) -> None:
-        """to_csv creates intermediate directories if needed."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        graph = CitationGraph(seed_papers=[seed], depth=0, direction="both")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            nested = os.path.join(tmpdir, "a", "b", "c", "graph.csv")
-            papers_path, edges_path = graph.to_csv(nested)
-
-            assert os.path.exists(papers_path)
-            assert os.path.exists(edges_path)

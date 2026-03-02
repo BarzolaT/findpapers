@@ -1,24 +1,110 @@
 from __future__ import annotations
 
-import csv
 import json
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from findpapers.core.paper import Paper
+from findpapers.utils.version import package_version
 
 if TYPE_CHECKING:
+    from findpapers.core.citation_graph import CitationGraph
     from findpapers.core.search_result import SearchResult
 
+#: Union of all exportable types.
+Exportable = Union["SearchResult", "CitationGraph", list[Paper]]
 
-def export_to_json(search: SearchResult, path: str) -> None:
-    """Write search results to a JSON file.
+
+def _extract_papers(data: Exportable) -> list[Paper]:
+    """Extract a flat list of papers from any exportable input.
 
     Parameters
     ----------
-    search : SearchResult
-        SearchResult instance with results and metadata.
+    data : SearchResult | CitationGraph | list[Paper]
+        Source of papers.
+
+    Returns
+    -------
+    list[Paper]
+        Papers extracted from *data*.
+
+    Raises
+    ------
+    TypeError
+        If *data* is not a supported type.
+    """
+    from findpapers.core.citation_graph import CitationGraph
+    from findpapers.core.search_result import SearchResult
+
+    if isinstance(data, list):
+        return data
+    if isinstance(data, SearchResult):
+        return data.papers
+    if isinstance(data, CitationGraph):
+        return data.papers
+    raise TypeError(
+        f"Expected SearchResult, CitationGraph, or list[Paper], got {type(data).__name__}"
+    )
+
+
+def _serialize_to_dict(data: Exportable) -> dict:
+    """Serialize any exportable input to a dictionary.
+
+    The output always contains a top-level ``"type"`` key so that
+    :func:`load_from_json` can reconstruct the original object.
+
+    Parameters
+    ----------
+    data : SearchResult | CitationGraph | list[Paper]
+        Data to serialize.
+
+    Returns
+    -------
+    dict
+        JSON-ready dictionary.
+
+    Raises
+    ------
+    TypeError
+        If *data* is not a supported type.
+    """
+    from findpapers.core.citation_graph import CitationGraph
+    from findpapers.core.search_result import SearchResult
+
+    if isinstance(data, SearchResult):
+        payload = data.to_dict()
+        payload["type"] = "search_result"
+        return payload
+    if isinstance(data, CitationGraph):
+        payload = data.to_dict()
+        payload["type"] = "citation_graph"
+        return payload
+    if isinstance(data, list):
+        return {
+            "type": "paper_list",
+            "metadata": {
+                "version": package_version(),
+                "total_papers": len(data),
+            },
+            "papers": [Paper.to_dict(p) for p in data],
+        }
+    raise TypeError(
+        f"Expected SearchResult, CitationGraph, or list[Paper], got {type(data).__name__}"
+    )
+
+
+def export_to_json(data: Exportable, path: str) -> None:
+    """Write data to a JSON file.
+
+    Accepts a :class:`~findpapers.core.search_result.SearchResult`,
+    a :class:`~findpapers.core.citation_graph.CitationGraph`, or a
+    plain ``list[Paper]``.
+
+    Parameters
+    ----------
+    data : SearchResult | CitationGraph | list[Paper]
+        Data to export.
     path : str
         Output file path.
 
@@ -26,18 +112,22 @@ def export_to_json(search: SearchResult, path: str) -> None:
     -------
     None
     """
-    payload = search.to_dict()
+    payload = _serialize_to_dict(data)
     with Path(path).open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
 
 
-def export_to_csv(search: SearchResult, path: str) -> None:
-    """Write search results to a CSV file using the standard column order.
+def export_to_bibtex(data: Exportable, path: str) -> None:
+    """Write data to a BibTeX file.
+
+    Accepts a :class:`~findpapers.core.search_result.SearchResult`,
+    a :class:`~findpapers.core.citation_graph.CitationGraph`, or a
+    plain ``list[Paper]``.
 
     Parameters
     ----------
-    search : SearchResult
-        SearchResult instance with papers to export.
+    data : SearchResult | CitationGraph | list[Paper]
+        Data to export.
     path : str
         Output file path.
 
@@ -45,107 +135,70 @@ def export_to_csv(search: SearchResult, path: str) -> None:
     -------
     None
     """
-    columns = csv_columns()
-    with Path(path).open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=columns)
-        writer.writeheader()
-        for paper in search.papers:
-            writer.writerow(paper_to_csv_row(paper))
-
-
-def export_to_bibtex(search: SearchResult, path: str) -> None:
-    """Write search results to a BibTeX file.
-
-    Parameters
-    ----------
-    search : SearchResult
-        SearchResult instance with papers to export.
-    path : str
-        Output file path.
-
-    Returns
-    -------
-    None
-    """
-    bibtex_output = "".join(paper_to_bibtex(paper) for paper in search.papers)
+    papers = _extract_papers(data)
+    bibtex_output = "".join(paper_to_bibtex(paper) for paper in papers)
     with Path(path).open("w", encoding="utf-8") as handle:
         handle.write(bibtex_output)
 
 
-def csv_columns() -> list[str]:
-    """Return the CSV column order.
+def load_from_json(
+    path: str,
+) -> "SearchResult | CitationGraph | list[Paper]":
+    """Load data previously exported with :func:`export_to_json`.
 
-    Returns
-    -------
-    list[str]
-        Column names ordered by priority.
-    """
-    paper_fields = [
-        "title",
-        "abstract",
-        "authors",
-        "author_affiliations",
-        "publication_date",
-        "url",
-        "pdf_url",
-        "doi",
-        "citations",
-        "keywords",
-        "comments",
-        "page_count",
-        "page_range",
-        "databases",
-        "paper_type",
-    ]
-    source_fields = [
-        "source_title",
-        "source_type",
-        "source_isbn",
-        "source_issn",
-        "source_publisher",
-    ]
-    return paper_fields + source_fields
+    The ``"type"`` key in the JSON payload is used to reconstruct the
+    correct Python object:
 
+    * ``"search_result"`` → :class:`~findpapers.core.search_result.SearchResult`
+    * ``"citation_graph"`` → :class:`~findpapers.core.citation_graph.CitationGraph`
+    * ``"paper_list"`` → ``list[Paper]``
 
-def paper_to_csv_row(paper: Paper) -> dict[str, object]:
-    """Convert a paper into a CSV row mapping.
+    Files exported **before** the ``"type"`` key was introduced are
+    auto-detected as either a ``SearchResult`` (when the payload
+    contains a ``"papers"`` key) or a ``CitationGraph`` (when it
+    contains ``"nodes"`` and ``"edges"`` keys).
 
     Parameters
     ----------
-    paper : Paper
-        Paper instance.
+    path : str
+        Path to a JSON file created by :func:`export_to_json`.
 
     Returns
     -------
-    dict[str, object]
-        CSV row mapping.
+    SearchResult | CitationGraph | list[Paper]
+        The reconstructed object.
+
+    Raises
+    ------
+    ValueError
+        If the file format cannot be identified.
     """
-    source = paper.source
-    row: dict[str, object] = {
-        "title": paper.title,
-        "abstract": paper.abstract,
-        "authors": "; ".join(author.name for author in paper.authors),
-        "author_affiliations": "; ".join(
-            author.affiliation for author in paper.authors if author.affiliation
-        ),
-        "publication_date": paper.publication_date.isoformat() if paper.publication_date else None,
-        "url": paper.url,
-        "pdf_url": paper.pdf_url,
-        "doi": paper.doi,
-        "citations": paper.citations,
-        "keywords": "; ".join(sorted(paper.keywords)),
-        "comments": paper.comments,
-        "page_count": paper.page_count,
-        "page_range": paper.page_range,
-        "databases": "; ".join(sorted(paper.databases)),
-        "paper_type": paper.paper_type.value if paper.paper_type else None,
-        "source_title": source.title if source else None,
-        "source_type": source.source_type.value if source and source.source_type else None,
-        "source_isbn": source.isbn if source else None,
-        "source_issn": source.issn if source else None,
-        "source_publisher": source.publisher if source else None,
-    }
-    return row
+    from findpapers.core.citation_graph import CitationGraph
+    from findpapers.core.search_result import SearchResult
+
+    with Path(path).open("r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+
+    kind = payload.get("type")
+
+    # Explicit type discriminator.
+    if kind == "search_result":
+        return SearchResult.from_dict(payload)
+    if kind == "citation_graph":
+        return CitationGraph.from_dict(payload)
+    if kind == "paper_list":
+        return [Paper.from_dict(p) for p in payload.get("papers", [])]
+
+    # Legacy auto-detection (files saved before "type" was added).
+    if "nodes" in payload and "edges" in payload:
+        return CitationGraph.from_dict(payload)
+    if "papers" in payload:
+        return SearchResult.from_dict(payload)
+
+    raise ValueError(
+        "Unrecognised JSON format: expected a 'type' key or a recognisable "
+        "SearchResult / CitationGraph structure."
+    )
 
 
 def paper_to_bibtex(paper: Paper) -> str:
