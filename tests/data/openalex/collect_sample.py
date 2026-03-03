@@ -17,16 +17,23 @@ OpenAlex API features:
 
 import json
 import os
+import re
 import urllib.parse
 from datetime import datetime
 from pathlib import Path
 
 import requests
 
+
+def _sanitize_url(url: str) -> str:
+    """Remove api_key parameter from a URL to avoid committing secrets."""
+    return re.sub(r"([?&])api_key=[^&]*", r"\1api_key=***REDACTED***", url)
+
+
 # Configuration
 OUTPUT_DIR = Path(__file__).parent
 PROJECT_ROOT = OUTPUT_DIR.parent.parent.parent
-LIMIT = 50
+LIMIT = 15
 
 # OpenAlex API configuration
 # Base URL: https://api.openalex.org/works
@@ -124,7 +131,7 @@ def collect_openalex_sample() -> None:
         metadata = {
             "collected_at": datetime.now().isoformat(),
             "api_url": BASE_URL,
-            "full_url": full_url,
+            "full_url": _sanitize_url(full_url),
             "query": QUERY,
             "filter": filter_str,
             "date_range": {"from": DATE_FROM, "to": DATE_TO},

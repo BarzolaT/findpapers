@@ -16,7 +16,6 @@ Examples:
 
 Notes:
 - IEEE and Scopus require API keys in .env file or environment variables
-- bioRxiv and medRxiv don't support keyword search (only date filtering)
 - arXiv and PubMed are fully open APIs
 - After collecting API samples, pages/collect_pages.py is also run to fetch
   landing-page HTML for the collected DOIs
@@ -29,9 +28,7 @@ from pathlib import Path
 # Available collectors
 COLLECTORS = {
     "arxiv": "arxiv/collect_sample.py",
-    "biorxiv": "biorxiv/collect_sample.py",
     "crossref": "crossref/collect_sample.py",
-    "medrxiv": "medrxiv/collect_sample.py",
     "ieee": "ieee/collect_sample.py",
     "pubmed": "pubmed/collect_sample.py",
     "scopus": "scopus/collect_sample.py",
@@ -65,7 +62,19 @@ def run_collector(name: str, script_path: Path) -> bool:
 
 
 def run_page_collector(selected_dbs: list[str]) -> bool:
-    """Run the landing-page collector for the given databases."""
+    """Run the landing-page collector for the given databases.
+
+    Databases that the page collector does not support (e.g. crossref, whose
+    sample data uses a non-standard structure) are silently skipped.
+    """
+    # Only forward databases that the page collector actually supports.
+    _PAGES_SUPPORTED = {"arxiv", "ieee", "pubmed", "scopus", "openalex", "semanticscholar"}
+    page_dbs = [db for db in selected_dbs if db in _PAGES_SUPPORTED]
+
+    if not page_dbs:
+        print("\n⚠ No databases eligible for page collection — skipping")
+        return True
+
     print("\n" + "=" * 70)
     print("  Running PAGES collector")
     print("=" * 70 + "\n")
@@ -77,7 +86,7 @@ def run_page_collector(selected_dbs: list[str]) -> bool:
 
     try:
         result = subprocess.run(
-            [sys.executable, str(pages_script)] + selected_dbs,
+            [sys.executable, str(pages_script)] + page_dbs,
             cwd=pages_script.parent,
             check=True,
             capture_output=False,

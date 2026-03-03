@@ -13,6 +13,7 @@ Set the SCOPUS_API_KEY environment variable or create a .env file in the project
 
 import json
 import os
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -67,7 +68,11 @@ DATE_RANGE = "2020-2022"
 
 
 def collect_scopus_sample() -> None:
-    """Collect sample data from Scopus API."""
+    """Collect sample data from Scopus API.
+
+    The Scopus API returns at most 25 entries per request, so we paginate
+    until we reach ``LIMIT`` entries or exhaust the result set.
+    """
     print("=" * 60)
     print("Scopus API Sample Data Collector")
     print("=" * 60)
@@ -84,37 +89,69 @@ def collect_scopus_sample() -> None:
         "Accept": "application/json",
     }
 
-    params = {
-        "query": QUERY,
-        "start": 0,
-        "count": 25,  # Reduced from LIMIT due to API restrictions
-        "date": DATE_RANGE,
-        "sort": "-coverDate",  # Descending by cover date
-        "view": "STANDARD",  # COMPLETE requires special entitlements
-    }
+    page_size = 25  # Scopus API maximum per request
+    all_entries: list[dict] = []
+    start = 0
 
     print(f"\nRequest URL: {BASE_URL}")
     print(f"Query: {QUERY}")
     print(f"Date range: {DATE_RANGE}")
-    print(f"Parameters: {json.dumps(params, indent=2)}\n")
+    print(f"Target: {LIMIT} papers (page size {page_size})\n")
 
-    print(f"Fetching {LIMIT} papers from Scopus...")
+    print(f"Fetching up to {LIMIT} papers from Scopus...")
 
     try:
-        response = requests.get(BASE_URL, headers=headers, params=params, timeout=60)
-        response.raise_for_status()
+        while len(all_entries) < LIMIT:
+            params = {
+                "query": QUERY,
+                "start": start,
+                "count": page_size,
+                "date": DATE_RANGE,
+                "sort": "-coverDate",
+                "view": "STANDARD",
+            }
 
-        data = response.json()
+            response = requests.get(BASE_URL, headers=headers, params=params, timeout=60)
+            response.raise_for_status()
+
+            data = response.json()
+            search_results = data.get("search-results", {})
+            entries = search_results.get("entry", [])
+
+            if not isinstance(entries, list) or len(entries) == 0:
+                break
+
+            all_entries.extend(entries)
+            print(
+                f"  Page {start // page_size + 1}: got {len(entries)} entries "
+                f"(total so far: {len(all_entries)})"
+            )
+
+            # Stop if we got fewer than a full page (no more results)
+            if len(entries) < page_size:
+                break
+
+            start += page_size
+
+            # Be polite between pages
+            if len(all_entries) < LIMIT:
+                time.sleep(1.0)
+
+        # Trim to exact LIMIT
+        all_entries = all_entries[:LIMIT]
+
+        # Build a single combined response structure
+        combined_data = data.copy()
+        combined_data["search-results"] = dict(search_results)
+        combined_data["search-results"]["entry"] = all_entries
 
         # Save JSON response
         json_path = OUTPUT_DIR / "sample_response.json"
-        json_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
-        print(f"✓ Saved JSON response to: {json_path}")
+        json_path.write_text(json.dumps(combined_data, indent=2), encoding="utf-8")
+        print(f"\n✓ Saved JSON response to: {json_path}")
 
         # Extract result counts
-        search_results = data.get("search-results", {})
         total_results = search_results.get("opensearch:totalResults", "N/A")
-        entries = search_results.get("entry", [])
 
         # Save metadata
         metadata = {
@@ -123,16 +160,18 @@ def collect_scopus_sample() -> None:
             "query": QUERY,
             "date_range": DATE_RANGE,
             "limit": LIMIT,
+            "page_size": page_size,
+            "pages_fetched": (start // page_size) + 1,
             "response_status": response.status_code,
             "total_results": total_results,
-            "entries_returned": len(entries) if isinstance(entries, list) else 0,
+            "entries_returned": len(all_entries),
         }
         metadata_path = OUTPUT_DIR / "collection_metadata.json"
         metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
         print(f"✓ Saved collection metadata to: {metadata_path}")
 
         print(f"\n✓ Total matching results: {total_results}")
-        print(f"✓ Entries returned: {len(entries) if isinstance(entries, list) else 0}")
+        print(f"✓ Entries returned: {len(all_entries)}")
 
         print("\n" + "=" * 60)
         print("Collection complete!")

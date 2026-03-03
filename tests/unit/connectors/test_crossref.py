@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import datetime
-import json
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,18 +11,6 @@ from findpapers.connectors.crossref import (
     CrossRefConnector,
 )
 from findpapers.core.source import SourceType
-
-# ---------------------------------------------------------------------------
-# Load real CrossRef API fixtures collected via collect_sample.py
-# ---------------------------------------------------------------------------
-
-_FIXTURES_PATH = Path(__file__).resolve().parents[2] / "data" / "crossref" / "sample_responses.json"
-
-
-def _load_fixtures() -> dict:
-    """Load the collected CrossRef sample responses."""
-    return json.loads(_FIXTURES_PATH.read_text(encoding="utf-8"))
-
 
 # ---------------------------------------------------------------------------
 # Sample CrossRef work records for testing
@@ -494,9 +480,9 @@ class TestBuildPaperFromRealData:
     """
 
     @pytest.fixture(autouse=True)
-    def _fixtures(self) -> None:
+    def _fixtures(self, crossref_sample_json) -> None:
         """Load the real CrossRef fixtures once per test class."""
-        self.data = _load_fixtures()
+        self.data = crossref_sample_json
 
     # -- Nature journal article (10.1038/nature12373) -----------------------
 

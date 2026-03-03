@@ -1,6 +1,6 @@
 {
-  "total": 8269,
-  "token": "PCOKWVSKJJGM4TWNJNI3EUSQJIWVNUSRKBFEYK2JFUBHFI4VBRJQZEWTFSGJGTJNRWJU3DCNBVGFHU4MZVGY2LGTKKGU2LJMRUJA3EUNBRGBEU6MSVRGWAPOKIKAK",
+  "total": 8490,
+  "token": "PCOKWVSKJJGM4TWNJNI3EUSQJIWVNUSRKBFEYK2JFUBHFI4VBSJVEDGNZSG5EDESCPJ4ZUYMKKJIZTMSFWGI2DGMJXGJFTKNJSJJFDIMJQGRFTJMSVRGWAPYAYKCK",
   "data": [
     {
       "paperId": "000170e0e67cae990b5cebce7f9f2f7b0f72c496",
@@ -104,8 +104,8 @@
           "name": "Tolga Erol"
         },
         {
-          "authorId": "2179147925",
-          "name": "Turan Topalo\u011flu"
+          "authorId": "2368050553",
+          "name": "T. Topalo\u011flu"
         },
         {
           "authorId": "1389527546",
@@ -318,7 +318,7 @@
       "venue": "International Journal of Machine Learning and Cybernetics",
       "year": 2021,
       "referenceCount": 77,
-      "citationCount": 145,
+      "citationCount": 147,
       "isOpenAccess": true,
       "openAccessPdf": {
         "url": "https://link.springer.com/content/pdf/10.1007/s13042-022-01553-3.pdf",
@@ -386,6 +386,79 @@
       "abstract": "In many cases of machine learning, research suggests that the development of training data might have a higher relevance than the choice and modelling of classifiers themselves. Thus, data augmentation methods have been developed to improve classifiers by artificially created training data. In NLP, there is the challenge of establishing universal rules for text transformations which provide new linguistic patterns. In this paper, we present and evaluate a text generation method suitable to increase the performance of classifiers for long and short texts. We achieved promising improvements when evaluating short as well as long text tasks with the enhancement by our text generation method. Especially with regard to small data analytics, additive accuracy gains of up to 15.53% and 3.56% are achieved within a constructed low data regime, compared to the no augmentation baseline and another data augmentation technique. As the current track of these constructed regimes is not universally applicable, we also show major improvements in several real world low data tasks (up to +4.84 F1-score). Since we are evaluating the method from many perspectives (in total 11 datasets), we also observe situations where the method might not be suitable. We discuss implications and patterns for the successful application of our approach on different types of datasets."
     },
     {
+      "paperId": "0022cb28a6153dfe8e628a9e259c0f2bc6a762f1",
+      "externalIds": {
+        "MAG": "3044754756",
+        "DOI": "10.1016/j.trip.2020.100176",
+        "CorpusId": 225558616
+      },
+      "corpusId": 225558616,
+      "url": "https://www.semanticscholar.org/paper/0022cb28a6153dfe8e628a9e259c0f2bc6a762f1",
+      "title": "Vehicle involvements in hydroplaning crashes: Applying interpretable machine learning",
+      "venue": "",
+      "year": 2020,
+      "referenceCount": 38,
+      "citationCount": 14,
+      "isOpenAccess": true,
+      "openAccessPdf": {
+        "url": "https://doi.org/10.1016/j.trip.2020.100176",
+        "status": "GOLD",
+        "license": "CCBYNCND",
+        "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1016/j.trip.2020.100176?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/j.trip.2020.100176, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+      },
+      "fieldsOfStudy": [
+        "Computer Science"
+      ],
+      "s2FieldsOfStudy": [
+        {
+          "category": "Computer Science",
+          "source": "external"
+        },
+        {
+          "category": "Computer Science",
+          "source": "s2-fos-model"
+        },
+        {
+          "category": "Engineering",
+          "source": "s2-fos-model"
+        },
+        {
+          "category": "Environmental Science",
+          "source": "s2-fos-model"
+        }
+      ],
+      "publicationTypes": null,
+      "publicationDate": "2020-07-01",
+      "journal": {
+        "name": "",
+        "pages": "100176",
+        "volume": "6"
+      },
+      "authors": [
+        {
+          "authorId": "2109619283",
+          "name": "Subasish Das"
+        },
+        {
+          "authorId": "3327201",
+          "name": "Anandi K. Dutta"
+        },
+        {
+          "authorId": "1939311",
+          "name": "Kakan C. Dey"
+        },
+        {
+          "authorId": "40458326",
+          "name": "M. Jalayer"
+        },
+        {
+          "authorId": "8436219",
+          "name": "Abhisek Mudgal"
+        }
+      ],
+      "abstract": "Abstract Although hydroplaning is a major contributor to roadway crashes, it is not typically reported in conventional crash databases. Hence, a framework to classify various crash attributes from police reports and to identify hydroplaning crashes is strongly needed. This study applied natural language processing (NLP) tools to seven years (2010\u20132016) of crash data from the Louisiana traffic crash database to identify hydroplaning related crashes. This research focused on the development of a framework to apply interpretable machine learning models to unstructured textual content in order to classify the number of vehicle involvements in a crash. This approach evaluated the effectiveness of keywords in determining the classification. This study used three machine learning algorithms. Of these algorithms, the eXtreme Gradient Boosting (XGBoost) model was found to be the most effective classifier. This research provided a platform to understand the application of interpretability in machine learning models. The outcomes of this study prove that underlying trends or precursors can be revealed and analyzed through these models. Furthermore, this indicates that quantitative modeling techniques can be used to address safety concerns."
+    },
+    {
       "paperId": "002912aefce306d7bcf00ab6dfbcc6aa05447941",
       "externalIds": {
         "PubMedCentral": "8968783",
@@ -400,7 +473,7 @@
       "venue": "Social Network Analysis and Mining",
       "year": 2022,
       "referenceCount": 49,
-      "citationCount": 21,
+      "citationCount": 22,
       "isOpenAccess": true,
       "openAccessPdf": {
         "url": "https://link.springer.com/content/pdf/10.1007/s13278-022-00872-1.pdf",
@@ -533,8 +606,8 @@
       "url": "https://www.semanticscholar.org/paper/0036c9dbc356b6daef640c792cf1e19a9f976c23",
       "title": "Using Machine Learning to Demystify Startups Funding, Post-Money Valuation, and Success",
       "venue": "Social Science Research Network",
-      "year": 2020,
-      "referenceCount": 36,
+      "year": 2021,
+      "referenceCount": 35,
       "citationCount": 19,
       "isOpenAccess": false,
       "openAccessPdf": {
@@ -559,13 +632,13 @@
         }
       ],
       "publicationTypes": null,
-      "publicationDate": "2020-08-27",
+      "publicationDate": "2021-05-11",
       "journal": {
-        "name": "Mutual Funds"
+        "name": "SSRN Electronic Journal"
       },
       "authors": [
         {
-          "authorId": "2003406528",
+          "authorId": "2356974064",
           "name": "Yu Qian Ang"
         },
         {
@@ -577,7 +650,7 @@
           "name": "S. Saghafian"
         }
       ],
-      "abstract": "This chapter develops a novel approach to predict post-money valuation of startups across various regions and sectors, as well as their probabilities of success. Using startup funding data and descriptions from Crunchbase over a ten-year period, we develop two models linking information such as description, region, and venture capital funding to successful outcomes such as the achievement of an acquisition or IPO. The first model utilizes latent Dirichlet allocation, a generative statistical model in natural language processing, to organize the startups in the dataset into clusters representing various sectors in the typical economy. An optimized distributed gradient boosting regressor (XGBoost) is subsequently deployed to make use of the resultant feature set to predict post-money valuation, with Bayesian optimization used to find the optimal hyperparameters. Our model consistently achieves an accuracy of over 95% on hold-out test sets, even with some continuous features removed. The second model is a feed-forward neural network constructed using TensorFlow, with the final layer providing probabilities of success.We find that post-money valuations across regions are typically log-normally distributed, and startups in regions such as San Francisco Bay Area typically witness higher valuations across most sectors. We also find that startups operating in specific geographical regions and sectors of economy (e.g., regions and sectors with higher number of investors) typically have higher predicted probabilities of success. Our approach offers an empirical perspective to startups, policymakers, and venture funds to benchmark and predict valuation and success, clearing some opacity in the modern startup economy."
+      "abstract": "This chapter develops a novel approach to predict post-money valuation of startups across various regions and sectors, as well as their probabilities of success. Using startup funding data and descriptions from Crunchbase over a ten-year period, we develop two models linking information such as description, region, and venture capital funding to successful outcomes such as the achievement of an acquisition or IPO. The \ufb01rst model utilizes latent Dirichlet allocation, a generative statistical model in natural language processing, to organize the startups in the dataset into clusters representing various sectors in the typical economy. An optimized distributed gradient boosting regressor ( XGBoost ) is subsequently deployed to make use of the resultant feature set to predict post-money valuation, with Bayesian optimization used to \ufb01nd the optimal hyperparameters. Our model consistently achieves an accuracy of over 95% on hold-out test sets, even with some continuous features removed. The second model is a feed-forward neural network constructed using TensorFlow, with the \ufb01nal layer providing probabilities of success. We \ufb01nd that post-money valuations across regions are typically log-normally distributed, and startups in regions such as San Francisco Bay Area typically witness higher valuations across most sectors. We also \ufb01nd that startups operating in speci\ufb01c geographical regions and sectors of economy (e.g., regions and sectors with higher number of investors) typically have higher predicted probabilities of success. Our approach o\ufb00ers an empirical perspective to startups, policymakers, and venture funds to benchmark and predict valuation and success, clearing some opacity in the modern startup economy."
     },
     {
       "paperId": "0040c37c9648b0e7f3f68659335e9f83ce161111",
@@ -762,7 +835,7 @@
       "venue": "Journal of Nursing Scholarship",
       "year": 2022,
       "referenceCount": 31,
-      "citationCount": 26,
+      "citationCount": 28,
       "isOpenAccess": false,
       "openAccessPdf": {
         "url": "",
@@ -1024,7 +1097,7 @@
       "venue": "Medical Informatics Europe",
       "year": 2021,
       "referenceCount": 13,
-      "citationCount": 5,
+      "citationCount": 6,
       "isOpenAccess": true,
       "openAccessPdf": {
         "url": "https://ebooks.iospress.nl/pdf/doi/10.3233/SHTI210178",
@@ -1315,7 +1388,7 @@
       "venue": "New Review of Academic Librarianship",
       "year": 2021,
       "referenceCount": 22,
-      "citationCount": 75,
+      "citationCount": 76,
       "isOpenAccess": false,
       "openAccessPdf": {
         "url": "",
@@ -1362,6 +1435,61 @@
       "abstract": "Abstract This paper focuses on the opportunities and challenges associated with the use of artificial intelligence (AI) in academic library operations. In the quest to render fast, effective and efficient services, academic libraries have adopted different technologies in the past. Artificial intelligence technologies is the latest among the technologies currently being introduced in libraries. The technology which is considered an intelligent system, come in the form of robots and expert systems which have natural language processing, machine learning and pattern recognition capabilities. This paper examined the features of AI, the application of AI to library operations, examples of academic libraries with AI technologies in Sub-Saharan Africa, the need for AI in libraries and the challenges associated with the adoption of AI in libraries. The study concluded that AI holds a lot of prospects for the improvement of information services delivery in African academic libraries. Consequently, its adoption is a sinequanon to delivering robust library services in the Fourth Industrial Revolution (4IR)."
     },
     {
+      "paperId": "00794574cf4c9bae135d25df8e0aacf01825fb45",
+      "externalIds": {
+        "MAG": "3193579020",
+        "DOI": "10.1016/b978-0-323-85769-7.00009-4",
+        "CorpusId": 238964603
+      },
+      "corpusId": 238964603,
+      "url": "https://www.semanticscholar.org/paper/00794574cf4c9bae135d25df8e0aacf01825fb45",
+      "title": "Introduction to cognitive computing and its various applications",
+      "venue": "Cognitive Computing for Human-Robot Interaction",
+      "year": 2021,
+      "referenceCount": 18,
+      "citationCount": 17,
+      "isOpenAccess": false,
+      "openAccessPdf": {
+        "url": "",
+        "status": null,
+        "license": null,
+        "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1016/b978-0-323-85769-7.00009-4?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1016/b978-0-323-85769-7.00009-4, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+      },
+      "fieldsOfStudy": [
+        "Computer Science"
+      ],
+      "s2FieldsOfStudy": [
+        {
+          "category": "Computer Science",
+          "source": "external"
+        },
+        {
+          "category": "Computer Science",
+          "source": "s2-fos-model"
+        },
+        {
+          "category": "Psychology",
+          "source": "s2-fos-model"
+        }
+      ],
+      "publicationTypes": null,
+      "publicationDate": null,
+      "journal": {
+        "name": "Cognitive Computing for Human-Robot Interaction"
+      },
+      "authors": [
+        {
+          "authorId": "1414784329",
+          "name": "Sushila Aghav-Palwe"
+        },
+        {
+          "authorId": "2290293147",
+          "name": "Anita Gunjal"
+        }
+      ],
+      "abstract": "Abstract Cognitive computing is an intelligent system that converses with and mimics the human being in a natural form by learning at scale, reasoning with purpose. Cognitive computing is the third era of computing and now cognitive computing has attracted considerable attention in both academia and industry. Machines and humans\u2019 intelligence gets combined to solve the most complex problems of the world. Complicated problems can be solved by computing framework without intervention of humans. Natural language processing with emotion analysis, artificial intelligence (AI), machine learning, neural networks are building blocks of cognitive computing process to tackle problems as the way human beings do. Nowadays, advance technologies adapt cognitive computing in many areas to assist human experts in smart decision making for the betterment of businesses. Current technology expectations are to make human life better and to help them work in better ways. Nowadays, there is explosive data growth, business conditions are also changing rapidly so intelligent, hassle-free, and enhanced interactions amongst human beings and technology can be effectively addressed by cognitive systems. AI is in use in many apps like the Alexa: Amazon voice assistant, Netflix and Amazon algorithms which recommend the next to watch or buy. Some examples of personal assistants that uses cognitive computing are Alexa, Siri, Google assistant, and Cortana. Advancement of technology and its adoption in the public and private sectors will greatly affect the future of cognitive computing due to technology evolutionary paths and trends. Cognitive systems must be adaptive, interactive, iterative, and stateful and contextual in commercial and widespread applications. Some of the applications that can use cognitive computing to gain benefits from this type of technology are cognitive computing for changing business values, Financial and Investment firms, Healthcare and veterinary medicine, Travel and Tourism, Health and wellness, Education and learning, Agriculture, Communication and network technology."
+    },
+    {
       "paperId": "0084f3cb0a1754272151c5268a783f24bf5676a0",
       "externalIds": {
         "PubMedCentral": "8010506",
@@ -1375,8 +1503,8 @@
       "title": "Review of deep learning: concepts, CNN architectures, challenges, applications, future directions",
       "venue": "Journal of Big Data",
       "year": 2021,
-      "referenceCount": 349,
-      "citationCount": 5921,
+      "referenceCount": 348,
+      "citationCount": 6078,
       "isOpenAccess": true,
       "openAccessPdf": {
         "url": "https://journalofbigdata.springeropen.com/counter/pdf/10.1186/s40537-021-00444-8",
@@ -1494,7 +1622,7 @@
         },
         {
           "authorId": "1880502",
-          "name": "Wenyin Gong"
+          "name": "W. Gong"
         },
         {
           "authorId": "2144438792",
@@ -1517,7 +1645,7 @@
       "venue": "Knowledge and Information Systems",
       "year": 2020,
       "referenceCount": 186,
-      "citationCount": 236,
+      "citationCount": 240,
       "isOpenAccess": false,
       "openAccessPdf": {
         "url": "",
@@ -1581,7 +1709,7 @@
       "venue": "ACM Trans. Asian Low Resour. Lang. Inf. Process.",
       "year": 2022,
       "referenceCount": 92,
-      "citationCount": 12,
+      "citationCount": 13,
       "isOpenAccess": false,
       "openAccessPdf": {
         "url": "",
@@ -1929,7 +2057,7 @@
       "venue": "Interspeech",
       "year": 2020,
       "referenceCount": 38,
-      "citationCount": 144,
+      "citationCount": 145,
       "isOpenAccess": true,
       "openAccessPdf": {
         "url": "https://arxiv.org/pdf/2008.01551",
@@ -2152,7 +2280,7 @@
       "venue": "Conference on Fairness, Accountability and Transparency",
       "year": 2022,
       "referenceCount": 48,
-      "citationCount": 251,
+      "citationCount": 257,
       "isOpenAccess": true,
       "openAccessPdf": {
         "url": "https://dl.acm.org/doi/pdf/10.1145/3531146.3533234",
@@ -2223,11 +2351,79 @@
           "name": "Nicole DeCario"
         },
         {
-          "authorId": "2169933158",
-          "name": "Will Buchanan"
+          "authorId": "2069110130",
+          "name": "W. Buchanan"
         }
       ],
       "abstract": "The advent of cloud computing has provided people around the world with unprecedented access to computational power and enabled rapid growth in technologies such as machine learning, the computational demands of which incur a high energy cost and a commensurate carbon footprint. As a result, recent scholarship has called for better estimates of the greenhouse gas impact of AI: data scientists today do not have easy or reliable access to measurements of this information, which precludes development of actionable tactics. We argue that cloud providers presenting information about software carbon intensity to users is a fundamental stepping stone towards minimizing emissions. In this paper, we provide a framework for measuring software carbon intensity, and propose to measure operational carbon emissions by using location-based and time-specific marginal emissions data per energy unit. We provide measurements of operational software carbon intensity for a set of modern models covering natural language processing and computer vision applications, and a wide range of model sizes, including pretraining of a 6.1 billion parameter language model. We then evaluate a suite of approaches for reducing emissions on the Microsoft Azure cloud compute platform: using cloud instances in different geographic regions, using cloud instances at different times of day, and dynamically pausing cloud instances when the marginal carbon intensity is above a certain threshold. We confirm previous results that the geographic region of the data center plays a significant role in the carbon intensity for a given cloud instance, and find that choosing an appropriate region can have the largest operational emissions reduction impact. We also present new results showing that the time of day has meaningful impact on operational software carbon intensity.Finally, we conclude with recommendations for how machine learning practitioners can use software carbon intensity information to reduce environmental impact."
+    },
+    {
+      "paperId": "00e1d284260e2f8be8cd47c0bb22a1892d91deba",
+      "externalIds": {
+        "MAG": "3135835076",
+        "DBLP": "journals/ipm/AyoubYZ21",
+        "PubMedCentral": "7980090",
+        "ArXiv": "2103.00747",
+        "DOI": "10.1016/j.ipm.2021.102569",
+        "CorpusId": 232076239,
+        "PubMed": "33776192"
+      },
+      "corpusId": 232076239,
+      "url": "https://www.semanticscholar.org/paper/00e1d284260e2f8be8cd47c0bb22a1892d91deba",
+      "title": "Combat COVID-19 infodemic using explainable natural language processing models",
+      "venue": "Information Processing & Management",
+      "year": 2021,
+      "referenceCount": 50,
+      "citationCount": 144,
+      "isOpenAccess": true,
+      "openAccessPdf": {
+        "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7980090",
+        "status": "GREEN",
+        "license": null,
+        "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/2103.00747, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
+      },
+      "fieldsOfStudy": [
+        "Computer Science",
+        "Medicine"
+      ],
+      "s2FieldsOfStudy": [
+        {
+          "category": "Computer Science",
+          "source": "external"
+        },
+        {
+          "category": "Medicine",
+          "source": "external"
+        },
+        {
+          "category": "Computer Science",
+          "source": "s2-fos-model"
+        }
+      ],
+      "publicationTypes": [
+        "JournalArticle"
+      ],
+      "publicationDate": "2021-03-01",
+      "journal": {
+        "name": "Information Processing & Management",
+        "pages": "102569 - 102569",
+        "volume": "58"
+      },
+      "authors": [
+        {
+          "authorId": "153011612",
+          "name": "Jackie Ayoub"
+        },
+        {
+          "authorId": "2252160650",
+          "name": "X. J. Yang"
+        },
+        {
+          "authorId": "2281242156",
+          "name": "Feng Zhou"
+        }
+      ],
+      "abstract": "Misinformation of COVID-19 is prevalent on social media as the pandemic unfolds, and the associated risks are extremely high. Thus, it is critical to detect and combat such misinformation. Recently, deep learning models using natural language processing techniques, such as BERT (Bidirectional Encoder Representations from Transformers), have achieved great successes in detecting misinformation. In this paper, we proposed an explainable natural language processing model based on DistilBERT and SHAP (Shapley Additive exPlanations) to combat misinformation about COVID-19 due to their efficiency and effectiveness. First, we collected a dataset of 984 claims about COVID-19 with fact-checking. By augmenting the data using back-translation, we doubled the sample size of the dataset and the DistilBERT model was able to obtain good performance (accuracy: 0.972; areas under the curve: 0.993) in detecting misinformation about COVID-19. Our model was also tested on a larger dataset for AAAI2021 \u2014 COVID-19 Fake News Detection Shared Task and obtained good performance (accuracy: 0.938; areas under the curve: 0.985). The performance on both datasets was better than traditional machine learning models. Second, in order to boost public trust in model prediction, we employed SHAP to improve model explainability, which was further evaluated using a between-subjects experiment with three conditions, i.e., text (T), text+SHAP explanation (TSE), and text+SHAP explanation+source and evidence (TSESE). The participants were significantly more likely to trust and share information related to COVID-19 in the TSE and TSESE conditions than in the T condition. Our results provided good implications for detecting misinformation about COVID-19 and improving public trust."
     },
     {
       "paperId": "00eba050ee4b26fa5bc6f4a406c2ee98a5ee241f",
@@ -2243,7 +2439,7 @@
       "venue": "IEEE/ACM Transactions on Computational Biology & Bioinformatics",
       "year": 2021,
       "referenceCount": 0,
-      "citationCount": 26,
+      "citationCount": 27,
       "isOpenAccess": false,
       "openAccessPdf": {
         "url": "",
@@ -2423,8 +2619,8 @@
           "name": "Rajal Nivargi"
         },
         {
-          "authorId": "2095460077",
-          "name": "Sree Sai Teja Lanka"
+          "authorId": "2396770232",
+          "name": "Sree Lanka"
         },
         {
           "authorId": "2080136131",
@@ -2533,7 +2729,7 @@
       "venue": "Frontiers in Education",
       "year": 2020,
       "referenceCount": 42,
-      "citationCount": 99,
+      "citationCount": 108,
       "isOpenAccess": true,
       "openAccessPdf": {
         "url": "https://www.frontiersin.org/articles/10.3389/feduc.2020.572367/pdf",
@@ -2566,7 +2762,7 @@
       "authors": [
         {
           "authorId": "2130485879",
-          "name": "Vivekanandan Kumar"
+          "name": "Vivekanandan S. Kumar"
         },
         {
           "authorId": "36280323",
@@ -2827,7 +3023,7 @@
       "venue": "ACM Computing Surveys",
       "year": 2020,
       "referenceCount": 295,
-      "citationCount": 174,
+      "citationCount": 177,
       "isOpenAccess": true,
       "openAccessPdf": {
         "url": "https://arxiv.org/pdf/2002.05442",
@@ -2925,177 +3121,6 @@
         }
       ],
       "abstract": "Organizations handling huge amount of data needs to preserve privacy of the documents. Every customer has the rights to ask for privacy of their documents. These documents can be classified into different categories like private, public, confidential, etc. Using suitable text classification methods, documents can be classified into different categories. Various approaches like machine learning (ML), deep learning (DL), natural language processing (NLP) is available. Machine learning algorithms are showing acceptable performance but doesn\u2019t work well when data grows in size. In this paper, convolutional neural network(CNN) which is a deep learning model, is used to classify documents into different categories. Deep learning models are beneficial over machine learning models in terms of performance and volume of data to be classified. The performance of the model is evaluated and obtained acceptable performance."
-    },
-    {
-      "paperId": "01295091d318dca8212431590cce2c7a1081469c",
-      "externalIds": {
-        "DBLP": "journals/access/KimKJ21",
-        "DOI": "10.1109/ACCESS.2021.3055513",
-        "CorpusId": 231914275
-      },
-      "corpusId": 231914275,
-      "url": "https://www.semanticscholar.org/paper/01295091d318dca8212431590cce2c7a1081469c",
-      "title": "Compositional Generalization via Parsing Tree Annotation",
-      "venue": "IEEE Access",
-      "year": 2021,
-      "referenceCount": 32,
-      "citationCount": 1,
-      "isOpenAccess": true,
-      "openAccessPdf": {
-        "url": "https://doi.org/10.1109/access.2021.3055513",
-        "status": "GOLD",
-        "license": "CCBYNCND",
-        "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1109/ACCESS.2021.3055513?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1109/ACCESS.2021.3055513, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
-      },
-      "fieldsOfStudy": [
-        "Computer Science"
-      ],
-      "s2FieldsOfStudy": [
-        {
-          "category": "Computer Science",
-          "source": "external"
-        },
-        {
-          "category": "Computer Science",
-          "source": "s2-fos-model"
-        }
-      ],
-      "publicationTypes": [
-        "JournalArticle"
-      ],
-      "publicationDate": null,
-      "journal": {
-        "name": "IEEE Access",
-        "pages": "24326-24333",
-        "volume": "9"
-      },
-      "authors": [
-        {
-          "authorId": "46207898",
-          "name": "Segwang Kim"
-        },
-        {
-          "authorId": "2117059788",
-          "name": "Joonyoung Kim"
-        },
-        {
-          "authorId": "1731707",
-          "name": "Kyomin Jung"
-        }
-      ],
-      "abstract": "Humans can understand a novel sentence by parsing it into known components like phrases and clauses. To achieve human-level artificial intelligence, compositional generalization tasks are suggested and used to assess machine learning models. Among those tasks, the SCAN tasks are challenging for the standard deep learning models, such as RNN sequence-to-sequence models and Transformers, that show great success across many natural language processing tasks. Even though a long line of deep learning research has developed memory augmented neural networks aimed at the SCAN tasks, their generalities remain questionable for more complex and realistic applications where the standard seq2seq models dominate. Hence, one needs to propose a method that helps the standard models to discover compositional rules. To this end, we propose a data augmentation technique using paring trees. Our technique annotates targets by inserting a new delimiter token in between them according to their parsing trees. For the training stage, the technique needs prior knowledge about the targets\u2019 semantic or syntactic compositionality. On the other hand, for the test stage, the technique uses no such knowledge. Experiments show that our technique enables the standard models to achieve compositional generalization on the SCAN tasks. Furthermore, we validate our technique on a synthetic task and confirm the standard models\u2019 strong performance gains without using prior knowledge about semantic compositionality. As one way to infuse parsing tree information into sequences, our technique can be used for tasks with structured targets like program code generation tasks."
-    },
-    {
-      "paperId": "012ebba5181a8cd02816a77d31c7ccbba7a09547",
-      "externalIds": {
-        "ArXiv": "2212.07126",
-        "CorpusId": 280950436
-      },
-      "corpusId": 280950436,
-      "url": "https://www.semanticscholar.org/paper/012ebba5181a8cd02816a77d31c7ccbba7a09547",
-      "title": "Explainability of Text Processing and Retrieval Methods: A Survey",
-      "venue": "",
-      "year": 2022,
-      "referenceCount": 169,
-      "citationCount": 0,
-      "isOpenAccess": false,
-      "openAccessPdf": {
-        "url": "",
-        "status": null,
-        "license": null,
-        "disclaimer": "Notice: Paper or abstract available at https://arxiv.org/abs/2212.07126, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
-      },
-      "fieldsOfStudy": [
-        "Computer Science"
-      ],
-      "s2FieldsOfStudy": [
-        {
-          "category": "Computer Science",
-          "source": "external"
-        },
-        {
-          "category": "Computer Science",
-          "source": "s2-fos-model"
-        },
-        {
-          "category": "Linguistics",
-          "source": "s2-fos-model"
-        }
-      ],
-      "publicationTypes": [
-        "Review"
-      ],
-      "publicationDate": "2022-12-14",
-      "journal": null,
-      "authors": [
-        {
-          "authorId": "152623586",
-          "name": "Sourav Saha"
-        },
-        {
-          "authorId": "1956144",
-          "name": "Debapriyo Majumdar"
-        },
-        {
-          "authorId": "2283940660",
-          "name": "Mandar Mitra"
-        }
-      ],
-      "abstract": "Deep Learning and Machine Learning based models have become extremely popular in text processing and information retrieval. However, the non-linear structures present inside the networks make these models largely inscrutable. A significant body of research has focused on increasing the transparency of these models. This article provides a broad overview of research on the explainability and interpretability of natural language processing and information retrieval methods. More specifically, we survey approaches that have been applied to explain word embeddings, sequence modeling, attention modules, transformers, BERT, and document ranking. The concluding section suggests some possible directions for future research on this topic."
-    },
-    {
-      "paperId": "012fa240ba3d1e3e6425f9c3ce51e36df5256ddb",
-      "externalIds": {
-        "DBLP": "conf/racs/ItoM22",
-        "DOI": "10.1145/3538641.3561488",
-        "CorpusId": 253022178
-      },
-      "corpusId": 253022178,
-      "url": "https://www.semanticscholar.org/paper/012fa240ba3d1e3e6425f9c3ce51e36df5256ddb",
-      "title": "Sentence embedding based emotion recognition from text data",
-      "venue": "Research in Adaptive and Convergent Systems",
-      "year": 2022,
-      "referenceCount": 22,
-      "citationCount": 1,
-      "isOpenAccess": false,
-      "openAccessPdf": {
-        "url": "",
-        "status": null,
-        "license": null,
-        "disclaimer": "Notice: Paper or abstract available at https://api.unpaywall.org/v2/10.1145/3538641.3561488?email=<INSERT_YOUR_EMAIL> or https://doi.org/10.1145/3538641.3561488, which is subject to the license by the author or copyright owner provided with this content. Please go to the source to verify the license and copyright information for your use."
-      },
-      "fieldsOfStudy": [
-        "Computer Science"
-      ],
-      "s2FieldsOfStudy": [
-        {
-          "category": "Computer Science",
-          "source": "external"
-        },
-        {
-          "category": "Computer Science",
-          "source": "s2-fos-model"
-        }
-      ],
-      "publicationTypes": [
-        "Book",
-        "JournalArticle"
-      ],
-      "publicationDate": "2022-10-03",
-      "journal": {
-        "name": "Proceedings of the Conference on Research in Adaptive and Convergent Systems"
-      },
-      "authors": [
-        {
-          "authorId": "2111011841",
-          "name": "M. Ito"
-        },
-        {
-          "authorId": "1781086",
-          "name": "K. Markov"
-        }
-      ],
-      "abstract": "Automatic emotion recognition from text is an important task in the field of natural language processing (NLP) with applications in data mining, e-learning, information filtering systems, human-computer interaction, and internet services. Recent advances in machine learning and deep neural networks have boosted the NLP systems' performance tremendously. The availability of large pre-trained language models has simplified the feature extraction and facilitated the building of systems from small amounts of data by transfer learning. In this study, we investigate and compare various methods of sentence embedding including simple embedding matrix as well as sophisticated models such as BERT. The recognition back-end consists of standard SVR or Feed-Forward DNN regressors. In our experiments, we used the EmoBank corpus where each sentence is labeled with Valence-Arousal scores. The results clearly show the benefits of the transfer learning and fine-tuning of pre-trained models with respect to classical model training from scratch."
     }
   ]
 }

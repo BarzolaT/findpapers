@@ -16,12 +16,19 @@ API Key: Optional but recommended for higher rate limits (10 req/sec vs 3 req/se
 
 import json
 import os
+import re
 import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 
 import requests
+
+
+def _sanitize_url(url: str) -> str:
+    """Remove api_key parameter from a URL to avoid committing secrets."""
+    return re.sub(r"([?&])api_key=[^&]*", r"\1api_key=***REDACTED***", url)
+
 
 # Configuration
 OUTPUT_DIR = Path(__file__).parent
@@ -151,7 +158,7 @@ def collect_pubmed_sample() -> None:
         # Save metadata
         metadata = {
             "collected_at": datetime.now().isoformat(),
-            "esearch_url": search_url,
+            "esearch_url": _sanitize_url(search_url),
             "efetch_url": EFETCH_URL,
             "query": QUERY,
             "date_range": {"from": DATE_FROM, "to": DATE_TO},

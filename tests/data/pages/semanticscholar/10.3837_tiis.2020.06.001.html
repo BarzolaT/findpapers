@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="/" />
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta http-equiv="Expires" content="Mon, 06 Jan 1990 00:00:01 GMT">
+<meta http-equiv='Expires' content='-1'>
+<meta http-equiv='cache-control' content='no-cache'>
+<meta http-equiv='pragma' content='no-cache'>
+<meta name="_csrf" content=""/>
+<meta name="_csrf_header" content=""/>
+<meta name="description" content="KSII Transactions on Internet and Information Systems" />
+<meta name="keywords" content="KSII, TIIS, Journal" />
+<link rel="shortcut icon" href="https://d2kjln74dkk4oj.cloudfront.net/img/journals/tiis/favicon.ico" type="image/x-icon" />
+<!-- ======================================================================
+Mobile Specific Meta
+======================================================================= -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<!-- ======================================================================
+Style CSS + Google Fonts
+======================================================================= -->
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,600,700,800" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://d2kjln74dkk4oj.cloudfront.net/tiis/css/style.css"/>
+<link rel="stylesheet" href="https://d2kjln74dkk4oj.cloudfront.net/tiis/css/custom.css"/>
+<link rel="stylesheet" href="https://d2kjln74dkk4oj.cloudfront.net/tiis/css/jquery-ui.css"/>
+<link href="https://d2kjln74dkk4oj.cloudfront.net/vendor/metronic/global/plugins/simple-line-icons/simple-line-icons.css" rel="stylesheet" type="text/css" />
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://d2j16w31g89z0j.cloudfront.net/vendor/metronic/global/plugins/bootbox/bootbox.min.js"></script><meta name="description" content="TIIS Paper Details" />
+    <meta name="robots" content="INDEX,FOLLOW"/>
+    <meta name="citation_title" content="Auxiliary Stacked Denoising Autoencoder based Collaborative Filtering Recommendation"/>
+    <meta name="citation_author" content="Ruihui Mu"/>
+    <meta name="citation_author" content="Xiaoqin Zeng"/>
+    <meta name="citation_publication_date" content="2020/06/30"/>
+    <meta name="citation_journal_title" content="KSII Transactions on Internet and Information Systems"/>
+    <meta name="citation_volume" content="14"/>
+    <meta name="citation_issue" content="6"/>
+    <meta name="citation_firstpage" content="2310"/>
+    <meta name="citation_lastpage" content="2332"/>
+    <meta name="citation_pdf_url" content='https://itiis.org/digital-library/manuscript/file/23581/TIIS Vol 14, No 6-1.pdf'/>
+    <title>Auxiliary Stacked Denoising Autoencoder based Collaborative Filtering Recommendation</title>
+</head>
+
+<body>
+<div class="header">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="logo">
+                    <a href="/journals/tiis"><img src="https://d2kjln74dkk4oj.cloudfront.net/img/journals/tiis/elements/tiis-logo.png"/></a>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <ul class="header-socials">
+                    <li>
+                        <span style="font-size:1.5em"><b>KSII Transactions on Internet and Information Systems</b></span><br/>
+                        Monthly Online Journal (eISSN: 1976-7277)<br/>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu site-bg-color">
+        <div class="container">
+            <div class="responsive-menu">Menu</div>
+            <ul class="responsive-menu-active">
+                <li id="menu-about"><a href="/journals/tiis/about">About</a></li>
+                <li id="menu-hot"><a href="/journals/tiis/hot-paper-ranking">Hot Downloaded Papers</a>
+                    <ul class="children">
+                        <li><a href="/journals/tiis/hot-paper-ranking">Hot Downloaded Papers (Past 3 months) </a></li>
+                        <li><a href="/journals/tiis/paper-ranking">Most Downloaded Papers </a></li>
+                    </ul>
+                </li>
+
+                <li id="menu-board"><a href="/journals/tiis/board">Editorial Board</a></li>
+                <li id="menu-library"><a href="/journals/tiis/digital-library">Digital Library</a>
+                </li>
+                <li id="menu-info"><a href="/journals/tiis/author-guide">Information</a>
+                    <ul class="children">
+                        <li><a href="/journals/tiis/author-guide">Author Guide</a></li>
+                        <li><a href="/journals/tiis/publication-ethics">Publications Ethics and Malpractice Statement</a></li>
+                        <li><a href="/journals/tiis/reviewer-guide">Editor and Reviewer Guide</a></li>
+                    </ul>
+                </li>
+                <li id="menu-special"><a href="/journals/tiis/special-issue">Special Issues</a></li>
+                <li id="menu-submit"><a href="http://mc.manuscriptcentral.com/tiisjournal" target="_blank">Submit Manuscript</a>
+
+                </li>
+            </ul>
+        </div>
+    </div>
+</div><!-- ======================================================================
+                                START CONTENT
+======================================================================= -->
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="blog-entry">
+                    <h1 class="entry-header">Auxiliary Stacked Denoising Autoencoder based Collaborative Filtering Recommendation</h1>
+                    <div class="">
+                        <ul style="display: inline !important;">
+                            <li style="display:inline;font-size: large">
+                                    <a class="author-link" href="/journals/tiis/digital-library/category-search?author=Ruihui Mu">Ruihui Mu</a>,
+                                </li>
+                            <li style="display:inline;font-size: large">
+                                    <a class="author-link" href="/journals/tiis/digital-library/category-search?author=Xiaoqin Zeng">Xiaoqin Zeng</a>,
+                                </li>
+                            </ul>
+                        <span class="volIssueDate">Vol. 14, No. 6, June 30, 2020</span>
+                        <br/>
+                        <img src="https://d2kjln74dkk4oj.cloudfront.net/img/doi_icon.png" border="0" align="absmiddle" style="display: inline !important; vertical-align:middle;"/>
+                        <span style="vertical-align:middle">10.3837/tiis.2020.06.001</span>,
+                        <span style="vertical-align:middle">Download Paper (Free):</span>
+                        <a href="/journals/tiis/digital-library/manuscript/file/23581/TIIS Vol 14, No 6-1.pdf">
+                            <img src="https://d2kjln74dkk4oj.cloudfront.net/img/journals/tiis/elements/pdficon_small.png"
+                                 border="0" align="absmiddle" style="display: inline !important; vertical-align:middle;"
+                                 src="https://d2kjln74dkk4oj.cloudfront.net/img/journals/tiis/elements/pdficon_small.png" />
+                        </a>
+                        <ul>
+                            <li style="display:inline;margin-right: 1px;">
+                                    <a class="label label-default" href="/journals/tiis/digital-library/category-search?keyword=auxiliary information" style="color: white;">auxiliary information</a>
+                                </li>
+                            <li style="display:inline;margin-right: 1px;">
+                                    <a class="label label-default" href="/journals/tiis/digital-library/category-search?keyword=Collaborative Filtering" style="color: white;">Collaborative Filtering</a>
+                                </li>
+                            <li style="display:inline;margin-right: 1px;">
+                                    <a class="label label-default" href="/journals/tiis/digital-library/category-search?keyword=data sparsity" style="color: white;">data sparsity</a>
+                                </li>
+                            <li style="display:inline;margin-right: 1px;">
+                                    <a class="label label-default" href="/journals/tiis/digital-library/category-search?keyword=Recommender System" style="color: white;">Recommender System</a>
+                                </li>
+                            <li style="display:inline;margin-right: 1px;">
+                                    <a class="label label-default" href="/journals/tiis/digital-library/category-search?keyword=stacked denoising autoencoder" style="color: white;">stacked denoising autoencoder</a>
+                                </li>
+                            </ul>
+                    </div>
+                    <br/>
+                    <h4>Abstract</h4>
+                    <p class="blackauthortext" align="justify">In recent years, deep learning techniques have achieved tremendous successes in natural language processing, speech recognition and image processing. Collaborative filtering(CF) recommendation is one of widely used methods and has significant effects in implementing the new recommendation function, but it also has limitations in dealing with the problem of poor scalability, cold start and data sparsity, etc. Combining the traditional recommendation algorithm with the deep learning model has brought great opportunity for the construction of a new recommender system. In this paper, we propose a novel collaborative recommendation model based on auxiliary stacked denoising autoencoder(ASDAE), the model learns effective the preferences of users from auxiliary information. Firstly, we integrate auxiliary information with rating information. Then, we design a stacked denoising autoencoder based collaborative recommendation model to learn the preferences of users from auxiliary information and rating information. Finally, we conduct comprehensive experiments on three real datasets to compare our proposed model with state-of-the-art methods. Experimental results demonstrate that our proposed model is superior to other recommendation methods.</p>
+
+                    <br/>
+
+                    <h4>Statistics</h4>
+                    <div id="stats">
+                        <a href="#" class="showHide">Show / Hide Statistics</a>
+                        <br/>
+                        <div style='display:none'>
+                            <div style="font-size:small; text-align:left;">
+                                <br/>
+                                <b>Statistics (Cumulative Counts from December 1st, 2015)</b><br/>
+                                Multiple requests among the same browser session are counted as one view.<br/>
+                                If you mouse over a chart, the values of data points will be shown.
+                            </div>
+                            <table style="text-align:center;" class="statistics center">
+                                <tr>
+                                    <td class="center">
+                                        <div class="center" id="chart_div"></div>
+                                        <div class="center">
+                                            <button class="btn btn-primary btn-sm" id="prev" value="&lt; " disabled="true">&lt; </button>
+                                            <button class="btn btn-primary btn-sm" id="zoom" value="Zoom">Zoom</button>
+                                            <button class="btn btn-primary btn-sm" id="next" value=" &gt;" disabled="true"> &gt;</button>
+                                        </div>
+                                        <br/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <br/>
+
+                    <h4>Cite this article</h4>
+                    <div class="well">
+                        <h6>[IEEE Style]</h6>
+                        <div class="citation">R. Mu and X. Zeng, "Auxiliary Stacked Denoising Autoencoder based Collaborative Filtering Recommendation," KSII Transactions on Internet and Information Systems, vol. 14, no. 6, pp. 2310-2332, 2020. DOI: 10.3837/tiis.2020.06.001.</div>
+                        <br/>
+                        <h6>[ACM Style]</h6>
+                        <div class="citation">Ruihui Mu and Xiaoqin Zeng. 2020. Auxiliary Stacked Denoising Autoencoder based Collaborative Filtering Recommendation. <em>KSII Transactions on Internet and Information Systems</em>, 14, 6, (2020), 2310-2332. DOI: 10.3837/tiis.2020.06.001.</div>
+                        <br/>
+                        <h6>[BibTeX Style]</h6>
+                        <div class="citation">@article{tiis:23581, title="Auxiliary Stacked Denoising Autoencoder based Collaborative Filtering Recommendation", author="Ruihui Mu and Xiaoqin Zeng and ", journal="KSII Transactions on Internet and Information Systems", DOI={10.3837/tiis.2020.06.001}, volume={14}, number={6}, year="2020", month={June}, pages={2310-2332}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+    <div class="sidebar">
+        <div class="widget">
+            <h2 class="widget-title">Unified Search<br/>
+                <small style="font-size: 0.9em;">(<span class="lowercase">in</span> <span class="capitalize">title, author, abstract</span>, <span class="lowercase">and</span> <span class="capitalize">keywords</span>)</small>
+            </h2>
+
+            <form id="form-unified-search" class="search-form" action="https://itiis.org/digital-library/search" method="get"><input style="width:41px !important;" type="submit" value="" class="search-form-button">
+                <input type="text" name="all" placeholder="Search" class="search-form-line">
+            </form></div>
+        <div class="widget">
+            <h2 class="widget-title">Category Search</h2>
+            <form id="form-category-search" action="https://itiis.org/digital-library/category-search" method="get"><div class="search-form">
+                    <label for="title">Title</label><br/>
+                    <input type="text" id="title" name="title" class="form-control" value="" placeholder="Title Word(s)"/><br/>
+                    <label for="author" >Author</label><br/>
+                    <input type="text" id="author" name="author" class="form-control" value="" placeholder="John Doe"/><br/>
+                    <label for="abstract" >Abstract</label><br/>
+                    <input type="text" id="abstract" name="abstract" class="form-control" value="" placeholder="Abstract Word(s)"/><br/>
+                    <label for="keyword">Keywords</label><br/>
+                    <input type="text" id="keyword" name="keyword" class="form-control" value="" placeholder="Internet, Algorithm"/><br/>
+                    <label for="doi">DOI</label><br/>
+                    <input type="text" id="doi" name="doi" class="form-control" value="" placeholder="10.3837/TIIS.2008.02"/><br/>
+                    <button type="submit" onclick="validateForm()" class="btn btn-primary right">Search</button>
+                </div><br/>
+                <input type="hidden" name="" value=""/>
+            </form><!-- end search form -->
+        </div>
+        </div>
+</div>
+</div>
+    </div>
+</div>
+<!-- ======================================================================
+                                END CONTENT
+======================================================================= -->
+<div class="footer">
+    <div class="container">
+
+
+    </div>
+    <div class="footer-copyright">
+        KSII Transactions on Internet and Information Systems <br/>
+        &copy; 2007~Present, KSII. All Rights Reserved.<br/>
+    </div>
+</div><!-- ======================================================================
+                                START SCRIPTS
+======================================================================= -->
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/modernizr.custom.63321.js" type="text/javascript"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/jquery-1.10.0.min.js" type="text/javascript"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/jquery-ui.min.js" type="text/javascript"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/placeholder.js" type="text/javascript"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/imagesloaded.pkgd.min.js" type="text/javascript"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/masonry.pkgd.min.js" type="text/javascript"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/jquery.swipebox.min.js" type="text/javascript"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/farbtastic/farbtastic.js" type="text/javascript"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/options.js" type="text/javascript"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/tiis/js/plugins.js" type="text/javascript"></script>
+<script src="https://d2kjln74dkk4oj.cloudfront.net/js/validateSearchForm.js" type="text/javascript"></script>
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+<![endif]-->
+<!-- ======================================================================
+END SCRIPTS
+======================================================================= -->
+<script>
+
+    $( document ).ready( function() {
+        $( window ).scroll( function() {
+            if ( $( this ).scrollTop() > 200 ) {
+                $( '.top' ).fadeIn();
+            } else {
+                $( '.top' ).fadeOut();
+            }
+        } );
+        $( '.top' ).click( function() {
+            $( 'html, body' ).animate( { scrollTop : 0 }, 400 );
+            return false;
+        } );
+
+        var pathname = jQuery(location).attr('pathname');
+
+        if (pathname.indexOf("/about") > -1) {
+            $("#menu-about").addClass("active-menu");
+        } else if (pathname.indexOf("/board") > -1) {
+            $("#menu-board").addClass("active-menu");
+        } else if (pathname.indexOf("/digital-library") > -1) {
+            $("#menu-library").addClass("active-menu");
+        } else if (pathname.indexOf("/author-guide") > -1) {
+            $("#menu-info").addClass("active-menu");
+        } else if (pathname.indexOf("/publication-ethics") > -1) {
+            $("#menu-info").addClass("active-menu");
+        } else if (pathname.indexOf("/reviewer-guide") > -1) {
+            $("#menu-info").addClass("active-menu");
+        } else if (pathname.indexOf("/special-issue") > -1) {
+            $("#menu-special").addClass("active-menu");
+        }
+
+        var submenu = $(".active-menu").find("ul").clone();
+
+        if (submenu.length > 0) {
+            $("#submenu-widget").append(submenu.removeClass("children"));
+            $("#submenu-widget").show();
+        }
+
+    } );
+</script>
+<script type="text/javascript"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('visualization', '1', {packages: ['corechart', 'line']});
+
+    google.charts.setOnLoadCallback(drawChart);
+
+    $("div[id=stats]").on('click', '.showHide', function(event) {
+        event.preventDefault();
+        obj = $(this).next().next();
+
+        if (obj.prop("tagName") == "DIV") {
+            if (obj.css("display") != 'block') {
+                obj.css("display", 'block');
+                drawChart();
+            } else {
+                obj.css("display", 'none');
+            }
+        }
+    });
+
+    function drawChart() {
+        //var MAX = /*[[23581]]*/ 7;
+        var manuscript_id =23581;
+        var firstYear;
+        var lastYear;
+        var MAX;
+        var jsonData;
+        $.ajax({
+            url: "https://itiis.org/digital-library/manuscript/"+manuscript_id+"/count",
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                jsonData = data.jsonData;
+                firstYear = data.firstYear;
+                lastYear = data.lastYear;
+                MAX = data.size;
+
+            }
+        });
+
+
+        var options = {
+            legend: {
+                position: 'top'
+            },
+            focusTarget: 'category',
+            tooltip: {isHtml: false},
+            backgroundColor: '#f1f8e9',
+            hAxis: {
+                viewWindow: {
+                    min: MAX-7,
+                    max: MAX
+                }
+
+            }
+        };
+
+        var prevButton = document.getElementById('prev');
+        var nextButton = document.getElementById('next');
+        var changeZoomButton = document.getElementById('zoom');
+
+
+        //var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        //chart.draw(data, options);
+        var data = new google.visualization.DataTable(jsonData);
+
+        // Instantiate and draw our chart, passing in some options.
+        /*<![CDATA[*/
+        var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+
+
+        function drawChart() {
+
+            // Disabling the button while the chart is drawing.
+            prevButton.disabled = true;
+            nextButton.disabled = true;
+            changeZoomButton.disabled = true;
+            google.visualization.events.addListener(chart, 'ready',
+                function() {
+                    prevButton.disabled = options.hAxis.viewWindow.min <= 0;
+                    nextButton.disabled = options.hAxis.viewWindow.max >= MAX;
+                    changeZoomButton.disabled = false;
+                });
+            chart.draw(data, options);
+
+        }
+
+        prevButton.onclick = function() {
+            options.hAxis.viewWindow.min -= 1;
+            options.hAxis.viewWindow.max -= 1;
+            drawChart();
+        };
+        nextButton.onclick = function() {
+            options.hAxis.viewWindow.min += 1;
+            options.hAxis.viewWindow.max += 1;
+            drawChart();
+        };
+        var zoomed = false;
+        changeZoomButton.onclick = function() {
+            if (zoomed) {
+
+                options.hAxis.viewWindow.min = MAX-7;
+                options.hAxis.viewWindow.max = MAX;
+                options.title = lastYear;
+                options.hAxis.showTextEvery = 1;
+            } else {
+
+                options.hAxis.viewWindow.min = 0;
+                options.hAxis.viewWindow.max = MAX;
+                options.title = firstYear+' - '+lastYear;
+                options.hAxis.showTextEvery = Math.round(MAX / 3);
+            }
+            zoomed = !zoomed;
+            drawChart();
+        };
+        drawChart();
+        /*]]>*/
+
+    }
+</script>
+<!-- ======================================================================
+                                END SCRIPTS
+======================================================================= -->
+<div style="position: fixed; bottom: 10px; right: 20px;">
+    <a href="#" class="top" style="display: none;"><img width="36" height="36" src="https://d2kjln74dkk4oj.cloudfront.net/img/journals/tiis/elements/arrows_2_3.png" title="Top" /></a>
+</div></body>
+</html>

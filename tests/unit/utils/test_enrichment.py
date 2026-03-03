@@ -1,6 +1,6 @@
 """Unit tests for findpapers.utils.enrichment.
 
-Tests use real HTML pages collected from arXiv, PubMed, medRxiv, OpenAlex,
+Tests use real HTML pages collected from arXiv, PubMed, OpenAlex,
 IEEE, Scopus, and SemanticScholar that are stored in tests/data/pages/.  This
 lets us verify parsing correctness against real-world markup without making
 live network requests.
@@ -46,7 +46,6 @@ def _load(rel: str) -> str | None:
 ARXIV_HTML = _load("arxiv/abs_2301.00306v4.html")
 ARXIV_HTML_WITH_DOI = _load("arxiv/10.1016_j.apenergy.2023.121323.html")
 PUBMED_HTML = _load("pubmed/10.3758_s13428-022-02028-7.html")
-MEDRXIV_HTML = _load("medrxiv/10.1101_19004184.html")
 OPENALEX_HTML = _load("openalex/10.3126_nelta.v27i1-2.53203.html")
 IEEE_HTML = _load("ieee/10.1109_ACCESS.2021.3119621.html")
 SCOPUS_HTML = _load("scopus/10.1055_a-2233-2736.html")
@@ -191,19 +190,6 @@ class TestExtractMetadataFromHtml:
         _skip_if_missing(PUBMED_HTML)
         meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
         assert "citation_issn" in meta
-
-    def test_medrxiv_has_doi(self) -> None:
-        """medRxiv page provides a citation_doi (bioRxiv/medRxiv format)."""
-        _skip_if_missing(MEDRXIV_HTML)
-        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
-        doi_val = meta.get("citation_doi")
-        assert doi_val and str(doi_val).startswith("10.1101/")
-
-    def test_medrxiv_has_pdf_url(self) -> None:
-        """medRxiv page provides a PDF URL."""
-        _skip_if_missing(MEDRXIV_HTML)
-        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
-        assert "citation_pdf_url" in meta
 
     def test_openalex_has_doi(self) -> None:
         """OpenAlex landing page provides a citation_doi meta tag."""
@@ -698,24 +684,6 @@ class TestBuildPaperFromMetadata:
         assert len(paper.title) > 5
         assert len(paper.authors) > 0
 
-    def test_medrxiv_paper_has_doi_no_publication(self) -> None:
-        """medRxiv page builds a paper with a DOI but no journal (preprint server)."""
-        _skip_if_missing(MEDRXIV_HTML)
-        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
-        paper = build_paper_from_metadata(meta, "https://doi.org/10.1101/19004184")
-        assert paper is not None
-        assert paper.doi is not None and paper.doi.startswith("10.1101/")
-        assert paper.source is None
-
-    def test_medrxiv_paper_has_pdf_url(self) -> None:
-        """medRxiv page populates pdf_url."""
-        _skip_if_missing(MEDRXIV_HTML)
-        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
-        paper = build_paper_from_metadata(meta, "https://doi.org/10.1101/19004184")
-        assert paper is not None
-        assert paper.pdf_url is not None
-        assert "medrxiv" in paper.pdf_url.lower()
-
     def test_openalex_paper_has_doi_and_journal(self) -> None:
         """OpenAlex landing page produces a paper with DOI and journal publication."""
         _skip_if_missing(OPENALEX_HTML)
@@ -773,15 +741,6 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "https://doi.org/10.4230/DagRep.12.6.14")
         assert paper is not None
         assert paper.keywords and len(paper.keywords) > 0
-
-    def test_medrxiv_paper_has_page_count(self) -> None:
-        """medRxiv pages expose citation_num_pages; it must populate page_count."""
-        _skip_if_missing(MEDRXIV_HTML)
-        meta = extract_metadata_from_html(MEDRXIV_HTML)  # type: ignore[arg-type]
-        paper = build_paper_from_metadata(meta, "https://doi.org/10.1101/19004184")
-        assert paper is not None
-        assert paper.page_count is not None
-        assert paper.page_count > 0
 
 
 # ---------------------------------------------------------------------------
@@ -1013,24 +972,6 @@ class TestEnrichFromSources:
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.")
         assert result.source is not None
-
-    def test_real_medrxiv_page_end_to_end(self) -> None:
-        """Full end-to-end: mock requests for a medRxiv HTML page and build a Paper."""
-        _skip_if_missing(MEDRXIV_HTML)
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = MEDRXIV_HTML
-        mock_resp.raise_for_status = MagicMock()
-
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
-            result = enrich_from_sources(["https://doi.org/10.1101/19004184"], timeout=10)
-
-        assert result is not None
-        assert result.doi is not None and result.doi.startswith("10.1101/")
-        # medRxiv is a preprint server — no formal publication
-        assert result.source is None
-        assert result.pdf_url is not None
 
     def test_real_openalex_page_end_to_end(self) -> None:
         """Full end-to-end: mock requests for an OpenAlex landing page and build a Paper."""

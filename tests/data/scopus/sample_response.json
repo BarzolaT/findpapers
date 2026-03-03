@@ -1,18 +1,18 @@
 {
   "search-results": {
     "opensearch:totalResults": "14501",
-    "opensearch:startIndex": "0",
+    "opensearch:startIndex": "25",
     "opensearch:itemsPerPage": "25",
     "opensearch:Query": {
       "@role": "request",
       "@searchTerms": "TITLE-ABS-KEY((\"machine learning\" OR \"deep learning\") AND (\"nlp\" OR \"natural language processing\"))",
-      "@startPage": "0"
+      "@startPage": "25"
     },
     "link": [
       {
         "@_fa": "true",
         "@ref": "self",
-        "@href": "https://api.elsevier.com/content/search/scopus?start=0&count=25&query=TITLE-ABS-KEY%28%28%22machine+learning%22+OR+%22deep+learning%22%29+AND+%28%22nlp%22+OR+%22natural+language+processing%22%29%29&date=2020-2022&sort=-coverDate&view=STANDARD",
+        "@href": "https://api.elsevier.com/content/search/scopus?start=25&count=25&query=TITLE-ABS-KEY%28%28%22machine+learning%22+OR+%22deep+learning%22%29+AND+%28%22nlp%22+OR+%22natural+language+processing%22%29%29&date=2020-2022&sort=-coverDate&view=STANDARD",
         "@type": "application/json"
       },
       {
@@ -23,8 +23,14 @@
       },
       {
         "@_fa": "true",
+        "@ref": "prev",
+        "@href": "https://api.elsevier.com/content/search/scopus?start=0&count=25&query=TITLE-ABS-KEY%28%28%22machine+learning%22+OR+%22deep+learning%22%29+AND+%28%22nlp%22+OR+%22natural+language+processing%22%29%29&date=2020-2022&sort=-coverDate&view=STANDARD",
+        "@type": "application/json"
+      },
+      {
+        "@_fa": "true",
         "@ref": "next",
-        "@href": "https://api.elsevier.com/content/search/scopus?start=25&count=25&query=TITLE-ABS-KEY%28%28%22machine+learning%22+OR+%22deep+learning%22%29+AND+%28%22nlp%22+OR+%22natural+language+processing%22%29%29&date=2020-2022&sort=-coverDate&view=STANDARD",
+        "@href": "https://api.elsevier.com/content/search/scopus?start=50&count=25&query=TITLE-ABS-KEY%28%28%22machine+learning%22+OR+%22deep+learning%22%29+AND+%28%22nlp%22+OR+%22natural+language+processing%22%29%29&date=2020-2022&sort=-coverDate&view=STANDARD",
         "@type": "application/json"
       },
       {
@@ -156,6 +162,12 @@
             },
             {
               "$": "publisherfullgold"
+            },
+            {
+              "$": "repository"
+            },
+            {
+              "$": "repositoryam"
             }
           ]
         },
@@ -166,6 +178,9 @@
             },
             {
               "$": "Gold"
+            },
+            {
+              "$": "Green"
             }
           ]
         }
@@ -818,7 +833,7 @@
         "prism:coverDate": "2022-12-27",
         "prism:coverDisplayDate": "27 December 2022",
         "prism:doi": "10.1145/3558391",
-        "citedby-count": "15",
+        "citedby-count": "16",
         "affiliation": [
           {
             "@_fa": "true",
@@ -873,7 +888,7 @@
         "prism:coverDate": "2022-12-27",
         "prism:coverDisplayDate": "27 December 2022",
         "prism:doi": "10.1021/acsnano.2c07681",
-        "citedby-count": "20",
+        "citedby-count": "21",
         "affiliation": [
           {
             "@_fa": "true",
@@ -1586,6 +1601,1542 @@
         "subtype": "cp",
         "subtypeDescription": "Conference Paper",
         "source-id": "21101145551",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85150361342"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85150361342?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85150361342&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85150361342&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85150361342",
+        "dc:identifier": "SCOPUS_ID:85150361342",
+        "eid": "2-s2.0-85150361342",
+        "dc:title": "Research and application of matching network",
+        "dc:creator": "Jiang C.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450398343]"
+          }
+        ],
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-23",
+        "prism:coverDisplayDate": "23 December 2022",
+        "prism:doi": "10.1145/3579654.3579775",
+        "citedby-count": "0",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Beijing University of Posts and Telecommunications",
+            "affiliation-city": "Beijing",
+            "affiliation-country": "China"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "article-number": "115",
+        "source-id": "11600154611",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85152138528"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85152138528?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85152138528&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85152138528&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85152138528",
+        "dc:identifier": "SCOPUS_ID:85152138528",
+        "eid": "2-s2.0-85152138528",
+        "dc:title": "Proceedings of the 2022 10th International Conference on Information Technology: IoT and Smart City, ICIT 2022",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450397438]"
+          }
+        ],
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-23",
+        "prism:coverDisplayDate": "23 December 2022",
+        "citedby-count": "0",
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cr",
+        "subtypeDescription": "Conference Review",
+        "source-id": "21101145551",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85149939098"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85149939098?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85149939098&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85149939098&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85149939098",
+        "dc:identifier": "SCOPUS_ID:85149939098",
+        "eid": "2-s2.0-85149939098",
+        "dc:title": "MLNLP 2022 - 2022 5th International Conference on Machine Learning and Natural Language Processing, Conference Proceedings",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450399067]"
+          }
+        ],
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-23",
+        "prism:coverDisplayDate": "23 December 2022",
+        "citedby-count": "0",
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cr",
+        "subtypeDescription": "Conference Review",
+        "source-id": "11600154611",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85145680785"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85145680785?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85145680785&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85145680785&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "full-text",
+            "@href": "https://api.elsevier.com/content/article/eid/1-s2.0-S1664322422072128"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85145680785",
+        "dc:identifier": "SCOPUS_ID:85145680785",
+        "eid": "2-s2.0-85145680785",
+        "dc:title": "AbAgIntPre: A deep learning method for predicting antibody-antigen interactions based on sequence information",
+        "dc:creator": "Huang Y.",
+        "prism:publicationName": "Frontiers in Immunology",
+        "prism:eIssn": "16643224",
+        "prism:volume": "13",
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-22",
+        "prism:coverDisplayDate": "22 December 2022",
+        "prism:doi": "10.3389/fimmu.2022.1053617",
+        "citedby-count": "38",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "China Agricultural University",
+            "affiliation-city": "Beijing",
+            "affiliation-country": "China"
+          },
+          {
+            "@_fa": "true",
+            "affilname": "Key Laboratory of Molecular Cardiovascular Sciences, Ministry of Education",
+            "affiliation-city": "Beijing",
+            "affiliation-country": "China"
+          }
+        ],
+        "pubmed-id": "36618397",
+        "prism:aggregationType": "Journal",
+        "subtype": "ar",
+        "subtypeDescription": "Article",
+        "article-number": "1053617",
+        "source-id": "21100229161",
+        "openaccess": "1",
+        "openaccessFlag": true,
+        "freetoread": {
+          "value": [
+            {
+              "$": "all"
+            },
+            {
+              "$": "publisherfullgold"
+            },
+            {
+              "$": "repository"
+            },
+            {
+              "$": "repositoryam"
+            }
+          ]
+        },
+        "freetoreadLabel": {
+          "value": [
+            {
+              "$": "All Open Access"
+            },
+            {
+              "$": "Gold"
+            },
+            {
+              "$": "Green"
+            }
+          ]
+        }
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85140055219"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85140055219?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85140055219&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85140055219&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "full-text",
+            "@href": "https://api.elsevier.com/content/article/eid/1-s2.0-S0950705122010474"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85140055219",
+        "dc:identifier": "SCOPUS_ID:85140055219",
+        "eid": "2-s2.0-85140055219",
+        "dc:title": "Sector-level sentiment analysis with deep learning",
+        "dc:creator": "Almalis I.",
+        "prism:publicationName": "Knowledge Based Systems",
+        "prism:issn": "09507051",
+        "prism:volume": "258",
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-22",
+        "prism:coverDisplayDate": "22 December 2022",
+        "prism:doi": "10.1016/j.knosys.2022.109954",
+        "pii": "S0950705122010474",
+        "citedby-count": "35",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Aristotle University of Thessaloniki",
+            "affiliation-city": "Thessaloniki",
+            "affiliation-country": "Greece"
+          }
+        ],
+        "prism:aggregationType": "Journal",
+        "subtype": "ar",
+        "subtypeDescription": "Article",
+        "article-number": "109954",
+        "source-id": "24772",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85140894393"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85140894393?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85140894393&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85140894393&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "full-text",
+            "@href": "https://api.elsevier.com/content/article/eid/1-s2.0-S0950705122010930"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85140894393",
+        "dc:identifier": "SCOPUS_ID:85140894393",
+        "eid": "2-s2.0-85140894393",
+        "dc:title": "COHETS: A highlight extraction method using textual streams of streaming videos",
+        "dc:creator": "Chen C.C.",
+        "prism:publicationName": "Knowledge Based Systems",
+        "prism:issn": "09507051",
+        "prism:volume": "258",
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-22",
+        "prism:coverDisplayDate": "22 December 2022",
+        "prism:doi": "10.1016/j.knosys.2022.110000",
+        "pii": "S0950705122010930",
+        "citedby-count": "3",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "National Taiwan University",
+            "affiliation-city": "Taipei",
+            "affiliation-country": "Taiwan"
+          }
+        ],
+        "prism:aggregationType": "Journal",
+        "subtype": "ar",
+        "subtypeDescription": "Article",
+        "article-number": "110000",
+        "source-id": "24772",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85146732048"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85146732048?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85146732048&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85146732048&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85146732048",
+        "dc:identifier": "SCOPUS_ID:85146732048",
+        "eid": "2-s2.0-85146732048",
+        "dc:title": "Understanding User Requirements for Smart Cockpit of New Energy Vehicles: A Natural Language Process Approach",
+        "dc:creator": "Lin S.",
+        "prism:publicationName": "SAE Technical Papers",
+        "prism:eIssn": "01487191",
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-22",
+        "prism:coverDisplayDate": "22 December 2022",
+        "prism:doi": "10.4271/2022-01-7075",
+        "citedby-count": "3",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Guangdong University of Technology",
+            "affiliation-city": "Guangzhou",
+            "affiliation-country": "China"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "21100239259",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85141857990"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85141857990?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85141857990&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85141857990&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85141857990",
+        "dc:identifier": "SCOPUS_ID:85141857990",
+        "eid": "2-s2.0-85141857990",
+        "dc:title": "Streaming Overlay Architecture for Lightweight LSTM Computation on FPGA SoCs",
+        "dc:creator": "Ioannou L.",
+        "prism:publicationName": "ACM Transactions on Reconfigurable Technology and Systems",
+        "prism:issn": "19367406",
+        "prism:eIssn": "19367414",
+        "prism:volume": "16",
+        "prism:issueIdentifier": "1",
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-22",
+        "prism:coverDisplayDate": "22 December 2022",
+        "prism:doi": "10.1145/3543069",
+        "citedby-count": "8",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "School of Engineering",
+            "affiliation-city": "Coventry",
+            "affiliation-country": "United Kingdom"
+          }
+        ],
+        "prism:aggregationType": "Journal",
+        "subtype": "ar",
+        "subtypeDescription": "Article",
+        "article-number": "8",
+        "source-id": "21100217640",
+        "openaccess": "1",
+        "openaccessFlag": true,
+        "freetoread": {
+          "value": [
+            {
+              "$": "all"
+            },
+            {
+              "$": "publisherhybridgold"
+            }
+          ]
+        },
+        "freetoreadLabel": {
+          "value": [
+            {
+              "$": "All Open Access"
+            },
+            {
+              "$": "Hybrid Gold"
+            }
+          ]
+        }
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85140081301"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85140081301?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85140081301&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85140081301&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "full-text",
+            "@href": "https://api.elsevier.com/content/article/eid/1-s2.0-S0950705122010383"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85140081301",
+        "dc:identifier": "SCOPUS_ID:85140081301",
+        "eid": "2-s2.0-85140081301",
+        "dc:title": "SCICERO: A deep learning and NLP approach for generating scientific knowledge graphs in the computer science domain",
+        "dc:creator": "Dess\u00ed D.",
+        "prism:publicationName": "Knowledge Based Systems",
+        "prism:issn": "09507051",
+        "prism:volume": "258",
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-22",
+        "prism:coverDisplayDate": "22 December 2022",
+        "prism:doi": "10.1016/j.knosys.2022.109945",
+        "pii": "S0950705122010383",
+        "citedby-count": "52",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Universit\u00e0 degli Studi di Cagliari",
+            "affiliation-city": "Cagliari",
+            "affiliation-country": "Italy"
+          }
+        ],
+        "prism:aggregationType": "Journal",
+        "subtype": "ar",
+        "subtypeDescription": "Article",
+        "article-number": "109945",
+        "source-id": "24772",
+        "openaccess": "2",
+        "openaccessFlag": false,
+        "freetoread": {
+          "value": [
+            {
+              "$": "all"
+            },
+            {
+              "$": "repository"
+            },
+            {
+              "$": "repositoryam"
+            }
+          ]
+        },
+        "freetoreadLabel": {
+          "value": [
+            {
+              "$": "All Open Access"
+            },
+            {
+              "$": "Green"
+            }
+          ]
+        }
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85181185914"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85181185914?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85181185914&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85181185914&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85181185914",
+        "dc:identifier": "SCOPUS_ID:85181185914",
+        "eid": "2-s2.0-85181185914",
+        "dc:title": "IoT-enabled convolutional neural networks: Techniques and applications",
+        "dc:creator": "Naved M.",
+        "prism:publicationName": "Iot Enabled Convolutional Neural Networks Techniques and Applications",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9788770227254, 9788770227124]"
+          }
+        ],
+        "prism:pageRange": "1-362",
+        "prism:coverDate": "2022-12-21",
+        "prism:coverDisplayDate": "21 December 2022",
+        "citedby-count": "1",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Amity University",
+            "affiliation-city": "Noida",
+            "affiliation-country": "India"
+          }
+        ],
+        "prism:aggregationType": "Book",
+        "subtype": "bk",
+        "subtypeDescription": "Book",
+        "source-id": "21101195057",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85181187092"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85181187092?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85181187092&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85181187092&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85181187092",
+        "dc:identifier": "SCOPUS_ID:85181187092",
+        "eid": "2-s2.0-85181187092",
+        "dc:title": "Application of IoT-enabled CNN for natural language processing",
+        "dc:creator": "Kumar A.",
+        "prism:publicationName": "Iot Enabled Convolutional Neural Networks Techniques and Applications",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9788770227254, 9788770227124]"
+          }
+        ],
+        "prism:pageRange": "149-177",
+        "prism:coverDate": "2022-12-21",
+        "prism:coverDisplayDate": "21 December 2022",
+        "citedby-count": "22",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Bennett University",
+            "affiliation-city": "Greater Noida",
+            "affiliation-country": "India"
+          }
+        ],
+        "prism:aggregationType": "Book",
+        "subtype": "ch",
+        "subtypeDescription": "Book Chapter",
+        "source-id": "21101195057",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85145505440"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85145505440?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85145505440&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85145505440&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "full-text",
+            "@href": "https://api.elsevier.com/content/article/eid/1-s2.0-S1663981222050017"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85145505440",
+        "dc:identifier": "SCOPUS_ID:85145505440",
+        "eid": "2-s2.0-85145505440",
+        "dc:title": "Exploring the effects of drug, disease, and protein dependencies on biomedical named entity recognition: A comparative analysis",
+        "dc:creator": "Han P.",
+        "prism:publicationName": "Frontiers in Pharmacology",
+        "prism:eIssn": "16639812",
+        "prism:volume": "13",
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-21",
+        "prism:coverDisplayDate": "21 December 2022",
+        "prism:doi": "10.3389/fphar.2022.1020759",
+        "citedby-count": "10",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "China University of Petroleum (East China)",
+            "affiliation-city": "Qingdao",
+            "affiliation-country": "China"
+          }
+        ],
+        "prism:aggregationType": "Journal",
+        "subtype": "ar",
+        "subtypeDescription": "Article",
+        "article-number": "1020759",
+        "source-id": "21100214102",
+        "openaccess": "1",
+        "openaccessFlag": true,
+        "freetoread": {
+          "value": [
+            {
+              "$": "all"
+            },
+            {
+              "$": "publisherfullgold"
+            },
+            {
+              "$": "repository"
+            },
+            {
+              "$": "repositoryam"
+            }
+          ]
+        },
+        "freetoreadLabel": {
+          "value": [
+            {
+              "$": "All Open Access"
+            },
+            {
+              "$": "Gold"
+            },
+            {
+              "$": "Green"
+            }
+          ]
+        }
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85144081755"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85144081755?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85144081755&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85144081755&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85144081755",
+        "dc:identifier": "SCOPUS_ID:85144081755",
+        "eid": "2-s2.0-85144081755",
+        "dc:title": "What Do Firebase Developers Discuss About? An Empirical Study on Stack Overflow Posts",
+        "dc:creator": "Aman Khan M.S.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450399036]"
+          }
+        ],
+        "prism:pageRange": "65-74",
+        "prism:coverDate": "2022-12-20",
+        "prism:coverDisplayDate": "20 December 2022",
+        "prism:doi": "10.1145/3569551.3569558",
+        "citedby-count": "3",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Bangladesh University of Engineering and Technology",
+            "affiliation-city": "Dhaka",
+            "affiliation-country": "Bangladesh"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "11600154611",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85171377431"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85171377431?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85171377431&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85171377431&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85171377431",
+        "dc:identifier": "SCOPUS_ID:85171377431",
+        "eid": "2-s2.0-85171377431",
+        "dc:title": "Computational Stylistics in Poetry, Prose, and Drama",
+        "dc:creator": "Bories A.S.",
+        "prism:publicationName": "Computational Stylistics in Poetry Prose and Drama",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9783110781410, 9783110781502]"
+          }
+        ],
+        "prism:pageRange": "1-231",
+        "prism:coverDate": "2022-12-19",
+        "prism:coverDisplayDate": "19 December 2022",
+        "prism:doi": "10.1515/9783110781502",
+        "citedby-count": "5",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Universit\u00e4t Basel",
+            "affiliation-city": "Basel",
+            "affiliation-country": "Switzerland"
+          }
+        ],
+        "prism:aggregationType": "Book",
+        "subtype": "bk",
+        "subtypeDescription": "Book",
+        "source-id": "21101177526",
+        "openaccess": "1",
+        "openaccessFlag": true,
+        "freetoread": {
+          "value": [
+            {
+              "$": "all"
+            },
+            {
+              "$": "publisherfullgold"
+            }
+          ]
+        },
+        "freetoreadLabel": {
+          "value": [
+            {
+              "$": "All Open Access"
+            },
+            {
+              "$": "Gold"
+            }
+          ]
+        }
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85171368601"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85171368601?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85171368601&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85171368601&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85171368601",
+        "dc:identifier": "SCOPUS_ID:85171368601",
+        "eid": "2-s2.0-85171368601",
+        "dc:title": "Closing remarks: What was this all about?",
+        "dc:creator": "Bories A.S.",
+        "prism:publicationName": "Computational Stylistics in Poetry Prose and Drama",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9783110781410, 9783110781502]"
+          }
+        ],
+        "prism:pageRange": "223-231",
+        "prism:coverDate": "2022-12-19",
+        "prism:coverDisplayDate": "19 December 2022",
+        "prism:doi": "10.1515/9783110781502-012",
+        "citedby-count": "0",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Universit\u00e4t Basel",
+            "affiliation-city": "Basel",
+            "affiliation-country": "Switzerland"
+          }
+        ],
+        "prism:aggregationType": "Book",
+        "subtype": "ch",
+        "subtypeDescription": "Book Chapter",
+        "source-id": "21101177526",
+        "openaccess": "1",
+        "openaccessFlag": true,
+        "freetoread": {
+          "value": [
+            {
+              "$": "all"
+            },
+            {
+              "$": "publisherfullgold"
+            }
+          ]
+        },
+        "freetoreadLabel": {
+          "value": [
+            {
+              "$": "All Open Access"
+            },
+            {
+              "$": "Gold"
+            }
+          ]
+        }
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85158152980"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85158152980?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85158152980&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85158152980&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85158152980",
+        "dc:identifier": "SCOPUS_ID:85158152980",
+        "eid": "2-s2.0-85158152980",
+        "dc:title": "Investigation of Automatic Part-of-Speech Tagging using CRF, HMM and LSTM on Misspelled and Edited Texts",
+        "dc:creator": "Aydinov F.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450398749]"
+          }
+        ],
+        "prism:pageRange": "21-28",
+        "prism:coverDate": "2022-12-17",
+        "prism:coverDisplayDate": "17 December 2022",
+        "prism:doi": "10.1145/3582099.3582103",
+        "citedby-count": "2",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "University of Glasgow",
+            "affiliation-city": "Glasgow",
+            "affiliation-country": "United Kingdom"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "21101150681",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85158137775"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85158137775?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85158137775&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85158137775&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85158137775",
+        "dc:identifier": "SCOPUS_ID:85158137775",
+        "eid": "2-s2.0-85158137775",
+        "dc:title": "Technology-Enhanced Systemic Quality Assurance with the Aid of Text-Based Emotion Recognition of Facebook Comments for Higher Education Institutions",
+        "dc:creator": "Cantil J.B.J.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450398749]"
+          }
+        ],
+        "prism:pageRange": "255-262",
+        "prism:coverDate": "2022-12-17",
+        "prism:coverDisplayDate": "17 December 2022",
+        "prism:doi": "10.1145/3582099.3582137",
+        "citedby-count": "0",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Davao del Sur State College",
+            "affiliation-city": "Digos",
+            "affiliation-country": "Philippines"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "21101150681",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85168765441"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85168765441?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85168765441&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85168765441&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85168765441",
+        "dc:identifier": "SCOPUS_ID:85168765441",
+        "eid": "2-s2.0-85168765441",
+        "dc:title": "Task-specific pre-training improves models for paraphrase generation",
+        "dc:creator": "Skurzhanskyi O.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450397629]"
+          }
+        ],
+        "prism:pageRange": "44-48",
+        "prism:coverDate": "2022-12-16",
+        "prism:coverDisplayDate": "16 December 2022",
+        "prism:doi": "10.1145/3582768.3582791",
+        "citedby-count": "0",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Taras Shevchenko National University of Kyiv",
+            "affiliation-city": "Kyiv",
+            "affiliation-country": "Ukraine"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "21101173070",
+        "openaccess": "1",
+        "openaccessFlag": true,
+        "freetoread": {
+          "value": [
+            {
+              "$": "all"
+            },
+            {
+              "$": "publisherfullgold"
+            }
+          ]
+        },
+        "freetoreadLabel": {
+          "value": [
+            {
+              "$": "All Open Access"
+            },
+            {
+              "$": "Gold"
+            }
+          ]
+        }
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85168768046"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85168768046?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85168768046&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85168768046&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85168768046",
+        "dc:identifier": "SCOPUS_ID:85168768046",
+        "eid": "2-s2.0-85168768046",
+        "dc:title": "Contextualised Modelling for Effective Citation Function Classification",
+        "dc:creator": "Jiang X.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450397629]"
+          }
+        ],
+        "prism:pageRange": "93-103",
+        "prism:coverDate": "2022-12-16",
+        "prism:coverDisplayDate": "16 December 2022",
+        "prism:doi": "10.1145/3582768.3582769",
+        "citedby-count": "3",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Coventry University",
+            "affiliation-city": "Coventry",
+            "affiliation-country": "United Kingdom"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "21101173070",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85159721358"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85159721358?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85159721358&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85159721358&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85159721358",
+        "dc:identifier": "SCOPUS_ID:85159721358",
+        "eid": "2-s2.0-85159721358",
+        "dc:title": "Semi-Automatic Short-Answer Grading Tools for Thai Language using Natural Language Processing",
+        "dc:creator": "Wangwiwattana C.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450398015]"
+          }
+        ],
+        "prism:pageRange": "123-128",
+        "prism:coverDate": "2022-12-16",
+        "prism:coverDisplayDate": "16 December 2022",
+        "prism:doi": "10.1145/3582580.3582600",
+        "citedby-count": "2",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "University of the Thai Chamber of Commerce",
+            "affiliation-city": "Bangkok",
+            "affiliation-country": "Thailand"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "21101152575",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85168767663"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85168767663?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85168767663&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85168767663&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85168767663",
+        "dc:identifier": "SCOPUS_ID:85168767663",
+        "eid": "2-s2.0-85168767663",
+        "dc:title": "iGrade: an automated short answer grading system",
+        "dc:creator": "Alhamed D.H.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450397629]"
+          }
+        ],
+        "prism:pageRange": "110-116",
+        "prism:coverDate": "2022-12-16",
+        "prism:coverDisplayDate": "16 December 2022",
+        "prism:doi": "10.1145/3582768.3582790",
+        "citedby-count": "5",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "Imam Abdulrahman Bin Faisal University",
+            "affiliation-city": "Dammam",
+            "affiliation-country": "Saudi Arabia"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "21101173070",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/105005569659"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/105005569659?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=105005569659&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=105005569659&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/105005569659",
+        "dc:identifier": "SCOPUS_ID:105005569659",
+        "eid": "2-s2.0-105005569659",
+        "dc:title": "Beginner's guide to streamlit with python: Build web-based data and machine learning applications",
+        "dc:creator": "Raghavendra S.",
+        "prism:publicationName": "Beginner S Guide to Streamlit with Python Build Web Based Data and Machine Learning Applications",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781484289822, 9781484289839]"
+          }
+        ],
+        "prism:pageRange": "1-203",
+        "prism:coverDate": "2022-12-16",
+        "prism:coverDisplayDate": "16 December 2022",
+        "prism:doi": "10.1007/978-1-4842-8983-9",
+        "citedby-count": "2",
+        "prism:aggregationType": "Book",
+        "subtype": "bk",
+        "subtypeDescription": "Book",
+        "source-id": "21101296104",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85157960935"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85157960935?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85157960935&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85157960935&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85157960935",
+        "dc:identifier": "SCOPUS_ID:85157960935",
+        "eid": "2-s2.0-85157960935",
+        "dc:title": "An Abnormal Domain Name Generation Method Based on a Character-Level Model",
+        "dc:creator": "Wu C.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450398343]"
+          }
+        ],
+        "prism:pageRange": "804-810",
+        "prism:coverDate": "2022-12-16",
+        "prism:coverDisplayDate": "16 December 2022",
+        "prism:doi": "10.1145/3584376.3584519",
+        "citedby-count": "2",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "State Key Laboratory of Mathematical Engineering and Advanced Computing",
+            "affiliation-city": "Zhengzhou",
+            "affiliation-country": "China"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "21101150420",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85169079012"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85169079012?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85169079012&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85169079012&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85169079012",
+        "dc:identifier": "SCOPUS_ID:85169079012",
+        "eid": "2-s2.0-85169079012",
+        "dc:title": "NLPIR 2022 - 2022 6th International Conference on Natural Language Processing and Information Retrieval",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450397629]"
+          }
+        ],
+        "prism:pageRange": null,
+        "prism:coverDate": "2022-12-16",
+        "prism:coverDisplayDate": "16 December 2022",
+        "citedby-count": "0",
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cr",
+        "subtypeDescription": "Conference Review",
+        "source-id": "21101174263",
+        "openaccess": "0",
+        "openaccessFlag": false
+      },
+      {
+        "@_fa": "true",
+        "link": [
+          {
+            "@_fa": "true",
+            "@ref": "self",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85168774131"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "author-affiliation",
+            "@href": "https://api.elsevier.com/content/abstract/scopus_id/85168774131?field=author,affiliation"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus",
+            "@href": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85168774131&origin=inward"
+          },
+          {
+            "@_fa": "true",
+            "@ref": "scopus-citedby",
+            "@href": "https://www.scopus.com/inward/citedby.uri?partnerID=HzOxMe3b&scp=85168774131&origin=inward"
+          }
+        ],
+        "prism:url": "https://api.elsevier.com/content/abstract/scopus_id/85168774131",
+        "dc:identifier": "SCOPUS_ID:85168774131",
+        "eid": "2-s2.0-85168774131",
+        "dc:title": "A Stylometric Dataset for Bengali Poems",
+        "dc:creator": "Shuhan M.K.B.",
+        "prism:publicationName": "ACM International Conference Proceeding Series",
+        "prism:isbn": [
+          {
+            "@_fa": "true",
+            "$": "[9781450397629]"
+          }
+        ],
+        "prism:pageRange": "176-180",
+        "prism:coverDate": "2022-12-16",
+        "prism:coverDisplayDate": "16 December 2022",
+        "prism:doi": "10.1145/3582768.3582788",
+        "citedby-count": "0",
+        "affiliation": [
+          {
+            "@_fa": "true",
+            "affilname": "BKash Limited",
+            "affiliation-city": "Dhaka",
+            "affiliation-country": "Bangladesh"
+          }
+        ],
+        "prism:aggregationType": "Conference Proceeding",
+        "subtype": "cp",
+        "subtypeDescription": "Conference Paper",
+        "source-id": "21101173070",
         "openaccess": "0",
         "openaccessFlag": false
       }

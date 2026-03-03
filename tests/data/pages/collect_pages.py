@@ -159,7 +159,7 @@ def _extract_json_dois(
     if isinstance(data, list):
         items = data
     elif isinstance(data, dict):
-        # Various APIs wrap the list: OpenAlex → "results", bioRxiv → "collection", etc.
+        # Various APIs wrap the list: OpenAlex → "results", Crossref → "items", etc.
         for key in ("results", "collection", "items", "papers", "data", "articles"):
             if isinstance(data.get(key), list):
                 items = data[key]
@@ -217,22 +217,6 @@ def _extract_pubmed(sample_path: Path) -> Iterator[tuple[str, str | None]]:
             yield url, doi
 
 
-def _extract_biorxiv_medrxiv(sample_path: Path) -> Iterator[tuple[str, str | None]]:
-    """Yield (url, doi) for every entry in a bioRxiv/medRxiv JSON collection response.
-
-    Uses the server hostname directly (medrxiv.org / biorxiv.org) to avoid
-    doi.org redirect failures for older DOIs.
-    """
-    data = json.loads(sample_path.read_text(encoding="utf-8"))
-    items = data.get("collection", [])
-    for item in items:
-        doi = item.get("doi", "")
-        server = item.get("server", "biorxiv").lower()
-        if doi and doi.startswith("10.1101/"):
-            url = f"https://www.{server}.org/content/{doi}"
-            yield url, doi
-
-
 def _extract_scopus(sample_path: Path) -> Iterator[tuple[str, str | None]]:
     """Yield (url, doi) for every entry in a Scopus JSON response.
 
@@ -255,13 +239,6 @@ DB_CONFIGS: dict[str, dict] = {
     "arxiv": {
         "sample": "arxiv/sample_response.xml",
         "extractor": _extract_arxiv,
-    },
-    # bioRxiv is intentionally excluded: the server actively blocks automated
-    # HTTP requests with 403 responses regardless of User-Agent or request rate,
-    # making reliable page collection impossible without a browser.
-    "medrxiv": {
-        "sample": "medrxiv/sample_response.json",
-        "extractor": _extract_biorxiv_medrxiv,
     },
     "ieee": {
         "sample": "ieee/sample_response.json",
@@ -288,7 +265,7 @@ DB_CONFIGS: dict[str, dict] = {
         ),
     },
     "semanticscholar": {
-        "sample": "semanticscholar/relevance_search_response.json",
+        "sample": "semanticscholar/bulk_search_response.json",
         # S2 paper pages are JS-rendered; use the DOI to hit the publisher page.
         "extractor": lambda p: _extract_json_dois(
             p,

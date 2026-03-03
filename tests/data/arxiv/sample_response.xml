@@ -2,10 +2,10 @@
 <feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
   <id>https://arxiv.org/api/28urs9lxk7btByY9ps1yhz0MOJ0</id>
   <title>arXiv Query: search_query=( (all:machine AND all:learning) OR (all:deep AND all:learning) AND (all:nlp OR all:natural AND all:language AND all:processing) ) AND submittedDate:"202001010000 TO 202212312359"&amp;id_list=&amp;start=0&amp;max_results=50</title>
-  <updated>2026-02-01T17:54:18Z</updated>
+  <updated>2026-03-03T15:32:17Z</updated>
   <link href="https://arxiv.org/api/query?search_query=((all:machine+AND+all:learning)+OR+((all:deep+AND+all:learning)+AND+(all:nlp+OR+(all:natural+AND+(all:language+AND+all:processing)))))+AND+submittedDate:%22202001010000+TO+202212312359%22&amp;start=0&amp;max_results=50&amp;id_list=" type="application/atom+xml"/>
   <opensearch:itemsPerPage>50</opensearch:itemsPerPage>
-  <opensearch:totalResults>96778</opensearch:totalResults>
+  <opensearch:totalResults>96781</opensearch:totalResults>
   <opensearch:startIndex>0</opensearch:startIndex>
   <entry>
     <id>http://arxiv.org/abs/2301.00306v4</id>
@@ -534,24 +534,27 @@
     </author>
   </entry>
   <entry>
-    <id>http://arxiv.org/abs/2301.00201v3</id>
+    <id>http://arxiv.org/abs/2301.00201v4</id>
     <title>Exploring Singularities in point clouds with the graph Laplacian: An explicit approach</title>
-    <updated>2025-02-17T06:57:41Z</updated>
-    <link href="https://arxiv.org/abs/2301.00201v3" rel="alternate" type="text/html"/>
-    <link href="https://arxiv.org/pdf/2301.00201v3" rel="related" type="application/pdf" title="pdf"/>
+    <updated>2026-02-23T08:41:22Z</updated>
+    <link href="https://arxiv.org/abs/2301.00201v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2301.00201v4" rel="related" type="application/pdf" title="pdf"/>
     <summary>We develop theory and methods that use the graph Laplacian to analyze the geometry of the underlying manifold of datasets. Our theory provides theoretical guarantees and explicit bounds on the functional forms of the graph Laplacian when it acts on functions defined close to singularities of the underlying manifold. We use these explicit bounds to develop tests for singularities and propose methods that can be used to estimate geometric properties of singularities in the datasets.</summary>
     <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
     <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
     <category term="math.DG" scheme="http://arxiv.org/schemas/atom"/>
     <published>2022-12-31T13:48:42Z</published>
-    <arxiv:comment>27 pages, 12 figures</arxiv:comment>
+    <arxiv:comment>28 pages, 12 figures</arxiv:comment>
     <arxiv:primary_category term="stat.ML"/>
+    <arxiv:journal_ref>Journal of Computational Mathematics and Data Science 14 (2025) 100113</arxiv:journal_ref>
     <author>
       <name>Martin Andersson</name>
     </author>
     <author>
       <name>Benny Avelin</name>
     </author>
+    <arxiv:doi>10.1016/j.jcmds.2025.100113</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1016/j.jcmds.2025.100113" title="doi"/>
   </entry>
   <entry>
     <id>http://arxiv.org/abs/2301.00199v2</id>
@@ -1210,11 +1213,11 @@
     </author>
   </entry>
   <entry>
-    <id>http://arxiv.org/abs/2301.00061v2</id>
+    <id>http://arxiv.org/abs/2301.00061v3</id>
     <title>A Global Optimization Algorithm for K-Center Clustering of One Billion Samples</title>
-    <updated>2025-08-23T22:25:04Z</updated>
-    <link href="https://arxiv.org/abs/2301.00061v2" rel="alternate" type="text/html"/>
-    <link href="https://arxiv.org/pdf/2301.00061v2" rel="related" type="application/pdf" title="pdf"/>
+    <updated>2026-02-06T21:51:09Z</updated>
+    <link href="https://arxiv.org/abs/2301.00061v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2301.00061v3" rel="related" type="application/pdf" title="pdf"/>
     <summary>This paper presents a practical global optimization algorithm for the K-center clustering problem, which aims to select K samples as the cluster centers to minimize the maximum within-cluster distance. This algorithm is based on a reduced-space branch and bound scheme and guarantees convergence to the global optimum in a finite number of steps by only branching on the regions of centers. To improve efficiency, we have designed a two-stage decomposable lower bound, the solution of which can be derived in a closed form. In addition, we also propose several acceleration techniques to narrow down the region of centers, including bounds tightening, sample reduction, and parallelization. Extensive studies on synthetic and real-world datasets have demonstrated that our algorithm can solve the K-center problems to global optimal within 4 hours for ten million samples in the serial mode and one billion samples in the parallel mode. Moreover, compared with the state-of-the-art heuristic methods, the global optimum obtained by our algorithm can averagely reduce the objective function by 25.8% on all the synthetic and real-world datasets.</summary>
     <category term="math.OC" scheme="http://arxiv.org/schemas/atom"/>
     <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>

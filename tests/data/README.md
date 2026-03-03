@@ -14,13 +14,9 @@ tests/data/
 │   ├── collect_sample.py     # arXiv API collector
 │   ├── sample_response.xml   # Raw XML response (after running)
 │   └── collection_metadata.json
-├── biorxiv/
-│   ├── collect_sample.py     # bioRxiv API collector
-│   ├── sample_response.json  # Raw JSON response (after running)
-│   └── collection_metadata.json
-├── medrxiv/
-│   ├── collect_sample.py     # medRxiv API collector
-│   ├── sample_response.json  # Raw JSON response (after running)
+├── crossref/
+│   ├── collect_sample.py     # CrossRef API collector
+│   ├── sample_responses.json # Raw JSON responses (after running)
 │   └── collection_metadata.json
 ├── ieee/
 │   ├── collect_sample.py     # IEEE Xplore API collector
@@ -41,7 +37,6 @@ tests/data/
 │   └── collection_metadata.json
 ├── semanticscholar/
 │   ├── collect_sample.py     # Semantic Scholar API collector
-│   ├── relevance_search_response.json  # Relevance search response
 │   ├── bulk_search_response.json       # Bulk search response
 │   └── collection_metadata.json
 └── pages/
@@ -51,13 +46,11 @@ tests/data/
     │   ├── <doi>.html            # HTML landing page
     │   ├── <doi>.meta.json       # URL, DOI, status metadata
     │   └── index.json            # Per-database summary
-    ├── medrxiv/   (same layout)
     ├── ieee/      (same layout)
     ├── pubmed/    (same layout)
     ├── scopus/    (same layout)
     ├── openalex/  (same layout)
     └── semanticscholar/ (same layout)
-    # Note: bioRxiv is excluded — the server blocks automated requests (403).
 ```
 
 ## Usage
@@ -110,8 +103,7 @@ Some APIs require authentication:
 | Database         | API Key Required | Environment Variable                    |
 |------------------|------------------|-----------------------------------------|
 | arXiv            | No               | -                                       |
-| bioRxiv          | No               | -                                       |
-| medRxiv          | No               | -                                       |
+| CrossRef         | No               | -                                       |
 | IEEE             | **Yes**          | `FINDPAPERS_IEEE_API_TOKEN`             |
 | PubMed           | No*              | `FINDPAPERS_PUBMED_API_TOKEN`           |
 | Scopus           | **Yes**          | `FINDPAPERS_SCOPUS_API_TOKEN`           |
@@ -150,14 +142,11 @@ All collectors use the same search concepts and date range:
 
 > **Note**: Each API uses different query syntax. The collectors adapt the search terms
 > to each API's specific format (Boolean operators, field specifiers, etc.).
->
-> **bioRxiv/medRxiv**: These APIs don't support keyword search, so their collectors
-> use web scraping on www.medrxiv.org/search to find DOIs, then fetch metadata via API.
 
 ## API Documentation
 
 - **arXiv**: https://info.arxiv.org/help/api/user-manual.html
-- **bioRxiv/medRxiv**: https://api.biorxiv.org/
+- **CrossRef**: https://www.crossref.org/documentation/
 - **IEEE Xplore**: https://developer.ieee.org/docs
 - **PubMed**: https://www.ncbi.nlm.nih.gov/books/NBK25500/
 - **Scopus**: https://dev.elsevier.com/documentation/ScopusSearchAPI.wadl

@@ -111,21 +111,15 @@ def scopus_sample_json():
 
 
 @pytest.fixture
-def biorxiv_search_html():
-    """Read bioRxiv search results HTML page."""
-    return (DATA_DIR / "biorxiv" / "search_page_sample.html").read_text(encoding="utf-8")
-
-
-@pytest.fixture
-def biorxiv_api_responses():
-    """Read bioRxiv API metadata responses."""
-    return json.loads((DATA_DIR / "biorxiv" / "api_responses.json").read_text())
-
-
-@pytest.fixture
 def openalex_sample_json():
     """Read OpenAlex sample JSON response."""
     return json.loads((DATA_DIR / "openalex" / "sample_response.json").read_text())
+
+
+@pytest.fixture
+def crossref_sample_json():
+    """Read CrossRef sample responses (dict keyed by DOI)."""
+    return json.loads((DATA_DIR / "crossref" / "sample_responses.json").read_text(encoding="utf-8"))
 
 
 @pytest.fixture

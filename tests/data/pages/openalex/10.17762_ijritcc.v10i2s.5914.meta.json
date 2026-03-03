@@ -2,9 +2,9 @@
   "key": "10.17762/ijritcc.v10i2s.5914",
   "url": "http://dx.doi.org/10.17762/ijritcc.v10i2s.5914",
   "doi": "10.17762/ijritcc.v10i2s.5914",
-  "final_url": null,
-  "status": null,
-  "content_type": null,
-  "size_bytes": 0,
-  "error": "request_failed"
+  "final_url": "https://ijritcc.org/index.php/ijritcc/article/view/5914",
+  "status": 200,
+  "content_type": "text/html; charset=utf-8",
+  "size_bytes": 51557,
+  "error": null
 }
