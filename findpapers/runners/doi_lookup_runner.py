@@ -78,8 +78,6 @@ class DOILookupRunner:
         self._timeout = timeout
         self._connector = CrossRefConnector(email=email)
         self._result: Paper | None = None
-        self._executed = False
-        self._runtime: float = 0.0
 
     # ------------------------------------------------------------------
     # Public interface
@@ -118,48 +116,13 @@ class DOILookupRunner:
         finally:
             self._connector.close()
 
-        self._runtime = perf_counter() - start
-        self._executed = True
+        runtime = perf_counter() - start
 
         if verbose:
             status = "found" if self._result is not None else "not found"
-            logger.info("DOI lookup %s (%.2f s)", status, self._runtime)
+            logger.info("DOI lookup %s (%.2f s)", status, runtime)
 
         return self._result
-
-    def get_result(self) -> Paper | None:
-        """Return the paper obtained from the last :meth:`run` call.
-
-        Returns
-        -------
-        Paper | None
-            The paper, or ``None`` if the DOI was not found.
-
-        Raises
-        ------
-        RuntimeError
-            If :meth:`run` has not been called yet.
-        """
-        if not self._executed:
-            raise RuntimeError("DOILookupRunner has not been executed yet.")
-        return self._result
-
-    def get_runtime(self) -> float:
-        """Return the wall-clock runtime of the last :meth:`run` call.
-
-        Returns
-        -------
-        float
-            Runtime in seconds.
-
-        Raises
-        ------
-        RuntimeError
-            If :meth:`run` has not been called yet.
-        """
-        if not self._executed:
-            raise RuntimeError("DOILookupRunner has not been executed yet.")
-        return self._runtime
 
     # ------------------------------------------------------------------
     # Private helpers

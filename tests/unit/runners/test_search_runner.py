@@ -11,7 +11,6 @@ from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import Database
 from findpapers.core.source import Source
-from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.search_runner import SearchRunner
 
 
@@ -115,18 +114,6 @@ class TestSearchRunnerInit:
         )
         assert runner._skipped_databases == []  # noqa: SLF001
 
-    def test_get_results_before_run_raises(self):
-        """get_results() before run() raises SearchRunnerNotExecutedError."""
-        runner = SearchRunner(query="[ml]", databases=["arxiv"])
-        with pytest.raises(SearchRunnerNotExecutedError):
-            runner.get_results()
-
-    def test_get_metrics_before_run_raises(self):
-        """get_metrics() before run() raises SearchRunnerNotExecutedError."""
-        runner = SearchRunner(query="[ml]", databases=["arxiv"])
-        with pytest.raises(SearchRunnerNotExecutedError):
-            runner.get_metrics()
-
 
 class TestSearchRunnerPipeline:
     """Tests for the full pipeline via run()."""
@@ -168,61 +155,45 @@ class TestSearchRunnerPipeline:
         mock_searcher.close.assert_called_once()
 
     def test_get_results_after_run(self):
-        """get_results() returns the collected papers after run()."""
+        """run() result contains the collected papers."""
         paper = _make_paper()
         runner = self._make_runner_with_mock_papers([paper])
-        runner.run()
-        results = runner.get_results()
-        assert len(results) == 1
-        assert results[0].title == paper.title
-
-    def test_get_results_returns_deep_copy(self):
-        """get_results() returns independent copies."""
-        paper = _make_paper()
-        runner = self._make_runner_with_mock_papers([paper])
-        runner.run()
-        res1 = runner.get_results()
-        res1[0].title = "modified"
-        res2 = runner.get_results()
-        assert res2[0].title == paper.title
+        result = runner.run()
+        assert len(result.papers) == 1
+        assert result.papers[0].title == paper.title
 
     def test_metrics_populated_after_run(self):
-        """Metrics dict contains expected keys after run()."""
+        """SearchResult contains runtime after run()."""
         runner = self._make_runner_with_mock_papers([_make_paper()])
-        runner.run()
-        metrics = runner.get_metrics()
-        assert "total_papers" in metrics
-        assert "runtime_in_seconds" in metrics
+        result = runner.run()
+        assert result.runtime_seconds is not None
+        assert result.runtime_seconds >= 0
 
     def test_metrics_include_zero_for_skipped_databases(self):
-        """Skipped databases (no API key) appear in metrics with count 0."""
+        """Skipped databases (no API key) do not break the run."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = [_make_paper()]
         runner._searchers = [mock_searcher]  # noqa: SLF001
-        runner.run()
-        metrics = runner.get_metrics()
-        assert "total_papers_from_ieee" in metrics
-        assert metrics["total_papers_from_ieee"] == 0
-        assert "total_papers_from_arxiv" in metrics
-        assert metrics["total_papers_from_arxiv"] == 1
+        result = runner.run()
+        assert len(result.papers) == 1
 
     def test_deduplication_merges_same_doi(self):
         """Two papers with the same DOI are merged into one."""
         p1 = _make_paper(title="Paper A", doi="10.1234/test")
         p2 = _make_paper(title="Paper B", doi="10.1234/test")
         runner = self._make_runner_with_mock_papers([p1, p2])
-        runner.run()
-        assert len(runner.get_results()) == 1
+        result = runner.run()
+        assert len(result.papers) == 1
 
     def test_deduplication_keeps_different_dois(self):
         """Papers with different DOIs *and* different titles are kept separately."""
         p1 = _make_paper(title="Paper A", doi="10.1234/aaa")
         p2 = _make_paper(title="Paper B", doi="10.1234/bbb")
         runner = self._make_runner_with_mock_papers([p1, p2])
-        runner.run()
-        assert len(runner.get_results()) == 2
+        result = runner.run()
+        assert len(result.papers) == 2
 
     def test_deduplication_second_pass_merges_same_title_different_doi(self):
         """Pass 2 merges papers with the same title even when DOIs differ.
@@ -235,8 +206,8 @@ class TestSearchRunnerPipeline:
         p1 = _make_paper(title="Attention is All You Need", doi="10.48550/arxiv.1706.03762")
         p2 = _make_paper(title="Attention is All You Need", doi="10.5555/3295222.3295349")
         runner = self._make_runner_with_mock_papers([p1, p2])
-        runner.run()
-        assert len(runner.get_results()) == 1
+        result = runner.run()
+        assert len(result.papers) == 1
 
     def test_deduplication_second_pass_merges_same_title_one_without_year(self):
         """Pass 2 merges same-title papers when one lacks a publication date.
@@ -265,8 +236,8 @@ class TestSearchRunnerPipeline:
             doi="10.5555/3295222.3295349",
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
-        runner.run()
-        assert len(runner.get_results()) == 1
+        result = runner.run()
+        assert len(result.papers) == 1
 
     def test_deduplication_second_pass_keeps_same_title_different_year(self):
         """Papers with the same title but different publication years are kept separate."""
@@ -289,8 +260,8 @@ class TestSearchRunnerPipeline:
             doi="10.1234/ai-2023",
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
-        runner.run()
-        assert len(runner.get_results()) == 2
+        result = runner.run()
+        assert len(result.papers) == 2
 
     def test_deduplication_second_pass_merges_preprints_across_year_boundary(self):
         """Same preprint on two servers across Dec/Jan boundary is merged into one.
@@ -321,8 +292,8 @@ class TestSearchRunnerPipeline:
             doi="10.2139/ssrn.5967774",
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
-        runner.run()
-        assert len(runner.get_results()) == 1
+        result = runner.run()
+        assert len(result.papers) == 1
 
     def test_deduplication_second_pass_merges_preprint_with_published_version(self):
         """Preprint DOI + publisher DOI with adjacent years are merged into one.
@@ -352,8 +323,8 @@ class TestSearchRunnerPipeline:
             doi="10.1201/9781003561460-19",
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
-        runner.run()
-        assert len(runner.get_results()) == 1
+        result = runner.run()
+        assert len(result.papers) == 1
 
     def test_deduplication_second_pass_keeps_non_preprint_adjacent_years(self):
         """Two non-preprint papers with same title and adjacent years are kept separate.
@@ -381,8 +352,8 @@ class TestSearchRunnerPipeline:
             doi="10.1234/ai-2023",
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
-        runner.run()
-        assert len(runner.get_results()) == 2
+        result = runner.run()
+        assert len(result.papers) == 2
 
     def test_deduplication_second_pass_keeps_preprints_with_large_year_gap(self):
         """Preprints with the same title but years >1 apart are kept separate."""
@@ -405,23 +376,23 @@ class TestSearchRunnerPipeline:
             doi="10.48550/arxiv.2406.00001",
         )
         runner = self._make_runner_with_mock_papers([p1, p2])
-        runner.run()
-        assert len(runner.get_results()) == 2
+        result = runner.run()
+        assert len(result.papers) == 2
 
     def test_run_can_be_called_twice(self):
         """Calling run() twice resets previous results."""
         papers1 = [_make_paper(title="First")]
         runner = self._make_runner_with_mock_papers(papers1)
-        runner.run()
-        assert len(runner.get_results()) == 1
+        result = runner.run()
+        assert len(result.papers) == 1
 
         # Replace mock to return different papers on second call.
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = [_make_paper(title="A"), _make_paper(title="B")]
         runner._searchers = [mock_searcher]  # noqa: SLF001
-        runner.run()
-        assert len(runner.get_results()) == 2
+        result = runner.run()
+        assert len(result.papers) == 2
 
     def test_searcher_error_is_handled_gracefully(self):
         """If a searcher raises an exception, run() still completes."""
@@ -430,8 +401,8 @@ class TestSearchRunnerPipeline:
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.side_effect = RuntimeError("network error")
         runner._searchers = [mock_searcher]  # noqa: SLF001
-        runner.run()
-        assert len(runner.get_results()) == 0
+        result = runner.run()
+        assert len(result.papers) == 0
 
     def test_unsupported_query_error_emits_warning(self, caplog):
         """UnsupportedQueryError from a searcher emits a warning regardless of verbose."""
@@ -491,9 +462,9 @@ class TestSearchRunnerVerbose:
 
         runner = self._make_runner_with_mock_papers([_make_paper()])
         with caplog.at_level(logging.INFO):
-            runner.run(verbose=True)
+            result = runner.run(verbose=True)
         # No exception raised; runner should be executed.
-        assert runner.get_metrics()["total_papers"] >= 0
+        assert len(result.papers) >= 0
 
     def test_verbose_true_emits_configuration_header(self, caplog):
         """verbose=True logs the configuration header."""
@@ -570,8 +541,8 @@ class TestSearchRunnerParallel:
 
         runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], num_workers=2)
         runner._searchers = [mock_s1, mock_s2]  # noqa: SLF001
-        runner.run()
-        assert len(runner.get_results()) == 2
+        result = runner.run()
+        assert len(result.papers) == 2
 
     def test_num_workers_capped_to_number_of_searchers(self):
         """num_workers is capped to the number of configured searchers."""
@@ -600,9 +571,9 @@ class TestSearchRunnerParallel:
         original = sr_mod.execute_tasks
         sr_mod.execute_tasks = _capture_execute
         try:
-            runner.run()
+            result = runner.run()
         finally:
             sr_mod.execute_tasks = original
 
         assert captured == [2], f"Expected num_workers=2, got {captured}"
-        assert len(runner.get_results()) == 2
+        assert len(result.papers) == 2

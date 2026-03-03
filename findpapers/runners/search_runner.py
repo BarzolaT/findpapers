@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from copy import deepcopy
 from datetime import datetime, timezone
 from time import perf_counter
 
@@ -16,7 +15,7 @@ from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.core.paper import Paper, _is_preprint_doi
 from findpapers.core.search_result import Database, SearchResult
-from findpapers.exceptions import SearchRunnerNotExecutedError, UnsupportedQueryError
+from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
 from findpapers.query.validator import QueryValidator
@@ -80,8 +79,8 @@ class SearchRunner:
     ...     databases=["arxiv", "pubmed"],
     ...     max_papers_per_database=50,
     ... )
-    >>> runner.run()
-    >>> papers = runner.get_results()
+    >>> result = runner.run()
+    >>> papers = result.papers
     """
 
     def __init__(
@@ -98,7 +97,6 @@ class SearchRunner:
         num_workers: int = 1,
     ) -> None:
         """Initialise search configuration without executing it."""
-        self._executed = False
         self._results: list[Paper] = []
         self._metrics: dict[str, int | float] = {}
         self._search: SearchResult | None = None
@@ -190,7 +188,6 @@ class SearchRunner:
         metrics["total_papers"] = len(self._results)
         metrics["runtime_in_seconds"] = perf_counter() - start
         self._metrics = metrics
-        self._executed = True
 
         if verbose:
             logger.info("=== Results ===")
@@ -210,53 +207,9 @@ class SearchRunner:
         )
         return self._search
 
-    def get_results(self) -> list[Paper]:
-        """Return a deep copy of the collected papers.
-
-        Returns
-        -------
-        list[Paper]
-            Collected and processed papers.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            If :meth:`run` has not been called yet.
-        """
-        self._ensure_executed()
-        return deepcopy(self._results)
-
-    def get_metrics(self) -> dict[str, int | float]:
-        """Return a snapshot of numeric performance metrics.
-
-        Returns
-        -------
-        dict[str, int | float]
-            Metrics dictionary with at least ``total_papers`` and
-            ``runtime_in_seconds``.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            If :meth:`run` has not been called yet.
-        """
-        self._ensure_executed()
-        return dict(self._metrics)
-
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
-
-    def _ensure_executed(self) -> None:
-        """Raise if the runner has not been executed yet.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            When :meth:`run` has not been called.
-        """
-        if not self._executed:
-            raise SearchRunnerNotExecutedError("SearchRunner has not been executed yet.")
 
     def _build_searchers(
         self,

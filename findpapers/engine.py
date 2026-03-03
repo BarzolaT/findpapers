@@ -335,8 +335,7 @@ class Engine:
             proxy=self._proxy,
             ssl_verify=self._ssl_verify,
         )
-        runner.run(verbose=verbose, show_progress=show_progress)
-        return runner.get_metrics()
+        return runner.run(verbose=verbose, show_progress=show_progress)
 
     def enrich(
         self,
@@ -426,8 +425,7 @@ class Engine:
             num_workers=num_workers,
             timeout=timeout,
         )
-        runner.run(verbose=verbose, show_progress=show_progress)
-        return runner.get_metrics()
+        return runner.run(verbose=verbose, show_progress=show_progress)
 
     def fetch_paper_by_doi(
         self,

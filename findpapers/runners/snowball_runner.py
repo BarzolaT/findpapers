@@ -18,7 +18,6 @@ from findpapers.connectors.openalex import OpenAlexConnector
 from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
-from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.progress import make_progress_bar
 
@@ -79,7 +78,6 @@ class SnowballRunner:
         self._direction = direction
         self._num_workers = max(num_workers, 1)
         self._email = email
-        self._executed = False
         self._graph: CitationGraph | None = None
         self._metrics: dict[str, int | float] = {}
 
@@ -186,7 +184,6 @@ class SnowballRunner:
             "runtime_in_seconds": elapsed,
         }
         self._graph = graph
-        self._executed = True
 
         if verbose:
             logger.info("=== Snowball Results ===")
@@ -197,55 +194,9 @@ class SnowballRunner:
 
         return graph
 
-    def get_result(self) -> CitationGraph:
-        """Return the citation graph built by the last run.
-
-        Returns
-        -------
-        CitationGraph
-            The citation graph.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            If :meth:`run` has not been called yet.
-        """
-        self._ensure_executed()
-        assert self._graph is not None
-        return self._graph
-
-    def get_metrics(self) -> dict[str, int | float]:
-        """Return performance metrics from the last run.
-
-        Returns
-        -------
-        dict[str, int | float]
-            Metrics dictionary.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            If :meth:`run` has not been called yet.
-        """
-        self._ensure_executed()
-        return dict(self._metrics)
-
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
-
-    def _ensure_executed(self) -> None:
-        """Raise if the runner has not been executed yet.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            When :meth:`run` has not been called.
-        """
-        if not self._executed:
-            raise SearchRunnerNotExecutedError(
-                "SnowballRunner has not been executed yet. Call run() first."
-            )
 
     def _build_connectors(
         self,

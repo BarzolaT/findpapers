@@ -237,7 +237,7 @@ class TestEngineDownload:
         fake_metrics = {"total_papers": 1, "downloaded_papers": 1}
         with patch("findpapers.engine.DownloadRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.get_metrics.return_value = fake_metrics
+            mock_runner.run.return_value = fake_metrics
             mock_cls.return_value = mock_runner
 
             papers = [_make_paper()]
@@ -265,7 +265,7 @@ class TestEngineDownload:
         engine = Engine()
         with patch("findpapers.engine.DownloadRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.get_metrics.return_value = {}
+            mock_runner.run.return_value = {}
             mock_cls.return_value = mock_runner
 
             engine.download([], "/tmp/out")
@@ -280,7 +280,7 @@ class TestEngineDownload:
         engine = Engine()
         with patch("findpapers.engine.DownloadRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.get_metrics.return_value = {}
+            mock_runner.run.return_value = {}
             mock_cls.return_value = mock_runner
 
             engine.download([], "/tmp/out", show_progress=False)
@@ -302,7 +302,7 @@ class TestEngineEnrich:
         fake_metrics = {"total_papers": 2, "enriched_papers": 1}
         with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.get_metrics.return_value = fake_metrics
+            mock_runner.run.return_value = fake_metrics
             mock_cls.return_value = mock_runner
 
             papers = [_make_paper(), _make_paper(title="P2")]
@@ -322,7 +322,7 @@ class TestEngineEnrich:
         engine = Engine()
         with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.get_metrics.return_value = {}
+            mock_runner.run.return_value = {}
             mock_cls.return_value = mock_runner
 
             engine.enrich([])
@@ -337,7 +337,7 @@ class TestEngineEnrich:
         engine = Engine()
         with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.get_metrics.return_value = {}
+            mock_runner.run.return_value = {}
             mock_cls.return_value = mock_runner
 
             engine.enrich([], show_progress=False)

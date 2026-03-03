@@ -6,12 +6,9 @@ import os
 from datetime import date
 from unittest.mock import patch
 
-import pytest
-
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.source import Source
-from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.download_runner import DownloadRunner
 
 
@@ -41,13 +38,6 @@ class TestDownloadRunnerInit:
         papers = [_make_paper()]
         runner = DownloadRunner(papers=papers, output_directory="/tmp/out")
         assert runner._output_directory == "/tmp/out"  # noqa: SLF001
-        assert runner._executed is False  # noqa: SLF001
-
-    def test_get_metrics_before_run_raises(self):
-        """get_metrics() before run() raises SearchRunnerNotExecutedError."""
-        runner = DownloadRunner(papers=[], output_directory="/tmp")
-        with pytest.raises(SearchRunnerNotExecutedError):
-            runner.get_metrics()
 
 
 class TestDownloadRunnerBuildFilename:
@@ -148,8 +138,7 @@ class TestDownloadRunnerRun:
     def test_run_with_empty_list(self, tmp_path):
         """run() with empty paper list completes successfully."""
         runner = DownloadRunner(papers=[], output_directory=str(tmp_path))
-        runner.run()
-        metrics = runner.get_metrics()
+        metrics = runner.run()
         assert metrics["total_papers"] == 0
         assert metrics["downloaded_papers"] == 0
 
@@ -157,8 +146,7 @@ class TestDownloadRunnerRun:
         """Metrics contain expected keys after run()."""
         runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
         with patch.object(runner, "_download_paper", return_value=(False, [])):
-            runner.run()
-        metrics = runner.get_metrics()
+            metrics = runner.run()
         assert "total_papers" in metrics
         assert "downloaded_papers" in metrics
         assert "runtime_in_seconds" in metrics
@@ -174,15 +162,15 @@ class TestDownloadRunnerRun:
         """Successful download increments downloaded_papers metric."""
         runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
         with patch.object(runner, "_download_paper", return_value=(True, ["http://url"])):
-            runner.run()
-        assert runner.get_metrics()["downloaded_papers"] == 1
+            metrics = runner.run()
+        assert metrics["downloaded_papers"] == 1
 
     def test_download_failure_logged(self, tmp_path):
         """Failed download leaves downloaded_papers at 0."""
         runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
         with patch.object(runner, "_download_paper", return_value=(False, ["http://url"])):
-            runner.run()
-        assert runner.get_metrics()["downloaded_papers"] == 0
+            metrics = runner.run()
+        assert metrics["downloaded_papers"] == 0
         # Error log must exist
         error_log = os.path.join(str(tmp_path), "download_errors.txt")
         assert os.path.exists(error_log)
@@ -196,8 +184,8 @@ class TestDownloadRunnerVerbose:
 
         runner = DownloadRunner(papers=[], output_directory=str(tmp_path))
         # Should not raise.
-        runner.run(verbose=True)
-        assert runner.get_metrics()["total_papers"] == 0
+        metrics = runner.run(verbose=True)
+        assert metrics["total_papers"] == 0
 
     def test_verbose_true_emits_configuration_header(self, tmp_path, caplog):
         """verbose=True logs the DownloadRunner configuration header."""
@@ -526,12 +514,12 @@ class TestDownloadRunnerUrlPriority:
             return self._make_pdf_response()
 
         with patch.object(runner, "_request", side_effect=_fake_request):
-            runner.run()
+            metrics = runner.run()
 
         assert call_order[0] == "http://example.com/paper.pdf", (
             "pdf_url must be the first URL tried"
         )
-        assert runner.get_metrics()["downloaded_papers"] == 1
+        assert metrics["downloaded_papers"] == 1
 
     def test_falls_back_to_url_when_pdf_url_fails(self, tmp_path):
         """When pdf_url request fails, url is tried next."""
@@ -554,11 +542,11 @@ class TestDownloadRunnerUrlPriority:
             return self._make_pdf_response()
 
         with patch.object(runner, "_request", side_effect=_fake_request):
-            runner.run()
+            metrics = runner.run()
 
         assert call_order[0] == "http://example.com/broken.pdf"
         assert "http://example.com/landing" in call_order
-        assert runner.get_metrics()["downloaded_papers"] == 1
+        assert metrics["downloaded_papers"] == 1
 
     def test_only_url_when_no_pdf_url(self, tmp_path):
         """When pdf_url is not set, url is used directly."""
@@ -579,7 +567,7 @@ class TestDownloadRunnerUrlPriority:
             return self._make_pdf_response()
 
         with patch.object(runner, "_request", side_effect=_fake_request):
-            runner.run()
+            metrics = runner.run()
 
         assert call_order[0] == "http://example.com/landing"
-        assert runner.get_metrics()["downloaded_papers"] == 1
+        assert metrics["downloaded_papers"] == 1

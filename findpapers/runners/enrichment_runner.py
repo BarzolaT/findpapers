@@ -8,7 +8,6 @@ from time import perf_counter
 
 from findpapers.connectors.crossref import CrossRefConnector
 from findpapers.core.paper import Paper
-from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.utils.enrichment import build_paper_from_metadata, fetch_metadata
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.parallel import execute_tasks
@@ -101,8 +100,7 @@ class EnrichmentRunner:
     Examples
     --------
     >>> runner = EnrichmentRunner(papers=papers, num_workers=4, timeout=15.0)
-    >>> runner.run(verbose=True)
-    >>> metrics = runner.get_metrics()
+    >>> metrics = runner.run(verbose=True)
     """
 
     def __init__(
@@ -113,7 +111,6 @@ class EnrichmentRunner:
         timeout: float | None = 10.0,
     ) -> None:
         """Initialise enrichment configuration without executing it."""
-        self._executed = False
         self._results = list(papers)
         self._metrics: dict[str, int | float] = {}
         self._num_workers = num_workers
@@ -124,7 +121,7 @@ class EnrichmentRunner:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, verbose: bool = False, show_progress: bool = True) -> None:
+    def run(self, verbose: bool = False, show_progress: bool = True) -> dict[str, int | float]:
         """Enrich all configured papers in-place.
 
         Parameters
@@ -139,7 +136,9 @@ class EnrichmentRunner:
 
         Returns
         -------
-        None
+        dict[str, int | float]
+            Metrics with at least ``total_papers``, ``enriched_papers``,
+            and ``runtime_in_seconds``.
         """
         if verbose:
             configure_verbose_logging()
@@ -168,7 +167,6 @@ class EnrichmentRunner:
 
         metrics["runtime_in_seconds"] = perf_counter() - start
         self._metrics = metrics
-        self._executed = True
 
         if verbose:
             logger.info("=== Enrichment Summary ===")
@@ -182,37 +180,11 @@ class EnrichmentRunner:
             logger.info("Runtime: %.2f s", metrics["runtime_in_seconds"])
             logger.info("==========================")
 
-    def get_metrics(self) -> dict[str, int | float]:
-        """Return a snapshot of numeric performance metrics.
-
-        Returns
-        -------
-        dict[str, int | float]
-            Metrics with at least ``total_papers``, ``enriched_papers``, and
-            ``runtime_in_seconds``.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            If :meth:`run` has not been called yet.
-        """
-        self._ensure_executed()
         return dict(self._metrics)
 
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
-
-    def _ensure_executed(self) -> None:
-        """Raise if :meth:`run` has not been called.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            When the runner has not been executed.
-        """
-        if not self._executed:
-            raise SearchRunnerNotExecutedError("EnrichmentRunner has not been executed yet.")
 
     def _enrich_results(
         self,

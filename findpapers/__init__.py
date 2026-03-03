@@ -6,7 +6,6 @@ from findpapers.core.paper import PaperType
 from findpapers.core.query import ConnectorType, FilterCode
 from findpapers.core.source import SourceType
 from findpapers.engine import Engine
-from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.doi_lookup_runner import DOILookupRunner
 from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
@@ -24,7 +23,6 @@ __all__ = [
     "ConnectorType",
     "PaperType",
     "SearchRunner",
-    "SearchRunnerNotExecutedError",
     "SnowballRunner",
     "SourceType",
 ]

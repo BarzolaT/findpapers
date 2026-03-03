@@ -4,12 +4,9 @@ from __future__ import annotations
 
 import datetime
 
-import pytest
-
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
-from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.runners.snowball_runner import SnowballRunner
 
 # ---------------------------------------------------------------------------
@@ -145,26 +142,6 @@ class TestSnowballRunnerInit:
         runner = SnowballRunner(seed_papers=[seed], depth=-1)
 
         assert runner._depth == 0
-
-
-class TestSnowballRunnerNotExecuted:
-    """Tests that accessing results before run() raises an error."""
-
-    def test_get_result_before_run(self) -> None:
-        """get_result raises SearchRunnerNotExecutedError."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        runner = SnowballRunner(seed_papers=[seed])
-
-        with pytest.raises(SearchRunnerNotExecutedError):
-            runner.get_result()
-
-    def test_get_metrics_before_run(self) -> None:
-        """get_metrics raises SearchRunnerNotExecutedError."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        runner = SnowballRunner(seed_papers=[seed])
-
-        with pytest.raises(SearchRunnerNotExecutedError):
-            runner.get_metrics()
 
 
 class TestSnowballRunnerRun:
@@ -449,21 +426,15 @@ class TestSnowballRunnerMetrics:
     """Tests for metrics after execution."""
 
     def test_metrics_after_run(self) -> None:
-        """Metrics contain expected keys."""
+        """Graph contains expected data after run()."""
         seed = _make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=[seed], depth=0)
         runner._connectors = [FakeCitationConnector()]
 
-        runner.run()
-        metrics = runner.get_metrics()
+        graph = runner.run()
 
-        assert metrics["seed_papers"] == 1
-        assert metrics["skipped_seeds_without_doi"] == 0
-        assert metrics["depth"] == 0
-        assert metrics["total_papers"] == 1
-        assert metrics["total_edges"] == 0
-        assert "runtime_in_seconds" in metrics
-        assert metrics["runtime_in_seconds"] >= 0
+        assert graph.paper_count == 1
+        assert graph.edge_count == 0
 
     def test_show_progress_false_disables_progress_bar(self) -> None:
         """show_progress=False suppresses the tqdm progress bar."""

@@ -107,32 +107,6 @@ class TestDOILookupRunnerInit:
         runner = DOILookupRunner(doi="10.1234/test", timeout=30.0)
         assert runner._timeout == 30.0  # noqa: SLF001
 
-    def test_not_executed_by_default(self):
-        """Runner is not marked as executed on creation."""
-        runner = DOILookupRunner(doi="10.1234/test")
-        assert runner._executed is False  # noqa: SLF001
-
-
-# ---------------------------------------------------------------------------
-# get_result / get_runtime before run()
-# ---------------------------------------------------------------------------
-
-
-class TestDOILookupRunnerBeforeRun:
-    """Tests for accessing results before run() is called."""
-
-    def test_get_result_before_run_raises(self):
-        """get_result() before run() raises RuntimeError."""
-        runner = DOILookupRunner(doi="10.1234/test")
-        with pytest.raises(RuntimeError, match="has not been executed"):
-            runner.get_result()
-
-    def test_get_runtime_before_run_raises(self):
-        """get_runtime() before run() raises RuntimeError."""
-        runner = DOILookupRunner(doi="10.1234/test")
-        with pytest.raises(RuntimeError, match="has not been executed"):
-            runner.get_runtime()
-
 
 # ---------------------------------------------------------------------------
 # run()
@@ -200,36 +174,6 @@ class TestDOILookupRunnerRun:
 
         mock_fetch.assert_called_once_with("10.1234/test")
 
-    def test_get_result_after_run(self):
-        """get_result() returns the same object as run()."""
-        fake_paper = _fake_paper()
-        with (
-            patch(
-                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
-                return_value=_fake_crossref_work(),
-            ),
-            patch(
-                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
-                return_value=fake_paper,
-            ),
-        ):
-            runner = DOILookupRunner(doi="10.1234/test")
-            run_result = runner.run()
-            get_result = runner.get_result()
-
-        assert run_result is get_result
-
-    def test_get_runtime_after_run(self):
-        """get_runtime() returns a non-negative float after run()."""
-        with patch(
-            "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
-            return_value=None,
-        ):
-            runner = DOILookupRunner(doi="10.1234/test")
-            runner.run()
-
-        assert runner.get_runtime() >= 0.0
-
     def test_run_verbose_mode(self):
         """run() with verbose=True does not raise."""
         with patch(
@@ -265,4 +209,3 @@ class TestDOILookupRunnerRun:
 
         assert first is None
         assert second is fake_paper
-        assert runner.get_result() is fake_paper

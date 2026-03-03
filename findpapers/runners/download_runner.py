@@ -11,7 +11,6 @@ from time import perf_counter
 import requests
 
 from findpapers.core.paper import Paper
-from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.utils.download import build_filename, build_proxies, resolve_pdf_url
 from findpapers.utils.http_headers import get_browser_headers
 from findpapers.utils.logging_config import configure_verbose_logging
@@ -50,8 +49,7 @@ class DownloadRunner:
     Examples
     --------
     >>> runner = DownloadRunner(papers=papers, output_directory="/tmp/pdfs")
-    >>> runner.run(verbose=True)
-    >>> metrics = runner.get_metrics()
+    >>> metrics = runner.run(verbose=True)
     """
 
     def __init__(
@@ -64,7 +62,6 @@ class DownloadRunner:
         ssl_verify: bool = True,
     ) -> None:
         """Initialise download configuration without executing it."""
-        self._executed = False
         self._results = list(papers)
         self._metrics: dict[str, int | float] = {}
         self._output_directory = output_directory
@@ -77,7 +74,7 @@ class DownloadRunner:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, verbose: bool = False, show_progress: bool = True) -> None:
+    def run(self, verbose: bool = False, show_progress: bool = True) -> dict[str, int | float]:
         """Download PDFs for all configured papers.
 
         Parameters
@@ -92,7 +89,9 @@ class DownloadRunner:
 
         Returns
         -------
-        None
+        dict[str, int | float]
+            Metrics with at least ``total_papers``, ``downloaded_papers``,
+            and ``runtime_in_seconds``.
         """
         if verbose:
             configure_verbose_logging()
@@ -159,7 +158,6 @@ class DownloadRunner:
 
         metrics["runtime_in_seconds"] = perf_counter() - start
         self._metrics = metrics
-        self._executed = True
 
         if verbose:
             logger.info("=== Download Summary ===")
@@ -170,37 +168,11 @@ class DownloadRunner:
             logger.info("Runtime: %.2f s", metrics["runtime_in_seconds"])
             logger.info("========================")
 
-    def get_metrics(self) -> dict[str, int | float]:
-        """Return a snapshot of numeric performance metrics.
-
-        Returns
-        -------
-        dict[str, int | float]
-            Metrics with at least ``total_papers``, ``downloaded_papers``, and
-            ``runtime_in_seconds``.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            If :meth:`run` has not been called yet.
-        """
-        self._ensure_executed()
         return dict(self._metrics)
 
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
-
-    def _ensure_executed(self) -> None:
-        """Raise if :meth:`run` has not been called.
-
-        Raises
-        ------
-        SearchRunnerNotExecutedError
-            When the runner has not been executed.
-        """
-        if not self._executed:
-            raise SearchRunnerNotExecutedError("DownloadRunner has not been executed yet.")
 
     def _build_proxies(self) -> dict[str, str] | None:
         """Build a proxies dict for *requests* if a proxy is configured.
