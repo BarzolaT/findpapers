@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from enum import Enum
 from time import perf_counter
 
 from findpapers.connectors.crossref import CrossRefConnector
@@ -13,6 +14,33 @@ from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.parallel import execute_tasks
 
 logger = logging.getLogger(__name__)
+
+
+class EnrichmentOutcome(Enum):
+    """Possible outcomes of enriching a single paper.
+
+    Attributes
+    ----------
+    ENRICHED_DOI : str
+        At least one field was updated, with CrossRef contributing data.
+    ENRICHED : str
+        At least one field was updated via URL scraping.
+    NO_CHANGE : str
+        Metadata was fetched but mirrored existing data.
+    NO_METADATA : str
+        URLs were reachable but returned no parseable metadata.
+    FETCH_ERROR : str
+        All sources raised HTTP/network errors.
+    NO_URLS : str
+        Paper has no usable URL and no DOI.
+    """
+
+    ENRICHED_DOI = "enriched+doi"
+    ENRICHED = "enriched"
+    NO_CHANGE = "no_change"
+    NO_METADATA = "no_metadata"
+    FETCH_ERROR = "fetch_error"
+    NO_URLS = "no_urls"
 
 
 def _enrichment_snapshot(paper: Paper) -> tuple:
@@ -217,7 +245,7 @@ class EnrichmentRunner:
         no_change = 0
         no_urls = 0
 
-        def _enrich_task(paper: Paper) -> str:
+        def _enrich_task(paper: Paper) -> EnrichmentOutcome:
             return self._enrich_paper(paper, timeout=timeout)
 
         for _paper, result, error in execute_tasks(
@@ -235,17 +263,17 @@ class EnrichmentRunner:
                     logger.warning("Error enriching paper: %s", error)
                 fetch_errors += 1
                 continue
-            if isinstance(result, str) and result.startswith("enriched"):
+            if result in (EnrichmentOutcome.ENRICHED, EnrichmentOutcome.ENRICHED_DOI):
                 enriched += 1
-                if "doi" in result:
+                if result == EnrichmentOutcome.ENRICHED_DOI:
                     doi_enriched += 1
-            elif result == "fetch_error":
+            elif result == EnrichmentOutcome.FETCH_ERROR:
                 fetch_errors += 1
-            elif result == "no_metadata":
+            elif result == EnrichmentOutcome.NO_METADATA:
                 no_metadata += 1
-            elif result == "no_change":
+            elif result == EnrichmentOutcome.NO_CHANGE:
                 no_change += 1
-            elif result == "no_urls":
+            elif result == EnrichmentOutcome.NO_URLS:
                 no_urls += 1
 
         metrics["enriched_papers"] = enriched
@@ -255,7 +283,7 @@ class EnrichmentRunner:
         metrics["no_change_papers"] = no_change
         metrics["no_urls_papers"] = no_urls
 
-    def _enrich_paper(self, paper: Paper, timeout: float | None = None) -> str:
+    def _enrich_paper(self, paper: Paper, timeout: float | None = None) -> EnrichmentOutcome:
         """Attempt to enrich a single paper using the CrossRef API and URL scraping.
 
         The method first queries the CrossRef API when the paper has a DOI,
@@ -272,16 +300,8 @@ class EnrichmentRunner:
 
         Returns
         -------
-        str
-            One of:
-            * ``"enriched+doi"`` — at least one field was updated, with CrossRef
-              contributing data.
-            * ``"enriched"``     — at least one field was updated via URL scraping.
-            * ``"no_change"``    — metadata was fetched but mirrored existing data.
-            * ``"no_metadata"``  — URLs were reachable but returned no parseable
-              metadata (non-HTML or missing title tag).
-            * ``"fetch_error"``  — all sources raised HTTP/network errors.
-            * ``"no_urls"``      — paper has no usable URL and no DOI.
+        EnrichmentOutcome
+            The outcome of the enrichment attempt.
         """
         before = _enrichment_snapshot(paper)
         doi_contributed = False
@@ -345,16 +365,16 @@ class EnrichmentRunner:
         changed = _enrichment_snapshot(paper) != before
 
         if not paper.doi and not deduped:
-            return "no_urls"
+            return EnrichmentOutcome.NO_URLS
         if changed:
-            return "enriched+doi" if doi_contributed else "enriched"
+            return EnrichmentOutcome.ENRICHED_DOI if doi_contributed else EnrichmentOutcome.ENRICHED
         # Nothing changed from here on — classify the reason.
         if had_url_metadata or doi_contributed:
             # Sources returned data but it mirrored what we already had.
-            return "no_change"
+            return EnrichmentOutcome.NO_CHANGE
         if had_fetch_error and not paper.doi:
-            return "fetch_error"
+            return EnrichmentOutcome.FETCH_ERROR
         if deduped and not had_fetch_error and not had_url_metadata:
             # URLs were reachable but returned no parseable metadata.
-            return "no_metadata"
-        return "no_change"
+            return EnrichmentOutcome.NO_METADATA
+        return EnrichmentOutcome.NO_CHANGE
