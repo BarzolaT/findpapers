@@ -35,6 +35,18 @@ _IEEE_CONTENT_TYPE_MAP: dict[str, SourceType] = {
     "early access": SourceType.OTHER,
 }
 
+# Mapping from IEEE content_type (lowered) to PaperType.
+_IEEE_PAPER_TYPE_MAP: dict[str, PaperType] = {
+    "journals": PaperType.ARTICLE,
+    "magazines": PaperType.ARTICLE,
+    "conferences": PaperType.INPROCEEDINGS,
+    "books": PaperType.INBOOK,
+    "ebooks": PaperType.INBOOK,
+    "standards": PaperType.TECHREPORT,
+    "courses": PaperType.MISC,
+    "early access": PaperType.ARTICLE,
+}
+
 
 class IEEEConnector(SearchConnectorBase):
     """Connector for the IEEE Xplore database.
@@ -222,16 +234,6 @@ class IEEEConnector(SearchConnectorBase):
             )
 
         # Infer paper_type from content_type.
-        _IEEE_PAPER_TYPE_MAP: dict[str, PaperType] = {
-            "journals": PaperType.ARTICLE,
-            "magazines": PaperType.ARTICLE,
-            "conferences": PaperType.INPROCEEDINGS,
-            "books": PaperType.INBOOK,
-            "ebooks": PaperType.INBOOK,
-            "standards": PaperType.TECHREPORT,
-            "courses": PaperType.MISC,
-            "early access": PaperType.ARTICLE,
-        }
         paper_type = _IEEE_PAPER_TYPE_MAP.get(raw_content_type)
 
         # Pages

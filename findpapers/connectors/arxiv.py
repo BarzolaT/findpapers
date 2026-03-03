@@ -30,6 +30,14 @@ _NS = {"atom": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas
 # Example: http://arxiv.org/abs/1706.03762v5 → 1706.03762
 _ARXIV_ID_RE = re.compile(r"arxiv\.org/abs/([\d.]+)", re.IGNORECASE)
 
+# Mapping from SourceType to PaperType for arXiv entries.
+_ARXIV_PAPER_TYPE_MAP: dict[SourceType, PaperType] = {
+    SourceType.JOURNAL: PaperType.ARTICLE,
+    SourceType.CONFERENCE: PaperType.INPROCEEDINGS,
+    SourceType.BOOK: PaperType.INBOOK,
+    SourceType.REPOSITORY: PaperType.UNPUBLISHED,
+}
+
 
 class ArxivConnector(SearchConnectorBase):
     """Connector for the arXiv preprint database.
@@ -207,12 +215,6 @@ class ArxivConnector(SearchConnectorBase):
             comment = comment_el.text.strip()
 
         # Infer paper_type from source_type.
-        _ARXIV_PAPER_TYPE_MAP: dict[SourceType, PaperType] = {
-            SourceType.JOURNAL: PaperType.ARTICLE,
-            SourceType.CONFERENCE: PaperType.INPROCEEDINGS,
-            SourceType.BOOK: PaperType.INBOOK,
-            SourceType.REPOSITORY: PaperType.UNPUBLISHED,
-        }
         paper_type: PaperType | None = None
         if source is not None and source.source_type is not None:
             paper_type = _ARXIV_PAPER_TYPE_MAP.get(source.source_type)

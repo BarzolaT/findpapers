@@ -32,6 +32,24 @@ _SCOPUS_AGGREGATION_TYPE_MAP: dict[str, SourceType] = {
     "trade journal": SourceType.JOURNAL,
 }
 
+# Mapping from Scopus subtypeDescription (lowered) to PaperType.
+_SCOPUS_PAPER_TYPE_MAP: dict[str, PaperType] = {
+    "article": PaperType.ARTICLE,
+    "review": PaperType.ARTICLE,
+    "short survey": PaperType.ARTICLE,
+    "letter": PaperType.ARTICLE,
+    "note": PaperType.ARTICLE,
+    "editorial": PaperType.ARTICLE,
+    "erratum": PaperType.ARTICLE,
+    "business article": PaperType.ARTICLE,
+    "conference paper": PaperType.INPROCEEDINGS,
+    "conference review": PaperType.INPROCEEDINGS,
+    "book": PaperType.BOOK,
+    "book chapter": PaperType.INBOOK,
+    "report": PaperType.TECHREPORT,
+    "data paper": PaperType.MISC,
+}
+
 
 class ScopusConnector(SearchConnectorBase):
     """Connector for the Elsevier Scopus database.
@@ -222,22 +240,6 @@ class ScopusConnector(SearchConnectorBase):
         # Conference Paper, Conference Review, Data Paper, Editorial,
         # Erratum, Letter, Note, Press Release, Report, Retracted, Review,
         # Short Survey, Undefined
-        _SCOPUS_PAPER_TYPE_MAP: dict[str, PaperType] = {
-            "article": PaperType.ARTICLE,
-            "review": PaperType.ARTICLE,
-            "short survey": PaperType.ARTICLE,
-            "letter": PaperType.ARTICLE,
-            "note": PaperType.ARTICLE,
-            "editorial": PaperType.ARTICLE,
-            "erratum": PaperType.ARTICLE,
-            "business article": PaperType.ARTICLE,
-            "conference paper": PaperType.INPROCEEDINGS,
-            "conference review": PaperType.INPROCEEDINGS,
-            "book": PaperType.BOOK,
-            "book chapter": PaperType.INBOOK,
-            "report": PaperType.TECHREPORT,
-            "data paper": PaperType.MISC,
-        }
         raw_subtype = (entry.get("subtypeDescription") or "").strip().lower()
         paper_type = _SCOPUS_PAPER_TYPE_MAP.get(raw_subtype)
 

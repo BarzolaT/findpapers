@@ -55,6 +55,23 @@ _SS_PUB_TYPE_MAP: dict[str, SourceType] = {
     "BookSection": SourceType.BOOK,
 }
 
+# Mapping from Semantic Scholar publicationTypes entries to PaperType.
+_SS_PAPER_TYPE_MAP: dict[str, PaperType] = {
+    "JournalArticle": PaperType.ARTICLE,
+    "Review": PaperType.ARTICLE,
+    "CaseReport": PaperType.ARTICLE,
+    "ClinicalTrial": PaperType.ARTICLE,
+    "Editorial": PaperType.ARTICLE,
+    "LettersAndComments": PaperType.ARTICLE,
+    "MetaAnalysis": PaperType.ARTICLE,
+    "Study": PaperType.ARTICLE,
+    "Conference": PaperType.INPROCEEDINGS,
+    "Book": PaperType.BOOK,
+    "BookSection": PaperType.INBOOK,
+    "Dataset": PaperType.MISC,
+    "News": PaperType.MISC,
+}
+
 
 class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
     """Connector for the Semantic Scholar research corpus.
@@ -387,21 +404,6 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         # Review, JournalArticle, CaseReport, ClinicalTrial, Conference,
         # Dataset, Editorial, LettersAndComments, MetaAnalysis, News,
         # Study, Book, BookSection
-        _SS_PAPER_TYPE_MAP: dict[str, PaperType] = {
-            "JournalArticle": PaperType.ARTICLE,
-            "Review": PaperType.ARTICLE,
-            "CaseReport": PaperType.ARTICLE,
-            "ClinicalTrial": PaperType.ARTICLE,
-            "Editorial": PaperType.ARTICLE,
-            "LettersAndComments": PaperType.ARTICLE,
-            "MetaAnalysis": PaperType.ARTICLE,
-            "Study": PaperType.ARTICLE,
-            "Conference": PaperType.INPROCEEDINGS,
-            "Book": PaperType.BOOK,
-            "BookSection": PaperType.INBOOK,
-            "Dataset": PaperType.MISC,
-            "News": PaperType.MISC,
-        }
         paper_type: PaperType | None = None
         pub_types = item.get("publicationTypes") or []
         for pt in pub_types:

@@ -42,6 +42,30 @@ _OPENALEX_SOURCE_TYPE_MAP: dict[str, SourceType] = {
 # (the API supports pipe-separated ID filters).
 _REFERENCES_BATCH_SIZE = 50
 
+# Mapping from OpenAlex work.type (lowered) to PaperType.
+_OPENALEX_PAPER_TYPE_MAP: dict[str, PaperType] = {
+    "article": PaperType.ARTICLE,
+    "review": PaperType.ARTICLE,
+    "letter": PaperType.ARTICLE,
+    "editorial": PaperType.ARTICLE,
+    "erratum": PaperType.ARTICLE,
+    "book-chapter": PaperType.INBOOK,
+    "book": PaperType.BOOK,
+    "dissertation": PaperType.PHDTHESIS,
+    "preprint": PaperType.UNPUBLISHED,
+    "report": PaperType.TECHREPORT,
+    "standard": PaperType.TECHREPORT,
+    "peer-review": PaperType.MISC,
+    "other": PaperType.MISC,
+    "paratext": PaperType.MISC,
+    "reference-entry": PaperType.INCOLLECTION,
+    "dataset": PaperType.MISC,
+    "component": PaperType.MISC,
+    "grant": PaperType.MISC,
+    "supplementary-materials": PaperType.MISC,
+    "libguides": PaperType.MISC,
+}
+
 
 class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
     """Connector for the OpenAlex open catalog of academic works.
@@ -491,28 +515,6 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             pages = first_page
 
         # Infer paper_type from the work-level "type" field.
-        _OPENALEX_PAPER_TYPE_MAP: dict[str, PaperType] = {
-            "article": PaperType.ARTICLE,
-            "review": PaperType.ARTICLE,
-            "letter": PaperType.ARTICLE,
-            "editorial": PaperType.ARTICLE,
-            "erratum": PaperType.ARTICLE,
-            "book-chapter": PaperType.INBOOK,
-            "book": PaperType.BOOK,
-            "dissertation": PaperType.PHDTHESIS,
-            "preprint": PaperType.UNPUBLISHED,
-            "report": PaperType.TECHREPORT,
-            "standard": PaperType.TECHREPORT,
-            "peer-review": PaperType.MISC,
-            "other": PaperType.MISC,
-            "paratext": PaperType.MISC,
-            "reference-entry": PaperType.INCOLLECTION,
-            "dataset": PaperType.MISC,
-            "component": PaperType.MISC,
-            "grant": PaperType.MISC,
-            "supplementary-materials": PaperType.MISC,
-            "libguides": PaperType.MISC,
-        }
         raw_work_type = (work.get("type") or "").strip().lower()
         paper_type = _OPENALEX_PAPER_TYPE_MAP.get(raw_work_type)
 
