@@ -589,9 +589,10 @@ class TestPubmedConnectorSearch:
 
         searcher._http_session = MagicMock()
         searcher._http_session.get.return_value = esearch_mock
-        with patch.object(
-            searcher, "_fetch_details", side_effect=Exception("fetch error")
-        ), patch.object(searcher, "_rate_limit"):
+        with (
+            patch.object(searcher, "_fetch_details", side_effect=Exception("fetch error")),
+            patch.object(searcher, "_rate_limit"),
+        ):
             papers = searcher.search(simple_query)
 
         assert papers == []

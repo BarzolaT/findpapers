@@ -133,9 +133,10 @@ class TestExecuteTasksParallel:
         def _fake_as_completed(fs, timeout=None):
             raise FuturesTimeoutError()
 
-        with patch("findpapers.utils.parallel.as_completed", side_effect=_fake_as_completed), patch(
-            "findpapers.utils.parallel.ThreadPoolExecutor"
-        ) as mock_executor_cls:
+        with (
+            patch("findpapers.utils.parallel.as_completed", side_effect=_fake_as_completed),
+            patch("findpapers.utils.parallel.ThreadPoolExecutor") as mock_executor_cls,
+        ):
             mock_executor = MagicMock()
             mock_executor_cls.return_value.__enter__.return_value = mock_executor
             mock_executor.submit.side_effect = lambda fn, item: item_to_future[item]
@@ -159,9 +160,10 @@ class TestExecuteTasksParallel:
         def _fake_as_completed(fs, timeout=None):
             raise FuturesTimeoutError()
 
-        with patch("findpapers.utils.parallel.as_completed", side_effect=_fake_as_completed), patch(
-            "findpapers.utils.parallel.ThreadPoolExecutor"
-        ) as mock_executor_cls:
+        with (
+            patch("findpapers.utils.parallel.as_completed", side_effect=_fake_as_completed),
+            patch("findpapers.utils.parallel.ThreadPoolExecutor") as mock_executor_cls,
+        ):
             mock_executor = MagicMock()
             mock_executor_cls.return_value.__enter__.return_value = mock_executor
             mock_executor.submit.side_effect = lambda fn, item: boom_future

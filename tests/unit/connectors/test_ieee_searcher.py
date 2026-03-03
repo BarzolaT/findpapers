@@ -278,8 +278,9 @@ class TestIEEEConnectorSearch:
         """HTTP error in _get breaks the pagination loop and returns partial results."""
         searcher = IEEEConnector()
 
-        with patch.object(searcher, "_get", side_effect=Exception("network error")), patch.object(
-            searcher, "_rate_limit"
+        with (
+            patch.object(searcher, "_get", side_effect=Exception("network error")),
+            patch.object(searcher, "_rate_limit"),
         ):
             papers = searcher.search(simple_query)
 

@@ -381,8 +381,9 @@ class TestSemanticScholarConnectorSearch:
         """Exception in _get breaks the loop and returns empty list."""
         searcher = SemanticScholarConnector()
 
-        with patch.object(searcher, "_get", side_effect=Exception("network error")), patch.object(
-            searcher, "_rate_limit"
+        with (
+            patch.object(searcher, "_get", side_effect=Exception("network error")),
+            patch.object(searcher, "_rate_limit"),
         ):
             papers = searcher.search(simple_query)
 

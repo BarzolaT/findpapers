@@ -95,7 +95,7 @@ class TestExtractMetadataFromHtml:
 
     def test_dc_colon_prefix_normalised_to_dot(self) -> None:
         """Dublin Core colon-form keys (dc:creator) are mapped to dot-form (dc.creator)."""
-        html = "<html><head>" '<meta name="dc:creator" content="Smith, J">' "</head></html>"
+        html = '<html><head><meta name="dc:creator" content="Smith, J"></head></html>'
         meta = extract_metadata_from_html(html)
         # The colon-form key must NOT appear; the dot-form must be present.
         assert "dc:creator" not in meta

@@ -295,8 +295,7 @@ class Paper:
         max_allowed = datetime.date.today() + datetime.timedelta(days=_MAX_FUTURE_DAYS)
         if value > max_allowed:
             logger.debug(
-                "Discarding implausible future publication date %s "
-                "(more than %d days from today).",
+                "Discarding implausible future publication date %s (more than %d days from today).",
                 value.isoformat(),
                 _MAX_FUTURE_DAYS,
             )

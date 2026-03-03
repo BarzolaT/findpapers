@@ -52,7 +52,7 @@ _USER_AGENTS: list[str] = [
     # Firefox on Windows
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
     # Firefox on macOS
-    ("Mozilla/5.0 (Macintosh; Intel Mac OS X 14.3; rv:124.0) " "Gecko/20100101 Firefox/124.0"),
+    ("Mozilla/5.0 (Macintosh; Intel Mac OS X 14.3; rv:124.0) Gecko/20100101 Firefox/124.0"),
     # Firefox on Linux
     "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
     # Safari on macOS

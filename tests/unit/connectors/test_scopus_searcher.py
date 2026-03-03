@@ -290,11 +290,14 @@ class TestScopusConnectorSearch:
         response_with_data.raise_for_status = MagicMock()
         response_empty_page = self._empty_page_response(mock_response)
 
-        with patch.object(
-            searcher,
-            "_get",
-            side_effect=[response_with_data, response_empty_page],
-        ) as mocked_get, patch.object(searcher, "_rate_limit"):
+        with (
+            patch.object(
+                searcher,
+                "_get",
+                side_effect=[response_with_data, response_empty_page],
+            ) as mocked_get,
+            patch.object(searcher, "_rate_limit"),
+        ):
             papers = searcher.search(simple_query)
 
         assert mocked_get.call_count == 2
@@ -307,8 +310,9 @@ class TestScopusConnectorSearch:
         response_with_data = mock_response(json_data=scopus_sample_json)
         response_with_data.raise_for_status = MagicMock()
 
-        with patch.object(searcher, "_get", return_value=response_with_data), patch.object(
-            searcher, "_rate_limit"
+        with (
+            patch.object(searcher, "_get", return_value=response_with_data),
+            patch.object(searcher, "_rate_limit"),
         ):
             papers = searcher.search(simple_query, max_papers=2)
 
@@ -318,8 +322,9 @@ class TestScopusConnectorSearch:
         """Exception in _get breaks the pagination loop and returns empty list."""
         searcher = ScopusConnector()
 
-        with patch.object(searcher, "_get", side_effect=Exception("network error")), patch.object(
-            searcher, "_rate_limit"
+        with (
+            patch.object(searcher, "_get", side_effect=Exception("network error")),
+            patch.object(searcher, "_rate_limit"),
         ):
             papers = searcher.search(simple_query)
 
@@ -333,11 +338,14 @@ class TestScopusConnectorSearch:
         response_empty_page = self._empty_page_response(mock_response)
         callback = MagicMock()
 
-        with patch.object(
-            searcher,
-            "_get",
-            side_effect=[response_with_data, response_empty_page],
-        ), patch.object(searcher, "_rate_limit"):
+        with (
+            patch.object(
+                searcher,
+                "_get",
+                side_effect=[response_with_data, response_empty_page],
+            ),
+            patch.object(searcher, "_rate_limit"),
+        ):
             searcher.search(simple_query, progress_callback=callback)
 
         callback.assert_called()
@@ -360,8 +368,9 @@ class TestScopusConnectorSearch:
         response = mock_response(json_data=single_entry_data)
         response.raise_for_status = MagicMock()
 
-        with patch.object(searcher, "_get", return_value=response), patch.object(
-            searcher, "_rate_limit"
+        with (
+            patch.object(searcher, "_get", return_value=response),
+            patch.object(searcher, "_rate_limit"),
         ):
             papers = searcher.search(simple_query)
 

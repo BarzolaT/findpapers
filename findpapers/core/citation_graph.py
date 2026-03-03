@@ -320,7 +320,8 @@ class CitationGraph:
                 {
                     **paper.to_dict(),
                     "snowball_depth": self._paper_depths.get(
-                        self._paper_key(paper), -1  # type: ignore[arg-type]
+                        self._paper_key(paper),  # type: ignore[arg-type]
+                        -1,
                     ),
                 }
                 for paper in self._papers.values()

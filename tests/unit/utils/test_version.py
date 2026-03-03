@@ -33,13 +33,16 @@ class TestPackageVersion:
 
     def test_falls_back_to_pyproject_on_package_not_found(self):
         """package_version calls version_from_pyproject when package metadata is unavailable."""
-        with patch(
-            "findpapers.utils.version.metadata.version",
-            side_effect=metadata.PackageNotFoundError("findpapers"),
-        ), patch(
-            "findpapers.utils.version.version_from_pyproject",
-            return_value="0.9.0",
-        ) as mock_fallback:
+        with (
+            patch(
+                "findpapers.utils.version.metadata.version",
+                side_effect=metadata.PackageNotFoundError("findpapers"),
+            ),
+            patch(
+                "findpapers.utils.version.version_from_pyproject",
+                return_value="0.9.0",
+            ) as mock_fallback,
+        ):
             result = package_version()
 
         mock_fallback.assert_called_once()

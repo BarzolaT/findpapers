@@ -450,9 +450,9 @@ class TestSearchRunnerPipeline:
         with caplog.at_level(logging.WARNING, logger="findpapers.runners.search_runner"):
             runner.run(verbose=False)  # verbose=False: warning must still appear
 
-        assert any(
-            "arXiv" in m or "Skipping" in m for m in caplog.messages
-        ), f"Expected warning not found in: {caplog.messages}"
+        assert any("arXiv" in m or "Skipping" in m for m in caplog.messages), (
+            f"Expected warning not found in: {caplog.messages}"
+        )
 
     def test_regular_error_warning_requires_verbose(self, caplog):
         """A generic searcher error only emits a warning when verbose=True."""

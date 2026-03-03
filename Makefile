@@ -53,8 +53,7 @@ test_report:
 
 lint:
 	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run ruff check $(TARGET)
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run isort --check-only $(TARGET)
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run black --check $(TARGET)
+	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run ruff format --check $(TARGET)
 	@if [ "$(TARGET)" = "." ]; then \
 		MYPYPATH=typings POETRY_VIRTUALENVS_CREATE=false $(POETRY) run mypy findpapers tests/unit; \
 	else \
@@ -63,5 +62,4 @@ lint:
 
 format:
 	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run ruff check $(TARGET) --fix
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run isort $(TARGET)
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run black $(TARGET)
+	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run ruff format $(TARGET)

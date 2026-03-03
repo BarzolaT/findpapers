@@ -528,9 +528,9 @@ class TestDownloadRunnerUrlPriority:
         with patch.object(runner, "_request", side_effect=_fake_request):
             runner.run()
 
-        assert (
-            call_order[0] == "http://example.com/paper.pdf"
-        ), "pdf_url must be the first URL tried"
+        assert call_order[0] == "http://example.com/paper.pdf", (
+            "pdf_url must be the first URL tried"
+        )
         assert runner.get_metrics()["downloaded_papers"] == 1
 
     def test_falls_back_to_url_when_pdf_url_fails(self, tmp_path):

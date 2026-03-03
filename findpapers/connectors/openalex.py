@@ -489,7 +489,9 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 issn = (
                     issn_list[0]
                     if isinstance(issn_list, list) and issn_list
-                    else str(issn_list) if issn_list else None
+                    else str(issn_list)
+                    if issn_list
+                    else None
                 )
                 raw_src_type = (source_data.get("type") or "").strip().lower()
                 source_type = _OPENALEX_SOURCE_TYPE_MAP.get(raw_src_type)

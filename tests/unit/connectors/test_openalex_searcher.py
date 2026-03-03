@@ -443,8 +443,9 @@ class TestOpenAlexConnectorSearch:
         """Exception in _get breaks the loop and returns what was gathered."""
         searcher = OpenAlexConnector()
 
-        with patch.object(searcher, "_get", side_effect=Exception("timeout")), patch.object(
-            searcher, "_rate_limit"
+        with (
+            patch.object(searcher, "_get", side_effect=Exception("timeout")),
+            patch.object(searcher, "_rate_limit"),
         ):
             papers = searcher.search(simple_query)
 

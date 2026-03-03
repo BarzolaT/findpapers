@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from concurrent.futures import TimeoutError as FuturesTimeoutError
-from concurrent.futures import as_completed
 from time import perf_counter
 from typing import TypeVar
 

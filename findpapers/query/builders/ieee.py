@@ -192,7 +192,7 @@ class IEEEQueryBuilder(QueryBuilder):
         if filter_code == FilterCode.TITLE_ABSTRACT:
             return {
                 "querytext": (
-                    f'("Article Title":{self._quote(term)} OR ' f'"Abstract":{self._quote(term)})'
+                    f'("Article Title":{self._quote(term)} OR "Abstract":{self._quote(term)})'
                 )
             }
         return {

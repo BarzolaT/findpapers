@@ -58,7 +58,7 @@ class PubmedQueryBuilder(QueryBuilder):
                     return QueryValidationResult(
                         is_valid=False,
                         error_message=(
-                            "PubMed wildcard '*' requires at least 4 characters " "before '*'."
+                            "PubMed wildcard '*' requires at least 4 characters before '*'."
                         ),
                     )
         return QueryValidationResult(is_valid=True)
@@ -115,7 +115,7 @@ class PubmedQueryBuilder(QueryBuilder):
 
         def plain_term(term_node: QueryNode) -> str:
             """Convert term without filter prefix."""
-            return f'"{ term_node.value or ""}"'
+            return f'"{term_node.value or ""}"'
 
         def group_wrapper(group_node: QueryNode, inner: str) -> str | None:
             """Wrap a plain group expression with PubMed postfix tag.
