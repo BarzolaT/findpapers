@@ -96,6 +96,8 @@ class CitationGraph:
         # falling back to title).
         self._papers: dict[str, Paper] = {}
         self._edges: list[CitationEdge] = []
+        # Set of (source_key, target_key) tuples for O(1) duplicate edge detection.
+        self._edge_keys: set[tuple[str, str]] = set()
         # Track the depth at which each paper was first discovered.
         self._paper_depths: dict[str, int] = {}
 
@@ -229,13 +231,12 @@ class CitationGraph:
         canonical_source = self._papers.get(source_key, source)
         canonical_target = self._papers.get(target_key, target)
 
-        # Prevent duplicate edges.
-        for edge in self._edges:
-            existing_src = self._paper_key(edge.source)
-            existing_tgt = self._paper_key(edge.target)
-            if existing_src == source_key and existing_tgt == target_key:
-                return
+        # Prevent duplicate edges (O(1) lookup).
+        edge_key = (source_key, target_key)
+        if edge_key in self._edge_keys:
+            return
 
+        self._edge_keys.add(edge_key)
         self._edges.append(CitationEdge(source=canonical_source, target=canonical_target))
 
     # ------------------------------------------------------------------
@@ -379,6 +380,7 @@ class CitationGraph:
             tgt_key = tgt_doi or tgt_title
             if src_key in papers and tgt_key in papers:
                 graph._edges.append(CitationEdge(source=papers[src_key], target=papers[tgt_key]))
+                graph._edge_keys.add((src_key, tgt_key))
 
         return graph
 
