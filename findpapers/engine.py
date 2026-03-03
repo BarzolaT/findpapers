@@ -19,6 +19,7 @@ Example
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import Literal
 
@@ -128,6 +129,12 @@ class Engine:
             )
         else:
             self._ssl_verify = ssl_verify
+
+        if not self._ssl_verify:
+            logging.getLogger(__name__).warning(
+                "SSL certificate verification is disabled. "
+                "Connections may be vulnerable to man-in-the-middle attacks."
+            )
 
     # ------------------------------------------------------------------
     # Public interface

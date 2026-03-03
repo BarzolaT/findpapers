@@ -145,6 +145,27 @@ class TestEngineInit:
             engine = Engine(ssl_verify=False)
         assert engine._ssl_verify is False
 
+    def test_ssl_verify_false_logs_warning(self, caplog):
+        """Engine logs a security warning when SSL verification is disabled."""
+        with caplog.at_level("WARNING", logger="findpapers.engine"):
+            Engine(ssl_verify=False)
+        assert any("SSL certificate verification is disabled" in msg for msg in caplog.messages)
+
+    def test_ssl_verify_true_no_warning(self, caplog):
+        """Engine does not log a warning when SSL verification is enabled."""
+        env_clear = {"FINDPAPERS_SSL_VERIFY": ""}
+        with patch.dict(os.environ, env_clear, clear=False):
+            with caplog.at_level("WARNING", logger="findpapers.engine"):
+                Engine(ssl_verify=True)
+        assert not any("SSL certificate verification" in msg for msg in caplog.messages)
+
+    def test_ssl_verify_env_false_logs_warning(self, caplog):
+        """Engine logs a warning when SSL is disabled via environment variable."""
+        with patch.dict(os.environ, {"FINDPAPERS_SSL_VERIFY": "false"}, clear=False):
+            with caplog.at_level("WARNING", logger="findpapers.engine"):
+                Engine()
+        assert any("SSL certificate verification is disabled" in msg for msg in caplog.messages)
+
 
 # ---------------------------------------------------------------------------
 # search()
