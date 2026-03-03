@@ -87,7 +87,7 @@ def _serialize_to_dict(data: Exportable) -> dict:
                 "version": package_version(),
                 "total_papers": len(data),
             },
-            "papers": [Paper.to_dict(p) for p in data],
+            "papers": [p.to_dict() for p in data],
         }
     raise TypeError(
         f"Expected SearchResult, CitationGraph, or list[Paper], got {type(data).__name__}"

@@ -28,7 +28,7 @@ def test_publication_to_from_dict():
         "publisher": "Pub",
     }
     source = Source.from_dict(data)
-    assert Source.to_dict(source)["title"] == "T"
+    assert source.to_dict()["title"] == "T"
 
 
 def test_paper_requires_title():
@@ -419,7 +419,7 @@ class TestPaperType:
             publication_date=None,
             paper_type=PaperType.INPROCEEDINGS,
         )
-        d = Paper.to_dict(paper)
+        d = paper.to_dict()
         assert d["paper_type"] == "inproceedings"
 
     def test_paper_type_none_serialized_as_none(self) -> None:
@@ -431,7 +431,7 @@ class TestPaperType:
             source=None,
             publication_date=None,
         )
-        d = Paper.to_dict(paper)
+        d = paper.to_dict()
         assert d["paper_type"] is None
 
     def test_paper_type_deserialized_from_dict(self) -> None:
@@ -520,7 +520,7 @@ class TestPaperType:
             publication_date=None,
             paper_type=PaperType.TECHREPORT,
         )
-        restored = Paper.from_dict(Paper.to_dict(paper))
+        restored = Paper.from_dict(paper.to_dict())
         assert restored.paper_type is PaperType.TECHREPORT
 
 
@@ -617,16 +617,14 @@ class TestInferPageCount:
 
     def test_from_dict_infers(self) -> None:
         """from_dict auto-fills page_count when absent."""
-        data = Paper.to_dict(
-            Paper(
-                title="T",
-                abstract="",
-                authors=[],
-                source=None,
-                publication_date=None,
-                page_range="1-15",
-            )
-        )
+        data = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            page_range="1-15",
+        ).to_dict()
         # Force page_count to None to test inference via from_dict.
         data["page_count"] = None
         restored = Paper.from_dict(data)
@@ -711,7 +709,7 @@ class TestPaperEquality:
         original = Paper(
             title="T", abstract="", authors=[], source=None, publication_date=None, doi="10.1/abc"
         )
-        data = Paper.to_dict(original)
+        data = original.to_dict()
         restored = Paper.from_dict(data)
         assert restored in [original]
 

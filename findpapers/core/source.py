@@ -173,24 +173,18 @@ class Source:
             source_type=source_type,
         )
 
-    @staticmethod
-    def to_dict(source: Source) -> dict:
-        """Convert a Source to dict.
-
-        Parameters
-        ----------
-        source : Source
-            Source instance.
+    def to_dict(self) -> dict:
+        """Serialize this Source to a plain dictionary.
 
         Returns
         -------
         dict
-            Source dictionary.
+            Source data suitable for JSON serialization.
         """
         return {
-            "title": source.title,
-            "isbn": source.isbn,
-            "issn": source.issn,
-            "publisher": source.publisher,
-            "source_type": source.source_type.value if source.source_type else None,
+            "title": self.title,
+            "isbn": self.isbn,
+            "issn": self.issn,
+            "publisher": self.publisher,
+            "source_type": self.source_type.value if self.source_type else None,
         }

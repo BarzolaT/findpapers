@@ -318,7 +318,7 @@ class CitationGraph:
             },
             "nodes": [
                 {
-                    **Paper.to_dict(paper),
+                    **paper.to_dict(),
                     "snowball_depth": self._paper_depths.get(
                         self._paper_key(paper), -1  # type: ignore[arg-type]
                     ),

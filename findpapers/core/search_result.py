@@ -134,7 +134,7 @@ class SearchResult:
         }
         return {
             "metadata": metadata,
-            "papers": [Paper.to_dict(paper) for paper in self.papers],
+            "papers": [paper.to_dict() for paper in self.papers],
         }
 
     @classmethod

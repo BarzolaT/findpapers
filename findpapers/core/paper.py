@@ -496,36 +496,30 @@ class Paper:
             paper_type=paper_type,
         )
 
-    @staticmethod
-    def to_dict(paper: "Paper") -> dict:
-        """Convert a Paper to dict.
-
-        Parameters
-        ----------
-        paper : Paper
-            Paper instance.
+    def to_dict(self) -> dict:
+        """Serialize this Paper to a plain dictionary.
 
         Returns
         -------
         dict
-            Paper dictionary.
+            Paper data suitable for JSON serialization.
         """
         return {
-            "title": paper.title,
-            "abstract": paper.abstract,
-            "authors": [author.to_dict() for author in paper.authors],
-            "source": (Source.to_dict(paper.source) if paper.source is not None else None),
+            "title": self.title,
+            "abstract": self.abstract,
+            "authors": [author.to_dict() for author in self.authors],
+            "source": (self.source.to_dict() if self.source is not None else None),
             "publication_date": (
-                paper.publication_date.isoformat() if paper.publication_date is not None else None
+                self.publication_date.isoformat() if self.publication_date is not None else None
             ),
-            "url": paper.url,
-            "pdf_url": paper.pdf_url,
-            "doi": paper.doi,
-            "citations": paper.citations,
-            "keywords": sorted(paper.keywords),
-            "comments": paper.comments,
-            "page_count": paper.page_count,
-            "page_range": paper.page_range,
-            "databases": sorted(paper.databases),
-            "paper_type": paper.paper_type.value if paper.paper_type else None,
+            "url": self.url,
+            "pdf_url": self.pdf_url,
+            "doi": self.doi,
+            "citations": self.citations,
+            "keywords": sorted(self.keywords),
+            "comments": self.comments,
+            "page_count": self.page_count,
+            "page_range": self.page_range,
+            "databases": sorted(self.databases),
+            "paper_type": self.paper_type.value if self.paper_type else None,
         }
