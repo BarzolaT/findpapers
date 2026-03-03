@@ -14,6 +14,7 @@ from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.utils.download import build_filename, build_proxies, resolve_pdf_url
 from findpapers.utils.http_headers import get_browser_headers
+from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.parallel import execute_tasks
 
 logger = logging.getLogger(__name__)
@@ -94,11 +95,7 @@ class DownloadRunner:
         None
         """
         if verbose:
-            logging.getLogger().setLevel(logging.DEBUG)
-            # Suppress verbose output from third-party HTTP libraries so that
-            # only findpapers' own loggers emit debug messages.
-            for _noisy in ("urllib3", "requests", "httpx", "charset_normalizer"):
-                logging.getLogger(_noisy).setLevel(logging.WARNING)
+            configure_verbose_logging()
             logger.info("=== DownloadRunner Configuration ===")
             logger.info("Total papers: %d", len(self._results))
             logger.info("Output directory: %s", self._output_directory)

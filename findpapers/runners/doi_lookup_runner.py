@@ -7,6 +7,7 @@ from time import perf_counter
 
 from findpapers.connectors.crossref import CrossRefConnector
 from findpapers.core.paper import Paper
+from findpapers.utils.logging_config import configure_verbose_logging
 
 logger = logging.getLogger(__name__)
 
@@ -100,9 +101,7 @@ class DOILookupRunner:
             cannot be parsed into a valid paper.
         """
         if verbose:
-            logging.getLogger().setLevel(logging.DEBUG)
-            for _noisy in ("urllib3", "requests", "httpx", "charset_normalizer"):
-                logging.getLogger(_noisy).setLevel(logging.WARNING)
+            configure_verbose_logging()
             logger.info("=== DOILookupRunner ===")
             logger.info("DOI: %s", self._doi)
             logger.info("Timeout: %s", self._timeout or "default")

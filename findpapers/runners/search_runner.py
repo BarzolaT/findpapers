@@ -20,6 +20,7 @@ from findpapers.exceptions import SearchRunnerNotExecutedError, UnsupportedQuery
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
 from findpapers.query.validator import QueryValidator
+from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.parallel import execute_tasks
 from findpapers.utils.progress import make_progress_bar
 
@@ -152,11 +153,7 @@ class SearchRunner:
             Search result object containing papers and metadata.
         """
         if verbose:
-            logging.getLogger().setLevel(logging.DEBUG)
-            # Suppress verbose output from third-party HTTP libraries so that
-            # only findpapers' own loggers emit debug messages.
-            for _noisy in ("urllib3", "requests", "httpx", "charset_normalizer"):
-                logging.getLogger(_noisy).setLevel(logging.WARNING)
+            configure_verbose_logging()
             logger.info("=== SearchRunner Configuration ===")
             logger.info("Databases: %s", [s.name for s in self._searchers])
             logger.info("Num workers: %d", self._num_workers)

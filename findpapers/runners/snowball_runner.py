@@ -19,6 +19,7 @@ from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
+from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.progress import make_progress_bar
 
 logger = logging.getLogger(__name__)
@@ -113,9 +114,7 @@ class SnowballRunner:
             The built citation graph.
         """
         if verbose:
-            logging.getLogger().setLevel(logging.DEBUG)
-            for _noisy in ("urllib3", "requests", "httpx", "charset_normalizer"):
-                logging.getLogger(_noisy).setLevel(logging.WARNING)
+            configure_verbose_logging()
             logger.info("=== SnowballRunner Configuration ===")
             logger.info(
                 "Seed papers: %d (skipped %d without DOI)",

@@ -9,6 +9,7 @@ from findpapers.connectors.crossref import CrossRefConnector
 from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
 from findpapers.utils.enrichment import build_paper_from_metadata, fetch_metadata
+from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.parallel import execute_tasks
 
 logger = logging.getLogger(__name__)
@@ -113,11 +114,7 @@ class EnrichmentRunner:
         None
         """
         if verbose:
-            logging.getLogger().setLevel(logging.DEBUG)
-            # Suppress verbose output from third-party HTTP libraries so that
-            # only findpapers' own loggers emit debug messages.
-            for _noisy in ("urllib3", "requests", "httpx", "charset_normalizer"):
-                logging.getLogger(_noisy).setLevel(logging.WARNING)
+            configure_verbose_logging()
             logger.info("=== EnrichmentRunner Configuration ===")
             logger.info("Total papers: %d", len(self._results))
             logger.info("Num workers: %d", self._num_workers)
