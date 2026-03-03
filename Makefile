@@ -8,8 +8,8 @@ POETRY = $(VENV_BIN)/poetry
 PYTEST_ARGS ?=
 TARGET ?= .
 
-include .env
-export $(shell sed 's/=.*//' .env)
+-include .env
+export $(shell [ -f .env ] && sed 's/=.*//' .env)
 
 help:
 	@echo "make clean"
