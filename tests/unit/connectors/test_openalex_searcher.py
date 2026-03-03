@@ -36,6 +36,22 @@ class TestOpenAlexConnectorInit:
         searcher = OpenAlexConnector(api_key="mykey")
         assert searcher._api_key == "mykey"
 
+    def test_warning_when_no_api_key(self, caplog):
+        """A warning is logged when no API key is provided."""
+        import logging
+
+        with caplog.at_level(logging.WARNING, logger="findpapers.connectors.openalex"):
+            OpenAlexConnector()
+        assert any("No API key provided for OpenAlex" in msg for msg in caplog.messages)
+
+    def test_no_warning_when_api_key_provided(self, caplog):
+        """No warning is logged when an API key is provided."""
+        import logging
+
+        with caplog.at_level(logging.WARNING, logger="findpapers.connectors.openalex"):
+            OpenAlexConnector(api_key="mykey")
+        assert not any("No API key provided" in msg for msg in caplog.messages)
+
 
 class TestOpenAlexPrepareHeaders:
     """Tests for _prepare_headers."""

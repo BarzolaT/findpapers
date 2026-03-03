@@ -92,6 +92,15 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
             _MIN_REQUEST_INTERVAL_WITH_KEY if api_key else _MIN_REQUEST_INTERVAL_DEFAULT
         )
 
+        if not api_key:
+            logger.warning(
+                "No API key provided for Semantic Scholar. "
+                "Without a key, requests share the unauthenticated pool "
+                "(up to 1000 req/s shared among all anonymous users). "
+                "Request a key at https://www.semanticscholar.org/product/api "
+                "for a dedicated quota."
+            )
+
     @property
     def name(self) -> str:
         """Return the database identifier.

@@ -78,6 +78,14 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         self._api_key = api_key
         self._email = email
 
+        if not api_key:
+            logger.warning(
+                "No API key provided for OpenAlex. "
+                "The daily budget without a key is $0.01/day (~10 requests), "
+                "suitable for testing only. Get a free key at "
+                "https://openalex.org/settings/api to increase your quota."
+            )
+
     @property
     def name(self) -> str:
         """Return the database identifier.

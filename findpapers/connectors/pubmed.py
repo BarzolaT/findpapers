@@ -73,6 +73,14 @@ class PubmedConnector(SearchConnectorBase):
             _MIN_REQUEST_INTERVAL_WITH_KEY if api_key else _MIN_REQUEST_INTERVAL_DEFAULT
         )
 
+        if not api_key:
+            logger.warning(
+                "No API key provided for PubMed. "
+                "Without a key, the rate limit is 3 requests/second "
+                "(instead of 10 req/s with a key). Request a free key at "
+                "https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/"
+            )
+
     @property
     def name(self) -> str:
         """Return the database identifier.
