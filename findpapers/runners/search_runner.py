@@ -131,7 +131,7 @@ class SearchRunner:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, verbose: bool = False) -> SearchResult:
+    def run(self, verbose: bool = False, show_progress: bool = True) -> SearchResult:
         """Execute the configured pipeline and return the results.
 
         Can be called multiple times; each call resets previous results.
@@ -140,6 +140,11 @@ class SearchRunner:
         ----------
         verbose : bool
             Enable verbose logging and print a summary after execution.
+        show_progress : bool
+            When ``True`` (default), display tqdm progress bars for each
+            database while papers are being fetched.  Set to ``False``
+            to suppress progress output (e.g. in non-interactive
+            environments or to keep log output clean).
 
         Returns
         -------
@@ -168,7 +173,7 @@ class SearchRunner:
         for _skipped in self._skipped_databases:
             metrics[f"total_papers_from_{_skipped}"] = 0
 
-        self._fetch_papers(metrics, verbose)
+        self._fetch_papers(metrics, verbose, show_progress=show_progress)
 
         before_dedupe = len(self._results)
         self._deduplicate_and_merge(metrics)
@@ -324,7 +329,13 @@ class SearchRunner:
                 )
         return available, skipped
 
-    def _fetch_papers(self, metrics: dict[str, int | float], verbose: bool = False) -> None:
+    def _fetch_papers(
+        self,
+        metrics: dict[str, int | float],
+        verbose: bool = False,
+        *,
+        show_progress: bool = True,
+    ) -> None:
         """Fetch papers from all configured searchers.
 
         Updates *metrics* with per-database paper counts.
@@ -335,6 +346,8 @@ class SearchRunner:
             Metrics dict to update in-place.
         verbose : bool
             Enable verbose logging.
+        show_progress : bool
+            Display tqdm progress bars.
 
         Returns
         -------
@@ -354,7 +367,9 @@ class SearchRunner:
             list[Paper]
                 Retrieved papers.
             """
-            with make_progress_bar(desc=searcher.name, unit="paper") as pbar:
+            with make_progress_bar(
+                desc=searcher.name, unit="paper", disable=not show_progress
+            ) as pbar:
 
                 def _cb(current: int, total: int | None) -> None:
                     pbar.total = total

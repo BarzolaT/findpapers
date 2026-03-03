@@ -303,6 +303,19 @@ class TestEnrichmentRunnerVerbose:
                 runner.run(verbose=False)
         assert "EnrichmentRunner Configuration" not in " ".join(caplog.messages)
 
+    def test_show_progress_false_disables_progress_bar(self):
+        """show_progress=False suppresses the tqdm progress bar."""
+        runner = EnrichmentRunner(papers=[_make_paper()])
+        with (
+            patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
+            patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
+            patch("findpapers.utils.parallel.make_progress_bar") as mock_pbar,
+        ):
+            runner.run(show_progress=False)
+            assert mock_pbar.called
+            for call in mock_pbar.call_args_list:
+                assert call.kwargs.get("disable") is True
+
     def test_verbose_true_suppresses_third_party_loggers(self):
         """verbose=True sets noisy third-party loggers to WARNING to avoid credential leaks."""
         import logging

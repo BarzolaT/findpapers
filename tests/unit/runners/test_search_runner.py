@@ -506,6 +506,36 @@ class TestSearchRunnerVerbose:
             runner.run(verbose=False)
         assert "SearchRunner Configuration" not in " ".join(caplog.messages)
 
+    def test_show_progress_false_disables_progress_bars(self):
+        """show_progress=False suppresses tqdm progress bars."""
+        from unittest.mock import patch
+
+        runner = self._make_runner_with_mock_papers([_make_paper()])
+        with patch("findpapers.runners.search_runner.make_progress_bar") as mock_pbar:
+            mock_ctx = MagicMock()
+            mock_pbar.return_value.__enter__ = MagicMock(return_value=mock_ctx)
+            mock_pbar.return_value.__exit__ = MagicMock(return_value=False)
+            runner.run(show_progress=False)
+            # Verify that make_progress_bar was called with disable=True
+            for call in mock_pbar.call_args_list:
+                assert call.kwargs.get("disable") is True or (
+                    len(call.args) > 3 and call.args[3] is True
+                )
+
+    def test_show_progress_true_enables_progress_bars(self):
+        """show_progress=True (default) enables tqdm progress bars."""
+        from unittest.mock import patch
+
+        runner = self._make_runner_with_mock_papers([_make_paper()])
+        with patch("findpapers.runners.search_runner.make_progress_bar") as mock_pbar:
+            mock_ctx = MagicMock()
+            mock_pbar.return_value.__enter__ = MagicMock(return_value=mock_ctx)
+            mock_pbar.return_value.__exit__ = MagicMock(return_value=False)
+            runner.run(show_progress=True)
+            # Verify that make_progress_bar was called with disable=False
+            for call in mock_pbar.call_args_list:
+                assert call.kwargs.get("disable") is False
+
 
 class TestSearchRunnerParallel:
     """Tests for parallel execution."""

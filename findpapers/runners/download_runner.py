@@ -76,13 +76,18 @@ class DownloadRunner:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, verbose: bool = False) -> None:
+    def run(self, verbose: bool = False, show_progress: bool = True) -> None:
         """Download PDFs for all configured papers.
 
         Parameters
         ----------
         verbose : bool
             Enable verbose logging and print a summary after execution.
+        show_progress : bool
+            When ``True`` (default), display a tqdm progress bar while
+            papers are being downloaded.  Set to ``False`` to suppress
+            progress output (e.g. in non-interactive environments or to
+            keep log output clean).
 
         Returns
         -------
@@ -142,7 +147,7 @@ class DownloadRunner:
             progress_total=len(self._results),
             progress_unit="paper",
             progress_desc="Downloading",
-            use_progress=True,
+            use_progress=show_progress,
         ):
             if error is not None or result is None:
                 self._log_download_error(error_log_path, paper.title, [])

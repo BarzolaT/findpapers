@@ -242,6 +242,20 @@ class TestDownloadRunnerVerbose:
             runner.run(verbose=False)
         assert "DownloadRunner Configuration" not in " ".join(caplog.messages)
 
+    def test_show_progress_false_disables_progress_bar(self, tmp_path):
+        """show_progress=False suppresses the tqdm progress bar."""
+        papers = [_make_paper()]
+        runner = DownloadRunner(papers=papers, output_directory=str(tmp_path))
+        with (
+            patch.object(runner, "_download_paper", return_value=(True, [])),
+            patch("findpapers.utils.parallel.make_progress_bar") as mock_pbar,
+        ):
+            runner.run(show_progress=False)
+            # Verify that make_progress_bar was called with disable=True
+            assert mock_pbar.called
+            for call in mock_pbar.call_args_list:
+                assert call.kwargs.get("disable") is True
+
     def test_verbose_true_suppresses_third_party_loggers(self, tmp_path):
         """verbose=True sets noisy third-party loggers to WARNING to avoid credential leaks."""
         import logging

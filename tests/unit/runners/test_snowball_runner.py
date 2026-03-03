@@ -464,3 +464,29 @@ class TestSnowballRunnerMetrics:
         assert metrics["total_edges"] == 0
         assert "runtime_in_seconds" in metrics
         assert metrics["runtime_in_seconds"] >= 0
+
+    def test_show_progress_false_disables_progress_bar(self) -> None:
+        """show_progress=False suppresses the tqdm progress bar."""
+        from unittest.mock import patch
+
+        seed = _make_paper("Seed", doi="10.1000/seed")
+        ref = _make_paper("Ref", doi="10.2000/ref")
+        connector = FakeCitationConnector(references={"10.1000/seed": [ref]})
+        runner = SnowballRunner(seed_papers=[seed], depth=1)
+        runner._connectors = [connector]
+
+        with patch("findpapers.runners.snowball_runner.make_progress_bar") as mock_pbar:
+            mock_ctx = type(
+                "MockCtx",
+                (),
+                {
+                    "__enter__": lambda self: self,
+                    "__exit__": lambda self, *args: False,
+                    "update": lambda self, n=1: None,
+                },
+            )()
+            mock_pbar.return_value = mock_ctx
+            runner.run(show_progress=False)
+            assert mock_pbar.called
+            for call in mock_pbar.call_args_list:
+                assert call.kwargs.get("disable") is True

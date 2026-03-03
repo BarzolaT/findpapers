@@ -190,7 +190,7 @@ class TestEngineSearch:
             semantic_scholar_api_key="s2-k",
             num_workers=3,
         )
-        mock_runner.run.assert_called_once_with(verbose=True)
+        mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
         assert result is fake_search
 
     def test_search_default_per_call_params(self):
@@ -205,7 +205,19 @@ class TestEngineSearch:
 
         _, kwargs = mock_cls.call_args
         assert kwargs["num_workers"] == 1
-        mock_runner.run.assert_called_once_with(verbose=False)
+        mock_runner.run.assert_called_once_with(verbose=False, show_progress=True)
+
+    def test_search_show_progress_false(self):
+        """show_progress=False is forwarded to SearchRunner.run()."""
+        engine = Engine()
+        with patch("findpapers.engine.SearchRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = MagicMock(spec=SearchResult)
+            mock_cls.return_value = mock_runner
+
+            engine.search("[ml]", show_progress=False)
+
+        mock_runner.run.assert_called_once_with(verbose=False, show_progress=False)
 
 
 # ---------------------------------------------------------------------------
@@ -245,7 +257,7 @@ class TestEngineDownload:
             proxy="http://proxy:8080",
             ssl_verify=False,
         )
-        mock_runner.run.assert_called_once_with(verbose=True)
+        mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
         assert result == fake_metrics
 
     def test_download_default_per_call_params(self):
@@ -261,7 +273,19 @@ class TestEngineDownload:
         _, kwargs = mock_cls.call_args
         assert kwargs["num_workers"] == 1
         assert kwargs["timeout"] == 10.0
-        mock_runner.run.assert_called_once_with(verbose=False)
+        mock_runner.run.assert_called_once_with(verbose=False, show_progress=True)
+
+    def test_download_show_progress_false(self):
+        """show_progress=False is forwarded to DownloadRunner.run()."""
+        engine = Engine()
+        with patch("findpapers.engine.DownloadRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.get_metrics.return_value = {}
+            mock_cls.return_value = mock_runner
+
+            engine.download([], "/tmp/out", show_progress=False)
+
+        mock_runner.run.assert_called_once_with(verbose=False, show_progress=False)
 
 
 # ---------------------------------------------------------------------------
@@ -290,7 +314,7 @@ class TestEngineEnrich:
             num_workers=4,
             timeout=25.0,
         )
-        mock_runner.run.assert_called_once_with(verbose=True)
+        mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
         assert result == fake_metrics
 
     def test_enrich_default_per_call_params(self):
@@ -306,7 +330,19 @@ class TestEngineEnrich:
         _, kwargs = mock_cls.call_args
         assert kwargs["num_workers"] == 1
         assert kwargs["timeout"] == 10.0
-        mock_runner.run.assert_called_once_with(verbose=False)
+        mock_runner.run.assert_called_once_with(verbose=False, show_progress=True)
+
+    def test_enrich_show_progress_false(self):
+        """show_progress=False is forwarded to EnrichmentRunner.run()."""
+        engine = Engine()
+        with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.get_metrics.return_value = {}
+            mock_cls.return_value = mock_runner
+
+            engine.enrich([], show_progress=False)
+
+        mock_runner.run.assert_called_once_with(verbose=False, show_progress=False)
 
 
 # ---------------------------------------------------------------------------
@@ -400,7 +436,7 @@ class TestEngineSnowball:
             result = engine.snowball(seed)
 
         mock_cls.assert_called_once()
-        mock_runner.run.assert_called_once_with(verbose=False)
+        mock_runner.run.assert_called_once_with(verbose=False, show_progress=True)
         assert result is mock_graph
 
     def test_snowball_passes_parameters(self):
@@ -427,7 +463,7 @@ class TestEngineSnowball:
         assert kwargs["num_workers"] == 3
         assert kwargs["openalex_api_key"] == "oakey"
         assert kwargs["email"] == "me@test.com"
-        mock_runner.run.assert_called_once_with(verbose=True)
+        mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
 
     def test_snowball_accepts_list_of_papers(self):
         """snowball() accepts a list of papers."""
@@ -446,6 +482,20 @@ class TestEngineSnowball:
 
         call_args = mock_cls.call_args
         assert call_args[1]["seed_papers"] is seeds
+
+    def test_snowball_show_progress_false(self):
+        """show_progress=False is forwarded to SnowballRunner.run()."""
+        engine = Engine()
+        seed = _make_paper("Seed", doi="10.1000/seed")
+
+        with patch("findpapers.engine.SnowballRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = MagicMock()
+            mock_cls.return_value = mock_runner
+
+            engine.snowball(seed, show_progress=False)
+
+        mock_runner.run.assert_called_once_with(verbose=False, show_progress=False)
 
 
 class TestSnowballImport:

@@ -74,8 +74,13 @@ def execute_tasks(
         total = len(items)  # type: ignore[arg-type]
 
     progress_bar = (
-        make_progress_bar(desc=progress_desc, total=total, unit=progress_unit)
-        if use_progress and total is not None
+        make_progress_bar(
+            desc=progress_desc,
+            total=total,
+            unit=progress_unit,
+            disable=not use_progress,
+        )
+        if total is not None
         else None
     )
 

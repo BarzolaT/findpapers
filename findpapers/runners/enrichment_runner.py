@@ -95,13 +95,18 @@ class EnrichmentRunner:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, verbose: bool = False) -> None:
+    def run(self, verbose: bool = False, show_progress: bool = True) -> None:
         """Enrich all configured papers in-place.
 
         Parameters
         ----------
         verbose : bool
             Enable verbose logging and print a summary after execution.
+        show_progress : bool
+            When ``True`` (default), display a tqdm progress bar while
+            papers are being enriched.  Set to ``False`` to suppress
+            progress output (e.g. in non-interactive environments or to
+            keep log output clean).
 
         Returns
         -------
@@ -131,7 +136,7 @@ class EnrichmentRunner:
             "no_urls_papers": 0,
         }
 
-        self._enrich_results(metrics, verbose)
+        self._enrich_results(metrics, verbose, show_progress=show_progress)
 
         metrics["runtime_in_seconds"] = perf_counter() - start
         self._metrics = metrics
@@ -181,7 +186,13 @@ class EnrichmentRunner:
         if not self._executed:
             raise SearchRunnerNotExecutedError("EnrichmentRunner has not been executed yet.")
 
-    def _enrich_results(self, metrics: dict[str, int | float], verbose: bool = False) -> None:
+    def _enrich_results(
+        self,
+        metrics: dict[str, int | float],
+        verbose: bool = False,
+        *,
+        show_progress: bool = True,
+    ) -> None:
         """Enrich all papers and update metrics.
 
         Parameters
@@ -190,6 +201,8 @@ class EnrichmentRunner:
             Metrics dict to update in-place.
         verbose : bool
             Enable verbose logging.
+        show_progress : bool
+            Display tqdm progress bars.
 
         Returns
         -------
@@ -218,7 +231,7 @@ class EnrichmentRunner:
             progress_total=len(self._results),
             progress_unit="paper",
             progress_desc="Enriching",
-            use_progress=True,
+            use_progress=show_progress,
         ):
             if error is not None:
                 if verbose:

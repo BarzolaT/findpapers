@@ -141,6 +141,7 @@ class Engine:
         max_papers_per_database: int | None = None,
         num_workers: int = 1,
         verbose: bool = False,
+        show_progress: bool = True,
     ) -> SearchResult:
         """Search for academic papers across multiple databases.
 
@@ -194,6 +195,11 @@ class Engine:
         verbose : bool
             When ``True``, emit detailed log messages at DEBUG level.
             Defaults to ``False``.
+        show_progress : bool
+            When ``True`` (default), display tqdm progress bars while
+            papers are being fetched.  Set to ``False`` to suppress
+            progress output (e.g. in non-interactive environments or to
+            keep log output clean).
 
         Returns
         -------
@@ -254,7 +260,7 @@ class Engine:
             semantic_scholar_api_key=self._semantic_scholar_api_key,
             num_workers=num_workers,
         )
-        return runner.run(verbose=verbose)
+        return runner.run(verbose=verbose, show_progress=show_progress)
 
     def download(
         self,
@@ -264,6 +270,7 @@ class Engine:
         num_workers: int = 1,
         timeout: float | None = 10.0,
         verbose: bool = False,
+        show_progress: bool = True,
     ) -> dict[str, int | float]:
         """Download PDFs for a list of papers.
 
@@ -290,6 +297,10 @@ class Engine:
         verbose : bool
             When ``True``, emit detailed log messages at DEBUG level.
             Defaults to ``False``.
+        show_progress : bool
+            When ``True`` (default), display a tqdm progress bar while
+            papers are being downloaded.  Set to ``False`` to suppress
+            progress output.
 
         Returns
         -------
@@ -324,7 +335,7 @@ class Engine:
             proxy=self._proxy,
             ssl_verify=self._ssl_verify,
         )
-        runner.run(verbose=verbose)
+        runner.run(verbose=verbose, show_progress=show_progress)
         return runner.get_metrics()
 
     def enrich(
@@ -334,6 +345,7 @@ class Engine:
         num_workers: int = 1,
         timeout: float | None = 10.0,
         verbose: bool = False,
+        show_progress: bool = True,
     ) -> dict[str, int | float]:
         """Enrich papers with additional metadata from web sources.
 
@@ -361,6 +373,10 @@ class Engine:
         verbose : bool
             When ``True``, emit detailed log messages at DEBUG level.
             Defaults to ``False``.
+        show_progress : bool
+            When ``True`` (default), display a tqdm progress bar while
+            papers are being enriched.  Set to ``False`` to suppress
+            progress output.
 
         Returns
         -------
@@ -410,7 +426,7 @@ class Engine:
             num_workers=num_workers,
             timeout=timeout,
         )
-        runner.run(verbose=verbose)
+        runner.run(verbose=verbose, show_progress=show_progress)
         return runner.get_metrics()
 
     def fetch_paper_by_doi(
@@ -490,6 +506,7 @@ class Engine:
         direction: Literal["both", "backward", "forward"] = "both",
         num_workers: int = 1,
         verbose: bool = False,
+        show_progress: bool = True,
     ) -> CitationGraph:
         """Build a citation graph around seed papers via snowballing.
 
@@ -522,6 +539,10 @@ class Engine:
             parallelism is capped at the number of available connectors.
         verbose : bool
             When ``True``, emit detailed log messages at DEBUG level.
+        show_progress : bool
+            When ``True`` (default), display tqdm progress bars while
+            papers are being expanded.  Set to ``False`` to suppress
+            progress output.
 
         Returns
         -------
@@ -569,7 +590,7 @@ class Engine:
             semantic_scholar_api_key=self._semantic_scholar_api_key,
             num_workers=num_workers,
         )
-        return runner.run(verbose=verbose)
+        return runner.run(verbose=verbose, show_progress=show_progress)
 
     # ------------------------------------------------------------------
     # Export / Import

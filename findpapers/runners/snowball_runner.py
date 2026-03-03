@@ -19,6 +19,7 @@ from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
 from findpapers.exceptions import SearchRunnerNotExecutedError
+from findpapers.utils.progress import make_progress_bar
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +92,7 @@ class SnowballRunner:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, verbose: bool = False) -> CitationGraph:
+    def run(self, verbose: bool = False, show_progress: bool = True) -> CitationGraph:
         """Execute the snowball and return the citation graph.
 
         Can be called multiple times; each call resets previous results.
@@ -100,6 +101,11 @@ class SnowballRunner:
         ----------
         verbose : bool
             Enable verbose logging.
+        show_progress : bool
+            When ``True`` (default), display tqdm progress bars for each
+            snowball level while papers are being expanded.  Set to
+            ``False`` to suppress progress output (e.g. in non-interactive
+            environments or to keep log output clean).
 
         Returns
         -------
@@ -146,9 +152,16 @@ class SnowballRunner:
 
             next_frontier: list[Paper] = []
 
-            for paper in frontier:
-                discovered = self._expand_paper(paper, graph, level)
-                next_frontier.extend(discovered)
+            with make_progress_bar(
+                desc=f"Level {level}/{self._depth}",
+                total=len(frontier),
+                unit="paper",
+                disable=not show_progress,
+            ) as pbar:
+                for paper in frontier:
+                    discovered = self._expand_paper(paper, graph, level)
+                    next_frontier.extend(discovered)
+                    pbar.update(1)
 
             frontier = next_frontier
 

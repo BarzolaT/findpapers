@@ -9,6 +9,7 @@ def make_progress_bar(
     desc: str | None = None,
     total: int | None = None,
     unit: str = "item",
+    disable: bool = False,
 ) -> tqdm:
     """Create a tqdm progress bar with the project's standard style.
 
@@ -28,6 +29,10 @@ def make_progress_bar(
         indeterminate mode.
     unit : str
         Singular label for one unit of work (e.g. ``"paper"``).
+    disable : bool
+        When ``True`` the progress bar is silenced — nothing is printed to
+        stderr.  Useful for non-interactive environments or when log
+        cleanliness is preferred.  Defaults to ``False``.
 
     Returns
     -------
@@ -47,4 +52,5 @@ def make_progress_bar(
         unit=unit,
         leave=True,
         dynamic_ncols=True,
+        disable=disable,
     )

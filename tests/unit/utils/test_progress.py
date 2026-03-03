@@ -75,3 +75,15 @@ class TestMakeProgressBar:
         pbar.update(5)
         assert pbar.n == 5
         pbar.close()
+
+    def test_disable_suppresses_output(self):
+        """When disable=True the progress bar is silenced."""
+        pbar = make_progress_bar(total=10, disable=True)
+        assert pbar.disable is True
+        pbar.close()
+
+    def test_disable_false_by_default(self):
+        """By default the progress bar is enabled."""
+        pbar = make_progress_bar(total=10)
+        assert pbar.disable is False
+        pbar.close()
