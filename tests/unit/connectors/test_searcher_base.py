@@ -92,6 +92,26 @@ class TestSearchConnectorBaseGetLogging:
         # urlencode encodes *** as %2A%2A%2A; either form confirms the value is masked
         assert "api_key=%2A%2A%2A" in messages or "api_key=***" in messages
 
+    def test_sensitive_headers_redacted_in_request_log(self, caplog) -> None:
+        """API key values in headers are replaced with *** in the request log."""
+        import logging
+
+        searcher = _StubConnector()
+        resp = _make_response()
+
+        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
+                searcher._get(  # noqa: SLF001
+                    "https://api.example.com/search",
+                    headers={"X-ELS-APIKey": "my-secret-key", "Accept": "application/json"},
+                )
+
+        messages = " ".join(caplog.messages)
+        assert "my-secret-key" not in messages
+        assert "***" in messages
+        # Non-sensitive headers should still appear
+        assert "application/json" in messages
+
     def test_response_logged_at_debug(self, caplog) -> None:
         """_get logs the response status, content-type, and size at DEBUG level."""
         import logging

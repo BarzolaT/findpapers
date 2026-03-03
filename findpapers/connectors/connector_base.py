@@ -31,6 +31,16 @@ _SENSITIVE_PARAM_NAMES: frozenset[str] = frozenset(
     }
 )
 
+# Header names (compared case-insensitively) that carry API credentials
+# and must be redacted before logging.
+_SENSITIVE_HEADER_NAMES: frozenset[str] = frozenset(
+    {
+        "x-els-apikey",
+        "x-api-key",
+        "authorization",
+    }
+)
+
 
 class ConnectorBase(ABC):
     """Abstract base class for external API connectors.
@@ -169,7 +179,7 @@ class ConnectorBase(ABC):
         prepared_params = self._prepare_params(dict(params) if params else {})
         prepared_headers = self._prepare_headers(dict(headers) if headers else {})
         self._rate_limit()
-        self._log_request(url, prepared_params or None)
+        self._log_request(url, prepared_params or None, headers=prepared_headers)
         response = requests.get(
             url,
             params=prepared_params or None,
@@ -218,7 +228,7 @@ class ConnectorBase(ABC):
         prepared_params = self._prepare_params(dict(params) if params else {})
         prepared_headers = self._prepare_headers(dict(headers) if headers else {})
         self._rate_limit()
-        self._log_request(url, prepared_params or None, method="POST")
+        self._log_request(url, prepared_params or None, method="POST", headers=prepared_headers)
         response = requests.post(
             url,
             json=json_body,
@@ -231,11 +241,17 @@ class ConnectorBase(ABC):
         response.raise_for_status()
         return response
 
-    def _log_request(self, url: str, params: Optional[dict] = None, method: str = "GET") -> None:
+    def _log_request(
+        self,
+        url: str,
+        params: Optional[dict] = None,
+        method: str = "GET",
+        headers: Optional[dict] = None,
+    ) -> None:
         """Log an outgoing HTTP request at ``DEBUG`` level.
 
-        API keys and other sensitive parameters are replaced with ``"***"``
-        so that credentials are never written to logs.
+        API keys and other sensitive parameters and headers are replaced with
+        ``"***"`` so that credentials are never written to logs.
 
         Parameters
         ----------
@@ -245,6 +261,8 @@ class ConnectorBase(ABC):
             Query parameters to be sent with the request.
         method : str
             HTTP method (e.g. ``"GET"`` or ``"POST"``).
+        headers : dict | None
+            HTTP headers to be sent with the request.
         """
         if not logger.isEnabledFor(logging.DEBUG):
             return
@@ -256,6 +274,11 @@ class ConnectorBase(ABC):
         else:
             full_url = url
         logger.debug("[%s] %s %s", self.name, method, full_url)
+        if headers:
+            safe_headers = {
+                k: "***" if k.lower() in _SENSITIVE_HEADER_NAMES else v for k, v in headers.items()
+            }
+            logger.debug("[%s] headers: %s", self.name, safe_headers)
 
     def _log_response(self, response: requests.Response) -> None:
         """Log a summary of an HTTP response at ``DEBUG`` level.
