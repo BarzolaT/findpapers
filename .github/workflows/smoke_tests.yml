@@ -1,0 +1,95 @@
+name: Smoke Tests
+
+# Runs real integration tests after a merge to main.
+# This is a non-blocking, report-only workflow — it never gates PRs.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    name: Smoke Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    # Never block merges — mark failures as neutral so they only appear in
+    # the Actions tab / summary without turning the commit red.
+    continue-on-error: true
+
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install poetry
+
+      - name: Configure poetry
+        run: python -m poetry config virtualenvs.in-project true
+
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: .venv
+          key: venv-smoke-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: python -m poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+
+      - name: Install dependencies
+        run: python -m poetry install
+
+      - name: Run smoke tests
+        env:
+          # Optional API keys — add them as repository secrets when available.
+          FINDPAPERS_IEEE_API_TOKEN: ${{ secrets.FINDPAPERS_IEEE_API_TOKEN }}
+          FINDPAPERS_SCOPUS_API_TOKEN: ${{ secrets.FINDPAPERS_SCOPUS_API_TOKEN }}
+          FINDPAPERS_PUBMED_API_TOKEN: ${{ secrets.FINDPAPERS_PUBMED_API_TOKEN }}
+          FINDPAPERS_OPENALEX_API_TOKEN: ${{ secrets.FINDPAPERS_OPENALEX_API_TOKEN }}
+          FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN: ${{ secrets.FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN }}
+          FINDPAPERS_EMAIL: ${{ secrets.FINDPAPERS_EMAIL }}
+        run: |
+          python -m poetry run pytest \
+            tests/integration \
+            -m integration \
+            -v \
+            --tb=long \
+            --junitxml=reports/smoke-tests.xml \
+            -o "addopts=" \
+            2>&1 | tee smoke-output.txt
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## 🔬 Smoke Test Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Ran live integration tests against external APIs after merge to \`main\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f smoke-output.txt ]; then
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -30 smoke-output.txt >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-report
+          path: |
+            reports/smoke-tests.xml
+            smoke-output.txt
+          retention-days: 30

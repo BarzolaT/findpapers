@@ -38,9 +38,12 @@ issues = "https://github.com/jonatasgrosman/findpapers/issues"
 [tool.pytest.ini_options]
 junit_family = "xunit2"
 minversion = "6.0"
-addopts = "-ra -q"
+addopts = "-ra -q -m 'not integration'"
 testpaths = [
     "tests"
+]
+markers = [
+    "integration: live integration/smoke tests that hit real external APIs",
 ]
 
 [tool.coverage.run]
