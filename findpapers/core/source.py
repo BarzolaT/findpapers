@@ -78,6 +78,43 @@ class Source:
         self.publisher = publisher
         self.source_type = source_type
 
+    def __eq__(self, other: object) -> bool:
+        """Check equality by title (case-insensitive).
+
+        Parameters
+        ----------
+        other : object
+            Object to compare against.
+
+        Returns
+        -------
+        bool
+            ``True`` if both are :class:`Source` with matching titles.
+        """
+        if not isinstance(other, Source):
+            return NotImplemented
+        return self.title.strip().lower() == other.title.strip().lower()
+
+    def __hash__(self) -> int:
+        """Return a hash based on the lowered title.
+
+        Returns
+        -------
+        int
+            Hash value.
+        """
+        return hash(self.title.strip().lower())
+
+    def __repr__(self) -> str:
+        """Return a developer-friendly representation.
+
+        Returns
+        -------
+        str
+            Representation string.
+        """
+        return f"Source(title={self.title!r})"
+
     def merge(self, source: Source) -> None:
         """Merge another source into this one.
 

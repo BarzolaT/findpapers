@@ -631,3 +631,125 @@ class TestInferPageCount:
         data["page_count"] = None
         restored = Paper.from_dict(data)
         assert restored.page_count == 15
+
+
+# ------------------------------------------------------------------
+# Paper.__eq__ / __hash__
+# ------------------------------------------------------------------
+
+
+class TestPaperEquality:
+    """Tests for Paper.__eq__ and __hash__."""
+
+    def test_same_doi_means_equal(self) -> None:
+        """Papers with matching DOIs are equal regardless of title."""
+        a = Paper(
+            title="A", abstract="", authors=[], source=None, publication_date=None, doi="10.1/x"
+        )
+        b = Paper(
+            title="B", abstract="", authors=[], source=None, publication_date=None, doi="10.1/x"
+        )
+        assert a == b
+        assert hash(a) == hash(b)
+
+    def test_doi_case_insensitive(self) -> None:
+        """DOI comparison is case-insensitive."""
+        a = Paper(
+            title="A", abstract="", authors=[], source=None, publication_date=None, doi="10.1/X"
+        )
+        b = Paper(
+            title="B", abstract="", authors=[], source=None, publication_date=None, doi="10.1/x"
+        )
+        assert a == b
+
+    def test_same_title_no_doi_means_equal(self) -> None:
+        """Papers without DOI but with the same title are equal."""
+        a = Paper(title="Same", abstract="a", authors=[], source=None, publication_date=None)
+        b = Paper(title="Same", abstract="b", authors=[], source=None, publication_date=None)
+        assert a == b
+        assert hash(a) == hash(b)
+
+    def test_title_case_insensitive(self) -> None:
+        """Title comparison is case-insensitive when no DOI is present."""
+        a = Paper(title="HELLO", abstract="", authors=[], source=None, publication_date=None)
+        b = Paper(title="hello", abstract="", authors=[], source=None, publication_date=None)
+        assert a == b
+
+    def test_different_doi_not_equal(self) -> None:
+        """Papers with different DOIs are not equal."""
+        a = Paper(
+            title="A", abstract="", authors=[], source=None, publication_date=None, doi="10.1/x"
+        )
+        b = Paper(
+            title="A", abstract="", authors=[], source=None, publication_date=None, doi="10.2/y"
+        )
+        assert a != b
+
+    def test_different_title_no_doi_not_equal(self) -> None:
+        """Papers without DOI and different titles are not equal."""
+        a = Paper(title="Alpha", abstract="", authors=[], source=None, publication_date=None)
+        b = Paper(title="Beta", abstract="", authors=[], source=None, publication_date=None)
+        assert a != b
+
+    def test_not_equal_to_non_paper(self) -> None:
+        """Comparison with non-Paper returns NotImplemented."""
+        p = Paper(title="A", abstract="", authors=[], source=None, publication_date=None)
+        assert p != "not a paper"
+
+    def test_paper_usable_in_set(self) -> None:
+        """Papers with same identity can be deduplicated in a set."""
+        a = Paper(
+            title="X", abstract="", authors=[], source=None, publication_date=None, doi="10.1/z"
+        )
+        b = Paper(
+            title="Y", abstract="", authors=[], source=None, publication_date=None, doi="10.1/z"
+        )
+        assert len({a, b}) == 1
+
+    def test_paper_in_list_after_deserialization(self) -> None:
+        """Paper created from dict is found via 'in' operator on a list."""
+        original = Paper(
+            title="T", abstract="", authors=[], source=None, publication_date=None, doi="10.1/abc"
+        )
+        data = Paper.to_dict(original)
+        restored = Paper.from_dict(data)
+        assert restored in [original]
+
+
+# ------------------------------------------------------------------
+# Source.__eq__ / __hash__
+# ------------------------------------------------------------------
+
+
+class TestSourceEquality:
+    """Tests for Source.__eq__ and __hash__."""
+
+    def test_same_title_means_equal(self) -> None:
+        """Sources with the same title are equal."""
+        a = Source(title="Nature")
+        b = Source(title="Nature")
+        assert a == b
+        assert hash(a) == hash(b)
+
+    def test_title_case_insensitive(self) -> None:
+        """Source equality is case-insensitive."""
+        a = Source(title="NATURE")
+        b = Source(title="nature")
+        assert a == b
+
+    def test_different_title_not_equal(self) -> None:
+        """Sources with different titles are not equal."""
+        a = Source(title="Nature")
+        b = Source(title="Science")
+        assert a != b
+
+    def test_not_equal_to_non_source(self) -> None:
+        """Comparison with non-Source returns NotImplemented."""
+        s = Source(title="Nature")
+        assert s != "not a source"
+
+    def test_source_usable_in_set(self) -> None:
+        """Sources with the same title can be deduplicated in a set."""
+        a = Source(title="Nature")
+        b = Source(title="nature")
+        assert len({a, b}) == 1

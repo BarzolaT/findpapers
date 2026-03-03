@@ -207,6 +207,69 @@ class Paper:
         self.databases = databases if databases is not None else set()
         self.paper_type = paper_type
 
+    def __eq__(self, other: object) -> bool:
+        """Check equality by DOI (case-insensitive) or title.
+
+        Two papers are equal if they share the same DOI (case-insensitive)
+        or, when neither has a DOI, the same lowercased title.
+
+        Parameters
+        ----------
+        other : object
+            Object to compare against.
+
+        Returns
+        -------
+        bool
+            ``True`` if both are :class:`Paper` with matching identity.
+        """
+        if not isinstance(other, Paper):
+            return NotImplemented
+        self_key = self._identity_key()
+        other_key = other._identity_key()
+        if self_key is None or other_key is None:
+            return self is other
+        return self_key == other_key
+
+    def __hash__(self) -> int:
+        """Return a hash based on DOI or lowercased title.
+
+        Returns
+        -------
+        int
+            Hash value.
+        """
+        key = self._identity_key()
+        if key is None:
+            return id(self)
+        return hash(key)
+
+    def __repr__(self) -> str:
+        """Return a developer-friendly representation.
+
+        Returns
+        -------
+        str
+            Representation string.
+        """
+        return f"Paper(title={self.title!r}, doi={self.doi!r})"
+
+    def _identity_key(self) -> str | None:
+        """Return a unique identity key for this paper, or ``None``.
+
+        Prefers DOI (lowercased); falls back to lowercased title.
+
+        Returns
+        -------
+        str | None
+            A canonical string key, or ``None`` if no identifier available.
+        """
+        if self.doi:
+            return self.doi.strip().lower()
+        if self.title:
+            return self.title.strip().lower()
+        return None
+
     @staticmethod
     def _sanitize_date(
         value: datetime.date | None,
