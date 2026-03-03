@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from findpapers.core.query import Query
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
 
@@ -17,7 +18,7 @@ _parser = QueryParser()
 _propagator = FilterPropagator()
 
 
-def _parse(query_str: str):
+def _parse(query_str: str) -> Query:
     """Parse and propagate a query string."""
     q = _parser.parse(query_str)
     return _propagator.propagate(q)
@@ -69,7 +70,11 @@ def wildcard_query():
 def mock_response():
     """Factory for creating mock HTTP responses."""
 
-    def _make(json_data=None, text=None, status_code=200):
+    def _make(
+        json_data: object = None,
+        text: str | None = None,
+        status_code: int = 200,
+    ) -> MagicMock:
         mock = MagicMock()
         mock.status_code = status_code
         mock.text = text or ""

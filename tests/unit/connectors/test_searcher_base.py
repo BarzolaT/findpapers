@@ -8,6 +8,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from findpapers.connectors.search_base import SearchConnectorBase
+from findpapers.core.paper import Paper
+from findpapers.core.query import Query
+from findpapers.query.builder import QueryBuilder
 
 # ---------------------------------------------------------------------------
 # Minimal concrete subclass for testing
@@ -17,7 +20,7 @@ from findpapers.connectors.search_base import SearchConnectorBase
 class _StubConnector(SearchConnectorBase):
     """Minimal concrete SearchConnectorBase for testing _get and logging helpers."""
 
-    def __init__(self, query_builder=None):
+    def __init__(self, query_builder: QueryBuilder | None = None) -> None:
         self._query_builder = query_builder if query_builder is not None else MagicMock()
 
     @property
@@ -25,7 +28,7 @@ class _StubConnector(SearchConnectorBase):
         return "Stub"
 
     @property
-    def query_builder(self):
+    def query_builder(self) -> QueryBuilder:
         return self._query_builder
 
     @property
@@ -34,10 +37,10 @@ class _StubConnector(SearchConnectorBase):
 
     def _fetch_papers(
         self,
-        query,
+        query: Query,
         max_papers: Optional[int],
         progress_callback: Optional[Callable],
-    ) -> List:
+    ) -> List[Paper]:
         return []
 
 
