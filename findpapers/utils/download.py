@@ -136,8 +136,6 @@ def build_filename(year: int | None, title: str | None) -> str:
     Examples
     --------
     >>> build_filename(2024, "Deep Learning: A Survey")
-    'Deep Learning: A Survey'
-    >>> build_filename(2024, "Deep Learning: A Survey")
     '2024-Deep_Learning__A_Survey.pdf'
     """
     safe_year = str(year) if year is not None else "unknown"

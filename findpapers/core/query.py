@@ -228,7 +228,7 @@ class Query:
     - Filter specifiers can be added before terms or groups:
       - Syntax: filter[term] or filter([group])
       - Valid filter codes: ti (title), abs (abstract), key (keywords),
-        au (author), pu (publication), aff (affiliation),
+        au (author), src (source), aff (affiliation),
         tiabs (title + abstract), tiabskey (title + abstract + keywords)
       - Filter codes are case-insensitive (normalized to lowercase internally)
       - When omitted, defaults to tiabs (title + abstract)

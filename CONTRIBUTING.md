@@ -137,12 +137,10 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 * If you changed any code, run `make format`, `make lint` and `make test` before committing.
 * Aim to keep test coverage as close to 100% as possible.
 * Public methods must include parameters, returns, and possible exceptions.
-* We follow the [PEP8 Style Guide][https://peps.python.org/pep-0008/] for general coding.
-* We follow the [Numpy Docstring Style Guide][https://numpydoc.readthedocs.io/en/latest/format.html] for code documentation.
+* We follow the [PEP8 Style Guide](https://peps.python.org/pep-0008/) for general coding.
+* We follow the [Numpy Docstring Style Guide](https://numpydoc.readthedocs.io/en/latest/format.html) for code documentation.
 * We use [mypy](http://mypy-lang.org/) for static type checking.
-* Follow the [isort](https://pycqa.github.io/isort/) rules for import sorting.
-* Follow the [black](https://black.readthedocs.io/en/stable/) rules for code formatting.
-* Follow the [ruff](https://ruff.rs/) rules for linting.
+* Follow the [ruff](https://ruff.rs/) rules for linting and code formatting.
 * When adding new dependencies, add them to the `pyproject.toml` file using Poetry.
 * PRs can only be merged if the code is formatted properly and all tests are passing.
 * No secret keys, passwords, or sensitive information should be committed to the repository.
