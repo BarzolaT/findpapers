@@ -137,40 +137,44 @@ class SnowballRunner:
 
         frontier = list(self._seed_papers)
 
-        for level in range(1, self._depth + 1):
-            if not frontier:
-                break
+        try:
+            for level in range(1, self._depth + 1):
+                if not frontier:
+                    break
 
-            if verbose:
-                logger.info(
-                    "Level %d/%d: processing %d papers.",
-                    level,
-                    self._depth,
-                    len(frontier),
-                )
+                if verbose:
+                    logger.info(
+                        "Level %d/%d: processing %d papers.",
+                        level,
+                        self._depth,
+                        len(frontier),
+                    )
 
-            next_frontier: list[Paper] = []
+                next_frontier: list[Paper] = []
 
-            with make_progress_bar(
-                desc=f"Level {level}/{self._depth}",
-                total=len(frontier),
-                unit="paper",
-                disable=not show_progress,
-            ) as pbar:
-                for paper in frontier:
-                    discovered = self._expand_paper(paper, graph, level)
-                    next_frontier.extend(discovered)
-                    pbar.update(1)
+                with make_progress_bar(
+                    desc=f"Level {level}/{self._depth}",
+                    total=len(frontier),
+                    unit="paper",
+                    disable=not show_progress,
+                ) as pbar:
+                    for paper in frontier:
+                        discovered = self._expand_paper(paper, graph, level)
+                        next_frontier.extend(discovered)
+                        pbar.update(1)
 
-            frontier = next_frontier
+                frontier = next_frontier
 
-            if verbose:
-                logger.info(
-                    "Level %d/%d complete: %d new papers discovered.",
-                    level,
-                    self._depth,
-                    len(next_frontier),
-                )
+                if verbose:
+                    logger.info(
+                        "Level %d/%d complete: %d new papers discovered.",
+                        level,
+                        self._depth,
+                        len(next_frontier),
+                    )
+        finally:
+            for connector in self._connectors:
+                connector.close()
 
         elapsed = perf_counter() - start
         self._metrics = {

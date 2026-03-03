@@ -252,10 +252,10 @@ class TestIEEEConnectorSearch:
         searcher = IEEEConnector()
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get", return_value=response
-        ), patch.object(searcher, "_rate_limit"):
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 
         assert len(papers) > 0
@@ -266,10 +266,10 @@ class TestIEEEConnectorSearch:
         searcher = IEEEConnector()
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get", return_value=response
-        ), patch.object(searcher, "_rate_limit"):
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=2)
 
         assert len(papers) <= 2
@@ -291,10 +291,10 @@ class TestIEEEConnectorSearch:
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
         callback = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get", return_value=response
-        ), patch.object(searcher, "_rate_limit"):
+        with patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=callback)
 
         callback.assert_called()

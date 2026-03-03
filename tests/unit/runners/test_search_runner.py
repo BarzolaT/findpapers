@@ -148,6 +148,25 @@ class TestSearchRunnerPipeline:
         result = runner.run()
         assert isinstance(result, SearchResult)
 
+    def test_run_closes_searcher_sessions(self):
+        """run() closes all searcher sessions after execution."""
+        runner = self._make_runner_with_mock_papers([_make_paper()])
+        mock_searcher = runner._searchers[0]  # noqa: SLF001
+        runner.run()
+        mock_searcher.close.assert_called_once()
+
+    def test_run_closes_sessions_on_searcher_error(self):
+        """Searcher sessions are closed even when a searcher raises during fetch."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.side_effect = RuntimeError("boom")
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+
+        # execute_tasks catches the error internally, so run() completes.
+        runner.run()
+        mock_searcher.close.assert_called_once()
+
     def test_get_results_after_run(self):
         """get_results() returns the collected papers after run()."""
         paper = _make_paper()

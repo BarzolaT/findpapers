@@ -50,12 +50,71 @@ class ConnectorBase(ABC):
     and debug-level request/response logging with sensitive-parameter
     redaction.
 
+    A :class:`requests.Session` is created lazily on the first HTTP call
+    so that TCP+TLS connections are pooled and reused across requests to
+    the same host.
+
     Subclasses must implement :attr:`name` and :attr:`min_request_interval`.
     """
 
     # Shared rate-limiter state; assignment in _rate_limit creates an instance
     # attribute that shadows this default, so multiple instances are isolated.
     _last_request_time: float = 0.0
+
+    # ------------------------------------------------------------------
+    # HTTP Session (connection pooling)
+    # ------------------------------------------------------------------
+
+    def _get_session(self) -> requests.Session:
+        """Return the shared :class:`requests.Session`, creating it lazily.
+
+        Using a session allows ``urllib3`` to keep TCP+TLS connections alive
+        across consecutive requests to the same host, which significantly
+        reduces latency for connectors that issue many paginated calls.
+
+        Returns
+        -------
+        requests.Session
+            The reusable HTTP session bound to this connector instance.
+        """
+        # Instance attribute created on first access; avoids requiring
+        # subclasses to call super().__init__().
+        if not hasattr(self, "_http_session"):
+            self._http_session = requests.Session()
+        return self._http_session
+
+    def close(self) -> None:
+        """Close the underlying HTTP session, releasing pooled connections.
+
+        Safe to call multiple times or even if no request was ever made.
+        """
+        if hasattr(self, "_http_session"):
+            self._http_session.close()
+            del self._http_session
+
+    # Context-manager protocol so connectors can be used with ``with``.
+
+    def __enter__(self) -> ConnectorBase:
+        """Enter the runtime context and return the connector itself.
+
+        Returns
+        -------
+        ConnectorBase
+            ``self``, allowing ``with Connector() as c: ...`` usage.
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # noqa: ANN001
+        """Exit the runtime context, closing the HTTP session."""
+        self.close()
+
+    def __del__(self) -> None:
+        """Best-effort cleanup: close the session when garbage-collected.
+
+        This is a safety-net only; callers should prefer :meth:`close` or
+        a ``with`` block for deterministic resource release.
+        """
+        self.close()
 
     @property
     @abstractmethod
@@ -180,7 +239,7 @@ class ConnectorBase(ABC):
         prepared_headers = self._prepare_headers(dict(headers) if headers else {})
         self._rate_limit()
         self._log_request(url, prepared_params or None, headers=prepared_headers)
-        response = requests.get(
+        response = self._get_session().get(
             url,
             params=prepared_params or None,
             headers=prepared_headers or None,
@@ -229,7 +288,7 @@ class ConnectorBase(ABC):
         prepared_headers = self._prepare_headers(dict(headers) if headers else {})
         self._rate_limit()
         self._log_request(url, prepared_params or None, method="POST", headers=prepared_headers)
-        response = requests.post(
+        response = self._get_session().post(
             url,
             json=json_body,
             params=prepared_params or None,

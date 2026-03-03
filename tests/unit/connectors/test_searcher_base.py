@@ -66,10 +66,11 @@ class TestSearchConnectorBaseGetLogging:
 
         searcher = _StubConnector()
         resp = _make_response()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = resp
 
-        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-                searcher._get("https://api.example.com/search", params={"q": "ml"})  # noqa: SLF001
+        with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
+            searcher._get("https://api.example.com/search", params={"q": "ml"})  # noqa: SLF001
 
         assert any("GET" in m and "example.com" in m for m in caplog.messages)
 
@@ -79,13 +80,14 @@ class TestSearchConnectorBaseGetLogging:
 
         searcher = _StubConnector()
         resp = _make_response()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = resp
 
-        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-                searcher._get(  # noqa: SLF001
-                    "https://api.example.com/search",
-                    params={"q": "ml", "api_key": "top-secret"},
-                )
+        with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
+            searcher._get(  # noqa: SLF001
+                "https://api.example.com/search",
+                params={"q": "ml", "api_key": "top-secret"},
+            )
 
         messages = " ".join(caplog.messages)
         assert "top-secret" not in messages
@@ -98,13 +100,14 @@ class TestSearchConnectorBaseGetLogging:
 
         searcher = _StubConnector()
         resp = _make_response()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = resp
 
-        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-                searcher._get(  # noqa: SLF001
-                    "https://api.example.com/search",
-                    headers={"X-ELS-APIKey": "my-secret-key", "Accept": "application/json"},
-                )
+        with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
+            searcher._get(  # noqa: SLF001
+                "https://api.example.com/search",
+                headers={"X-ELS-APIKey": "my-secret-key", "Accept": "application/json"},
+            )
 
         messages = " ".join(caplog.messages)
         assert "my-secret-key" not in messages
@@ -118,10 +121,11 @@ class TestSearchConnectorBaseGetLogging:
 
         searcher = _StubConnector()
         resp = _make_response(status=200, content=b"hello")
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = resp
 
-        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-                searcher._get("https://api.example.com/search")  # noqa: SLF001
+        with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
+            searcher._get("https://api.example.com/search")  # noqa: SLF001
 
         messages = " ".join(caplog.messages)
         assert "200" in messages
@@ -140,11 +144,12 @@ class TestSearchConnectorBaseGetLogging:
         searcher = _StubConnector()
         resp = _make_response(status=404, reason="Not Found", content=b"not found")
         resp.raise_for_status.side_effect = req_lib.HTTPError("404")
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = resp
 
-        with patch("findpapers.connectors.connector_base.requests.get", return_value=resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-                with pytest.raises(req_lib.HTTPError):
-                    searcher._get("https://api.example.com/missing")  # noqa: SLF001
+        with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
+            with pytest.raises(req_lib.HTTPError):
+                searcher._get("https://api.example.com/missing")  # noqa: SLF001
 
         messages = " ".join(caplog.messages)
         assert "404" in messages  # response was logged before the exception was raised
@@ -179,10 +184,11 @@ class TestSearchConnectorBasePrepareHeaders:
             captured.append(kwargs.get("headers") or {})
             return resp
 
-        with patch("findpapers.connectors.connector_base.requests.get", side_effect=_fake_get):
-            searcher._get("https://api.example.com/search")  # noqa: SLF001
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = _fake_get
+        searcher._get("https://api.example.com/search")  # noqa: SLF001
 
-        assert captured, "requests.get was not called"
+        assert captured, "session.get was not called"
         ua = captured[0].get("User-Agent", "")
         assert "Mozilla" in ua
 
@@ -235,3 +241,54 @@ class TestSearchConnectorBaseSearch:
             papers = searcher.search(mock_query)
 
         assert papers == []
+
+
+class TestConnectorBaseSessionPooling:
+    """Tests for the lazy HTTP session and connection-pooling lifecycle."""
+
+    def test_session_created_lazily(self) -> None:
+        """No session exists until _get_session is called."""
+        connector = _StubConnector()
+        assert not hasattr(connector, "_http_session")
+
+        session = connector._get_session()  # noqa: SLF001
+        assert hasattr(connector, "_http_session")
+        assert session is connector._http_session
+
+    def test_session_reused_across_calls(self) -> None:
+        """Consecutive calls to _get_session return the same instance."""
+        connector = _StubConnector()
+        first = connector._get_session()  # noqa: SLF001
+        second = connector._get_session()  # noqa: SLF001
+        assert first is second
+
+    def test_close_removes_session(self) -> None:
+        """close() removes the cached session attribute."""
+        connector = _StubConnector()
+        connector._get_session()  # noqa: SLF001
+        assert hasattr(connector, "_http_session")
+
+        connector.close()
+        assert not hasattr(connector, "_http_session")
+
+    def test_close_idempotent(self) -> None:
+        """Calling close() multiple times does not raise."""
+        connector = _StubConnector()
+        connector.close()
+        connector.close()  # should not raise
+
+    def test_context_manager_closes_session(self) -> None:
+        """Exiting a with-block calls close() on the connector."""
+        with _StubConnector() as connector:
+            _ = connector._get_session()  # noqa: SLF001
+            assert hasattr(connector, "_http_session")
+
+        # After __exit__, the cached session attribute is removed,
+        # confirming close() was invoked.
+        assert not hasattr(connector, "_http_session")
+
+    def test_context_manager_returns_self(self) -> None:
+        """The with-block yields the connector itself."""
+        stub = _StubConnector()
+        with stub as ctx:
+            assert ctx is stub

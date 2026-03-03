@@ -417,10 +417,9 @@ class TestOpenAlexConnectorSearch:
         first_page.raise_for_status = MagicMock()
         second_page = self._make_next_page_response(mock_response)
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[first_page, second_page],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [first_page, second_page]
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 
         assert len(papers) > 0
@@ -433,10 +432,9 @@ class TestOpenAlexConnectorSearch:
         first_page.raise_for_status = MagicMock()
         second_page = self._make_next_page_response(mock_response)
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[first_page, second_page],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [first_page, second_page]
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=2)
 
         assert len(papers) <= 2
@@ -460,10 +458,9 @@ class TestOpenAlexConnectorSearch:
         second_page = self._make_next_page_response(mock_response)
         callback = MagicMock()
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[first_page, second_page],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [first_page, second_page]
+        with patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=callback)
 
         callback.assert_called()
@@ -514,10 +511,9 @@ class TestOpenAlexConnectorSearch:
         page_ml = _make_page("10.ml/1", "Machine Learning Paper")
         page_dl = _make_page("10.dl/1", "Deep Learning Paper")
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[page_ml, page_dl],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [page_ml, page_dl]
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(or_query, max_papers=2)
 
         # Both OR clauses must have been fetched.
@@ -557,10 +553,9 @@ class TestOpenAlexConnectorSearch:
         page_ml = _make_page("10.ml/1", "Machine Learning Paper")
         page_dl = _make_page("10.dl/1", "Deep Learning Paper")
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[page_ml, page_dl],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [page_ml, page_dl]
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(or_query, max_papers=1)
 
         assert len(papers) <= 1

@@ -161,7 +161,10 @@ class EnrichmentRunner:
             "no_urls_papers": 0,
         }
 
-        self._enrich_results(metrics, verbose, show_progress=show_progress)
+        try:
+            self._enrich_results(metrics, verbose, show_progress=show_progress)
+        finally:
+            self._crossref.close()
 
         metrics["runtime_in_seconds"] = perf_counter() - start
         self._metrics = metrics

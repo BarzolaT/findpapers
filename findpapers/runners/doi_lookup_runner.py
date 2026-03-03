@@ -109,11 +109,14 @@ class DOILookupRunner:
 
         start = perf_counter()
 
-        work = self._connector.fetch_work(self._doi)
-        if work is not None:
-            self._result = self._connector.build_paper(work)
-        else:
-            self._result = None
+        try:
+            work = self._connector.fetch_work(self._doi)
+            if work is not None:
+                self._result = self._connector.build_paper(work)
+            else:
+                self._result = None
+        finally:
+            self._connector.close()
 
         self._runtime = perf_counter() - start
         self._executed = True

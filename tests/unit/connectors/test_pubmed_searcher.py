@@ -543,9 +543,9 @@ class TestPubmedConnectorSearch:
 
         side_effects = [esearch_mock, efetch_mock]
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get", side_effect=side_effects
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = side_effects
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 
         assert len(papers) > 0
@@ -565,10 +565,9 @@ class TestPubmedConnectorSearch:
         efetch_mock = mock_response(text=pubmed_efetch_xml)
         efetch_mock.raise_for_status = MagicMock()
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[esearch_mock, efetch_mock],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [esearch_mock, efetch_mock]
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=2)
 
         assert len(papers) <= 2
@@ -588,13 +587,11 @@ class TestPubmedConnectorSearch:
         esearch_mock = mock_response(json_data=pubmed_esearch_json)
         esearch_mock.raise_for_status = MagicMock()
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get", return_value=esearch_mock
-        ), patch.object(
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = esearch_mock
+        with patch.object(
             searcher, "_fetch_details", side_effect=Exception("fetch error")
-        ), patch.object(
-            searcher, "_rate_limit"
-        ):
+        ), patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 
         assert papers == []
@@ -614,10 +611,9 @@ class TestPubmedConnectorSearch:
         efetch_mock.raise_for_status = MagicMock()
         callback = MagicMock()
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[esearch_mock, efetch_mock],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [esearch_mock, efetch_mock]
+        with patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=callback)
 
         callback.assert_called()

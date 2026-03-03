@@ -170,7 +170,11 @@ class SearchRunner:
         for _skipped in self._skipped_databases:
             metrics[f"total_papers_from_{_skipped}"] = 0
 
-        self._fetch_papers(metrics, verbose, show_progress=show_progress)
+        try:
+            self._fetch_papers(metrics, verbose, show_progress=show_progress)
+        finally:
+            for searcher in self._searchers:
+                searcher.close()
 
         before_dedupe = len(self._results)
         self._deduplicate_and_merge(metrics)

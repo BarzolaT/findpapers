@@ -433,10 +433,10 @@ class TestArxivConnectorSearch:
         searcher = ArxivConnector()
         response = mock_response(text=arxiv_sample_xml)
         response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get", return_value=response
-        ), patch.object(searcher, "_rate_limit"):
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=5)
 
         assert len(papers) <= 5
@@ -447,10 +447,10 @@ class TestArxivConnectorSearch:
         searcher = ArxivConnector()
         response = mock_response(text=arxiv_sample_xml)
         response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get", return_value=response
-        ), patch.object(searcher, "_rate_limit"):
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=3)
 
         assert len(papers) <= 3
@@ -465,9 +465,9 @@ class TestArxivConnectorSearch:
         def _callback(current, total):
             callback_calls.append((current, total))
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get", return_value=response
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
+        with patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=_callback)
 
         assert len(callback_calls) > 0
@@ -477,9 +477,9 @@ class TestArxivConnectorSearch:
         searcher = ArxivConnector()
         import requests as req
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get", side_effect=req.HTTPError("500")
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = req.HTTPError("500")
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 
         assert papers == []

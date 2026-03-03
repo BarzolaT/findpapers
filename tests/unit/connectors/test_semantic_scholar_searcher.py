@@ -350,10 +350,9 @@ class TestSemanticScholarConnectorSearch:
         first_page.raise_for_status = MagicMock()
         second_page = self._empty_page(mock_response)
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[first_page, second_page],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [first_page, second_page]
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 
         assert len(papers) > 0
@@ -371,10 +370,9 @@ class TestSemanticScholarConnectorSearch:
         first_page.raise_for_status = MagicMock()
         second_page = self._empty_page(mock_response)
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[first_page, second_page],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [first_page, second_page]
+        with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query, max_papers=2)
 
         assert len(papers) <= 2
@@ -403,10 +401,9 @@ class TestSemanticScholarConnectorSearch:
         second_page = self._empty_page(mock_response)
         callback = MagicMock()
 
-        with patch(
-            "findpapers.connectors.connector_base.requests.get",
-            side_effect=[first_page, second_page],
-        ), patch.object(searcher, "_rate_limit"):
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [first_page, second_page]
+        with patch.object(searcher, "_rate_limit"):
             searcher.search(simple_query, progress_callback=callback)
 
         callback.assert_called()
