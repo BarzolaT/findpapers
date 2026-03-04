@@ -12,10 +12,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter
 from typing import Literal
 
+from findpapers.connectors import CITATION_REGISTRY
 from findpapers.connectors.citation_base import CitationConnectorBase
-from findpapers.connectors.crossref import CrossRefConnector
-from findpapers.connectors.openalex import OpenAlexConnector
-from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
 from findpapers.utils.logging_config import configure_verbose_logging
@@ -221,23 +219,17 @@ class SnowballRunner:
         list[CitationConnectorBase]
             Available citation connectors.
         """
-        connectors: list[CitationConnectorBase] = []
+        # Per-connector constructor credentials.  Connectors with no entry
+        # are constructed with no arguments.  The classes are looked up in
+        # the central CITATION_REGISTRY so that this runner does not need
+        # to import every concrete connector.
+        _credentials: dict[str, dict[str, str | None]] = {
+            "openalex": {"api_key": openalex_api_key, "email": email},
+            "semantic_scholar": {"api_key": semantic_scholar_api_key},
+            "crossref": {"email": email},
+        }
 
-        openalex = OpenAlexConnector(
-            api_key=openalex_api_key,
-            email=email,
-        )
-        connectors.append(openalex)
-
-        semantic_scholar = SemanticScholarConnector(
-            api_key=semantic_scholar_api_key,
-        )
-        connectors.append(semantic_scholar)
-
-        crossref = CrossRefConnector(email=email)
-        connectors.append(crossref)
-
-        return connectors
+        return [cls(**_credentials.get(name, {})) for name, cls in CITATION_REGISTRY.items()]
 
     def _expand_paper(
         self,

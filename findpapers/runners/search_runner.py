@@ -3,17 +3,11 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
 from datetime import UTC, datetime
 from time import perf_counter
 
-from findpapers.connectors.arxiv import ArxivConnector
-from findpapers.connectors.ieee import IEEEConnector
-from findpapers.connectors.openalex import OpenAlexConnector
-from findpapers.connectors.pubmed import PubmedConnector
-from findpapers.connectors.scopus import ScopusConnector
+from findpapers.connectors import SEARCH_REGISTRY
 from findpapers.connectors.search_base import SearchConnectorBase
-from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.core.paper import Paper, _is_preprint_doi
 from findpapers.core.search_result import Database, SearchResult
 from findpapers.exceptions import UnsupportedQueryError
@@ -252,23 +246,20 @@ class SearchRunner:
         ValueError
             When an unknown database identifier is provided.
         """
-        # Factory callables — connectors are only instantiated for the
-        # databases the caller actually requested, avoiding unnecessary
-        # construction (and the warning spam that comes with it when API
-        # keys are absent for unused databases).
-        _factories: dict[Database, Callable[[], SearchConnectorBase]] = {
-            Database.ARXIV: lambda: ArxivConnector(),
-            Database.IEEE: lambda: IEEEConnector(api_key=ieee_api_key),
-            Database.OPENALEX: lambda: OpenAlexConnector(api_key=openalex_api_key, email=email),
-            Database.PUBMED: lambda: PubmedConnector(api_key=pubmed_api_key),
-            Database.SCOPUS: lambda: ScopusConnector(api_key=scopus_api_key),
-            Database.SEMANTIC_SCHOLAR: lambda: SemanticScholarConnector(
-                api_key=semantic_scholar_api_key
-            ),
+        # Per-database constructor credentials.  Databases with no entry
+        # (e.g. Arxiv) are constructed with no arguments.  The class for
+        # each Database is looked up in the central SEARCH_REGISTRY so
+        # that this runner does not need to import every concrete connector.
+        _credentials: dict[Database, dict[str, str | None]] = {
+            Database.IEEE: {"api_key": ieee_api_key},
+            Database.OPENALEX: {"api_key": openalex_api_key, "email": email},
+            Database.PUBMED: {"api_key": pubmed_api_key},
+            Database.SCOPUS: {"api_key": scopus_api_key},
+            Database.SEMANTIC_SCHOLAR: {"api_key": semantic_scholar_api_key},
         }
 
-        valid_values = {db.value for db in Database}
-        raw = [db.strip().lower() for db in (databases or [db.value for db in Database])]
+        valid_values = {db.value for db in SEARCH_REGISTRY}
+        raw = [db.strip().lower() for db in (databases or [db.value for db in SEARCH_REGISTRY])]
         unknown = [db for db in raw if db not in valid_values]
         if unknown:
             raise ValueError(
@@ -276,7 +267,9 @@ class SearchRunner:
                 f"Accepted values: {', '.join(sorted(valid_values))}"
             )
 
-        searchers = [_factories[Database(db)]() for db in raw]
+        searchers = [
+            SEARCH_REGISTRY[Database(db)](**_credentials.get(Database(db), {})) for db in raw
+        ]
         available = []
         skipped: list[str] = []
         for searcher in searchers:
