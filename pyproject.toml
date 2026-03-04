@@ -44,7 +44,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ['.']
+source = ["findpapers"]
 
 [tool.coverage.report]
 exclude_lines = [
