@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from ..utils.merge import merge_value
 
 
-class SourceType(str, Enum):
+class SourceType(StrEnum):
     """Classification of academic publication sources.
 
     Each value represents a broad category of venue or platform

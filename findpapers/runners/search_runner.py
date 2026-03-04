@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from time import perf_counter
 
 from findpapers.connectors.arxiv import ArxivConnector
@@ -201,7 +201,7 @@ class SearchRunner:
         self._search = SearchResult(
             query=self._query_string,
             max_papers_per_database=self._max_papers_per_database,
-            processed_at=datetime.now(timezone.utc),
+            processed_at=datetime.now(UTC),
             databases=[s.name for s in self._searchers],
             papers=list(self._results),
             runtime_seconds=self._metrics.get("runtime_in_seconds"),

@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 import datetime
-from enum import Enum
+from enum import StrEnum
 
 from ..utils.version import package_version
 from .paper import Paper
 
 
-class Database(str, Enum):
+class Database(StrEnum):
     """Supported academic database identifiers.
 
-    Inheriting from :class:`str` makes each member compare equal to its string
-    value, so code such as ``database == "arxiv"`` continues to work without
-    modification.
+    As a :class:`StrEnum`, each member compares equal to its string value,
+    so code such as ``database == "arxiv"`` works without modification.
     """
 
     ARXIV = "arxiv"
@@ -77,12 +76,10 @@ class SearchResult:
         self.until = until
         self.max_papers_per_database = max_papers_per_database
         processed_at = (
-            processed_at
-            if processed_at is not None
-            else datetime.datetime.now(datetime.timezone.utc)
+            processed_at if processed_at is not None else datetime.datetime.now(datetime.UTC)
         )
         if processed_at.tzinfo is None:
-            processed_at = processed_at.replace(tzinfo=datetime.timezone.utc)
+            processed_at = processed_at.replace(tzinfo=datetime.UTC)
         self.processed_at = processed_at
         self.databases = databases
         self.papers: list[Paper] = papers or []
@@ -126,7 +123,7 @@ class SearchResult:
             "until": self.until.isoformat() if self.until else None,
             "databases": self.databases,
             "max_papers_per_database": self.max_papers_per_database,
-            "timestamp": self.processed_at.astimezone(datetime.timezone.utc).isoformat(),
+            "timestamp": self.processed_at.astimezone(datetime.UTC).isoformat(),
             "version": package_version(),
             "runtime_seconds": self.runtime_seconds,
             "runtime_seconds_per_database": dict(self.runtime_seconds_per_database),

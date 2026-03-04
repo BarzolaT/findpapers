@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
-from enum import Enum
+from enum import StrEnum
 
 from ..utils.merge import merge_authors, merge_value
 from .author import Author
@@ -11,7 +11,7 @@ from .source import Source
 logger = logging.getLogger(__name__)
 
 
-class PaperType(str, Enum):
+class PaperType(StrEnum):
     """BibTeX-aligned classification of a paper.
 
     Each value corresponds directly to a standard BibTeX entry type,

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 
 
 class NodeType(Enum):
@@ -15,11 +15,11 @@ class NodeType(Enum):
     GROUP = "group"
 
 
-class ConnectorType(str, Enum):
+class ConnectorType(StrEnum):
     """Type of boolean connector.
 
-    Inheriting from :class:`str` preserves equality with raw connector strings
-    so existing ``connector == "and"`` comparisons keep working unchanged.
+    Inheriting from :class:`StrEnum` preserves equality with raw connector
+    strings so existing ``connector == "and"`` comparisons keep working.
     """
 
     AND = "and"
@@ -27,10 +27,10 @@ class ConnectorType(str, Enum):
     AND_NOT = "and not"
 
 
-class FilterCode(str, Enum):
+class FilterCode(StrEnum):
     """Valid filter codes for query filter specifiers.
 
-    Each member inherits from :class:`str` so ``filter_code == "ti"``
+    Each member inherits from :class:`StrEnum` so ``filter_code == "ti"``
     comparisons keep working without modification.
 
     Members

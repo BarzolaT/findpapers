@@ -5,7 +5,7 @@ from __future__ import annotations
 from importlib import metadata
 from pathlib import Path
 
-import tomli
+import tomllib
 
 
 def package_version() -> str:
@@ -34,5 +34,5 @@ def version_from_pyproject() -> str:
     if not pyproject_path.exists():
         return "unknown"
     with pyproject_path.open("rb") as handle:
-        data = tomli.load(handle)
+        data = tomllib.load(handle)
     return str(data.get("tool", {}).get("poetry", {}).get("version", "unknown"))
