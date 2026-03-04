@@ -152,8 +152,8 @@ class CrossRefConnector(CitationConnectorBase):
             logger.debug("CrossRef: DOI %s not found (404)", doi)
             return None
         response.raise_for_status()
-        data = response.json()
-        return data.get("message")
+        data: dict[str, Any] = response.json()
+        return data.get("message")  # type: ignore[return-value]
 
     def build_paper(self, work: dict[str, Any]) -> Paper | None:
         """Build a :class:`~findpapers.core.paper.Paper` from a CrossRef work record.

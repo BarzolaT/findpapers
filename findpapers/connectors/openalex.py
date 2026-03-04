@@ -752,13 +752,13 @@ def _find_repository_source(work: dict[str, Any]) -> dict[str, Any] | None:
     return None
 
 
-def _reconstruct_abstract(inverted_index: dict) -> str:
+def _reconstruct_abstract(inverted_index: dict | None) -> str:
     """Reconstruct plain text abstract from OpenAlex inverted index.
 
     Parameters
     ----------
-    inverted_index : dict
-        Mapping of word → list of positions.
+    inverted_index : dict | None
+        Mapping of word → list of positions, or ``None``.
 
     Returns
     -------

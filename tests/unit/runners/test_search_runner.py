@@ -122,7 +122,7 @@ class TestSearchRunnerPipeline:
     def test_run_closes_searcher_sessions(self):
         """run() closes all searcher sessions after execution."""
         runner = self._make_runner_with_mock_papers([make_paper()])
-        mock_searcher = runner._searchers[0]  # noqa: SLF001
+        mock_searcher: MagicMock = runner._searchers[0]  # type: ignore[assignment]  # noqa: SLF001
         runner.run()
         mock_searcher.close.assert_called_once()
 
@@ -553,7 +553,7 @@ class TestSearchRunnerParallel:
         import findpapers.runners.search_runner as sr_mod
 
         original = sr_mod.execute_tasks
-        sr_mod.execute_tasks = _capture_execute
+        sr_mod.execute_tasks = _capture_execute  # type: ignore[assignment]
         try:
             result = runner.run()
         finally:

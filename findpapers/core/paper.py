@@ -121,7 +121,8 @@ def _merge_doi(base: str | None, incoming: str | None) -> str | None:
         return base
 
     # Both preprint, both publisher, or indistinguishable: fall back to default.
-    return merge_value(base, incoming)
+    result: str | None = merge_value(base, incoming)
+    return result
 
 
 class Paper:

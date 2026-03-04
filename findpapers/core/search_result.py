@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 from enum import StrEnum
+from typing import Any
 
 from ..utils.version import package_version
 from .paper import Paper
@@ -109,12 +110,12 @@ class SearchResult:
         if paper in self.papers:
             self.papers.remove(paper)
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize search to a dictionary representation.
 
         Returns
         -------
-        dict[str, object]
+        dict[str, Any]
             Dictionary representation of the search.
         """
         metadata = {

@@ -14,7 +14,7 @@ class TestExecuteTasksSequential:
         """All items yield a result."""
         results = list(execute_tasks([1, 2, 3], lambda x: x * 2, num_workers=None, timeout=None))
         values = [r for _, r, e in results if e is None]
-        assert sorted(values) == [2, 4, 6]
+        assert sorted(v for v in values if v is not None) == [2, 4, 6]
 
     def test_errors_surfaced_as_third_element(self):
         """Task errors are surfaced as the exception element, not raised."""
@@ -30,7 +30,9 @@ class TestExecuteTasksSequential:
 
     def test_empty_items(self):
         """Empty input yields no results."""
-        results = list(execute_tasks([], lambda x: x, num_workers=None, timeout=None))
+        results: list[tuple[int, int | None, Exception | None]] = list(
+            execute_tasks([], lambda x: x, num_workers=None, timeout=None)
+        )
         assert results == []
 
     def test_timeout_stops_processing(self):
@@ -67,7 +69,7 @@ class TestExecuteTasksParallel:
     def test_all_items_processed_parallel(self):
         """All items are processed in parallel mode."""
         results = list(execute_tasks([1, 2, 3], lambda x: x * 3, num_workers=3, timeout=None))
-        values = sorted(r for _, r, e in results if e is None)
+        values = sorted(r for _, r, e in results if e is None and r is not None)
         assert values == [3, 6, 9]
 
     def test_parallel_errors_surfaced(self):
@@ -80,7 +82,7 @@ class TestExecuteTasksParallel:
 
         results = list(execute_tasks([1, 2, 3], _mixed, num_workers=2, timeout=None))
         errors = [e for _, _, e in results if e is not None]
-        successes = [r for _, r, e in results if e is None]
+        successes = [r for _, r, e in results if e is None and r is not None]
         assert len(errors) == 1
         assert sorted(successes) == [1, 3]
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from findpapers.connectors.openalex import (
@@ -400,7 +401,7 @@ class TestOpenAlexConnectorReconstructAbstract:
 class TestOpenAlexConnectorSearch:
     """Tests for search() with mocked HTTP calls."""
 
-    def _make_next_page_response(self, mock_response, empty: bool = False):
+    def _make_next_page_response(self, mock_response: Any, empty: bool = False) -> MagicMock:
         """Build a response that signals no further pages."""
         data = {
             "meta": {"count": 0, "per_page": 25, "next_cursor": None},
@@ -408,7 +409,7 @@ class TestOpenAlexConnectorSearch:
         }
         r = mock_response(json_data=data)
         r.raise_for_status = MagicMock()
-        return r
+        return r  # type: ignore[no-any-return]
 
     def test_search_returns_papers(self, simple_query, openalex_sample_json, mock_response):
         """search() returns papers from OpenAlex JSON response."""
@@ -507,7 +508,7 @@ class TestOpenAlexConnectorSearch:
             }
             r = mock_response(json_data=data)
             r.raise_for_status = MagicMock()
-            return r
+            return r  # type: ignore[no-any-return]
 
         page_ml = _make_page("10.ml/1", "Machine Learning Paper")
         page_dl = _make_page("10.dl/1", "Deep Learning Paper")
@@ -549,7 +550,7 @@ class TestOpenAlexConnectorSearch:
             }
             r = mock_response(json_data=data)
             r.raise_for_status = MagicMock()
-            return r
+            return r  # type: ignore[no-any-return]
 
         page_ml = _make_page("10.ml/1", "Machine Learning Paper")
         page_dl = _make_page("10.dl/1", "Deep Learning Paper")
