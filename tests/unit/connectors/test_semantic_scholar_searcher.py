@@ -409,11 +409,15 @@ class TestSemanticScholarConnectorSearch:
 
         callback.assert_called()
 
-    def test_search_raises_surfaces_via_base(self, simple_query):
-        """Unexpected exception in _fetch_papers returns an empty list."""
+    def test_search_network_error_returns_empty_list(self, simple_query):
+        """Network error in _fetch_papers is caught and returns an empty list."""
+        import requests as req_lib
+
         searcher = SemanticScholarConnector()
 
-        with patch.object(searcher, "_fetch_papers", side_effect=RuntimeError("boom")):
+        with patch.object(
+            searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
+        ):
             papers = searcher.search(simple_query)
 
         assert papers == []

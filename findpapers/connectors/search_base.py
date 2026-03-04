@@ -12,13 +12,15 @@ from abc import abstractmethod
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+import requests
+
 if TYPE_CHECKING:
     from findpapers.core.paper import Paper
     from findpapers.core.query import Query
     from findpapers.query.builder import QueryBuilder, QueryValidationResult
 
 from findpapers.connectors.connector_base import ConnectorBase
-from findpapers.exceptions import UnsupportedQueryError
+from findpapers.exceptions import ConnectorError, UnsupportedQueryError
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +123,6 @@ class SearchConnectorBase(ConnectorBase):
 
         try:
             return self._fetch_papers(query, max_papers, progress_callback)
-        except Exception:
-            logger.exception("Unexpected error while searching '%s'.", self.name)
+        except (requests.RequestException, ConnectorError):
+            logger.exception("Error while searching '%s'.", self.name)
             return []

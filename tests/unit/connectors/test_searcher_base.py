@@ -224,14 +224,62 @@ class TestSearchConnectorBaseSearch:
         with pytest.raises(UnsupportedQueryError, match=r"Stub.*Wildcard"):
             searcher.search(mock_query)
 
-    def test_fetch_papers_exception_returns_empty_list(self) -> None:
-        """Unexpected exception in _fetch_papers is caught and returns empty list."""
+    def test_request_exception_returns_empty_list(self) -> None:
+        """requests.RequestException in _fetch_papers is caught and returns empty list."""
+        import requests as req_lib
+
         searcher = self._make_searcher_with_validation(is_valid=True)
         mock_query = MagicMock()
-        with patch.object(searcher, "_fetch_papers", side_effect=RuntimeError("boom")):
+        with patch.object(
+            searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
+        ):
             papers = searcher.search(mock_query)
 
         assert papers == []
+
+    def test_http_error_returns_empty_list(self) -> None:
+        """requests.HTTPError (e.g. 401) in _fetch_papers is caught and returns empty list."""
+        import requests as req_lib
+
+        searcher = self._make_searcher_with_validation(is_valid=True)
+        mock_query = MagicMock()
+        with patch.object(searcher, "_fetch_papers", side_effect=req_lib.HTTPError("401")):
+            papers = searcher.search(mock_query)
+
+        assert papers == []
+
+    def test_connector_error_returns_empty_list(self) -> None:
+        """ConnectorError in _fetch_papers is caught and returns empty list."""
+        from findpapers.exceptions import ConnectorError
+
+        searcher = self._make_searcher_with_validation(is_valid=True)
+        mock_query = MagicMock()
+        with patch.object(searcher, "_fetch_papers", side_effect=ConnectorError("API key invalid")):
+            papers = searcher.search(mock_query)
+
+        assert papers == []
+
+    def test_unexpected_exception_propagates(self) -> None:
+        """Unexpected exception (e.g. RuntimeError) in _fetch_papers is NOT caught."""
+        searcher = self._make_searcher_with_validation(is_valid=True)
+        mock_query = MagicMock()
+        with pytest.raises(RuntimeError, match="boom"):
+            with patch.object(searcher, "_fetch_papers", side_effect=RuntimeError("boom")):
+                searcher.search(mock_query)
+
+    def test_caught_exceptions_are_logged(self, caplog) -> None:
+        """Caught network errors are logged at ERROR level with traceback."""
+        import logging
+
+        import requests as req_lib
+
+        searcher = self._make_searcher_with_validation(is_valid=True)
+        mock_query = MagicMock()
+        with caplog.at_level(logging.ERROR, logger="findpapers.connectors.search_base"):
+            with patch.object(searcher, "_fetch_papers", side_effect=req_lib.Timeout("timed out")):
+                searcher.search(mock_query)
+
+        assert any("Stub" in m and "Error" in m for m in caplog.messages)
 
 
 class TestConnectorBaseSessionPooling:
