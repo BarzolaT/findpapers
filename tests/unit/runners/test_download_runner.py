@@ -8,26 +8,8 @@ from unittest.mock import patch
 
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
-from findpapers.core.source import Source
 from findpapers.runners.download_runner import DownloadRunner
-
-
-def _make_paper(
-    title: str = "Test Paper",
-    doi: str | None = "10.1234/test",
-    urls: set[str] | None = None,
-) -> Paper:
-    """Create a minimal Paper for testing."""
-    url = next(iter(urls)) if urls else "http://example.com/paper"
-    return Paper(
-        title=title,
-        abstract="An abstract.",
-        authors=[Author(name="Author One")],
-        source=Source(title="Test Journal"),
-        publication_date=date(2023, 1, 1),
-        url=url,
-        doi=doi,
-    )
+from tests.conftest import make_paper
 
 
 class TestDownloadRunnerInit:
@@ -35,7 +17,7 @@ class TestDownloadRunnerInit:
 
     def test_init_stores_config(self):
         """Constructor stores configuration without executing."""
-        papers = [_make_paper()]
+        papers = [make_paper()]
         runner = DownloadRunner(papers=papers, output_directory="/tmp/out")
         assert runner._output_directory == "/tmp/out"  # noqa: SLF001
 
@@ -45,7 +27,7 @@ class TestDownloadRunnerBuildFilename:
 
     def test_filename_includes_year_and_title(self):
         """Filename starts with year and contains sanitised title."""
-        paper = _make_paper(title="My Test Paper")
+        paper = make_paper(title="My Test Paper")
         paper.publication_date = date(2023, 5, 1)  # type: ignore[assignment]
         runner = DownloadRunner(papers=[], output_directory="/tmp")
         filename = runner._build_filename(paper)  # noqa: SLF001
@@ -54,14 +36,14 @@ class TestDownloadRunnerBuildFilename:
 
     def test_filename_sanitises_spaces(self):
         """Spaces in title are replaced with underscores."""
-        paper = _make_paper(title="Hello World")
+        paper = make_paper(title="Hello World")
         runner = DownloadRunner(papers=[], output_directory="/tmp")
         filename = runner._build_filename(paper)  # noqa: SLF001
         assert " " not in filename
 
     def test_filename_unknown_year_when_no_date(self):
         """Papers without publication_date use 'unknown' as year."""
-        paper = _make_paper()
+        paper = make_paper()
         paper.publication_date = None  # type: ignore[assignment]
         runner = DownloadRunner(papers=[], output_directory="/tmp")
         filename = runner._build_filename(paper)  # noqa: SLF001
@@ -102,7 +84,7 @@ class TestDownloadRunnerResolvePdfUrl:
         """Unknown host returns None."""
         runner = self._runner()
         result = runner._resolve_pdf_url(  # noqa: SLF001
-            "https://unknown.host/article/123", _make_paper()
+            "https://unknown.host/article/123", make_paper()
         )
         assert result is None
 
@@ -110,7 +92,7 @@ class TestDownloadRunnerResolvePdfUrl:
         """Springer URL is correctly resolved to PDF."""
         runner = self._runner()
         url = "https://link.springer.com/article/10.1007/s00000-000-0000-0"
-        result = runner._resolve_pdf_url(url, _make_paper())  # noqa: SLF001
+        result = runner._resolve_pdf_url(url, make_paper())  # noqa: SLF001
         assert result is not None
         assert result.endswith(".pdf")
         assert "/content/pdf/" in result
@@ -119,7 +101,7 @@ class TestDownloadRunnerResolvePdfUrl:
         """IEEE document URL is resolved using path."""
         runner = self._runner()
         url = "https://ieeexplore.ieee.org/document/12345"
-        result = runner._resolve_pdf_url(url, _make_paper())  # noqa: SLF001
+        result = runner._resolve_pdf_url(url, make_paper())  # noqa: SLF001
         assert result is not None
         assert "12345" in result
 
@@ -127,7 +109,7 @@ class TestDownloadRunnerResolvePdfUrl:
         """Frontiers in article URL resolved to PDF."""
         runner = self._runner()
         url = "https://www.frontiersin.org/articles/10.3389/fnins.2020.12345/full"
-        result = runner._resolve_pdf_url(url, _make_paper())  # noqa: SLF001
+        result = runner._resolve_pdf_url(url, make_paper())  # noqa: SLF001
         assert result is not None
         assert result.endswith("/pdf")
 
@@ -144,7 +126,7 @@ class TestDownloadRunnerRun:
 
     def test_metrics_populated_after_run(self, tmp_path):
         """Metrics contain expected keys after run()."""
-        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch.object(runner, "_download_paper", return_value=(False, [])):
             metrics = runner.run()
         assert "total_papers" in metrics
@@ -160,14 +142,14 @@ class TestDownloadRunnerRun:
 
     def test_download_success_increments_count(self, tmp_path):
         """Successful download increments downloaded_papers metric."""
-        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch.object(runner, "_download_paper", return_value=(True, ["http://url"])):
             metrics = runner.run()
         assert metrics["downloaded_papers"] == 1
 
     def test_download_failure_logged(self, tmp_path):
         """Failed download leaves downloaded_papers at 0."""
-        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch.object(runner, "_download_paper", return_value=(False, ["http://url"])):
             metrics = runner.run()
         assert metrics["downloaded_papers"] == 0
@@ -191,7 +173,7 @@ class TestDownloadRunnerVerbose:
         """verbose=True logs the DownloadRunner configuration header."""
         import logging
 
-        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch.object(runner, "_download_paper", return_value=(True, ["http://url"])):
             with caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"):
                 runner.run(verbose=True)
@@ -201,7 +183,7 @@ class TestDownloadRunnerVerbose:
         """verbose=True logs the download summary after execution."""
         import logging
 
-        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch.object(runner, "_download_paper", return_value=(True, ["http://url"])):
             with caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"):
                 runner.run(verbose=True)
@@ -213,7 +195,7 @@ class TestDownloadRunnerVerbose:
         """verbose=True logs a WARNING when a paper download fails."""
         import logging
 
-        paper = _make_paper(title="Failing Paper")
+        paper = make_paper(title="Failing Paper")
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
         with patch.object(runner, "_download_paper", side_effect=RuntimeError("network error")):
             with caplog.at_level(logging.WARNING, logger="findpapers.runners.download_runner"):
@@ -232,7 +214,7 @@ class TestDownloadRunnerVerbose:
 
     def test_show_progress_false_disables_progress_bar(self, tmp_path):
         """show_progress=False suppresses the tqdm progress bar."""
-        papers = [_make_paper()]
+        papers = [make_paper()]
         runner = DownloadRunner(papers=papers, output_directory=str(tmp_path))
         with (
             patch.object(runner, "_download_paper", return_value=(True, [])),
@@ -274,7 +256,7 @@ class TestDownloadRunnerVerbose:
         import logging
         from unittest.mock import MagicMock
 
-        paper = _make_paper(title="Debug Log Paper")
+        paper = make_paper(title="Debug Log Paper")
 
         mock_resp = MagicMock()
         mock_resp.status_code = 200
@@ -296,7 +278,7 @@ class TestDownloadRunnerVerbose:
         """No response log is emitted when requests.get raises (no connection established)."""
         import logging
 
-        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch(
             "findpapers.runners.download_runner.requests.get",
             side_effect=ConnectionError("refused"),
@@ -321,7 +303,7 @@ class TestDownloadRunnerVerbose:
         mock_resp.url = "http://example.com/paper.pdf"
         mock_resp.ok = True
 
-        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch(
             "findpapers.runners.download_runner.requests.get", return_value=mock_resp
         ) as mock_get:
@@ -347,7 +329,7 @@ class TestDownloadRunnerVerbose:
         mock_resp.url = "http://example.com/paper"
         mock_resp.ok = False
 
-        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch("findpapers.runners.download_runner.requests.get", return_value=mock_resp):
             with caplog.at_level(logging.WARNING, logger="findpapers.runners.download_runner"):
                 runner.run(verbose=True)
@@ -381,7 +363,7 @@ class TestDownloadRunnerSslVerify:
         mock_resp.url = "http://example.com/paper.pdf"
 
         runner = DownloadRunner(
-            papers=[_make_paper()],
+            papers=[make_paper()],
             output_directory=str(tmp_path),
             ssl_verify=False,
         )
@@ -406,7 +388,7 @@ class TestDownloadRunnerSslVerify:
         mock_resp.url = "http://example.com/paper.pdf"
 
         runner = DownloadRunner(
-            papers=[_make_paper()],
+            papers=[make_paper()],
             output_directory=str(tmp_path),
         )
         with patch(
@@ -437,7 +419,7 @@ class TestDownloadRunnerSslVerify:
         """When requests.get raises, the exception is logged at DEBUG level."""
         import logging
 
-        runner = DownloadRunner(papers=[_make_paper()], output_directory=str(tmp_path))
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch(
             "findpapers.runners.download_runner.requests.get",
             side_effect=ConnectionError("SSL handshake failed"),

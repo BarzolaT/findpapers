@@ -2,31 +2,10 @@
 
 from __future__ import annotations
 
-import datetime
 from unittest.mock import MagicMock, patch
 
 from findpapers.connectors.crossref import CrossRefConnector
-from findpapers.core.author import Author
-from findpapers.core.paper import Paper
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _make_paper(
-    title: str = "Test Paper",
-    doi: str | None = "10.1000/test",
-) -> Paper:
-    """Create a minimal Paper for testing."""
-    return Paper(
-        title=title,
-        abstract="",
-        authors=[Author(name="Test Author")],
-        source=None,
-        publication_date=datetime.date(2024, 1, 1),
-        doi=doi,
-    )
+from tests.conftest import make_paper
 
 
 def _make_crossref_work(
@@ -62,7 +41,7 @@ class TestCrossRefFetchReferences:
     def test_returns_empty_for_paper_without_doi(self) -> None:
         """Papers without DOI return empty list."""
         connector = CrossRefConnector()
-        paper = _make_paper(doi=None)
+        paper = make_paper(doi=None)
 
         result = connector.fetch_references(paper)
 
@@ -72,7 +51,7 @@ class TestCrossRefFetchReferences:
     def test_fetches_references_from_reference_list(self, mock_fetch: MagicMock) -> None:
         """Parses DOIs from the reference list and fetches each one."""
         connector = CrossRefConnector()
-        paper = _make_paper(doi="10.1000/seed")
+        paper = make_paper(doi="10.1000/seed")
 
         seed_work = _make_crossref_work(
             doi="10.1000/seed",
@@ -100,7 +79,7 @@ class TestCrossRefFetchReferences:
     def test_handles_work_not_found(self, mock_fetch: MagicMock) -> None:
         """Returns empty list when the seed work is not found (None)."""
         connector = CrossRefConnector()
-        paper = _make_paper(doi="10.1000/missing")
+        paper = make_paper(doi="10.1000/missing")
 
         mock_fetch.return_value = None
 
@@ -112,7 +91,7 @@ class TestCrossRefFetchReferences:
     def test_handles_work_without_reference_field(self, mock_fetch: MagicMock) -> None:
         """Returns empty list when the work has no reference field."""
         connector = CrossRefConnector()
-        paper = _make_paper(doi="10.1000/norefs")
+        paper = make_paper(doi="10.1000/norefs")
 
         work = _make_crossref_work(doi="10.1000/norefs", title="No Refs")
         # No "reference" key at all
@@ -126,7 +105,7 @@ class TestCrossRefFetchReferences:
     def test_skips_references_that_fail_to_resolve(self, mock_fetch: MagicMock) -> None:
         """References whose fetch_work call raises are silently skipped."""
         connector = CrossRefConnector()
-        paper = _make_paper(doi="10.1000/seed")
+        paper = make_paper(doi="10.1000/seed")
 
         seed_work = _make_crossref_work(
             doi="10.1000/seed",
@@ -150,7 +129,7 @@ class TestCrossRefFetchReferences:
     def test_handles_fetch_work_error_for_seed(self, mock_fetch: MagicMock) -> None:
         """Returns empty list when fetching the seed work raises."""
         connector = CrossRefConnector()
-        paper = _make_paper(doi="10.1000/error")
+        paper = make_paper(doi="10.1000/error")
 
         mock_fetch.side_effect = Exception("Network error")
 
@@ -162,7 +141,7 @@ class TestCrossRefFetchReferences:
     def test_skips_references_without_title(self, mock_fetch: MagicMock) -> None:
         """References that build_paper returns None for are skipped."""
         connector = CrossRefConnector()
-        paper = _make_paper(doi="10.1000/seed")
+        paper = make_paper(doi="10.1000/seed")
 
         seed_work = _make_crossref_work(
             doi="10.1000/seed",
@@ -190,7 +169,7 @@ class TestCrossRefFetchCitedBy:
     def test_always_returns_empty_list(self) -> None:
         """CrossRef does not support forward citation lookups."""
         connector = CrossRefConnector()
-        paper = _make_paper(doi="10.1000/popular")
+        paper = make_paper(doi="10.1000/popular")
 
         result = connector.fetch_cited_by(paper)
 
@@ -199,7 +178,7 @@ class TestCrossRefFetchCitedBy:
     def test_returns_empty_for_paper_without_doi(self) -> None:
         """Even without DOI, returns empty list gracefully."""
         connector = CrossRefConnector()
-        paper = _make_paper(doi=None)
+        paper = make_paper(doi=None)
 
         result = connector.fetch_cited_by(paper)
 

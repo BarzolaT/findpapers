@@ -2,31 +2,10 @@
 
 from __future__ import annotations
 
-import datetime
 from unittest.mock import MagicMock, patch
 
 from findpapers.connectors.semantic_scholar import SemanticScholarConnector
-from findpapers.core.author import Author
-from findpapers.core.paper import Paper
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _make_paper(
-    title: str = "Test Paper",
-    doi: str | None = "10.1000/test",
-) -> Paper:
-    """Create a minimal Paper for testing."""
-    return Paper(
-        title=title,
-        abstract="",
-        authors=[Author(name="Test Author")],
-        source=None,
-        publication_date=datetime.date(2024, 1, 1),
-        doi=doi,
-    )
+from tests.conftest import make_paper
 
 
 def _make_ss_paper_record(
@@ -65,7 +44,7 @@ class TestSemanticScholarFetchReferences:
     def test_returns_empty_for_paper_without_doi(self) -> None:
         """Papers without DOI return empty list."""
         connector = SemanticScholarConnector()
-        paper = _make_paper(doi=None)
+        paper = make_paper(doi=None)
 
         result = connector.fetch_references(paper)
 
@@ -75,7 +54,7 @@ class TestSemanticScholarFetchReferences:
     def test_fetches_references(self, mock_get: MagicMock) -> None:
         """Fetches references using the /paper/{id}/references endpoint."""
         connector = SemanticScholarConnector()
-        paper = _make_paper(doi="10.1000/seed")
+        paper = make_paper(doi="10.1000/seed")
 
         response = MagicMock()
         response.json.return_value = {
@@ -101,7 +80,7 @@ class TestSemanticScholarFetchReferences:
     def test_handles_empty_response(self, mock_get: MagicMock) -> None:
         """Returns empty list when API returns no data."""
         connector = SemanticScholarConnector()
-        paper = _make_paper(doi="10.1000/empty")
+        paper = make_paper(doi="10.1000/empty")
 
         response = MagicMock()
         response.json.return_value = {"data": [], "next": None}
@@ -115,7 +94,7 @@ class TestSemanticScholarFetchReferences:
     def test_handles_api_error(self, mock_get: MagicMock) -> None:
         """Returns empty list on API error."""
         connector = SemanticScholarConnector()
-        paper = _make_paper(doi="10.1000/error")
+        paper = make_paper(doi="10.1000/error")
 
         mock_get.side_effect = Exception("API error")
 
@@ -135,7 +114,7 @@ class TestSemanticScholarFetchCitedBy:
     def test_returns_empty_for_paper_without_doi(self) -> None:
         """Papers without DOI return empty list."""
         connector = SemanticScholarConnector()
-        paper = _make_paper(doi=None)
+        paper = make_paper(doi=None)
 
         result = connector.fetch_cited_by(paper)
 
@@ -145,7 +124,7 @@ class TestSemanticScholarFetchCitedBy:
     def test_fetches_citing_papers(self, mock_get: MagicMock) -> None:
         """Fetches citations using the /paper/{id}/citations endpoint."""
         connector = SemanticScholarConnector()
-        paper = _make_paper(doi="10.1000/cited")
+        paper = make_paper(doi="10.1000/cited")
 
         response = MagicMock()
         response.json.return_value = {
@@ -167,7 +146,7 @@ class TestSemanticScholarFetchCitedBy:
     def test_paginates_through_multiple_pages(self, mock_get: MagicMock) -> None:
         """Follows offset-based pagination until exhausted."""
         connector = SemanticScholarConnector()
-        paper = _make_paper(doi="10.1000/popular")
+        paper = make_paper(doi="10.1000/popular")
 
         # Page 1: returns 1000 items (full page) with next offset
         page1 = MagicMock()
@@ -199,7 +178,7 @@ class TestSemanticScholarFetchCitedBy:
     def test_handles_api_error(self, mock_get: MagicMock) -> None:
         """Returns empty list on API error."""
         connector = SemanticScholarConnector()
-        paper = _make_paper(doi="10.1000/error")
+        paper = make_paper(doi="10.1000/error")
 
         mock_get.side_effect = Exception("Network error")
 
@@ -211,7 +190,7 @@ class TestSemanticScholarFetchCitedBy:
     def test_skips_unparseable_entries(self, mock_get: MagicMock) -> None:
         """Entries without a title are skipped silently."""
         connector = SemanticScholarConnector()
-        paper = _make_paper(doi="10.1000/mixed")
+        paper = make_paper(doi="10.1000/mixed")
 
         bad_record = _make_ss_paper_record("bad", "10.1000/bad", "")
         good_record = _make_ss_paper_record("good", "10.1000/good", "Good Paper")

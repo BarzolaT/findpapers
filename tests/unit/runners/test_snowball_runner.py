@@ -2,32 +2,10 @@
 
 from __future__ import annotations
 
-import datetime
-
 from findpapers.connectors.citation_base import CitationConnectorBase
-from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.runners.snowball_runner import SnowballRunner
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _make_paper(
-    title: str,
-    doi: str | None = None,
-    abstract: str = "",
-) -> Paper:
-    """Create a minimal Paper for testing."""
-    return Paper(
-        title=title,
-        abstract=abstract,
-        authors=[Author(name="Test Author")],
-        source=None,
-        publication_date=datetime.date(2024, 1, 1),
-        doi=doi,
-    )
+from tests.conftest import make_paper
 
 
 class FakeCitationConnector(CitationConnectorBase):
@@ -113,15 +91,15 @@ class TestSnowballRunnerInit:
 
     def test_single_paper_seed(self) -> None:
         """Accepts a single Paper as seed_papers."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
+        seed = make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=seed, depth=1)
 
         assert len(runner._seed_papers) == 1
 
     def test_skips_papers_without_doi(self) -> None:
         """Papers without DOI are silently skipped."""
-        seed_with_doi = _make_paper("With DOI", doi="10.1000/ok")
-        seed_without_doi = _make_paper("No DOI")
+        seed_with_doi = make_paper("With DOI", doi="10.1000/ok")
+        seed_without_doi = make_paper("No DOI")
         runner = SnowballRunner(seed_papers=[seed_with_doi, seed_without_doi])
 
         assert len(runner._seed_papers) == 1
@@ -129,7 +107,7 @@ class TestSnowballRunnerInit:
 
     def test_default_parameters(self) -> None:
         """Default depth is 1, direction is 'both', num_workers is 1."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
+        seed = make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=[seed])
 
         assert runner._depth == 1
@@ -138,7 +116,7 @@ class TestSnowballRunnerInit:
 
     def test_depth_clamped_to_zero(self) -> None:
         """Negative depth is clamped to 0."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
+        seed = make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=[seed], depth=-1)
 
         assert runner._depth == 0
@@ -149,7 +127,7 @@ class TestSnowballRunnerRun:
 
     def test_depth_zero_returns_only_seeds(self) -> None:
         """With depth=0 no expansion happens; only seeds in the graph."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
+        seed = make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=[seed], depth=0)
         runner._connectors = [FakeCitationConnector()]
 
@@ -160,9 +138,9 @@ class TestSnowballRunnerRun:
 
     def test_backward_snowball_depth_1(self) -> None:
         """Backward snowballing collects references of the seed."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref1 = _make_paper("Ref 1", doi="10.1000/r1")
-        ref2 = _make_paper("Ref 2", doi="10.1000/r2")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref1 = make_paper("Ref 1", doi="10.1000/r1")
+        ref2 = make_paper("Ref 2", doi="10.1000/r2")
 
         connector = FakeCitationConnector(
             references={"10.1000/seed": [ref1, ref2]},
@@ -183,9 +161,9 @@ class TestSnowballRunnerRun:
 
     def test_forward_snowball_depth_1(self) -> None:
         """Forward snowballing collects papers that cite the seed."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        citing1 = _make_paper("Citing 1", doi="10.1000/c1")
-        citing2 = _make_paper("Citing 2", doi="10.1000/c2")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        citing1 = make_paper("Citing 1", doi="10.1000/c1")
+        citing2 = make_paper("Citing 2", doi="10.1000/c2")
 
         connector = FakeCitationConnector(
             cited_by={"10.1000/seed": [citing1, citing2]},
@@ -206,9 +184,9 @@ class TestSnowballRunnerRun:
 
     def test_both_directions_depth_1(self) -> None:
         """Snowballing in both directions collects refs and citing papers."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref = _make_paper("Ref", doi="10.1000/ref")
-        citing = _make_paper("Citing", doi="10.1000/citing")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.1000/ref")
+        citing = make_paper("Citing", doi="10.1000/citing")
 
         connector = FakeCitationConnector(
             references={"10.1000/seed": [ref]},
@@ -228,9 +206,9 @@ class TestSnowballRunnerRun:
 
     def test_depth_2_expands_second_level(self) -> None:
         """At depth=2, papers found at level 1 are also expanded."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        level1 = _make_paper("Level 1", doi="10.1000/l1")
-        level2 = _make_paper("Level 2", doi="10.1000/l2")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        level1 = make_paper("Level 1", doi="10.1000/l1")
+        level2 = make_paper("Level 2", doi="10.1000/l2")
 
         connector = FakeCitationConnector(
             references={
@@ -255,9 +233,9 @@ class TestSnowballRunnerRun:
 
     def test_deduplication_across_connectors(self) -> None:
         """Same paper found by different connectors is not duplicated."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref = _make_paper("Ref", doi="10.1000/ref")
-        ref_dup = _make_paper("Ref (duplicate)", doi="10.1000/ref")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.1000/ref")
+        ref_dup = make_paper("Ref (duplicate)", doi="10.1000/ref")
 
         connector1 = FakeCitationConnector(references={"10.1000/seed": [ref]})
         connector2 = FakeCitationConnector(references={"10.1000/seed": [ref_dup]})
@@ -276,8 +254,8 @@ class TestSnowballRunnerRun:
 
     def test_cycle_detection(self) -> None:
         """Papers already in the graph are not expanded again."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref = _make_paper("Ref", doi="10.1000/ref")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.1000/ref")
 
         # ref cites seed back — creates a cycle.
         connector = FakeCitationConnector(
@@ -303,7 +281,7 @@ class TestSnowballRunnerRun:
 
     def test_connector_error_does_not_crash(self) -> None:
         """If a connector raises, the runner logs and continues."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
+        seed = make_paper("Seed", doi="10.1000/seed")
 
         class ErrorConnector(CitationConnectorBase):
             """Connector that always raises."""
@@ -375,10 +353,10 @@ class TestSnowballRunnerRun:
 
     def test_multiple_seeds(self) -> None:
         """Multiple seed papers are all expanded at depth 1."""
-        seed1 = _make_paper("Seed 1", doi="10.1000/s1")
-        seed2 = _make_paper("Seed 2", doi="10.1000/s2")
-        ref1 = _make_paper("Ref 1", doi="10.1000/r1")
-        ref2 = _make_paper("Ref 2", doi="10.1000/r2")
+        seed1 = make_paper("Seed 1", doi="10.1000/s1")
+        seed2 = make_paper("Seed 2", doi="10.1000/s2")
+        ref1 = make_paper("Ref 1", doi="10.1000/r1")
+        ref2 = make_paper("Ref 2", doi="10.1000/r2")
 
         connector = FakeCitationConnector(
             references={
@@ -400,9 +378,9 @@ class TestSnowballRunnerRun:
 
     def test_parallel_connectors(self) -> None:
         """With num_workers > 1, connectors are queried in parallel."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref1 = _make_paper("Ref C1", doi="10.1000/rc1")
-        ref2 = _make_paper("Ref C2", doi="10.1000/rc2")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref1 = make_paper("Ref C1", doi="10.1000/rc1")
+        ref2 = make_paper("Ref C2", doi="10.1000/rc2")
 
         connector1 = FakeCitationConnector(references={"10.1000/seed": [ref1]})
         connector2 = FakeCitationConnector(references={"10.1000/seed": [ref2]})
@@ -427,7 +405,7 @@ class TestSnowballRunnerMetrics:
 
     def test_metrics_after_run(self) -> None:
         """Graph contains expected data after run()."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
+        seed = make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=[seed], depth=0)
         runner._connectors = [FakeCitationConnector()]
 
@@ -440,8 +418,8 @@ class TestSnowballRunnerMetrics:
         """show_progress=False suppresses the tqdm progress bar."""
         from unittest.mock import patch
 
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref = _make_paper("Ref", doi="10.2000/ref")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.2000/ref")
         connector = FakeCitationConnector(references={"10.1000/seed": [ref]})
         runner = SnowballRunner(seed_papers=[seed], depth=1)
         runner._connectors = [connector]
@@ -468,8 +446,8 @@ class TestSnowballRunnerVerbose:
 
     def test_verbose_logs_configuration_and_results(self) -> None:
         """verbose=True logs configuration, per-level info, and results."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref = _make_paper("Ref", doi="10.1000/ref")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.1000/ref")
         connector = FakeCitationConnector(references={"10.1000/seed": [ref]})
         runner = SnowballRunner(seed_papers=[seed], depth=1, direction="backward")
         runner._connectors = [connector]
@@ -480,9 +458,9 @@ class TestSnowballRunnerVerbose:
 
     def test_verbose_multi_level(self) -> None:
         """verbose=True logs at each depth level."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        l1 = _make_paper("L1", doi="10.1000/l1")
-        l2 = _make_paper("L2", doi="10.1000/l2")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        l1 = make_paper("L1", doi="10.1000/l1")
+        l2 = make_paper("L2", doi="10.1000/l2")
         connector = FakeCitationConnector(
             references={"10.1000/seed": [l1], "10.1000/l1": [l2]},
         )
@@ -555,8 +533,8 @@ class TestSnowballRunnerParallelErrors:
                 """
                 raise RuntimeError("boom")
 
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref = _make_paper("Ref", doi="10.1000/ref")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.1000/ref")
         good = FakeCitationConnector(references={"10.1000/seed": [ref]})
         bad = BoomConnector()
 
@@ -578,8 +556,8 @@ class TestSnowballRunnerParallelErrors:
         """When _query_single_connector itself raises, the future exception is caught."""
         from unittest.mock import patch
 
-        seed = _make_paper("Seed", doi="10.1000/seed")
-        ref = _make_paper("Ref", doi="10.1000/ref")
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.1000/ref")
         good = FakeCitationConnector(references={"10.1000/seed": [ref]})
         bad = FakeCitationConnector()
 
@@ -612,7 +590,7 @@ class TestSnowballRunnerEmptyFrontier:
 
     def test_empty_frontier_breaks_early(self) -> None:
         """When no new papers are discovered, deeper levels are skipped."""
-        seed = _make_paper("Seed", doi="10.1000/seed")
+        seed = make_paper("Seed", doi="10.1000/seed")
         # Connector returns no references at any level.
         connector = FakeCitationConnector(references={})
         runner = SnowballRunner(

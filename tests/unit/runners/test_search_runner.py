@@ -12,23 +12,7 @@ from findpapers.core.paper import Paper
 from findpapers.core.search_result import Database
 from findpapers.core.source import Source
 from findpapers.runners.search_runner import SearchRunner
-
-
-def _make_paper(
-    title: str = "Test Paper",
-    doi: str | None = None,
-) -> Paper:
-    """Create a minimal Paper for testing."""
-    pub = Source(title="Test Journal")
-    return Paper(
-        title=title,
-        abstract="An abstract.",
-        authors=[Author(name="Author One")],
-        source=pub,
-        publication_date=date(2023, 1, 1),
-        url="http://example.com",
-        doi=doi,
-    )
+from tests.conftest import make_paper
 
 
 class TestSearchRunnerInit:
@@ -131,13 +115,13 @@ class TestSearchRunnerPipeline:
         """run() returns a SearchResult instance."""
         from findpapers.core.search_result import SearchResult
 
-        runner = self._make_runner_with_mock_papers([_make_paper()])
+        runner = self._make_runner_with_mock_papers([make_paper()])
         result = runner.run()
         assert isinstance(result, SearchResult)
 
     def test_run_closes_searcher_sessions(self):
         """run() closes all searcher sessions after execution."""
-        runner = self._make_runner_with_mock_papers([_make_paper()])
+        runner = self._make_runner_with_mock_papers([make_paper()])
         mock_searcher = runner._searchers[0]  # noqa: SLF001
         runner.run()
         mock_searcher.close.assert_called_once()
@@ -156,7 +140,7 @@ class TestSearchRunnerPipeline:
 
     def test_get_results_after_run(self):
         """run() result contains the collected papers."""
-        paper = _make_paper()
+        paper = make_paper()
         runner = self._make_runner_with_mock_papers([paper])
         result = runner.run()
         assert len(result.papers) == 1
@@ -164,7 +148,7 @@ class TestSearchRunnerPipeline:
 
     def test_metrics_populated_after_run(self):
         """SearchResult contains runtime after run()."""
-        runner = self._make_runner_with_mock_papers([_make_paper()])
+        runner = self._make_runner_with_mock_papers([make_paper()])
         result = runner.run()
         assert result.runtime_seconds is not None
         assert result.runtime_seconds >= 0
@@ -174,23 +158,23 @@ class TestSearchRunnerPipeline:
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
-        mock_searcher.search.return_value = [_make_paper()]
+        mock_searcher.search.return_value = [make_paper()]
         runner._searchers = [mock_searcher]  # noqa: SLF001
         result = runner.run()
         assert len(result.papers) == 1
 
     def test_deduplication_merges_same_doi(self):
         """Two papers with the same DOI are merged into one."""
-        p1 = _make_paper(title="Paper A", doi="10.1234/test")
-        p2 = _make_paper(title="Paper B", doi="10.1234/test")
+        p1 = make_paper(title="Paper A", doi="10.1234/test")
+        p2 = make_paper(title="Paper B", doi="10.1234/test")
         runner = self._make_runner_with_mock_papers([p1, p2])
         result = runner.run()
         assert len(result.papers) == 1
 
     def test_deduplication_keeps_different_dois(self):
         """Papers with different DOIs *and* different titles are kept separately."""
-        p1 = _make_paper(title="Paper A", doi="10.1234/aaa")
-        p2 = _make_paper(title="Paper B", doi="10.1234/bbb")
+        p1 = make_paper(title="Paper A", doi="10.1234/aaa")
+        p2 = make_paper(title="Paper B", doi="10.1234/bbb")
         runner = self._make_runner_with_mock_papers([p1, p2])
         result = runner.run()
         assert len(result.papers) == 2
@@ -203,8 +187,8 @@ class TestSearchRunnerPipeline:
         another (e.g. ``10.48550/arxiv.1706.03762`` vs ``10.5555/3295222.3295349``
         for "Attention is All You Need").
         """
-        p1 = _make_paper(title="Attention is All You Need", doi="10.48550/arxiv.1706.03762")
-        p2 = _make_paper(title="Attention is All You Need", doi="10.5555/3295222.3295349")
+        p1 = make_paper(title="Attention is All You Need", doi="10.48550/arxiv.1706.03762")
+        p2 = make_paper(title="Attention is All You Need", doi="10.5555/3295222.3295349")
         runner = self._make_runner_with_mock_papers([p1, p2])
         result = runner.run()
         assert len(result.papers) == 1
@@ -381,7 +365,7 @@ class TestSearchRunnerPipeline:
 
     def test_run_can_be_called_twice(self):
         """Calling run() twice resets previous results."""
-        papers1 = [_make_paper(title="First")]
+        papers1 = [make_paper(title="First")]
         runner = self._make_runner_with_mock_papers(papers1)
         result = runner.run()
         assert len(result.papers) == 1
@@ -389,7 +373,7 @@ class TestSearchRunnerPipeline:
         # Replace mock to return different papers on second call.
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
-        mock_searcher.search.return_value = [_make_paper(title="A"), _make_paper(title="B")]
+        mock_searcher.search.return_value = [make_paper(title="A"), make_paper(title="B")]
         runner._searchers = [mock_searcher]  # noqa: SLF001
         result = runner.run()
         assert len(result.papers) == 2
@@ -460,7 +444,7 @@ class TestSearchRunnerVerbose:
         """run(verbose=True) completes without raising."""
         import logging
 
-        runner = self._make_runner_with_mock_papers([_make_paper()])
+        runner = self._make_runner_with_mock_papers([make_paper()])
         with caplog.at_level(logging.INFO):
             result = runner.run(verbose=True)
         # No exception raised; runner should be executed.
@@ -470,7 +454,7 @@ class TestSearchRunnerVerbose:
         """verbose=True logs the configuration header."""
         import logging
 
-        runner = self._make_runner_with_mock_papers([_make_paper()])
+        runner = self._make_runner_with_mock_papers([make_paper()])
         with caplog.at_level(logging.INFO, logger="findpapers.runners.search_runner"):
             runner.run(verbose=True)
         messages = " ".join(caplog.messages)
@@ -480,7 +464,7 @@ class TestSearchRunnerVerbose:
         """verbose=True logs the results summary."""
         import logging
 
-        runner = self._make_runner_with_mock_papers([_make_paper()])
+        runner = self._make_runner_with_mock_papers([make_paper()])
         with caplog.at_level(logging.INFO, logger="findpapers.runners.search_runner"):
             runner.run(verbose=True)
         messages = " ".join(caplog.messages)
@@ -491,7 +475,7 @@ class TestSearchRunnerVerbose:
         """verbose=False (default) does not log the configuration header."""
         import logging
 
-        runner = self._make_runner_with_mock_papers([_make_paper()])
+        runner = self._make_runner_with_mock_papers([make_paper()])
         with caplog.at_level(logging.INFO, logger="findpapers.runners.search_runner"):
             runner.run(verbose=False)
         assert "SearchRunner Configuration" not in " ".join(caplog.messages)
@@ -500,7 +484,7 @@ class TestSearchRunnerVerbose:
         """show_progress=False suppresses tqdm progress bars."""
         from unittest.mock import patch
 
-        runner = self._make_runner_with_mock_papers([_make_paper()])
+        runner = self._make_runner_with_mock_papers([make_paper()])
         with patch("findpapers.runners.search_runner.make_progress_bar") as mock_pbar:
             mock_ctx = MagicMock()
             mock_pbar.return_value.__enter__ = MagicMock(return_value=mock_ctx)
@@ -516,7 +500,7 @@ class TestSearchRunnerVerbose:
         """show_progress=True (default) enables tqdm progress bars."""
         from unittest.mock import patch
 
-        runner = self._make_runner_with_mock_papers([_make_paper()])
+        runner = self._make_runner_with_mock_papers([make_paper()])
         with patch("findpapers.runners.search_runner.make_progress_bar") as mock_pbar:
             mock_ctx = MagicMock()
             mock_pbar.return_value.__enter__ = MagicMock(return_value=mock_ctx)
@@ -534,10 +518,10 @@ class TestSearchRunnerParallel:
         """Parallel mode (num_workers > 1) still returns results from all searchers."""
         mock_s1 = MagicMock()
         mock_s1.name = "arXiv"
-        mock_s1.search.return_value = [_make_paper(title="A")]
+        mock_s1.search.return_value = [make_paper(title="A")]
         mock_s2 = MagicMock()
         mock_s2.name = "PubMed"
-        mock_s2.search.return_value = [_make_paper(title="B")]
+        mock_s2.search.return_value = [make_paper(title="B")]
 
         runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], num_workers=2)
         runner._searchers = [mock_s1, mock_s2]  # noqa: SLF001
@@ -548,10 +532,10 @@ class TestSearchRunnerParallel:
         """num_workers is capped to the number of configured searchers."""
         mock_s1 = MagicMock()
         mock_s1.name = "arXiv"
-        mock_s1.search.return_value = [_make_paper(title="A")]
+        mock_s1.search.return_value = [make_paper(title="A")]
         mock_s2 = MagicMock()
         mock_s2.name = "PubMed"
-        mock_s2.search.return_value = [_make_paper(title="B")]
+        mock_s2.search.return_value = [make_paper(title="B")]
 
         # num_workers=10 but only 2 searchers — effective workers must be capped to 2.
         runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], num_workers=10)
