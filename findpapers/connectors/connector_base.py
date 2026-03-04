@@ -15,9 +15,11 @@ from urllib.parse import urlencode
 
 import requests
 
-from findpapers.utils.http_headers import get_browser_headers
+from findpapers.utils.version import package_version
 
 logger = logging.getLogger(__name__)
+
+_REPO_URL = "https://github.com/jonatasgrosman/findpapers"
 
 # Parameter names (compared case-insensitively) that carry API credentials
 # and must be redacted before logging.
@@ -182,12 +184,30 @@ class ConnectorBase(ABC):
         """
         return params
 
-    def _prepare_headers(self, headers: dict) -> dict:
-        """Augment HTTP headers before the request is sent.
+    def _library_user_agent(self) -> str:
+        """Build the library's standard ``User-Agent`` string.
 
-        The default implementation returns *headers* unchanged.  Subclasses
-        override this to inject API keys, ``Accept`` values, or custom
-        ``User-Agent`` strings.
+        Format: ``findpapers/<version> (<repo_url>; mailto:<email>)`` when an
+        email is available, or ``findpapers/<version> (<repo_url>)`` otherwise.
+        Several academic APIs (CrossRef, OpenAlex) grant higher rate-limits
+        when a ``mailto:`` clause is present.
+
+        Returns
+        -------
+        str
+            User-Agent header value.
+        """
+        version = package_version()
+        email: str | None = getattr(self, "_email", None)
+        if email:
+            return f"findpapers/{version} ({_REPO_URL}; mailto:{email})"
+        return f"findpapers/{version} ({_REPO_URL})"
+
+    def _prepare_headers(self, headers: dict) -> dict:
+        """Inject the library ``User-Agent`` and return augmented headers.
+
+        Subclasses should call ``super()._prepare_headers(headers)`` and then
+        add their own keys (API tokens, Accept types, etc.).
 
         Parameters
         ----------
@@ -197,12 +217,9 @@ class ConnectorBase(ABC):
         Returns
         -------
         dict
-            Augmented headers.
+            Headers with ``User-Agent`` set (caller values take precedence).
         """
-        # Merge browser headers as defaults so every outgoing request carries
-        # a realistic User-Agent even when the subclass does not set one.
-        # Subclass-provided values always take precedence.
-        return {**get_browser_headers(), **headers}
+        return {"User-Agent": self._library_user_agent(), **headers}
 
     def _get(
         self,

@@ -152,9 +152,10 @@ class IEEEConnector(SearchConnectorBase):
         dict
             Headers with ``X-API-Key`` added when a key is set.
         """
+        updated = super()._prepare_headers(headers)
         if self._api_key:
-            return {**headers, "X-API-Key": self._api_key}
-        return headers
+            updated["X-API-Key"] = self._api_key
+        return updated
 
     def _parse_paper(self, item: Dict[str, Any]) -> Optional[Paper]:
         """Parse a single IEEE API result item.

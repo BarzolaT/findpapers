@@ -164,9 +164,10 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         dict
             Headers with ``x-api-key`` added when a key is set.
         """
+        updated = super()._prepare_headers(headers)
         if self._api_key:
-            return {**headers, "x-api-key": self._api_key}
-        return headers
+            updated["x-api-key"] = self._api_key
+        return updated
 
     # ------------------------------------------------------------------
     # Citation methods (CitationConnectorBase)

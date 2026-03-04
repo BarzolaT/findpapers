@@ -23,8 +23,6 @@ _BASE_URL = "https://api.openalex.org/works"
 _PAGE_SIZE = 200  # OpenAlex max per_page
 # Polite pool: ~10 req/s with email in User-Agent → use 0.1s interval
 _MIN_REQUEST_INTERVAL = 0.15
-# Default User-Agent used when no contact email has been provided.
-_USER_AGENT_DEFAULT = "findpapers/1.0 (https://github.com/jonatasgrosman/findpapers)"
 
 # Mapping from OpenAlex source.type values to SourceType.
 _OPENALEX_SOURCE_TYPE_MAP: dict[str, SourceType] = {
@@ -159,24 +157,6 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         if self._api_key:
             return {**params, "api_key": self._api_key}
         return params
-
-    def _prepare_headers(self, headers: dict) -> dict:
-        """Set the User-Agent header for OpenAlex polite pool access.
-
-        Parameters
-        ----------
-        headers : dict
-            Raw HTTP headers.
-
-        Returns
-        -------
-        dict
-            Headers with ``User-Agent`` set.
-        """
-        user_agent = _USER_AGENT_DEFAULT
-        if self._email:
-            user_agent = f"findpapers/1.0 (mailto:{self._email})"
-        return {**headers, "User-Agent": user_agent}
 
     # ------------------------------------------------------------------
     # Citation methods (CitationConnectorBase)

@@ -27,10 +27,6 @@ logger = logging.getLogger(__name__)
 
 _CROSSREF_API_URL = "https://api.crossref.org/works"
 
-# Default User-Agent used when no contact email has been provided.
-# CrossRef grants higher rate-limits when a ``mailto`` is present.
-_CROSSREF_USER_AGENT_DEFAULT = "findpapers/1.0 (https://github.com/jonatasgrosman/findpapers)"
-
 # Minimum interval between requests — CrossRef polite pool recommends
 # keeping traffic moderate; 0.1 s (10 req/s) is well within limits.
 _MIN_REQUEST_INTERVAL = 0.1
@@ -114,30 +110,6 @@ class CrossRefConnector(CitationConnectorBase):
             Interval in seconds.
         """
         return _MIN_REQUEST_INTERVAL
-
-    def _prepare_headers(self, headers: dict) -> dict:
-        """Inject the CrossRef polite-pool ``User-Agent`` header.
-
-        Parameters
-        ----------
-        headers : dict
-            Raw HTTP headers.
-
-        Returns
-        -------
-        dict
-            Headers with the CrossRef ``User-Agent`` set.
-        """
-        merged = super()._prepare_headers(headers)
-        if self._email:
-            user_agent = (
-                "findpapers/1.0 (https://github.com/jonatasgrosman/findpapers; "
-                f"mailto:{self._email})"
-            )
-        else:
-            user_agent = _CROSSREF_USER_AGENT_DEFAULT
-        merged["User-Agent"] = user_agent
-        return merged
 
     # ------------------------------------------------------------------
     # Public API

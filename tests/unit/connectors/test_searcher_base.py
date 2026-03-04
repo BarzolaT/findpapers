@@ -159,41 +159,29 @@ class TestSearchConnectorBaseGetLogging:
 
 
 class TestSearchConnectorBasePrepareHeaders:
-    """Tests for the browser-header injection in SearchConnectorBase._prepare_headers."""
+    """Tests for ConnectorBase._prepare_headers (library User-Agent injection)."""
 
-    def test_browser_headers_injected_by_default(self) -> None:
-        """_prepare_headers always includes a browser-like User-Agent."""
+    def test_user_agent_injected_by_default(self) -> None:
+        """Base _prepare_headers always adds a findpapers User-Agent."""
         searcher = _StubConnector()
         result = searcher._prepare_headers({})  # noqa: SLF001
         assert "User-Agent" in result
-        assert "Mozilla" in result["User-Agent"]
-        assert "python-requests" not in result["User-Agent"].lower()
+        assert "findpapers" in result["User-Agent"]
 
-    def test_subclass_headers_take_precedence(self) -> None:
-        """Caller-supplied headers override the browser defaults."""
+    def test_caller_headers_preserved(self) -> None:
+        """Caller-supplied headers are present alongside the User-Agent."""
         searcher = _StubConnector()
-        custom = {"User-Agent": "CustomAgent/1.0", "X-Api-Key": "secret"}
+        custom = {"Accept": "application/json", "X-Custom": "value"}
         result = searcher._prepare_headers(custom)  # noqa: SLF001
-        assert result["User-Agent"] == "CustomAgent/1.0"
-        assert result["X-Api-Key"] == "secret"
+        assert result["Accept"] == "application/json"
+        assert result["X-Custom"] == "value"
+        assert "findpapers" in result["User-Agent"]
 
-    def test_browser_headers_sent_in_get_request(self) -> None:
-        """requests.get receives a headers dict with a browser User-Agent."""
+    def test_caller_can_override_user_agent(self) -> None:
+        """Explicit User-Agent from caller takes precedence over the default."""
         searcher = _StubConnector()
-        resp = _make_response()
-        captured: list[dict] = []
-
-        def _fake_get(url, **kwargs):
-            captured.append(kwargs.get("headers") or {})
-            return resp
-
-        searcher._http_session = MagicMock()
-        searcher._http_session.get.side_effect = _fake_get
-        searcher._get("https://api.example.com/search")  # noqa: SLF001
-
-        assert captured, "session.get was not called"
-        ua = captured[0].get("User-Agent", "")
-        assert "Mozilla" in ua
+        result = searcher._prepare_headers({"User-Agent": "Custom/1.0"})  # noqa: SLF001
+        assert result["User-Agent"] == "Custom/1.0"
 
 
 class TestSearchConnectorBaseSearch:

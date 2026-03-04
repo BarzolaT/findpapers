@@ -139,7 +139,8 @@ class ScopusConnector(SearchConnectorBase):
             Headers with ``Accept`` set to JSON and optionally
             ``X-ELS-APIKey`` added.
         """
-        updated = {**headers, "Accept": "application/json"}
+        updated = super()._prepare_headers(headers)
+        updated["Accept"] = "application/json"
         if self._api_key:
             updated["X-ELS-APIKey"] = self._api_key
         return updated
