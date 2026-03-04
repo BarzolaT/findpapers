@@ -36,7 +36,7 @@ class TestSearchRunnerInit:
 
     def test_invalid_query_raises(self):
         """Malformed query raises QueryValidationError at construction time."""
-        from findpapers.core.query import QueryValidationError
+        from findpapers.exceptions import QueryValidationError
 
         with pytest.raises(QueryValidationError):
             SearchRunner(query="((bad query")

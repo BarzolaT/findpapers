@@ -6,6 +6,13 @@ from findpapers.core.paper import PaperType
 from findpapers.core.query import ConnectorType, FilterCode
 from findpapers.core.source import SourceType
 from findpapers.engine import Engine
+from findpapers.exceptions import (
+    ConnectorError,
+    ExportError,
+    FindpapersError,
+    QueryValidationError,
+    UnsupportedQueryError,
+)
 from findpapers.runners.doi_lookup_runner import DOILookupRunner
 from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
@@ -15,14 +22,19 @@ from findpapers.runners.snowball_runner import SnowballRunner
 __all__ = [
     "Author",
     "CitationGraph",
+    "ConnectorError",
+    "ConnectorType",
     "DOILookupRunner",
     "DownloadRunner",
     "Engine",
     "EnrichmentRunner",
+    "ExportError",
     "FilterCode",
-    "ConnectorType",
+    "FindpapersError",
     "PaperType",
+    "QueryValidationError",
     "SearchRunner",
     "SnowballRunner",
     "SourceType",
+    "UnsupportedQueryError",
 ]

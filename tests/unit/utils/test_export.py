@@ -14,6 +14,7 @@ from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source, SourceType
+from findpapers.exceptions import ExportError
 from findpapers.utils.export import (
     _extract_papers,
     _serialize_to_dict,
@@ -143,8 +144,8 @@ class TestExtractPapers:
         assert len(papers) == 2
 
     def test_raises_for_unsupported_type(self) -> None:
-        """Raises TypeError for unsupported input."""
-        with pytest.raises(TypeError, match="Expected"):
+        """Raises ExportError for unsupported input."""
+        with pytest.raises(ExportError, match="Expected"):
             _extract_papers("not a valid input")  # type: ignore[arg-type]
 
 
@@ -175,8 +176,8 @@ class TestSerializeToDict:
         assert len(result["papers"]) == 1
 
     def test_raises_for_unsupported_type(self) -> None:
-        """Raises TypeError for unsupported input."""
-        with pytest.raises(TypeError, match="Expected"):
+        """Raises ExportError for unsupported input."""
+        with pytest.raises(ExportError, match="Expected"):
             _serialize_to_dict("not valid")  # type: ignore[arg-type]
 
 
@@ -638,11 +639,11 @@ class TestLoadFromJson:
         assert isinstance(loaded, CitationGraph)
 
     def test_unrecognised_format_raises(self) -> None:
-        """Files with unrecognised structure cause ValueError."""
+        """Files with unrecognised structure cause ExportError."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "bad.json")
             with open(path, "w", encoding="utf-8") as fh:
                 json.dump({"foo": "bar"}, fh)
 
-            with pytest.raises(ValueError, match="Unrecognised"):
+            with pytest.raises(ExportError, match="Unrecognised"):
                 load_from_json(path)

@@ -11,8 +11,8 @@ from findpapers.core.query import (
     NodeType,
     Query,
     QueryNode,
-    QueryValidationError,
 )
+from findpapers.exceptions import QueryValidationError
 
 # ---------------------------------------------------------------------------
 # FilterCode enum

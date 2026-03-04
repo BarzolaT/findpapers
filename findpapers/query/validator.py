@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import re
 
-from findpapers.core.query import VALID_FILTER_CODES, QueryValidationError
+from findpapers.core.query import VALID_FILTER_CODES
+from findpapers.exceptions import QueryValidationError
 
 
 class QueryValidator:

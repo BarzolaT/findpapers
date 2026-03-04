@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Union
 
 from findpapers.core.paper import Paper
+from findpapers.exceptions import ExportError
 from findpapers.utils.version import package_version
 
 if TYPE_CHECKING:
@@ -31,7 +32,7 @@ def _extract_papers(data: Exportable) -> list[Paper]:
 
     Raises
     ------
-    TypeError
+    ExportError
         If *data* is not a supported type.
     """
     from findpapers.core.citation_graph import CitationGraph
@@ -43,7 +44,7 @@ def _extract_papers(data: Exportable) -> list[Paper]:
         return data.papers
     if isinstance(data, CitationGraph):
         return data.papers
-    raise TypeError(
+    raise ExportError(
         f"Expected SearchResult, CitationGraph, or list[Paper], got {type(data).__name__}"
     )
 
@@ -66,7 +67,7 @@ def _serialize_to_dict(data: Exportable) -> dict:
 
     Raises
     ------
-    TypeError
+    ExportError
         If *data* is not a supported type.
     """
     from findpapers.core.citation_graph import CitationGraph
@@ -89,7 +90,7 @@ def _serialize_to_dict(data: Exportable) -> dict:
             },
             "papers": [p.to_dict() for p in data],
         }
-    raise TypeError(
+    raise ExportError(
         f"Expected SearchResult, CitationGraph, or list[Paper], got {type(data).__name__}"
     )
 
@@ -170,7 +171,7 @@ def load_from_json(
 
     Raises
     ------
-    ValueError
+    ExportError
         If the file format cannot be identified.
     """
     from findpapers.core.citation_graph import CitationGraph
@@ -195,7 +196,7 @@ def load_from_json(
     if "papers" in payload:
         return SearchResult.from_dict(payload)
 
-    raise ValueError(
+    raise ExportError(
         "Unrecognised JSON format: expected a 'type' key or a recognisable "
         "SearchResult / CitationGraph structure."
     )

@@ -69,10 +69,6 @@ class FilterCode(str, Enum):
 VALID_FILTER_CODES: frozenset[str] = frozenset(fc.value for fc in FilterCode)
 
 
-class QueryValidationError(ValueError):
-    """Raised when a query string is invalid."""
-
-
 @dataclass
 class QueryNode:
     """A node in the query tree.

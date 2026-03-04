@@ -2,7 +2,7 @@
 
 import pytest
 
-from findpapers.core.query import QueryValidationError
+from findpapers.exceptions import QueryValidationError
 from findpapers.query.validator import QueryValidator
 
 
