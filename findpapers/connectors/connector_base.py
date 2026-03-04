@@ -63,6 +63,10 @@ class ConnectorBase(ABC):
     # attribute that shadows this default, so multiple instances are isolated.
     _last_request_time: float = 0.0
 
+    # Default HTTP timeout in seconds for all requests.  Subclasses or callers
+    # can override by setting ``self._timeout`` in ``__init__``.
+    _timeout: float = 30.0
+
     # ------------------------------------------------------------------
     # HTTP Session (connection pooling)
     # ------------------------------------------------------------------
@@ -260,7 +264,7 @@ class ConnectorBase(ABC):
             url,
             params=prepared_params or None,
             headers=prepared_headers or None,
-            timeout=30,
+            timeout=self._timeout,
         )
         self._last_request_time = time.monotonic()
         self._log_response(response)
@@ -310,7 +314,7 @@ class ConnectorBase(ABC):
             json=json_body,
             params=prepared_params or None,
             headers=prepared_headers or None,
-            timeout=30,
+            timeout=self._timeout,
         )
         self._last_request_time = time.monotonic()
         self._log_response(response)

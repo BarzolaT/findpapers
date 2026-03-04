@@ -144,7 +144,7 @@ class CrossRefConnector(CitationConnectorBase):
 
         self._rate_limit()
         self._log_request(url, headers=prepared_headers)
-        response = self._get_session().get(url, headers=prepared_headers, timeout=30)
+        response = self._get_session().get(url, headers=prepared_headers, timeout=self._timeout)
         self._last_request_time = time.monotonic()
         self._log_response(response)
 
