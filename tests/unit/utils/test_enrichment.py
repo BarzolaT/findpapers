@@ -1,4 +1,4 @@
-"""Unit tests for findpapers.utils.enrichment.
+"""Unit tests for findpapers.utils.metadata_parser and enrichment pipeline.
 
 Tests use real HTML pages collected from arXiv, PubMed, OpenAlex,
 IEEE, Scopus, and SemanticScholar that are stored in tests/data/pages/.  This
@@ -15,13 +15,12 @@ import pytest
 
 from findpapers.core.author import Author
 from findpapers.core.source import SourceType
-from findpapers.utils.enrichment import (
-    _parse_authors,
-    _parse_keywords,
-    build_paper_from_metadata,
-    enrich_from_sources,
+from findpapers.runners.enrichment_runner import build_paper_from_metadata
+from findpapers.utils.metadata_parser import (
     extract_metadata_from_html,
     fetch_metadata,
+    parse_authors,
+    parse_keywords,
 )
 
 # ---------------------------------------------------------------------------
@@ -210,7 +209,7 @@ class TestExtractMetadataFromHtml:
         meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
         authors_raw = meta.get("citation_author")
         assert authors_raw is not None
-        authors = _parse_authors(authors_raw)
+        authors = parse_authors(authors_raw)
         assert len(authors) >= 1
         assert all(isinstance(a, str) and a for a in authors)
 
@@ -256,91 +255,91 @@ class TestExtractMetadataFromHtml:
 
 
 # ---------------------------------------------------------------------------
-# _parse_authors
+# parse_authors
 # ---------------------------------------------------------------------------
 
 
 class TestParseAuthors:
-    """Unit tests for the _parse_authors() helper."""
+    """Unit tests for the parse_authors() helper."""
 
     def test_none_returns_empty_list(self) -> None:
         """None input yields an empty list."""
-        assert _parse_authors(None) == []
+        assert parse_authors(None) == []
 
     def test_single_string_returned_as_single_item(self) -> None:
         """A plain string with no semicolons is returned as a one-element list."""
-        result = _parse_authors("Smith, John")
+        result = parse_authors("Smith, John")
         assert result == ["Smith, John"]
 
     def test_semicolon_separated_string_split(self) -> None:
         """PubMed-style semicolon-separated author string is split into individual names."""
-        result = _parse_authors("Wang Y;Tian J;Yazar Y")
+        result = parse_authors("Wang Y;Tian J;Yazar Y")
         assert result == ["Wang Y", "Tian J", "Yazar Y"]
 
     def test_trailing_semicolon_ignored(self) -> None:
         """A trailing semicolon (PubMed sometimes adds one) does not produce an empty entry."""
-        result = _parse_authors("Smith J;Doe J;")
+        result = parse_authors("Smith J;Doe J;")
         assert result == ["Smith J", "Doe J"]
 
     def test_list_of_strings_returned_flat(self) -> None:
         """A list of plain name strings is returned as-is."""
-        result = _parse_authors(["Smith, J", "Doe, J"])
+        result = parse_authors(["Smith, J", "Doe, J"])
         assert result == ["Smith, J", "Doe, J"]
 
     def test_list_items_with_semicolons_split(self) -> None:
         """List items that themselves contain semicolons are expanded."""
-        result = _parse_authors(["Smith J;Doe J", "Jones K"])
+        result = parse_authors(["Smith J;Doe J", "Jones K"])
         assert result == ["Smith J", "Doe J", "Jones K"]
 
     def test_duplicates_deduplicated_preserving_order(self) -> None:
         """Duplicate author names in a list are removed while preserving order."""
-        result = _parse_authors(["Smith, J", "Doe, J", "Smith, J"])
+        result = parse_authors(["Smith, J", "Doe, J", "Smith, J"])
         assert result == ["Smith, J", "Doe, J"]
 
 
 # ---------------------------------------------------------------------------
-# _parse_keywords
+# parse_keywords
 # ---------------------------------------------------------------------------
 
 
 class TestParseKeywords:
-    """Unit tests for the _parse_keywords() helper."""
+    """Unit tests for the parse_keywords() helper."""
 
     def test_none_returns_empty_set(self) -> None:
         """None input yields an empty set."""
-        assert _parse_keywords(None) == set()
+        assert parse_keywords(None) == set()
 
     def test_empty_string_returns_empty_set(self) -> None:
         """Empty string yields an empty set."""
-        assert _parse_keywords("") == set()
+        assert parse_keywords("") == set()
 
     def test_comma_separated_string_split(self) -> None:
         """Comma-separated keywords are split correctly."""
-        result = _parse_keywords("machine learning, deep learning, NLP")
+        result = parse_keywords("machine learning, deep learning, NLP")
         assert result == {"machine learning", "deep learning", "NLP"}
 
     def test_semicolon_separated_string_split(self) -> None:
         """Semicolon-separated keywords are split correctly."""
-        result = _parse_keywords("AI; ML; DL")
+        result = parse_keywords("AI; ML; DL")
         assert result == {"AI", "ML", "DL"}
 
     def test_single_keyword_returned_as_set(self) -> None:
         """A string with no delimiter is returned as a one-element set."""
-        assert _parse_keywords("deep learning") == {"deep learning"}
+        assert parse_keywords("deep learning") == {"deep learning"}
 
     def test_list_of_keywords_merged(self) -> None:
         """A list of keyword strings (e.g. from multiple dc.subject tags) is merged."""
-        result = _parse_keywords(["machine learning", "NLP", "deep learning"])
+        result = parse_keywords(["machine learning", "NLP", "deep learning"])
         assert result == {"machine learning", "NLP", "deep learning"}
 
     def test_list_with_comma_separated_items_expanded(self) -> None:
         """List items that are themselves comma-separated strings are fully expanded."""
-        result = _parse_keywords(["AI, ML", "DL"])
+        result = parse_keywords(["AI, ML", "DL"])
         assert result == {"AI", "ML", "DL"}
 
     def test_whitespace_stripped(self) -> None:
         """Leading/trailing whitespace on each keyword is stripped."""
-        result = _parse_keywords("  AI  ,  ML  ")
+        result = parse_keywords("  AI  ,  ML  ")
         assert result == {"AI", "ML"}
 
 
@@ -759,7 +758,7 @@ class TestFetchMetadata:
         mock_resp.text = ""
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
             result = fetch_metadata("https://example.com/paper.pdf")
         assert result is None
 
@@ -772,7 +771,7 @@ class TestFetchMetadata:
         mock_resp.text = html
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
             result = fetch_metadata("https://example.com/paper")
         assert isinstance(result, dict)
         assert result.get("citation_title") == "Test Paper"
@@ -784,7 +783,7 @@ class TestFetchMetadata:
         mock_resp = MagicMock()
         mock_resp.raise_for_status.side_effect = req_lib.HTTPError("404")
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
             with pytest.raises(req_lib.HTTPError):
                 fetch_metadata("https://example.com/missing")
 
@@ -795,7 +794,9 @@ class TestFetchMetadata:
         mock_resp.text = "<html><head><meta name='citation_title' content='T'></head></html>"
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp) as mock_get:
+        with patch(
+            "findpapers.utils.metadata_parser.requests.get", return_value=mock_resp
+        ) as mock_get:
             fetch_metadata("https://example.com", timeout=42.0)
 
         _, kwargs = mock_get.call_args
@@ -810,7 +811,7 @@ class TestFetchMetadata:
         mock_resp.text = ARXIV_HTML
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
             result = fetch_metadata("https://arxiv.org/abs/2301.00306v4")
 
         assert result is not None
@@ -825,7 +826,7 @@ class TestFetchMetadata:
         mock_resp.text = PUBMED_HTML
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
             result = fetch_metadata("https://pubmed.ncbi.nlm.nih.gov/36006759/")
 
         assert result is not None
@@ -844,8 +845,8 @@ class TestFetchMetadata:
         mock_resp.raise_for_status = MagicMock()
 
         url = "https://example.com/paper"
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.enrichment"):
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"):
                 fetch_metadata(url)
 
         assert any("GET" in m and "example.com" in m for m in caplog.messages)
@@ -862,8 +863,8 @@ class TestFetchMetadata:
         mock_resp.content = b"hello"
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.enrichment"):
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"):
                 fetch_metadata("https://example.com/paper")
 
         messages = " ".join(caplog.messages)
@@ -884,8 +885,8 @@ class TestFetchMetadata:
         mock_resp.content = b"not found"
         mock_resp.raise_for_status.side_effect = req_lib.HTTPError("404")
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.enrichment"):
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
+            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"):
                 with pytest.raises(req_lib.HTTPError):
                     fetch_metadata("https://example.com/missing")
 
@@ -894,52 +895,12 @@ class TestFetchMetadata:
 
 
 # ---------------------------------------------------------------------------
-# enrich_from_sources
+# End-to-end: fetch_metadata → build_paper_from_metadata
 # ---------------------------------------------------------------------------
 
 
-class TestEnrichFromSources:
-    """Tests for enrich_from_sources()."""
-
-    def test_returns_none_when_all_urls_fail(self) -> None:
-        """enrich_from_sources returns None when every URL raises an error."""
-        with patch(
-            "findpapers.utils.enrichment.fetch_metadata",
-            side_effect=Exception("network error"),
-        ):
-            result = enrich_from_sources(["https://example.com/paper"], timeout=5)
-        assert result is None
-
-    def test_returns_none_when_metadata_is_none(self) -> None:
-        """enrich_from_sources returns None when fetch_metadata returns None (non-HTML)."""
-        with patch("findpapers.utils.enrichment.fetch_metadata", return_value=None):
-            result = enrich_from_sources(["https://example.com/paper"], timeout=5)
-        assert result is None
-
-    def test_returns_none_when_metadata_has_no_title(self) -> None:
-        """enrich_from_sources returns None when metadata produces no title (can't build Paper)."""
-        with patch(
-            "findpapers.utils.enrichment.fetch_metadata", return_value={"og:description": "x"}
-        ):
-            result = enrich_from_sources(["https://example.com/paper"], timeout=5)
-        assert result is None
-
-    def test_skips_pdf_urls(self) -> None:
-        """URLs containing 'pdf' are skipped entirely without a network call."""
-        with patch("findpapers.utils.enrichment.fetch_metadata") as mock_fetch:
-            enrich_from_sources(["https://example.com/document.pdf"], timeout=5)
-        mock_fetch.assert_not_called()
-
-    def test_returns_paper_on_successful_fetch(self) -> None:
-        """enrich_from_sources returns a Paper when one URL succeeds."""
-        good_meta = {
-            "citation_title": "Great Paper",
-            "citation_author": "Smith, J",
-        }
-        with patch("findpapers.utils.enrichment.fetch_metadata", return_value=good_meta):
-            result = enrich_from_sources(["https://example.com/paper"], timeout=5)
-        assert result is not None
-        assert result.title == "Great Paper"
+class TestFetchAndBuildPipeline:
+    """Integration tests that exercise fetch_metadata + build_paper_from_metadata together."""
 
     def test_real_arxiv_page_end_to_end(self) -> None:
         """Full end-to-end: mock requests for an arXiv HTML page and build a Paper."""
@@ -950,9 +911,11 @@ class TestEnrichFromSources:
         mock_resp.text = ARXIV_HTML
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
-            result = enrich_from_sources(["https://arxiv.org/abs/2301.00306v4"], timeout=10)
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
+            metadata = fetch_metadata("https://arxiv.org/abs/2301.00306v4", timeout=10)
 
+        assert metadata is not None
+        result = build_paper_from_metadata(metadata, "https://arxiv.org/abs/2301.00306v4")
         assert result is not None
         assert len(result.title) > 5
         assert result.pdf_url is not None
@@ -966,9 +929,11 @@ class TestEnrichFromSources:
         mock_resp.text = PUBMED_HTML
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
-            result = enrich_from_sources(["https://pubmed.ncbi.nlm.nih.gov/36006759/"], timeout=10)
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
+            metadata = fetch_metadata("https://pubmed.ncbi.nlm.nih.gov/36006759/", timeout=10)
 
+        assert metadata is not None
+        result = build_paper_from_metadata(metadata, "https://pubmed.ncbi.nlm.nih.gov/36006759/")
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.")
         assert result.source is not None
@@ -982,11 +947,12 @@ class TestEnrichFromSources:
         mock_resp.text = OPENALEX_HTML
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
-            result = enrich_from_sources(
-                ["http://dx.doi.org/10.3126/nelta.v27i1-2.53203"], timeout=10
-            )
+        url = "http://dx.doi.org/10.3126/nelta.v27i1-2.53203"
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
+            metadata = fetch_metadata(url, timeout=10)
 
+        assert metadata is not None
+        result = build_paper_from_metadata(metadata, url)
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.")
         assert result.source is not None
@@ -1000,11 +966,12 @@ class TestEnrichFromSources:
         mock_resp.text = IEEE_HTML
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.enrichment.requests.get", return_value=mock_resp):
-            result = enrich_from_sources(
-                ["https://ieeexplore.ieee.org/document/9568778/"], timeout=10
-            )
+        url = "https://ieeexplore.ieee.org/document/9568778/"
+        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
+            metadata = fetch_metadata(url, timeout=10)
 
+        assert metadata is not None
+        result = build_paper_from_metadata(metadata, url)
         assert result is not None
         assert result.doi is not None and result.doi.startswith("10.")
         assert result.source is not None

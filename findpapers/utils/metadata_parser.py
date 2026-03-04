@@ -1,4 +1,15 @@
-"""Utilities for enriching papers by scraping metadata from web pages."""
+"""Low-level HTML metadata extraction and parsing helpers.
+
+This module handles:
+
+* Fetching HTML pages and extracting ``<meta>`` tag data.
+* Parsing IEEE Xplore JS-embedded metadata blobs.
+* Normalising author names, affiliations, DOIs, dates and keywords from
+  heterogeneous metadata formats.
+
+Higher-level orchestration (e.g. assembling :class:`~findpapers.core.paper.Paper`
+objects) lives in :mod:`findpapers.runners.enrichment_runner`.
+"""
 
 from __future__ import annotations
 
@@ -13,13 +24,14 @@ from lxml import html
 from lxml.html import HtmlElement
 
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper
-from findpapers.core.source import Source, SourceType
 from findpapers.utils.http_headers import get_browser_headers
 
 logger = logging.getLogger(__name__)
 
-# Metadata keys searched in priority order for each field.
+# ---------------------------------------------------------------------------
+# Metadata key constants — searched in priority order for each field
+# ---------------------------------------------------------------------------
+
 TITLE_META_KEYS = [
     "citation_title",
     "dc.title",
@@ -90,25 +102,27 @@ SOURCE_ISBN_KEYS = [
     "citation_isbn",
     "prism.isbn",
 ]
-
-# Mapping from meta key names to SourceType for source classification.
-_SOURCE_KEY_TYPE_MAP: dict[str, SourceType] = {
-    "citation_journal_title": SourceType.JOURNAL,
-    "citation_conference_title": SourceType.CONFERENCE,
-    "citation_book_title": SourceType.BOOK,
-    "citation_inbook_title": SourceType.BOOK,
-}
 PDF_URL_KEYS = [
     "citation_pdf_url",
 ]
 
-# Keys used to build the page-range and page-count fields on Paper.
-_FIRSTPAGE_KEY = "citation_firstpage"
-_LASTPAGE_KEY = "citation_lastpage"
-_NUM_PAGES_KEY = "citation_num_pages"
+# Mapping from meta key names to source-type identifiers for classification.
+# Values are plain strings so this module does not depend on
+# :class:`~findpapers.core.source.SourceType` directly.
+SOURCE_KEY_TYPE_MAP: dict[str, str] = {
+    "citation_journal_title": "journal",
+    "citation_conference_title": "conference",
+    "citation_book_title": "book",
+    "citation_inbook_title": "book",
+}
 
-# Preprint server names to avoid treating them as formal sources.
-_PREPRINT_SERVERS = {"biorxiv", "medrxiv", "arxiv"}
+# Keys used to build page-range and page-count fields.
+FIRSTPAGE_KEY = "citation_firstpage"
+LASTPAGE_KEY = "citation_lastpage"
+NUM_PAGES_KEY = "citation_num_pages"
+
+# Preprint server names to avoid treating as formal sources.
+PREPRINT_SERVERS = {"biorxiv", "medrxiv", "arxiv"}
 
 # doi.org URL prefixes that some databases add before the bare DOI.
 _DOI_URL_PREFIXES = (
@@ -123,6 +137,11 @@ _IEEE_META_RE = re.compile(
     r"xplGlobal\.document\.metadata\s*=\s*(\{.*?\});",
     re.DOTALL,
 )
+
+
+# ---------------------------------------------------------------------------
+# Fetching & HTML extraction
+# ---------------------------------------------------------------------------
 
 
 def fetch_metadata(url: str, timeout: float | None = None) -> dict[str, Any] | None:
@@ -326,7 +345,12 @@ def _merge_ieee_metadata(content: str, metadata: dict[str, Any]) -> None:
     _set_if_absent("citation_publisher", data.get("publisher"))
 
 
-def _pick_metadata_value(metadata: dict[str, Any], keys: Iterable[str]) -> str | None:
+# ---------------------------------------------------------------------------
+# Value parsing helpers
+# ---------------------------------------------------------------------------
+
+
+def pick_metadata_value(metadata: dict[str, Any], keys: Iterable[str]) -> str | None:
     """Return the first non-empty value for any of the candidate keys.
 
     Parameters
@@ -353,7 +377,7 @@ def _pick_metadata_value(metadata: dict[str, Any], keys: Iterable[str]) -> str |
     return None
 
 
-def _parse_date(value: str | None) -> date | None:
+def parse_date(value: str | None) -> date | None:
     """Parse a date string into a :class:`datetime.date`.
 
     Tries several common metadata date formats in order.
@@ -379,7 +403,7 @@ def _parse_date(value: str | None) -> date | None:
     return None
 
 
-def _normalize_doi(raw: str) -> str | None:
+def normalize_doi(raw: str) -> str | None:
     """Strip doi.org URL prefixes and return a bare DOI, or ``None`` if invalid.
 
     Parameters
@@ -401,7 +425,7 @@ def _normalize_doi(raw: str) -> str | None:
     return value if value.startswith("10.") else None
 
 
-def _parse_keywords(value: str | list | None) -> set[str]:
+def parse_keywords(value: str | list | None) -> set[str]:
     """Parse keyword metadata into a set of strings.
 
     Handles three forms:
@@ -426,7 +450,7 @@ def _parse_keywords(value: str | list | None) -> set[str]:
     if isinstance(value, list):
         result: set[str] = set()
         for item in value:
-            result |= _parse_keywords(item)
+            result |= parse_keywords(item)
         return result
     if "," in value:
         parts = value.split(",")
@@ -437,7 +461,7 @@ def _parse_keywords(value: str | list | None) -> set[str]:
     return {part.strip() for part in parts if part.strip()}
 
 
-def _parse_authors(value: Any) -> list[str]:
+def parse_authors(value: Any) -> list[str]:
     """Normalise author metadata into a flat list of strings.
 
     Handles three forms:
@@ -474,10 +498,10 @@ def _parse_authors(value: Any) -> list[str]:
     return [part.strip() for part in str(value).split(";") if part.strip()]
 
 
-def _parse_affiliations(value: Any) -> list[str]:
+def parse_affiliations(value: Any) -> list[str]:
     """Normalise affiliation metadata into a flat list of strings.
 
-    Works similarly to :func:`_parse_authors`: handles ``list``, semicolon-
+    Works similarly to :func:`parse_authors`: handles ``list``, semicolon-
     separated ``str``, and single-string forms.
 
     Parameters
@@ -497,7 +521,7 @@ def _parse_affiliations(value: Any) -> list[str]:
     return [part.strip() for part in str(value).split(";") if part.strip()]
 
 
-def _build_authors_from_metadata(metadata: dict[str, Any]) -> list[Author]:
+def build_authors_from_metadata(metadata: dict[str, Any]) -> list[Author]:
     """Build :class:`Author` objects pairing names with affiliations.
 
     Author names are resolved from :data:`AUTHOR_META_KEYS`, and affiliations
@@ -519,7 +543,7 @@ def _build_authors_from_metadata(metadata: dict[str, Any]) -> list[Author]:
     for key in AUTHOR_META_KEYS:
         raw = metadata.get(key)
         if raw:
-            names = _parse_authors(raw)
+            names = parse_authors(raw)
             if names:
                 break
 
@@ -527,7 +551,7 @@ def _build_authors_from_metadata(metadata: dict[str, Any]) -> list[Author]:
     for key in AUTHOR_AFFILIATION_META_KEYS:
         raw = metadata.get(key)
         if raw:
-            affiliations = _parse_affiliations(raw)
+            affiliations = parse_affiliations(raw)
             if affiliations:
                 break
 
@@ -536,136 +560,3 @@ def _build_authors_from_metadata(metadata: dict[str, Any]) -> list[Author]:
         affiliation = affiliations[idx] if idx < len(affiliations) else None
         authors.append(Author(name=name, affiliation=affiliation))
     return authors
-
-
-def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper | None:
-    """Build a :class:`~findpapers.core.paper.Paper` from extracted metadata.
-
-    Parameters
-    ----------
-    metadata : dict[str, Any]
-        Metadata extracted from the page.
-    page_url : str
-        Final landing-page URL (used as a source URL and fallback).
-
-    Returns
-    -------
-    Paper | None
-        Populated paper instance, or ``None`` when required fields are absent.
-    """
-    title = _pick_metadata_value(metadata, TITLE_META_KEYS)
-    if not title:
-        return None
-
-    abstract = _pick_metadata_value(metadata, ABSTRACT_META_KEYS)
-
-    # DOI — try each candidate key in priority order; normalise URL prefixes.
-    doi: str | None = None
-    for doi_key in DOI_META_KEYS:
-        raw = metadata.get(doi_key)
-        if isinstance(raw, list):
-            raw = max((str(v).strip() for v in raw if v), key=len, default=None)
-        if raw:
-            doi = _normalize_doi(str(raw))
-            if doi:
-                break
-
-    # Authors — build Author objects with affiliations when available.
-    authors: list[Author] = _build_authors_from_metadata(metadata)
-
-    # Keywords — accumulate from all matching keys.
-    keywords: set[str] = set()
-    for kw_key in KEYWORDS_META_KEYS:
-        val = metadata.get(kw_key)
-        if val:
-            keywords |= _parse_keywords(val)
-
-    publication_date = _parse_date(_pick_metadata_value(metadata, DATE_META_KEYS))
-
-    # Page range — combine first/last page into a single string when available.
-    first_page = (str(metadata.get(_FIRSTPAGE_KEY) or "")).strip()
-    last_page = (str(metadata.get(_LASTPAGE_KEY) or "")).strip()
-    if first_page and last_page:
-        pages: str | None = f"{first_page}\u2013{last_page}"  # en-dash
-    elif first_page:
-        pages = first_page
-    else:
-        pages = None
-
-    # Number of pages — parse as int when the key is present.
-    page_count: int | None = None
-    num_pages_raw = metadata.get(_NUM_PAGES_KEY)
-    if num_pages_raw:
-        try:
-            page_count = int(str(num_pages_raw).strip())
-        except ValueError:
-            pass
-
-    source_title = _pick_metadata_value(metadata, SOURCE_TITLE_KEYS)
-    source = None
-    source_type: SourceType | None = None
-    if source_title and source_title.lower() not in _PREPRINT_SERVERS:
-        # Determine source_type based on which meta key matched.
-        for key in SOURCE_TITLE_KEYS:
-            raw = metadata.get(key)
-            if raw:
-                val = raw[0].strip() if isinstance(raw, list) else str(raw).strip()
-                if val:
-                    source_type = _SOURCE_KEY_TYPE_MAP.get(key)
-                    break
-        source = Source(
-            title=source_title,
-            issn=_pick_metadata_value(metadata, SOURCE_ISSN_KEYS),
-            isbn=_pick_metadata_value(metadata, SOURCE_ISBN_KEYS),
-            publisher=_pick_metadata_value(metadata, SOURCE_PUBLISHER_KEYS),
-            source_type=source_type,
-        )
-
-    pdf_url_val = _pick_metadata_value(metadata, PDF_URL_KEYS)
-
-    return Paper(
-        title=title,
-        abstract=abstract or "",
-        authors=authors,
-        source=source,
-        publication_date=publication_date,
-        url=page_url,
-        pdf_url=pdf_url_val,
-        doi=doi,
-        keywords=keywords or None,
-        page_range=pages,
-        page_count=page_count,
-    )
-
-
-def enrich_from_sources(urls: Iterable[str], timeout: float | None) -> Paper | None:
-    """Try each URL until metadata can be successfully fetched and parsed.
-
-    PDF URLs are skipped because they rarely contain useful ``<meta>`` tags.
-
-    Parameters
-    ----------
-    urls : Iterable[str]
-        Candidate landing-page or PDF URLs.
-    timeout : float | None
-        HTTP request timeout in seconds.
-
-    Returns
-    -------
-    Paper | None
-        Enriched :class:`~findpapers.core.paper.Paper`, or ``None`` when all
-        URLs fail or return no useful metadata.
-    """
-    for url in dict.fromkeys(urls):  # deduplicate while preserving insertion order
-        if "pdf" in url.lower():
-            continue
-        try:
-            metadata = fetch_metadata(url, timeout=timeout)
-        except Exception:  # noqa: BLE001
-            continue
-        if not metadata:
-            continue
-        paper = build_paper_from_metadata(metadata, url)
-        if paper is not None:
-            return paper
-    return None

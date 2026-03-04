@@ -5,11 +5,36 @@ from __future__ import annotations
 import logging
 from enum import Enum
 from time import perf_counter
+from typing import Any
 
 from findpapers.connectors.crossref import CrossRefConnector
+from findpapers.core.author import Author
 from findpapers.core.paper import Paper
-from findpapers.utils.enrichment import build_paper_from_metadata, fetch_metadata
+from findpapers.core.source import Source, SourceType
 from findpapers.utils.logging_config import configure_verbose_logging
+from findpapers.utils.metadata_parser import (
+    ABSTRACT_META_KEYS,
+    DATE_META_KEYS,
+    DOI_META_KEYS,
+    FIRSTPAGE_KEY,
+    KEYWORDS_META_KEYS,
+    LASTPAGE_KEY,
+    NUM_PAGES_KEY,
+    PDF_URL_KEYS,
+    PREPRINT_SERVERS,
+    SOURCE_ISBN_KEYS,
+    SOURCE_ISSN_KEYS,
+    SOURCE_KEY_TYPE_MAP,
+    SOURCE_PUBLISHER_KEYS,
+    SOURCE_TITLE_KEYS,
+    TITLE_META_KEYS,
+    build_authors_from_metadata,
+    fetch_metadata,
+    normalize_doi,
+    parse_date,
+    parse_keywords,
+    pick_metadata_value,
+)
 from findpapers.utils.parallel import execute_tasks
 
 logger = logging.getLogger(__name__)
@@ -45,7 +70,7 @@ class EnrichmentOutcome(Enum):
 def _enrichment_snapshot(paper: Paper) -> tuple:
     """Return a tuple of enrichable fields for change-detection.
 
-    The tuple covers every field that :func:`~findpapers.utils.enrichment.fetch_metadata`
+    The tuple covers every field that :func:`~findpapers.utils.metadata_parser.fetch_metadata`
     can populate so that ``_enrich_paper`` can tell whether a merge actually improved the
     paper rather than just confirming data that was already present.
 
@@ -74,6 +99,107 @@ def _enrichment_snapshot(paper: Paper) -> tuple:
         paper.source.issn if paper.source else None,
         paper.source.isbn if paper.source else None,
         paper.source.source_type if paper.source else None,
+    )
+
+
+def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper | None:
+    """Build a :class:`~findpapers.core.paper.Paper` from extracted metadata.
+
+    Parameters
+    ----------
+    metadata : dict[str, Any]
+        Metadata extracted from the page.
+    page_url : str
+        Final landing-page URL (used as a source URL and fallback).
+
+    Returns
+    -------
+    Paper | None
+        Populated paper instance, or ``None`` when required fields are absent.
+    """
+    title = pick_metadata_value(metadata, TITLE_META_KEYS)
+    if not title:
+        return None
+
+    abstract = pick_metadata_value(metadata, ABSTRACT_META_KEYS)
+
+    # DOI — try each candidate key in priority order; normalise URL prefixes.
+    doi: str | None = None
+    for doi_key in DOI_META_KEYS:
+        raw = metadata.get(doi_key)
+        if isinstance(raw, list):
+            raw = max((str(v).strip() for v in raw if v), key=len, default=None)
+        if raw:
+            doi = normalize_doi(str(raw))
+            if doi:
+                break
+
+    # Authors — build Author objects with affiliations when available.
+    authors: list[Author] = build_authors_from_metadata(metadata)
+
+    # Keywords — accumulate from all matching keys.
+    keywords: set[str] = set()
+    for kw_key in KEYWORDS_META_KEYS:
+        val = metadata.get(kw_key)
+        if val:
+            keywords |= parse_keywords(val)
+
+    publication_date = parse_date(pick_metadata_value(metadata, DATE_META_KEYS))
+
+    # Page range — combine first/last page into a single string when available.
+    first_page = (str(metadata.get(FIRSTPAGE_KEY) or "")).strip()
+    last_page = (str(metadata.get(LASTPAGE_KEY) or "")).strip()
+    if first_page and last_page:
+        pages: str | None = f"{first_page}\u2013{last_page}"  # en-dash
+    elif first_page:
+        pages = first_page
+    else:
+        pages = None
+
+    # Number of pages — parse as int when the key is present.
+    page_count: int | None = None
+    num_pages_raw = metadata.get(NUM_PAGES_KEY)
+    if num_pages_raw:
+        try:
+            page_count = int(str(num_pages_raw).strip())
+        except ValueError:
+            pass
+
+    source_title = pick_metadata_value(metadata, SOURCE_TITLE_KEYS)
+    source = None
+    source_type: SourceType | None = None
+    if source_title and source_title.lower() not in PREPRINT_SERVERS:
+        # Determine source_type based on which meta key matched.
+        for key in SOURCE_TITLE_KEYS:
+            raw = metadata.get(key)
+            if raw:
+                val = raw[0].strip() if isinstance(raw, list) else str(raw).strip()
+                if val:
+                    type_str = SOURCE_KEY_TYPE_MAP.get(key)
+                    source_type = SourceType(type_str) if type_str else None
+                    break
+        source = Source(
+            title=source_title,
+            issn=pick_metadata_value(metadata, SOURCE_ISSN_KEYS),
+            isbn=pick_metadata_value(metadata, SOURCE_ISBN_KEYS),
+            publisher=pick_metadata_value(metadata, SOURCE_PUBLISHER_KEYS),
+            source_type=source_type,
+        )
+
+    pdf_url_val = pick_metadata_value(metadata, PDF_URL_KEYS)
+
+    return Paper(
+        title=title,
+        abstract=abstract or "",
+        authors=authors,
+        source=source,
+        publication_date=publication_date,
+        url=page_url,
+        pdf_url=pdf_url_val,
+        doi=doi,
+        keywords=keywords or None,
+        page_range=pages,
+        page_count=page_count,
     )
 
 
