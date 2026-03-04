@@ -18,8 +18,6 @@ import time
 from typing import Any, Optional
 from urllib.parse import quote as _url_quote
 
-import requests as _requests_lib
-
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
@@ -173,8 +171,8 @@ class CrossRefConnector(CitationConnectorBase):
         prepared_headers = self._prepare_headers({})
 
         self._rate_limit()
-        self._log_request(url)
-        response = _requests_lib.get(url, headers=prepared_headers, timeout=30)
+        self._log_request(url, headers=prepared_headers)
+        response = self._get_session().get(url, headers=prepared_headers, timeout=30)
         self._last_request_time = time.monotonic()
         self._log_response(response)
 

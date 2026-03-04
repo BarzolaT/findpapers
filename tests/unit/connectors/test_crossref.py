@@ -403,14 +403,15 @@ class TestCrossRefConnector:
         mock_response.headers = {"Content-Type": "application/json"}
         mock_response.content = b"{}"
 
-        with patch(
-            "findpapers.connectors.crossref._requests_lib.get", return_value=mock_response
-        ) as mock:
-            result = self.connector.fetch_work("10.1038/nature12373")
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        self.connector._http_session = mock_session
+
+        result = self.connector.fetch_work("10.1038/nature12373")
 
         assert result == _FULL_WORK
-        mock.assert_called_once()
-        call_args = mock.call_args
+        mock_session.get.assert_called_once()
+        call_args = mock_session.get.call_args
         assert "10.1038%2Fnature12373" in call_args[0][0] or "nature12373" in call_args[0][0]
 
     def test_404_returns_none(self) -> None:
@@ -420,8 +421,11 @@ class TestCrossRefConnector:
         mock_response.headers = {"Content-Type": "application/json"}
         mock_response.content = b"{}"
 
-        with patch("findpapers.connectors.crossref._requests_lib.get", return_value=mock_response):
-            result = self.connector.fetch_work("10.9999/nonexistent")
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        self.connector._http_session = mock_session
+
+        result = self.connector.fetch_work("10.9999/nonexistent")
 
         assert result is None
 
@@ -433,13 +437,11 @@ class TestCrossRefConnector:
         mock_response.headers = {"Content-Type": "application/json"}
         mock_response.content = b"{}"
 
-        with (
-            patch(
-                "findpapers.connectors.crossref._requests_lib.get",
-                return_value=mock_response,
-            ),
-            pytest.raises(Exception, match="Server error"),
-        ):
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        self.connector._http_session = mock_session
+
+        with pytest.raises(Exception, match="Server error"):
             self.connector.fetch_work("10.1234/error")
 
     def test_user_agent_header_sent(self) -> None:
@@ -451,12 +453,13 @@ class TestCrossRefConnector:
         mock_response.headers = {"Content-Type": "application/json"}
         mock_response.content = b"{}"
 
-        with patch(
-            "findpapers.connectors.crossref._requests_lib.get", return_value=mock_response
-        ) as mock:
-            self.connector.fetch_work("10.1234/test")
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        self.connector._http_session = mock_session
 
-        headers = mock.call_args[1].get("headers", {})
+        self.connector.fetch_work("10.1234/test")
+
+        headers = mock_session.get.call_args[1].get("headers", {})
         assert "findpapers" in headers.get("User-Agent", "")
 
     def test_build_paper_delegates(self) -> None:
