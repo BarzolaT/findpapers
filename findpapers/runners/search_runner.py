@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from datetime import datetime, timezone
 from time import perf_counter
 
@@ -251,13 +252,19 @@ class SearchRunner:
         ValueError
             When an unknown database identifier is provided.
         """
-        all_searchers: dict[Database, SearchConnectorBase] = {
-            Database.ARXIV: ArxivConnector(),
-            Database.IEEE: IEEEConnector(api_key=ieee_api_key),
-            Database.OPENALEX: OpenAlexConnector(api_key=openalex_api_key, email=email),
-            Database.PUBMED: PubmedConnector(api_key=pubmed_api_key),
-            Database.SCOPUS: ScopusConnector(api_key=scopus_api_key),
-            Database.SEMANTIC_SCHOLAR: SemanticScholarConnector(api_key=semantic_scholar_api_key),
+        # Factory callables — connectors are only instantiated for the
+        # databases the caller actually requested, avoiding unnecessary
+        # construction (and the warning spam that comes with it when API
+        # keys are absent for unused databases).
+        _factories: dict[Database, Callable[[], SearchConnectorBase]] = {
+            Database.ARXIV: lambda: ArxivConnector(),
+            Database.IEEE: lambda: IEEEConnector(api_key=ieee_api_key),
+            Database.OPENALEX: lambda: OpenAlexConnector(api_key=openalex_api_key, email=email),
+            Database.PUBMED: lambda: PubmedConnector(api_key=pubmed_api_key),
+            Database.SCOPUS: lambda: ScopusConnector(api_key=scopus_api_key),
+            Database.SEMANTIC_SCHOLAR: lambda: SemanticScholarConnector(
+                api_key=semantic_scholar_api_key
+            ),
         }
 
         valid_values = {db.value for db in Database}
@@ -269,7 +276,7 @@ class SearchRunner:
                 f"Accepted values: {', '.join(sorted(valid_values))}"
             )
 
-        searchers = [all_searchers[Database(db)] for db in raw]
+        searchers = [_factories[Database(db)]() for db in raw]
         available = []
         skipped: list[str] = []
         for searcher in searchers:
