@@ -461,3 +461,168 @@ class TestSnowballRunnerMetrics:
             assert mock_pbar.called
             for call in mock_pbar.call_args_list:
                 assert call.kwargs.get("disable") is True
+
+
+class TestSnowballRunnerVerbose:
+    """Tests for verbose logging branches."""
+
+    def test_verbose_logs_configuration_and_results(self) -> None:
+        """verbose=True logs configuration, per-level info, and results."""
+        seed = _make_paper("Seed", doi="10.1000/seed")
+        ref = _make_paper("Ref", doi="10.1000/ref")
+        connector = FakeCitationConnector(references={"10.1000/seed": [ref]})
+        runner = SnowballRunner(seed_papers=[seed], depth=1, direction="backward")
+        runner._connectors = [connector]
+
+        graph = runner.run(verbose=True, show_progress=False)
+
+        assert graph.paper_count == 2
+
+    def test_verbose_multi_level(self) -> None:
+        """verbose=True logs at each depth level."""
+        seed = _make_paper("Seed", doi="10.1000/seed")
+        l1 = _make_paper("L1", doi="10.1000/l1")
+        l2 = _make_paper("L2", doi="10.1000/l2")
+        connector = FakeCitationConnector(
+            references={"10.1000/seed": [l1], "10.1000/l1": [l2]},
+        )
+        runner = SnowballRunner(seed_papers=[seed], depth=2, direction="backward")
+        runner._connectors = [connector]
+
+        graph = runner.run(verbose=True, show_progress=False)
+
+        assert graph.paper_count == 3
+
+
+class TestSnowballRunnerParallelErrors:
+    """Tests for error handling in parallel connector execution."""
+
+    def test_parallel_connector_exception_is_caught(self) -> None:
+        """Exception in a parallel connector is caught; other results survive."""
+
+        class BoomConnector(CitationConnectorBase):
+            """Connector whose future raises."""
+
+            @property
+            def name(self) -> str:
+                """Return name.
+
+                Returns
+                -------
+                str
+                    Connector name.
+                """
+                return "boom"
+
+            @property
+            def min_request_interval(self) -> float:
+                """Return interval.
+
+                Returns
+                -------
+                float
+                    Zero.
+                """
+                return 0.0
+
+            def fetch_references(self, paper: Paper) -> list[Paper]:
+                """Always raise.
+
+                Parameters
+                ----------
+                paper : Paper
+                    Ignored.
+
+                Raises
+                ------
+                RuntimeError
+                    Always.
+                """
+                raise RuntimeError("boom")
+
+            def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+                """Always raise.
+
+                Parameters
+                ----------
+                paper : Paper
+                    Ignored.
+
+                Raises
+                ------
+                RuntimeError
+                    Always.
+                """
+                raise RuntimeError("boom")
+
+        seed = _make_paper("Seed", doi="10.1000/seed")
+        ref = _make_paper("Ref", doi="10.1000/ref")
+        good = FakeCitationConnector(references={"10.1000/seed": [ref]})
+        bad = BoomConnector()
+
+        runner = SnowballRunner(
+            seed_papers=[seed],
+            depth=1,
+            direction="backward",
+            num_workers=4,
+        )
+        runner._connectors = [good, bad]
+
+        graph = runner.run(show_progress=False)
+
+        # The good connector's result should still be present.
+        assert graph.paper_count == 2  # seed + ref
+        assert graph.edge_count == 1
+
+    def test_parallel_future_exception_is_caught(self) -> None:
+        """When _query_single_connector itself raises, the future exception is caught."""
+        from unittest.mock import patch
+
+        seed = _make_paper("Seed", doi="10.1000/seed")
+        ref = _make_paper("Ref", doi="10.1000/ref")
+        good = FakeCitationConnector(references={"10.1000/seed": [ref]})
+        bad = FakeCitationConnector()
+
+        runner = SnowballRunner(
+            seed_papers=[seed],
+            depth=1,
+            direction="backward",
+            num_workers=4,
+        )
+        runner._connectors = [good, bad]
+
+        original = runner._query_single_connector
+
+        def patched(connector, paper):  # type: ignore[no-untyped-def]
+            """Raise for the 'bad' connector, delegate otherwise."""
+            if connector is bad:
+                raise RuntimeError("unexpected crash")
+            return original(connector, paper)
+
+        with patch.object(runner, "_query_single_connector", side_effect=patched):
+            graph = runner.run(show_progress=False)
+
+        # The good connector result survives; the bad one is logged & skipped.
+        assert graph.paper_count == 2  # seed + ref
+        assert graph.edge_count == 1
+
+
+class TestSnowballRunnerEmptyFrontier:
+    """Tests for early termination when frontier is empty."""
+
+    def test_empty_frontier_breaks_early(self) -> None:
+        """When no new papers are discovered, deeper levels are skipped."""
+        seed = _make_paper("Seed", doi="10.1000/seed")
+        # Connector returns no references at any level.
+        connector = FakeCitationConnector(references={})
+        runner = SnowballRunner(
+            seed_papers=[seed],
+            depth=3,
+            direction="backward",
+        )
+        runner._connectors = [connector]
+
+        graph = runner.run(show_progress=False)
+
+        assert graph.paper_count == 1  # only the seed
+        assert graph.edge_count == 0
