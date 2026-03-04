@@ -1,4 +1,4 @@
-.PHONY: help clean setup test test_report lint format
+.PHONY: help clean setup test test_integration test_report lint format
 
 VENV ?= venv
 VENV_BIN = $(VENV)/bin
@@ -28,6 +28,8 @@ help:
 	@echo "       run tests (optional: pass additional pytest arguments)"
 	@echo "       examples: make test PYTEST_ARGS='-k test_name'"
 	@echo "                 make test PYTEST_ARGS='tests/unit/test_query.py::TestClass -v'"
+	@echo "make test_integration [PYTEST_ARGS='args']"
+	@echo "       run integration/smoke tests that hit real external APIs"
 	@echo "make test_report"
 	@echo "       run tests and save tests and coverag reports"
 
@@ -47,6 +49,9 @@ clean:
 
 test:
 	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run pytest --durations=3 -v --cov=${PWD}/findpapers $(PYTEST_ARGS)
+
+test_integration:
+	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run pytest -v -m integration $(PYTEST_ARGS)
 
 test_report:
 	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run pytest --durations=3 -v --cov=${PWD}/findpapers --cov-report xml:reports/coverage.xml --junitxml=reports/tests.xml $(PYTEST_ARGS)
