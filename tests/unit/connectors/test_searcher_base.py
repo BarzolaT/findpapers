@@ -6,6 +6,7 @@ from typing import Callable, List, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.paper import Paper
@@ -331,3 +332,255 @@ class TestConnectorBaseSessionPooling:
         stub = _StubConnector()
         with stub as ctx:
             assert ctx is stub
+
+
+class TestConnectorBaseRetry:
+    """Tests for automatic retry with exponential backoff in _get / _post."""
+
+    @staticmethod
+    def _make_response(
+        status: int = 200,
+        reason: str = "OK",
+        content: bytes = b"body",
+        headers: dict | None = None,
+    ) -> MagicMock:
+        """Build a minimal mock requests.Response."""
+        resp = MagicMock()
+        resp.status_code = status
+        resp.reason = reason
+        resp.headers = headers or {"Content-Type": "application/json"}
+        resp.content = content
+        resp.raise_for_status = MagicMock()
+        if status >= 400:
+            resp.raise_for_status.side_effect = requests.HTTPError(
+                f"{status} {reason}", response=resp
+            )
+        return resp
+
+    def test_successful_request_no_retry(self) -> None:
+        """A 200 response is returned immediately without retrying."""
+        connector = _StubConnector()
+        connector._max_retries = 3
+        connector._retry_base_delay = 0.0
+        resp = self._make_response(200)
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = resp
+
+        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+
+        assert result is resp
+        assert connector._http_session.get.call_count == 1
+
+    def test_429_retried_then_succeeds(self) -> None:
+        """A 429 response triggers retries until a 200 is received."""
+        connector = _StubConnector()
+        connector._max_retries = 3
+        connector._retry_base_delay = 0.0
+
+        resp_429 = self._make_response(429, "Too Many Requests")
+        # Override raise_for_status: 429 should NOT raise during retry loop
+        # (only after all retries exhausted). The response mock needs to not
+        # raise so the retry logic itself can check status_code.
+        resp_429.raise_for_status = MagicMock()
+        resp_200 = self._make_response(200)
+
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = [resp_429, resp_429, resp_200]
+
+        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+
+        assert result is resp_200
+        assert connector._http_session.get.call_count == 3
+
+    def test_503_retried_then_succeeds(self) -> None:
+        """A 503 response triggers retries until a 200 is received."""
+        connector = _StubConnector()
+        connector._max_retries = 2
+        connector._retry_base_delay = 0.0
+
+        resp_503 = self._make_response(503, "Service Unavailable")
+        resp_503.raise_for_status = MagicMock()
+        resp_200 = self._make_response(200)
+
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = [resp_503, resp_200]
+
+        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+
+        assert result is resp_200
+        assert connector._http_session.get.call_count == 2
+
+    def test_retries_exhausted_raises_http_error(self) -> None:
+        """When all retries are exhausted, HTTPError is raised."""
+        import requests as req_lib
+
+        connector = _StubConnector()
+        connector._max_retries = 2
+        connector._retry_base_delay = 0.0
+
+        resp_429 = self._make_response(429, "Too Many Requests")
+        # After retries are exhausted, raise_for_status is called on the last response.
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = resp_429
+
+        with pytest.raises(req_lib.HTTPError):
+            connector._get("https://api.example.com/test")  # noqa: SLF001
+
+        # 1 initial + 2 retries = 3 requests total
+        assert connector._http_session.get.call_count == 3
+
+    def test_non_retryable_status_raises_immediately(self) -> None:
+        """A 404 is not retryable and raises HTTPError immediately."""
+        import requests as req_lib
+
+        connector = _StubConnector()
+        connector._max_retries = 3
+        connector._retry_base_delay = 0.0
+
+        resp_404 = self._make_response(404, "Not Found")
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = resp_404
+
+        with pytest.raises(req_lib.HTTPError):
+            connector._get("https://api.example.com/test")  # noqa: SLF001
+
+        # Only 1 attempt — no retries for 404.
+        assert connector._http_session.get.call_count == 1
+
+    def test_connection_error_retried_then_succeeds(self) -> None:
+        """A ConnectionError triggers retries until a request succeeds."""
+        import requests as req_lib
+
+        connector = _StubConnector()
+        connector._max_retries = 2
+        connector._retry_base_delay = 0.0
+
+        resp_200 = self._make_response(200)
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = [
+            req_lib.ConnectionError("reset"),
+            resp_200,
+        ]
+
+        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+
+        assert result is resp_200
+        assert connector._http_session.get.call_count == 2
+
+    def test_timeout_error_retried_then_succeeds(self) -> None:
+        """A Timeout triggers retries until a request succeeds."""
+        import requests as req_lib
+
+        connector = _StubConnector()
+        connector._max_retries = 2
+        connector._retry_base_delay = 0.0
+
+        resp_200 = self._make_response(200)
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = [
+            req_lib.Timeout("timed out"),
+            resp_200,
+        ]
+
+        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+
+        assert result is resp_200
+        assert connector._http_session.get.call_count == 2
+
+    def test_connection_error_retries_exhausted(self) -> None:
+        """Persistent ConnectionError is raised after all retries are exhausted."""
+        import requests as req_lib
+
+        connector = _StubConnector()
+        connector._max_retries = 1
+        connector._retry_base_delay = 0.0
+
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = req_lib.ConnectionError("down")
+
+        with pytest.raises(req_lib.ConnectionError):
+            connector._get("https://api.example.com/test")  # noqa: SLF001
+
+        # 1 initial + 1 retry = 2 attempts.
+        assert connector._http_session.get.call_count == 2
+
+    def test_retry_after_header_respected(self) -> None:
+        """When 429 has Retry-After header, delay is at least that value."""
+        connector = _StubConnector()
+        connector._max_retries = 1
+        connector._retry_base_delay = 0.01
+
+        resp_429 = self._make_response(
+            429,
+            "Too Many Requests",
+            headers={"Content-Type": "application/json", "Retry-After": "5"},
+        )
+        resp_429.raise_for_status = MagicMock()
+
+        # Use _retry_delay directly to verify Retry-After is honoured.
+        delay = connector._retry_delay(0, resp_429)  # noqa: SLF001
+        assert delay >= 5.0
+
+    def test_retry_delay_exponential_growth(self) -> None:
+        """Delay increases exponentially with each attempt."""
+        connector = _StubConnector()
+        connector._retry_base_delay = 1.0
+        connector._retry_max_delay = 120.0
+
+        delays = [connector._retry_delay(i) for i in range(5)]  # noqa: SLF001
+
+        # Base delays: 1, 2, 4, 8, 16 (before jitter).
+        # With up to 25% jitter, minimum values are the base.
+        for i, delay in enumerate(delays):
+            base = 1.0 * (2**i)
+            assert delay >= base
+            assert delay <= base * 1.25 + 0.01  # small tolerance for float precision
+
+    def test_retry_delay_capped_at_max(self) -> None:
+        """Delay is capped at _retry_max_delay even for high attempt numbers."""
+        connector = _StubConnector()
+        connector._retry_base_delay = 1.0
+        connector._retry_max_delay = 10.0
+
+        delay = connector._retry_delay(20)  # noqa: SLF001
+
+        # 1 * 2^20 = 1048576, but capped at 10, with up to 25% jitter = 12.5 max.
+        assert delay <= 10.0 * 1.25 + 0.01
+
+    def test_retry_logs_warnings(self, caplog) -> None:
+        """Retried requests log warnings with attempt information."""
+        import logging
+
+        connector = _StubConnector()
+        connector._max_retries = 1
+        connector._retry_base_delay = 0.0
+
+        resp_429 = self._make_response(429, "Too Many Requests")
+        resp_429.raise_for_status = MagicMock()
+        resp_200 = self._make_response(200)
+
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = [resp_429, resp_200]
+
+        with caplog.at_level(logging.WARNING, logger="findpapers.connectors.connector_base"):
+            connector._get("https://api.example.com/test")  # noqa: SLF001
+
+        assert any("429" in m and "retrying" in m for m in caplog.messages)
+
+    def test_post_retries_on_transient_error(self) -> None:
+        """_post also retries on transient 503 errors."""
+        connector = _StubConnector()
+        connector._max_retries = 1
+        connector._retry_base_delay = 0.0
+
+        resp_503 = self._make_response(503, "Service Unavailable")
+        resp_503.raise_for_status = MagicMock()
+        resp_200 = self._make_response(200)
+
+        connector._http_session = MagicMock()
+        connector._http_session.post.side_effect = [resp_503, resp_200]
+
+        result = connector._post("https://api.example.com/test", json_body={"q": "ml"})  # noqa: SLF001
+
+        assert result is resp_200
+        assert connector._http_session.post.call_count == 2

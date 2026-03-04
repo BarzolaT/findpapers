@@ -8,6 +8,7 @@ service inherits a consistent, production-ready networking layer.
 from __future__ import annotations
 
 import logging
+import random
 import time
 from abc import ABC, abstractmethod
 from urllib.parse import urlencode
@@ -65,6 +66,22 @@ class ConnectorBase(ABC):
     # Default HTTP timeout in seconds for all requests.  Subclasses or callers
     # can override by setting ``self._timeout`` in ``__init__``.
     _timeout: float = 30.0
+
+    # ------------------------------------------------------------------
+    # Retry configuration
+    # ------------------------------------------------------------------
+
+    # HTTP status codes that trigger an automatic retry.
+    _retryable_status_codes: frozenset[int] = frozenset({429, 502, 503, 504})
+
+    # Maximum number of retry attempts (excluding the initial request).
+    _max_retries: int = 3
+
+    # Base delay in seconds for exponential backoff (delay = base * 2^attempt).
+    _retry_base_delay: float = 1.0
+
+    # Maximum delay cap in seconds to prevent excessively long waits.
+    _retry_max_delay: float = 60.0
 
     # ------------------------------------------------------------------
     # HTTP Session (connection pooling)
@@ -168,6 +185,159 @@ class ConnectorBase(ABC):
         if elapsed < self.min_request_interval:
             time.sleep(self.min_request_interval - elapsed)
 
+    def _retry_delay(self, attempt: int, response: requests.Response | None = None) -> float:
+        """Compute the delay before the next retry attempt.
+
+        Uses exponential backoff with jitter.  If the response contains a
+        ``Retry-After`` header (common with 429 responses), that value is
+        used as the minimum delay.
+
+        Parameters
+        ----------
+        attempt : int
+            Zero-based retry attempt number (0 = first retry).
+        response : requests.Response | None
+            The HTTP response that triggered the retry, if available.
+
+        Returns
+        -------
+        float
+            Delay in seconds before the next retry.
+        """
+        # Exponential backoff: base * 2^attempt, capped at max_delay.
+        backoff: float = min(self._retry_base_delay * (2**attempt), self._retry_max_delay)
+
+        # Honour Retry-After header when present (429 responses).
+        if response is not None:
+            retry_after = response.headers.get("Retry-After")
+            if retry_after is not None:
+                try:
+                    backoff = max(backoff, float(retry_after))
+                except (ValueError, TypeError):
+                    pass  # Non-numeric Retry-After (e.g. HTTP-date); ignore.
+
+        # Add jitter (0–25 %) to avoid thundering-herd effects.
+        jitter: float = backoff * 0.25 * random.random()  # noqa: S311
+        return backoff + jitter
+
+    def _request_with_retry(
+        self,
+        method: str,
+        url: str,
+        params: dict | None = None,
+        headers: dict | None = None,
+        json_body: dict | list | None = None,
+    ) -> requests.Response:
+        """Execute an HTTP request with automatic retry on transient failures.
+
+        Retries are triggered for status codes in :attr:`_retryable_status_codes`
+        and for :class:`requests.ConnectionError` /
+        :class:`requests.Timeout` exceptions.  Uses exponential backoff with
+        jitter between attempts.
+
+        Parameters
+        ----------
+        method : str
+            HTTP method (``"GET"`` or ``"POST"``).
+        url : str
+            Target URL.
+        params : dict | None
+            Query parameters (already prepared).
+        headers : dict | None
+            HTTP headers (already prepared).
+        json_body : dict | list | None
+            JSON payload for POST requests.
+
+        Returns
+        -------
+        requests.Response
+            Successful HTTP response.
+
+        Raises
+        ------
+        requests.HTTPError
+            On non-2xx status codes after all retries are exhausted.
+        requests.ConnectionError
+            On persistent connection failures.
+        requests.Timeout
+            On persistent timeout failures.
+        """
+        last_response: requests.Response | None = None
+        last_exception: Exception | None = None
+
+        for attempt in range(1 + self._max_retries):
+            try:
+                self._rate_limit()
+                self._log_request(url, params or None, method=method, headers=headers)
+
+                if method == "POST":
+                    response = self._get_session().post(
+                        url,
+                        json=json_body,
+                        params=params or None,
+                        headers=headers or None,
+                        timeout=self._timeout,
+                    )
+                else:
+                    response = self._get_session().get(
+                        url,
+                        params=params or None,
+                        headers=headers or None,
+                        timeout=self._timeout,
+                    )
+
+                self._last_request_time = time.monotonic()
+                self._log_response(response)
+
+                # Check for retryable status codes.
+                if (
+                    response.status_code in self._retryable_status_codes
+                    and attempt < self._max_retries
+                ):
+                    delay = self._retry_delay(attempt, response)
+                    logger.warning(
+                        "[%s] HTTP %d from %s — retrying in %.1fs (attempt %d/%d).",
+                        self.name,
+                        response.status_code,
+                        url,
+                        delay,
+                        attempt + 1,
+                        self._max_retries,
+                    )
+                    time.sleep(delay)
+                    last_response = response
+                    continue
+
+                response.raise_for_status()
+                return response
+
+            except (requests.ConnectionError, requests.Timeout) as exc:
+                last_exception = exc
+                if attempt < self._max_retries:
+                    delay = self._retry_delay(attempt)
+                    logger.warning(
+                        "[%s] %s for %s — retrying in %.1fs (attempt %d/%d).",
+                        self.name,
+                        type(exc).__name__,
+                        url,
+                        delay,
+                        attempt + 1,
+                        self._max_retries,
+                    )
+                    time.sleep(delay)
+                    continue
+                raise
+
+        # All retries exhausted with a retryable status code.
+        if last_response is not None:
+            last_response.raise_for_status()
+        if last_exception is not None:  # pragma: no cover
+            raise last_exception
+
+        raise RuntimeError(
+            "Unreachable: retry loop exited without response or exception."
+        )  # pragma: no cover
+
     def _prepare_params(self, params: dict) -> dict:
         """Augment query parameters before the request is sent.
 
@@ -230,11 +400,13 @@ class ConnectorBase(ABC):
         params: dict | None = None,
         headers: dict | None = None,
     ) -> requests.Response:
-        """Perform a rate-limited, logged GET request.
+        """Perform a rate-limited, logged GET request with automatic retry.
 
         Calls :meth:`_prepare_params` and :meth:`_prepare_headers` so
         subclasses can inject credentials without duplicating the
-        rate-limiting and logging boilerplate.
+        rate-limiting and logging boilerplate.  Transient failures
+        (429, 502, 503, 504 and connection/timeout errors) are retried
+        with exponential backoff.
 
         Parameters
         ----------
@@ -253,22 +425,16 @@ class ConnectorBase(ABC):
         Raises
         ------
         requests.HTTPError
-            On non-2xx status codes.
+            On non-2xx status codes after all retries are exhausted.
         """
         prepared_params = self._prepare_params(dict(params) if params else {})
         prepared_headers = self._prepare_headers(dict(headers) if headers else {})
-        self._rate_limit()
-        self._log_request(url, prepared_params or None, headers=prepared_headers)
-        response = self._get_session().get(
-            url,
-            params=prepared_params or None,
-            headers=prepared_headers or None,
-            timeout=self._timeout,
+        return self._request_with_retry(
+            method="GET",
+            url=url,
+            params=prepared_params,
+            headers=prepared_headers,
         )
-        self._last_request_time = time.monotonic()
-        self._log_response(response)
-        response.raise_for_status()
-        return response
 
     def _post(
         self,
@@ -277,7 +443,7 @@ class ConnectorBase(ABC):
         params: dict | None = None,
         headers: dict | None = None,
     ) -> requests.Response:
-        """Perform a rate-limited, logged POST request.
+        """Perform a rate-limited, logged POST request with automatic retry.
 
         Mirrors :meth:`_get` but sends a JSON body via ``requests.post``.
         Calls :meth:`_prepare_params` and :meth:`_prepare_headers` for
@@ -302,23 +468,17 @@ class ConnectorBase(ABC):
         Raises
         ------
         requests.HTTPError
-            On non-2xx status codes.
+            On non-2xx status codes after all retries are exhausted.
         """
         prepared_params = self._prepare_params(dict(params) if params else {})
         prepared_headers = self._prepare_headers(dict(headers) if headers else {})
-        self._rate_limit()
-        self._log_request(url, prepared_params or None, method="POST", headers=prepared_headers)
-        response = self._get_session().post(
-            url,
-            json=json_body,
-            params=prepared_params or None,
-            headers=prepared_headers or None,
-            timeout=self._timeout,
+        return self._request_with_retry(
+            method="POST",
+            url=url,
+            params=prepared_params,
+            headers=prepared_headers,
+            json_body=json_body,
         )
-        self._last_request_time = time.monotonic()
-        self._log_response(response)
-        response.raise_for_status()
-        return response
 
     def _log_request(
         self,
