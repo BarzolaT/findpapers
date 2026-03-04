@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 from ..utils.merge import merge_value
 
@@ -44,10 +43,10 @@ class Source:
     def __init__(
         self,
         title: str,
-        isbn: Optional[str] = None,
-        issn: Optional[str] = None,
-        publisher: Optional[str] = None,
-        source_type: Optional[SourceType] = None,
+        isbn: str | None = None,
+        issn: str | None = None,
+        publisher: str | None = None,
+        source_type: SourceType | None = None,
     ) -> None:
         """Create a Source instance.
 

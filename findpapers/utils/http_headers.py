@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import random as _random_module
 from random import Random
-from typing import Optional
 
 # ---------------------------------------------------------------------------
 # User-Agent pool
@@ -70,7 +69,7 @@ _USER_AGENTS: list[str] = [
 ]
 
 
-def get_browser_headers(rng: Optional[Random] = None) -> dict[str, str]:
+def get_browser_headers(rng: Random | None = None) -> dict[str, str]:
     """Return a set of HTTP headers that mimic a real browser request.
 
     A User-Agent is picked at random from a pool covering Chrome, Firefox,

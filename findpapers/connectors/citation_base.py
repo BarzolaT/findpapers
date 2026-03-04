@@ -9,7 +9,7 @@ snowballing).
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from findpapers.core.paper import Paper
@@ -30,7 +30,7 @@ class CitationConnectorBase(ConnectorBase):
     """
 
     @abstractmethod
-    def fetch_references(self, paper: "Paper") -> List["Paper"]:
+    def fetch_references(self, paper: "Paper") -> list["Paper"]:
         """Return papers cited *by* the given paper (backward snowballing).
 
         Parameters
@@ -47,7 +47,7 @@ class CitationConnectorBase(ConnectorBase):
         """
 
     @abstractmethod
-    def fetch_cited_by(self, paper: "Paper") -> List["Paper"]:
+    def fetch_cited_by(self, paper: "Paper") -> list["Paper"]:
         """Return papers that cite the given paper (forward snowballing).
 
         Parameters

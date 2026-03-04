@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 import logging
 from collections.abc import Callable
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
@@ -62,8 +62,8 @@ class ScopusConnector(SearchConnectorBase):
 
     def __init__(
         self,
-        query_builder: Optional[ScopusQueryBuilder] = None,
-        api_key: Optional[str] = None,
+        query_builder: ScopusQueryBuilder | None = None,
+        api_key: str | None = None,
     ) -> None:
         """Create a Scopus searcher.
 
@@ -145,7 +145,7 @@ class ScopusConnector(SearchConnectorBase):
             updated["X-ELS-APIKey"] = self._api_key
         return updated
 
-    def _parse_paper(self, entry: Dict[str, Any]) -> Optional[Paper]:
+    def _parse_paper(self, entry: dict[str, Any]) -> Paper | None:
         """Parse a single Scopus search result entry.
 
         Parameters
@@ -186,7 +186,7 @@ class ScopusConnector(SearchConnectorBase):
 
         # Publication date
         cover_date = (entry.get("prism:coverDate") or "").strip()
-        pub_date: Optional[datetime.date] = None
+        pub_date: datetime.date | None = None
         if cover_date:
             try:
                 pub_date = datetime.date.fromisoformat(cover_date[:10])
@@ -194,15 +194,15 @@ class ScopusConnector(SearchConnectorBase):
                 pass
 
         # DOI / URL
-        doi: Optional[str] = (entry.get("prism:doi") or "").strip() or None
-        url: Optional[str] = None
+        doi: str | None = (entry.get("prism:doi") or "").strip() or None
+        url: str | None = None
         for link_item in entry.get("link", []):
             if isinstance(link_item, dict) and link_item.get("@ref") == "scopus":
                 url = (link_item.get("@href") or "").strip() or None
                 break
 
         # Citations
-        citations: Optional[int] = None
+        citations: int | None = None
         cite_count = entry.get("citedby-count")
         if cite_count is not None:
             try:
@@ -214,7 +214,7 @@ class ScopusConnector(SearchConnectorBase):
         pub_title = (
             entry.get("prism:publicationName") or entry.get("prism:issueName") or ""
         ).strip()
-        source: Optional[Source] = None
+        source: Source | None = None
         if pub_title:
             issn = (entry.get("prism:issn") or entry.get("prism:eIssn") or "").strip() or None
             # prism:isbn may be a list of dicts in some responses
@@ -245,7 +245,7 @@ class ScopusConnector(SearchConnectorBase):
         paper_type = _SCOPUS_PAPER_TYPE_MAP.get(raw_subtype)
 
         # Pages
-        pages: Optional[str] = (entry.get("prism:pageRange") or "").strip() or None
+        pages: str | None = (entry.get("prism:pageRange") or "").strip() or None
 
         try:
             paper = Paper(
@@ -269,9 +269,9 @@ class ScopusConnector(SearchConnectorBase):
     def _fetch_papers(
         self,
         query: Query,
-        max_papers: Optional[int],
-        progress_callback: Optional[Callable[[int, Optional[int]], None]],
-    ) -> List[Paper]:
+        max_papers: int | None,
+        progress_callback: Callable[[int, int | None], None] | None,
+    ) -> list[Paper]:
         """Fetch papers from Scopus with pagination.
 
         Parameters
@@ -289,10 +289,10 @@ class ScopusConnector(SearchConnectorBase):
             Retrieved papers.
         """
         scopus_query = self._query_builder.convert_query(query)
-        papers: List[Paper] = []
+        papers: list[Paper] = []
         processed = 0
         offset = 0
-        total: Optional[int] = None
+        total: int | None = None
 
         while True:
             remaining = (max_papers - len(papers)) if max_papers is not None else _PAGE_SIZE

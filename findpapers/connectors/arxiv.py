@@ -6,7 +6,6 @@ import datetime
 import logging
 import re
 from collections.abc import Callable
-from typing import List, Optional
 from xml.etree import ElementTree as ET
 
 from findpapers.connectors.search_base import SearchConnectorBase
@@ -48,7 +47,7 @@ class ArxivConnector(SearchConnectorBase):
     Rate limit: 3 seconds between requests (as recommended by arXiv).
     """
 
-    def __init__(self, query_builder: Optional[ArxivQueryBuilder] = None) -> None:
+    def __init__(self, query_builder: ArxivQueryBuilder | None = None) -> None:
         """Create an arXiv searcher.
 
         Parameters
@@ -93,7 +92,7 @@ class ArxivConnector(SearchConnectorBase):
         return _MIN_REQUEST_INTERVAL
 
     @staticmethod
-    def _parse_date(date_str: Optional[str]) -> Optional[str]:
+    def _parse_date(date_str: str | None) -> str | None:
         """Parse ISO-8601 date string to ``YYYY-MM-DD``.
 
         Parameters
@@ -110,7 +109,7 @@ class ArxivConnector(SearchConnectorBase):
             return None
         return date_str[:10]
 
-    def _parse_paper(self, entry: ET.Element) -> Optional[Paper]:
+    def _parse_paper(self, entry: ET.Element) -> Paper | None:
         """Parse a single Atom entry element into a :class:`Paper`.
 
         Parameters
@@ -156,13 +155,13 @@ class ArxivConnector(SearchConnectorBase):
 
         # DOI — prefer the explicit <arxiv:doi> element (publisher DOI).
         # When absent, derive the canonical arXiv DOI from the entry ID.
-        doi: Optional[str] = None
+        doi: str | None = None
         doi_el = entry.find("arxiv:doi", _NS)
         if doi_el is not None and doi_el.text:
             doi = doi_el.text.strip()
 
         # URL - prefer HTML link
-        url: Optional[str] = None
+        url: str | None = None
         for link_el in entry.findall("atom:link", _NS):
             rel = link_el.get("rel", "")
             href = link_el.get("href", "")
@@ -183,7 +182,7 @@ class ArxivConnector(SearchConnectorBase):
                 doi = f"10.48550/arXiv.{m.group(1)}"
 
         # PDF URL
-        pdf_url: Optional[str] = None
+        pdf_url: str | None = None
         for link_el in entry.findall("atom:link", _NS):
             title_attr = link_el.get("title", "")
             href = link_el.get("href", "")
@@ -194,7 +193,7 @@ class ArxivConnector(SearchConnectorBase):
         # Journal ref → source.
         # Papers with a journal reference were formally published in a journal.
         journal_ref_el = entry.find("arxiv:journal_ref", _NS)
-        source: Optional[Source] = None
+        source: Source | None = None
         has_journal_ref = (
             journal_ref_el is not None and journal_ref_el.text and journal_ref_el.text.strip()
         )
@@ -209,7 +208,7 @@ class ArxivConnector(SearchConnectorBase):
             source = Source(title="arXiv", source_type=SourceType.REPOSITORY)
 
         # Comments — optional free-text note (e.g. "39 pages, 14 figures")
-        comment: Optional[str] = None
+        comment: str | None = None
         comment_el = entry.find("arxiv:comment", _NS)
         if comment_el is not None and comment_el.text and comment_el.text.strip():
             comment = comment_el.text.strip()
@@ -241,9 +240,9 @@ class ArxivConnector(SearchConnectorBase):
     def _fetch_papers(
         self,
         query: Query,
-        max_papers: Optional[int],
-        progress_callback: Optional[Callable[[int, Optional[int]], None]],
-    ) -> List[Paper]:
+        max_papers: int | None,
+        progress_callback: Callable[[int, int | None], None] | None,
+    ) -> list[Paper]:
         """Fetch papers from arXiv with pagination and rate limiting.
 
         Parameters
@@ -261,7 +260,7 @@ class ArxivConnector(SearchConnectorBase):
             Retrieved papers.
         """
         arxiv_query = self._query_builder.convert_query(query)
-        papers: List[Paper] = []
+        papers: list[Paper] = []
         processed = 0
         offset = 0
 
@@ -286,7 +285,7 @@ class ArxivConnector(SearchConnectorBase):
             tree = ET.fromstring(response.text)
 
             total_results_el = tree.find("{http://a9.com/-/spec/opensearch/1.1/}totalResults")
-            total: Optional[int] = None
+            total: int | None = None
             if total_results_el is not None and total_results_el.text:
                 try:
                     total = int(total_results_el.text.strip())
@@ -347,7 +346,7 @@ _JOURNAL_RE = re.compile(
 )
 
 
-def _infer_source_type_from_journal_ref(text: str) -> Optional[SourceType]:
+def _infer_source_type_from_journal_ref(text: str) -> SourceType | None:
     """Infer a :class:`SourceType` from a free-text ``journal_ref`` string.
 
     The function applies keyword heuristics in priority order:
@@ -380,7 +379,7 @@ def _infer_source_type_from_journal_ref(text: str) -> Optional[SourceType]:
     return None
 
 
-def _parse_date_from_str(date_str: Optional[str]) -> Optional[datetime.date]:
+def _parse_date_from_str(date_str: str | None) -> datetime.date | None:
     """Parse a date string into a :class:`datetime.date`.
 
     Parameters

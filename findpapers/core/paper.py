@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 import logging
 from enum import Enum
-from typing import Optional, Set
 
 from ..utils.merge import merge_authors, merge_value
 from .author import Author
@@ -135,16 +134,16 @@ class Paper:
         authors: list[Author],
         source: Source | None,
         publication_date: datetime.date | None,
-        url: Optional[str] = None,
-        pdf_url: Optional[str] = None,
-        doi: Optional[str] = None,
-        citations: Optional[int] = None,
-        keywords: Optional[Set[str]] = None,
-        comments: Optional[str] = None,
-        page_count: Optional[int] = None,
-        page_range: Optional[str] = None,
-        databases: Optional[Set[str]] = None,
-        paper_type: Optional[PaperType] = None,
+        url: str | None = None,
+        pdf_url: str | None = None,
+        doi: str | None = None,
+        citations: int | None = None,
+        keywords: set[str] | None = None,
+        comments: str | None = None,
+        page_count: int | None = None,
+        page_range: str | None = None,
+        databases: set[str] | None = None,
+        paper_type: PaperType | None = None,
     ) -> None:
         """Create a Paper instance.
 

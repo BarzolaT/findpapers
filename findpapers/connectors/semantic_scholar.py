@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 import logging
 from collections.abc import Callable
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
@@ -86,8 +86,8 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
 
     def __init__(
         self,
-        query_builder: Optional[SemanticScholarQueryBuilder] = None,
-        api_key: Optional[str] = None,
+        query_builder: SemanticScholarQueryBuilder | None = None,
+        api_key: str | None = None,
     ) -> None:
         """Create a Semantic Scholar searcher.
 
@@ -298,7 +298,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         logger.debug("Semantic Scholar: fetching citations for DOI %s.", paper.doi)
         return self._fetch_all_citation_pages(paper.doi, "citations")
 
-    def _parse_paper(self, item: Dict[str, Any]) -> Optional[Paper]:
+    def _parse_paper(self, item: dict[str, Any]) -> Paper | None:
         """Parse a single Semantic Scholar paper record.
 
         Parameters
@@ -325,7 +325,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
                 authors.append(Author(name=name))
 
         # Publication date
-        pub_date: Optional[datetime.date] = None
+        pub_date: datetime.date | None = None
         _pub_date_str = (item.get("publicationDate") or "").strip()
         if _pub_date_str:
             try:
@@ -342,23 +342,23 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         # Prefer the explicit DOI field; fall back to deriving a canonical
         # arXiv DOI (10.48550/arXiv.<id>) when only the ArXivId is available.
         external_ids = item.get("externalIds") or {}
-        doi: Optional[str] = (external_ids.get("DOI") or "").strip() or None
+        doi: str | None = (external_ids.get("DOI") or "").strip() or None
         if doi is None:
             arxiv_id = (external_ids.get("ArXivId") or "").strip()
             if arxiv_id:
                 doi = f"10.48550/arXiv.{arxiv_id}"
 
         # URL
-        url: Optional[str] = (item.get("url") or "").strip() or None
+        url: str | None = (item.get("url") or "").strip() or None
 
         # PDF URL
-        pdf_url: Optional[str] = None
+        pdf_url: str | None = None
         open_access_pdf = item.get("openAccessPdf")
         if isinstance(open_access_pdf, dict):
             pdf_url = (open_access_pdf.get("url") or "").strip() or None
 
         # Citations
-        citations: Optional[int] = item.get("citationCount")
+        citations: int | None = item.get("citationCount")
 
         # Keywords from fields of study
         keywords: set[str] = set()
@@ -367,14 +367,14 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
                 keywords.add(field.strip())
 
         # Source
-        source: Optional[Source] = None
+        source: Source | None = None
         journal = item.get("journal") or {}
         venue = (item.get("venue") or "").strip()
         pub_title = (journal.get("name") or venue or "").strip()
 
         # Determine source_type from publicationVenue.type (preferred),
         # falling back to publicationTypes list.
-        source_type: Optional[SourceType] = None
+        source_type: SourceType | None = None
         pub_venue = item.get("publicationVenue") or {}
         venue_type = (pub_venue.get("type") or "").strip().lower()
         if venue_type:
@@ -394,7 +394,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
             source = Source(title=venue, source_type=source_type)
 
         # Pages from journal info
-        pages: Optional[str] = None
+        pages: str | None = None
         if journal:
             raw_pages = (journal.get("pages") or "").strip()
             if raw_pages:
@@ -486,9 +486,9 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
     def _fetch_papers(
         self,
         query: Query,
-        max_papers: Optional[int],
-        progress_callback: Optional[Callable[[int, Optional[int]], None]],
-    ) -> List[Paper]:
+        max_papers: int | None,
+        progress_callback: Callable[[int, int | None], None] | None,
+    ) -> list[Paper]:
         """Fetch papers from Semantic Scholar bulk search with pagination.
 
         Parameters
@@ -506,10 +506,10 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
             Retrieved papers.
         """
         ss_params = self._query_builder.convert_query(query)
-        papers: List[Paper] = []
+        papers: list[Paper] = []
         author_id_to_authors: dict[str, list[Author]] = {}
-        token: Optional[str] = None  # Semantic Scholar uses token-based pagination
-        total: Optional[int] = None
+        token: str | None = None  # Semantic Scholar uses token-based pagination
+        total: int | None = None
 
         while True:
             remaining = (max_papers - len(papers)) if max_papers is not None else _PAGE_SIZE

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, TypeAlias
 
 from findpapers.core.paper import Paper
 from findpapers.exceptions import ExportError
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from findpapers.core.search_result import SearchResult
 
 #: Union of all exportable types.
-Exportable = Union["SearchResult", "CitationGraph", list[Paper]]
+Exportable: TypeAlias = "SearchResult | CitationGraph | list[Paper]"
 
 
 def _extract_papers(data: Exportable) -> list[Paper]:

@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from findpapers.core.paper import Paper
@@ -54,9 +54,9 @@ class SearchConnectorBase(ConnectorBase):
     def _fetch_papers(
         self,
         query: "Query",
-        max_papers: Optional[int],
-        progress_callback: Optional[Callable[[int, Optional[int]], None]],
-    ) -> List["Paper"]:
+        max_papers: int | None,
+        progress_callback: Callable[[int, int | None], None] | None,
+    ) -> list["Paper"]:
         """Fetch papers from the database.
 
         Subclasses implement HTTP requests, rate limiting, pagination and
@@ -89,9 +89,9 @@ class SearchConnectorBase(ConnectorBase):
     def search(
         self,
         query: "Query",
-        max_papers: Optional[int] = None,
-        progress_callback: Optional[Callable[[int, Optional[int]], None]] = None,
-    ) -> List["Paper"]:
+        max_papers: int | None = None,
+        progress_callback: Callable[[int, int | None], None] | None = None,
+    ) -> list["Paper"]:
         """Execute search and return a list of papers.
 
         Validates the query first.  If validation fails the search is skipped

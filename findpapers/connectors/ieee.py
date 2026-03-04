@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 import logging
 from collections.abc import Callable
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
@@ -59,8 +59,8 @@ class IEEEConnector(SearchConnectorBase):
 
     def __init__(
         self,
-        query_builder: Optional[IEEEQueryBuilder] = None,
-        api_key: Optional[str] = None,
+        query_builder: IEEEQueryBuilder | None = None,
+        api_key: str | None = None,
     ) -> None:
         """Create an IEEE Xplore searcher.
 
@@ -157,7 +157,7 @@ class IEEEConnector(SearchConnectorBase):
             updated["X-API-Key"] = self._api_key
         return updated
 
-    def _parse_paper(self, item: Dict[str, Any]) -> Optional[Paper]:
+    def _parse_paper(self, item: dict[str, Any]) -> Paper | None:
         """Parse a single IEEE API result item.
 
         Parameters
@@ -185,7 +185,7 @@ class IEEEConnector(SearchConnectorBase):
                 authors.append(Author(name=full_name, affiliation=affiliation))
 
         # Publication date
-        pub_date: Optional[datetime.date] = None
+        pub_date: datetime.date | None = None
         pub_year = item.get("publication_year")
         if pub_year:
             try:
@@ -194,9 +194,9 @@ class IEEEConnector(SearchConnectorBase):
                 pass
 
         # DOI / URL
-        doi: Optional[str] = (item.get("doi") or "").strip() or None
-        url: Optional[str] = (item.get("html_url") or item.get("pdf_url") or "").strip() or None
-        pdf_url: Optional[str] = (item.get("pdf_url") or "").strip() or None
+        doi: str | None = (item.get("doi") or "").strip() or None
+        url: str | None = (item.get("html_url") or item.get("pdf_url") or "").strip() or None
+        pdf_url: str | None = (item.get("pdf_url") or "").strip() or None
 
         # Keywords — ieee_terms, author_terms, etc. are nested inside index_terms
         keywords: set[str] = set()
@@ -208,7 +208,7 @@ class IEEEConnector(SearchConnectorBase):
                     keywords.add(kw)
 
         # Citations
-        citations: Optional[int] = None
+        citations: int | None = None
         citation_count = item.get("citing_paper_count")
         if citation_count is not None:
             try:
@@ -219,7 +219,7 @@ class IEEEConnector(SearchConnectorBase):
         # Source
         source_title = (item.get("publication_title") or "").strip()
         raw_content_type = (item.get("content_type") or "").strip().lower()
-        source: Optional[Source] = None
+        source: Source | None = None
         if source_title:
             issn = (item.get("issn") or "").strip() or None
             isbn = (item.get("isbn") or "").strip() or None
@@ -240,7 +240,7 @@ class IEEEConnector(SearchConnectorBase):
         # Pages
         start_page = item.get("start_page") or ""
         end_page = item.get("end_page") or ""
-        pages: Optional[str] = None
+        pages: str | None = None
         if start_page and end_page:
             pages = f"{start_page}-{end_page}"
         elif start_page:
@@ -270,9 +270,9 @@ class IEEEConnector(SearchConnectorBase):
     def _fetch_papers(
         self,
         query: Query,
-        max_papers: Optional[int],
-        progress_callback: Optional[Callable[[int, Optional[int]], None]],
-    ) -> List[Paper]:
+        max_papers: int | None,
+        progress_callback: Callable[[int, int | None], None] | None,
+    ) -> list[Paper]:
         """Fetch papers from IEEE Xplore with pagination.
 
         Parameters
@@ -290,10 +290,10 @@ class IEEEConnector(SearchConnectorBase):
             Retrieved papers.
         """
         ieee_params = self._query_builder.convert_query(query)
-        papers: List[Paper] = []
+        papers: list[Paper] = []
         processed = 0
         offset = 1  # IEEE uses 1-based pagination
-        total: Optional[int] = None
+        total: int | None = None
 
         while True:
             remaining = (max_papers - len(papers)) if max_papers is not None else _PAGE_SIZE

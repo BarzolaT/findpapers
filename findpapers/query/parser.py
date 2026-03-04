@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from typing import Optional
 
 from findpapers.core.query import (
     VALID_FILTER_CODES,
@@ -40,7 +39,7 @@ class QueryParser:
         root = self._parse_query_recursive(raw_query, None)
         return Query(raw_query=raw_query, root=root)
 
-    def _extract_filter_prefix(self, text: str) -> tuple[Optional[FilterCode], str]:
+    def _extract_filter_prefix(self, text: str) -> tuple[FilterCode | None, str]:
         """Extract filter prefix from the end of a text buffer.
 
         Given text like "something ti", extracts the filter code and returns
@@ -75,7 +74,7 @@ class QueryParser:
                 return FilterCode(filter_code), remaining.rstrip()
         return None, text
 
-    def _parse_query_recursive(self, query: str, parent: Optional[QueryNode]) -> QueryNode:
+    def _parse_query_recursive(self, query: str, parent: QueryNode | None) -> QueryNode:
         """Recursively parse a query or subquery.
 
         Parameters

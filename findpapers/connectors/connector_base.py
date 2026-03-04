@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import Optional
 from urllib.parse import urlencode
 
 import requests
@@ -228,8 +227,8 @@ class ConnectorBase(ABC):
     def _get(
         self,
         url: str,
-        params: Optional[dict] = None,
-        headers: Optional[dict] = None,
+        params: dict | None = None,
+        headers: dict | None = None,
     ) -> requests.Response:
         """Perform a rate-limited, logged GET request.
 
@@ -274,9 +273,9 @@ class ConnectorBase(ABC):
     def _post(
         self,
         url: str,
-        json_body: Optional[dict | list] = None,
-        params: Optional[dict] = None,
-        headers: Optional[dict] = None,
+        json_body: dict | list | None = None,
+        params: dict | None = None,
+        headers: dict | None = None,
     ) -> requests.Response:
         """Perform a rate-limited, logged POST request.
 
@@ -324,9 +323,9 @@ class ConnectorBase(ABC):
     def _log_request(
         self,
         url: str,
-        params: Optional[dict] = None,
+        params: dict | None = None,
         method: str = "GET",
-        headers: Optional[dict] = None,
+        headers: dict | None = None,
     ) -> None:
         """Log an outgoing HTTP request at ``DEBUG`` level.
 

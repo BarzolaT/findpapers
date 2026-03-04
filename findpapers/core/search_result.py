@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 from enum import Enum
-from typing import List, Optional
 
 from ..utils.version import package_version
 from .paper import Paper
@@ -41,14 +40,14 @@ class SearchResult:
     def __init__(
         self,
         query: str,
-        since: Optional[datetime.date] = None,
-        until: Optional[datetime.date] = None,
-        max_papers_per_database: Optional[int] = None,
-        processed_at: Optional[datetime.datetime] = None,
-        databases: Optional[List[str]] = None,
-        papers: Optional[List[Paper]] = None,
-        runtime_seconds: Optional[float] = None,
-        runtime_seconds_per_database: Optional[dict[str, float]] = None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
+        max_papers_per_database: int | None = None,
+        processed_at: datetime.datetime | None = None,
+        databases: list[str] | None = None,
+        papers: list[Paper] | None = None,
+        runtime_seconds: float | None = None,
+        runtime_seconds_per_database: dict[str, float] | None = None,
     ) -> None:
         """Create a SearchResult instance.
 
@@ -86,7 +85,7 @@ class SearchResult:
             processed_at = processed_at.replace(tzinfo=datetime.timezone.utc)
         self.processed_at = processed_at
         self.databases = databases
-        self.papers: List[Paper] = papers or []
+        self.papers: list[Paper] = papers or []
         self.runtime_seconds = runtime_seconds
         self.runtime_seconds_per_database: dict[str, float] = dict(
             runtime_seconds_per_database or {}

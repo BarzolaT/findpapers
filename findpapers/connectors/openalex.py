@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 import logging
 from collections.abc import Callable
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
@@ -78,9 +78,9 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
 
     def __init__(
         self,
-        query_builder: Optional[OpenAlexQueryBuilder] = None,
-        api_key: Optional[str] = None,
-        email: Optional[str] = None,
+        query_builder: OpenAlexQueryBuilder | None = None,
+        api_key: str | None = None,
+        email: str | None = None,
     ) -> None:
         """Create an OpenAlex searcher.
 
@@ -367,7 +367,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
 
         return all_papers
 
-    def _parse_paper(self, work: Dict[str, Any]) -> Optional[Paper]:
+    def _parse_paper(self, work: dict[str, Any]) -> Paper | None:
         """Parse a single OpenAlex work object into a :class:`Paper`.
 
         Parameters
@@ -407,7 +407,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 authors.append(Author(name=name, affiliation=affiliation))
 
         # Publication date
-        pub_date: Optional[datetime.date] = None
+        pub_date: datetime.date | None = None
         _pub_date_str = (work.get("publication_date") or "").strip()
         if _pub_date_str:
             try:
@@ -416,27 +416,27 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 pass
 
         # DOI / URL
-        doi_raw: Optional[str] = (work.get("doi") or "").strip() or None
-        doi: Optional[str] = None
+        doi_raw: str | None = (work.get("doi") or "").strip() or None
+        doi: str | None = None
         if doi_raw:
             # OpenAlex returns full DOI URL: https://doi.org/10.xxx/yyy
             doi = doi_raw.replace("https://doi.org/", "").replace("http://doi.org/", "")
 
-        url: Optional[str] = None
+        url: str | None = None
         open_access = work.get("open_access") or {}
         url = (open_access.get("oa_url") or "").strip() or None
         if not url:
             primary = work.get("primary_location") or {}
             url = (primary.get("landing_page_url") or "").strip() or None
 
-        pdf_url: Optional[str] = None
+        pdf_url: str | None = None
         for loc in work.get("locations", []):
             if isinstance(loc, dict) and loc.get("pdf_url"):
                 pdf_url = loc["pdf_url"]
                 break
 
         # Citations
-        citations: Optional[int] = work.get("cited_by_count")
+        citations: int | None = work.get("cited_by_count")
 
         # Keywords / concepts
         keywords: set[str] = set()
@@ -460,7 +460,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         # institutional repos, Zenodo) should not be used as the paper's
         # publication source since they represent the *hosting location*, not
         # the actual venue.
-        source: Optional[Source] = None
+        source: Source | None = None
         source_data = _find_best_source(work)
         if source_data:
             pub_title = (source_data.get("display_name") or "").strip()
@@ -487,7 +487,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                     source = Source(title=repo_name, source_type=SourceType.REPOSITORY)
 
         # Pages from biblio
-        pages: Optional[str] = None
+        pages: str | None = None
         biblio = work.get("biblio") or {}
         first_page = (biblio.get("first_page") or "").strip()
         last_page = (biblio.get("last_page") or "").strip()
@@ -532,10 +532,10 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
 
     def _fetch_single_query(
         self,
-        query_params: Dict[str, Any],
-        max_papers: Optional[int],
-        papers: List[Paper],
-        progress_callback: Optional[Callable[[int, Optional[int]], None]],
+        query_params: dict[str, Any],
+        max_papers: int | None,
+        papers: list[Paper],
+        progress_callback: Callable[[int, int | None], None] | None,
     ) -> None:
         """Fetch papers for one converted query variant using cursor-based pagination.
 
@@ -551,7 +551,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             Progress callback.
         """
         cursor = "*"
-        total: Optional[int] = None
+        total: int | None = None
         processed = 0
 
         # Cap results to at most 1 year in the future to avoid placeholder
@@ -621,9 +621,9 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
     def _fetch_papers(
         self,
         query: Query,
-        max_papers: Optional[int],
-        progress_callback: Optional[Callable[[int, Optional[int]], None]],
-    ) -> List[Paper]:
+        max_papers: int | None,
+        progress_callback: Callable[[int, int | None], None] | None,
+    ) -> list[Paper]:
         """Fetch papers from OpenAlex handling query expansion.
 
         Parameters
@@ -641,7 +641,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             Retrieved papers, deduplicated by DOI.
         """
         expanded = self._query_builder.expand_query(query)
-        all_papers: List[Paper] = []
+        all_papers: list[Paper] = []
         seen_keys: set[str] = set()
 
         for sub_query in expanded:
@@ -650,7 +650,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             # from being fetched.  Each branch is allowed to return up to
             # max_papers results independently; the combined list is
             # deduplicated and truncated to max_papers at the very end.
-            sub_papers: List[Paper] = []
+            sub_papers: list[Paper] = []
             sub_params = self._query_builder.convert_query(sub_query)
             self._fetch_single_query(sub_params, max_papers, sub_papers, progress_callback)
 
@@ -664,7 +664,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         return all_papers[:max_papers] if max_papers is not None else all_papers
 
 
-def _find_best_source(work: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def _find_best_source(work: dict[str, Any]) -> dict[str, Any] | None:
     """Select the best publication source from an OpenAlex work.
 
     OpenAlex distinguishes several source types (``journal``, ``conference``,
@@ -715,7 +715,7 @@ def _find_best_source(work: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     return None
 
 
-def _find_repository_source(work: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def _find_repository_source(work: dict[str, Any]) -> dict[str, Any] | None:
     """Find a repository-type source when no formal venue is available.
 
     When ``_find_best_source`` yields ``None`` (i.e. the work is only hosted

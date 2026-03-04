@@ -15,7 +15,7 @@ import datetime
 import logging
 import re
 import time
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import quote as _url_quote
 
 from findpapers.connectors.citation_base import CitationConnectorBase
@@ -437,7 +437,7 @@ class CrossRefConnector(CitationConnectorBase):
         abstract = CrossRefConnector._strip_jats_tags(raw_abstract) if raw_abstract else ""
 
         # DOI
-        doi: Optional[str] = (work.get("DOI") or "").strip() or None
+        doi: str | None = (work.get("DOI") or "").strip() or None
 
         # Authors
         authors = CrossRefConnector._parse_authors(work)
@@ -449,23 +449,23 @@ class CrossRefConnector(CitationConnectorBase):
         keywords = CrossRefConnector._parse_keywords(work)
 
         # Citations count
-        citations: Optional[int] = work.get("is-referenced-by-count")
+        citations: int | None = work.get("is-referenced-by-count")
 
         # Page range
-        pages: Optional[str] = (work.get("page") or "").strip() or None
+        pages: str | None = (work.get("page") or "").strip() or None
 
         # Number of pages — not directly available, but can be inferred from
         # page range when it's in "first-last" format.
-        page_count: Optional[int] = None
+        page_count: int | None = None
 
         # PDF URL
         pdf_url = CrossRefConnector._parse_pdf_url(work)
 
         # URL — use the DOI URL as landing page.
-        url: Optional[str] = (work.get("URL") or "").strip() or None
+        url: str | None = (work.get("URL") or "").strip() or None
 
         # Source (journal, conference, book, etc.)
-        source: Optional[Source] = None
+        source: Source | None = None
         container_titles = work.get("container-title") or []
         source_title = (
             container_titles[0].strip()

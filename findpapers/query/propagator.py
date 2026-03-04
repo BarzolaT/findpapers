@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from findpapers.core.query import FilterCode, NodeType, Query, QueryNode
 
 
@@ -33,9 +31,7 @@ class FilterPropagator:
         self._propagate_filters(query.root)
         return query
 
-    def _propagate_filters(
-        self, node: QueryNode, parent_filter: Optional[FilterCode] = None
-    ) -> None:
+    def _propagate_filters(self, node: QueryNode, parent_filter: FilterCode | None = None) -> None:
         """Propagate filter specifier from parent nodes to children.
 
         This calculates inherited_filter_code and children_match_filter for all nodes:
@@ -111,7 +107,7 @@ class FilterPropagator:
 
         return True
 
-    def _check_node_uses_filter(self, node: QueryNode, target_filter: Optional[str]) -> bool:
+    def _check_node_uses_filter(self, node: QueryNode, target_filter: str | None) -> bool:
         """Recursively check if a node and all its children use the target effective filter.
 
         Parameters

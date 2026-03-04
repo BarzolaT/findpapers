@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime
 import logging
 from collections.abc import Callable
-from typing import List, Optional
 from xml.etree import ElementTree as ET
 
 from findpapers.connectors.search_base import SearchConnectorBase
@@ -54,8 +53,8 @@ class PubmedConnector(SearchConnectorBase):
 
     def __init__(
         self,
-        query_builder: Optional[PubmedQueryBuilder] = None,
-        api_key: Optional[str] = None,
+        query_builder: PubmedQueryBuilder | None = None,
+        api_key: str | None = None,
     ) -> None:
         """Create a PubMed searcher.
 
@@ -188,7 +187,7 @@ class PubmedConnector(SearchConnectorBase):
         tree = ET.fromstring(response.text)
         return tree.findall(".//PubmedArticle")
 
-    def _parse_paper(self, article_el: ET.Element) -> Optional[Paper]:
+    def _parse_paper(self, article_el: ET.Element) -> Paper | None:
         """Parse a PubmedArticle element into a :class:`Paper`.
 
         Parameters
@@ -246,7 +245,7 @@ class PubmedConnector(SearchConnectorBase):
 
         # Publication date
         pub_date_el = article.find(".//PubDate")
-        pub_date: Optional[datetime.date] = None
+        pub_date: datetime.date | None = None
         if pub_date_el is not None:
             year = pub_date_el.findtext("Year") or ""
             month = pub_date_el.findtext("Month") or "01"
@@ -260,7 +259,7 @@ class PubmedConnector(SearchConnectorBase):
                     pass
 
         # DOI
-        doi: Optional[str] = None
+        doi: str | None = None
         for id_el in article_el.findall(".//ArticleId"):
             if id_el.get("IdType") == "doi" and id_el.text and id_el.text.strip():
                 doi = id_el.text.strip()
@@ -268,7 +267,7 @@ class PubmedConnector(SearchConnectorBase):
 
         # URL via PMID
         pmid_el = medline.find("PMID")
-        url: Optional[str] = None
+        url: str | None = None
         if pmid_el is not None and pmid_el.text and pmid_el.text.strip():
             url = f"https://pubmed.ncbi.nlm.nih.gov/{pmid_el.text.strip()}/"
 
@@ -284,7 +283,7 @@ class PubmedConnector(SearchConnectorBase):
                 keywords.add(kw)
 
         # Pages
-        pages: Optional[str] = None
+        pages: str | None = None
         pagination_el = article.find(".//Pagination")
         if pagination_el is not None:
             medline_pgn = (pagination_el.findtext("MedlinePgn") or "").strip()
@@ -300,7 +299,7 @@ class PubmedConnector(SearchConnectorBase):
 
         # Source (journal)
         journal_el = article.find(".//Journal")
-        source: Optional[Source] = None
+        source: Source | None = None
         if journal_el is not None:
             journal_title = journal_el.findtext("Title") or ""
             abbrev = journal_el.findtext("ISOAbbreviation") or ""
@@ -320,7 +319,7 @@ class PubmedConnector(SearchConnectorBase):
             for pt_el in article.findall(".//PublicationTypeList/PublicationType")
             if pt_el.text
         ]
-        paper_type: Optional[PaperType] = None
+        paper_type: PaperType | None = None
         for rule_key, rule_type in self._PUBMED_PAPER_TYPE_RULES:
             if any(rule_key in pt for pt in pub_type_texts):
                 paper_type = rule_type
@@ -348,9 +347,9 @@ class PubmedConnector(SearchConnectorBase):
     def _fetch_papers(
         self,
         query: Query,
-        max_papers: Optional[int],
-        progress_callback: Optional[Callable[[int, Optional[int]], None]],
-    ) -> List[Paper]:
+        max_papers: int | None,
+        progress_callback: Callable[[int, int | None], None] | None,
+    ) -> list[Paper]:
         """Fetch papers from PubMed with pagination (esearch + efetch).
 
         Parameters
@@ -368,10 +367,10 @@ class PubmedConnector(SearchConnectorBase):
             Retrieved papers.
         """
         pubmed_query = self._query_builder.convert_query(query)
-        papers: List[Paper] = []
+        papers: list[Paper] = []
         processed = 0
         offset = 0
-        total: Optional[int] = None
+        total: int | None = None
 
         while True:
             remaining = (max_papers - processed) if max_papers is not None else _PAGE_SIZE

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List, Union
+from typing import Dict
 
 from findpapers.core.query import FilterCode, Query
 
@@ -42,7 +42,7 @@ class QueryExecutionPlan:
         - `NOT`: difference (left minus right)
     """
 
-    request_payloads: list[Union[str, Dict]]
+    request_payloads: list[str | Dict]
     combination_expression: str
 
 
@@ -80,7 +80,7 @@ class QueryBuilder(ABC):
         """
 
     @abstractmethod
-    def convert_query(self, query: Query) -> Union[str, Dict]:
+    def convert_query(self, query: Query) -> str | Dict:
         """Convert Query into a database-specific payload.
 
         Parameters
@@ -131,7 +131,7 @@ class QueryBuilder(ABC):
         """
         return filter_code in self._SUPPORTED_FILTERS
 
-    def expand_query(self, query: Query) -> List[Query]:
+    def expand_query(self, query: Query) -> list[Query]:
         """Expand query into multiple queries when necessary.
 
         The default implementation returns a single-element list containing

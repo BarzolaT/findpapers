@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
 
 
 class NodeType(Enum):
@@ -101,11 +100,11 @@ class QueryNode:
     """
 
     node_type: NodeType
-    value: Optional[str] = None
-    children: List["QueryNode"] = field(default_factory=list)
-    filter_code: Optional[FilterCode] = None
-    inherited_filter_code: Optional[FilterCode] = None
-    children_match_filter: Optional[bool] = None
+    value: str | None = None
+    children: list["QueryNode"] = field(default_factory=list)
+    filter_code: FilterCode | None = None
+    inherited_filter_code: FilterCode | None = None
+    children_match_filter: bool | None = None
 
     def to_dict(self) -> dict:
         """Convert the node to a dictionary representation.
@@ -156,7 +155,7 @@ class QueryNode:
         inherited_filter_code = (
             FilterCode(inherited_filter_code_str) if inherited_filter_code_str is not None else None
         )
-        value: Optional[str] = (
+        value: str | None = (
             ConnectorType(raw_value)
             if node_type == NodeType.CONNECTOR and raw_value is not None
             else raw_value
@@ -170,7 +169,7 @@ class QueryNode:
             children_match_filter=children_match_filter_value,
         )
 
-    def get_all_terms(self) -> List[str]:
+    def get_all_terms(self) -> list[str]:
         """Get all term values from this node and its children.
 
         Returns
@@ -178,14 +177,14 @@ class QueryNode:
         list[str]
             List of all term values.
         """
-        terms: List[str] = []
+        terms: list[str] = []
         if self.node_type == NodeType.TERM and self.value:
             terms.append(self.value)
         for child in self.children:
             terms.extend(child.get_all_terms())
         return terms
 
-    def get_all_filters(self) -> List[FilterCode]:
+    def get_all_filters(self) -> list[FilterCode]:
         """Get all unique filter codes used in this node and its children.
 
         Returns
@@ -241,7 +240,7 @@ class Query:
     raw_query: str
     root: QueryNode
 
-    def get_all_terms(self) -> List[str]:
+    def get_all_terms(self) -> list[str]:
         """Get all term values from the query.
 
         Returns
@@ -251,7 +250,7 @@ class Query:
         """
         return self.root.get_all_terms()
 
-    def get_all_filters(self) -> List[FilterCode]:
+    def get_all_filters(self) -> list[FilterCode]:
         """Get all unique filter codes used in the query.
 
         Returns
