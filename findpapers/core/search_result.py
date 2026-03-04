@@ -1,3 +1,5 @@
+"""Search result container that aggregates papers from multiple databases."""
+
 from __future__ import annotations
 
 import datetime

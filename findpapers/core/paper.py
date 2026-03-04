@@ -1,3 +1,5 @@
+"""Paper domain model representing an academic publication."""
+
 from __future__ import annotations
 
 import datetime
