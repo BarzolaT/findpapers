@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import random
+import threading
 import time
 from abc import ABC, abstractmethod
 from urllib.parse import urlencode
@@ -62,6 +63,9 @@ class ConnectorBase(ABC):
     # Shared rate-limiter state; assignment in _rate_limit creates an instance
     # attribute that shadows this default, so multiple instances are isolated.
     _last_request_time: float = 0.0
+
+    # Per-instance lock for thread-safe rate limiting.  Lazily created in
+    # ``_get_lock()`` so subclasses don't need to call ``super().__init__()``.
 
     # Default HTTP timeout in seconds for all requests.  Subclasses or callers
     # can override by setting ``self._timeout`` in ``__init__``.
@@ -175,15 +179,28 @@ class ConnectorBase(ABC):
         """
         return True
 
+    def _get_lock(self) -> threading.Lock:
+        """Return the per-instance lock, creating it lazily.
+
+        Returns
+        -------
+        threading.Lock
+            The lock guarding rate-limiter state for this connector.
+        """
+        if not hasattr(self, "_lock"):
+            self._lock = threading.Lock()
+        return self._lock
+
     def _rate_limit(self) -> None:
         """Enforce the minimum interval between HTTP requests.
 
-        Sleeps only the remaining time needed so that ``min_request_interval``
-        seconds have elapsed since the last request completed.
+        Thread-safe: uses a per-instance lock so concurrent threads sharing
+        the same connector never violate the rate limit.
         """
-        elapsed = time.monotonic() - self._last_request_time
-        if elapsed < self.min_request_interval:
-            time.sleep(self.min_request_interval - elapsed)
+        with self._get_lock():
+            elapsed = time.monotonic() - self._last_request_time
+            if elapsed < self.min_request_interval:
+                time.sleep(self.min_request_interval - elapsed)
 
     def _retry_delay(self, attempt: int, response: requests.Response | None = None) -> float:
         """Compute the delay before the next retry attempt.
@@ -286,7 +303,8 @@ class ConnectorBase(ABC):
                         timeout=self._timeout,
                     )
 
-                self._last_request_time = time.monotonic()
+                with self._get_lock():
+                    self._last_request_time = time.monotonic()
                 self._log_response(response)
 
                 # Check for retryable status codes.

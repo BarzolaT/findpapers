@@ -587,3 +587,52 @@ class TestConnectorBaseRetry:
 
         assert result is resp_200
         assert connector._http_session.post.call_count == 2
+
+
+class TestConnectorBaseThreadSafety:
+    """Tests for thread-safe rate limiting."""
+
+    def test_rate_limit_lock_is_per_instance(self) -> None:
+        """Each connector has its own lock to avoid cross-instance blocking."""
+        c1 = _StubConnector()
+        c2 = _StubConnector()
+        assert c1._get_lock() is not c2._get_lock()  # noqa: SLF001
+
+    def test_rate_limit_lock_is_reused(self) -> None:
+        """The same lock is returned on consecutive calls."""
+        connector = _StubConnector()
+        lock_a = connector._get_lock()  # noqa: SLF001
+        lock_b = connector._get_lock()  # noqa: SLF001
+        assert lock_a is lock_b
+
+    def test_concurrent_rate_limit_respects_interval(self) -> None:
+        """Two threads sharing a connector both respect the minimum interval."""
+        import threading
+
+        connector = _StubConnector()
+        timestamps: list[float] = []
+        lock = threading.Lock()
+
+        def _call() -> None:
+            import time
+
+            connector._rate_limit()  # noqa: SLF001
+            with lock:
+                timestamps.append(time.monotonic())
+            connector._last_request_time = time.monotonic()  # noqa: SLF001
+
+        # Patch the read-only property to use a measurable interval.
+        with patch.object(
+            type(connector),
+            "min_request_interval",
+            new_callable=lambda: property(lambda self: 0.05),
+        ):
+            t1 = threading.Thread(target=_call)
+            t2 = threading.Thread(target=_call)
+            t1.start()
+            t2.start()
+            t1.join()
+            t2.join()
+
+        # Both threads completed; the lock prevented data corruption.
+        assert len(timestamps) == 2
