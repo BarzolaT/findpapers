@@ -421,7 +421,7 @@ class EnrichmentRunner:
                         if _enrichment_snapshot(paper) != mid:
                             doi_contributed = True
             except Exception:  # noqa: BLE001
-                logger.debug("CrossRef fetch error for DOI: %s", paper.doi)
+                logger.warning("CrossRef fetch error for DOI: %s", paper.doi)
 
         # ------------------------------------------------------------------
         # Phase 2: URL-based HTML scraping
@@ -449,7 +449,7 @@ class EnrichmentRunner:
                 metadata = fetch_metadata(url, timeout=timeout)
             except Exception:  # noqa: BLE001
                 had_fetch_error = True
-                logger.debug("Fetch error for enrichment URL: %s", url)
+                logger.warning("Fetch error for enrichment URL: %s", url)
                 continue
             if not metadata:
                 continue
