@@ -2,9 +2,10 @@
 
 from findpapers.core.author import Author
 from findpapers.core.citation_graph import CitationGraph
-from findpapers.core.paper import PaperType
+from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import ConnectorType, FilterCode
-from findpapers.core.source import SourceType
+from findpapers.core.search_result import SearchResult
+from findpapers.core.source import Source, SourceType
 from findpapers.engine import Engine
 from findpapers.exceptions import (
     ConnectorError,
@@ -31,10 +32,13 @@ __all__ = [
     "ExportError",
     "FilterCode",
     "FindpapersError",
+    "Paper",
     "PaperType",
     "QueryValidationError",
+    "SearchResult",
     "SearchRunner",
     "SnowballRunner",
+    "Source",
     "SourceType",
     "UnsupportedQueryError",
 ]
