@@ -154,6 +154,7 @@ class PubmedConnector(SearchConnectorBase):
             "sort": "pub_date",
             "retstart": retstart,
             "retmax": retmax,
+            **getattr(self, "_date_params", {}),
         }
         response = self._get(_ESEARCH_URL, params)
         data = response.json()
@@ -349,6 +350,8 @@ class PubmedConnector(SearchConnectorBase):
         query: Query,
         max_papers: int | None,
         progress_callback: Callable[[int, int | None], None] | None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
     ) -> list[Paper]:
         """Fetch papers from PubMed with pagination (esearch + efetch).
 
@@ -360,6 +363,10 @@ class PubmedConnector(SearchConnectorBase):
             Maximum papers to retrieve.
         progress_callback : Callable[[int, int | None], None] | None
             Progress callback.
+        since : datetime.date | None
+            Only return papers published on or after this date.
+        until : datetime.date | None
+            Only return papers published on or before this date.
 
         Returns
         -------
@@ -367,6 +374,15 @@ class PubmedConnector(SearchConnectorBase):
             Retrieved papers.
         """
         pubmed_query = self._query_builder.convert_query(query)
+
+        # Build date range parameters for PubMed esearch.
+        self._date_params: dict[str, str] = {}
+        if since or until:
+            self._date_params["datetype"] = "pdat"  # publication date
+            if since:
+                self._date_params["mindate"] = since.strftime("%Y/%m/%d")
+            if until:
+                self._date_params["maxdate"] = until.strftime("%Y/%m/%d")
         papers: list[Paper] = []
         processed = 0
         offset = 0

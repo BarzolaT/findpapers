@@ -271,6 +271,8 @@ class ScopusConnector(SearchConnectorBase):
         query: Query,
         max_papers: int | None,
         progress_callback: Callable[[int, int | None], None] | None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
     ) -> list[Paper]:
         """Fetch papers from Scopus with pagination.
 
@@ -282,6 +284,10 @@ class ScopusConnector(SearchConnectorBase):
             Maximum papers to retrieve.
         progress_callback : Callable[[int, int | None], None] | None
             Progress callback.
+        since : datetime.date | None
+            Only return papers published on or after this date.
+        until : datetime.date | None
+            Only return papers published on or before this date.
 
         Returns
         -------
@@ -305,6 +311,13 @@ class ScopusConnector(SearchConnectorBase):
                 "sort": "-coverDate",
                 "view": "STANDARD",
             }
+
+            # Scopus supports date filtering via the ``date`` parameter.
+            # Format: ``YYYY-YYYY`` (start year – end year).
+            if since is not None or until is not None:
+                from_year = str(since.year) if since else "1900"
+                to_year = str(until.year) if until else "9999"
+                params["date"] = f"{from_year}-{to_year}"
 
             try:
                 response = self._get(_BASE_URL, params)

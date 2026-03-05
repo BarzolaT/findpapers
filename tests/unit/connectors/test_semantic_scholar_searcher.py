@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from unittest.mock import MagicMock, patch
 
 from findpapers.connectors.semantic_scholar import SemanticScholarConnector
@@ -421,3 +422,46 @@ class TestSemanticScholarConnectorSearch:
             papers = searcher.search(simple_query)
 
         assert papers == []
+
+    def test_since_until_adds_date_range_param(
+        self, simple_query, semantic_scholar_sample_json, mock_response
+    ):
+        """search() adds publicationDateOrYear range when since/until are given."""
+        searcher = SemanticScholarConnector()
+        first_page = mock_response(json_data=semantic_scholar_sample_json)
+        first_page.raise_for_status = MagicMock()
+        second_page = mock_response(json_data={"total": 0, "token": None, "data": []})
+        second_page.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [first_page, second_page]
+
+        since = datetime.date(2022, 1, 1)
+        until = datetime.date(2023, 12, 31)
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, max_papers=5, since=since, until=until)
+
+        call_args = searcher._http_session.get.call_args_list[0]
+        params = call_args.kwargs.get("params") or call_args[1].get("params", {})
+        assert params.get("publicationDateOrYear") == "2022-01-01:2023-12-31"
+
+    def test_since_only_open_ended_range(
+        self, simple_query, semantic_scholar_sample_json, mock_response
+    ):
+        """search() with only `since` produces an open-ended range."""
+        searcher = SemanticScholarConnector()
+        first_page = mock_response(json_data=semantic_scholar_sample_json)
+        first_page.raise_for_status = MagicMock()
+        second_page = mock_response(json_data={"total": 0, "token": None, "data": []})
+        second_page.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [first_page, second_page]
+
+        since = datetime.date(2021, 6, 15)
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, max_papers=5, since=since)
+
+        call_args = searcher._http_session.get.call_args_list[0]
+        params = call_args.kwargs.get("params") or call_args[1].get("params", {})
+        assert params.get("publicationDateOrYear") == "2021-06-15:"

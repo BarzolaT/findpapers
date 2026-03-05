@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from unittest.mock import MagicMock, patch
 
 from findpapers.connectors.scopus import ScopusConnector
@@ -389,3 +390,27 @@ class TestScopusConnectorSearch:
             papers = searcher.search(simple_query)
 
         assert papers == []
+
+    def test_since_until_adds_date_param(self, simple_query, scopus_sample_json, mock_response):
+        """search() adds date=YYYY-YYYY when since/until are given."""
+        searcher = ScopusConnector()
+        response = mock_response(json_data=scopus_sample_json)
+        response.raise_for_status = MagicMock()
+        get_calls: list = []
+
+        def _fake_get(url, params=None, headers=None):
+            get_calls.append(params)
+            return response
+
+        since = datetime.date(2019, 5, 1)
+        until = datetime.date(2023, 11, 30)
+
+        with (
+            patch.object(searcher, "_get", side_effect=_fake_get),
+            patch.object(searcher, "_rate_limit"),
+        ):
+            searcher.search(simple_query, max_papers=5, since=since, until=until)
+
+        assert len(get_calls) >= 1
+        params = get_calls[0]
+        assert params["date"] == "2019-2023"

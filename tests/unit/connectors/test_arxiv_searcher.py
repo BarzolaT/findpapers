@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -483,3 +484,58 @@ class TestArxivConnectorSearch:
             papers = searcher.search(simple_query)
 
         assert papers == []
+
+    def test_since_until_appended_to_query(self, simple_query, arxiv_sample_xml, mock_response):
+        """search() appends submittedDate range when since/until are given."""
+        searcher = ArxivConnector()
+        response = mock_response(text=arxiv_sample_xml)
+        response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
+
+        since = datetime.date(2023, 1, 15)
+        until = datetime.date(2023, 12, 31)
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, max_papers=5, since=since, until=until)
+
+        call_args = searcher._http_session.get.call_args
+        params = call_args.kwargs.get("params") or call_args[1].get("params", {})
+        search_query = params.get("search_query", "")
+        assert "submittedDate:[202301150000+TO+202312312359]" in search_query
+
+    def test_since_only_uses_open_end(self, simple_query, arxiv_sample_xml, mock_response):
+        """search() with only `since` uses a far-future end date."""
+        searcher = ArxivConnector()
+        response = mock_response(text=arxiv_sample_xml)
+        response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
+
+        since = datetime.date(2020, 6, 1)
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, max_papers=5, since=since)
+
+        call_args = searcher._http_session.get.call_args
+        params = call_args.kwargs.get("params") or call_args[1].get("params", {})
+        search_query = params.get("search_query", "")
+        assert "submittedDate:[202006010000+TO+999912312359]" in search_query
+
+    def test_until_only_uses_open_start(self, simple_query, arxiv_sample_xml, mock_response):
+        """search() with only `until` uses a far-past start date."""
+        searcher = ArxivConnector()
+        response = mock_response(text=arxiv_sample_xml)
+        response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
+
+        until = datetime.date(2022, 3, 15)
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, max_papers=5, until=until)
+
+        call_args = searcher._http_session.get.call_args
+        params = call_args.kwargs.get("params") or call_args[1].get("params", {})
+        search_query = params.get("search_query", "")
+        assert "submittedDate:[000001010000+TO+202203152359]" in search_query

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -565,3 +566,27 @@ class TestOpenAlexConnectorSearch:
             papers = searcher.search(or_query, max_papers=1)
 
         assert len(papers) <= 1
+
+    def test_since_until_adds_filter_params(
+        self, simple_query, openalex_sample_json, mock_response
+    ):
+        """search() adds from_publication_date/to_publication_date filters."""
+        searcher = OpenAlexConnector()
+        data = openalex_sample_json.copy()
+        data["meta"] = {"count": 1, "next_cursor": None}
+        response = mock_response(json_data=data)
+        response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
+
+        since = datetime.date(2022, 1, 1)
+        until = datetime.date(2023, 6, 30)
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, max_papers=5, since=since, until=until)
+
+        call_args = searcher._http_session.get.call_args
+        params = call_args.kwargs.get("params") or call_args[1].get("params", {})
+        filter_str = params.get("filter", "")
+        assert "from_publication_date:2022-01-01" in filter_str
+        assert "to_publication_date:2023-06-30" in filter_str

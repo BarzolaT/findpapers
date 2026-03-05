@@ -19,6 +19,7 @@ Example
 
 from __future__ import annotations
 
+import datetime as dt
 import logging
 import os
 from typing import Literal
@@ -146,6 +147,8 @@ class Engine:
         *,
         databases: list[str] | None = None,
         max_papers_per_database: int | None = None,
+        since: dt.date | None = None,
+        until: dt.date | None = None,
         num_workers: int = 1,
         verbose: bool = False,
         show_progress: bool = True,
@@ -196,6 +199,14 @@ class Engine:
         max_papers_per_database : int | None
             Cap on the number of papers retrieved from each database.
             ``None`` means no limit.
+        since : datetime.date | None
+            Only return papers published on or after this date.  Passed to
+            each database connector's API when supported.  ``None`` means
+            no lower-bound filter.
+        until : datetime.date | None
+            Only return papers published on or before this date.  Passed to
+            each database connector's API when supported.  ``None`` means
+            no upper-bound filter.
         num_workers : int
             Number of parallel workers used to query databases concurrently.
             Defaults to ``1`` (sequential).
@@ -266,6 +277,8 @@ class Engine:
             email=self._email,
             semantic_scholar_api_key=self._semantic_scholar_api_key,
             num_workers=num_workers,
+            since=since,
+            until=until,
         )
         return runner.run(verbose=verbose, show_progress=show_progress)
 

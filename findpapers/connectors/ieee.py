@@ -272,6 +272,8 @@ class IEEEConnector(SearchConnectorBase):
         query: Query,
         max_papers: int | None,
         progress_callback: Callable[[int, int | None], None] | None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
     ) -> list[Paper]:
         """Fetch papers from IEEE Xplore with pagination.
 
@@ -283,6 +285,10 @@ class IEEEConnector(SearchConnectorBase):
             Maximum papers to retrieve.
         progress_callback : Callable[[int, int | None], None] | None
             Progress callback.
+        since : datetime.date | None
+            Only return papers published on or after this date (year granularity).
+        until : datetime.date | None
+            Only return papers published on or before this date (year granularity).
 
         Returns
         -------
@@ -290,6 +296,12 @@ class IEEEConnector(SearchConnectorBase):
             Retrieved papers.
         """
         ieee_params = self._query_builder.convert_query(query)
+
+        # IEEE Xplore supports year-level date filtering via start_year / end_year.
+        if since is not None:
+            ieee_params["start_year"] = str(since.year)
+        if until is not None:
+            ieee_params["end_year"] = str(until.year)
         papers: list[Paper] = []
         processed = 0
         offset = 1  # IEEE uses 1-based pagination

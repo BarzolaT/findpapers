@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import logging
 from datetime import UTC, datetime
 from time import perf_counter
@@ -90,6 +91,8 @@ class SearchRunner:
         email: str | None = None,
         semantic_scholar_api_key: str | None = None,
         num_workers: int = 1,
+        since: dt.date | None = None,
+        until: dt.date | None = None,
     ) -> None:
         """Initialise search configuration without executing it."""
         self._results: list[Paper] = []
@@ -99,6 +102,8 @@ class SearchRunner:
         self._query_string = query
         self._max_papers_per_database = max_papers_per_database
         self._num_workers = num_workers
+        self._since = since
+        self._until = until
 
         # Parse and validate the query upfront so errors surface early.
         validator = QueryValidator()
@@ -199,6 +204,8 @@ class SearchRunner:
             databases=[s.name for s in self._searchers],
             papers=list(self._results),
             runtime_seconds=self._metrics.get("runtime_in_seconds"),
+            since=self._since,
+            until=self._until,
         )
         return self._search
 
@@ -334,6 +341,8 @@ class SearchRunner:
                     self._query,
                     max_papers=self._max_papers_per_database,
                     progress_callback=_cb,
+                    since=self._since,
+                    until=self._until,
                 )
 
         num_searchers = len(self._searchers)

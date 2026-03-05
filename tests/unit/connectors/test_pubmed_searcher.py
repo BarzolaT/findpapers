@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from unittest.mock import MagicMock, patch
 from xml.etree import ElementTree as ET
 
@@ -631,3 +632,28 @@ class TestPubmedConnectorSearch:
             papers = searcher.search(simple_query)
 
         assert papers == []
+
+    def test_since_until_adds_date_params(
+        self, simple_query, pubmed_esearch_json, pubmed_efetch_xml, mock_response
+    ):
+        """search() adds mindate/maxdate/datetype when since/until are given."""
+        searcher = PubmedConnector()
+        esearch_mock = mock_response(json_data=pubmed_esearch_json)
+        esearch_mock.raise_for_status = MagicMock()
+        efetch_mock = mock_response(text=pubmed_efetch_xml)
+        efetch_mock.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [esearch_mock, efetch_mock]
+
+        since = datetime.date(2022, 3, 1)
+        until = datetime.date(2023, 9, 30)
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, max_papers=5, since=since, until=until)
+
+        # The first call is the esearch; check its params for date filtering.
+        esearch_call = searcher._http_session.get.call_args_list[0]
+        params = esearch_call.kwargs.get("params") or esearch_call[1].get("params", {})
+        assert params.get("datetype") == "pdat"
+        assert params.get("mindate") == "2022/03/01"
+        assert params.get("maxdate") == "2023/09/30"

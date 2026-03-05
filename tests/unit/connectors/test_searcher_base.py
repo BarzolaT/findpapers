@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from typing import Callable, List, Optional
 from unittest.mock import MagicMock, patch
 
@@ -41,6 +42,8 @@ class _StubConnector(SearchConnectorBase):
         query: Query,
         max_papers: Optional[int],
         progress_callback: Optional[Callable],
+        since: Optional[datetime.date] = None,
+        until: Optional[datetime.date] = None,
     ) -> List[Paper]:
         return []
 

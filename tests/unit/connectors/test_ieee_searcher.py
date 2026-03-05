@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -312,3 +313,40 @@ class TestIEEEConnectorSearch:
             papers = searcher.search(simple_query)
 
         assert papers == []
+
+    def test_since_until_adds_year_params(self, simple_query, ieee_sample_json, mock_response):
+        """search() adds start_year/end_year when since/until are given."""
+        searcher = IEEEConnector()
+        response = mock_response(json_data=ieee_sample_json)
+        response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
+
+        since = datetime.date(2020, 3, 1)
+        until = datetime.date(2023, 6, 30)
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, max_papers=5, since=since, until=until)
+
+        call_args = searcher._http_session.get.call_args
+        params = call_args.kwargs.get("params") or call_args[1].get("params", {})
+        assert params.get("start_year") == "2020"
+        assert params.get("end_year") == "2023"
+
+    def test_since_only_adds_start_year(self, simple_query, ieee_sample_json, mock_response):
+        """search() adds only start_year when only `since` is given."""
+        searcher = IEEEConnector()
+        response = mock_response(json_data=ieee_sample_json)
+        response.raise_for_status = MagicMock()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = response
+
+        since = datetime.date(2021, 1, 1)
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query, max_papers=5, since=since)
+
+        call_args = searcher._http_session.get.call_args
+        params = call_args.kwargs.get("params") or call_args[1].get("params", {})
+        assert params.get("start_year") == "2021"
+        assert "end_year" not in params

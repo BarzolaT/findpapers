@@ -242,6 +242,8 @@ class ArxivConnector(SearchConnectorBase):
         query: Query,
         max_papers: int | None,
         progress_callback: Callable[[int, int | None], None] | None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
     ) -> list[Paper]:
         """Fetch papers from arXiv with pagination and rate limiting.
 
@@ -253,6 +255,10 @@ class ArxivConnector(SearchConnectorBase):
             Maximum papers to retrieve.
         progress_callback : Callable[[int, int | None], None] | None
             Progress callback.
+        since : datetime.date | None
+            Only return papers submitted on or after this date.
+        until : datetime.date | None
+            Only return papers submitted on or before this date.
 
         Returns
         -------
@@ -260,6 +266,16 @@ class ArxivConnector(SearchConnectorBase):
             Retrieved papers.
         """
         arxiv_query = self._query_builder.convert_query(query)
+
+        # Append arXiv submittedDate range filter when date bounds are given.
+        if since or until:
+            from_date = since.strftime("%Y%m%d") + "0000" if since else "000001010000"
+            to_date = until.strftime("%Y%m%d") + "2359" if until else "999912312359"
+            date_filter = f"submittedDate:[{from_date}+TO+{to_date}]"
+            if arxiv_query:
+                arxiv_query = f"{arxiv_query}+AND+{date_filter}"
+            else:
+                arxiv_query = date_filter
         papers: list[Paper] = []
         processed = 0
         offset = 0

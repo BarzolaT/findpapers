@@ -190,6 +190,8 @@ class TestEngineSearch:
             email="me@example.com",
             semantic_scholar_api_key="s2-k",
             num_workers=3,
+            since=None,
+            until=None,
         )
         mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
         assert result is fake_search

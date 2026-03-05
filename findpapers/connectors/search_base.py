@@ -7,6 +7,7 @@ search-specific contract: query validation, paper fetching, and the public
 
 from __future__ import annotations
 
+import datetime
 import logging
 from abc import abstractmethod
 from collections.abc import Callable
@@ -58,6 +59,8 @@ class SearchConnectorBase(ConnectorBase):
         query: "Query",
         max_papers: int | None,
         progress_callback: Callable[[int, int | None], None] | None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
     ) -> list["Paper"]:
         """Fetch papers from the database.
 
@@ -76,6 +79,10 @@ class SearchConnectorBase(ConnectorBase):
             every candidate item attempted (regardless of whether it was
             successfully parsed), so the bar always reaches ``total`` even
             when some items fail to parse.
+        since : datetime.date | None
+            Only return papers published on or after this date.
+        until : datetime.date | None
+            Only return papers published on or before this date.
 
         Returns
         -------
@@ -93,6 +100,8 @@ class SearchConnectorBase(ConnectorBase):
         query: "Query",
         max_papers: int | None = None,
         progress_callback: Callable[[int, int | None], None] | None = None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
     ) -> list["Paper"]:
         """Execute search and return a list of papers.
 
@@ -107,6 +116,10 @@ class SearchConnectorBase(ConnectorBase):
             Maximum number of papers to return.
         progress_callback : Callable[[int, int | None], None] | None
             Progress callback called as ``callback(current, total_or_none)``.
+        since : datetime.date | None
+            Only return papers published on or after this date.
+        until : datetime.date | None
+            Only return papers published on or before this date.
 
         Returns
         -------
@@ -122,7 +135,7 @@ class SearchConnectorBase(ConnectorBase):
             )
 
         try:
-            return self._fetch_papers(query, max_papers, progress_callback)
+            return self._fetch_papers(query, max_papers, progress_callback, since, until)
         except (requests.RequestException, ConnectorError):
             logger.exception("Error while searching '%s'.", self.name)
             return []

@@ -488,6 +488,8 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         query: Query,
         max_papers: int | None,
         progress_callback: Callable[[int, int | None], None] | None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
     ) -> list[Paper]:
         """Fetch papers from Semantic Scholar bulk search with pagination.
 
@@ -499,6 +501,10 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
             Maximum papers to retrieve.
         progress_callback : Callable[[int, int | None], None] | None
             Progress callback.
+        since : datetime.date | None
+            Only return papers published on or after this date.
+        until : datetime.date | None
+            Only return papers published on or before this date.
 
         Returns
         -------
@@ -506,6 +512,12 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
             Retrieved papers.
         """
         ss_params = self._query_builder.convert_query(query)
+
+        # Semantic Scholar supports publicationDateOrYear range filter.
+        if since or until:
+            from_part = since.isoformat() if since else ""
+            to_part = until.isoformat() if until else ""
+            ss_params["publicationDateOrYear"] = f"{from_part}:{to_part}"
         papers: list[Paper] = []
         author_id_to_authors: dict[str, list[Author]] = {}
         token: str | None = None  # Semantic Scholar uses token-based pagination

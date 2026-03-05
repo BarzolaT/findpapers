@@ -536,6 +536,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         max_papers: int | None,
         papers: list[Paper],
         progress_callback: Callable[[int, int | None], None] | None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
     ) -> None:
         """Fetch papers for one converted query variant using cursor-based pagination.
 
@@ -549,6 +551,10 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             Accumulator — papers appended in-place.
         progress_callback : Callable | None
             Progress callback.
+        since : datetime.date | None
+            Only return papers published on or after this date.
+        until : datetime.date | None
+            Only return papers published on or before this date.
         """
         cursor = "*"
         total: int | None = None
@@ -584,6 +590,14 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 params["filter"] = f"{existing_filter},{date_cap}"
             else:
                 params["filter"] = date_cap
+
+            # Apply user-specified date bounds on top of the automatic cap.
+            if since is not None:
+                params["filter"] += f",from_publication_date:{since.isoformat()}"
+            if until is not None:
+                # Only override the cap when the user's bound is tighter.
+                if until.isoformat() < _max_pub_date:
+                    params["filter"] += f",to_publication_date:{until.isoformat()}"
 
             try:
                 response = self._get(_BASE_URL, params)
@@ -623,6 +637,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         query: Query,
         max_papers: int | None,
         progress_callback: Callable[[int, int | None], None] | None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
     ) -> list[Paper]:
         """Fetch papers from OpenAlex handling query expansion.
 
@@ -634,6 +650,10 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             Maximum papers to retrieve.
         progress_callback : Callable[[int, int | None], None] | None
             Progress callback.
+        since : datetime.date | None
+            Only return papers published on or after this date.
+        until : datetime.date | None
+            Only return papers published on or before this date.
 
         Returns
         -------
@@ -652,7 +672,9 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             # deduplicated and truncated to max_papers at the very end.
             sub_papers: list[Paper] = []
             sub_params = self._query_builder.convert_query(sub_query)
-            self._fetch_single_query(sub_params, max_papers, sub_papers, progress_callback)
+            self._fetch_single_query(
+                sub_params, max_papers, sub_papers, progress_callback, since, until
+            )
 
             # Merge into the global accumulator, deduplicating across branches.
             for paper in sub_papers:
