@@ -256,6 +256,31 @@ class Paper:
         """
         return f"Paper(title={self.title!r}, doi={self.doi!r})"
 
+    def __str__(self) -> str:
+        """Return a human-readable citation-like string.
+
+        Format: ``"Author et al. (Year). Title."``
+        Falls back gracefully when author or date is missing.
+
+        Returns
+        -------
+        str
+            Friendly citation string.
+        """
+        parts: list[str] = []
+        if self.authors:
+            first = self.authors[0].name
+            if len(self.authors) > 1:
+                parts.append(f"{first} et al.")
+            else:
+                parts.append(first)
+        if self.publication_date is not None:
+            parts.append(f"({self.publication_date.year})")
+        # Always include the title, terminated with a period
+        title = self.title.rstrip(".")
+        parts.append(f"{title}.")
+        return " ".join(parts)
+
     def _identity_key(self) -> str | None:
         """Return a unique identity key for this paper, or ``None``.
 

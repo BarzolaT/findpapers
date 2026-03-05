@@ -116,6 +116,21 @@ class Source:
         """
         return f"Source(title={self.title!r})"
 
+    def __str__(self) -> str:
+        """Return a human-readable representation.
+
+        Format: ``"Title (Publisher)"`` when a publisher is available,
+        otherwise just the title.
+
+        Returns
+        -------
+        str
+            Friendly string.
+        """
+        if self.publisher:
+            return f"{self.title} ({self.publisher})"
+        return self.title
+
     def merge(self, source: Source) -> None:
         """Merge another source into this one.
 

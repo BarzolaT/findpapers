@@ -751,3 +751,113 @@ class TestSourceEquality:
         a = Source(title="Nature")
         b = Source(title="nature")
         assert len({a, b}) == 1
+
+
+# ---------------------------------------------------------------------------
+# Source.__str__
+# ---------------------------------------------------------------------------
+
+
+class TestSourceStr:
+    """Tests for Source.__str__."""
+
+    def test_str_with_publisher(self) -> None:
+        """str(source) includes publisher in parentheses."""
+        s = Source(title="Nature", publisher="Springer")
+        assert str(s) == "Nature (Springer)"
+
+    def test_str_without_publisher(self) -> None:
+        """str(source) returns just the title when there is no publisher."""
+        s = Source(title="Nature")
+        assert str(s) == "Nature"
+
+    def test_str_differs_from_repr(self) -> None:
+        """__str__ and __repr__ produce different output."""
+        s = Source(title="Nature", publisher="Springer")
+        assert str(s) != repr(s)
+
+
+# ---------------------------------------------------------------------------
+# Paper.__str__
+# ---------------------------------------------------------------------------
+
+
+class TestPaperStr:
+    """Tests for Paper.__str__."""
+
+    def test_str_full(self) -> None:
+        """str(paper) with authors and date looks like a citation."""
+        paper = Paper(
+            title="Deep Learning",
+            abstract="",
+            authors=[Author(name="LeCun, Y."), Author(name="Bengio, Y.")],
+            source=None,
+            publication_date=datetime.date(2015, 5, 1),
+        )
+        assert str(paper) == "LeCun, Y. et al. (2015) Deep Learning."
+
+    def test_str_single_author(self) -> None:
+        """str(paper) with a single author omits 'et al.'."""
+        paper = Paper(
+            title="A Survey",
+            abstract="",
+            authors=[Author(name="Smith, J.")],
+            source=None,
+            publication_date=datetime.date(2020, 1, 1),
+        )
+        assert str(paper) == "Smith, J. (2020) A Survey."
+
+    def test_str_no_authors(self) -> None:
+        """str(paper) without authors starts with year."""
+        paper = Paper(
+            title="Anonymous Work",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=datetime.date(2021, 6, 1),
+        )
+        assert str(paper) == "(2021) Anonymous Work."
+
+    def test_str_no_date(self) -> None:
+        """str(paper) without date omits year."""
+        paper = Paper(
+            title="Timeless",
+            abstract="",
+            authors=[Author(name="Doe, J.")],
+            source=None,
+            publication_date=None,
+        )
+        assert str(paper) == "Doe, J. Timeless."
+
+    def test_str_minimal(self) -> None:
+        """str(paper) with no authors and no date returns just the title."""
+        paper = Paper(
+            title="Only Title",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        assert str(paper) == "Only Title."
+
+    def test_str_title_trailing_dot_not_duplicated(self) -> None:
+        """A title already ending with '.' does not get a double period."""
+        paper = Paper(
+            title="Ends with dot.",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        assert str(paper) == "Ends with dot."
+
+    def test_str_differs_from_repr(self) -> None:
+        """__str__ and __repr__ produce different output."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="A, B.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        assert str(paper) != repr(paper)
