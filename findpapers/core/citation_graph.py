@@ -98,6 +98,11 @@ class CitationGraph:
         self._edges: list[CitationEdge] = []
         # Set of (source_key, target_key) tuples for O(1) duplicate edge detection.
         self._edge_keys: set[tuple[str, str]] = set()
+        # Adjacency dicts for O(1) neighbor lookups.
+        # _forward_adj: source_key → list of target Papers  (references)
+        # _backward_adj: target_key → list of source Papers (cited-by)
+        self._forward_adj: dict[str, list[Paper]] = {}
+        self._backward_adj: dict[str, list[Paper]] = {}
         # Track the depth at which each paper was first discovered.
         self._paper_depths: dict[str, int] = {}
 
@@ -239,6 +244,10 @@ class CitationGraph:
         self._edge_keys.add(edge_key)
         self._edges.append(CitationEdge(source=canonical_source, target=canonical_target))
 
+        # Update adjacency dicts for O(1) lookups.
+        self._forward_adj.setdefault(source_key, []).append(canonical_target)
+        self._backward_adj.setdefault(target_key, []).append(canonical_source)
+
     # ------------------------------------------------------------------
     # Query helpers
     # ------------------------------------------------------------------
@@ -257,7 +266,9 @@ class CitationGraph:
             Papers that *paper* cites.
         """
         key = self._paper_key(paper)
-        return [edge.target for edge in self._edges if self._paper_key(edge.source) == key]
+        if key is None:
+            return []
+        return list(self._forward_adj.get(key, []))
 
     def get_cited_by(self, paper: Paper) -> list[Paper]:
         """Return papers that cite the given paper (forward direction).
@@ -273,7 +284,9 @@ class CitationGraph:
             Papers that cite *paper*.
         """
         key = self._paper_key(paper)
-        return [edge.source for edge in self._edges if self._paper_key(edge.target) == key]
+        if key is None:
+            return []
+        return list(self._backward_adj.get(key, []))
 
     def get_paper_depth(self, paper: Paper) -> int | None:
         """Return the traversal depth at which a paper was first discovered.
@@ -382,6 +395,9 @@ class CitationGraph:
             if src_key in papers and tgt_key in papers:
                 graph._edges.append(CitationEdge(source=papers[src_key], target=papers[tgt_key]))
                 graph._edge_keys.add((src_key, tgt_key))
+                # Rebuild adjacency dicts.
+                graph._forward_adj.setdefault(src_key, []).append(papers[tgt_key])
+                graph._backward_adj.setdefault(tgt_key, []).append(papers[src_key])
 
         return graph
 

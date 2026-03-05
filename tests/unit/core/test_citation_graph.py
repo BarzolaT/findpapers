@@ -281,3 +281,37 @@ class TestCitationGraph:
         assert graph.get_references(center)[0] is ref
         assert len(graph.get_cited_by(center)) == 1
         assert graph.get_cited_by(center)[0] is citing
+
+    def test_get_references_unknown_paper_returns_empty(self) -> None:
+        """get_references returns empty list for unknown paper."""
+        graph = CitationGraph(seed_papers=[], depth=1, direction="both")
+        unknown = make_paper("Unknown", doi="10.1000/unknown")
+        assert graph.get_references(unknown) == []
+
+    def test_get_cited_by_unknown_paper_returns_empty(self) -> None:
+        """get_cited_by returns empty list for unknown paper."""
+        graph = CitationGraph(seed_papers=[], depth=1, direction="both")
+        unknown = make_paper("Unknown", doi="10.1000/unknown")
+        assert graph.get_cited_by(unknown) == []
+
+    def test_adjacency_after_from_dict_round_trip(self) -> None:
+        """get_references/get_cited_by work after from_dict reconstruction."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.1000/ref")
+        citing = make_paper("Citing", doi="10.1000/citing")
+        graph = CitationGraph(seed_papers=[seed], depth=1, direction="both")
+        graph.add_paper(ref, depth=1)
+        graph.add_paper(citing, depth=1)
+        graph.add_edge(seed, ref)
+        graph.add_edge(citing, seed)
+
+        restored = CitationGraph.from_dict(graph.to_dict())
+
+        # Lookup by DOI since instances differ after round-trip.
+        restored_seed = [p for p in restored.papers if p.doi == "10.1000/seed"][0]
+        refs = restored.get_references(restored_seed)
+        cited_by = restored.get_cited_by(restored_seed)
+        assert len(refs) == 1
+        assert refs[0].doi == "10.1000/ref"
+        assert len(cited_by) == 1
+        assert cited_by[0].doi == "10.1000/citing"
