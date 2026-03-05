@@ -476,6 +476,165 @@ class TestPaperToBibtex:
         entry = paper_to_bibtex(paper)
         assert entry.startswith("@misc{")
 
+    def test_article_contains_journal_field(self) -> None:
+        """@article entry includes journal field from source title."""
+        pub = Source(title="Nature Machine Intelligence", source_type=SourceType.JOURNAL)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.ARTICLE,
+        )
+        entry = paper_to_bibtex(paper)
+        assert "journal = {Nature Machine Intelligence}" in entry
+
+    def test_inproceedings_contains_booktitle_field(self) -> None:
+        """@inproceedings entry includes booktitle field from source title."""
+        pub = Source(title="NeurIPS 2023", source_type=SourceType.CONFERENCE)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.INPROCEEDINGS,
+        )
+        entry = paper_to_bibtex(paper)
+        assert "booktitle = {NeurIPS 2023}" in entry
+
+    def test_incollection_contains_booktitle_field(self) -> None:
+        """@incollection entry includes booktitle field from source title."""
+        pub = Source(title="Advances in AI", source_type=SourceType.BOOK)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.INCOLLECTION,
+        )
+        entry = paper_to_bibtex(paper)
+        assert "booktitle = {Advances in AI}" in entry
+
+    def test_techreport_contains_institution_field(self) -> None:
+        """@techreport entry includes institution field from source publisher."""
+        pub = Source(title="Tech Reports", publisher="MIT", source_type=SourceType.OTHER)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.TECHREPORT,
+        )
+        entry = paper_to_bibtex(paper)
+        assert "institution = {MIT}" in entry
+
+    def test_contains_doi_field(self) -> None:
+        """Entry includes doi field when paper has DOI."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+            doi="10.1234/example.doi",
+        )
+        entry = paper_to_bibtex(paper)
+        assert "doi = {10.1234/example.doi}" in entry
+
+    def test_no_doi_field_when_none(self) -> None:
+        """Entry omits doi field when paper has no DOI."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
+        assert "doi" not in entry
+
+    def test_contains_abstract_field(self) -> None:
+        """Entry includes abstract field when paper has abstract."""
+        paper = Paper(
+            title="T",
+            abstract="A deep survey.",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
+        assert "abstract = {A deep survey.}" in entry
+
+    def test_no_abstract_field_when_empty(self) -> None:
+        """Entry omits abstract field when abstract is empty."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
+        assert "abstract" not in entry
+
+    def test_contains_keywords_field(self) -> None:
+        """Entry includes keywords field sorted alphabetically."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+            keywords={"deep learning", "AI"},
+        )
+        entry = paper_to_bibtex(paper)
+        assert "keywords = {AI, deep learning}" in entry
+
+    def test_contains_url_field(self) -> None:
+        """Entry includes url field when paper has URL."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+            url="https://example.com/paper",
+        )
+        entry = paper_to_bibtex(paper)
+        assert "url = {https://example.com/paper}" in entry
+
+    def test_no_journal_when_not_article(self) -> None:
+        """Non-article entries do not include journal field."""
+        pub = Source(title="NeurIPS 2023", source_type=SourceType.CONFERENCE)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.INPROCEEDINGS,
+        )
+        entry = paper_to_bibtex(paper)
+        assert "journal" not in entry
+
+    def test_no_booktitle_when_article(self) -> None:
+        """@article entries do not include booktitle field."""
+        pub = Source(title="Nature", source_type=SourceType.JOURNAL)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.ARTICLE,
+        )
+        entry = paper_to_bibtex(paper)
+        assert "booktitle" not in entry
+
 
 # ---------------------------------------------------------------------------
 # export_to_json

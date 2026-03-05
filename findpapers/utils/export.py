@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, TypeAlias
 
-from findpapers.core.paper import Paper
+from findpapers.core.paper import Paper, PaperType
 from findpapers.exceptions import ExportError
 from findpapers.utils.version import package_version
 
@@ -235,6 +235,25 @@ def paper_to_bibtex(paper: Paper) -> str:
     if how_published:
         lines.append(f"{default_tab}howpublished = {{{how_published}}},")
 
+    # journal field for @article entries
+    if paper.paper_type == PaperType.ARTICLE and source is not None:
+        lines.append(f"{default_tab}journal = {{{source.title}}},")
+
+    # booktitle field for @inproceedings / @incollection entries
+    if paper.paper_type in {PaperType.INPROCEEDINGS, PaperType.INCOLLECTION} and source is not None:
+        lines.append(f"{default_tab}booktitle = {{{source.title}}},")
+
+    # institution field for @techreport / @phdthesis / @mastersthesis entries
+    if (
+        paper.paper_type in {PaperType.TECHREPORT, PaperType.PHDTHESIS, PaperType.MASTERSTHESIS}
+        and source is not None
+        and source.publisher is not None
+    ):
+        lines.append(f"{default_tab}institution = {{{source.publisher}}},")
+
+    if paper.doi is not None:
+        lines.append(f"{default_tab}doi = {{{paper.doi}}},")
+
     if source is not None and source.publisher is not None:
         lines.append(f"{default_tab}publisher = {{{source.publisher}}},")
 
@@ -243,6 +262,16 @@ def paper_to_bibtex(paper: Paper) -> str:
 
     if paper.page_range is not None:
         lines.append(f"{default_tab}pages = {{{paper.page_range}}},")
+
+    if paper.abstract:
+        lines.append(f"{default_tab}abstract = {{{paper.abstract}}},")
+
+    if paper.keywords:
+        kw_str = ", ".join(sorted(paper.keywords))
+        lines.append(f"{default_tab}keywords = {{{kw_str}}},")
+
+    if paper.url is not None:
+        lines.append(f"{default_tab}url = {{{paper.url}}},")
 
     entry = "\n".join(lines)
     entry = entry.rstrip(",") + "\n" if entry.endswith(",") else entry
