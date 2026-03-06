@@ -132,7 +132,13 @@ class PubmedConnector(SearchConnectorBase):
             return {**params, "api_key": self._api_key}
         return params
 
-    def _search_ids(self, pubmed_query: str, retstart: int, retmax: int) -> tuple[list[str], int]:
+    def _search_ids(
+        self,
+        pubmed_query: str,
+        retstart: int,
+        retmax: int,
+        date_params: dict[str, str] | None = None,
+    ) -> tuple[list[str], int]:
         """Fetch PMIDs via esearch.
 
         Parameters
@@ -143,6 +149,8 @@ class PubmedConnector(SearchConnectorBase):
             Pagination offset.
         retmax : int
             Maximum results per page.
+        date_params : dict[str, str] | None
+            Optional date-range filters (datetype, mindate, maxdate).
 
         Returns
         -------
@@ -156,7 +164,7 @@ class PubmedConnector(SearchConnectorBase):
             "sort": "pub_date",
             "retstart": retstart,
             "retmax": retmax,
-            **getattr(self, "_date_params", {}),
+            **(date_params or {}),
         }
         response = self._get(_ESEARCH_URL, params)
         data = response.json()
@@ -376,13 +384,13 @@ class PubmedConnector(SearchConnectorBase):
         pubmed_query = self._query_builder.convert_query(query)
 
         # Build date range parameters for PubMed esearch.
-        self._date_params: dict[str, str] = {}
+        date_params: dict[str, str] = {}
         if since or until:
-            self._date_params["datetype"] = "pdat"  # publication date
+            date_params["datetype"] = "pdat"  # publication date
             if since:
-                self._date_params["mindate"] = since.strftime("%Y/%m/%d")
+                date_params["mindate"] = since.strftime("%Y/%m/%d")
             if until:
-                self._date_params["maxdate"] = until.strftime("%Y/%m/%d")
+                date_params["maxdate"] = until.strftime("%Y/%m/%d")
         papers: list[Paper] = []
         processed = 0
         offset = 0
@@ -395,7 +403,7 @@ class PubmedConnector(SearchConnectorBase):
                 break
 
             try:
-                ids, total = self._search_ids(pubmed_query, offset, page_size)
+                ids, total = self._search_ids(pubmed_query, offset, page_size, date_params)
             except Exception:
                 logger.exception("PubMed esearch failed (offset=%d).", offset)
                 break
