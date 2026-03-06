@@ -520,7 +520,7 @@ class Engine:
         self,
         papers: list[Paper] | Paper,
         *,
-        depth: int = 1,
+        max_depth: int = 1,
         direction: Literal["both", "backward", "forward"] = "both",
         num_workers: int = 1,
         verbose: bool = False,
@@ -544,10 +544,10 @@ class Engine:
             One or more seed papers from which the snowball starts.
             Typically obtained from ``engine.search(...).papers`` or
             ``engine.fetch_paper_by_doi(...)``.
-        depth : int
-            Number of snowball iterations.  ``1`` (default) retrieves
-            only the immediate neighbours.  ``2`` also expands papers
-            found at level 1, and so on.
+        max_depth : int
+            Maximum number of snowball iterations.  ``1`` (default)
+            retrieves only the immediate neighbours.  ``2`` also expands
+            papers found at level 1, and so on.
         direction : Literal["both", "backward", "forward"]
             ``"backward"`` fetches references (papers cited *by* the seed),
             ``"forward"`` fetches citing papers, ``"both"`` does both.
@@ -582,7 +582,7 @@ class Engine:
         >>> from findpapers import Engine
         >>> engine = Engine()
         >>> seed = engine.fetch_paper_by_doi("10.1038/nature12373")
-        >>> graph = engine.snowball(seed, depth=1)
+        >>> graph = engine.snowball(seed, max_depth=1)
         >>> print(f"{graph.paper_count} papers, {graph.edge_count} edges")
         42 papers, 65 edges
 
@@ -595,13 +595,13 @@ class Engine:
         >>> result = engine.search("[deep learning]")
         >>> graph = engine.snowball(
         ...     result.papers[:5],
-        ...     depth=2,
+        ...     max_depth=2,
         ...     direction="backward",
         ... )
         """
         runner = SnowballRunner(
             seed_papers=papers,
-            depth=depth,
+            max_depth=max_depth,
             direction=direction,
             openalex_api_key=self._openalex_api_key,
             email=self._email,
@@ -656,7 +656,7 @@ class Engine:
 
         Export a citation graph:
 
-        >>> graph = engine.snowball(seed, depth=1)
+        >>> graph = engine.snowball(seed, max_depth=1)
         >>> Engine.export_to_json(graph, "graph.json")
         """
         from findpapers.utils.export import export_to_json

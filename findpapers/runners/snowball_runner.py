@@ -36,7 +36,7 @@ class SnowballRunner:
     seed_papers : list[Paper] | Paper
         One or more papers to start the snowball from.  Papers without a
         DOI are silently skipped (they cannot be resolved by the APIs).
-    depth : int
+    max_depth : int
         Maximum number of snowball iterations.  ``1`` (the default)
         retrieves only the immediate neighbours of seed papers.
     direction : Literal["both", "backward", "forward"]
@@ -59,20 +59,29 @@ class SnowballRunner:
         self,
         seed_papers: list[Paper] | Paper,
         *,
-        depth: int = 1,
+        max_depth: int = 1,
         direction: Literal["both", "backward", "forward"] = "both",
         openalex_api_key: str | None = None,
         email: str | None = None,
         semantic_scholar_api_key: str | None = None,
         num_workers: int = 1,
     ) -> None:
-        """Initialise snowball configuration without executing it."""
+        """Initialise snowball configuration without executing it.
+
+        Raises
+        ------
+        ValueError
+            If *max_depth* is less than 1.
+        """
+        if max_depth < 1:
+            raise ValueError(f"max_depth must be >= 1, got {max_depth}")
+
         if isinstance(seed_papers, Paper):
             seed_papers = [seed_papers]
 
         self._seed_papers = [p for p in seed_papers if p.doi]
         self._skipped_seeds = len(seed_papers) - len(self._seed_papers)
-        self._depth = max(depth, 0)
+        self._max_depth = max_depth
         self._direction = direction
         self._num_workers = max(num_workers, 1)
         self._email = email
@@ -117,7 +126,7 @@ class SnowballRunner:
                 len(self._seed_papers),
                 self._skipped_seeds,
             )
-            logger.info("Depth: %d", self._depth)
+            logger.info("Max depth: %d", self._max_depth)
             logger.info("Direction: %s", self._direction)
             logger.info("Connectors: %s", [c.name for c in self._connectors])
             logger.info("Num workers: %d", self._num_workers)
@@ -127,14 +136,14 @@ class SnowballRunner:
 
         graph = CitationGraph(
             seed_papers=self._seed_papers,
-            depth=self._depth,
+            max_depth=self._max_depth,
             direction=self._direction,
         )
 
         frontier = list(self._seed_papers)
 
         try:
-            for level in range(1, self._depth + 1):
+            for level in range(1, self._max_depth + 1):
                 if not frontier:
                     break
 
@@ -142,20 +151,20 @@ class SnowballRunner:
                     logger.info(
                         "Level %d/%d: processing %d papers.",
                         level,
-                        self._depth,
+                        self._max_depth,
                         len(frontier),
                     )
 
                 next_frontier: list[Paper] = []
 
                 with make_progress_bar(
-                    desc=f"Level {level}/{self._depth}",
+                    desc=f"Level {level}/{self._max_depth}",
                     total=len(frontier),
                     unit="paper",
                     disable=not show_progress,
                 ) as pbar:
                     for paper in frontier:
-                        discovered = self._expand_paper(paper, graph, level)
+                        discovered = self._expand_paper(paper, graph)
                         next_frontier.extend(discovered)
                         pbar.update(1)
 
@@ -165,7 +174,7 @@ class SnowballRunner:
                     logger.info(
                         "Level %d/%d complete: %d new papers discovered.",
                         level,
-                        self._depth,
+                        self._max_depth,
                         len(next_frontier),
                     )
         finally:
@@ -176,7 +185,7 @@ class SnowballRunner:
         self._metrics = {
             "seed_papers": len(self._seed_papers),
             "skipped_seeds_without_doi": self._skipped_seeds,
-            "depth": self._depth,
+            "max_depth": self._max_depth,
             "total_papers": graph.paper_count,
             "total_edges": graph.edge_count,
             "runtime_in_seconds": elapsed,
@@ -235,12 +244,13 @@ class SnowballRunner:
         self,
         paper: Paper,
         graph: CitationGraph,
-        level: int,
     ) -> list[Paper]:
         """Expand one paper by fetching its references and/or citing papers.
 
         For each connector, fetches backward and/or forward citations,
-        adds new papers to the graph and records edges.
+        adds new papers to the graph and records edges.  The depth of
+        discovered papers is automatically derived from the depth of
+        *paper* in the graph.
 
         Parameters
         ----------
@@ -248,8 +258,6 @@ class SnowballRunner:
             The paper to expand.
         graph : CitationGraph
             The graph under construction.
-        level : int
-            Current BFS depth level.
 
         Returns
         -------
@@ -268,7 +276,7 @@ class SnowballRunner:
             if references is not None:
                 for ref_paper in references:
                     is_new = not graph.contains(ref_paper)
-                    canonical = graph.add_paper(ref_paper, depth=level)
+                    canonical = graph.add_paper(ref_paper, discovered_from=paper)
                     graph.add_edge(paper, canonical)
                     if is_new:
                         new_papers.append(canonical)
@@ -277,7 +285,7 @@ class SnowballRunner:
             if citing is not None:
                 for citing_paper in citing:
                     is_new = not graph.contains(citing_paper)
-                    canonical = graph.add_paper(citing_paper, depth=level)
+                    canonical = graph.add_paper(citing_paper, discovered_from=paper)
                     graph.add_edge(canonical, paper)
                     if is_new:
                         new_papers.append(canonical)

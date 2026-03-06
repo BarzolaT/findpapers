@@ -66,7 +66,7 @@ class CitationGraph:
     ----------
     seed_papers : list[Paper]
         The initial papers from which the snowball started.
-    depth : int
+    max_depth : int
         Maximum traversal depth used during construction.
     direction : Literal["both", "backward", "forward"]
         The snowball direction(s) used during construction.
@@ -75,7 +75,7 @@ class CitationGraph:
     def __init__(
         self,
         seed_papers: list[Paper],
-        depth: int,
+        max_depth: int,
         direction: Literal["both", "backward", "forward"],
     ) -> None:
         """Create a CitationGraph.
@@ -84,13 +84,20 @@ class CitationGraph:
         ----------
         seed_papers : list[Paper]
             Initial seed papers.
-        depth : int
+        max_depth : int
             Maximum traversal depth.
         direction : Literal["both", "backward", "forward"]
             Snowball direction(s).
+
+        Raises
+        ------
+        ValueError
+            If *max_depth* is less than 1.
         """
+        if max_depth < 1:
+            raise ValueError(f"max_depth must be >= 1, got {max_depth}")
         self.seed_papers: list[Paper] = list(seed_papers)
-        self.depth = depth
+        self.max_depth = max_depth
         self.direction = direction
         # All papers in the graph, keyed by a unique identifier (DOI preferred,
         # falling back to title).
@@ -181,8 +188,11 @@ class CitationGraph:
         key = self._paper_key(paper)
         return key is not None and key in self._papers
 
-    def add_paper(self, paper: Paper, depth: int) -> Paper:
+    def add_paper(self, paper: Paper, discovered_from: Paper) -> Paper:
         """Add a paper to the graph (or merge with an existing entry).
+
+        The paper's depth is automatically computed as
+        ``get_paper_depth(discovered_from) + 1``.
 
         If the paper already exists it is merged and the existing instance
         is returned.  Otherwise the new paper is stored and returned.
@@ -191,14 +201,27 @@ class CitationGraph:
         ----------
         paper : Paper
             Paper to add.
-        depth : int
-            The traversal depth at which this paper was discovered.
+        discovered_from : Paper
+            The parent paper from which *paper* was discovered.  Must
+            already be in the graph so that its depth can be resolved.
 
         Returns
         -------
         Paper
             The canonical paper instance in the graph.
+
+        Raises
+        ------
+        ValueError
+            If *discovered_from* is not in the graph.
         """
+        parent_depth = self.get_paper_depth(discovered_from)
+        if parent_depth is None:
+            raise ValueError(
+                "discovered_from paper is not in the graph; add it first or pass it as a seed."
+            )
+        depth = parent_depth + 1
+
         key = self._paper_key(paper)
         if key is None:
             return paper
@@ -323,7 +346,7 @@ class CitationGraph:
         return {
             "metadata": {
                 "seed_papers": [{"doi": p.doi, "title": p.title} for p in self.seed_papers],
-                "depth": self.depth,
+                "max_depth": self.max_depth,
                 "direction": self.direction,
                 "total_papers": len(self._papers),
                 "total_edges": len(self._edges),
@@ -362,7 +385,7 @@ class CitationGraph:
         """
         metadata = data.get("metadata", {})
         direction = metadata.get("direction", "both")
-        depth = metadata.get("depth", 0)
+        max_depth = metadata.get("max_depth", metadata.get("depth", 1))
 
         # Rebuild papers keyed by DOI / title.
         papers: dict[str, Paper] = {}
@@ -378,7 +401,7 @@ class CitationGraph:
         # Identify seeds (depth == 0).
         seed_papers = [p for k, p in papers.items() if paper_depths.get(k) == 0]
 
-        graph = cls(seed_papers=[], depth=depth, direction=direction)
+        graph = cls(seed_papers=[], max_depth=max_depth, direction=direction)
         graph._papers = papers
         graph._paper_depths = paper_depths
         graph.seed_papers = seed_papers

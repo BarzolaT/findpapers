@@ -458,14 +458,14 @@ class TestEngineSnowball:
 
             engine.snowball(
                 seed,
-                depth=2,
+                max_depth=2,
                 direction="backward",
                 num_workers=3,
                 verbose=True,
             )
 
         _, kwargs = mock_cls.call_args
-        assert kwargs["depth"] == 2
+        assert kwargs["max_depth"] == 2
         assert kwargs["direction"] == "backward"
         assert kwargs["num_workers"] == 3
         assert kwargs["openalex_api_key"] == "oakey"
@@ -551,7 +551,7 @@ class TestEngineExportJson:
         from findpapers.core.citation_graph import CitationGraph
 
         seed = make_paper(doi="10.1/seed")
-        graph = CitationGraph(seed_papers=[seed], depth=1, direction="backward")
+        graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
         path = str(tmp_path / "graph.json")
         Engine.export_to_json(graph, path)
         assert os.path.exists(path)
@@ -618,7 +618,7 @@ class TestEngineLoadFromJson:
         from findpapers.core.citation_graph import CitationGraph
 
         seed = make_paper(doi="10.1/seed")
-        graph = CitationGraph(seed_papers=[seed], depth=1, direction="backward")
+        graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
         path = str(tmp_path / "graph.json")
         Engine.export_to_json(graph, path)
 

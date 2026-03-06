@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.paper import Paper
 from findpapers.runners.snowball_runner import SnowballRunner
@@ -93,7 +95,7 @@ class TestSnowballRunnerInit:
     def test_single_paper_seed(self) -> None:
         """Accepts a single Paper as seed_papers."""
         seed = make_paper("Seed", doi="10.1000/seed")
-        runner = SnowballRunner(seed_papers=seed, depth=1)
+        runner = SnowballRunner(seed_papers=seed, max_depth=1)
 
         assert len(runner._seed_papers) == 1
 
@@ -107,35 +109,44 @@ class TestSnowballRunnerInit:
         assert runner._skipped_seeds == 1
 
     def test_default_parameters(self) -> None:
-        """Default depth is 1, direction is 'both', num_workers is 1."""
+        """Default max_depth is 1, direction is 'both', num_workers is 1."""
         seed = make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=[seed])
 
-        assert runner._depth == 1
+        assert runner._max_depth == 1
         assert runner._direction == "both"
         assert runner._num_workers == 1
 
-    def test_depth_clamped_to_zero(self) -> None:
-        """Negative depth is clamped to 0."""
+    def test_max_depth_zero_raises(self) -> None:
+        """max_depth of zero raises ValueError."""
         seed = make_paper("Seed", doi="10.1000/seed")
-        runner = SnowballRunner(seed_papers=[seed], depth=-1)
+        with pytest.raises(ValueError, match="max_depth must be >= 1"):
+            SnowballRunner(seed_papers=[seed], max_depth=0)
 
-        assert runner._depth == 0
+    def test_max_depth_negative_raises(self) -> None:
+        """Negative max_depth raises ValueError."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        with pytest.raises(ValueError, match="max_depth must be >= 1"):
+            SnowballRunner(seed_papers=[seed], max_depth=-1)
 
 
 class TestSnowballRunnerRun:
     """Tests for the snowball execution logic."""
 
-    def test_depth_zero_returns_only_seeds(self) -> None:
-        """With depth=0 no expansion happens; only seeds in the graph."""
+    def test_depth_one_returns_immediate_neighbours(self) -> None:
+        """With max_depth=1 only immediate neighbours are fetched."""
         seed = make_paper("Seed", doi="10.1000/seed")
-        runner = SnowballRunner(seed_papers=[seed], depth=0)
-        runner._connectors = [FakeCitationConnector()]
+        ref = make_paper("Ref", doi="10.1000/ref")
+        connector = FakeCitationConnector(
+            references={"10.1000/seed": [ref]},
+        )
+        runner = SnowballRunner(seed_papers=[seed], max_depth=1, direction="backward")
+        runner._connectors = [connector]
 
         graph = runner.run()
 
-        assert graph.paper_count == 1
-        assert graph.edge_count == 0
+        assert graph.paper_count == 2
+        assert graph.edge_count == 1
 
     def test_backward_snowball_depth_1(self) -> None:
         """Backward snowballing collects references of the seed."""
@@ -148,7 +159,7 @@ class TestSnowballRunnerRun:
         )
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=1,
+            max_depth=1,
             direction="backward",
         )
         runner._connectors = [connector]
@@ -171,7 +182,7 @@ class TestSnowballRunnerRun:
         )
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=1,
+            max_depth=1,
             direction="forward",
         )
         runner._connectors = [connector]
@@ -195,7 +206,7 @@ class TestSnowballRunnerRun:
         )
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=1,
+            max_depth=1,
             direction="both",
         )
         runner._connectors = [connector]
@@ -206,7 +217,7 @@ class TestSnowballRunnerRun:
         assert graph.edge_count == 2
 
     def test_depth_2_expands_second_level(self) -> None:
-        """At depth=2, papers found at level 1 are also expanded."""
+        """At max_depth=2, papers found at level 1 are also expanded."""
         seed = make_paper("Seed", doi="10.1000/seed")
         level1 = make_paper("Level 1", doi="10.1000/l1")
         level2 = make_paper("Level 2", doi="10.1000/l2")
@@ -219,7 +230,7 @@ class TestSnowballRunnerRun:
         )
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=2,
+            max_depth=2,
             direction="backward",
         )
         runner._connectors = [connector]
@@ -243,7 +254,7 @@ class TestSnowballRunnerRun:
 
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=1,
+            max_depth=1,
             direction="backward",
         )
         runner._connectors = [connector1, connector2]
@@ -267,7 +278,7 @@ class TestSnowballRunnerRun:
         )
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=2,
+            max_depth=2,
             direction="backward",
         )
         runner._connectors = [connector]
@@ -341,7 +352,7 @@ class TestSnowballRunnerRun:
 
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=1,
+            max_depth=1,
             direction="both",
         )
         runner._connectors = [ErrorConnector()]
@@ -367,7 +378,7 @@ class TestSnowballRunnerRun:
         )
         runner = SnowballRunner(
             seed_papers=[seed1, seed2],
-            depth=1,
+            max_depth=1,
             direction="backward",
         )
         runner._connectors = [connector]
@@ -388,7 +399,7 @@ class TestSnowballRunnerRun:
 
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=1,
+            max_depth=1,
             direction="backward",
             num_workers=3,
         )
@@ -407,7 +418,7 @@ class TestSnowballRunnerMetrics:
     def test_metrics_after_run(self) -> None:
         """Graph contains expected data after run()."""
         seed = make_paper("Seed", doi="10.1000/seed")
-        runner = SnowballRunner(seed_papers=[seed], depth=0)
+        runner = SnowballRunner(seed_papers=[seed], max_depth=1)
         runner._connectors = [FakeCitationConnector()]
 
         graph = runner.run()
@@ -422,7 +433,7 @@ class TestSnowballRunnerMetrics:
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.2000/ref")
         connector = FakeCitationConnector(references={"10.1000/seed": [ref]})
-        runner = SnowballRunner(seed_papers=[seed], depth=1)
+        runner = SnowballRunner(seed_papers=[seed], max_depth=1)
         runner._connectors = [connector]
 
         with patch("findpapers.runners.snowball_runner.make_progress_bar") as mock_pbar:
@@ -450,7 +461,7 @@ class TestSnowballRunnerVerbose:
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
         connector = FakeCitationConnector(references={"10.1000/seed": [ref]})
-        runner = SnowballRunner(seed_papers=[seed], depth=1, direction="backward")
+        runner = SnowballRunner(seed_papers=[seed], max_depth=1, direction="backward")
         runner._connectors = [connector]
 
         graph = runner.run(verbose=True, show_progress=False)
@@ -465,7 +476,7 @@ class TestSnowballRunnerVerbose:
         connector = FakeCitationConnector(
             references={"10.1000/seed": [l1], "10.1000/l1": [l2]},
         )
-        runner = SnowballRunner(seed_papers=[seed], depth=2, direction="backward")
+        runner = SnowballRunner(seed_papers=[seed], max_depth=2, direction="backward")
         runner._connectors = [connector]
 
         graph = runner.run(verbose=True, show_progress=False)
@@ -541,7 +552,7 @@ class TestSnowballRunnerParallelErrors:
 
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=1,
+            max_depth=1,
             direction="backward",
             num_workers=4,
         )
@@ -564,7 +575,7 @@ class TestSnowballRunnerParallelErrors:
 
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=1,
+            max_depth=1,
             direction="backward",
             num_workers=4,
         )
@@ -598,7 +609,7 @@ class TestSnowballRunnerEmptyFrontier:
         connector = FakeCitationConnector(references={})
         runner = SnowballRunner(
             seed_papers=[seed],
-            depth=3,
+            max_depth=3,
             direction="backward",
         )
         runner._connectors = [connector]
