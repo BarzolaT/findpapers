@@ -708,7 +708,6 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "http://dx.doi.org/10.3126/nelta.v27i1-2.53203")
         assert paper is not None
         assert paper.keywords
-        assert len(paper.keywords) > 0
 
     def test_ieee_paper_has_authors(self) -> None:
         """IEEE Xplore page (JS blob) produces a paper with populated authors."""
@@ -735,7 +734,6 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "https://ieeexplore.ieee.org/document/9568778/")
         assert paper is not None
         assert paper.keywords
-        assert len(paper.keywords) > 0
 
     def test_scopus_authors_from_dc_colon_creator(self) -> None:
         """Scopus pages use dc:creator which must be normalised and used for authors."""
@@ -752,7 +750,6 @@ class TestBuildPaperFromMetadata:
         paper = build_paper_from_metadata(meta, "https://doi.org/10.4230/DagRep.12.6.14")
         assert paper is not None
         assert paper.keywords
-        assert len(paper.keywords) > 0
 
 
 # ---------------------------------------------------------------------------

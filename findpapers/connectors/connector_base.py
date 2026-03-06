@@ -234,6 +234,7 @@ class ConnectorBase(ABC):
         if response is not None:
             retry_after = response.headers.get("Retry-After")
             if retry_after is not None:
+                # Non-numeric Retry-After (e.g. HTTP-date); ignore.
                 with contextlib.suppress(ValueError, TypeError):
                     backoff = max(backoff, float(retry_after))
 

@@ -572,7 +572,9 @@ class TestSnowballRunnerParallelErrors:
 
         original = runner._query_single_connector
 
-        def patched(connector, paper):
+        def patched(
+            connector: CitationConnectorBase, paper: Paper
+        ) -> tuple[str, list[Paper] | None, list[Paper] | None]:
             """Raise for the 'bad' connector, delegate otherwise."""
             if connector is bad:
                 raise RuntimeError("unexpected crash")

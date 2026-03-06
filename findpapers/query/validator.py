@@ -372,7 +372,7 @@ class QueryValidator:
         # Split by TERM and check each segment
         segments = structure_cleaned.split("TERM")
 
-        for _i, segment in enumerate(segments):
+        for segment in segments:
             # Skip empty segments
             if not segment.strip():
                 continue
