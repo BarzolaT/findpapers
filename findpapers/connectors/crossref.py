@@ -14,9 +14,10 @@ from __future__ import annotations
 import datetime
 import logging
 import re
-import time
 from typing import Any
 from urllib.parse import quote as _url_quote
+
+import requests
 
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.author import Author
@@ -141,18 +142,15 @@ class CrossRefConnector(CitationConnectorBase):
             on retries).
         """
         url = f"{_CROSSREF_API_URL}/{_url_quote(doi, safe='')}"
-        prepared_headers = self._prepare_headers({})
 
-        self._rate_limit()
-        self._log_request(url, headers=prepared_headers)
-        response = self._get_session().get(url, headers=prepared_headers, timeout=self._timeout)
-        self._last_request_time = time.monotonic()
-        self._log_response(response)
+        try:
+            response = self._get(url)
+        except requests.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                logger.debug("CrossRef: DOI %s not found (404)", doi)
+                return None
+            raise
 
-        if response.status_code == 404:
-            logger.debug("CrossRef: DOI %s not found (404)", doi)
-            return None
-        response.raise_for_status()
         data: dict[str, Any] = response.json()
         message = data.get("message")
         return message if isinstance(message, dict) else None
