@@ -87,6 +87,7 @@ class CrossRefConnector(CitationConnectorBase):
         email : str | None
             Contact email for the CrossRef polite pool.
         """
+        super().__init__()
         self._email = email
 
     @property

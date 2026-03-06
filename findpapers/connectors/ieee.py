@@ -72,6 +72,7 @@ class IEEEConnector(SearchConnectorBase):
         api_key : str | None
             IEEE Xplore API key (required for production use).
         """
+        super().__init__()
         self._query_builder: IEEEQueryBuilder = query_builder or IEEEQueryBuilder()
         self._api_key = api_key
 

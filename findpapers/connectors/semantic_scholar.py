@@ -101,6 +101,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
             decoupled from the shared unauthenticated pool, and can be increased
             upon request).
         """
+        super().__init__()
         self._query_builder: SemanticScholarQueryBuilder = (
             query_builder or SemanticScholarQueryBuilder()
         )

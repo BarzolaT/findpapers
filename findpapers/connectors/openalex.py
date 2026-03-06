@@ -96,6 +96,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         email : str | None
             Contact email for the polite pool (recommended by OpenAlex).
         """
+        super().__init__()
         self._query_builder: OpenAlexQueryBuilder = query_builder or OpenAlexQueryBuilder()
         self._api_key = api_key
         self._email = email

@@ -56,6 +56,7 @@ class ArxivConnector(SearchConnectorBase):
             Builder used to validate and convert queries.  When ``None`` a
             default :class:`ArxivQueryBuilder` is created automatically.
         """
+        super().__init__()
         self._query_builder: ArxivQueryBuilder = query_builder or ArxivQueryBuilder()
 
     @property

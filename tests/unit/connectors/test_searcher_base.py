@@ -23,6 +23,7 @@ class _StubConnector(SearchConnectorBase):
     """Minimal concrete SearchConnectorBase for testing _get and logging helpers."""
 
     def __init__(self, query_builder: QueryBuilder | None = None) -> None:
+        super().__init__()
         self._query_builder = query_builder if query_builder is not None else MagicMock()
 
     @property

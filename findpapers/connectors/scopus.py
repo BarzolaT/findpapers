@@ -75,6 +75,7 @@ class ScopusConnector(SearchConnectorBase):
         api_key : str | None
             Elsevier API key (required for production use).
         """
+        super().__init__()
         self._query_builder: ScopusQueryBuilder = query_builder or ScopusQueryBuilder()
         self._api_key = api_key
 

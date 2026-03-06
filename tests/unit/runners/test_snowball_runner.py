@@ -25,6 +25,7 @@ class FakeCitationConnector(CitationConnectorBase):
         cited_by : dict[str, list[Paper]] | None
             Mapping from DOI to list of citing papers.
         """
+        super().__init__()
         self._references = references or {}
         self._cited_by = cited_by or {}
 

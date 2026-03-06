@@ -66,6 +66,7 @@ class PubmedConnector(SearchConnectorBase):
         api_key : str | None
             NCBI API key (increases rate limit from 3 to 10 req/s).
         """
+        super().__init__()
         self._query_builder: PubmedQueryBuilder = query_builder or PubmedQueryBuilder()
         self._api_key = api_key
         self._request_interval = (

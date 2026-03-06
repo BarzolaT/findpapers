@@ -60,16 +60,18 @@ class ConnectorBase(ABC):
     Subclasses must implement :attr:`name` and :attr:`min_request_interval`.
     """
 
-    # Shared rate-limiter state; assignment in _rate_limit creates an instance
-    # attribute that shadows this default, so multiple instances are isolated.
-    _last_request_time: float = 0.0
-
-    # Per-instance lock for thread-safe rate limiting.  Lazily created in
-    # ``_get_lock()`` so subclasses don't need to call ``super().__init__()``.
-
     # Default HTTP timeout in seconds for all requests.  Subclasses or callers
     # can override by setting ``self._timeout`` in ``__init__``.
     _timeout: float = 30.0
+
+    def __init__(self) -> None:
+        """Initialise per-instance rate-limiter state and threading lock.
+
+        Subclasses **must** call ``super().__init__()`` to ensure the
+        rate-limiter and threading lock are properly initialised.
+        """
+        self._last_request_time: float = 0.0
+        self._lock: threading.Lock = threading.Lock()
 
     # ------------------------------------------------------------------
     # Retry configuration
@@ -180,15 +182,13 @@ class ConnectorBase(ABC):
         return True
 
     def _get_lock(self) -> threading.Lock:
-        """Return the per-instance lock, creating it lazily.
+        """Return the per-instance threading lock.
 
         Returns
         -------
         threading.Lock
             The lock guarding rate-limiter state for this connector.
         """
-        if not hasattr(self, "_lock"):
-            self._lock = threading.Lock()
         return self._lock
 
     def _rate_limit(self) -> None:
