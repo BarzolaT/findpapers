@@ -8,10 +8,13 @@ from enum import Enum
 from time import perf_counter
 from typing import Any
 
+import requests
+
 from findpapers.connectors.crossref import CrossRefConnector
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.source import Source, SourceType
+from findpapers.utils.http_headers import get_browser_headers
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.metadata_parser import (
     ABSTRACT_META_KEYS,
@@ -30,7 +33,7 @@ from findpapers.utils.metadata_parser import (
     SOURCE_TITLE_KEYS,
     TITLE_META_KEYS,
     build_authors_from_metadata,
-    fetch_metadata,
+    extract_metadata_from_html,
     normalize_doi,
     parse_date,
     parse_keywords,
@@ -221,6 +224,13 @@ class EnrichmentRunner:
         sequentially.  Values greater than ``1`` enable parallel execution.
     timeout : float | None
         Per-request HTTP timeout in seconds.
+    proxy : str | None
+        Proxy URL for HTTP/HTTPS requests.  When provided, all URL-based
+        metadata fetches will be routed through this proxy.
+    ssl_verify : bool
+        Whether to verify SSL certificates.  Set to ``False`` when using
+        institutional proxies that perform SSL inspection.  Defaults to
+        ``True``.
 
     Examples
     --------
@@ -234,12 +244,16 @@ class EnrichmentRunner:
         email: str | None = None,
         num_workers: int = 1,
         timeout: float | None = 10.0,
+        proxy: str | None = None,
+        ssl_verify: bool = True,
     ) -> None:
         """Initialise enrichment configuration without executing it."""
         self._results = list(papers)
         self._metrics: dict[str, int | float] = {}
         self._num_workers = num_workers
         self._timeout = timeout
+        self._proxy = proxy
+        self._ssl_verify = ssl_verify
         self._crossref = CrossRefConnector(email=email)
 
     # ------------------------------------------------------------------
@@ -271,6 +285,8 @@ class EnrichmentRunner:
             logger.info("Total papers: %d", len(self._results))
             logger.info("Num workers: %d", self._num_workers)
             logger.info("Timeout: %s", self._timeout or "default")
+            logger.info("Proxy: %s", self._proxy or "none")
+            logger.info("SSL verify: %s", self._ssl_verify)
             logger.info("======================================")
 
         start = perf_counter()
@@ -383,6 +399,68 @@ class EnrichmentRunner:
         metrics["no_change_papers"] = no_change
         metrics["no_urls_papers"] = no_urls
 
+    def _build_proxies(self) -> dict[str, str] | None:
+        """Build a proxies dict for *requests* if a proxy is configured.
+
+        Returns
+        -------
+        dict[str, str] | None
+            Proxies mapping, or ``None``.
+        """
+        if self._proxy:
+            return {"http": self._proxy, "https": self._proxy}
+        return None
+
+    def _fetch_url_metadata(
+        self,
+        url: str,
+        timeout: float | None = None,
+    ) -> dict[str, Any] | None:
+        """Fetch an HTML page and extract ``<meta>`` tag metadata.
+
+        This is the HTTP boundary for enrichment URL scraping.  The actual
+        parsing is delegated to
+        :func:`~findpapers.utils.metadata_parser.extract_metadata_from_html`.
+
+        Parameters
+        ----------
+        url : str
+            URL to fetch.
+        timeout : float | None
+            Request timeout in seconds.
+
+        Returns
+        -------
+        dict[str, Any] | None
+            Parsed metadata dict, or ``None`` when the response is not HTML.
+
+        Raises
+        ------
+        requests.RequestException
+            If the HTTP request fails.
+        """
+        logger.debug("GET %s", url)
+        response = requests.get(
+            url,
+            headers=get_browser_headers(),
+            timeout=timeout,
+            allow_redirects=True,
+            proxies=self._build_proxies(),
+            verify=self._ssl_verify,
+        )
+        content_type = response.headers.get("content-type", "")
+        logger.debug(
+            "<- %s %s | content-type: %s | %d bytes",
+            response.status_code,
+            response.reason,
+            content_type.split(";")[0].strip() or "unknown",
+            len(response.content),
+        )
+        response.raise_for_status()
+        if "text/html" not in content_type.lower():
+            return None
+        return extract_metadata_from_html(response.text)
+
     def _enrich_paper(self, paper: Paper, timeout: float | None = None) -> EnrichmentOutcome:
         """Attempt to enrich a single paper using the CrossRef API and URL scraping.
 
@@ -445,7 +523,7 @@ class EnrichmentRunner:
         had_url_metadata = False
         for url in deduped:
             try:
-                metadata = fetch_metadata(url, timeout=timeout)
+                metadata = self._fetch_url_metadata(url, timeout=timeout)
             except Exception:  # noqa: BLE001
                 had_fetch_error = True
                 logger.warning("Fetch error for enrichment URL: %s", url)

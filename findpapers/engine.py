@@ -444,6 +444,8 @@ class Engine:
             email=self._email,
             num_workers=num_workers,
             timeout=timeout,
+            proxy=self._proxy,
+            ssl_verify=self._ssl_verify,
         )
         return runner.run(verbose=verbose, show_progress=show_progress)
 

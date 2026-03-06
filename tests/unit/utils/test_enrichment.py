@@ -9,7 +9,6 @@ live network requests.
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -18,7 +17,6 @@ from findpapers.core.source import SourceType
 from findpapers.runners.enrichment_runner import build_paper_from_metadata
 from findpapers.utils.metadata_parser import (
     extract_metadata_from_html,
-    fetch_metadata,
     parse_authors,
     parse_keywords,
 )
@@ -753,185 +751,18 @@ class TestBuildPaperFromMetadata:
 
 
 # ---------------------------------------------------------------------------
-# fetch_metadata
+# End-to-end: extract_metadata_from_html → build_paper_from_metadata
 # ---------------------------------------------------------------------------
 
 
-class TestFetchMetadata:
-    """Tests for fetch_metadata() — the function that makes HTTP requests."""
-
-    def test_returns_none_for_non_html_content_type(self) -> None:
-        """fetch_metadata returns None when content-type is not text/html."""
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "application/pdf"}
-        mock_resp.text = ""
-        mock_resp.raise_for_status = MagicMock()
-
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            result = fetch_metadata("https://example.com/paper.pdf")
-        assert result is None
-
-    def test_returns_dict_for_html_content_type(self) -> None:
-        """fetch_metadata returns a dict when content-type is text/html."""
-        html = '<html><head><meta name="citation_title" content="Test Paper"></head></html>'
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = html
-        mock_resp.raise_for_status = MagicMock()
-
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            result = fetch_metadata("https://example.com/paper")
-        assert isinstance(result, dict)
-        assert result.get("citation_title") == "Test Paper"
-
-    def test_raises_on_http_error(self) -> None:
-        """fetch_metadata propagates HTTP errors raised by raise_for_status()."""
-        import requests as req_lib
-
-        mock_resp = MagicMock()
-        mock_resp.raise_for_status.side_effect = req_lib.HTTPError("404")
-
-        with (
-            patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp),
-            pytest.raises(req_lib.HTTPError),
-        ):
-            fetch_metadata("https://example.com/missing")
-
-    def test_timeout_forwarded_to_requests(self) -> None:
-        """The timeout parameter is forwarded to requests.get."""
-        mock_resp = MagicMock()
-        mock_resp.headers = {"content-type": "text/html"}
-        mock_resp.text = "<html><head><meta name='citation_title' content='T'></head></html>"
-        mock_resp.raise_for_status = MagicMock()
-
-        with patch(
-            "findpapers.utils.metadata_parser.requests.get", return_value=mock_resp
-        ) as mock_get:
-            fetch_metadata("https://example.com", timeout=42.0)
-
-        _, kwargs = mock_get.call_args
-        assert kwargs.get("timeout") == 42.0
-
-    def test_real_arxiv_page_via_mock(self) -> None:
-        """fetch_metadata can parse a real arXiv page when requests.get is mocked."""
-        _skip_if_missing(ARXIV_HTML)
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = ARXIV_HTML
-        mock_resp.raise_for_status = MagicMock()
-
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            result = fetch_metadata("https://arxiv.org/abs/2301.00306v4")
-
-        assert result is not None
-        assert "citation_title" in result or "og:title" in result
-
-    def test_real_pubmed_page_via_mock(self) -> None:
-        """fetch_metadata can parse a real PubMed page when requests.get is mocked."""
-        _skip_if_missing(PUBMED_HTML)
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = PUBMED_HTML
-        mock_resp.raise_for_status = MagicMock()
-
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            result = fetch_metadata("https://pubmed.ncbi.nlm.nih.gov/36006759/")
-
-        assert result is not None
-        assert "citation_doi" in result
-
-    def test_request_logged_at_debug(self, caplog) -> None:
-        """fetch_metadata logs the outgoing GET URL at DEBUG level."""
-        import logging
-
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.reason = "OK"
-        mock_resp.headers = {"content-type": "text/html"}
-        mock_resp.text = "<html><head></head></html>"
-        mock_resp.content = b""
-        mock_resp.raise_for_status = MagicMock()
-
-        url = "https://example.com/paper"
-        with (
-            patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp),
-            caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"),
-        ):
-            fetch_metadata(url)
-
-        assert any("GET" in m and "example.com" in m for m in caplog.messages)
-
-    def test_response_logged_at_debug(self, caplog) -> None:
-        """fetch_metadata logs the response status, content-type, and size at DEBUG level."""
-        import logging
-
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.reason = "OK"
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = "<html><head></head></html>"
-        mock_resp.content = b"hello"
-        mock_resp.raise_for_status = MagicMock()
-
-        with (
-            patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp),
-            caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"),
-        ):
-            fetch_metadata("https://example.com/paper")
-
-        messages = " ".join(caplog.messages)
-        assert "200" in messages
-        assert "text/html" in messages
-        assert "5" in messages  # len(b"hello") == 5
-
-    def test_response_logged_before_raise_for_status(self, caplog) -> None:
-        """Response is logged even when raise_for_status() subsequently raises (e.g. 404)."""
-        import logging
-
-        import requests as req_lib
-
-        mock_resp = MagicMock()
-        mock_resp.status_code = 404
-        mock_resp.reason = "Not Found"
-        mock_resp.headers = {"content-type": "text/html"}
-        mock_resp.content = b"not found"
-        mock_resp.raise_for_status.side_effect = req_lib.HTTPError("404")
-
-        with (
-            patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp),
-            caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"),
-            pytest.raises(req_lib.HTTPError),
-        ):
-            fetch_metadata("https://example.com/missing")
-
-        messages = " ".join(caplog.messages)
-        assert "404" in messages  # response was logged before the exception was raised
-
-
-# ---------------------------------------------------------------------------
-# End-to-end: fetch_metadata → build_paper_from_metadata
-# ---------------------------------------------------------------------------
-
-
-class TestFetchAndBuildPipeline:
-    """Integration tests that exercise fetch_metadata + build_paper_from_metadata together."""
+class TestExtractAndBuildPipeline:
+    """Integration tests that exercise extract_metadata_from_html + build_paper_from_metadata."""
 
     def test_real_arxiv_page_end_to_end(self) -> None:
-        """Full end-to-end: mock requests for an arXiv HTML page and build a Paper."""
+        """Full end-to-end: parse arXiv HTML and build a Paper."""
         _skip_if_missing(ARXIV_HTML)
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = ARXIV_HTML
-        mock_resp.raise_for_status = MagicMock()
-
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            metadata = fetch_metadata("https://arxiv.org/abs/2301.00306v4", timeout=10)
-
+        assert ARXIV_HTML is not None
+        metadata = extract_metadata_from_html(ARXIV_HTML)
         assert metadata is not None
         result = build_paper_from_metadata(metadata, "https://arxiv.org/abs/2301.00306v4")
         assert result is not None
@@ -939,17 +770,10 @@ class TestFetchAndBuildPipeline:
         assert result.pdf_url is not None
 
     def test_real_pubmed_page_end_to_end(self) -> None:
-        """Full end-to-end: mock requests for a PubMed HTML page and build a Paper."""
+        """Full end-to-end: parse PubMed HTML and build a Paper."""
         _skip_if_missing(PUBMED_HTML)
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = PUBMED_HTML
-        mock_resp.raise_for_status = MagicMock()
-
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            metadata = fetch_metadata("https://pubmed.ncbi.nlm.nih.gov/36006759/", timeout=10)
-
+        assert PUBMED_HTML is not None
+        metadata = extract_metadata_from_html(PUBMED_HTML)
         assert metadata is not None
         result = build_paper_from_metadata(metadata, "https://pubmed.ncbi.nlm.nih.gov/36006759/")
         assert result is not None
@@ -958,19 +782,12 @@ class TestFetchAndBuildPipeline:
         assert result.source is not None
 
     def test_real_openalex_page_end_to_end(self) -> None:
-        """Full end-to-end: mock requests for an OpenAlex landing page and build a Paper."""
+        """Full end-to-end: parse OpenAlex landing page HTML and build a Paper."""
         _skip_if_missing(OPENALEX_HTML)
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = OPENALEX_HTML
-        mock_resp.raise_for_status = MagicMock()
-
-        url = "http://dx.doi.org/10.3126/nelta.v27i1-2.53203"
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            metadata = fetch_metadata(url, timeout=10)
-
+        assert OPENALEX_HTML is not None
+        metadata = extract_metadata_from_html(OPENALEX_HTML)
         assert metadata is not None
+        url = "http://dx.doi.org/10.3126/nelta.v27i1-2.53203"
         result = build_paper_from_metadata(metadata, url)
         assert result is not None
         assert result.doi is not None
@@ -978,19 +795,12 @@ class TestFetchAndBuildPipeline:
         assert result.source is not None
 
     def test_real_ieee_page_end_to_end(self) -> None:
-        """Full end-to-end: mock requests for an IEEE Xplore page and build a Paper."""
+        """Full end-to-end: parse IEEE Xplore HTML and build a Paper."""
         _skip_if_missing(IEEE_HTML)
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = IEEE_HTML
-        mock_resp.raise_for_status = MagicMock()
-
-        url = "https://ieeexplore.ieee.org/document/9568778/"
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            metadata = fetch_metadata(url, timeout=10)
-
+        assert IEEE_HTML is not None
+        metadata = extract_metadata_from_html(IEEE_HTML)
         assert metadata is not None
+        url = "https://ieeexplore.ieee.org/document/9568778/"
         result = build_paper_from_metadata(metadata, url)
         assert result is not None
         assert result.doi is not None

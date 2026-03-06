@@ -304,7 +304,8 @@ class TestEngineEnrich:
 
     def test_enrich_forwards_timeout(self, make_paper):
         """enrich() forwards per-call timeout to EnrichmentRunner."""
-        engine = Engine()
+        with patch.dict(os.environ, {"FINDPAPERS_PROXY": "", "FINDPAPERS_SSL_VERIFY": ""}):
+            engine = Engine()
         fake_metrics = {"total_papers": 2, "enriched_papers": 1}
         with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
             mock_runner = MagicMock()
@@ -319,13 +320,16 @@ class TestEngineEnrich:
             email=None,
             num_workers=4,
             timeout=25.0,
+            proxy=None,
+            ssl_verify=True,
         )
         mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
         assert result == fake_metrics
 
     def test_enrich_default_per_call_params(self):
         """num_workers defaults to 1, verbose to False, timeout to 10.0."""
-        engine = Engine()
+        with patch.dict(os.environ, {"FINDPAPERS_PROXY": "", "FINDPAPERS_SSL_VERIFY": ""}):
+            engine = Engine()
         with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = {}
@@ -336,11 +340,14 @@ class TestEngineEnrich:
         _, kwargs = mock_cls.call_args
         assert kwargs["num_workers"] == 1
         assert kwargs["timeout"] == 10.0
+        assert kwargs["proxy"] is None
+        assert kwargs["ssl_verify"] is True
         mock_runner.run.assert_called_once_with(verbose=False, show_progress=True)
 
     def test_enrich_show_progress_false(self):
         """show_progress=False is forwarded to EnrichmentRunner.run()."""
-        engine = Engine()
+        with patch.dict(os.environ, {"FINDPAPERS_PROXY": "", "FINDPAPERS_SSL_VERIFY": ""}):
+            engine = Engine()
         with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = {}

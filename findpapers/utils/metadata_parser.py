@@ -2,13 +2,15 @@
 
 This module handles:
 
-* Fetching HTML pages and extracting ``<meta>`` tag data.
+* Extracting ``<meta>`` tag data from HTML content.
 * Parsing IEEE Xplore JS-embedded metadata blobs.
 * Normalising author names, affiliations, DOIs, dates and keywords from
   heterogeneous metadata formats.
 
-Higher-level orchestration (e.g. assembling :class:`~findpapers.core.paper.Paper`
-objects) lives in :mod:`findpapers.runners.enrichment_runner`.
+HTTP fetching lives in the enrichment runner; this module only deals with
+already-fetched HTML strings.  Higher-level orchestration (e.g. assembling
+:class:`~findpapers.core.paper.Paper` objects) lives in
+:mod:`findpapers.runners.enrichment_runner`.
 """
 
 from __future__ import annotations
@@ -20,12 +22,10 @@ from collections.abc import Iterable
 from datetime import date, datetime
 from typing import Any
 
-import requests
 from lxml import html
 from lxml.html import HtmlElement
 
 from findpapers.core.author import Author
-from findpapers.utils.http_headers import get_browser_headers
 
 logger = logging.getLogger(__name__)
 
@@ -143,44 +143,6 @@ _IEEE_META_RE = re.compile(
 # ---------------------------------------------------------------------------
 # Fetching & HTML extraction
 # ---------------------------------------------------------------------------
-
-
-def fetch_metadata(url: str, timeout: float | None = None) -> dict[str, Any] | None:
-    """Fetch HTML metadata from a URL.
-
-    Parameters
-    ----------
-    url : str
-        URL to fetch.
-    timeout : float | None
-        Request timeout in seconds.
-
-    Returns
-    -------
-    dict[str, Any] | None
-        Parsed metadata dict, or ``None`` when the response is not HTML.
-
-    Raises
-    ------
-    requests.RequestException
-        If the HTTP request fails.
-    """
-    logger.debug("GET %s", url)
-    response = requests.get(
-        url, headers=get_browser_headers(), timeout=timeout, allow_redirects=True
-    )
-    content_type = response.headers.get("content-type", "")
-    logger.debug(
-        "<- %s %s | content-type: %s | %d bytes",
-        response.status_code,
-        response.reason,
-        content_type.split(";")[0].strip() or "unknown",
-        len(response.content),
-    )
-    response.raise_for_status()
-    if "text/html" not in content_type.lower():
-        return None
-    return extract_metadata_from_html(response.text)
 
 
 def extract_metadata_from_html(content: str) -> dict[str, Any]:
