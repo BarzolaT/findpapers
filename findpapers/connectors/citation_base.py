@@ -8,7 +8,6 @@ snowballing).
 
 from __future__ import annotations
 
-from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -29,9 +28,11 @@ class CitationConnectorBase(ConnectorBase):
     returning an empty list.  Vice-versa for forward-only connectors.
     """
 
-    @abstractmethod
     def fetch_references(self, paper: "Paper") -> list["Paper"]:
         """Return papers cited *by* the given paper (backward snowballing).
+
+        The default implementation returns an empty list.  Subclasses that
+        support backward snowballing should override this method.
 
         Parameters
         ----------
@@ -45,10 +46,13 @@ class CitationConnectorBase(ConnectorBase):
             Papers referenced by *paper*.  May be empty when the paper
             has no DOI, the API returns no data, or an error occurs.
         """
+        return []
 
-    @abstractmethod
     def fetch_cited_by(self, paper: "Paper") -> list["Paper"]:
         """Return papers that cite the given paper (forward snowballing).
+
+        The default implementation returns an empty list.  Subclasses that
+        support forward snowballing should override this method.
 
         Parameters
         ----------
@@ -62,3 +66,4 @@ class CitationConnectorBase(ConnectorBase):
             Papers that cite *paper*.  May be empty when the paper has
             no DOI, the API returns no data, or an error occurs.
         """
+        return []
