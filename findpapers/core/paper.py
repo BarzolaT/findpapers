@@ -468,7 +468,7 @@ class Paper:
         publication_date = paper_dict.get("publication_date")
         if isinstance(publication_date, str):
             try:
-                publication_date = datetime.datetime.strptime(publication_date, "%Y-%m-%d").date()
+                publication_date = datetime.date.fromisoformat(publication_date)
             except ValueError:
                 publication_date = None
 
