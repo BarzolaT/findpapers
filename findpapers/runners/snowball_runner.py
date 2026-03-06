@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter
 from typing import Literal
 
-from findpapers.connectors import CITATION_REGISTRY
+from findpapers.connectors import CITATION_REGISTRY, CitationSource
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
@@ -223,10 +223,10 @@ class SnowballRunner:
         # are constructed with no arguments.  The classes are looked up in
         # the central CITATION_REGISTRY so that this runner does not need
         # to import every concrete connector.
-        _credentials: dict[str, dict[str, str | None]] = {
-            "openalex": {"api_key": openalex_api_key, "email": email},
-            "semantic_scholar": {"api_key": semantic_scholar_api_key},
-            "crossref": {"email": email},
+        _credentials: dict[CitationSource, dict[str, str | None]] = {
+            CitationSource.OPENALEX: {"api_key": openalex_api_key, "email": email},
+            CitationSource.SEMANTIC_SCHOLAR: {"api_key": semantic_scholar_api_key},
+            CitationSource.CROSSREF: {"email": email},
         }
 
         return [cls(**_credentials.get(name, {})) for name, cls in CITATION_REGISTRY.items()]
