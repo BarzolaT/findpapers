@@ -1,4 +1,4 @@
-"""Tests for Paper, Publication, and SearchResult models."""
+"""Tests for the Paper model."""
 
 import datetime
 
@@ -6,29 +6,7 @@ import pytest
 
 from findpapers.core.author import Author
 from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, PaperType, _is_preprint_doi, _merge_doi
-from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source
-
-
-def test_publication_merge():
-    """Test merging two publications."""
-    base = Source(title="A", publisher=None)
-    incoming = Source(title="Longer", publisher="Pub")
-    base.merge(incoming)
-    assert base.title == "Longer"
-    assert base.publisher == "Pub"
-
-
-def test_publication_to_from_dict():
-    """Test source serialization and deserialization."""
-    data = {
-        "title": "T",
-        "isbn": "1",
-        "issn": "2",
-        "publisher": "Pub",
-    }
-    source = Source.from_dict(data)
-    assert source.to_dict()["title"] == "T"
 
 
 def test_paper_requires_title():
@@ -307,75 +285,6 @@ def test_paper_merge_prefers_publisher_doi_when_preprint_is_incoming():
     )
     base.merge(incoming)
     assert base.doi == "10.5555/3295222.3295349"
-
-
-def test_search_add_paper():
-    """Test adding paper to search results."""
-    search = SearchResult(query="q", databases=["arxiv"])
-    paper = Paper(
-        title="Title",
-        abstract="Abstract",
-        authors=[Author(name="Author")],
-        source=None,
-        publication_date=None,
-    )
-    search.add_paper(paper)
-    assert len(search.papers) == 1
-    assert search.papers[0].title == "Title"
-
-
-def _make_search_with_paper() -> SearchResult:
-    """Return a SearchResult with one Article paper for export tests."""
-    paper = Paper(
-        title="Export Test Paper",
-        abstract="Abstract text.",
-        authors=[Author(name="Author One")],
-        source=Source(title="Test Journal"),
-        publication_date=datetime.date(2023, 1, 1),
-    )
-    search = SearchResult(
-        query="[export]",
-        databases=["arxiv"],
-        since=datetime.date(2022, 1, 1),
-        until=datetime.date(2023, 12, 31),
-    )
-    search.add_paper(paper)
-    return search
-
-
-def test_search_to_dict_contains_papers():
-    """SearchResult.to_dict() returns a dict with 'papers' key."""
-    data = _make_search_with_paper().to_dict()
-    assert "papers" in data
-    assert len(data["papers"]) == 1
-
-
-def test_search_to_dict_contains_since_until():
-    """SearchResult.to_dict() serializes since/until in metadata."""
-    data = _make_search_with_paper().to_dict()
-    assert data["metadata"]["since"] == "2022-01-01"
-    assert data["metadata"]["until"] == "2023-12-31"
-
-
-def test_search_to_dict_since_until_none():
-    """SearchResult.to_dict() serializes None when since/until not set."""
-    search = SearchResult(query="[test]", databases=["arxiv"])
-    data = search.to_dict()
-    assert data["metadata"]["since"] is None
-    assert data["metadata"]["until"] is None
-
-
-def test_search_from_dict_round_trip():
-    """SearchResult.from_dict(to_dict()) preserves all fields."""
-    original = _make_search_with_paper()
-    data = original.to_dict()
-    restored = SearchResult.from_dict(data)
-    assert len(restored.papers) == 1
-    assert restored.papers[0].title == "Export Test Paper"
-    assert restored.query == "[export]"
-    assert restored.since == datetime.date(2022, 1, 1)
-    assert restored.until == datetime.date(2023, 12, 31)
-    assert restored.databases == ["arxiv"]
 
 
 # ---------------------------------------------------------------------------
@@ -712,69 +621,6 @@ class TestPaperEquality:
         data = original.to_dict()
         restored = Paper.from_dict(data)
         assert restored in [original]
-
-
-# ------------------------------------------------------------------
-# Source.__eq__ / __hash__
-# ------------------------------------------------------------------
-
-
-class TestSourceEquality:
-    """Tests for Source.__eq__ and __hash__."""
-
-    def test_same_title_means_equal(self) -> None:
-        """Sources with the same title are equal."""
-        a = Source(title="Nature")
-        b = Source(title="Nature")
-        assert a == b
-        assert hash(a) == hash(b)
-
-    def test_title_case_insensitive(self) -> None:
-        """Source equality is case-insensitive."""
-        a = Source(title="NATURE")
-        b = Source(title="nature")
-        assert a == b
-
-    def test_different_title_not_equal(self) -> None:
-        """Sources with different titles are not equal."""
-        a = Source(title="Nature")
-        b = Source(title="Science")
-        assert a != b
-
-    def test_not_equal_to_non_source(self) -> None:
-        """Comparison with non-Source returns NotImplemented."""
-        s = Source(title="Nature")
-        assert s != "not a source"
-
-    def test_source_usable_in_set(self) -> None:
-        """Sources with the same title can be deduplicated in a set."""
-        a = Source(title="Nature")
-        b = Source(title="nature")
-        assert len({a, b}) == 1
-
-
-# ---------------------------------------------------------------------------
-# Source.__str__
-# ---------------------------------------------------------------------------
-
-
-class TestSourceStr:
-    """Tests for Source.__str__."""
-
-    def test_str_with_publisher(self) -> None:
-        """str(source) includes publisher in parentheses."""
-        s = Source(title="Nature", publisher="Springer")
-        assert str(s) == "Nature (Springer)"
-
-    def test_str_without_publisher(self) -> None:
-        """str(source) returns just the title when there is no publisher."""
-        s = Source(title="Nature")
-        assert str(s) == "Nature"
-
-    def test_str_differs_from_repr(self) -> None:
-        """__str__ and __repr__ produce different output."""
-        s = Source(title="Nature", publisher="Springer")
-        assert str(s) != repr(s)
 
 
 # ---------------------------------------------------------------------------
