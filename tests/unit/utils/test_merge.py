@@ -35,9 +35,33 @@ def test_merge_value_combines_sets():
 
 
 def test_merge_value_combines_lists():
-    """Test that merge_value combines lists."""
+    """Test that merge_value combines lists preserving insertion order."""
     result = merge_value([1, 2], [3, 4])
-    assert set(result) == {1, 2, 3, 4}
+    assert result == [1, 2, 3, 4]
+
+
+def test_merge_value_combines_lists_deduplicates():
+    """Test that merge_value deduplicates list items while preserving order."""
+    result = merge_value([1, 2, 3], [2, 3, 4])
+    assert result == [1, 2, 3, 4]
+
+
+def test_merge_value_combines_lists_preserves_base_order():
+    """Base items appear first in their original order."""
+    result = merge_value(["c", "a"], ["b", "a"])
+    assert result == ["c", "a", "b"]
+
+
+def test_merge_value_combines_lists_unhashable():
+    """Test that merge_value handles unhashable items in lists."""
+    result = merge_value([{"a": 1}], [{"a": 1}, {"b": 2}])
+    assert result == [{"a": 1}, {"b": 2}]
+
+
+def test_merge_value_combines_tuples_preserves_order():
+    """Test that merge_value combines tuples preserving order."""
+    result = merge_value((1, 2, 3), (2, 3, 4))
+    assert result == (1, 2, 3, 4)
 
 
 def test_merge_value_combines_dicts():

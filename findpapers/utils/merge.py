@@ -91,9 +91,32 @@ def merge_value(base: Any, incoming: Any) -> Any:
     if isinstance(base, set) and isinstance(incoming, set):
         return base | incoming
     if isinstance(base, list) and isinstance(incoming, list):
-        return list({*base, *incoming})
+        # Preserve insertion order and tolerate unhashable items.
+        seen: set[Any] = set()
+        merged_list: list[Any] = []
+        for item in base + incoming:
+            try:
+                if item not in seen:
+                    seen.add(item)
+                    merged_list.append(item)
+            except TypeError:
+                # Unhashable item — fall back to linear scan.
+                if item not in merged_list:
+                    merged_list.append(item)
+        return merged_list
     if isinstance(base, tuple) and isinstance(incoming, tuple):
-        return tuple({*base, *incoming})
+        # Same order-preserving dedup for tuples.
+        seen_t: set[Any] = set()
+        merged_tuple: list[Any] = []
+        for item in base + incoming:
+            try:
+                if item not in seen_t:
+                    seen_t.add(item)
+                    merged_tuple.append(item)
+            except TypeError:
+                if item not in merged_tuple:
+                    merged_tuple.append(item)
+        return tuple(merged_tuple)
     if isinstance(base, dict) and isinstance(incoming, dict):
         merged = dict(base)
         for key in set(base.keys()) | set(incoming.keys()):
