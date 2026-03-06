@@ -8,6 +8,7 @@ from time import perf_counter
 from findpapers.connectors.crossref import CrossRefConnector
 from findpapers.core.paper import Paper
 from findpapers.utils.logging_config import configure_verbose_logging
+from findpapers.utils.metadata_parser import DOI_URL_PREFIXES
 
 logger = logging.getLogger(__name__)
 
@@ -42,15 +43,6 @@ class DOILookupRunner:
     >>> print(paper.title)
     Experimental ...
     """
-
-    # Common DOI URL prefixes to strip so that callers can pass either the
-    # bare DOI or the full URL.
-    _DOI_URL_PREFIXES = (
-        "https://doi.org/",
-        "http://doi.org/",
-        "https://dx.doi.org/",
-        "http://dx.doi.org/",
-    )
 
     def __init__(
         self,
@@ -148,7 +140,7 @@ class DOILookupRunner:
             If the result is empty after sanitization.
         """
         cleaned = doi.strip()
-        for prefix in cls._DOI_URL_PREFIXES:
+        for prefix in DOI_URL_PREFIXES:
             if cleaned.lower().startswith(prefix.lower()):
                 cleaned = cleaned[len(prefix) :]
                 break

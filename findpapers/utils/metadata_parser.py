@@ -126,7 +126,7 @@ NUM_PAGES_KEY = "citation_num_pages"
 PREPRINT_SERVERS = {"biorxiv", "medrxiv", "arxiv"}
 
 # doi.org URL prefixes that some databases add before the bare DOI.
-_DOI_URL_PREFIXES = (
+DOI_URL_PREFIXES = (
     "https://doi.org/",
     "http://doi.org/",
     "https://dx.doi.org/",
@@ -419,7 +419,7 @@ def normalize_doi(raw: str) -> str | None:
         recognisable DOI.
     """
     value = raw.strip()
-    for prefix in _DOI_URL_PREFIXES:
+    for prefix in DOI_URL_PREFIXES:
         if value.lower().startswith(prefix):
             value = value[len(prefix) :]
             break
