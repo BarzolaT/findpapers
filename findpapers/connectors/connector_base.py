@@ -7,6 +7,7 @@ service inherits a consistent, production-ready networking layer.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import random
 import threading
@@ -30,7 +31,6 @@ _SENSITIVE_PARAM_NAMES: frozenset[str] = frozenset(
         "apikey",
         "x-api-key",
         "x-els-apikey",
-        "x-api-key",
     }
 )
 
@@ -228,10 +228,8 @@ class ConnectorBase(ABC):
         if response is not None:
             retry_after = response.headers.get("Retry-After")
             if retry_after is not None:
-                try:
+                with contextlib.suppress(ValueError, TypeError):
                     backoff = max(backoff, float(retry_after))
-                except (ValueError, TypeError):
-                    pass  # Non-numeric Retry-After (e.g. HTTP-date); ignore.
 
         # Add jitter (0–25 %) to avoid thundering-herd effects.
         jitter: float = backoff * 0.25 * random.random()  # noqa: S311

@@ -263,7 +263,7 @@ class SnowballRunner:
         # parallel depending on num_workers.
         connector_results = self._query_connectors(paper)
 
-        for connector_name, references, citing in connector_results:
+        for _connector_name, references, citing in connector_results:
             # Backward: paper cites these references
             if references is not None:
                 for ref_paper in references:

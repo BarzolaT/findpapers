@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import logging
 from collections.abc import Callable
@@ -329,15 +330,11 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         pub_date: datetime.date | None = None
         _pub_date_str = (item.get("publicationDate") or "").strip()
         if _pub_date_str:
-            try:
+            with contextlib.suppress(ValueError):
                 pub_date = datetime.date.fromisoformat(_pub_date_str[:10])
-            except ValueError:
-                pass
         if pub_date is None and item.get("year"):
-            try:
+            with contextlib.suppress(ValueError, TypeError):
                 pub_date = datetime.date(int(item["year"]), 1, 1)
-            except (ValueError, TypeError):
-                pass
 
         # External IDs → DOI.
         # Prefer the explicit DOI field; fall back to deriving a canonical

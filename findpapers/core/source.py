@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from enum import StrEnum
 from typing import Any
 
@@ -177,10 +178,8 @@ class Source:
         raw_source_type = source_dict.get("source_type")
         source_type: SourceType | None = None
         if raw_source_type is not None:
-            try:
+            with contextlib.suppress(ValueError):
                 source_type = SourceType(raw_source_type)
-            except ValueError:
-                pass
 
         return cls(
             title=title,

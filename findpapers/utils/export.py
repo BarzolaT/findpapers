@@ -144,7 +144,7 @@ def export_to_bibtex(data: Exportable, path: str) -> None:
 
 def load_from_json(
     path: str,
-) -> "SearchResult | CitationGraph | list[Paper]":
+) -> SearchResult | CitationGraph | list[Paper]:
     """Load data previously exported with :func:`export_to_json`.
 
     The ``"type"`` key in the JSON payload is used to reconstruct the

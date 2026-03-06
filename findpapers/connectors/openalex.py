@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import logging
 from collections.abc import Callable
@@ -411,10 +412,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         pub_date: datetime.date | None = None
         _pub_date_str = (work.get("publication_date") or "").strip()
         if _pub_date_str:
-            try:
+            with contextlib.suppress(ValueError):
                 pub_date = datetime.date.fromisoformat(_pub_date_str[:10])
-            except ValueError:
-                pass
 
         # DOI / URL
         doi_raw: str | None = (work.get("doi") or "").strip() or None
@@ -595,10 +594,9 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             # Apply user-specified date bounds on top of the automatic cap.
             if since is not None:
                 params["filter"] += f",from_publication_date:{since.isoformat()}"
-            if until is not None:
+            if until is not None and until.isoformat() < _max_pub_date:
                 # Only override the cap when the user's bound is tighter.
-                if until.isoformat() < _max_pub_date:
-                    params["filter"] += f",to_publication_date:{until.isoformat()}"
+                params["filter"] += f",to_publication_date:{until.isoformat()}"
 
             try:
                 response = self._get(_BASE_URL, params)

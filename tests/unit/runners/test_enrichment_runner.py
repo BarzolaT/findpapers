@@ -226,9 +226,9 @@ class TestEnrichmentRunnerVerbose:
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
+            caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"),
         ):
-            with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
-                runner.run(verbose=True)
+            runner.run(verbose=True)
         assert "EnrichmentRunner Configuration" in " ".join(caplog.messages)
 
     def test_verbose_true_emits_enrichment_summary(self, caplog):
@@ -239,9 +239,9 @@ class TestEnrichmentRunnerVerbose:
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
+            caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"),
         ):
-            with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
-                runner.run(verbose=True)
+            runner.run(verbose=True)
         messages = " ".join(caplog.messages)
         assert "Enrichment Summary" in messages
         assert "Runtime" in messages
@@ -266,9 +266,9 @@ class TestEnrichmentRunnerVerbose:
         with (
             patch("findpapers.runners.enrichment_runner.fetch_metadata", return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
+            caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"),
         ):
-            with caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"):
-                runner.run(verbose=False)
+            runner.run(verbose=False)
         assert "EnrichmentRunner Configuration" not in " ".join(caplog.messages)
 
     def test_show_progress_false_disables_progress_bar(self):

@@ -144,7 +144,8 @@ class TestExtractMetadataFromHtml:
         meta = extract_metadata_from_html(ARXIV_HTML)  # type: ignore[arg-type]
         assert "citation_title" in meta or "og:title" in meta
         title = meta.get("citation_title") or meta.get("og:title")
-        assert isinstance(title, str) and len(title) > 5
+        assert isinstance(title, str)
+        assert len(title) > 5
 
     def test_arxiv_has_citation_authors(self) -> None:
         """arXiv page exposes one or more citation_author meta tags."""
@@ -155,7 +156,8 @@ class TestExtractMetadataFromHtml:
         if isinstance(authors, list):
             assert all(isinstance(a, str) and a for a in authors)
         else:
-            assert isinstance(authors, str) and authors
+            assert isinstance(authors, str)
+            assert authors
 
     def test_arxiv_has_citation_date(self) -> None:
         """arXiv page provides a citation_date or citation_online_date meta tag."""
@@ -175,14 +177,16 @@ class TestExtractMetadataFromHtml:
         _skip_if_missing(PUBMED_HTML)
         meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
         doi_val = meta.get("citation_doi") or meta.get("dc.identifier")
-        assert doi_val and "10." in str(doi_val)
+        assert doi_val
+        assert "10." in str(doi_val)
 
     def test_pubmed_has_journal_title(self) -> None:
         """PubMed page provides a citation_journal_title meta tag."""
         _skip_if_missing(PUBMED_HTML)
         meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
         assert "citation_journal_title" in meta
-        assert isinstance(meta["citation_journal_title"], str) and meta["citation_journal_title"]
+        assert isinstance(meta["citation_journal_title"], str)
+        assert meta["citation_journal_title"]
 
     def test_pubmed_has_issn(self) -> None:
         """PubMed page exposes citation_issn meta tag."""
@@ -195,7 +199,8 @@ class TestExtractMetadataFromHtml:
         _skip_if_missing(OPENALEX_HTML)
         meta = extract_metadata_from_html(OPENALEX_HTML)  # type: ignore[arg-type]
         doi_val = meta.get("citation_doi") or meta.get("dc.identifier.doi")
-        assert doi_val and "10." in str(doi_val)
+        assert doi_val
+        assert "10." in str(doi_val)
 
     def test_openalex_has_journal_title(self) -> None:
         """OpenAlex landing page exposes a citation_journal_title."""
@@ -218,14 +223,16 @@ class TestExtractMetadataFromHtml:
         _skip_if_missing(IEEE_HTML)
         meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
         doi_val = meta.get("citation_doi")
-        assert doi_val and "10." in str(doi_val)
+        assert doi_val
+        assert "10." in str(doi_val)
 
     def test_ieee_js_blob_extracts_keywords(self) -> None:
         """IEEE Xplore JS-blob extractor populates citation_keywords."""
         _skip_if_missing(IEEE_HTML)
         meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
         kw_val = meta.get("citation_keywords")
-        assert kw_val is not None and len(str(kw_val)) > 0
+        assert kw_val is not None
+        assert len(str(kw_val)) > 0
 
     def test_ieee_js_blob_extracts_journal_title(self) -> None:
         """IEEE Xplore JS-blob extractor populates citation_journal_title."""
@@ -670,7 +677,8 @@ class TestBuildPaperFromMetadata:
         meta = extract_metadata_from_html(PUBMED_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://pubmed.ncbi.nlm.nih.gov/36006759/")
         assert paper is not None
-        assert paper.doi is not None and paper.doi.startswith("10.")
+        assert paper.doi is not None
+        assert paper.doi.startswith("10.")
         assert paper.source is not None
         assert paper.source.issn is not None
 
@@ -689,7 +697,8 @@ class TestBuildPaperFromMetadata:
         meta = extract_metadata_from_html(OPENALEX_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "http://dx.doi.org/10.3126/nelta.v27i1-2.53203")
         assert paper is not None
-        assert paper.doi is not None and paper.doi.startswith("10.")
+        assert paper.doi is not None
+        assert paper.doi.startswith("10.")
         assert paper.source is not None
 
     def test_openalex_paper_has_keywords(self) -> None:
@@ -698,7 +707,8 @@ class TestBuildPaperFromMetadata:
         meta = extract_metadata_from_html(OPENALEX_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "http://dx.doi.org/10.3126/nelta.v27i1-2.53203")
         assert paper is not None
-        assert paper.keywords and len(paper.keywords) > 0
+        assert paper.keywords
+        assert len(paper.keywords) > 0
 
     def test_ieee_paper_has_authors(self) -> None:
         """IEEE Xplore page (JS blob) produces a paper with populated authors."""
@@ -714,7 +724,8 @@ class TestBuildPaperFromMetadata:
         meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://ieeexplore.ieee.org/document/9568778/")
         assert paper is not None
-        assert paper.doi is not None and paper.doi.startswith("10.")
+        assert paper.doi is not None
+        assert paper.doi.startswith("10.")
         assert paper.source is not None
 
     def test_ieee_paper_has_keywords(self) -> None:
@@ -723,7 +734,8 @@ class TestBuildPaperFromMetadata:
         meta = extract_metadata_from_html(IEEE_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://ieeexplore.ieee.org/document/9568778/")
         assert paper is not None
-        assert paper.keywords and len(paper.keywords) > 0
+        assert paper.keywords
+        assert len(paper.keywords) > 0
 
     def test_scopus_authors_from_dc_colon_creator(self) -> None:
         """Scopus pages use dc:creator which must be normalised and used for authors."""
@@ -739,7 +751,8 @@ class TestBuildPaperFromMetadata:
         meta = extract_metadata_from_html(SEMANTICSCHOLAR_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://doi.org/10.4230/DagRep.12.6.14")
         assert paper is not None
-        assert paper.keywords and len(paper.keywords) > 0
+        assert paper.keywords
+        assert len(paper.keywords) > 0
 
 
 # ---------------------------------------------------------------------------
@@ -783,9 +796,11 @@ class TestFetchMetadata:
         mock_resp = MagicMock()
         mock_resp.raise_for_status.side_effect = req_lib.HTTPError("404")
 
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            with pytest.raises(req_lib.HTTPError):
-                fetch_metadata("https://example.com/missing")
+        with (
+            patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp),
+            pytest.raises(req_lib.HTTPError),
+        ):
+            fetch_metadata("https://example.com/missing")
 
     def test_timeout_forwarded_to_requests(self) -> None:
         """The timeout parameter is forwarded to requests.get."""
@@ -845,9 +860,11 @@ class TestFetchMetadata:
         mock_resp.raise_for_status = MagicMock()
 
         url = "https://example.com/paper"
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"):
-                fetch_metadata(url)
+        with (
+            patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp),
+            caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"),
+        ):
+            fetch_metadata(url)
 
         assert any("GET" in m and "example.com" in m for m in caplog.messages)
 
@@ -863,9 +880,11 @@ class TestFetchMetadata:
         mock_resp.content = b"hello"
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"):
-                fetch_metadata("https://example.com/paper")
+        with (
+            patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp),
+            caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"),
+        ):
+            fetch_metadata("https://example.com/paper")
 
         messages = " ".join(caplog.messages)
         assert "200" in messages
@@ -885,10 +904,12 @@ class TestFetchMetadata:
         mock_resp.content = b"not found"
         mock_resp.raise_for_status.side_effect = req_lib.HTTPError("404")
 
-        with patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"):
-                with pytest.raises(req_lib.HTTPError):
-                    fetch_metadata("https://example.com/missing")
+        with (
+            patch("findpapers.utils.metadata_parser.requests.get", return_value=mock_resp),
+            caplog.at_level(logging.DEBUG, logger="findpapers.utils.metadata_parser"),
+            pytest.raises(req_lib.HTTPError),
+        ):
+            fetch_metadata("https://example.com/missing")
 
         messages = " ".join(caplog.messages)
         assert "404" in messages  # response was logged before the exception was raised
@@ -935,7 +956,8 @@ class TestFetchAndBuildPipeline:
         assert metadata is not None
         result = build_paper_from_metadata(metadata, "https://pubmed.ncbi.nlm.nih.gov/36006759/")
         assert result is not None
-        assert result.doi is not None and result.doi.startswith("10.")
+        assert result.doi is not None
+        assert result.doi.startswith("10.")
         assert result.source is not None
 
     def test_real_openalex_page_end_to_end(self) -> None:
@@ -954,7 +976,8 @@ class TestFetchAndBuildPipeline:
         assert metadata is not None
         result = build_paper_from_metadata(metadata, url)
         assert result is not None
-        assert result.doi is not None and result.doi.startswith("10.")
+        assert result.doi is not None
+        assert result.doi.startswith("10.")
         assert result.source is not None
 
     def test_real_ieee_page_end_to_end(self) -> None:
@@ -973,7 +996,9 @@ class TestFetchAndBuildPipeline:
         assert metadata is not None
         result = build_paper_from_metadata(metadata, url)
         assert result is not None
-        assert result.doi is not None and result.doi.startswith("10.")
+        assert result.doi is not None
+        assert result.doi.startswith("10.")
         assert result.source is not None
         assert len(result.authors) > 0
-        assert result.keywords and len(result.keywords) > 0
+        assert result.keywords
+        assert len(result.keywords) > 0

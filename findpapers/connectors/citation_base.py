@@ -28,7 +28,7 @@ class CitationConnectorBase(ConnectorBase):
     returning an empty list.  Vice-versa for forward-only connectors.
     """
 
-    def fetch_references(self, paper: "Paper") -> list["Paper"]:
+    def fetch_references(self, paper: Paper) -> list[Paper]:
         """Return papers cited *by* the given paper (backward snowballing).
 
         The default implementation returns an empty list.  Subclasses that
@@ -48,7 +48,7 @@ class CitationConnectorBase(ConnectorBase):
         """
         return []
 
-    def fetch_cited_by(self, paper: "Paper") -> list["Paper"]:
+    def fetch_cited_by(self, paper: Paper) -> list[Paper]:
         """Return papers that cite the given paper (forward snowballing).
 
         The default implementation returns an empty list.  Subclasses that

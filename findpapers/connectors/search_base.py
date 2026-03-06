@@ -44,7 +44,7 @@ class SearchConnectorBase(ConnectorBase):
 
     @property
     @abstractmethod
-    def query_builder(self) -> "QueryBuilder":
+    def query_builder(self) -> QueryBuilder:
         """Return the database-specific query builder.
 
         Returns
@@ -56,12 +56,12 @@ class SearchConnectorBase(ConnectorBase):
     @abstractmethod
     def _fetch_papers(
         self,
-        query: "Query",
+        query: Query,
         max_papers: int | None,
         progress_callback: Callable[[int, int | None], None] | None,
         since: datetime.date | None = None,
         until: datetime.date | None = None,
-    ) -> list["Paper"]:
+    ) -> list[Paper]:
         """Fetch papers from the database.
 
         Subclasses implement HTTP requests, rate limiting, pagination and
@@ -97,12 +97,12 @@ class SearchConnectorBase(ConnectorBase):
 
     def search(
         self,
-        query: "Query",
+        query: Query,
         max_papers: int | None = None,
         progress_callback: Callable[[int, int | None], None] | None = None,
         since: datetime.date | None = None,
         until: datetime.date | None = None,
-    ) -> list["Paper"]:
+    ) -> list[Paper]:
         """Execute search and return a list of papers.
 
         Validates the query first.  If validation fails the search is skipped

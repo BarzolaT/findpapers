@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 from enum import StrEnum
 from typing import Any
@@ -144,7 +145,7 @@ class SearchResult:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "SearchResult":
+    def from_dict(cls, data: dict) -> SearchResult:
         """Reconstruct a SearchResult from a dictionary.
 
         Accepts the format produced by :meth:`to_dict` (and by
@@ -166,26 +167,20 @@ class SearchResult:
         processed_at: datetime.datetime | None = None
         ts = metadata.get("timestamp")
         if isinstance(ts, str):
-            try:
+            with contextlib.suppress(ValueError):
                 processed_at = datetime.datetime.fromisoformat(ts)
-            except ValueError:
-                pass
 
         since: datetime.date | None = None
         since_str = metadata.get("since")
         if isinstance(since_str, str):
-            try:
+            with contextlib.suppress(ValueError):
                 since = datetime.date.fromisoformat(since_str)
-            except ValueError:
-                pass
 
         until: datetime.date | None = None
         until_str = metadata.get("until")
         if isinstance(until_str, str):
-            try:
+            with contextlib.suppress(ValueError):
                 until = datetime.date.fromisoformat(until_str)
-            except ValueError:
-                pass
 
         return cls(
             query=metadata.get("query", ""),

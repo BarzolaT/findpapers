@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 from enum import Enum
 from time import perf_counter
@@ -160,10 +161,8 @@ def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper 
     page_count: int | None = None
     num_pages_raw = metadata.get(NUM_PAGES_KEY)
     if num_pages_raw:
-        try:
+        with contextlib.suppress(ValueError):
             page_count = int(str(num_pages_raw).strip())
-        except ValueError:
-            pass
 
     source_title = pick_metadata_value(metadata, SOURCE_TITLE_KEYS)
     source = None

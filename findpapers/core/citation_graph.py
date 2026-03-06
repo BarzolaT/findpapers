@@ -343,7 +343,7 @@ class CitationGraph:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "CitationGraph":
+    def from_dict(cls, data: dict) -> CitationGraph:
         """Reconstruct a CitationGraph from a dictionary.
 
         Accepts the format produced by :meth:`to_dict` (and by

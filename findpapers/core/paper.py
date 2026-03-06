@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import logging
 from enum import StrEnum
@@ -430,7 +431,7 @@ class Paper:
         self.paper_type = merge_value(self.paper_type, paper.paper_type)
 
     @classmethod
-    def from_dict(cls, paper_dict: dict) -> "Paper":
+    def from_dict(cls, paper_dict: dict) -> Paper:
         """Create a paper from a dict.
 
         Parameters
@@ -500,10 +501,8 @@ class Paper:
         raw_paper_type = paper_dict.get("paper_type")
         paper_type: PaperType | None = None
         if isinstance(raw_paper_type, str):
-            try:
+            with contextlib.suppress(ValueError):
                 paper_type = PaperType(raw_paper_type)
-            except ValueError:
-                pass
 
         return cls(
             title=title,

@@ -57,7 +57,8 @@ class TestMakeProgressBar:
         """dynamic_ncols is enabled for adaptive terminal width."""
         pbar = make_progress_bar()
         # tqdm stores dynamic_ncols as a callable (screen-shape function) when enabled.
-        assert pbar.dynamic_ncols is not None and pbar.dynamic_ncols is not False
+        assert pbar.dynamic_ncols is not None
+        assert pbar.dynamic_ncols is not False
         pbar.close()
 
     def test_context_manager_usage(self):

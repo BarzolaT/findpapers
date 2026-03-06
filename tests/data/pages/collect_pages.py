@@ -31,9 +31,9 @@ import sys
 import time
 import unicodedata
 import urllib.parse
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterator
 from xml.etree import ElementTree as ET
 
 import requests

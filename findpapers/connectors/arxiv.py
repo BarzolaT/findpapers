@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import logging
 import re
@@ -273,10 +274,7 @@ class ArxivConnector(SearchConnectorBase):
             from_date = since.strftime("%Y%m%d") + "0000" if since else "000001010000"
             to_date = until.strftime("%Y%m%d") + "2359" if until else "999912312359"
             date_filter = f"submittedDate:[{from_date}+TO+{to_date}]"
-            if arxiv_query:
-                arxiv_query = f"{arxiv_query}+AND+{date_filter}"
-            else:
-                arxiv_query = date_filter
+            arxiv_query = f"{arxiv_query}+AND+{date_filter}" if arxiv_query else date_filter
         papers: list[Paper] = []
         processed = 0
         offset = 0
@@ -304,10 +302,8 @@ class ArxivConnector(SearchConnectorBase):
             total_results_el = tree.find("{http://a9.com/-/spec/opensearch/1.1/}totalResults")
             total: int | None = None
             if total_results_el is not None and total_results_el.text:
-                try:
+                with contextlib.suppress(ValueError):
                     total = int(total_results_el.text.strip())
-                except ValueError:
-                    pass
 
             entries = tree.findall("atom:entry", _NS)
             if not entries:

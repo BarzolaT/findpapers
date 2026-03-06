@@ -100,10 +100,11 @@ class FilterPropagator:
                 )
                 if child_effective_filter != group_filter:
                     return False
-            elif child.node_type == NodeType.GROUP:
+            elif child.node_type == NodeType.GROUP and not self._check_node_uses_filter(
+                child, group_filter
+            ):
                 # Check if nested group and its children use the same filter
-                if not self._check_node_uses_filter(child, group_filter):
-                    return False
+                return False
 
         return True
 

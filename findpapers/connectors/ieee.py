@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import logging
 from collections.abc import Callable
@@ -189,10 +190,8 @@ class IEEEConnector(SearchConnectorBase):
         pub_date: datetime.date | None = None
         pub_year = item.get("publication_year")
         if pub_year:
-            try:
+            with contextlib.suppress(ValueError, TypeError):
                 pub_date = datetime.date(int(pub_year), 1, 1)
-            except (ValueError, TypeError):
-                pass
 
         # DOI / URL
         doi: str | None = (item.get("doi") or "").strip() or None
@@ -212,10 +211,8 @@ class IEEEConnector(SearchConnectorBase):
         citations: int | None = None
         citation_count = item.get("citing_paper_count")
         if citation_count is not None:
-            try:
+            with contextlib.suppress(ValueError, TypeError):
                 citations = int(citation_count)
-            except (ValueError, TypeError):
-                pass
 
         # Source
         source_title = (item.get("publication_title") or "").strip()

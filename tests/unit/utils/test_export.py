@@ -32,7 +32,7 @@ from findpapers.utils.export import (
 # ---------------------------------------------------------------------------
 
 
-@pytest.fixture()
+@pytest.fixture
 def journal_publication() -> Source:
     """Return a journal publication."""
     return Source(
@@ -42,7 +42,7 @@ def journal_publication() -> Source:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def conference_publication() -> Source:
     """Return a conference proceedings publication."""
     return Source(
@@ -52,7 +52,7 @@ def conference_publication() -> Source:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def minimal_paper() -> Paper:
     """Return a paper with the minimum required fields."""
     return Paper(
@@ -64,7 +64,7 @@ def minimal_paper() -> Paper:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def full_paper(journal_publication: Source) -> Paper:
     """Return a paper with all fields populated."""
     return Paper(
@@ -85,7 +85,7 @@ def full_paper(journal_publication: Source) -> Paper:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def conference_paper(conference_publication: Source) -> Paper:
     """Return a paper in a conference proceedings."""
     return Paper(
@@ -100,7 +100,7 @@ def conference_paper(conference_publication: Source) -> Paper:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_search(full_paper: Paper, minimal_paper: Paper) -> SearchResult:
     """Return a SearchResult with two papers."""
     search = SearchResult(query="[deep learning]", databases=["arxiv"])
@@ -109,7 +109,7 @@ def sample_search(full_paper: Paper, minimal_paper: Paper) -> SearchResult:
     return search
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_graph(full_paper: Paper, minimal_paper: Paper) -> CitationGraph:
     """Return a CitationGraph with two papers and one edge."""
     full_paper.doi = "10.1000/full"

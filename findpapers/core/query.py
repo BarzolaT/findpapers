@@ -102,7 +102,7 @@ class QueryNode:
 
     node_type: NodeType
     value: str | None = None
-    children: list["QueryNode"] = field(default_factory=list)
+    children: list[QueryNode] = field(default_factory=list)
     filter_code: FilterCode | None = None
     inherited_filter_code: FilterCode | None = None
     children_match_filter: bool | None = None
@@ -131,7 +131,7 @@ class QueryNode:
         return result
 
     @classmethod
-    def from_dict(cls, data: dict) -> "QueryNode":
+    def from_dict(cls, data: dict) -> QueryNode:
         """Create a QueryNode from a dictionary.
 
         Parameters
@@ -275,7 +275,7 @@ class Query:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "Query":
+    def from_dict(cls, data: dict) -> Query:
         """Create a Query from a dictionary (bypasses validation).
 
         Parameters

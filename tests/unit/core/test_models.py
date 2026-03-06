@@ -33,7 +33,7 @@ def test_publication_to_from_dict():
 
 def test_paper_requires_title():
     """Test that paper requires a title."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="cannot be null"):
         Paper(
             title="",
             abstract="",

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Callable, List, Optional
+from collections.abc import Callable
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -41,11 +41,11 @@ class _StubConnector(SearchConnectorBase):
     def _fetch_papers(
         self,
         query: Query,
-        max_papers: Optional[int],
-        progress_callback: Optional[Callable],
-        since: Optional[datetime.date] = None,
-        until: Optional[datetime.date] = None,
-    ) -> List[Paper]:
+        max_papers: int | None,
+        progress_callback: Callable | None,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
+    ) -> list[Paper]:
         return []
 
 
@@ -155,9 +155,11 @@ class TestSearchConnectorBaseGetLogging:
         searcher._http_session = MagicMock()
         searcher._http_session.get.return_value = resp
 
-        with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-            with pytest.raises(req_lib.HTTPError):
-                searcher._get("https://api.example.com/missing")  # noqa: SLF001
+        with (
+            caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"),
+            pytest.raises(req_lib.HTTPError),
+        ):
+            searcher._get("https://api.example.com/missing")  # noqa: SLF001
 
         messages = " ".join(caplog.messages)
         assert "404" in messages  # response was logged before the exception was raised
@@ -268,9 +270,11 @@ class TestSearchConnectorBaseSearch:
         """Unexpected exception (e.g. RuntimeError) in _fetch_papers is NOT caught."""
         searcher = self._make_searcher_with_validation(is_valid=True)
         mock_query = MagicMock()
-        with pytest.raises(RuntimeError, match="boom"):
-            with patch.object(searcher, "_fetch_papers", side_effect=RuntimeError("boom")):
-                searcher.search(mock_query)
+        with (
+            pytest.raises(RuntimeError, match="boom"),
+            patch.object(searcher, "_fetch_papers", side_effect=RuntimeError("boom")),
+        ):
+            searcher.search(mock_query)
 
     def test_caught_exceptions_are_logged(self, caplog) -> None:
         """Caught network errors are logged at ERROR level with traceback."""
@@ -280,9 +284,11 @@ class TestSearchConnectorBaseSearch:
 
         searcher = self._make_searcher_with_validation(is_valid=True)
         mock_query = MagicMock()
-        with caplog.at_level(logging.ERROR, logger="findpapers.connectors.search_base"):
-            with patch.object(searcher, "_fetch_papers", side_effect=req_lib.Timeout("timed out")):
-                searcher.search(mock_query)
+        with (
+            caplog.at_level(logging.ERROR, logger="findpapers.connectors.search_base"),
+            patch.object(searcher, "_fetch_papers", side_effect=req_lib.Timeout("timed out")),
+        ):
+            searcher.search(mock_query)
 
         assert any("Stub" in m and "Error" in m for m in caplog.messages)
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import logging
 from collections.abc import Callable
@@ -255,10 +256,8 @@ class PubmedConnector(SearchConnectorBase):
             # Month may be abbreviated name
             month = _normalize_month(month)
             if year:
-                try:
+                with contextlib.suppress(ValueError):
                     pub_date = datetime.date.fromisoformat(f"{year}-{month}-{day}")
-                except ValueError:
-                    pass
 
         # DOI
         doi: str | None = None

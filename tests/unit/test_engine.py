@@ -134,16 +134,20 @@ class TestEngineInit:
     def test_ssl_verify_true_no_warning(self, caplog):
         """Engine does not log a warning when SSL verification is enabled."""
         env_clear = {"FINDPAPERS_SSL_VERIFY": ""}
-        with patch.dict(os.environ, env_clear, clear=False):
-            with caplog.at_level("WARNING", logger="findpapers.engine"):
-                Engine(ssl_verify=True)
+        with (
+            patch.dict(os.environ, env_clear, clear=False),
+            caplog.at_level("WARNING", logger="findpapers.engine"),
+        ):
+            Engine(ssl_verify=True)
         assert not any("SSL certificate verification" in msg for msg in caplog.messages)
 
     def test_ssl_verify_env_false_logs_warning(self, caplog):
         """Engine logs a warning when SSL is disabled via environment variable."""
-        with patch.dict(os.environ, {"FINDPAPERS_SSL_VERIFY": "false"}, clear=False):
-            with caplog.at_level("WARNING", logger="findpapers.engine"):
-                Engine()
+        with (
+            patch.dict(os.environ, {"FINDPAPERS_SSL_VERIFY": "false"}, clear=False),
+            caplog.at_level("WARNING", logger="findpapers.engine"),
+        ):
+            Engine()
         assert any("SSL certificate verification is disabled" in msg for msg in caplog.messages)
 
 
@@ -562,7 +566,8 @@ class TestEngineExportBibtex:
         search.add_paper(make_paper(doi="10.1/a"))
         path = str(tmp_path / "refs.bib")
         Engine.export_to_bibtex(search, path)
-        content = open(path, encoding="utf-8").read()
+        with open(path, encoding="utf-8") as file_handle:
+            content = file_handle.read()
         assert "@" in content
 
     def test_export_paper_list(self, tmp_path):
@@ -570,14 +575,16 @@ class TestEngineExportBibtex:
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "refs.bib")
         Engine.export_to_bibtex(papers, path)
-        content = open(path, encoding="utf-8").read()
+        with open(path, encoding="utf-8") as file_handle:
+            content = file_handle.read()
         assert "@" in content
 
     def test_empty_list_produces_empty_file(self, tmp_path):
         """An empty paper list creates an empty file."""
         path = str(tmp_path / "empty.bib")
         Engine.export_to_bibtex([], path)
-        content = open(path, encoding="utf-8").read()
+        with open(path, encoding="utf-8") as file_handle:
+            content = file_handle.read()
         assert content == ""
 
 

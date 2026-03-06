@@ -233,7 +233,7 @@ class TestQueryNode:
 class TestQuery:
     """Tests for the Query dataclass."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def simple_query(self) -> Query:
         """A simple Query with two terms joined by AND."""
         return Query(

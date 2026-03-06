@@ -271,10 +271,12 @@ class QueryValidator:
         for word in words:
             # Clean parentheses
             clean_word = word.strip("()")
-            if clean_word and clean_word not in valid_keywords:
-                # Check if it's an operator-like word
-                if clean_word in {"XOR", "NAND", "NOR"}:
-                    raise QueryValidationError(f"Invalid boolean operator: {clean_word}")
+            if (
+                clean_word
+                and clean_word not in valid_keywords
+                and clean_word in {"XOR", "NAND", "NOR"}
+            ):
+                raise QueryValidationError(f"Invalid boolean operator: {clean_word}")
 
     def _validate_connector_placement(self, structure: str) -> None:
         """Validate that connectors are properly placed between terms/groups.
@@ -370,7 +372,7 @@ class QueryValidator:
         # Split by TERM and check each segment
         segments = structure_cleaned.split("TERM")
 
-        for i, segment in enumerate(segments):
+        for _i, segment in enumerate(segments):
             # Skip empty segments
             if not segment.strip():
                 continue
@@ -386,9 +388,12 @@ class QueryValidator:
             words = cleaned.split()
             for word in words:
                 word_upper = word.upper()
-                if word_upper not in {"AND", "OR", "NOT"}:
-                    # Check if it looks like text that should be a term
-                    if word and not word.startswith("(") and not word.endswith(")"):
-                        raise QueryValidationError(
-                            f"All terms must be enclosed in square brackets: found '{word}'"
-                        )
+                if (
+                    word_upper not in {"AND", "OR", "NOT"}
+                    and word
+                    and not word.startswith("(")
+                    and not word.endswith(")")
+                ):
+                    raise QueryValidationError(
+                        f"All terms must be enclosed in square brackets: found '{word}'"
+                    )

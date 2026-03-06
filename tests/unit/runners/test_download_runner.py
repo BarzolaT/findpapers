@@ -174,9 +174,11 @@ class TestDownloadRunnerVerbose:
         import logging
 
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
-        with patch.object(runner, "_download_paper", return_value=(True, ["http://url"])):
-            with caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"):
-                runner.run(verbose=True)
+        with (
+            patch.object(runner, "_download_paper", return_value=(True, ["http://url"])),
+            caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"),
+        ):
+            runner.run(verbose=True)
         assert "DownloadRunner Configuration" in " ".join(caplog.messages)
 
     def test_verbose_true_emits_download_summary(self, tmp_path, caplog):
@@ -184,9 +186,11 @@ class TestDownloadRunnerVerbose:
         import logging
 
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
-        with patch.object(runner, "_download_paper", return_value=(True, ["http://url"])):
-            with caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"):
-                runner.run(verbose=True)
+        with (
+            patch.object(runner, "_download_paper", return_value=(True, ["http://url"])),
+            caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"),
+        ):
+            runner.run(verbose=True)
         messages = " ".join(caplog.messages)
         assert "Download Summary" in messages
         assert "Runtime" in messages
@@ -197,9 +201,11 @@ class TestDownloadRunnerVerbose:
 
         paper = make_paper(title="Failing Paper")
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
-        with patch.object(runner, "_download_paper", side_effect=RuntimeError("network error")):
-            with caplog.at_level(logging.WARNING, logger="findpapers.runners.download_runner"):
-                runner.run(verbose=True)
+        with (
+            patch.object(runner, "_download_paper", side_effect=RuntimeError("network error")),
+            caplog.at_level(logging.WARNING, logger="findpapers.runners.download_runner"),
+        ):
+            runner.run(verbose=True)
         warnings = [r.message for r in caplog.records if r.levelno == logging.WARNING]
         assert any("Failing Paper" in str(w) for w in warnings)
 
@@ -266,9 +272,11 @@ class TestDownloadRunnerVerbose:
         mock_resp.url = "http://example.com/paper.pdf"
 
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
-        with patch("findpapers.runners.download_runner.requests.get", return_value=mock_resp):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"):
-                runner.run(verbose=True)
+        with (
+            patch("findpapers.runners.download_runner.requests.get", return_value=mock_resp),
+            caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"),
+        ):
+            runner.run(verbose=True)
 
         debug_messages = " ".join(r.message for r in caplog.records if r.levelno == logging.DEBUG)
         assert "GET" in debug_messages
@@ -279,12 +287,14 @@ class TestDownloadRunnerVerbose:
         import logging
 
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
-        with patch(
-            "findpapers.runners.download_runner.requests.get",
-            side_effect=ConnectionError("refused"),
+        with (
+            patch(
+                "findpapers.runners.download_runner.requests.get",
+                side_effect=ConnectionError("refused"),
+            ),
+            caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"),
         ):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"):
-                runner.run(verbose=True)
+            runner.run(verbose=True)
 
         debug_messages = " ".join(r.message for r in caplog.records if r.levelno == logging.DEBUG)
         # GET is logged before the request attempt; response must NOT appear
@@ -330,9 +340,11 @@ class TestDownloadRunnerVerbose:
         mock_resp.ok = False
 
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
-        with patch("findpapers.runners.download_runner.requests.get", return_value=mock_resp):
-            with caplog.at_level(logging.WARNING, logger="findpapers.runners.download_runner"):
-                runner.run(verbose=True)
+        with (
+            patch("findpapers.runners.download_runner.requests.get", return_value=mock_resp),
+            caplog.at_level(logging.WARNING, logger="findpapers.runners.download_runner"),
+        ):
+            runner.run(verbose=True)
 
         warnings = [r.message for r in caplog.records if r.levelno == logging.WARNING]
         assert any("418" in str(w) or "bot" in str(w).lower() for w in warnings)
@@ -420,12 +432,14 @@ class TestDownloadRunnerSslVerify:
         import logging
 
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
-        with patch(
-            "findpapers.runners.download_runner.requests.get",
-            side_effect=ConnectionError("SSL handshake failed"),
+        with (
+            patch(
+                "findpapers.runners.download_runner.requests.get",
+                side_effect=ConnectionError("SSL handshake failed"),
+            ),
+            caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"),
         ):
-            with caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"):
-                runner.run(verbose=True)
+            runner.run(verbose=True)
 
         debug_messages = [r for r in caplog.records if r.levelno == logging.DEBUG]
         # At least one record should carry exc_info about the failure

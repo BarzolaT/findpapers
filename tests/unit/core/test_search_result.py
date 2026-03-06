@@ -116,7 +116,7 @@ class TestAddRemovePaper:
 class TestSearchResultSerialization:
     """Tests for to_dict / from_dict."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def full_search(self) -> SearchResult:
         """A SearchResult with representative field values."""
         p = make_paper(

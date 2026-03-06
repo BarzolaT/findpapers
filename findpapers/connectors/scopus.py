@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import logging
 from collections.abc import Callable
@@ -189,10 +190,8 @@ class ScopusConnector(SearchConnectorBase):
         cover_date = (entry.get("prism:coverDate") or "").strip()
         pub_date: datetime.date | None = None
         if cover_date:
-            try:
+            with contextlib.suppress(ValueError):
                 pub_date = datetime.date.fromisoformat(cover_date[:10])
-            except ValueError:
-                pass
 
         # DOI / URL
         doi: str | None = (entry.get("prism:doi") or "").strip() or None
@@ -206,10 +205,8 @@ class ScopusConnector(SearchConnectorBase):
         citations: int | None = None
         cite_count = entry.get("citedby-count")
         if cite_count is not None:
-            try:
+            with contextlib.suppress(ValueError, TypeError):
                 citations = int(cite_count)
-            except (ValueError, TypeError):
-                pass
 
         # Source
         pub_title = (

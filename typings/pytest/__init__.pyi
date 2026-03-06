@@ -1,10 +1,12 @@
-from typing import Any, Callable, Pattern, Sequence, Type
+from collections.abc import Callable, Sequence
+from re import Pattern
+from typing import Any
 
 class RaisesContext:
     def __enter__(self) -> BaseException: ...
     def __exit__(
         self,
-        exc_type: Type[BaseException] | None,
+        exc_type: type[BaseException] | None,
         exc: BaseException | None,
         tb: object | None,
     ) -> bool | None: ...
@@ -12,7 +14,7 @@ class RaisesContext:
 class _RaisesExc:
     def __call__(
         self,
-        expected_exception: Type[BaseException] | tuple[Type[BaseException], ...],
+        expected_exception: type[BaseException] | tuple[type[BaseException], ...],
         *,
         match: str | Pattern[str] | None = ...,
     ) -> RaisesContext: ...
