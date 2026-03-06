@@ -10,7 +10,6 @@ import pytest
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import SearchResult
 from findpapers.engine import Engine
-from tests.conftest import make_paper
 
 # ---------------------------------------------------------------------------
 # Construction
@@ -235,7 +234,7 @@ class TestEngineSearch:
 class TestEngineDownload:
     """Tests for Engine.download()."""
 
-    def test_download_uses_engine_proxy_and_ssl(self):
+    def test_download_uses_engine_proxy_and_ssl(self, make_paper):
         """download() forwards engine proxy and ssl_verify to DownloadRunner."""
         engine = Engine(
             proxy="http://proxy:8080",
@@ -303,7 +302,7 @@ class TestEngineDownload:
 class TestEngineEnrich:
     """Tests for Engine.enrich()."""
 
-    def test_enrich_forwards_timeout(self):
+    def test_enrich_forwards_timeout(self, make_paper):
         """enrich() forwards per-call timeout to EnrichmentRunner."""
         engine = Engine()
         fake_metrics = {"total_papers": 2, "enriched_papers": 1}
@@ -429,7 +428,7 @@ class TestEngineImport:
 class TestEngineSnowball:
     """Tests for Engine.snowball()."""
 
-    def test_snowball_delegates_to_runner(self):
+    def test_snowball_delegates_to_runner(self, make_paper):
         """snowball() creates a SnowballRunner and calls run()."""
         engine = Engine()
         seed = make_paper("Seed", doi="10.1000/seed")
@@ -446,7 +445,7 @@ class TestEngineSnowball:
         mock_runner.run.assert_called_once_with(verbose=False, show_progress=True)
         assert result is mock_graph
 
-    def test_snowball_passes_parameters(self):
+    def test_snowball_passes_parameters(self, make_paper):
         """snowball() passes configuration to SnowballRunner."""
         engine = Engine(openalex_api_key="oakey", email="me@test.com")
         seed = make_paper("Seed", doi="10.1000/seed")
@@ -472,7 +471,7 @@ class TestEngineSnowball:
         assert kwargs["email"] == "me@test.com"
         mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
 
-    def test_snowball_accepts_list_of_papers(self):
+    def test_snowball_accepts_list_of_papers(self, make_paper):
         """snowball() accepts a list of papers."""
         engine = Engine()
         seeds = [
@@ -490,7 +489,7 @@ class TestEngineSnowball:
         call_args = mock_cls.call_args
         assert call_args[1]["seed_papers"] is seeds
 
-    def test_snowball_show_progress_false(self):
+    def test_snowball_show_progress_false(self, make_paper):
         """show_progress=False is forwarded to SnowballRunner.run()."""
         engine = Engine()
         seed = make_paper("Seed", doi="10.1000/seed")
@@ -531,7 +530,7 @@ class TestSnowballImport:
 class TestEngineExportJson:
     """Tests for Engine.export_to_json static method."""
 
-    def test_export_search_result(self, tmp_path):
+    def test_export_search_result(self, make_paper, tmp_path):
         """SearchResult is exported to a JSON file."""
         search = SearchResult(query="[test]", databases=["arxiv"])
         search.add_paper(make_paper(doi="10.1/a"))
@@ -539,14 +538,14 @@ class TestEngineExportJson:
         Engine.export_to_json(search, path)
         assert os.path.exists(path)
 
-    def test_export_paper_list(self, tmp_path):
+    def test_export_paper_list(self, make_paper, tmp_path):
         """A plain list of papers is exported to a JSON file."""
         papers = [make_paper(doi="10.1/a"), make_paper(title="Paper B", doi="10.1/b")]
         path = str(tmp_path / "papers.json")
         Engine.export_to_json(papers, path)
         assert os.path.exists(path)
 
-    def test_export_citation_graph(self, tmp_path):
+    def test_export_citation_graph(self, make_paper, tmp_path):
         """A CitationGraph is exported to a JSON file."""
         from findpapers.core.citation_graph import CitationGraph
 
@@ -560,7 +559,7 @@ class TestEngineExportJson:
 class TestEngineExportBibtex:
     """Tests for Engine.export_to_bibtex static method."""
 
-    def test_export_search_result(self, tmp_path):
+    def test_export_search_result(self, make_paper, tmp_path):
         """SearchResult is exported to a BibTeX file."""
         search = SearchResult(query="[test]", databases=["arxiv"])
         search.add_paper(make_paper(doi="10.1/a"))
@@ -570,7 +569,7 @@ class TestEngineExportBibtex:
             content = file_handle.read()
         assert "@" in content
 
-    def test_export_paper_list(self, tmp_path):
+    def test_export_paper_list(self, make_paper, tmp_path):
         """A plain list of papers is exported to a BibTeX file."""
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "refs.bib")
@@ -591,7 +590,7 @@ class TestEngineExportBibtex:
 class TestEngineLoadFromJson:
     """Tests for Engine.load_from_json static method."""
 
-    def test_round_trip_search_result(self, tmp_path):
+    def test_round_trip_search_result(self, make_paper, tmp_path):
         """SearchResult survives export -> load round-trip via Engine."""
         search = SearchResult(query="[test]", databases=["arxiv"])
         search.add_paper(make_paper(doi="10.1/a"))
@@ -602,7 +601,7 @@ class TestEngineLoadFromJson:
         assert isinstance(loaded, SearchResult)
         assert len(loaded.papers) == 1
 
-    def test_round_trip_paper_list(self, tmp_path):
+    def test_round_trip_paper_list(self, make_paper, tmp_path):
         """Paper list survives export -> load round-trip via Engine."""
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.json")
@@ -613,7 +612,7 @@ class TestEngineLoadFromJson:
         assert len(loaded) == 1
         assert loaded[0].title == "Test Paper"
 
-    def test_round_trip_citation_graph(self, tmp_path):
+    def test_round_trip_citation_graph(self, make_paper, tmp_path):
         """CitationGraph survives export -> load round-trip via Engine."""
         from findpapers.core.citation_graph import CitationGraph
 

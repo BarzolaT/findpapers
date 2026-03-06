@@ -13,7 +13,6 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.runners.search_runner import SearchRunner
-from tests.conftest import make_paper
 
 
 class TestSearchRunnerInit:
@@ -112,7 +111,7 @@ class TestSearchRunnerPipeline:
         runner._searchers = [mock_searcher]  # noqa: SLF001
         return runner
 
-    def test_run_returns_search_object(self):
+    def test_run_returns_search_object(self, make_paper):
         """run() returns a SearchResult instance."""
         from findpapers.core.search_result import SearchResult
 
@@ -120,7 +119,7 @@ class TestSearchRunnerPipeline:
         result = runner.run()
         assert isinstance(result, SearchResult)
 
-    def test_run_closes_searcher_sessions(self):
+    def test_run_closes_searcher_sessions(self, make_paper):
         """run() closes all searcher sessions after execution."""
         runner = self._make_runner_with_mock_papers([make_paper()])
         mock_searcher: MagicMock = runner._searchers[0]  # type: ignore[assignment]  # noqa: SLF001
@@ -139,7 +138,7 @@ class TestSearchRunnerPipeline:
         runner.run()
         mock_searcher.close.assert_called_once()
 
-    def test_get_results_after_run(self):
+    def test_get_results_after_run(self, make_paper):
         """run() result contains the collected papers."""
         paper = make_paper()
         runner = self._make_runner_with_mock_papers([paper])
@@ -147,14 +146,14 @@ class TestSearchRunnerPipeline:
         assert len(result.papers) == 1
         assert result.papers[0].title == paper.title
 
-    def test_metrics_populated_after_run(self):
+    def test_metrics_populated_after_run(self, make_paper):
         """SearchResult contains runtime after run()."""
         runner = self._make_runner_with_mock_papers([make_paper()])
         result = runner.run()
         assert result.runtime_seconds is not None
         assert result.runtime_seconds >= 0
 
-    def test_metrics_include_zero_for_skipped_databases(self):
+    def test_metrics_include_zero_for_skipped_databases(self, make_paper):
         """Skipped databases (no API key) do not break the run."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])
         mock_searcher = MagicMock()
@@ -164,7 +163,7 @@ class TestSearchRunnerPipeline:
         result = runner.run()
         assert len(result.papers) == 1
 
-    def test_deduplication_merges_same_doi(self):
+    def test_deduplication_merges_same_doi(self, make_paper):
         """Two papers with the same DOI are merged into one."""
         p1 = make_paper(title="Paper A", doi="10.1234/test")
         p2 = make_paper(title="Paper B", doi="10.1234/test")
@@ -172,7 +171,7 @@ class TestSearchRunnerPipeline:
         result = runner.run()
         assert len(result.papers) == 1
 
-    def test_deduplication_keeps_different_dois(self):
+    def test_deduplication_keeps_different_dois(self, make_paper):
         """Papers with different DOIs *and* different titles are kept separately."""
         p1 = make_paper(title="Paper A", doi="10.1234/aaa")
         p2 = make_paper(title="Paper B", doi="10.1234/bbb")
@@ -180,7 +179,7 @@ class TestSearchRunnerPipeline:
         result = runner.run()
         assert len(result.papers) == 2
 
-    def test_deduplication_second_pass_merges_same_title_different_doi(self):
+    def test_deduplication_second_pass_merges_same_title_different_doi(self, make_paper):
         """Pass 2 merges papers with the same title even when DOIs differ.
 
         This covers the common cross-database case where the same work is
@@ -364,7 +363,7 @@ class TestSearchRunnerPipeline:
         result = runner.run()
         assert len(result.papers) == 2
 
-    def test_run_can_be_called_twice(self):
+    def test_run_can_be_called_twice(self, make_paper):
         """Calling run() twice resets previous results."""
         papers1 = [make_paper(title="First")]
         runner = self._make_runner_with_mock_papers(papers1)
@@ -441,7 +440,7 @@ class TestSearchRunnerVerbose:
         runner._searchers = [mock_searcher]  # noqa: SLF001
         return runner
 
-    def test_verbose_run_does_not_raise(self, caplog):
+    def test_verbose_run_does_not_raise(self, make_paper, caplog):
         """run(verbose=True) completes without raising."""
         import logging
 
@@ -451,7 +450,7 @@ class TestSearchRunnerVerbose:
         # No exception raised; runner should be executed.
         assert len(result.papers) >= 0
 
-    def test_verbose_true_emits_configuration_header(self, caplog):
+    def test_verbose_true_emits_configuration_header(self, make_paper, caplog):
         """verbose=True logs the configuration header."""
         import logging
 
@@ -461,7 +460,7 @@ class TestSearchRunnerVerbose:
         messages = " ".join(caplog.messages)
         assert "SearchRunner Configuration" in messages
 
-    def test_verbose_true_emits_results_summary(self, caplog):
+    def test_verbose_true_emits_results_summary(self, make_paper, caplog):
         """verbose=True logs the results summary."""
         import logging
 
@@ -472,7 +471,7 @@ class TestSearchRunnerVerbose:
         assert "Results" in messages
         assert "Runtime" in messages
 
-    def test_verbose_false_emits_no_configuration_log(self, caplog):
+    def test_verbose_false_emits_no_configuration_log(self, make_paper, caplog):
         """verbose=False (default) does not log the configuration header."""
         import logging
 
@@ -481,7 +480,7 @@ class TestSearchRunnerVerbose:
             runner.run(verbose=False)
         assert "SearchRunner Configuration" not in " ".join(caplog.messages)
 
-    def test_show_progress_false_disables_progress_bars(self):
+    def test_show_progress_false_disables_progress_bars(self, make_paper):
         """show_progress=False suppresses tqdm progress bars."""
         from unittest.mock import patch
 
@@ -497,7 +496,7 @@ class TestSearchRunnerVerbose:
                     len(call.args) > 3 and call.args[3] is True
                 )
 
-    def test_show_progress_true_enables_progress_bars(self):
+    def test_show_progress_true_enables_progress_bars(self, make_paper):
         """show_progress=True (default) enables tqdm progress bars."""
         from unittest.mock import patch
 
@@ -515,7 +514,7 @@ class TestSearchRunnerVerbose:
 class TestSearchRunnerParallel:
     """Tests for parallel execution."""
 
-    def test_num_workers_runs_all_searchers(self):
+    def test_num_workers_runs_all_searchers(self, make_paper):
         """Parallel mode (num_workers > 1) still returns results from all searchers."""
         mock_s1 = MagicMock()
         mock_s1.name = "arXiv"
@@ -529,7 +528,7 @@ class TestSearchRunnerParallel:
         result = runner.run()
         assert len(result.papers) == 2
 
-    def test_num_workers_capped_to_number_of_searchers(self):
+    def test_num_workers_capped_to_number_of_searchers(self, make_paper):
         """num_workers is capped to the number of configured searchers."""
         mock_s1 = MagicMock()
         mock_s1.name = "arXiv"
@@ -567,7 +566,7 @@ class TestSearchRunnerParallel:
 class TestSearchRunnerFailedDatabases:
     """Tests for tracking databases that fail during search."""
 
-    def test_no_failures_gives_empty_list(self):
+    def test_no_failures_gives_empty_list(self, make_paper):
         """When all searchers succeed, failed_databases is empty."""
         runner = SearchRunner(query="[ml]", databases=["arxiv"])
         mock_searcher = MagicMock()
@@ -597,7 +596,7 @@ class TestSearchRunnerFailedDatabases:
         result = runner.run()
         assert result.failed_databases == []
 
-    def test_mixed_success_and_failure(self):
+    def test_mixed_success_and_failure(self, make_paper):
         """Only the failing database is recorded; the successful one is not."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])
         ok_searcher = MagicMock()

@@ -7,7 +7,6 @@ import pytest
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.paper import Paper
 from findpapers.runners.snowball_runner import SnowballRunner
-from tests.conftest import make_paper
 
 
 class FakeCitationConnector(CitationConnectorBase):
@@ -92,14 +91,14 @@ class FakeCitationConnector(CitationConnectorBase):
 class TestSnowballRunnerInit:
     """Tests for SnowballRunner initialisation."""
 
-    def test_single_paper_seed(self) -> None:
+    def test_single_paper_seed(self, make_paper) -> None:
         """Accepts a single Paper as seed_papers."""
         seed = make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=seed, max_depth=1)
 
         assert len(runner._seed_papers) == 1
 
-    def test_skips_papers_without_doi(self) -> None:
+    def test_skips_papers_without_doi(self, make_paper) -> None:
         """Papers without DOI are silently skipped."""
         seed_with_doi = make_paper("With DOI", doi="10.1000/ok")
         seed_without_doi = make_paper("No DOI")
@@ -108,7 +107,7 @@ class TestSnowballRunnerInit:
         assert len(runner._seed_papers) == 1
         assert runner._skipped_seeds == 1
 
-    def test_default_parameters(self) -> None:
+    def test_default_parameters(self, make_paper) -> None:
         """Default max_depth is 1, direction is 'both', num_workers is 1."""
         seed = make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=[seed])
@@ -117,13 +116,13 @@ class TestSnowballRunnerInit:
         assert runner._direction == "both"
         assert runner._num_workers == 1
 
-    def test_max_depth_zero_raises(self) -> None:
+    def test_max_depth_zero_raises(self, make_paper) -> None:
         """max_depth of zero raises ValueError."""
         seed = make_paper("Seed", doi="10.1000/seed")
         with pytest.raises(ValueError, match="max_depth must be >= 1"):
             SnowballRunner(seed_papers=[seed], max_depth=0)
 
-    def test_max_depth_negative_raises(self) -> None:
+    def test_max_depth_negative_raises(self, make_paper) -> None:
         """Negative max_depth raises ValueError."""
         seed = make_paper("Seed", doi="10.1000/seed")
         with pytest.raises(ValueError, match="max_depth must be >= 1"):
@@ -133,7 +132,7 @@ class TestSnowballRunnerInit:
 class TestSnowballRunnerRun:
     """Tests for the snowball execution logic."""
 
-    def test_depth_one_returns_immediate_neighbours(self) -> None:
+    def test_depth_one_returns_immediate_neighbours(self, make_paper) -> None:
         """With max_depth=1 only immediate neighbours are fetched."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
@@ -148,7 +147,7 @@ class TestSnowballRunnerRun:
         assert graph.paper_count == 2
         assert graph.edge_count == 1
 
-    def test_backward_snowball_depth_1(self) -> None:
+    def test_backward_snowball_depth_1(self, make_paper) -> None:
         """Backward snowballing collects references of the seed."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref1 = make_paper("Ref 1", doi="10.1000/r1")
@@ -171,7 +170,7 @@ class TestSnowballRunnerRun:
         refs = graph.get_references(seed)
         assert len(refs) == 2
 
-    def test_forward_snowball_depth_1(self) -> None:
+    def test_forward_snowball_depth_1(self, make_paper) -> None:
         """Forward snowballing collects papers that cite the seed."""
         seed = make_paper("Seed", doi="10.1000/seed")
         citing1 = make_paper("Citing 1", doi="10.1000/c1")
@@ -194,7 +193,7 @@ class TestSnowballRunnerRun:
         cited_by = graph.get_cited_by(seed)
         assert len(cited_by) == 2
 
-    def test_both_directions_depth_1(self) -> None:
+    def test_both_directions_depth_1(self, make_paper) -> None:
         """Snowballing in both directions collects refs and citing papers."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
@@ -216,7 +215,7 @@ class TestSnowballRunnerRun:
         assert graph.paper_count == 3
         assert graph.edge_count == 2
 
-    def test_depth_2_expands_second_level(self) -> None:
+    def test_depth_2_expands_second_level(self, make_paper) -> None:
         """At max_depth=2, papers found at level 1 are also expanded."""
         seed = make_paper("Seed", doi="10.1000/seed")
         level1 = make_paper("Level 1", doi="10.1000/l1")
@@ -243,7 +242,7 @@ class TestSnowballRunnerRun:
         assert graph.get_paper_depth(level1) == 1
         assert graph.get_paper_depth(level2) == 2
 
-    def test_deduplication_across_connectors(self) -> None:
+    def test_deduplication_across_connectors(self, make_paper) -> None:
         """Same paper found by different connectors is not duplicated."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
@@ -264,7 +263,7 @@ class TestSnowballRunnerRun:
         assert graph.paper_count == 2  # seed + ref (deduplicated)
         assert graph.edge_count == 1  # one edge seed -> ref
 
-    def test_cycle_detection(self) -> None:
+    def test_cycle_detection(self, make_paper) -> None:
         """Papers already in the graph are not expanded again."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
@@ -291,7 +290,7 @@ class TestSnowballRunnerRun:
         # at depth 2 when ref is expanded).
         assert graph.edge_count == 2
 
-    def test_connector_error_does_not_crash(self) -> None:
+    def test_connector_error_does_not_crash(self, make_paper) -> None:
         """If a connector raises, the runner logs and continues."""
         seed = make_paper("Seed", doi="10.1000/seed")
 
@@ -363,7 +362,7 @@ class TestSnowballRunnerRun:
         assert graph.paper_count == 1  # only the seed
         assert graph.edge_count == 0
 
-    def test_multiple_seeds(self) -> None:
+    def test_multiple_seeds(self, make_paper) -> None:
         """Multiple seed papers are all expanded at depth 1."""
         seed1 = make_paper("Seed 1", doi="10.1000/s1")
         seed2 = make_paper("Seed 2", doi="10.1000/s2")
@@ -388,7 +387,7 @@ class TestSnowballRunnerRun:
         assert graph.paper_count == 4
         assert graph.edge_count == 2
 
-    def test_parallel_connectors(self) -> None:
+    def test_parallel_connectors(self, make_paper) -> None:
         """With num_workers > 1, connectors are queried in parallel."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref1 = make_paper("Ref C1", doi="10.1000/rc1")
@@ -415,7 +414,7 @@ class TestSnowballRunnerRun:
 class TestSnowballRunnerMetrics:
     """Tests for metrics after execution."""
 
-    def test_metrics_after_run(self) -> None:
+    def test_metrics_after_run(self, make_paper) -> None:
         """Graph contains expected data after run()."""
         seed = make_paper("Seed", doi="10.1000/seed")
         runner = SnowballRunner(seed_papers=[seed], max_depth=1)
@@ -426,7 +425,7 @@ class TestSnowballRunnerMetrics:
         assert graph.paper_count == 1
         assert graph.edge_count == 0
 
-    def test_show_progress_false_disables_progress_bar(self) -> None:
+    def test_show_progress_false_disables_progress_bar(self, make_paper) -> None:
         """show_progress=False suppresses the tqdm progress bar."""
         from unittest.mock import patch
 
@@ -456,7 +455,7 @@ class TestSnowballRunnerMetrics:
 class TestSnowballRunnerVerbose:
     """Tests for verbose logging branches."""
 
-    def test_verbose_logs_configuration_and_results(self) -> None:
+    def test_verbose_logs_configuration_and_results(self, make_paper) -> None:
         """verbose=True logs configuration, per-level info, and results."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
@@ -468,7 +467,7 @@ class TestSnowballRunnerVerbose:
 
         assert graph.paper_count == 2
 
-    def test_verbose_multi_level(self) -> None:
+    def test_verbose_multi_level(self, make_paper) -> None:
         """verbose=True logs at each depth level."""
         seed = make_paper("Seed", doi="10.1000/seed")
         l1 = make_paper("L1", doi="10.1000/l1")
@@ -487,7 +486,7 @@ class TestSnowballRunnerVerbose:
 class TestSnowballRunnerParallelErrors:
     """Tests for error handling in parallel connector execution."""
 
-    def test_parallel_connector_exception_is_caught(self) -> None:
+    def test_parallel_connector_exception_is_caught(self, make_paper) -> None:
         """Exception in a parallel connector is caught; other results survive."""
 
         class BoomConnector(CitationConnectorBase):
@@ -564,7 +563,7 @@ class TestSnowballRunnerParallelErrors:
         assert graph.paper_count == 2  # seed + ref
         assert graph.edge_count == 1
 
-    def test_parallel_future_exception_is_caught(self) -> None:
+    def test_parallel_future_exception_is_caught(self, make_paper) -> None:
         """When _query_single_connector itself raises, the future exception is caught."""
         from unittest.mock import patch
 
@@ -602,7 +601,7 @@ class TestSnowballRunnerParallelErrors:
 class TestSnowballRunnerEmptyFrontier:
     """Tests for early termination when frontier is empty."""
 
-    def test_empty_frontier_breaks_early(self) -> None:
+    def test_empty_frontier_breaks_early(self, make_paper) -> None:
         """When no new papers are discovered, deeper levels are skipped."""
         seed = make_paper("Seed", doi="10.1000/seed")
         # Connector returns no references at any level.

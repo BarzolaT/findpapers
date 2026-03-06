@@ -4,7 +4,6 @@ import pytest
 
 from findpapers.core.citation_graph import CitationEdge, CitationGraph
 from findpapers.core.paper import Paper
-from tests.conftest import make_paper
 
 # ---------------------------------------------------------------------------
 # CitationEdge tests
@@ -14,7 +13,7 @@ from tests.conftest import make_paper
 class TestCitationEdge:
     """Tests for the CitationEdge class."""
 
-    def test_creation(self) -> None:
+    def test_creation(self, make_paper) -> None:
         """Edge stores source and target papers."""
         source = make_paper("Source Paper", doi="10.1000/src")
         target = make_paper("Target Paper", doi="10.1000/tgt")
@@ -23,7 +22,7 @@ class TestCitationEdge:
         assert edge.source is source
         assert edge.target is target
 
-    def test_to_dict(self) -> None:
+    def test_to_dict(self, make_paper) -> None:
         """Edge serializes to dict with DOI and title keys."""
         source = make_paper("Source Paper", doi="10.1000/src")
         target = make_paper("Target Paper", doi="10.1000/tgt")
@@ -35,7 +34,7 @@ class TestCitationEdge:
         assert d["target_doi"] == "10.1000/tgt"
         assert d["target_title"] == "Target Paper"
 
-    def test_to_dict_without_doi(self) -> None:
+    def test_to_dict_without_doi(self, make_paper) -> None:
         """Edge serialization handles papers without DOI."""
         source = make_paper("Source Paper")
         target = make_paper("Target Paper")
@@ -66,7 +65,7 @@ class TestCitationGraph:
         with pytest.raises(ValueError, match="max_depth must be >= 1"):
             CitationGraph(seed_papers=[], max_depth=-5, direction="both")
 
-    def test_creation_with_seed_papers(self) -> None:
+    def test_creation_with_seed_papers(self, make_paper) -> None:
         """Graph registers seed papers at depth 0."""
         seed = make_paper("Seed", doi="10.1000/seed")
         graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="both")
@@ -78,7 +77,7 @@ class TestCitationGraph:
         assert graph.contains(seed)
         assert graph.get_paper_depth(seed) == 0
 
-    def test_add_paper_discovered_from_not_in_graph_raises(self) -> None:
+    def test_add_paper_discovered_from_not_in_graph_raises(self, make_paper) -> None:
         """add_paper raises ValueError if discovered_from is not in the graph."""
         graph = CitationGraph(seed_papers=[], max_depth=1, direction="both")
         paper = make_paper("Paper", doi="10.1000/p")
@@ -93,7 +92,7 @@ class TestCitationGraph:
         assert graph.paper_count == 0
         assert graph.edge_count == 0
 
-    def test_add_paper_new(self) -> None:
+    def test_add_paper_new(self, make_paper) -> None:
         """Adding a new paper increases paper count."""
         seed = make_paper("Seed", doi="10.1000/seed")
         graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="both")
@@ -105,7 +104,7 @@ class TestCitationGraph:
         assert graph.paper_count == 2
         assert graph.get_paper_depth(paper) == 1
 
-    def test_add_paper_duplicate_merges(self) -> None:
+    def test_add_paper_duplicate_merges(self, make_paper) -> None:
         """Adding a paper with the same DOI merges instead of duplicating."""
         seed = make_paper("Seed", doi="10.1000/seed")
         paper1 = make_paper("Paper V1", doi="10.1000/same")
@@ -119,7 +118,7 @@ class TestCitationGraph:
         # Merge should pick the longer title.
         assert "Longer" in result.title or result.title == "Paper V1"
 
-    def test_add_paper_keeps_shallowest_depth(self) -> None:
+    def test_add_paper_keeps_shallowest_depth(self, make_paper) -> None:
         """When the same paper is found at different depths, keep the shallowest."""
         seed = make_paper("Seed", doi="10.1000/seed")
         level1 = make_paper("Level 1", doi="10.1000/l1")
@@ -135,7 +134,7 @@ class TestCitationGraph:
         graph.add_paper(paper, discovered_from=seed)
         assert graph.get_paper_depth(paper) == 1
 
-    def test_add_paper_without_doi_uses_title(self) -> None:
+    def test_add_paper_without_doi_uses_title(self, make_paper) -> None:
         """Papers without DOI are keyed by title."""
         paper = make_paper("Unique Title")
         graph = CitationGraph(seed_papers=[paper], max_depth=1, direction="both")
@@ -143,7 +142,7 @@ class TestCitationGraph:
         assert graph.contains(paper)
         assert graph.paper_count == 1
 
-    def test_add_edge(self) -> None:
+    def test_add_edge(self, make_paper) -> None:
         """Adding an edge between two papers."""
         source = make_paper("Source", doi="10.1000/src")
         target = make_paper("Target", doi="10.1000/tgt")
@@ -156,7 +155,7 @@ class TestCitationGraph:
         assert graph.edges[0].source is source
         assert graph.edges[0].target is target
 
-    def test_add_edge_duplicate_ignored(self) -> None:
+    def test_add_edge_duplicate_ignored(self, make_paper) -> None:
         """Duplicate edges are silently dropped."""
         source = make_paper("Source", doi="10.1000/src")
         target = make_paper("Target", doi="10.1000/tgt")
@@ -168,7 +167,7 @@ class TestCitationGraph:
 
         assert graph.edge_count == 1
 
-    def test_get_references(self) -> None:
+    def test_get_references(self, make_paper) -> None:
         """get_references returns papers cited by the given paper."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref1 = make_paper("Ref 1", doi="10.1000/ref1")
@@ -185,7 +184,7 @@ class TestCitationGraph:
         assert ref1 in refs
         assert ref2 in refs
 
-    def test_get_cited_by(self) -> None:
+    def test_get_cited_by(self, make_paper) -> None:
         """get_cited_by returns papers that cite the given paper."""
         seed = make_paper("Seed", doi="10.1000/seed")
         citing1 = make_paper("Citing 1", doi="10.1000/c1")
@@ -202,21 +201,21 @@ class TestCitationGraph:
         assert citing1 in cited_by
         assert citing2 in cited_by
 
-    def test_get_paper_depth_unknown_paper(self) -> None:
+    def test_get_paper_depth_unknown_paper(self, make_paper) -> None:
         """get_paper_depth returns None for papers not in the graph."""
         graph = CitationGraph(seed_papers=[], max_depth=1, direction="both")
         unknown = make_paper("Unknown", doi="10.1000/unknown")
 
         assert graph.get_paper_depth(unknown) is None
 
-    def test_contains_false_for_unknown(self) -> None:
+    def test_contains_false_for_unknown(self, make_paper) -> None:
         """contains returns False for papers not in the graph."""
         graph = CitationGraph(seed_papers=[], max_depth=1, direction="both")
         unknown = make_paper("Unknown", doi="10.1000/unknown")
 
         assert not graph.contains(unknown)
 
-    def test_papers_property(self) -> None:
+    def test_papers_property(self, make_paper) -> None:
         """papers property returns all papers in the graph."""
         seed = make_paper("Seed", doi="10.1000/seed")
         other = make_paper("Other", doi="10.1000/other")
@@ -226,7 +225,7 @@ class TestCitationGraph:
         papers = graph.papers
         assert len(papers) == 2
 
-    def test_to_dict(self) -> None:
+    def test_to_dict(self, make_paper) -> None:
         """to_dict produces expected structure."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
@@ -251,7 +250,7 @@ class TestCitationGraph:
         assert depths["10.1000/seed"] == 0
         assert depths["10.1000/ref"] == 1
 
-    def test_from_dict_round_trip(self) -> None:
+    def test_from_dict_round_trip(self, make_paper) -> None:
         """from_dict(to_dict()) preserves papers or edges."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
@@ -268,7 +267,7 @@ class TestCitationGraph:
         assert restored.get_paper_depth(seed) == 0
         assert restored.get_paper_depth(ref) == 1
 
-    def test_multiple_seeds(self) -> None:
+    def test_multiple_seeds(self, make_paper) -> None:
         """Graph correctly handles multiple seed papers."""
         seed1 = make_paper("Seed 1", doi="10.1000/s1")
         seed2 = make_paper("Seed 2", doi="10.1000/s2")
@@ -278,7 +277,7 @@ class TestCitationGraph:
         assert graph.get_paper_depth(seed1) == 0
         assert graph.get_paper_depth(seed2) == 0
 
-    def test_case_insensitive_doi_matching(self) -> None:
+    def test_case_insensitive_doi_matching(self, make_paper) -> None:
         """DOI matching for contains/add is case-insensitive."""
         paper1 = make_paper("Paper", doi="10.1000/ABC")
         paper2 = make_paper("Paper Again", doi="10.1000/abc")
@@ -289,7 +288,7 @@ class TestCitationGraph:
         graph.add_paper(paper2, discovered_from=paper1)
         assert graph.paper_count == 1
 
-    def test_bidirectional_edges(self) -> None:
+    def test_bidirectional_edges(self, make_paper) -> None:
         """A paper can both cite and be cited by different papers."""
         center = make_paper("Center", doi="10.1000/center")
         ref = make_paper("Reference", doi="10.1000/ref")
@@ -306,19 +305,19 @@ class TestCitationGraph:
         assert len(graph.get_cited_by(center)) == 1
         assert graph.get_cited_by(center)[0] is citing
 
-    def test_get_references_unknown_paper_returns_empty(self) -> None:
+    def test_get_references_unknown_paper_returns_empty(self, make_paper) -> None:
         """get_references returns empty list for unknown paper."""
         graph = CitationGraph(seed_papers=[], max_depth=1, direction="both")
         unknown = make_paper("Unknown", doi="10.1000/unknown")
         assert graph.get_references(unknown) == []
 
-    def test_get_cited_by_unknown_paper_returns_empty(self) -> None:
+    def test_get_cited_by_unknown_paper_returns_empty(self, make_paper) -> None:
         """get_cited_by returns empty list for unknown paper."""
         graph = CitationGraph(seed_papers=[], max_depth=1, direction="both")
         unknown = make_paper("Unknown", doi="10.1000/unknown")
         assert graph.get_cited_by(unknown) == []
 
-    def test_adjacency_after_from_dict_round_trip(self) -> None:
+    def test_adjacency_after_from_dict_round_trip(self, make_paper) -> None:
         """get_references/get_cited_by work after from_dict reconstruction."""
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
@@ -367,7 +366,7 @@ class TestCitationGraphNoneKeyEdgeCases:
         graph = CitationGraph(seed_papers=[], max_depth=1, direction="both")
         assert graph._paper_key(paper) is None
 
-    def test_add_paper_returns_paper_unchanged(self) -> None:
+    def test_add_paper_returns_paper_unchanged(self, make_paper) -> None:
         """add_paper returns the paper as-is when key is None."""
         seed = make_paper("Seed", doi="10.1000/seed")
         paper = self._make_unidentifiable_paper()
@@ -378,7 +377,7 @@ class TestCitationGraphNoneKeyEdgeCases:
         assert result is paper
         assert graph.paper_count == 1  # only the seed
 
-    def test_add_edge_no_op_when_source_unidentifiable(self) -> None:
+    def test_add_edge_no_op_when_source_unidentifiable(self, make_paper) -> None:
         """add_edge is a no-op when source paper has no key."""
         source = self._make_unidentifiable_paper()
         target = make_paper("Target", doi="10.1000/tgt")
@@ -388,7 +387,7 @@ class TestCitationGraphNoneKeyEdgeCases:
 
         assert graph.edge_count == 0
 
-    def test_add_edge_no_op_when_target_unidentifiable(self) -> None:
+    def test_add_edge_no_op_when_target_unidentifiable(self, make_paper) -> None:
         """add_edge is a no-op when target paper has no key."""
         source = make_paper("Source", doi="10.1000/src")
         target = self._make_unidentifiable_paper()

@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from findpapers.connectors.openalex import OpenAlexConnector
-from tests.conftest import make_paper
 
 
 def _make_openalex_work(
@@ -46,7 +45,7 @@ def _make_openalex_work(
 class TestOpenAlexFetchReferences:
     """Tests for OpenAlexConnector.fetch_references."""
 
-    def test_returns_empty_for_paper_without_doi(self) -> None:
+    def test_returns_empty_for_paper_without_doi(self, make_paper) -> None:
         """Papers without DOI cannot be resolved; return empty list."""
         connector = OpenAlexConnector()
         paper = make_paper(doi=None)
@@ -56,7 +55,7 @@ class TestOpenAlexFetchReferences:
         assert result == []
 
     @patch.object(OpenAlexConnector, "_get")
-    def test_fetches_referenced_works(self, mock_get: MagicMock) -> None:
+    def test_fetches_referenced_works(self, mock_get: MagicMock, make_paper) -> None:
         """Fetches the work record and then batch-fetches referenced works."""
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/seed")
@@ -92,7 +91,7 @@ class TestOpenAlexFetchReferences:
         assert mock_get.call_count == 2
 
     @patch.object(OpenAlexConnector, "_get")
-    def test_returns_empty_when_no_referenced_works(self, mock_get: MagicMock) -> None:
+    def test_returns_empty_when_no_referenced_works(self, mock_get: MagicMock, make_paper) -> None:
         """Returns empty list when work has no referenced_works field."""
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/lonely")
@@ -109,7 +108,7 @@ class TestOpenAlexFetchReferences:
         assert refs == []
 
     @patch.object(OpenAlexConnector, "_get")
-    def test_handles_api_error_gracefully(self, mock_get: MagicMock) -> None:
+    def test_handles_api_error_gracefully(self, mock_get: MagicMock, make_paper) -> None:
         """Returns empty list when the API raises an exception."""
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/error")
@@ -129,7 +128,7 @@ class TestOpenAlexFetchReferences:
 class TestOpenAlexFetchCitedBy:
     """Tests for OpenAlexConnector.fetch_cited_by."""
 
-    def test_returns_empty_for_paper_without_doi(self) -> None:
+    def test_returns_empty_for_paper_without_doi(self, make_paper) -> None:
         """Papers without DOI cannot be resolved; return empty list."""
         connector = OpenAlexConnector()
         paper = make_paper(doi=None)
@@ -139,7 +138,7 @@ class TestOpenAlexFetchCitedBy:
         assert result == []
 
     @patch.object(OpenAlexConnector, "_get")
-    def test_fetches_citing_papers(self, mock_get: MagicMock) -> None:
+    def test_fetches_citing_papers(self, mock_get: MagicMock, make_paper) -> None:
         """Resolves the OpenAlex ID and fetches citing papers."""
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/cited")
@@ -165,7 +164,7 @@ class TestOpenAlexFetchCitedBy:
         assert cited_by[0].title == "Citing 1"
 
     @patch.object(OpenAlexConnector, "_get")
-    def test_paginates_through_multiple_pages(self, mock_get: MagicMock) -> None:
+    def test_paginates_through_multiple_pages(self, mock_get: MagicMock, make_paper) -> None:
         """Follows cursor pagination until exhausted."""
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/popular")
@@ -201,7 +200,7 @@ class TestOpenAlexFetchCitedBy:
         assert mock_get.call_count == 3  # id resolve + 2 pages
 
     @patch.object(OpenAlexConnector, "_get")
-    def test_returns_empty_when_id_not_resolved(self, mock_get: MagicMock) -> None:
+    def test_returns_empty_when_id_not_resolved(self, mock_get: MagicMock, make_paper) -> None:
         """Returns empty list when OpenAlex ID cannot be resolved."""
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/unknown")
@@ -215,7 +214,7 @@ class TestOpenAlexFetchCitedBy:
         assert cited_by == []
 
     @patch.object(OpenAlexConnector, "_get")
-    def test_handles_api_error_during_id_resolve(self, mock_get: MagicMock) -> None:
+    def test_handles_api_error_during_id_resolve(self, mock_get: MagicMock, make_paper) -> None:
         """Returns empty list when ID resolution fails."""
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/error")
@@ -236,7 +235,7 @@ class TestResolveOpenalexId:
     """Tests for the internal _resolve_openalex_id helper."""
 
     @patch.object(OpenAlexConnector, "_get")
-    def test_resolves_by_doi(self, mock_get: MagicMock) -> None:
+    def test_resolves_by_doi(self, mock_get: MagicMock, make_paper) -> None:
         """Returns the OpenAlex ID from the API response."""
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/ok")
@@ -249,7 +248,7 @@ class TestResolveOpenalexId:
 
         assert oa_id == "https://openalex.org/W12345"
 
-    def test_returns_none_without_doi(self) -> None:
+    def test_returns_none_without_doi(self, make_paper) -> None:
         """Returns None when paper has no DOI."""
         connector = OpenAlexConnector()
         paper = make_paper(doi=None)

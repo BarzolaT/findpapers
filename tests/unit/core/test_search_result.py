@@ -8,7 +8,6 @@ import pytest
 
 from findpapers.core.search_result import Database, SearchResult
 from findpapers.core.source import Source
-from tests.conftest import make_paper
 
 # ---------------------------------------------------------------------------
 # Database enum
@@ -69,7 +68,7 @@ class TestSearchResultInit:
         sr = SearchResult(query="[q]", processed_at=aware)
         assert sr.processed_at == aware
 
-    def test_initial_papers(self) -> None:
+    def test_initial_papers(self, make_paper) -> None:
         """Papers passed at construction are stored."""
         p = make_paper(title="Init Paper")
         sr = SearchResult(query="[q]", papers=[p])
@@ -85,14 +84,14 @@ class TestSearchResultInit:
 class TestAddRemovePaper:
     """Tests for add_paper and remove_paper."""
 
-    def test_add_paper(self) -> None:
+    def test_add_paper(self, make_paper) -> None:
         """add_paper appends to the list."""
         sr = SearchResult(query="[q]")
         p = make_paper()
         sr.add_paper(p)
         assert len(sr.papers) == 1
 
-    def test_remove_paper(self) -> None:
+    def test_remove_paper(self, make_paper) -> None:
         """remove_paper deletes a paper that is present."""
         sr = SearchResult(query="[q]")
         p = make_paper()
@@ -100,7 +99,7 @@ class TestAddRemovePaper:
         sr.remove_paper(p)
         assert len(sr.papers) == 0
 
-    def test_remove_paper_not_present(self) -> None:
+    def test_remove_paper_not_present(self, make_paper) -> None:
         """remove_paper on a missing paper is a no-op."""
         sr = SearchResult(query="[q]")
         p = make_paper()
@@ -117,7 +116,7 @@ class TestSearchResultSerialization:
     """Tests for to_dict / from_dict."""
 
     @pytest.fixture
-    def full_search(self) -> SearchResult:
+    def full_search(self, make_paper) -> SearchResult:
         """A SearchResult with representative field values."""
         p = make_paper(
             title="Serialize Me",

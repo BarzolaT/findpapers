@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Callable
 
 import pytest
 
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.source import Source
+
+# Type alias for the paper factory callable.
+PaperFactory = Callable[..., Paper]
 
 
 @pytest.fixture
@@ -23,7 +27,7 @@ def complex_query_string() -> str:
     return "[happiness] AND ([joy] OR [peace of mind]) AND NOT [stressful]"
 
 
-def make_paper(
+def _create_paper(
     title: str = "Test Paper",
     abstract: str = "An abstract.",
     doi: str | None = None,
@@ -81,3 +85,20 @@ def make_paper(
         keywords=keywords,
         citations=citations,
     )
+
+
+@pytest.fixture
+def make_paper() -> PaperFactory:
+    """Fixture providing a factory to create :class:`Paper` instances.
+
+    Returns
+    -------
+    PaperFactory
+        A callable with the same signature as :func:`_create_paper`.
+
+    Examples
+    --------
+    >>> def test_something(make_paper):
+    ...     paper = make_paper("My Title", doi="10.1000/test")
+    """
+    return _create_paper

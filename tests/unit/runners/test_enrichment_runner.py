@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from findpapers.runners.enrichment_runner import EnrichmentRunner
-from tests.conftest import make_paper
 
 # Minimal metadata dict that makes fetch_metadata look successful (HTML with a title).
 _FAKE_METADATA: dict = {"citation_title": "Test Paper"}
@@ -14,7 +13,7 @@ _FAKE_METADATA: dict = {"citation_title": "Test Paper"}
 class TestEnrichmentRunnerInit:
     """Tests for EnrichmentRunner initialisation."""
 
-    def test_init_stores_papers(self):
+    def test_init_stores_papers(self, make_paper):
         """Constructor stores a copy of the paper list."""
         papers = [make_paper()]
         runner = EnrichmentRunner(papers=papers)
@@ -32,7 +31,7 @@ class TestEnrichmentRunnerRun:
         assert metrics["total_papers"] == 0
         assert metrics["enriched_papers"] == 0
 
-    def test_metrics_populated_after_run(self):
+    def test_metrics_populated_after_run(self, make_paper):
         """Metrics contain all expected keys after run()."""
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
@@ -49,7 +48,7 @@ class TestEnrichmentRunnerRun:
         assert "no_urls_papers" in metrics
         assert "runtime_in_seconds" in metrics
 
-    def test_enriched_count_incremented_on_success(self):
+    def test_enriched_count_incremented_on_success(self, make_paper):
         """enriched_papers increments only when new data is actually merged.
 
         The base paper is missing a DOI; the mock enriched paper supplies one,
@@ -77,7 +76,7 @@ class TestEnrichmentRunnerRun:
             metrics = runner.run()
         assert metrics["enriched_papers"] == 1
 
-    def test_enriched_count_not_incremented_when_no_change(self):
+    def test_enriched_count_not_incremented_when_no_change(self, make_paper):
         """enriched_papers stays 0 when the merge adds nothing new.
 
         The base paper already has all the data the scraped paper can offer,
@@ -102,7 +101,7 @@ class TestEnrichmentRunnerRun:
             metrics = runner.run()
         assert metrics["enriched_papers"] == 0
 
-    def test_skips_papers_without_urls(self):
+    def test_skips_papers_without_urls(self, make_paper):
         """Papers without URLs (and no DOI) return 'no_urls' without fetching."""
         paper = make_paper(url=None)
         paper.doi = None  # ensure no DOI fallback URL either
@@ -117,7 +116,7 @@ class TestEnrichmentRunnerRun:
         assert metrics["enriched_papers"] == 0
         assert metrics["no_urls_papers"] == 1
 
-    def test_run_twice_resets(self):
+    def test_run_twice_resets(self, make_paper):
         """run() can be called multiple times; metrics are fresh each time."""
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
@@ -128,7 +127,7 @@ class TestEnrichmentRunnerRun:
             metrics = runner.run()
         assert metrics["enriched_papers"] == 0
 
-    def test_parallel_run(self):
+    def test_parallel_run(self, make_paper):
         """Parallel run completes and returns metrics."""
         papers = [make_paper(f"Paper {i}") for i in range(5)]
         runner = EnrichmentRunner(papers=papers, num_workers=3)
@@ -139,7 +138,7 @@ class TestEnrichmentRunnerRun:
             metrics = runner.run()
         assert metrics["total_papers"] == 5
 
-    def test_fetch_error_counted_when_url_raises(self):
+    def test_fetch_error_counted_when_url_raises(self, make_paper):
         """fetch_error_papers counts papers whose URL fetch raised an HTTP/network error."""
         paper = make_paper()
         paper.doi = None  # no DOI so CrossRef is skipped
@@ -152,7 +151,7 @@ class TestEnrichmentRunnerRun:
         assert metrics["fetch_error_papers"] == 1
         assert metrics["enriched_papers"] == 0
 
-    def test_no_metadata_counted_when_fetch_returns_none(self):
+    def test_no_metadata_counted_when_fetch_returns_none(self, make_paper):
         """no_metadata_papers counts papers whose URL returned non-HTML content."""
         paper = make_paper()
         paper.doi = None  # no DOI so CrossRef is skipped
@@ -162,7 +161,7 @@ class TestEnrichmentRunnerRun:
         assert metrics["no_metadata_papers"] == 1
         assert metrics["enriched_papers"] == 0
 
-    def test_no_change_counted_when_merge_changes_nothing(self):
+    def test_no_change_counted_when_merge_changes_nothing(self, make_paper):
         """no_change_papers counts papers where HTML was fetched but added no new data."""
         same_paper = make_paper()
         with (
@@ -184,7 +183,7 @@ class TestEnrichmentRunnerRun:
         assert metrics["no_change_papers"] == 1
         assert metrics["enriched_papers"] == 0
 
-    def test_doi_url_added_as_candidate(self):
+    def test_doi_url_added_as_candidate(self, make_paper):
         """When the paper has a DOI, https://doi.org/{doi} is tried as a candidate URL."""
         paper = make_paper()
         paper.doi = "10.1234/test"
@@ -218,7 +217,7 @@ class TestEnrichmentRunnerVerbose:
         metrics = runner.run(verbose=True)
         assert metrics["total_papers"] == 0
 
-    def test_verbose_true_emits_configuration_header(self, caplog):
+    def test_verbose_true_emits_configuration_header(self, make_paper, caplog):
         """verbose=True logs the EnrichmentRunner configuration header."""
         import logging
 
@@ -231,7 +230,7 @@ class TestEnrichmentRunnerVerbose:
             runner.run(verbose=True)
         assert "EnrichmentRunner Configuration" in " ".join(caplog.messages)
 
-    def test_verbose_true_emits_enrichment_summary(self, caplog):
+    def test_verbose_true_emits_enrichment_summary(self, make_paper, caplog):
         """verbose=True logs the enrichment summary after execution."""
         import logging
 
@@ -246,7 +245,7 @@ class TestEnrichmentRunnerVerbose:
         assert "Enrichment Summary" in messages
         assert "Runtime" in messages
 
-    def test_verbose_true_tracks_fetch_errors(self):
+    def test_verbose_true_tracks_fetch_errors(self, make_paper):
         """Fetch errors are counted in fetch_error_papers when URLs raise."""
         paper = make_paper()
         paper.doi = None  # no DOI so CrossRef is skipped
@@ -258,7 +257,7 @@ class TestEnrichmentRunnerVerbose:
             metrics = runner.run(verbose=True)
         assert metrics["fetch_error_papers"] == 1
 
-    def test_verbose_false_emits_no_configuration_log(self, caplog):
+    def test_verbose_false_emits_no_configuration_log(self, make_paper, caplog):
         """verbose=False (default) does not log the configuration header."""
         import logging
 
@@ -271,7 +270,7 @@ class TestEnrichmentRunnerVerbose:
             runner.run(verbose=False)
         assert "EnrichmentRunner Configuration" not in " ".join(caplog.messages)
 
-    def test_show_progress_false_disables_progress_bar(self):
+    def test_show_progress_false_disables_progress_bar(self, make_paper):
         """show_progress=False suppresses the tqdm progress bar."""
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
@@ -297,7 +296,7 @@ class TestEnrichmentRunnerVerbose:
 class TestEnrichmentRunnerCrossRef:
     """Tests for DOI-based enrichment via the CrossRef API."""
 
-    def test_crossref_enriches_paper_with_doi(self):
+    def test_crossref_enriches_paper_with_doi(self, make_paper):
         """Papers with a DOI attempt CrossRef API enrichment."""
         paper = make_paper()
         paper.doi = "10.1234/test"
@@ -327,7 +326,7 @@ class TestEnrichmentRunnerCrossRef:
         assert metrics["doi_enriched_papers"] == 1
         assert paper.citations == 42
 
-    def test_crossref_not_called_without_doi(self):
+    def test_crossref_not_called_without_doi(self, make_paper):
         """Papers without DOI skip CrossRef entirely."""
         paper = make_paper()
         paper.doi = None
@@ -346,7 +345,7 @@ class TestEnrichmentRunnerCrossRef:
 
         mock_crossref.assert_not_called()
 
-    def test_crossref_error_falls_back_to_url_scraping(self):
+    def test_crossref_error_falls_back_to_url_scraping(self, make_paper):
         """CrossRef error does not prevent URL-based enrichment."""
         paper = make_paper()
         paper.doi = "10.1234/test"
@@ -376,7 +375,7 @@ class TestEnrichmentRunnerCrossRef:
         assert metrics["doi_enriched_papers"] == 0
         assert paper.citations == 10
 
-    def test_crossref_and_scraping_both_contribute(self):
+    def test_crossref_and_scraping_both_contribute(self, make_paper):
         """Both CrossRef and URL scraping can contribute data to the same paper."""
         paper = make_paper()
         paper.doi = "10.1234/test"
@@ -419,7 +418,7 @@ class TestEnrichmentRunnerCrossRef:
         assert paper.citations == 100
         assert paper.pdf_url == "https://example.com/paper.pdf"
 
-    def test_doi_only_paper_no_urls_enriches_via_crossref(self):
+    def test_doi_only_paper_no_urls_enriches_via_crossref(self, make_paper):
         """Paper with DOI but no URL can still be enriched via CrossRef."""
         paper = make_paper(url=None)
         paper.doi = "10.1234/test"
