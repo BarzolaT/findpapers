@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum, StrEnum
+from typing import Any
 
 
 class NodeType(Enum):
@@ -106,15 +107,15 @@ class QueryNode:
     inherited_filter_code: FilterCode | None = None
     children_match_filter: bool | None = None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the node to a dictionary representation.
 
         Returns
         -------
-        dict
+        dict[str, Any]
             Dictionary representation of the node.
         """
-        result: dict = {"node_type": self.node_type.value}
+        result: dict[str, Any] = {"node_type": self.node_type.value}
         if self.value is not None:
             result["value"] = (
                 self.value.value if isinstance(self.value, ConnectorType) else self.value
@@ -260,12 +261,12 @@ class Query:
         """
         return self.root.get_all_filters()
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the query to a dictionary representation.
 
         Returns
         -------
-        dict
+        dict[str, Any]
             Dictionary with raw_query and tree structure.
         """
         return {

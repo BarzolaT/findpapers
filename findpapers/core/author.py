@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 
 class Author:
     """Represents a paper author with name and optional affiliation.
@@ -75,15 +77,15 @@ class Author:
         """
         return hash(self.name.lower())
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize the author to a dictionary.
 
         Returns
         -------
-        dict
+        dict[str, Any]
             Author data with ``"name"`` and optionally ``"affiliation"``.
         """
-        result: dict = {"name": self.name}
+        result: dict[str, Any] = {"name": self.name}
         if self.affiliation:
             result["affiliation"] = self.affiliation
         return result

@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import logging
 from enum import StrEnum
+from typing import Any
 
 from ..utils.merge import merge_authors, merge_value
 from .author import Author
@@ -522,12 +523,12 @@ class Paper:
             paper_type=paper_type,
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize this Paper to a plain dictionary.
 
         Returns
         -------
-        dict
+        dict[str, Any]
             Paper data suitable for JSON serialization.
         """
         return {

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Any
 
 from ..utils.merge import merge_value
 
@@ -189,12 +190,12 @@ class Source:
             source_type=source_type,
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize this Source to a plain dictionary.
 
         Returns
         -------
-        dict
+        dict[str, Any]
             Source data suitable for JSON serialization.
         """
         return {

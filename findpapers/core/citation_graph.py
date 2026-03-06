@@ -8,7 +8,7 @@ one paper cites another.
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from findpapers.core.paper import Paper
 from findpapers.utils.version import package_version
@@ -38,12 +38,12 @@ class CitationEdge:
         self.source = source
         self.target = target
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize the edge to a dictionary.
 
         Returns
         -------
-        dict
+        dict[str, Any]
             Dictionary with ``source_doi``, ``source_title``,
             ``target_doi`` and ``target_title`` keys.
         """
@@ -312,12 +312,12 @@ class CitationGraph:
     # Serialization
     # ------------------------------------------------------------------
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize the citation graph to a dictionary.
 
         Returns
         -------
-        dict
+        dict[str, Any]
             Dictionary with ``metadata``, ``nodes`` and ``edges`` keys.
         """
         return {
