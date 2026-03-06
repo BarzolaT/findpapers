@@ -154,7 +154,8 @@ class CrossRefConnector(CitationConnectorBase):
             return None
         response.raise_for_status()
         data: dict[str, Any] = response.json()
-        return data.get("message")  # type: ignore[return-value]
+        message = data.get("message")
+        return message if isinstance(message, dict) else None
 
     def build_paper(self, work: dict[str, Any]) -> Paper | None:
         """Build a :class:`~findpapers.core.paper.Paper` from a CrossRef work record.

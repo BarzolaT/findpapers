@@ -28,7 +28,7 @@ class TestDownloadRunnerBuildFilename:
     def test_filename_includes_year_and_title(self):
         """Filename starts with year and contains sanitised title."""
         paper = make_paper(title="My Test Paper")
-        paper.publication_date = date(2023, 5, 1)  # type: ignore[assignment]
+        paper.publication_date = date(2023, 5, 1)
         runner = DownloadRunner(papers=[], output_directory="/tmp")
         filename = runner._build_filename(paper)  # noqa: SLF001
         assert filename.startswith("2023")
@@ -44,7 +44,7 @@ class TestDownloadRunnerBuildFilename:
     def test_filename_unknown_year_when_no_date(self):
         """Papers without publication_date use 'unknown' as year."""
         paper = make_paper()
-        paper.publication_date = None  # type: ignore[assignment]
+        paper.publication_date = None
         runner = DownloadRunner(papers=[], output_directory="/tmp")
         filename = runner._build_filename(paper)  # noqa: SLF001
         assert filename.startswith("unknown")

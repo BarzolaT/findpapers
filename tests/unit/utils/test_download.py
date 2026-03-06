@@ -293,13 +293,13 @@ class TestBuildProxies:
             "https": "http://proxy.example.com:8080",
         }
 
-    def test_no_proxy_returns_none(self, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    def test_no_proxy_returns_none(self, monkeypatch) -> None:
         """No proxy and no env var returns None."""
         monkeypatch.delenv("FINDPAPERS_PROXY", raising=False)
         result = build_proxies(None)
         assert result is None
 
-    def test_env_var_used_when_no_explicit(self, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    def test_env_var_used_when_no_explicit(self, monkeypatch) -> None:
         """FINDPAPERS_PROXY env var is used when proxy param is None."""
         monkeypatch.setenv("FINDPAPERS_PROXY", "http://env-proxy:3128")
         proxies = build_proxies(None)
@@ -307,14 +307,14 @@ class TestBuildProxies:
         assert proxies["http"] == "http://env-proxy:3128"
         assert proxies["https"] == "http://env-proxy:3128"
 
-    def test_explicit_proxy_takes_precedence(self, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    def test_explicit_proxy_takes_precedence(self, monkeypatch) -> None:
         """Explicit proxy overrides FINDPAPERS_PROXY env var."""
         monkeypatch.setenv("FINDPAPERS_PROXY", "http://env-proxy:3128")
         proxies = build_proxies("http://explicit-proxy:9090")
         assert proxies is not None
         assert proxies["http"] == "http://explicit-proxy:9090"
 
-    def test_empty_string_proxy_treated_as_none(self, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    def test_empty_string_proxy_treated_as_none(self, monkeypatch) -> None:
         """Empty proxy string with no env var returns None."""
         monkeypatch.delenv("FINDPAPERS_PROXY", raising=False)
         # empty string is falsy, so treated as None

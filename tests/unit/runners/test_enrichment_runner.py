@@ -190,7 +190,7 @@ class TestEnrichmentRunnerRun:
         paper.doi = "10.1234/test"
         fetched_urls: list[str] = []
 
-        def _record_fetch(url: str, timeout: object = None) -> None:  # type: ignore[return]
+        def _record_fetch(url: str, timeout: object = None) -> None:
             fetched_urls.append(url)
             return None  # simulate non-HTML / no-metadata response
 

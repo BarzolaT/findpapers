@@ -572,7 +572,7 @@ class TestSnowballRunnerParallelErrors:
 
         original = runner._query_single_connector
 
-        def patched(connector, paper):  # type: ignore[no-untyped-def]
+        def patched(connector, paper):
             """Raise for the 'bad' connector, delegate otherwise."""
             if connector is bad:
                 raise RuntimeError("unexpected crash")

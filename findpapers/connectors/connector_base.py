@@ -13,6 +13,7 @@ import random
 import threading
 import time
 from abc import ABC, abstractmethod
+from types import TracebackType
 from urllib.parse import urlencode
 
 import requests
@@ -132,7 +133,12 @@ class ConnectorBase(ABC):
         """
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # noqa: ANN001
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Exit the runtime context, closing the HTTP session."""
         self.close()
 

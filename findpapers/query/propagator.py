@@ -58,13 +58,13 @@ class FilterPropagator:
             pass
         elif node.node_type in (NodeType.ROOT, NodeType.GROUP):
             # Determine effective filter for this node (to pass to children)
-            effective_filter = (
+            effective_filter: FilterCode | None = (
                 node.filter_code if node.filter_code is not None else node.inherited_filter_code
             )
 
             # Propagate to children
             for child in node.children:
-                self._propagate_filters(child, effective_filter)  # type: ignore[arg-type]
+                self._propagate_filters(child, effective_filter)
 
             # For GROUP nodes, check if all children match the group's filter
             if node.node_type == NodeType.GROUP:
