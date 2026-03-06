@@ -50,6 +50,7 @@ class SearchResult:
         papers: list[Paper] | None = None,
         runtime_seconds: float | None = None,
         runtime_seconds_per_database: dict[str, float] | None = None,
+        failed_databases: list[str] | None = None,
     ) -> None:
         """Create a SearchResult instance.
 
@@ -73,6 +74,10 @@ class SearchResult:
             Total runtime of the search pipeline.
         runtime_seconds_per_database : dict[str, float] | None
             Runtime in seconds for each database.
+        failed_databases : list[str] | None
+            Database identifiers that failed during search (network error,
+            connector error, etc.).  ``None`` means the information was not
+            recorded (e.g. loaded from an older export).
         """
         self.query = query
         self.since = since
@@ -90,6 +95,7 @@ class SearchResult:
         self.runtime_seconds_per_database: dict[str, float] = dict(
             runtime_seconds_per_database or {}
         )
+        self.failed_databases: list[str] = list(failed_databases or [])
 
     def add_paper(self, paper: Paper) -> None:
         """Add a paper to the results.
@@ -130,6 +136,7 @@ class SearchResult:
             "version": package_version(),
             "runtime_seconds": self.runtime_seconds,
             "runtime_seconds_per_database": dict(self.runtime_seconds_per_database),
+            "failed_databases": self.failed_databases or None,
         }
         return {
             "metadata": metadata,
@@ -190,4 +197,5 @@ class SearchResult:
             papers=[Paper.from_dict(p) for p in raw_papers],
             runtime_seconds=metadata.get("runtime_seconds"),
             runtime_seconds_per_database=metadata.get("runtime_seconds_per_database"),
+            failed_databases=metadata.get("failed_databases"),
         )

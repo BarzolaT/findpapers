@@ -190,3 +190,56 @@ class TestSearchResultSerialization:
         sr = SearchResult.from_dict({"metadata": {"timestamp": "not-a-date"}, "papers": []})
         # processed_at gets a fresh UTC timestamp when parsing fails
         assert sr.processed_at is not None
+
+
+# ---------------------------------------------------------------------------
+# failed_databases tracking
+# ---------------------------------------------------------------------------
+
+
+class TestFailedDatabases:
+    """Tests for the failed_databases field."""
+
+    def test_default_is_empty_list(self) -> None:
+        """When omitted, failed_databases defaults to an empty list."""
+        sr = SearchResult(query="[q]")
+        assert sr.failed_databases == []
+
+    def test_explicit_none_gives_empty_list(self) -> None:
+        """Passing None explicitly still yields an empty list internally."""
+        sr = SearchResult(query="[q]", failed_databases=None)
+        assert sr.failed_databases == []
+
+    def test_stores_provided_values(self) -> None:
+        """Provided database names are stored."""
+        sr = SearchResult(query="[q]", failed_databases=["arxiv", "ieee"])
+        assert sr.failed_databases == ["arxiv", "ieee"]
+
+    def test_to_dict_includes_failed_databases(self) -> None:
+        """to_dict serializes failed_databases into metadata."""
+        sr = SearchResult(query="[q]", failed_databases=["scopus"])
+        d = sr.to_dict()
+        assert d["metadata"]["failed_databases"] == ["scopus"]
+
+    def test_to_dict_none_when_empty(self) -> None:
+        """to_dict serializes empty list as None (compact representation)."""
+        sr = SearchResult(query="[q]")
+        d = sr.to_dict()
+        assert d["metadata"]["failed_databases"] is None
+
+    def test_round_trip_with_failures(self) -> None:
+        """failed_databases survives a to_dict / from_dict round-trip."""
+        sr = SearchResult(query="[q]", failed_databases=["ieee", "pubmed"])
+        restored = SearchResult.from_dict(sr.to_dict())
+        assert restored.failed_databases == ["ieee", "pubmed"]
+
+    def test_round_trip_without_failures(self) -> None:
+        """An empty failed_databases round-trips without error."""
+        sr = SearchResult(query="[q]")
+        restored = SearchResult.from_dict(sr.to_dict())
+        assert restored.failed_databases == []
+
+    def test_from_dict_missing_key(self) -> None:
+        """Older exports without the key produce an empty list."""
+        sr = SearchResult.from_dict({"metadata": {}, "papers": []})
+        assert sr.failed_databases == []

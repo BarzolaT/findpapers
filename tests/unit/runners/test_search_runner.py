@@ -11,6 +11,7 @@ from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import Database
 from findpapers.core.source import Source
+from findpapers.exceptions import UnsupportedQueryError
 from findpapers.runners.search_runner import SearchRunner
 from tests.conftest import make_paper
 
@@ -561,3 +562,51 @@ class TestSearchRunnerParallel:
 
         assert captured == [2], f"Expected num_workers=2, got {captured}"
         assert len(result.papers) == 2
+
+
+class TestSearchRunnerFailedDatabases:
+    """Tests for tracking databases that fail during search."""
+
+    def test_no_failures_gives_empty_list(self):
+        """When all searchers succeed, failed_databases is empty."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.return_value = [make_paper()]
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+        result = runner.run()
+        assert result.failed_databases == []
+
+    def test_runtime_error_records_failure(self):
+        """A database that raises RuntimeError is recorded in failed_databases."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.side_effect = RuntimeError("network down")
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+        result = runner.run()
+        assert Database.ARXIV in result.failed_databases
+
+    def test_unsupported_query_not_recorded(self):
+        """Databases skipped via UnsupportedQueryError are NOT in failed_databases."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.side_effect = UnsupportedQueryError("not supported")
+        runner._searchers = [mock_searcher]  # noqa: SLF001
+        result = runner.run()
+        assert result.failed_databases == []
+
+    def test_mixed_success_and_failure(self):
+        """Only the failing database is recorded; the successful one is not."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])
+        ok_searcher = MagicMock()
+        ok_searcher.name = Database.ARXIV
+        ok_searcher.search.return_value = [make_paper()]
+        bad_searcher = MagicMock()
+        bad_searcher.name = Database.IEEE
+        bad_searcher.search.side_effect = RuntimeError("timeout")
+        runner._searchers = [ok_searcher, bad_searcher]  # noqa: SLF001
+        result = runner.run()
+        assert result.failed_databases == [Database.IEEE]
+        assert len(result.papers) == 1

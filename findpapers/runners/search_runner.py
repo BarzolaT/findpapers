@@ -168,8 +168,9 @@ class SearchRunner:
         for _skipped in self._skipped_databases:
             metrics[f"total_papers_from_{_skipped}"] = 0
 
+        failed_databases: list[str] = []
         try:
-            self._fetch_papers(metrics, verbose, show_progress=show_progress)
+            failed_databases = self._fetch_papers(metrics, verbose, show_progress=show_progress)
         finally:
             for searcher in self._searchers:
                 searcher.close()
@@ -206,6 +207,7 @@ class SearchRunner:
             runtime_seconds=self._metrics.get("runtime_in_seconds"),
             since=self._since,
             until=self._until,
+            failed_databases=failed_databases or None,
         )
         return self._search
 
@@ -296,7 +298,7 @@ class SearchRunner:
         verbose: bool = False,
         *,
         show_progress: bool = True,
-    ) -> None:
+    ) -> list[str]:
         """Fetch papers from all configured searchers.
 
         Updates *metrics* with per-database paper counts.
@@ -312,7 +314,10 @@ class SearchRunner:
 
         Returns
         -------
-        None
+        list[str]
+            Names of databases that failed during the search (network or
+            connector errors).  Databases skipped due to unsupported
+            queries are **not** included.
         """
 
         def _run_searcher(searcher: SearchConnectorBase) -> list[Paper]:
@@ -348,6 +353,7 @@ class SearchRunner:
         num_searchers = len(self._searchers)
         num_workers = min(self._num_workers, num_searchers)
 
+        failed: list[str] = []
         for searcher, result, error in execute_tasks(
             self._searchers,
             _run_searcher,
@@ -359,11 +365,15 @@ class SearchRunner:
                 metrics[f"total_papers_from_{searcher.name}"] = 0
                 if isinstance(error, UnsupportedQueryError):
                     logger.warning("Skipping '%s': %s", searcher.name, error)
-                elif verbose:
-                    logger.warning("Error fetching from %s: %s", searcher.name, error)
+                else:
+                    failed.append(searcher.name)
+                    if verbose:
+                        logger.warning("Error fetching from %s: %s", searcher.name, error)
                 continue
             metrics[f"total_papers_from_{searcher.name}"] = len(result)
             self._results.extend(result)
+
+        return failed
 
     def _deduplicate_and_merge(self, metrics: dict[str, int | float]) -> None:
         """Collapse duplicate papers in two passes.
