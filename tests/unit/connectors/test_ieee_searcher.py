@@ -108,8 +108,8 @@ class TestIEEEConnectorParsePaper:
         assert paper is not None
         assert paper.citations is None
 
-    def test_publication_fields_extracted(self):
-        """Publication title, issn, isbn, and publisher are extracted."""
+    def test_source_fields_extracted(self):
+        """Source title, issn, isbn, and publisher are extracted."""
         item = {
             "title": "A Paper",
             "publication_title": "IEEE Trans.",

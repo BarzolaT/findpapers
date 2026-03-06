@@ -105,8 +105,8 @@ class TestSemanticScholarConnectorParsePaper:
         assert paper.keywords is not None
         assert "Computer Science" in paper.keywords
 
-    def test_publication_from_journal(self):
-        """Publication is built from journal.name."""
+    def test_source_from_journal(self):
+        """Source is built from journal.name."""
         item = {
             "title": "A Paper",
             "journal": {"name": "Nature", "pages": "1-10"},
@@ -118,8 +118,8 @@ class TestSemanticScholarConnectorParsePaper:
         assert paper.source.title == "Nature"
         assert paper.page_range == "1-10"
 
-    def test_publication_from_venue_fallback(self):
-        """venue is used as publication title when journal.name is absent."""
+    def test_source_from_venue_fallback(self):
+        """venue is used as source title when journal.name is absent."""
         item = {
             "title": "A Paper",
             "journal": {},

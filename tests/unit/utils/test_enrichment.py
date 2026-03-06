@@ -529,8 +529,8 @@ class TestBuildPaperFromMetadata:
         assert paper is not None
         assert Author(name="Smith, J") in paper.authors
 
-    def test_journal_publication_created(self) -> None:
-        """citation_journal_title creates a Publication."""
+    def test_journal_source_created(self) -> None:
+        """citation_journal_title creates a Source."""
         meta = {
             "citation_title": "Paper",
             "citation_journal_title": "Nature",
@@ -586,8 +586,8 @@ class TestBuildPaperFromMetadata:
         assert paper.source is not None
         assert paper.source.source_type == SourceType.BOOK
 
-    def test_conference_publication_created(self) -> None:
-        """citation_conference_title creates a Publication."""
+    def test_conference_source_created(self) -> None:
+        """citation_conference_title creates a Source."""
         meta = {
             "citation_title": "A Conference Paper",
             "citation_conference_title": "NeurIPS",
@@ -596,8 +596,8 @@ class TestBuildPaperFromMetadata:
         assert paper is not None
         assert paper.source is not None
 
-    def test_preprint_server_publication_not_created(self) -> None:
-        """Preprint server names (arxiv, biorxiv, medrxiv) are not treated as publications."""
+    def test_preprint_server_source_not_created(self) -> None:
+        """Preprint server names (arxiv, biorxiv, medrxiv) are not treated as sources."""
         for server in ("arxiv", "bioRxiv", "medRxiv"):
             meta = {
                 "citation_title": "A Preprint",
@@ -605,7 +605,7 @@ class TestBuildPaperFromMetadata:
             }
             paper = build_paper_from_metadata(meta, "http://x.com")
             assert paper is not None, f"Paper should be created for {server}"
-            assert paper.source is None, f"Publication should be None for preprint server {server}"
+            assert paper.source is None, f"Source should be None for preprint server {server}"
 
     def test_pdf_url_captured(self) -> None:
         """citation_pdf_url is stored on the paper."""
@@ -644,8 +644,8 @@ class TestBuildPaperFromMetadata:
     # Real-page integration tests
     # ------------------------------------------------------------------
 
-    def test_arxiv_paper_has_no_doi_no_publication(self) -> None:
-        """arXiv abs/* pages have no DOI and no formal publication attached."""
+    def test_arxiv_paper_has_no_doi_no_source(self) -> None:
+        """arXiv abs/* pages have no DOI and no formal source attached."""
         _skip_if_missing(ARXIV_HTML)
         meta = extract_metadata_from_html(ARXIV_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://arxiv.org/abs/2301.00306v4")
@@ -662,8 +662,8 @@ class TestBuildPaperFromMetadata:
         assert paper.pdf_url is not None
         assert "arxiv.org/pdf" in paper.pdf_url
 
-    def test_arxiv_paper_with_doi_has_no_publication(self) -> None:
-        """arXiv pre-print with a DOI still exposes no publication (server is arxiv)."""
+    def test_arxiv_paper_with_doi_has_no_source(self) -> None:
+        """arXiv pre-print with a DOI still exposes no source (server is arxiv)."""
         _skip_if_missing(ARXIV_HTML_WITH_DOI)
         meta = extract_metadata_from_html(ARXIV_HTML_WITH_DOI)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://arxiv.org/abs/2301.01148v1")
