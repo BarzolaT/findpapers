@@ -48,6 +48,6 @@ jobs:
       - name: Install Dependencies
         run: python -m poetry install
       - name: Test
-        run: python -m poetry run pytest --cov=findpapers 
+        run: python -m poetry run pytest --cov=findpapers --cov-fail-under=90
       - name: Upload coverage
         uses: codecov/codecov-action@v4
