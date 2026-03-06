@@ -8,6 +8,11 @@ POETRY = $(VENV_BIN)/poetry
 PYTEST_ARGS ?=
 TARGET ?= .
 
+# Ensure poetry run uses our local venv even when the shell has not
+# been activated with ``source venv/bin/activate``.
+export VIRTUAL_ENV := $(abspath $(VENV))
+export POETRY_VIRTUALENVS_CREATE := false
+
 -include .env
 export $(shell [ -f .env ] && sed 's/=.*//' .env)
 
@@ -36,7 +41,7 @@ help:
 setup:
 	@python -m venv $(VENV)
 	@$(PIP) install --upgrade pip poetry
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) install --with dev --no-interaction --no-ansi -vvv
+	@$(POETRY) install --with dev --no-interaction --no-ansi -vvv
 	@touch poetry.lock
 
 clean:
@@ -48,23 +53,23 @@ clean:
 	@find . -type f -name "*.py[co]" -exec rm -rf {} +
 
 test:
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run pytest --durations=3 -v --cov=${PWD}/findpapers $(PYTEST_ARGS)
+	@$(POETRY) run pytest --durations=3 -v --cov=${PWD}/findpapers $(PYTEST_ARGS)
 
 test_integration:
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run pytest -v -m integration $(PYTEST_ARGS)
+	@$(POETRY) run pytest -v -m integration $(PYTEST_ARGS)
 
 test_report:
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run pytest --durations=3 -v --cov=${PWD}/findpapers --cov-report xml:reports/coverage.xml --junitxml=reports/tests.xml $(PYTEST_ARGS)
+	@$(POETRY) run pytest --durations=3 -v --cov=${PWD}/findpapers --cov-report xml:reports/coverage.xml --junitxml=reports/tests.xml $(PYTEST_ARGS)
 
 lint:
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run ruff check $(TARGET)
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run ruff format --check $(TARGET)
+	@$(POETRY) run ruff check $(TARGET)
+	@$(POETRY) run ruff format --check $(TARGET)
 	@if [ "$(TARGET)" = "." ]; then \
-		MYPYPATH=typings POETRY_VIRTUALENVS_CREATE=false $(POETRY) run mypy findpapers tests/unit; \
+		MYPYPATH=typings $(POETRY) run mypy findpapers tests/unit; \
 	else \
-		MYPYPATH=typings POETRY_VIRTUALENVS_CREATE=false $(POETRY) run mypy $(TARGET); \
+		MYPYPATH=typings $(POETRY) run mypy $(TARGET); \
 	fi
 
 format:
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run ruff check $(TARGET) --fix
-	@POETRY_VIRTUALENVS_CREATE=false $(POETRY) run ruff format $(TARGET)
+	@$(POETRY) run ruff check $(TARGET) --fix
+	@$(POETRY) run ruff format $(TARGET)
