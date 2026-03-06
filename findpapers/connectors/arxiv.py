@@ -17,6 +17,7 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
+from findpapers.utils.metadata_parser import parse_date
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +152,7 @@ class ArxivConnector(SearchConnectorBase):
 
         # Published date
         published_el = entry.find("atom:published", _NS)
-        pub_date_str = _parse_date_from_str(
+        pub_date_str = parse_date(
             (published_el.text or "").strip() if published_el is not None else None
         )
 
@@ -390,24 +391,3 @@ def _infer_source_type_from_journal_ref(text: str) -> SourceType | None:
     if _JOURNAL_RE.search(text):
         return SourceType.JOURNAL
     return None
-
-
-def _parse_date_from_str(date_str: str | None) -> datetime.date | None:
-    """Parse a date string into a :class:`datetime.date`.
-
-    Parameters
-    ----------
-    date_str : str | None
-        Raw date string (ISO-8601 or ``YYYY-MM-DD`` prefix).
-
-    Returns
-    -------
-    datetime.date | None
-        Parsed date or ``None`` when input is empty / unparseable.
-    """
-    if not date_str:
-        return None
-    try:
-        return datetime.date.fromisoformat(date_str[:10])
-    except ValueError:
-        return None
