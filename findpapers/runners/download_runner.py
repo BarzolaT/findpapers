@@ -308,7 +308,7 @@ class DownloadRunner:
         _add(paper.pdf_url)
         _add(paper.url)
         if paper.doi is not None:
-            _add(f"http://doi.org/{paper.doi}")
+            _add(f"https://doi.org/{paper.doi}")
 
         for url in candidate_urls:
             attempted_urls.append(url)
