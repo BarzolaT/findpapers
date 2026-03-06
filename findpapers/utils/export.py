@@ -191,6 +191,41 @@ def load_from_json(
     )
 
 
+# Characters that must be escaped inside BibTeX field values.
+# Order matters: backslash must be escaped first to avoid double-escaping.
+_BIBTEX_ESCAPE_MAP: list[tuple[str, str]] = [
+    ("\\", r"\textbackslash{}"),
+    ("&", r"\&"),
+    ("%", r"\%"),
+    ("$", r"\$"),
+    ("#", r"\#"),
+    ("_", r"\_"),
+    ("~", r"\textasciitilde{}"),
+    ("^", r"\textasciicircum{}"),
+]
+
+
+def _escape_bibtex(text: str) -> str:
+    r"""Escape LaTeX special characters in a BibTeX field value.
+
+    Replaces characters that would otherwise break BibTeX/LaTeX parsing
+    with their LaTeX-safe equivalents.
+
+    Parameters
+    ----------
+    text : str
+        Raw text to escape.
+
+    Returns
+    -------
+    str
+        LaTeX-safe text suitable for inclusion in a BibTeX field.
+    """
+    for char, replacement in _BIBTEX_ESCAPE_MAP:
+        text = text.replace(char, replacement)
+    return text
+
+
 def paper_to_bibtex(paper: Paper) -> str:
     """Convert a paper into a BibTeX entry.
 
@@ -214,11 +249,11 @@ def paper_to_bibtex(paper: Paper) -> str:
     citation_type = f"@{paper.paper_type.value}" if paper.paper_type is not None else "@misc"
     citation_key = citation_key_for(paper)
     lines = [f"{citation_type}{{{citation_key},"]
-    lines.append(f"{default_tab}title = {{{paper.title}}},")
+    lines.append(f"{default_tab}title = {{{_escape_bibtex(paper.title)}}},")
 
     if paper.authors:
         authors = " and ".join(author.name for author in paper.authors)
-        lines.append(f"{default_tab}author = {{{authors}}},")
+        lines.append(f"{default_tab}author = {{{_escape_bibtex(authors)}}},")
 
     how_published = bibtex_how_published(paper)
     if how_published:
@@ -226,11 +261,11 @@ def paper_to_bibtex(paper: Paper) -> str:
 
     # journal field for @article entries
     if paper.paper_type == PaperType.ARTICLE and source is not None:
-        lines.append(f"{default_tab}journal = {{{source.title}}},")
+        lines.append(f"{default_tab}journal = {{{_escape_bibtex(source.title)}}},")
 
     # booktitle field for @inproceedings / @incollection entries
     if paper.paper_type in {PaperType.INPROCEEDINGS, PaperType.INCOLLECTION} and source is not None:
-        lines.append(f"{default_tab}booktitle = {{{source.title}}},")
+        lines.append(f"{default_tab}booktitle = {{{_escape_bibtex(source.title)}}},")
 
     # institution field for @techreport / @phdthesis / @mastersthesis entries
     if (
@@ -238,13 +273,13 @@ def paper_to_bibtex(paper: Paper) -> str:
         and source is not None
         and source.publisher is not None
     ):
-        lines.append(f"{default_tab}institution = {{{source.publisher}}},")
+        lines.append(f"{default_tab}institution = {{{_escape_bibtex(source.publisher)}}},")
 
     if paper.doi is not None:
         lines.append(f"{default_tab}doi = {{{paper.doi}}},")
 
     if source is not None and source.publisher is not None:
-        lines.append(f"{default_tab}publisher = {{{source.publisher}}},")
+        lines.append(f"{default_tab}publisher = {{{_escape_bibtex(source.publisher)}}},")
 
     if paper.publication_date is not None:
         lines.append(f"{default_tab}year = {{{paper.publication_date.year}}},")
@@ -253,11 +288,11 @@ def paper_to_bibtex(paper: Paper) -> str:
         lines.append(f"{default_tab}pages = {{{paper.page_range}}},")
 
     if paper.abstract:
-        lines.append(f"{default_tab}abstract = {{{paper.abstract}}},")
+        lines.append(f"{default_tab}abstract = {{{_escape_bibtex(paper.abstract)}}},")
 
     if paper.keywords:
         kw_str = ", ".join(sorted(paper.keywords))
-        lines.append(f"{default_tab}keywords = {{{kw_str}}},")
+        lines.append(f"{default_tab}keywords = {{{_escape_bibtex(kw_str)}}},")
 
     if paper.url is not None:
         lines.append(f"{default_tab}url = {{{paper.url}}},")

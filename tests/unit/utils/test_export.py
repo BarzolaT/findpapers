@@ -16,6 +16,7 @@ from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source, SourceType
 from findpapers.exceptions import ExportError
 from findpapers.utils.export import (
+    _escape_bibtex,
     _extract_papers,
     _serialize_to_dict,
     bibtex_how_published,
@@ -319,6 +320,70 @@ class TestBibtexHowPublished:
             url="https://example.org",
         )
         assert bibtex_how_published(paper) == ""
+
+
+# ---------------------------------------------------------------------------
+# _escape_bibtex
+# ---------------------------------------------------------------------------
+
+
+class TestEscapeBibtex:
+    """Tests for _escape_bibtex()."""
+
+    def test_plain_text_unchanged(self) -> None:
+        """Text without special characters passes through unchanged."""
+        assert _escape_bibtex("Hello World 123") == "Hello World 123"
+
+    def test_ampersand_escaped(self) -> None:
+        """Ampersand is escaped to \\&."""
+        assert _escape_bibtex("A & B") == r"A \& B"
+
+    def test_percent_escaped(self) -> None:
+        """Percent sign is escaped to \\%."""
+        assert _escape_bibtex("100% effective") == r"100\% effective"
+
+    def test_dollar_escaped(self) -> None:
+        """Dollar sign is escaped to \\$."""
+        assert _escape_bibtex("costs $5") == r"costs \$5"
+
+    def test_hash_escaped(self) -> None:
+        """Hash sign is escaped to \\#."""
+        assert _escape_bibtex("item #1") == r"item \#1"
+
+    def test_underscore_escaped(self) -> None:
+        """Underscore is escaped to \\_."""
+        assert _escape_bibtex("my_var") == r"my\_var"
+
+    def test_tilde_escaped(self) -> None:
+        """Tilde is escaped to \\textasciitilde{}."""
+        assert _escape_bibtex("approx~value") == r"approx\textasciitilde{}value"
+
+    def test_caret_escaped(self) -> None:
+        """Caret is escaped to \\textasciicircum{}."""
+        assert _escape_bibtex("x^2") == r"x\textasciicircum{}2"
+
+    def test_backslash_escaped(self) -> None:
+        """Backslash is escaped to \\textbackslash{}."""
+        assert _escape_bibtex("a\\b") == r"a\textbackslash{}b"
+
+    def test_multiple_special_characters(self) -> None:
+        """Multiple different special chars are all escaped."""
+        result = _escape_bibtex("A & B: 100% of $x_i^2")
+        assert r"\&" in result
+        assert r"\%" in result
+        assert r"\$" in result
+        assert r"\_" in result
+        assert r"\textasciicircum{}" in result
+
+    def test_backslash_escaped_before_others(self) -> None:
+        """Backslash is escaped first, so replacements aren't double-escaped."""
+        # A literal backslash followed by & should produce \textbackslash{}\&
+        result = _escape_bibtex("\\&")
+        assert result == r"\textbackslash{}\&"
+
+    def test_empty_string(self) -> None:
+        """Empty string returns empty string."""
+        assert _escape_bibtex("") == ""
 
 
 # ---------------------------------------------------------------------------
@@ -634,6 +699,137 @@ class TestPaperToBibtex:
         )
         entry = paper_to_bibtex(paper)
         assert "booktitle" not in entry
+
+    def test_title_special_chars_escaped(self) -> None:
+        """Special characters in title are LaTeX-escaped."""
+        paper = Paper(
+            title="A & B: 100% of $x_i",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
+        assert r"A \& B: 100\% of \$x\_i" in entry
+
+    def test_author_special_chars_escaped(self) -> None:
+        """Special characters in author names are LaTeX-escaped."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="O'Neil & Co_Lab")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
+        assert r"O'Neil \& Co\_Lab" in entry
+
+    def test_abstract_special_chars_escaped(self) -> None:
+        """Special characters in abstract are LaTeX-escaped."""
+        paper = Paper(
+            title="T",
+            abstract="We report 50% improvement & $x^2$ gain",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
+        assert r"50\% improvement \& \$x\textasciicircum{}2\$ gain" in entry
+
+    def test_journal_special_chars_escaped(self) -> None:
+        """Special characters in journal field are LaTeX-escaped."""
+        pub = Source(title="Science & Nature", source_type=SourceType.JOURNAL)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.ARTICLE,
+        )
+        entry = paper_to_bibtex(paper)
+        assert r"journal = {Science \& Nature}" in entry
+
+    def test_publisher_special_chars_escaped(self) -> None:
+        """Special characters in publisher field are LaTeX-escaped."""
+        pub = Source(title="J", publisher="Smith & Sons", source_type=SourceType.JOURNAL)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        entry = paper_to_bibtex(paper)
+        assert r"publisher = {Smith \& Sons}" in entry
+
+    def test_keywords_special_chars_escaped(self) -> None:
+        """Special characters in keywords are LaTeX-escaped."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+            keywords={"C# programming", "100%"},
+        )
+        entry = paper_to_bibtex(paper)
+        assert r"100\%" in entry
+        assert r"C\# programming" in entry
+
+    def test_doi_not_escaped(self) -> None:
+        """DOI field is not escaped (special chars are part of the identifier)."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+            doi="10.1000/test_doi#1",
+        )
+        entry = paper_to_bibtex(paper)
+        assert "doi = {10.1000/test_doi#1}" in entry
+
+    def test_url_not_escaped(self) -> None:
+        """URL field is not escaped (special chars are part of the URL)."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+            url="https://example.com/~user/path%20file",
+        )
+        entry = paper_to_bibtex(paper)
+        assert "url = {https://example.com/~user/path%20file}" in entry
+
+    def test_institution_special_chars_escaped(self) -> None:
+        """Special characters in institution field are LaTeX-escaped."""
+        pub = Source(title="Reports", publisher="AT&T Labs", source_type=SourceType.OTHER)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.TECHREPORT,
+        )
+        entry = paper_to_bibtex(paper)
+        assert r"institution = {AT\&T Labs}" in entry
+
+    def test_booktitle_special_chars_escaped(self) -> None:
+        """Special characters in booktitle field are LaTeX-escaped."""
+        pub = Source(title="Proc. A&B 2023", source_type=SourceType.CONFERENCE)
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[Author(name="X, Y.")],
+            source=pub,
+            publication_date=datetime.date(2021, 1, 1),
+            paper_type=PaperType.INPROCEEDINGS,
+        )
+        entry = paper_to_bibtex(paper)
+        assert r"booktitle = {Proc. A\&B 2023}" in entry
 
 
 # ---------------------------------------------------------------------------
