@@ -84,7 +84,6 @@ class SnowballRunner:
         self._max_depth = max_depth
         self._direction = direction
         self._num_workers = max(num_workers, 1)
-        self._email = email
         self._graph: CitationGraph | None = None
         self._metrics: dict[str, int | float] = {}
 
