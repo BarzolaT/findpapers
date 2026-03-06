@@ -3,15 +3,13 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TypeAlias
 
+from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper, PaperType
+from findpapers.core.search_result import SearchResult
 from findpapers.exceptions import ExportError
 from findpapers.utils.version import package_version
-
-if TYPE_CHECKING:
-    from findpapers.core.citation_graph import CitationGraph
-    from findpapers.core.search_result import SearchResult
 
 #: Union of all exportable types.
 Exportable: TypeAlias = "SearchResult | CitationGraph | list[Paper]"
@@ -35,9 +33,6 @@ def _extract_papers(data: Exportable) -> list[Paper]:
     ExportError
         If *data* is not a supported type.
     """
-    from findpapers.core.citation_graph import CitationGraph
-    from findpapers.core.search_result import SearchResult
-
     if isinstance(data, list):
         return data
     if isinstance(data, SearchResult):
@@ -70,9 +65,6 @@ def _serialize_to_dict(data: Exportable) -> dict:
     ExportError
         If *data* is not a supported type.
     """
-    from findpapers.core.citation_graph import CitationGraph
-    from findpapers.core.search_result import SearchResult
-
     if isinstance(data, SearchResult):
         payload = data.to_dict()
         payload["type"] = "search_result"
@@ -174,9 +166,6 @@ def load_from_json(
     ExportError
         If the file format cannot be identified.
     """
-    from findpapers.core.citation_graph import CitationGraph
-    from findpapers.core.search_result import SearchResult
-
     with Path(path).open("r", encoding="utf-8") as handle:
         payload = json.load(handle)
 
