@@ -707,3 +707,96 @@ class TestPaperStr:
             publication_date=datetime.date(2021, 1, 1),
         )
         assert str(paper) != repr(paper)
+
+
+class TestPaperIdentityEdgeCases:
+    """Tests for __eq__, __hash__, and _identity_key edge cases."""
+
+    def test_eq_identity_fallback_when_no_doi_no_title(self) -> None:
+        """__eq__ falls back to `is` when _identity_key returns None for either paper."""
+        # Paper with empty title and no DOI → _identity_key returns None
+        p1 = Paper(title="A", abstract="", authors=[], source=None, publication_date=None)
+        p2 = Paper(title="A", abstract="", authors=[], source=None, publication_date=None)
+        # Both have a title so they compare via key
+        assert p1 == p2
+        # Now remove keys: monkeypatch _identity_key to return None
+        p1._Paper__doi = None  # type: ignore[attr-defined]  # noqa: SLF001
+        p1.title = ""
+        # With empty title and no DOI, _identity_key returns None
+        assert p1._identity_key() is None  # noqa: SLF001
+        # Identity comparison: p1 is only equal to itself
+        assert p1 == p1  # noqa: PLR0124
+        assert p1 != p2
+
+    def test_hash_uses_id_when_no_key(self) -> None:
+        """__hash__ returns id(self) when _identity_key is None."""
+        p = Paper(title="temp", abstract="", authors=[], source=None, publication_date=None)
+        p.title = ""
+        p.doi = None
+        assert p._identity_key() is None  # noqa: SLF001
+        assert hash(p) == id(p)
+
+    def test_identity_key_returns_none_without_doi_or_title(self) -> None:
+        """_identity_key returns None when both doi and title are falsy."""
+        p = Paper(title="temp", abstract="", authors=[], source=None, publication_date=None)
+        p.title = ""
+        p.doi = None
+        assert p._identity_key() is None  # noqa: SLF001
+
+
+class TestPaperFromDictEdgeCases:
+    """Tests for from_dict coercion and edge-case handling."""
+
+    def test_missing_title_raises(self) -> None:
+        """from_dict raises ValueError when title is missing."""
+        with pytest.raises(ValueError, match="title"):
+            Paper.from_dict({})
+
+    def test_non_string_abstract_coerced(self) -> None:
+        """Non-string abstract is converted to str."""
+        d = {"title": "T", "abstract": 42, "authors": []}
+        paper = Paper.from_dict(d)
+        assert paper.abstract == "42"
+
+    def test_single_author_dict_not_list(self) -> None:
+        """A single author dict (not in a list) is wrapped into a list."""
+        d = {"title": "T", "authors": {"name": "J. Doe"}}
+        paper = Paper.from_dict(d)
+        assert len(paper.authors) == 1
+        assert paper.authors[0].name == "J. Doe"
+
+    def test_invalid_iso_date_becomes_none(self) -> None:
+        """A malformed date string is coerced to None."""
+        d = {"title": "T", "publication_date": "not-a-date"}
+        paper = Paper.from_dict(d)
+        assert paper.publication_date is None
+
+    def test_non_string_url_coerced(self) -> None:
+        """Non-string url is converted to str."""
+        d = {"title": "T", "url": 123}
+        paper = Paper.from_dict(d)
+        assert paper.url == "123"
+
+    def test_non_string_pdf_url_coerced(self) -> None:
+        """Non-string pdf_url is converted to str."""
+        d = {"title": "T", "pdf_url": 456}
+        paper = Paper.from_dict(d)
+        assert paper.pdf_url == "456"
+
+    def test_non_string_doi_coerced(self) -> None:
+        """Non-string doi is converted to str."""
+        d = {"title": "T", "doi": 789}
+        paper = Paper.from_dict(d)
+        assert paper.doi == "789"
+
+    def test_scalar_keywords_wrapped(self) -> None:
+        """A single scalar keyword (not a list) is wrapped into a set."""
+        d = {"title": "T", "keywords": "machine-learning"}
+        paper = Paper.from_dict(d)
+        assert paper.keywords == {"machine-learning"}
+
+    def test_scalar_databases_wrapped(self) -> None:
+        """A single scalar database (not a list) is wrapped into a set."""
+        d = {"title": "T", "databases": "scopus"}
+        paper = Paper.from_dict(d)
+        assert paper.databases == {"scopus"}
