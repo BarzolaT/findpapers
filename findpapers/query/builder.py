@@ -185,8 +185,6 @@ class QueryBuilder(ABC):
         str
             Combination expression.
         """
-        if not expanded_queries:
-            return ""
         if len(expanded_queries) == 1:
             return "q0"
         return " OR ".join(f"q{index}" for index in range(len(expanded_queries)))
