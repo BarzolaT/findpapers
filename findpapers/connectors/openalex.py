@@ -776,6 +776,8 @@ def _find_repository_source(work: dict[str, Any]) -> dict[str, Any] | None:
 def _reconstruct_abstract(inverted_index: dict | None) -> str:
     """Reconstruct plain text abstract from OpenAlex inverted index.
 
+    Uses a pre-allocated list indexed by position to avoid sorting.
+
     Parameters
     ----------
     inverted_index : dict | None
@@ -786,11 +788,15 @@ def _reconstruct_abstract(inverted_index: dict | None) -> str:
     str
         Reconstructed abstract string.
     """
-    word_positions: list[tuple[int, str]] = []
     if not inverted_index:
         return ""
+
+    # Find the maximum position to pre-allocate the output list
+    max_pos = max(pos for positions in inverted_index.values() for pos in positions)
+    words: list[str] = [""] * (max_pos + 1)
+
     for word, positions in inverted_index.items():
         for pos in positions:
-            word_positions.append((pos, word))
-    word_positions.sort(key=lambda x: x[0])
-    return " ".join(word for _, word in word_positions)
+            words[pos] = word
+
+    return " ".join(w for w in words if w)
