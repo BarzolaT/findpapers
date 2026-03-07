@@ -202,7 +202,7 @@ class CrossRefConnector(CitationConnectorBase):
 
         try:
             work = self.fetch_work(paper.doi)
-        except Exception:
+        except requests.RequestException:
             logger.warning("CrossRef: failed to fetch work for DOI %s", paper.doi)
             return []
 
@@ -221,7 +221,7 @@ class CrossRefConnector(CitationConnectorBase):
         for ref_doi in ref_dois:
             try:
                 ref_work = self.fetch_work(ref_doi)
-            except Exception:
+            except requests.RequestException:
                 logger.debug("CrossRef: could not fetch reference DOI %s", ref_doi)
                 continue
             if ref_work:

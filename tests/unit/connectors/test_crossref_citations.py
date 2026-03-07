@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import requests
+
 from findpapers.connectors.crossref import CrossRefConnector
 
 
@@ -119,7 +121,7 @@ class TestCrossRefFetchReferences:
         ref2_work = _make_crossref_work(doi="10.1000/r2", title="Ref 2")
 
         # seed_work succeeds, ref1 raises, ref2 succeeds
-        mock_fetch.side_effect = [seed_work, Exception("404"), ref2_work]
+        mock_fetch.side_effect = [seed_work, requests.RequestException("404"), ref2_work]
 
         refs = connector.fetch_references(paper)
 
@@ -132,7 +134,7 @@ class TestCrossRefFetchReferences:
         connector = CrossRefConnector()
         paper = make_paper(doi="10.1000/error")
 
-        mock_fetch.side_effect = Exception("Network error")
+        mock_fetch.side_effect = requests.RequestException("Network error")
 
         refs = connector.fetch_references(paper)
 

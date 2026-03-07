@@ -342,7 +342,7 @@ class DownloadRunner:
                     with open(output_filepath, "wb") as fp:
                         fp.write(response.content)
                     return True, attempted_urls
-            except Exception:  # noqa: BLE001
+            except (requests.RequestException, OSError):
                 logger.debug("Download attempt failed", exc_info=True)
 
         return False, attempted_urls
