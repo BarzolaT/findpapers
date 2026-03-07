@@ -21,7 +21,7 @@ from findpapers.utils.metadata_parser import parse_date
 
 logger = logging.getLogger(__name__)
 
-_BASE_URL = "http://export.arxiv.org/api/query"
+_BASE_URL = "https://export.arxiv.org/api/query"
 _PAGE_SIZE = 100
 # arXiv recommends at least 3 seconds between requests
 _MIN_REQUEST_INTERVAL = 3.0
