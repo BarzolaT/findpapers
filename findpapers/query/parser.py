@@ -110,7 +110,7 @@ class QueryParser:
                     )
                 current_connector = ""
 
-                subquery = ""
+                subquery_chars: list[str] = []
                 subquery_group_level = 1
 
                 while True:
@@ -121,12 +121,12 @@ class QueryParser:
 
                     if current_character == "[":
                         # Skip content inside brackets
-                        subquery += current_character
+                        subquery_chars.append(current_character)
                         while True:
                             current_character = next(query_iterator, None)
                             if current_character is None:
                                 raise QueryValidationError("Missing term closing bracket")
-                            subquery += current_character
+                            subquery_chars.append(current_character)
                             if current_character == "]":
                                 break
                         continue
@@ -139,7 +139,9 @@ class QueryParser:
                         if subquery_group_level == 0:
                             break
 
-                    subquery += current_character
+                    subquery_chars.append(current_character)
+
+                subquery = "".join(subquery_chars)
 
                 group_node = QueryNode(
                     node_type=NodeType.GROUP, children=[], filter_code=filter_code
@@ -160,7 +162,7 @@ class QueryParser:
                     )
                 current_connector = ""
 
-                term_value = ""
+                term_chars: list[str] = []
                 while True:
                     current_character = next(query_iterator, None)
 
@@ -170,7 +172,9 @@ class QueryParser:
                     if current_character == "]":
                         break
 
-                    term_value += current_character
+                    term_chars.append(current_character)
+
+                term_value = "".join(term_chars)
 
                 parent.children.append(
                     QueryNode(node_type=NodeType.TERM, value=term_value, filter_code=filter_code)
