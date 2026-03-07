@@ -474,6 +474,16 @@ class TestDownloadRunnerMaskProxyCredentials:
         assert "user" not in masked
         assert "***:***@" in masked
 
+    def test_malformed_proxy_url_returned_as_is(self):
+        """A badly-formed proxy URL that causes urlparse to fail is returned as-is."""
+
+        def _raising_urlparse(url, *args, **kwargs):
+            raise ValueError("boom")
+
+        with patch("findpapers.runners.download_runner.urllib.parse.urlparse", _raising_urlparse):
+            result = DownloadRunner._mask_proxy_credentials("not-a-url")  # noqa: SLF001
+        assert result == "not-a-url"
+
 
 class TestDownloadRunnerUrlPriority:
     """Tests that pdf_url is tried before other URLs."""
@@ -566,3 +576,170 @@ class TestDownloadRunnerUrlPriority:
 
         assert call_order[0] == "http://example.com/landing"
         assert metrics["downloaded_papers"] == 1
+
+
+class TestDownloadRunnerEdgeCases:
+    """Tests for uncovered edge-case paths in _download_paper and _request."""
+
+    @staticmethod
+    def _make_response(status_code=200, content_type="application/pdf", content=b"%PDF"):
+        """Build a minimal mock response."""
+        from unittest.mock import MagicMock
+
+        resp = MagicMock()
+        resp.status_code = status_code
+        resp.reason = "OK" if status_code == 200 else "Error"
+        resp.headers = {"content-type": content_type}
+        resp.content = content
+        resp.url = "http://example.com/paper"
+        resp.ok = status_code < 400
+        return resp
+
+    def test_existing_pdf_skipped(self, make_paper, tmp_path):
+        """_download_paper returns True without HTTP call when PDF already exists."""
+        paper = make_paper(title="Already There")
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        # Pre-create the file that _build_filename would generate
+        filename = runner._build_filename(paper)  # noqa: SLF001
+        filepath = tmp_path / filename
+        filepath.write_bytes(b"%PDF-existing")
+
+        with patch("findpapers.runners.download_runner.requests.get") as mock_get:
+            metrics = runner.run()
+
+        # The file already existed so requests.get() should not be called.
+        mock_get.assert_not_called()
+        assert metrics["downloaded_papers"] == 1
+
+    def test_doi_url_used_as_candidate(self, make_paper, tmp_path):
+        """DOI-based URL is used when paper has a DOI but no pdf_url/url."""
+        paper = make_paper(title="DOI Only")
+        paper.pdf_url = None
+        paper.url = None
+        paper.doi = "10.1234/test"
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        resp = self._make_response()
+        with patch("findpapers.runners.download_runner.requests.get", return_value=resp) as mg:
+            runner.run()
+
+        called_url = mg.call_args[0][0]
+        assert "doi.org/10.1234/test" in called_url
+
+    def test_html_response_resolves_to_pdf(self, make_paper, tmp_path):
+        """HTML response triggers _resolve_pdf_url and follows the resolved URL."""
+        paper = make_paper(title="HTML Redirect")
+        paper.pdf_url = None
+        paper.url = "https://link.springer.com/article/10.1007/s00000-000-0000-0"
+        paper.doi = None
+
+        html_resp = self._make_response(content_type="text/html", content=b"<html>")
+        html_resp.url = "https://link.springer.com/article/10.1007/s00000-000-0000-0"
+        pdf_resp = self._make_response(content_type="application/pdf", content=b"%PDF-data")
+
+        call_count = {"n": 0}
+
+        def _fake_get(url, **kwargs):
+            call_count["n"] += 1
+            if call_count["n"] == 1:
+                return html_resp
+            return pdf_resp
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch("findpapers.runners.download_runner.requests.get", side_effect=_fake_get):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 1
+        assert call_count["n"] == 2
+
+    def test_non_ok_response_logged(self, make_paper, tmp_path, caplog):
+        """Non-success status (non-418) logs at DEBUG level."""
+        import logging
+
+        paper = make_paper(title="Server Error")
+        paper.pdf_url = "http://example.com/broken"
+        paper.url = None
+        paper.doi = None
+
+        resp = self._make_response(status_code=500, content_type="text/html", content=b"error")
+        resp.ok = False
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with (
+            patch("findpapers.runners.download_runner.requests.get", return_value=resp),
+            caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"),
+        ):
+            runner.run()
+
+        debug_msgs = " ".join(r.message for r in caplog.records if r.levelno == logging.DEBUG)
+        assert "500" in debug_msgs
+
+    def test_download_exception_caught(self, make_paper, tmp_path):
+        """Exception during _download_paper loop is caught; download returns False."""
+        paper = make_paper(title="Exception Paper")
+        paper.pdf_url = "http://example.com/paper.pdf"
+        paper.url = None
+        paper.doi = None
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+
+        def _exploding_get(url, **kwargs):
+            raise RuntimeError("unexpected boom")
+
+        with patch("findpapers.runners.download_runner.requests.get", side_effect=_exploding_get):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 0
+
+    def test_proxy_with_port_masked(self):
+        """Proxy URL with user:pass and port masks credentials but keeps port."""
+        masked = DownloadRunner._mask_proxy_credentials(  # noqa: SLF001
+            "http://myuser:mypass@proxy.local:9090"
+        )
+        assert "myuser" not in masked
+        assert "mypass" not in masked
+        assert "9090" in masked
+        assert "proxy.local" in masked
+
+    def test_html_resolved_pdf_url_returns_none(self, make_paper, tmp_path):
+        """When resolved PDF URL request returns None, download continues to next URL."""
+        paper = make_paper(title="Resolved None")
+        paper.pdf_url = None
+        paper.url = "https://link.springer.com/article/10.1007/s00000-000-0000-0"
+        paper.doi = None
+
+        html_resp = self._make_response(content_type="text/html", content=b"<html>")
+        html_resp.url = "https://link.springer.com/article/10.1007/s00000-000-0000-0"
+
+        call_count = {"n": 0}
+
+        def _fake_get(url, **kwargs):
+            call_count["n"] += 1
+            if call_count["n"] == 1:
+                return html_resp
+            # Resolved PDF URL request fails
+            return None
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_request", side_effect=_fake_get):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 0
+        assert call_count["n"] == 2
+
+    def test_download_loop_exception_is_caught(self, make_paper, tmp_path):
+        """Exception raised inside download loop is caught, paper not downloaded."""
+        paper = make_paper(title="Loop Exception")
+        paper.pdf_url = "http://example.com/paper.pdf"
+        paper.url = None
+        paper.doi = None
+
+        resp = self._make_response(content_type="application/pdf")
+        # Make response.content raise to trigger the broad except
+        type(resp).content = property(lambda self: (_ for _ in ()).throw(OSError("disk full")))
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch("findpapers.runners.download_runner.requests.get", return_value=resp):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 0
