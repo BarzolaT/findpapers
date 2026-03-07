@@ -129,3 +129,78 @@ class TestQueryValidator:
         """Test that operators require whitespace."""
         with pytest.raises(QueryValidationError, match="Operators must have whitespace"):
             validator.validate("[term a]AND[term b]")
+
+    def test_closing_bracket_before_opening_raises_error(self, validator):
+        """Test that a closing bracket before an opening bracket raises an error."""
+        with pytest.raises(QueryValidationError, match="Unbalanced square brackets"):
+            validator.validate("]term[")
+
+    def test_closing_paren_before_opening_raises_error(self, validator):
+        """Test that a closing parenthesis before an opening parenthesis raises an error."""
+        with pytest.raises(QueryValidationError, match="Unbalanced parentheses"):
+            validator.validate(")[term a](")
+
+    def test_whitespace_only_term_raises_error(self, validator):
+        """Test that a whitespace-only term raises an error."""
+        with pytest.raises(QueryValidationError, match="Terms cannot be empty"):
+            validator.validate("[ ]")
+
+    def test_double_quotes_in_term_raises_error(self, validator):
+        """Test that double quotes inside a term raise an error."""
+        with pytest.raises(QueryValidationError, match="Terms cannot contain double quotes"):
+            validator.validate('[term "quoted"]')
+
+    def test_asterisk_wildcard_at_start_raises_error(self, validator):
+        """Test that asterisk wildcard at the start of a term raises an error."""
+        with pytest.raises(
+            QueryValidationError, match="Wildcards cannot be used at the start of a search term"
+        ):
+            validator.validate("[*term]")
+
+    def test_wildcard_in_multi_word_term_raises_error(self, validator):
+        """Test that a wildcard inside a multi-word term raises an error."""
+        with pytest.raises(
+            QueryValidationError, match="Wildcards can be used only in single terms"
+        ):
+            validator.validate("[hello wor*]")
+
+    def test_operator_without_space_after_raises_error(self, validator):
+        """Test that an operator without space after it raises an error."""
+        with pytest.raises(QueryValidationError, match="Operators must have whitespace"):
+            validator.validate("[term a] AND[term b]")
+
+    def test_invalid_operator_xor_raises_error(self, validator):
+        """Test that XOR is rejected as an invalid boolean operator."""
+        with pytest.raises(QueryValidationError, match="Invalid boolean operator"):
+            validator.validate("[term a] XOR [term b]")
+
+    def test_connector_at_start_raises_error(self, validator):
+        """Test that a connector at the start of the query raises an error."""
+        with pytest.raises(QueryValidationError, match="Connectors cannot appear at the beginning"):
+            validator.validate("OR [term a]")
+
+    def test_connector_at_end_raises_error(self, validator):
+        """Test that a connector at the end of the query raises an error."""
+        with pytest.raises(QueryValidationError, match="Connectors cannot appear at the end"):
+            validator.validate("[term a] AND")
+
+    def test_consecutive_connectors_raises_error(self, validator):
+        """Test that consecutive connectors raise an error."""
+        with pytest.raises(
+            QueryValidationError, match="Connectors must be between terms or groups"
+        ):
+            validator.validate("[term a] AND OR [term b]")
+
+    def test_unrecognized_word_between_terms_raises_error(self, validator):
+        """Test that a bare word between operators and terms raises an error."""
+        with pytest.raises(
+            QueryValidationError, match="All terms must be enclosed in square brackets"
+        ):
+            validator.validate("[term a] AND foo OR [term b]")
+
+    def test_query_without_terms_raises_error(self, validator):
+        """Test that a query with no bracketed terms raises an error."""
+        with pytest.raises(
+            QueryValidationError, match="Query must contain at least one term enclosed in"
+        ):
+            validator.validate("no brackets here")
