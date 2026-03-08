@@ -19,6 +19,10 @@ from random import Random
 # Covers major platforms and recent Chrome / Firefox / Safari / Edge versions
 # to maximise compatibility with bot-detection heuristics used by academic
 # publishers (IEEE, Elsevier, Springer, ACM, Wiley, …).
+#
+# NOTE: These version strings should be refreshed periodically (e.g. once or
+# twice a year) so they stay within the range of versions that publishers
+# consider "current".  Outdated versions may trigger stricter bot detection.
 _USER_AGENTS: list[str] = [
     # Chrome on Windows
     (
