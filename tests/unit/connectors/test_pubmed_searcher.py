@@ -657,3 +657,56 @@ class TestPubmedConnectorSearch:
         assert params.get("datetype") == "pdat"
         assert params.get("mindate") == "2022/03/01"
         assert params.get("maxdate") == "2023/09/30"
+
+    def test_pagination_uses_successful_paper_count(self, simple_query):
+        """Pagination should use len(papers) not processed count.
+
+        When some papers fail to parse, the connector should keep
+        fetching until max_papers successfully parsed papers are found,
+        rather than stopping based on the number of IDs processed.
+        """
+        searcher = PubmedConnector()
+
+        # Page 1: returns 3 IDs but only 1 parses successfully.
+        # Page 2: returns 3 IDs and 2 parse successfully => total = 3 >= max_papers.
+        call_count = 0
+
+        def fake_search_ids(
+            query: str,
+            offset: int,
+            count: int,
+            date_params: dict[str, str],
+        ) -> tuple[list[str], int]:
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return (["id1", "id2", "id3"], 10)
+            elif call_count == 2:
+                return (["id4", "id5", "id6"], 10)
+            return ([], 10)
+
+        def fake_fetch_details(ids: list[str]) -> list[ET.Element]:
+            # Return one element per ID (content doesn't matter here).
+            return [ET.Element("PubmedArticle") for _ in ids]
+
+        parse_results = iter(
+            [
+                MagicMock(),  # id1 -> success
+                None,  # id2 -> parse failure
+                None,  # id3 -> parse failure
+                MagicMock(),  # id4 -> success
+                MagicMock(),  # id5 -> success
+                None,  # id6 -> parse failure
+            ]
+        )
+
+        with (
+            patch.object(searcher, "_search_ids", side_effect=fake_search_ids),
+            patch.object(searcher, "_fetch_details", side_effect=fake_fetch_details),
+            patch.object(searcher, "_parse_paper", side_effect=lambda el: next(parse_results)),
+        ):
+            papers = searcher.search(simple_query, max_papers=3)
+
+        # Should have fetched 2 pages to reach 3 successfully parsed papers.
+        assert call_count == 2
+        assert len(papers) == 3

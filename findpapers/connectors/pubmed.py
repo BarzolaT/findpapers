@@ -397,7 +397,7 @@ class PubmedConnector(SearchConnectorBase):
         total: int | None = None
 
         while True:
-            remaining = (max_papers - processed) if max_papers is not None else _PAGE_SIZE
+            remaining = (max_papers - len(papers)) if max_papers is not None else _PAGE_SIZE
             page_size = min(_PAGE_SIZE, remaining)
             if page_size <= 0:
                 break
