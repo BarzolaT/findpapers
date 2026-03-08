@@ -107,6 +107,16 @@ class TestDOILookupRunnerInit:
         runner = DOILookupRunner(doi="10.1234/test", timeout=30.0)
         assert runner._timeout == 30.0  # noqa: SLF001
 
+    def test_timeout_propagated_to_connector(self):
+        """Custom timeout is forwarded to the underlying CrossRefConnector."""
+        runner = DOILookupRunner(doi="10.1234/test", timeout=42.0)
+        assert runner._connector._timeout == 42.0  # noqa: SLF001
+
+    def test_default_timeout_propagated_to_connector(self):
+        """Default timeout (10.0) is forwarded to the underlying CrossRefConnector."""
+        runner = DOILookupRunner(doi="10.1234/test")
+        assert runner._connector._timeout == 10.0  # noqa: SLF001
+
 
 # ---------------------------------------------------------------------------
 # run()

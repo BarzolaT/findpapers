@@ -69,6 +69,8 @@ class DOILookupRunner:
         self._doi = self._sanitize_doi(doi)
         self._timeout = timeout
         self._connector = CrossRefConnector(email=email)
+        if timeout is not None:
+            self._connector._timeout = timeout
         self._result: Paper | None = None
 
     # ------------------------------------------------------------------
