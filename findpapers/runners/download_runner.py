@@ -6,6 +6,7 @@ import datetime
 import logging
 import os
 import urllib.parse
+from datetime import UTC
 from time import perf_counter
 
 import requests
@@ -115,7 +116,7 @@ class DownloadRunner:
         os.makedirs(self._output_directory, exist_ok=True)
         error_log_path = os.path.join(self._output_directory, "download_errors.txt")
         with open(error_log_path, "a", encoding="utf-8") as fp:
-            now = datetime.datetime.now()
+            now = datetime.datetime.now(UTC)
             fp.write(
                 "------- A new download process started at: "
                 f"{datetime.datetime.strftime(now, '%Y-%m-%d %H:%M:%S')} \n"
