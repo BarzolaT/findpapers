@@ -12,7 +12,7 @@ from findpapers.core.paper import Paper
 from findpapers.core.search_result import Database
 from findpapers.core.source import Source
 from findpapers.exceptions import UnsupportedQueryError
-from findpapers.runners.search_runner import SearchRunner
+from findpapers.runners.search_runner import SearchRunner, _are_years_compatible
 
 
 class TestSearchRunnerInit:
@@ -609,3 +609,44 @@ class TestSearchRunnerFailedDatabases:
         result = runner.run()
         assert result.failed_databases == [Database.IEEE]
         assert len(result.papers) == 1
+
+
+# ---------------------------------------------------------------------------
+# _are_years_compatible
+# ---------------------------------------------------------------------------
+
+
+class TestAreYearsCompatible:
+    """Tests for the extracted _are_years_compatible helper."""
+
+    def test_same_year_compatible(self) -> None:
+        """Identical years are always compatible."""
+        assert _are_years_compatible(2025, 2025, None, None) is True
+
+    def test_none_year_a_compatible(self) -> None:
+        """Unknown year_a makes pair compatible."""
+        assert _are_years_compatible(None, 2025, None, None) is True
+
+    def test_none_year_b_compatible(self) -> None:
+        """Unknown year_b makes pair compatible."""
+        assert _are_years_compatible(2025, None, None, None) is True
+
+    def test_both_none_compatible(self) -> None:
+        """Both years unknown is compatible."""
+        assert _are_years_compatible(None, None, None, None) is True
+
+    def test_different_years_no_doi_incompatible(self) -> None:
+        """Different years without DOIs are not compatible."""
+        assert _are_years_compatible(2024, 2025, None, None) is False
+
+    def test_different_years_non_preprint_doi_incompatible(self) -> None:
+        """Different years with non-preprint DOIs are not compatible."""
+        assert _are_years_compatible(2024, 2025, "10.1038/x", "10.1016/y") is False
+
+    def test_adjacent_year_preprint_doi_compatible(self) -> None:
+        """Adjacent years with a preprint DOI (arXiv) are compatible."""
+        assert _are_years_compatible(2025, 2026, "10.48550/arXiv.123", "10.1038/x") is True
+
+    def test_two_year_gap_preprint_incompatible(self) -> None:
+        """Years separated by >1 are not compatible even with preprint DOI."""
+        assert _are_years_compatible(2024, 2026, "10.48550/arXiv.123", "10.1038/x") is False

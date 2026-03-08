@@ -440,28 +440,7 @@ class SearchRunner:
                 merged_into: Paper | None = None
                 for representative in groups:
                     rep_year = getattr(representative.publication_date, "year", None)
-                    # Compatible when years are equal OR either is unknown.
-                    years_same_or_unknown = (
-                        rep_year is None or paper_year is None or rep_year == paper_year
-                    )
-                    # Also compatible when at least one entry has a preprint
-                    # DOI and years differ by at most 1.  This covers both:
-                    #   (a) same preprint deposited to two servers across the
-                    #       Dec/Jan calendar boundary (both are preprints), and
-                    #   (b) preprint + published version where the preprint was
-                    #       filed in one year and the formal publication appeared
-                    #       in the adjacent year (only one is a preprint).
-                    rep_doi = representative.doi or ""
-                    cand_doi = paper.doi or ""
-                    preprint_adjacent = (
-                        rep_year is not None
-                        and paper_year is not None
-                        and abs(rep_year - paper_year) == 1
-                        and bool(rep_doi)
-                        and bool(cand_doi)
-                        and (_is_preprint_doi(rep_doi) or _is_preprint_doi(cand_doi))
-                    )
-                    if years_same_or_unknown or preprint_adjacent:
+                    if _are_years_compatible(rep_year, paper_year, representative.doi, paper.doi):
                         merged_into = representative
                         break
                 if merged_into is not None:
@@ -516,3 +495,49 @@ class SearchRunner:
         if title:
             return f"title:{str(title).strip().lower()}"
         return f"object:{id(paper)}"
+
+
+def _are_years_compatible(
+    year_a: int | None,
+    year_b: int | None,
+    doi_a: str | None,
+    doi_b: str | None,
+) -> bool:
+    """Return whether two publication years are compatible for merging.
+
+    Two papers are considered year-compatible when:
+
+    * Either year is unknown (``None``), or
+    * Both years are identical, or
+    * Their years differ by exactly 1 **and** at least one DOI belongs to a
+      preprint server (covers preprint-to-published transitions across the
+      Dec/Jan boundary).
+
+    Parameters
+    ----------
+    year_a : int | None
+        Publication year of the first paper.
+    year_b : int | None
+        Publication year of the second paper.
+    doi_a : str | None
+        DOI of the first paper.
+    doi_b : str | None
+        DOI of the second paper.
+
+    Returns
+    -------
+    bool
+        ``True`` when the years are compatible for merging.
+    """
+    if year_a is None or year_b is None or year_a == year_b:
+        return True
+
+    # Adjacent-year preprint check.
+    raw_doi_a = doi_a or ""
+    raw_doi_b = doi_b or ""
+    return (
+        abs(year_a - year_b) == 1
+        and bool(raw_doi_a)
+        and bool(raw_doi_b)
+        and (_is_preprint_doi(raw_doi_a) or _is_preprint_doi(raw_doi_b))
+    )
