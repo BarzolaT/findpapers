@@ -94,24 +94,6 @@ class ArxivConnector(SearchConnectorBase):
         """
         return _MIN_REQUEST_INTERVAL
 
-    @staticmethod
-    def _parse_date(date_str: str | None) -> str | None:
-        """Parse ISO-8601 date string to ``YYYY-MM-DD``.
-
-        Parameters
-        ----------
-        date_str : str | None
-            Raw date string from API.
-
-        Returns
-        -------
-        str | None
-            Formatted date or ``None`` when input is empty.
-        """
-        if not date_str:
-            return None
-        return date_str[:10]
-
     def _parse_paper(self, entry: ET.Element) -> Paper | None:
         """Parse a single Atom entry element into a :class:`Paper`.
 
