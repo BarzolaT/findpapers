@@ -141,6 +141,17 @@ class SnowballRunner:
 
         frontier = list(self._seed_papers)
 
+        # Create a single ThreadPoolExecutor for the entire run to avoid
+        # the overhead of creating/destroying one per paper.  When
+        # num_workers <= 1 connectors are called sequentially, so no pool
+        # is needed.
+        use_pool = self._num_workers > 1 and len(self._connectors) > 1
+        pool: ThreadPoolExecutor | None = (
+            ThreadPoolExecutor(max_workers=min(self._num_workers, len(self._connectors)))
+            if use_pool
+            else None
+        )
+
         try:
             for level in range(1, self._max_depth + 1):
                 if not frontier:
@@ -163,7 +174,7 @@ class SnowballRunner:
                     disable=not show_progress,
                 ) as pbar:
                     for paper in frontier:
-                        discovered = self._expand_paper(paper, graph)
+                        discovered = self._expand_paper(paper, graph, pool)
                         next_frontier.extend(discovered)
                         pbar.update(1)
 
@@ -177,6 +188,8 @@ class SnowballRunner:
                         len(next_frontier),
                     )
         finally:
+            if pool is not None:
+                pool.shutdown(wait=True)
             for connector in self._connectors:
                 connector.close()
 
@@ -243,6 +256,7 @@ class SnowballRunner:
         self,
         paper: Paper,
         graph: CitationGraph,
+        pool: ThreadPoolExecutor | None = None,
     ) -> list[Paper]:
         """Expand one paper by fetching its references and/or citing papers.
 
@@ -257,6 +271,9 @@ class SnowballRunner:
             The paper to expand.
         graph : CitationGraph
             The graph under construction.
+        pool : ThreadPoolExecutor | None
+            Optional shared thread pool for parallel connector queries.
+            When ``None``, connectors are called sequentially.
 
         Returns
         -------
@@ -268,7 +285,7 @@ class SnowballRunner:
 
         # Collect results from each connector — either sequentially or in
         # parallel depending on num_workers.
-        connector_results = self._query_connectors(paper)
+        connector_results = self._query_connectors(paper, pool)
 
         for _connector_name, references, citing in connector_results:
             # Backward: paper cites these references
@@ -341,43 +358,45 @@ class SnowballRunner:
     def _query_connectors(
         self,
         paper: Paper,
+        pool: ThreadPoolExecutor | None = None,
     ) -> list[tuple[str, list[Paper] | None, list[Paper] | None]]:
         """Query all connectors, optionally in parallel.
 
-        When ``num_workers`` is 1 the connectors are called sequentially.
-        Otherwise up to ``num_workers`` connectors are queried concurrently
-        using a thread pool.
+        When *pool* is ``None`` the connectors are called sequentially.
+        Otherwise connectors are queried concurrently using the shared
+        thread pool.
 
         Parameters
         ----------
         paper : Paper
             The paper to look up.
+        pool : ThreadPoolExecutor | None
+            Optional shared thread pool.  When ``None``, connectors are
+            called sequentially.
 
         Returns
         -------
         list[tuple[str, list[Paper] | None, list[Paper] | None]]
             Results from each connector.
         """
-        if self._num_workers <= 1:
+        if pool is None:
             return [
                 self._query_single_connector(connector, paper) for connector in self._connectors
             ]
 
         results: list[tuple[str, list[Paper] | None, list[Paper] | None]] = []
-        max_workers = min(self._num_workers, len(self._connectors))
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = {
-                executor.submit(self._query_single_connector, connector, paper): connector
-                for connector in self._connectors
-            }
-            for future in as_completed(futures):
-                try:
-                    results.append(future.result())
-                except Exception:
-                    connector = futures[future]
-                    logger.warning(
-                        "Unexpected error querying %s for '%s'.",
-                        connector.name,
-                        paper.title,
-                    )
+        futures = {
+            pool.submit(self._query_single_connector, connector, paper): connector
+            for connector in self._connectors
+        }
+        for future in as_completed(futures):
+            try:
+                results.append(future.result())
+            except Exception:
+                connector = futures[future]
+                logger.warning(
+                    "Unexpected error querying %s for '%s'.",
+                    connector.name,
+                    paper.title,
+                )
         return results
