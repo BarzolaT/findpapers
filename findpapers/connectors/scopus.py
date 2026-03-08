@@ -59,6 +59,14 @@ class ScopusConnector(SearchConnectorBase):
     https://dev.elsevier.com/sc_search_tips.html
 
     Rate limit: varies by institution (typically 2-9 req/s).
+
+    .. note::
+
+        The Scopus *Search API* returns only the first author
+        (``dc:creator``) per entry.  Full author lists require the
+        *Abstract Retrieval API*, which is not used here.  Papers
+        fetched through this connector will therefore have an
+        incomplete ``authors`` list.
     """
 
     def __init__(
