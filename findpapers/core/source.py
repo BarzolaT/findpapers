@@ -72,7 +72,7 @@ class Source:
         ValueError
             If title is empty.
         """
-        if title is None or len(title) == 0:
+        if not title:
             raise ValueError("Source's title cannot be null")
 
         self.title = title

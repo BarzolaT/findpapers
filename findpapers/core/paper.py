@@ -190,7 +190,7 @@ class Paper:
         ValueError
             If title is missing.
         """
-        if title is None or len(title) == 0:
+        if not title:
             raise ValueError("Paper's title cannot be null")
 
         self.title = title
