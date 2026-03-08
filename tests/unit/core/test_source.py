@@ -1,6 +1,8 @@
 """Tests for the Source model."""
 
-from findpapers.core.source import Source
+import pytest
+
+from findpapers.core.source import Source, SourceType
 
 
 def test_source_merge():
@@ -85,3 +87,96 @@ class TestSourceStr:
         """__str__ and __repr__ produce different output."""
         s = Source(title="Nature", publisher="Springer")
         assert str(s) != repr(s)
+
+
+# ---------------------------------------------------------------------------
+# Source.__init__ validation
+# ---------------------------------------------------------------------------
+
+
+class TestSourceInit:
+    """Tests for Source.__init__ ValueError."""
+
+    def test_none_title_raises(self) -> None:
+        """Passing None as title raises ValueError."""
+        with pytest.raises(ValueError, match="title"):
+            Source(title=None)  # type: ignore[arg-type]
+
+    def test_empty_title_raises(self) -> None:
+        """Passing empty string as title raises ValueError."""
+        with pytest.raises(ValueError, match="title"):
+            Source(title="")
+
+    def test_valid_title_stores_attributes(self) -> None:
+        """A valid title with all optional params stores them correctly."""
+        s = Source(
+            title="Nature",
+            isbn="978-0-123",
+            issn="0028-0836",
+            publisher="Springer",
+            source_type=SourceType.JOURNAL,
+        )
+        assert s.title == "Nature"
+        assert s.isbn == "978-0-123"
+        assert s.issn == "0028-0836"
+        assert s.publisher == "Springer"
+        assert s.source_type == SourceType.JOURNAL
+
+
+# ---------------------------------------------------------------------------
+# Source.from_dict validation
+# ---------------------------------------------------------------------------
+
+
+class TestSourceFromDict:
+    """Tests for Source.from_dict edge cases."""
+
+    def test_missing_title_raises(self) -> None:
+        """from_dict without title key raises ValueError."""
+        with pytest.raises(ValueError, match="title"):
+            Source.from_dict({})
+
+    def test_none_title_raises(self) -> None:
+        """from_dict with None title raises ValueError."""
+        with pytest.raises(ValueError, match="title"):
+            Source.from_dict({"title": None})
+
+    def test_non_string_title_raises(self) -> None:
+        """from_dict with non-string title raises ValueError."""
+        with pytest.raises(ValueError, match="title"):
+            Source.from_dict({"title": 123})
+
+    def test_valid_source_type_parsed(self) -> None:
+        """from_dict correctly parses a known source_type string."""
+        s = Source.from_dict({"title": "T", "source_type": "journal"})
+        assert s.source_type == SourceType.JOURNAL
+
+    def test_unknown_source_type_ignored(self) -> None:
+        """from_dict silently ignores an unrecognised source_type string."""
+        s = Source.from_dict({"title": "T", "source_type": "unknown_type"})
+        assert s.source_type is None
+
+    def test_no_source_type_is_none(self) -> None:
+        """from_dict with no source_type leaves it as None."""
+        s = Source.from_dict({"title": "T"})
+        assert s.source_type is None
+
+
+# ---------------------------------------------------------------------------
+# SourceType enum
+# ---------------------------------------------------------------------------
+
+
+class TestSourceType:
+    """Tests for SourceType enum values."""
+
+    def test_all_expected_values_exist(self) -> None:
+        """All expected SourceType members are present."""
+        expected = {"journal", "conference", "book", "repository", "other"}
+        actual = {st.value for st in SourceType}
+        assert actual == expected
+
+    def test_string_equality(self) -> None:
+        """SourceType members compare equal to their string values (StrEnum)."""
+        assert SourceType.JOURNAL == "journal"
+        assert SourceType.CONFERENCE == "conference"
