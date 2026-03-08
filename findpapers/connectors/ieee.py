@@ -200,7 +200,7 @@ class IEEEConnector(SearchConnectorBase):
 
         # Keywords — ieee_terms, author_terms, etc. are nested inside index_terms
         keywords: set[str] = set()
-        index_terms = item.get("index_terms", {})
+        index_terms = item.get("index_terms") or {}
         for kw_group in ["ieee_terms", "author_terms", "mesh_terms"]:
             for kw_el in index_terms.get(kw_group, {}).get("terms", []):
                 kw = kw_el.strip()

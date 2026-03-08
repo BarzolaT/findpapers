@@ -80,6 +80,14 @@ class TestIEEEConnectorParsePaper:
         assert paper.keywords is not None
         assert len(paper.keywords) == 3
 
+    def test_index_terms_explicit_none_does_not_crash(self):
+        """When index_terms is explicitly None (not just absent), parsing should not crash."""
+        item = {"title": "A Paper", "index_terms": None}
+        paper = IEEEConnector()._parse_paper(item)
+        assert paper is not None
+        # No keywords should be extracted, but no AttributeError either.
+        assert not paper.keywords
+
     def test_pages_start_end(self):
         """start_page and end_page are combined into page_range field."""
         item = {"title": "A Paper", "start_page": "10", "end_page": "20"}
