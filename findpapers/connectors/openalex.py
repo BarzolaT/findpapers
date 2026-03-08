@@ -17,6 +17,7 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
+from findpapers.utils.metadata_parser import normalize_doi
 
 logger = logging.getLogger(__name__)
 
@@ -417,10 +418,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
 
         # DOI / URL
         doi_raw: str | None = (work.get("doi") or "").strip() or None
-        doi: str | None = None
-        if doi_raw:
-            # OpenAlex returns full DOI URL: https://doi.org/10.xxx/yyy
-            doi = doi_raw.replace("https://doi.org/", "").replace("http://doi.org/", "")
+        doi = normalize_doi(doi_raw) if doi_raw else None
 
         url: str | None = None
         open_access = work.get("open_access") or {}
