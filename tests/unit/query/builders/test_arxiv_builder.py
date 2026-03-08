@@ -85,3 +85,22 @@ def test_arxiv_compound_query_no_percent_encoding(
     assert "AND" in converted
     assert "ti:healthcare" in converted
     assert "abs:healthcare" in converted
+
+
+def test_arxiv_rejects_wildcard_query(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """arXiv validation rejects queries with wildcard characters."""
+    query = parse_and_propagate("[machine*]")
+    result = ArxivQueryBuilder().validate_query(query)
+    assert result.is_valid is False
+    assert "wildcard" in (result.error_message or "").lower()
+
+
+def test_arxiv_rejects_question_mark_wildcard(
+    parse_and_propagate: Callable[[str], Query],
+) -> None:
+    """arXiv validation rejects queries with '?' wildcard."""
+    query = parse_and_propagate("[col?r]")
+    result = ArxivQueryBuilder().validate_query(query)
+    assert result.is_valid is False

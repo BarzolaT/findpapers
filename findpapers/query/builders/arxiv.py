@@ -47,7 +47,10 @@ class ArxivQueryBuilder(QueryBuilder):
                     error_message=f"Filter '{filter_code}' is not supported by arXiv.",
                 )
             if term.value and has_wildcard(term.value):
-                continue
+                return QueryValidationResult(
+                    is_valid=False,
+                    error_message="Wildcards are not supported by arXiv.",
+                )
         return QueryValidationResult(is_valid=True)
 
     def convert_query(self, query: Query) -> str:
