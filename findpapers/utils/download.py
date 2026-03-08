@@ -141,7 +141,7 @@ def build_filename(year: int | None, title: str | None) -> str:
     safe_year = str(year) if year is not None else "unknown"
     safe_title = title if title else "paper"
     raw = f"{safe_year}-{safe_title}"
-    sanitised = re.sub(r"[^\w\d-]", "_", raw)
+    sanitised = re.sub(r"[^\w-]", "_", raw)
     return f"{sanitised}.pdf"
 
 
