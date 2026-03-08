@@ -108,14 +108,14 @@ class FilterPropagator:
 
         return True
 
-    def _check_node_uses_filter(self, node: QueryNode, target_filter: str | None) -> bool:
+    def _check_node_uses_filter(self, node: QueryNode, target_filter: FilterCode | None) -> bool:
         """Recursively check if a node and all its children use the target effective filter.
 
         Parameters
         ----------
         node : QueryNode
             The node to check.
-        target_filter : str | None
+        target_filter : FilterCode | None
             The filter to match against.
 
         Returns
