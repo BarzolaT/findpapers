@@ -255,11 +255,15 @@ class ArxivConnector(SearchConnectorBase):
         arxiv_query = self._query_builder.convert_query(query)
 
         # Append arXiv submittedDate range filter when date bounds are given.
+        # Use plain spaces – ``requests`` encodes them as ``+`` in the URL,
+        # which is what the arXiv API expects.  Literal ``+`` characters were
+        # previously double-encoded as ``%2B``, causing the filter to be
+        # silently ignored.
         if since or until:
             from_date = since.strftime("%Y%m%d") + "0000" if since else "000001010000"
             to_date = until.strftime("%Y%m%d") + "2359" if until else "999912312359"
-            date_filter = f"submittedDate:[{from_date}+TO+{to_date}]"
-            arxiv_query = f"{arxiv_query}+AND+{date_filter}" if arxiv_query else date_filter
+            date_filter = f"submittedDate:[{from_date} TO {to_date}]"
+            arxiv_query = f"{arxiv_query} AND {date_filter}" if arxiv_query else date_filter
         papers: list[Paper] = []
         processed = 0
         offset = 0

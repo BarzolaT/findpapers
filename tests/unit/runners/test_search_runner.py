@@ -98,6 +98,11 @@ class TestSearchRunnerInit:
         )
         assert runner._skipped_databases == []
 
+    def test_empty_databases_list_raises(self):
+        """Passing an empty list for databases raises ValueError."""
+        with pytest.raises(ValueError, match="databases must not be an empty list"):
+            SearchRunner(query="[ml]", databases=[])
+
 
 class TestSearchRunnerPipeline:
     """Tests for the full pipeline via run()."""

@@ -268,6 +268,14 @@ class SearchRunner:
         }
 
         valid_values = {db.value for db in SEARCH_REGISTRY}
+
+        # Treat an explicit empty list as an error – the caller likely
+        # intended to pass ``None`` (select all) instead of ``[]``.
+        if databases is not None and len(databases) == 0:
+            raise ValueError(
+                "databases must not be an empty list. Pass None to select all available databases."
+            )
+
         raw = [db.strip().lower() for db in (databases or [db.value for db in SEARCH_REGISTRY])]
         unknown = [db for db in raw if db not in valid_values]
         if unknown:

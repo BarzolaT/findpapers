@@ -502,7 +502,10 @@ class TestArxivConnectorSearch:
         call_args = searcher._http_session.get.call_args
         params = call_args.kwargs.get("params") or call_args[1].get("params", {})
         search_query = params.get("search_query", "")
-        assert "submittedDate:[202301150000+TO+202312312359]" in search_query
+        assert "submittedDate:[202301150000 TO 202312312359]" in search_query
+        # The date filter must be joined with " AND " (spaces, not "+")
+        # so that requests encodes it correctly for the arXiv API.
+        assert " AND submittedDate:" in search_query
 
     def test_since_only_uses_open_end(self, simple_query, arxiv_sample_xml, mock_response):
         """search() with only `since` uses a far-future end date."""
@@ -520,7 +523,7 @@ class TestArxivConnectorSearch:
         call_args = searcher._http_session.get.call_args
         params = call_args.kwargs.get("params") or call_args[1].get("params", {})
         search_query = params.get("search_query", "")
-        assert "submittedDate:[202006010000+TO+999912312359]" in search_query
+        assert "submittedDate:[202006010000 TO 999912312359]" in search_query
 
     def test_until_only_uses_open_start(self, simple_query, arxiv_sample_xml, mock_response):
         """search() with only `until` uses a far-past start date."""
@@ -538,4 +541,4 @@ class TestArxivConnectorSearch:
         call_args = searcher._http_session.get.call_args
         params = call_args.kwargs.get("params") or call_args[1].get("params", {})
         search_query = params.get("search_query", "")
-        assert "submittedDate:[000001010000+TO+202203152359]" in search_query
+        assert "submittedDate:[000001010000 TO 202203152359]" in search_query
