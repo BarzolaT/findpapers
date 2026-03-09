@@ -389,9 +389,6 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
 
         if pub_title:
             source = Source(title=pub_title, source_type=source_type)
-        elif venue:
-            # Venue name present but not a formal journal — use as-is.
-            source = Source(title=venue, source_type=source_type)
 
         # Pages from journal info
         pages: str | None = None
@@ -428,7 +425,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
                 databases={self.name},
                 paper_type=paper_type,
             )
-        except ValueError:
+        except ValueError:  # pragma: no cover — title already validated above
             return None
 
         return paper

@@ -467,3 +467,153 @@ class TestSemanticScholarConnectorSearch:
         call_args = searcher._http_session.get.call_args_list[0]
         params = call_args.kwargs.get("params") or call_args[1].get("params", {})
         assert params.get("publicationDateOrYear") == "2021-06-15:"
+
+    def test_min_request_interval_property(self):
+        """min_request_interval property delegates to _request_interval."""
+        from findpapers.connectors.semantic_scholar import _MIN_REQUEST_INTERVAL_WITH_KEY
+
+        searcher = SemanticScholarConnector(api_key="key")
+        assert searcher.min_request_interval == _MIN_REQUEST_INTERVAL_WITH_KEY
+
+    def test_prepare_headers_injects_api_key(self):
+        """_prepare_headers adds x-api-key header when API key is set."""
+        searcher = SemanticScholarConnector(api_key="secret-key")
+        headers = searcher._prepare_headers({})
+        assert headers["x-api-key"] == "secret-key"
+
+    def test_prepare_headers_no_key(self):
+        """_prepare_headers does not add x-api-key when no key is set."""
+        searcher = SemanticScholarConnector()
+        headers = searcher._prepare_headers({})
+        assert "x-api-key" not in headers
+
+    def test_pagination_token_used_on_second_page(self, simple_query, mock_response):
+        """Pagination token from page 1 is sent as param on page 2."""
+        from findpapers.connectors.semantic_scholar import _PAGE_SIZE
+
+        # Build a first page with exactly _PAGE_SIZE items so size check passes.
+        items = [{"title": f"Paper {i}"} for i in range(_PAGE_SIZE)]
+        page1 = mock_response(json_data={"total": _PAGE_SIZE + 5, "token": "NEXT", "data": items})
+        page1.raise_for_status = MagicMock()
+        page2 = mock_response(json_data={"total": _PAGE_SIZE + 5, "token": None, "data": []})
+        page2.raise_for_status = MagicMock()
+
+        searcher = SemanticScholarConnector()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.side_effect = [page1, page2]
+
+        with patch.object(searcher, "_rate_limit"):
+            searcher.search(simple_query)
+
+        # The second call should include the token param.
+        assert searcher._http_session.get.call_count == 2
+        second_call_params = searcher._http_session.get.call_args_list[1].kwargs.get(
+            "params"
+        ) or searcher._http_session.get.call_args_list[1][1].get("params", {})
+        assert second_call_params.get("token") == "NEXT"
+
+    def test_empty_data_on_first_page_returns_empty(self, simple_query, mock_response):
+        """When first page returns no items, search returns empty list."""
+        page = mock_response(json_data={"total": 0, "token": None, "data": []})
+        page.raise_for_status = MagicMock()
+
+        searcher = SemanticScholarConnector()
+        searcher._http_session = MagicMock()
+        searcher._http_session.get.return_value = page
+
+        with patch.object(searcher, "_rate_limit"):
+            papers = searcher.search(simple_query)
+
+        assert papers == []
+
+
+class TestSemanticScholarAffiliationEnrichment:
+    """Tests for _enrich_author_affiliations."""
+
+    def test_affiliation_batch_request_error_continues(self):
+        """RequestException during batch fetch is caught and processing continues."""
+        from findpapers.core.author import Author
+
+        searcher = SemanticScholarConnector()
+        author = Author(name="Test Author")
+        id_map: dict[str, list] = {"auth1": [author]}
+
+        with patch.object(searcher, "_post", side_effect=requests.RequestException("fail")):
+            # Should not raise.
+            searcher._enrich_author_affiliations(id_map)
+
+        assert author.affiliation is None
+
+    def test_affiliation_non_dict_result_skipped(self):
+        """Non-dict entries in the batch response are silently skipped."""
+        from findpapers.core.author import Author
+
+        searcher = SemanticScholarConnector()
+        author = Author(name="Test Author")
+        id_map: dict[str, list] = {"auth1": [author]}
+
+        mock_resp = MagicMock()
+        # API returns a non-dict entry (e.g. None for unresolved author).
+        mock_resp.json.return_value = [None, "invalid"]
+
+        with patch.object(searcher, "_post", return_value=mock_resp):
+            searcher._enrich_author_affiliations(id_map)
+
+        assert author.affiliation is None
+
+    def test_affiliation_empty_affiliations_skipped(self):
+        """Authors with empty affiliations list are skipped."""
+        from findpapers.core.author import Author
+
+        searcher = SemanticScholarConnector()
+        author = Author(name="Test Author")
+        id_map: dict[str, list] = {"auth1": [author]}
+
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = [
+            {"authorId": "auth1", "affiliations": []},
+        ]
+
+        with patch.object(searcher, "_post", return_value=mock_resp):
+            searcher._enrich_author_affiliations(id_map)
+
+        assert author.affiliation is None
+
+    def test_affiliation_set_on_matching_authors(self):
+        """Affiliations are joined and set on matching authors."""
+        from findpapers.core.author import Author
+
+        searcher = SemanticScholarConnector()
+        author1 = Author(name="Author One")
+        author2 = Author(name="Author One Dup")
+        id_map: dict[str, list] = {"auth1": [author1, author2]}
+
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = [
+            {"authorId": "auth1", "affiliations": ["MIT", "Stanford"]},
+        ]
+
+        with patch.object(searcher, "_post", return_value=mock_resp):
+            searcher._enrich_author_affiliations(id_map)
+
+        assert author1.affiliation == "MIT; Stanford"
+        assert author2.affiliation == "MIT; Stanford"
+
+    def test_affiliation_not_overwritten_if_already_set(self):
+        """Authors with existing affiliation are not overwritten."""
+        from findpapers.core.author import Author
+
+        searcher = SemanticScholarConnector()
+        author = Author(name="Test Author")
+        author.affiliation = "Existing"
+        id_map: dict[str, list] = {"auth1": [author]}
+
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = [
+            {"authorId": "auth1", "affiliations": ["MIT"]},
+        ]
+
+        with patch.object(searcher, "_post", return_value=mock_resp):
+            searcher._enrich_author_affiliations(id_map)
+
+        assert author.affiliation == "Existing"
