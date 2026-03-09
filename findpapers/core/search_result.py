@@ -137,7 +137,7 @@ class SearchResult:
             "version": package_version(),
             "runtime_seconds": self.runtime_seconds,
             "runtime_seconds_per_database": dict(self.runtime_seconds_per_database),
-            "failed_databases": self.failed_databases or None,
+            "failed_databases": self.failed_databases,
         }
         return {
             "metadata": metadata,

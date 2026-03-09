@@ -220,11 +220,11 @@ class TestFailedDatabases:
         d = sr.to_dict()
         assert d["metadata"]["failed_databases"] == ["scopus"]
 
-    def test_to_dict_none_when_empty(self) -> None:
-        """to_dict serializes empty list as None (compact representation)."""
+    def test_to_dict_empty_list_when_no_failures(self) -> None:
+        """to_dict serializes empty list as [] to distinguish from missing data."""
         sr = SearchResult(query="[q]")
         d = sr.to_dict()
-        assert d["metadata"]["failed_databases"] is None
+        assert d["metadata"]["failed_databases"] == []
 
     def test_round_trip_with_failures(self) -> None:
         """failed_databases survives a to_dict / from_dict round-trip."""
