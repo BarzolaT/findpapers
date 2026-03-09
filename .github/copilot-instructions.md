@@ -17,6 +17,7 @@
 * Use environment variables or configuration files (e.g., `.env`) to manage sensitive data.
 * We follow the [PEP8 Style Guide][https://peps.python.org/pep-0008/] for general coding.
 * We follow the [Numpy Docstring Style Guide](https://numpydoc.readthedocs.io/en/latest/format.html) for code documentation.
+* Use the python venv and Poetry for dependency management. Do not use global Python packages.
 * The commit message should be concise and follow the format: `<type>: <short description>`. For example: `feat: add new API endpoint for user authentication`.
 * Use the appropriate commit type (feat, fix, perf, docs, test, chore) to indicate the nature of the change.
 * Always make sure you're following the guidelines described in the CONTRIBUTING.md file.
