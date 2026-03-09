@@ -1,3 +1,4 @@
+from typing import List
 import typer
 import logging
 from datetime import datetime
