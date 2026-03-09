@@ -331,7 +331,7 @@ class TestCitationGraph:
         restored = CitationGraph.from_dict(graph.to_dict())
 
         # Lookup by DOI since instances differ after round-trip.
-        restored_seed = [p for p in restored.papers if p.doi == "10.1000/seed"][0]
+        restored_seed = next(p for p in restored.papers if p.doi == "10.1000/seed")
         refs = restored.get_references(restored_seed)
         cited_by = restored.get_cited_by(restored_seed)
         assert len(refs) == 1

@@ -36,7 +36,7 @@ class TestSearchRunnerInit:
             query="[machine learning]",
             databases=["arxiv", "pubmed"],
         )
-        assert len(runner._searchers) == 2  # noqa: SLF001
+        assert len(runner._searchers) == 2
 
     def test_all_databases_when_none(self):
         """4 databases are selected when databases=None and no API keys given.
@@ -44,7 +44,7 @@ class TestSearchRunnerInit:
         IEEE and Scopus require API keys; without them they are skipped.
         """
         runner = SearchRunner(query="[ml]")
-        assert len(runner._searchers) == 4  # noqa: SLF001
+        assert len(runner._searchers) == 4
 
     def test_all_databases_when_api_keys_provided(self):
         """All 6 databases are selected when databases=None and API keys given."""
@@ -53,40 +53,40 @@ class TestSearchRunnerInit:
             ieee_api_key="ieee_key",
             scopus_api_key="scopus_key",
         )
-        assert len(runner._searchers) == 6  # noqa: SLF001
+        assert len(runner._searchers) == 6
 
     def test_ieee_skipped_without_api_key(self):
         """IEEE is excluded from the searcher list when no API key is given."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])
-        names = [s.name for s in runner._searchers]  # noqa: SLF001
+        names = [s.name for s in runner._searchers]
         assert "ieee" not in names
         assert "arxiv" in names
 
     def test_ieee_included_with_api_key(self):
         """IEEE is included when its API key is provided."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"], ieee_api_key="key")
-        names = [s.name for s in runner._searchers]  # noqa: SLF001
+        names = [s.name for s in runner._searchers]
         assert "ieee" in names
 
     def test_scopus_skipped_without_api_key(self):
         """Scopus is excluded from the searcher list when no API key is given."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "scopus"])
-        names = [s.name for s in runner._searchers]  # noqa: SLF001
+        names = [s.name for s in runner._searchers]
         assert "scopus" not in names
         assert "arxiv" in names
 
     def test_scopus_included_with_api_key(self):
         """Scopus is included when its API key is provided."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "scopus"], scopus_api_key="key")
-        names = [s.name for s in runner._searchers]  # noqa: SLF001
+        names = [s.name for s in runner._searchers]
         assert "scopus" in names
 
     def test_skipped_databases_recorded_when_no_key(self):
         """_skipped_databases lists names of databases dropped due to missing keys."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee", "scopus"])
-        assert "ieee" in runner._skipped_databases  # noqa: SLF001
-        assert "scopus" in runner._skipped_databases  # noqa: SLF001
-        assert "arxiv" not in runner._skipped_databases  # noqa: SLF001
+        assert "ieee" in runner._skipped_databases
+        assert "scopus" in runner._skipped_databases
+        assert "arxiv" not in runner._skipped_databases
 
     def test_skipped_databases_empty_when_keys_provided(self):
         """_skipped_databases is empty when all required keys are present."""
@@ -96,7 +96,7 @@ class TestSearchRunnerInit:
             ieee_api_key="key",
             scopus_api_key="key",
         )
-        assert runner._skipped_databases == []  # noqa: SLF001
+        assert runner._skipped_databases == []
 
 
 class TestSearchRunnerPipeline:
@@ -108,7 +108,7 @@ class TestSearchRunnerPipeline:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = papers
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
         return runner
 
     def test_run_returns_search_object(self, make_paper):
@@ -122,7 +122,7 @@ class TestSearchRunnerPipeline:
     def test_run_closes_searcher_sessions(self, make_paper):
         """run() closes all searcher sessions after execution."""
         runner = self._make_runner_with_mock_papers([make_paper()])
-        mock_searcher: MagicMock = runner._searchers[0]  # type: ignore[assignment]  # noqa: SLF001
+        mock_searcher: MagicMock = runner._searchers[0]  # type: ignore[assignment]
         runner.run()
         mock_searcher.close.assert_called_once()
 
@@ -132,7 +132,7 @@ class TestSearchRunnerPipeline:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.side_effect = RuntimeError("boom")
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
 
         # execute_tasks catches the error internally, so run() completes.
         runner.run()
@@ -159,7 +159,7 @@ class TestSearchRunnerPipeline:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = [make_paper()]
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
         result = runner.run()
         assert len(result.papers) == 1
 
@@ -374,7 +374,7 @@ class TestSearchRunnerPipeline:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = [make_paper(title="A"), make_paper(title="B")]
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
         result = runner.run()
         assert len(result.papers) == 2
 
@@ -384,7 +384,7 @@ class TestSearchRunnerPipeline:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.side_effect = RuntimeError("network error")
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
         result = runner.run()
         assert len(result.papers) == 0
 
@@ -400,7 +400,7 @@ class TestSearchRunnerPipeline:
         mock_searcher.search.side_effect = UnsupportedQueryError(
             "Search on 'arXiv' aborted: incompatible query."
         )
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
 
         with caplog.at_level(logging.WARNING, logger="findpapers.runners.search_runner"):
             runner.run(verbose=False)  # verbose=False: warning must still appear
@@ -417,7 +417,7 @@ class TestSearchRunnerPipeline:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.side_effect = RuntimeError("network timeout")
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
 
         with caplog.at_level(logging.WARNING, logger="findpapers.runners.search_runner"):
             runner.run(verbose=False)
@@ -437,7 +437,7 @@ class TestSearchRunnerVerbose:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = papers
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
         return runner
 
     def test_verbose_run_does_not_raise(self, make_paper, caplog):
@@ -524,7 +524,7 @@ class TestSearchRunnerParallel:
         mock_s2.search.return_value = [make_paper(title="B")]
 
         runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], num_workers=2)
-        runner._searchers = [mock_s1, mock_s2]  # noqa: SLF001
+        runner._searchers = [mock_s1, mock_s2]
         result = runner.run()
         assert len(result.papers) == 2
 
@@ -539,7 +539,7 @@ class TestSearchRunnerParallel:
 
         # num_workers=10 but only 2 searchers — effective workers must be capped to 2.
         runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], num_workers=10)
-        runner._searchers = [mock_s1, mock_s2]  # noqa: SLF001
+        runner._searchers = [mock_s1, mock_s2]
 
         captured: list[int | None] = []
         original_execute = __import__(
@@ -572,7 +572,7 @@ class TestSearchRunnerFailedDatabases:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.return_value = [make_paper()]
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
         result = runner.run()
         assert result.failed_databases == []
 
@@ -582,7 +582,7 @@ class TestSearchRunnerFailedDatabases:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.side_effect = RuntimeError("network down")
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
         result = runner.run()
         assert Database.ARXIV in result.failed_databases
 
@@ -592,7 +592,7 @@ class TestSearchRunnerFailedDatabases:
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
         mock_searcher.search.side_effect = UnsupportedQueryError("not supported")
-        runner._searchers = [mock_searcher]  # noqa: SLF001
+        runner._searchers = [mock_searcher]
         result = runner.run()
         assert result.failed_databases == []
 
@@ -605,7 +605,7 @@ class TestSearchRunnerFailedDatabases:
         bad_searcher = MagicMock()
         bad_searcher.name = Database.IEEE
         bad_searcher.search.side_effect = RuntimeError("timeout")
-        runner._searchers = [ok_searcher, bad_searcher]  # noqa: SLF001
+        runner._searchers = [ok_searcher, bad_searcher]
         result = runner.run()
         assert result.failed_databases == [Database.IEEE]
         assert len(result.papers) == 1

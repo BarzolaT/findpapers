@@ -76,7 +76,7 @@ def _safe_get(url: str, *, timeout: int = REQUEST_TIMEOUT) -> requests.Response 
             allow_redirects=True,
         )
         return resp
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"    ✗ Request error: {exc}")
         return None
 

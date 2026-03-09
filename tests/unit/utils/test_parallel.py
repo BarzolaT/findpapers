@@ -24,7 +24,7 @@ class TestExecuteTasksSequential:
 
         results = list(execute_tasks([1], _fail, num_workers=None, timeout=None))
         assert len(results) == 1
-        item, result, error = results[0]
+        _item, result, error = results[0]
         assert result is None
         assert isinstance(error, ValueError)
 

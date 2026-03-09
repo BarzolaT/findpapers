@@ -19,8 +19,8 @@ class TestEnrichmentRunnerInit:
         """Constructor stores a copy of the paper list."""
         papers = [make_paper()]
         runner = EnrichmentRunner(papers=papers)
-        assert runner._results is not papers  # noqa: SLF001
-        assert len(runner._results) == 1  # noqa: SLF001
+        assert runner._results is not papers
+        assert len(runner._results) == 1
 
 
 class TestEnrichmentRunnerRun:
@@ -491,7 +491,7 @@ class TestFetchUrlMetadata:
 
         runner = EnrichmentRunner(papers=[make_paper()])
         with patch("findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp):
-            result = runner._fetch_url_metadata("https://example.com/paper.pdf")  # noqa: SLF001
+            result = runner._fetch_url_metadata("https://example.com/paper.pdf")
         assert result is None
 
     def test_returns_dict_for_html_content_type(self, make_paper) -> None:
@@ -506,7 +506,7 @@ class TestFetchUrlMetadata:
 
         runner = EnrichmentRunner(papers=[make_paper()])
         with patch("findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp):
-            result = runner._fetch_url_metadata("https://example.com/paper")  # noqa: SLF001
+            result = runner._fetch_url_metadata("https://example.com/paper")
         assert isinstance(result, dict)
         assert result.get("citation_title") == "Test"
 
@@ -522,7 +522,7 @@ class TestFetchUrlMetadata:
         with patch(
             "findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp
         ) as mock_get:
-            runner._fetch_url_metadata("https://example.com")  # noqa: SLF001
+            runner._fetch_url_metadata("https://example.com")
 
         _, kwargs = mock_get.call_args
         assert kwargs["proxies"] == {"http": "http://proxy:8080", "https": "http://proxy:8080"}
@@ -539,7 +539,7 @@ class TestFetchUrlMetadata:
         with patch(
             "findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp
         ) as mock_get:
-            runner._fetch_url_metadata("https://example.com")  # noqa: SLF001
+            runner._fetch_url_metadata("https://example.com")
 
         _, kwargs = mock_get.call_args
         assert kwargs["verify"] is False
@@ -556,7 +556,7 @@ class TestFetchUrlMetadata:
         with patch(
             "findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp
         ) as mock_get:
-            runner._fetch_url_metadata("https://example.com")  # noqa: SLF001
+            runner._fetch_url_metadata("https://example.com")
 
         _, kwargs = mock_get.call_args
         assert kwargs["verify"] is True
@@ -573,7 +573,7 @@ class TestFetchUrlMetadata:
         with patch(
             "findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp
         ) as mock_get:
-            runner._fetch_url_metadata("https://example.com")  # noqa: SLF001
+            runner._fetch_url_metadata("https://example.com")
 
         _, kwargs = mock_get.call_args
         assert kwargs["proxies"] is None

@@ -6,6 +6,7 @@ import contextlib
 import datetime
 import logging
 from collections.abc import Callable
+from typing import ClassVar
 from xml.etree import ElementTree as ET
 
 import requests
@@ -42,7 +43,7 @@ class PubmedConnector(SearchConnectorBase):
 
     # Ordered list of (PubMed PublicationType UI prefix, PaperType) pairs.
     # Checked in priority order; first match wins.
-    _PUBMED_PAPER_TYPE_RULES: list[tuple[str, PaperType]] = [
+    _PUBMED_PAPER_TYPE_RULES: ClassVar[list[tuple[str, PaperType]]] = [
         ("congress", PaperType.INPROCEEDINGS),
         ("meeting abstract", PaperType.INPROCEEDINGS),
         ("academic dissertation", PaperType.PHDTHESIS),

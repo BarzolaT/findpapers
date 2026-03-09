@@ -239,7 +239,7 @@ class ConnectorBase(ABC):
                     backoff = max(backoff, float(retry_after))
 
         # Add jitter (0–25 %) to avoid thundering-herd effects.
-        jitter: float = backoff * 0.25 * random.random()  # noqa: S311
+        jitter: float = backoff * 0.25 * random.random()
         return backoff + jitter
 
     def _request_with_retry(

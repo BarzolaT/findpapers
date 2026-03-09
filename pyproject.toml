@@ -73,9 +73,10 @@ line-length = 100
 
 [tool.ruff.lint]
 # I = isort-compatible import sorting (replaces standalone isort).
-select = ["E", "F", "W", "I", "B", "SIM", "PT", "UP"]
+select = ["E", "F", "W", "I", "B", "SIM", "PT", "UP", "C4", "RUF"]
 # E501 is handled by ruff format, so we ignore it in the linter.
-ignore = ["E501"]
+# RUF002/RUF003: allow EN DASH (–) in docstrings/comments — intentional typography.
+ignore = ["E501", "RUF002", "RUF003"]
 
 [tool.ruff.format]
 # Replaces standalone black.

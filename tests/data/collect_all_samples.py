@@ -86,7 +86,7 @@ def run_page_collector(selected_dbs: list[str]) -> bool:
 
     try:
         result = subprocess.run(
-            [sys.executable, str(pages_script)] + page_dbs,
+            [sys.executable, str(pages_script), *page_dbs],
             cwd=pages_script.parent,
             check=True,
             capture_output=False,

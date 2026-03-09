@@ -78,7 +78,7 @@ class TestSearchConnectorBaseGetLogging:
         searcher._http_session.get.return_value = resp
 
         with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-            searcher._get("https://api.example.com/search", params={"q": "ml"})  # noqa: SLF001
+            searcher._get("https://api.example.com/search", params={"q": "ml"})
 
         assert any("GET" in m and "example.com" in m for m in caplog.messages)
 
@@ -92,7 +92,7 @@ class TestSearchConnectorBaseGetLogging:
         searcher._http_session.get.return_value = resp
 
         with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-            searcher._get(  # noqa: SLF001
+            searcher._get(
                 "https://api.example.com/search",
                 params={"q": "ml", "api_key": "top-secret"},
             )
@@ -112,7 +112,7 @@ class TestSearchConnectorBaseGetLogging:
         searcher._http_session.get.return_value = resp
 
         with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-            searcher._get(  # noqa: SLF001
+            searcher._get(
                 "https://api.example.com/search",
                 headers={"X-ELS-APIKey": "my-secret-key", "Accept": "application/json"},
             )
@@ -133,7 +133,7 @@ class TestSearchConnectorBaseGetLogging:
         searcher._http_session.get.return_value = resp
 
         with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
-            searcher._get("https://api.example.com/search")  # noqa: SLF001
+            searcher._get("https://api.example.com/search")
 
         messages = " ".join(caplog.messages)
         assert "200" in messages
@@ -159,7 +159,7 @@ class TestSearchConnectorBaseGetLogging:
             caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"),
             pytest.raises(req_lib.HTTPError),
         ):
-            searcher._get("https://api.example.com/missing")  # noqa: SLF001
+            searcher._get("https://api.example.com/missing")
 
         messages = " ".join(caplog.messages)
         assert "404" in messages  # response was logged before the exception was raised
@@ -171,7 +171,7 @@ class TestSearchConnectorBasePrepareHeaders:
     def test_user_agent_injected_by_default(self) -> None:
         """Base _prepare_headers always adds a findpapers User-Agent."""
         searcher = _StubConnector()
-        result = searcher._prepare_headers({})  # noqa: SLF001
+        result = searcher._prepare_headers({})
         assert "User-Agent" in result
         assert "findpapers" in result["User-Agent"]
 
@@ -179,7 +179,7 @@ class TestSearchConnectorBasePrepareHeaders:
         """Caller-supplied headers are present alongside the User-Agent."""
         searcher = _StubConnector()
         custom = {"Accept": "application/json", "X-Custom": "value"}
-        result = searcher._prepare_headers(custom)  # noqa: SLF001
+        result = searcher._prepare_headers(custom)
         assert result["Accept"] == "application/json"
         assert result["X-Custom"] == "value"
         assert "findpapers" in result["User-Agent"]
@@ -187,7 +187,7 @@ class TestSearchConnectorBasePrepareHeaders:
     def test_caller_can_override_user_agent(self) -> None:
         """Explicit User-Agent from caller takes precedence over the default."""
         searcher = _StubConnector()
-        result = searcher._prepare_headers({"User-Agent": "Custom/1.0"})  # noqa: SLF001
+        result = searcher._prepare_headers({"User-Agent": "Custom/1.0"})
         assert result["User-Agent"] == "Custom/1.0"
 
 
@@ -301,21 +301,21 @@ class TestConnectorBaseSessionPooling:
         connector = _StubConnector()
         assert not hasattr(connector, "_http_session")
 
-        session = connector._get_session()  # noqa: SLF001
+        session = connector._get_session()
         assert hasattr(connector, "_http_session")
         assert session is connector._http_session
 
     def test_session_reused_across_calls(self) -> None:
         """Consecutive calls to _get_session return the same instance."""
         connector = _StubConnector()
-        first = connector._get_session()  # noqa: SLF001
-        second = connector._get_session()  # noqa: SLF001
+        first = connector._get_session()
+        second = connector._get_session()
         assert first is second
 
     def test_close_removes_session(self) -> None:
         """close() removes the cached session attribute."""
         connector = _StubConnector()
-        connector._get_session()  # noqa: SLF001
+        connector._get_session()
         assert hasattr(connector, "_http_session")
 
         connector.close()
@@ -330,7 +330,7 @@ class TestConnectorBaseSessionPooling:
     def test_context_manager_closes_session(self) -> None:
         """Exiting a with-block calls close() on the connector."""
         with _StubConnector() as connector:
-            _ = connector._get_session()  # noqa: SLF001
+            _ = connector._get_session()
             assert hasattr(connector, "_http_session")
 
         # After __exit__, the cached session attribute is removed,
@@ -376,7 +376,7 @@ class TestConnectorBaseRetry:
         connector._http_session = MagicMock()
         connector._http_session.get.return_value = resp
 
-        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+        result = connector._get("https://api.example.com/test")
 
         assert result is resp
         assert connector._http_session.get.call_count == 1
@@ -397,7 +397,7 @@ class TestConnectorBaseRetry:
         connector._http_session = MagicMock()
         connector._http_session.get.side_effect = [resp_429, resp_429, resp_200]
 
-        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+        result = connector._get("https://api.example.com/test")
 
         assert result is resp_200
         assert connector._http_session.get.call_count == 3
@@ -415,7 +415,7 @@ class TestConnectorBaseRetry:
         connector._http_session = MagicMock()
         connector._http_session.get.side_effect = [resp_503, resp_200]
 
-        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+        result = connector._get("https://api.example.com/test")
 
         assert result is resp_200
         assert connector._http_session.get.call_count == 2
@@ -434,7 +434,7 @@ class TestConnectorBaseRetry:
         connector._http_session.get.return_value = resp_429
 
         with pytest.raises(req_lib.HTTPError):
-            connector._get("https://api.example.com/test")  # noqa: SLF001
+            connector._get("https://api.example.com/test")
 
         # 1 initial + 2 retries = 3 requests total
         assert connector._http_session.get.call_count == 3
@@ -452,7 +452,7 @@ class TestConnectorBaseRetry:
         connector._http_session.get.return_value = resp_404
 
         with pytest.raises(req_lib.HTTPError):
-            connector._get("https://api.example.com/test")  # noqa: SLF001
+            connector._get("https://api.example.com/test")
 
         # Only 1 attempt — no retries for 404.
         assert connector._http_session.get.call_count == 1
@@ -472,7 +472,7 @@ class TestConnectorBaseRetry:
             resp_200,
         ]
 
-        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+        result = connector._get("https://api.example.com/test")
 
         assert result is resp_200
         assert connector._http_session.get.call_count == 2
@@ -492,7 +492,7 @@ class TestConnectorBaseRetry:
             resp_200,
         ]
 
-        result = connector._get("https://api.example.com/test")  # noqa: SLF001
+        result = connector._get("https://api.example.com/test")
 
         assert result is resp_200
         assert connector._http_session.get.call_count == 2
@@ -509,7 +509,7 @@ class TestConnectorBaseRetry:
         connector._http_session.get.side_effect = req_lib.ConnectionError("down")
 
         with pytest.raises(req_lib.ConnectionError):
-            connector._get("https://api.example.com/test")  # noqa: SLF001
+            connector._get("https://api.example.com/test")
 
         # 1 initial + 1 retry = 2 attempts.
         assert connector._http_session.get.call_count == 2
@@ -528,7 +528,7 @@ class TestConnectorBaseRetry:
         resp_429.raise_for_status = MagicMock()
 
         # Use _retry_delay directly to verify Retry-After is honoured.
-        delay = connector._retry_delay(0, resp_429)  # noqa: SLF001
+        delay = connector._retry_delay(0, resp_429)
         assert delay >= 5.0
 
     def test_retry_delay_exponential_growth(self) -> None:
@@ -537,7 +537,7 @@ class TestConnectorBaseRetry:
         connector._retry_base_delay = 1.0
         connector._retry_max_delay = 120.0
 
-        delays = [connector._retry_delay(i) for i in range(5)]  # noqa: SLF001
+        delays = [connector._retry_delay(i) for i in range(5)]
 
         # Base delays: 1, 2, 4, 8, 16 (before jitter).
         # With up to 25% jitter, minimum values are the base.
@@ -552,7 +552,7 @@ class TestConnectorBaseRetry:
         connector._retry_base_delay = 1.0
         connector._retry_max_delay = 10.0
 
-        delay = connector._retry_delay(20)  # noqa: SLF001
+        delay = connector._retry_delay(20)
 
         # 1 * 2^20 = 1048576, but capped at 10, with up to 25% jitter = 12.5 max.
         assert delay <= 10.0 * 1.25 + 0.01
@@ -573,7 +573,7 @@ class TestConnectorBaseRetry:
         connector._http_session.get.side_effect = [resp_429, resp_200]
 
         with caplog.at_level(logging.WARNING, logger="findpapers.connectors.connector_base"):
-            connector._get("https://api.example.com/test")  # noqa: SLF001
+            connector._get("https://api.example.com/test")
 
         assert any("429" in m and "retrying" in m for m in caplog.messages)
 
@@ -590,7 +590,7 @@ class TestConnectorBaseRetry:
         connector._http_session = MagicMock()
         connector._http_session.post.side_effect = [resp_503, resp_200]
 
-        result = connector._post("https://api.example.com/test", json_body={"q": "ml"})  # noqa: SLF001
+        result = connector._post("https://api.example.com/test", json_body={"q": "ml"})
 
         assert result is resp_200
         assert connector._http_session.post.call_count == 2
@@ -603,13 +603,13 @@ class TestConnectorBaseThreadSafety:
         """Each connector has its own lock to avoid cross-instance blocking."""
         c1 = _StubConnector()
         c2 = _StubConnector()
-        assert c1._get_lock() is not c2._get_lock()  # noqa: SLF001
+        assert c1._get_lock() is not c2._get_lock()
 
     def test_rate_limit_lock_is_reused(self) -> None:
         """The same lock is returned on consecutive calls."""
         connector = _StubConnector()
-        lock_a = connector._get_lock()  # noqa: SLF001
-        lock_b = connector._get_lock()  # noqa: SLF001
+        lock_a = connector._get_lock()
+        lock_b = connector._get_lock()
         assert lock_a is lock_b
 
     def test_concurrent_rate_limit_respects_interval(self) -> None:
@@ -623,10 +623,10 @@ class TestConnectorBaseThreadSafety:
         def _call() -> None:
             import time
 
-            connector._rate_limit()  # noqa: SLF001
+            connector._rate_limit()
             with lock:
                 timestamps.append(time.monotonic())
-            connector._last_request_time = time.monotonic()  # noqa: SLF001
+            connector._last_request_time = time.monotonic()
 
         # Patch the read-only property to use a measurable interval.
         with patch.object(

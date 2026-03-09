@@ -51,27 +51,27 @@ class TestDOISanitization:
     def test_bare_doi_unchanged(self):
         """A bare DOI is kept as-is."""
         runner = DOILookupRunner(doi="10.1234/test")
-        assert runner._doi == "10.1234/test"  # noqa: SLF001
+        assert runner._doi == "10.1234/test"
 
     def test_https_prefix_stripped(self):
         """Common https://doi.org/ prefix is stripped."""
         runner = DOILookupRunner(doi="https://doi.org/10.1234/test")
-        assert runner._doi == "10.1234/test"  # noqa: SLF001
+        assert runner._doi == "10.1234/test"
 
     def test_http_prefix_stripped(self):
         """http://doi.org/ prefix is stripped."""
         runner = DOILookupRunner(doi="http://doi.org/10.1234/test")
-        assert runner._doi == "10.1234/test"  # noqa: SLF001
+        assert runner._doi == "10.1234/test"
 
     def test_dx_prefix_stripped(self):
         """https://dx.doi.org/ prefix is stripped."""
         runner = DOILookupRunner(doi="https://dx.doi.org/10.1234/test")
-        assert runner._doi == "10.1234/test"  # noqa: SLF001
+        assert runner._doi == "10.1234/test"
 
     def test_whitespace_stripped(self):
         """Leading/trailing whitespace is removed."""
         runner = DOILookupRunner(doi="  10.1234/test  ")
-        assert runner._doi == "10.1234/test"  # noqa: SLF001
+        assert runner._doi == "10.1234/test"
 
     def test_empty_doi_raises(self):
         """An empty DOI raises ValueError."""
@@ -100,22 +100,22 @@ class TestDOILookupRunnerInit:
     def test_default_timeout(self):
         """Default timeout is 10.0 seconds."""
         runner = DOILookupRunner(doi="10.1234/test")
-        assert runner._timeout == 10.0  # noqa: SLF001
+        assert runner._timeout == 10.0
 
     def test_custom_timeout(self):
         """Custom timeout is stored."""
         runner = DOILookupRunner(doi="10.1234/test", timeout=30.0)
-        assert runner._timeout == 30.0  # noqa: SLF001
+        assert runner._timeout == 30.0
 
     def test_timeout_propagated_to_connector(self):
         """Custom timeout is forwarded to the underlying CrossRefConnector."""
         runner = DOILookupRunner(doi="10.1234/test", timeout=42.0)
-        assert runner._connector._timeout == 42.0  # noqa: SLF001
+        assert runner._connector._timeout == 42.0
 
     def test_default_timeout_propagated_to_connector(self):
         """Default timeout (10.0) is forwarded to the underlying CrossRefConnector."""
         runner = DOILookupRunner(doi="10.1234/test")
-        assert runner._connector._timeout == 10.0  # noqa: SLF001
+        assert runner._connector._timeout == 10.0
 
 
 # ---------------------------------------------------------------------------

@@ -105,7 +105,7 @@ def execute_tasks(
                 try:
                     result: R | None = task(item)
                     error: Exception | None = None
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     result = None
                     error = exc
                 _update_progress(item, result, error)
@@ -123,7 +123,7 @@ def execute_tasks(
                         try:
                             fut_result: R | None = future.result()
                             fut_error: Exception | None = None
-                        except Exception as exc:  # noqa: BLE001
+                        except Exception as exc:
                             fut_result = None
                             fut_error = exc
                         _update_progress(item, fut_result, fut_error)
@@ -141,7 +141,7 @@ def execute_tasks(
                         try:
                             fut_result = future.result()
                             fut_error = None
-                        except Exception as exc:  # noqa: BLE001
+                        except Exception as exc:
                             fut_result = None
                             fut_error = exc
                         _update_progress(item, fut_result, fut_error)

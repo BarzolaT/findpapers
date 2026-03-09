@@ -161,7 +161,7 @@ class TestMergeAuthors:
         # base wins (larger), but Bob's affiliation is back-filled from incoming.
         result = merge_authors(base, incoming)
         assert len(result) == 3
-        bob = [a for a in result if a.name == "Bob"][0]
+        bob = next(a for a in result if a.name == "Bob")
         assert bob.affiliation == "Harvard"
 
     def test_backfill_is_case_insensitive(self):
@@ -170,7 +170,7 @@ class TestMergeAuthors:
         incoming = [_a("Alice Smith", affiliation="MIT")]
         # base wins (tie → base), Alice's affiliation is back-filled.
         result = merge_authors(base, incoming)
-        alice = [a for a in result if a.name.lower() == "alice smith"][0]
+        alice = next(a for a in result if a.name.lower() == "alice smith")
         assert alice.affiliation == "MIT"
 
     def test_backfill_does_not_overwrite_existing_affiliation(self):
@@ -178,7 +178,7 @@ class TestMergeAuthors:
         base = [_a("Alice", affiliation="MIT"), _a("Bob"), _a("Charlie")]
         incoming = [_a("Alice", affiliation="Stanford")]
         result = merge_authors(base, incoming)
-        alice = [a for a in result if a.name == "Alice"][0]
+        alice = next(a for a in result if a.name == "Alice")
         assert alice.affiliation == "MIT"  # not overwritten
 
     def test_backfill_when_incoming_wins(self):
@@ -188,7 +188,7 @@ class TestMergeAuthors:
         # incoming wins (larger), Alice's affiliation back-filled from base.
         result = merge_authors(base, incoming)
         assert len(result) == 3
-        alice = [a for a in result if a.name == "Alice"][0]
+        alice = next(a for a in result if a.name == "Alice")
         assert alice.affiliation == "MIT"
 
     def test_no_backfill_when_loser_has_no_affiliations(self):

@@ -18,7 +18,7 @@ class TestDownloadRunnerInit:
         """Constructor stores configuration without executing."""
         papers = [make_paper()]
         runner = DownloadRunner(papers=papers, output_directory="/tmp/out")
-        assert runner._output_directory == "/tmp/out"  # noqa: SLF001
+        assert runner._output_directory == "/tmp/out"
 
 
 class TestDownloadRunnerBuildFilename:
@@ -29,7 +29,7 @@ class TestDownloadRunnerBuildFilename:
         paper = make_paper(title="My Test Paper")
         paper.publication_date = date(2023, 5, 1)
         runner = DownloadRunner(papers=[], output_directory="/tmp")
-        filename = runner._build_filename(paper)  # noqa: SLF001
+        filename = runner._build_filename(paper)
         assert filename.startswith("2023")
         assert filename.endswith(".pdf")
 
@@ -37,7 +37,7 @@ class TestDownloadRunnerBuildFilename:
         """Spaces in title are replaced with underscores."""
         paper = make_paper(title="Hello World")
         runner = DownloadRunner(papers=[], output_directory="/tmp")
-        filename = runner._build_filename(paper)  # noqa: SLF001
+        filename = runner._build_filename(paper)
         assert " " not in filename
 
     def test_filename_unknown_year_when_no_date(self, make_paper):
@@ -45,7 +45,7 @@ class TestDownloadRunnerBuildFilename:
         paper = make_paper()
         paper.publication_date = None
         runner = DownloadRunner(papers=[], output_directory="/tmp")
-        filename = runner._build_filename(paper)  # noqa: SLF001
+        filename = runner._build_filename(paper)
         assert filename.startswith("unknown")
 
 
@@ -55,20 +55,20 @@ class TestDownloadRunnerBuildProxies:
     def test_proxy_from_arg(self):
         """Proxy from constructor argument is used."""
         runner = DownloadRunner(papers=[], output_directory="/tmp", proxy="http://proxy:8080")
-        proxies = runner._build_proxies()  # noqa: SLF001
+        proxies = runner._build_proxies()
         assert proxies == {"http": "http://proxy:8080", "https": "http://proxy:8080"}
 
     def test_no_proxy_returns_none(self, monkeypatch):
         """None is returned when no proxy is configured."""
         monkeypatch.delenv("FINDPAPERS_PROXY", raising=False)
         runner = DownloadRunner(papers=[], output_directory="/tmp")
-        assert runner._build_proxies() is None  # noqa: SLF001
+        assert runner._build_proxies() is None
 
     def test_proxy_from_env(self, monkeypatch):
         """Proxy is read from FINDPAPERS_PROXY env variable."""
         monkeypatch.setenv("FINDPAPERS_PROXY", "http://env-proxy:9090")
         runner = DownloadRunner(papers=[], output_directory="/tmp")
-        proxies = runner._build_proxies()  # noqa: SLF001
+        proxies = runner._build_proxies()
         assert proxies is not None
         assert proxies["http"] == "http://env-proxy:9090"
 
@@ -82,16 +82,14 @@ class TestDownloadRunnerResolvePdfUrl:
     def test_unknown_host_returns_none(self, make_paper):
         """Unknown host returns None."""
         runner = self._runner()
-        result = runner._resolve_pdf_url(  # noqa: SLF001
-            "https://unknown.host/article/123", make_paper()
-        )
+        result = runner._resolve_pdf_url("https://unknown.host/article/123", make_paper())
         assert result is None
 
     def test_springer_url_resolved(self, make_paper):
         """Springer URL is correctly resolved to PDF."""
         runner = self._runner()
         url = "https://link.springer.com/article/10.1007/s00000-000-0000-0"
-        result = runner._resolve_pdf_url(url, make_paper())  # noqa: SLF001
+        result = runner._resolve_pdf_url(url, make_paper())
         assert result is not None
         assert result.endswith(".pdf")
         assert "/content/pdf/" in result
@@ -100,7 +98,7 @@ class TestDownloadRunnerResolvePdfUrl:
         """IEEE document URL is resolved using path."""
         runner = self._runner()
         url = "https://ieeexplore.ieee.org/document/12345"
-        result = runner._resolve_pdf_url(url, make_paper())  # noqa: SLF001
+        result = runner._resolve_pdf_url(url, make_paper())
         assert result is not None
         assert "12345" in result
 
@@ -108,7 +106,7 @@ class TestDownloadRunnerResolvePdfUrl:
         """Frontiers in article URL resolved to PDF."""
         runner = self._runner()
         url = "https://www.frontiersin.org/articles/10.3389/fnins.2020.12345/full"
-        result = runner._resolve_pdf_url(url, make_paper())  # noqa: SLF001
+        result = runner._resolve_pdf_url(url, make_paper())
         assert result is not None
         assert result.endswith("/pdf")
 
@@ -355,12 +353,12 @@ class TestDownloadRunnerSslVerify:
     def test_ssl_verify_defaults_to_true(self):
         """ssl_verify defaults to True when not specified."""
         runner = DownloadRunner(papers=[], output_directory="/tmp")
-        assert runner._ssl_verify is True  # noqa: SLF001
+        assert runner._ssl_verify is True
 
     def test_ssl_verify_stored_when_false(self):
         """ssl_verify=False is stored on the runner."""
         runner = DownloadRunner(papers=[], output_directory="/tmp", ssl_verify=False)
-        assert runner._ssl_verify is False  # noqa: SLF001
+        assert runner._ssl_verify is False
 
     def test_ssl_verify_passed_to_requests_get(self, make_paper, tmp_path):
         """ssl_verify value is forwarded to requests.get as verify=."""
@@ -450,17 +448,17 @@ class TestDownloadRunnerMaskProxyCredentials:
 
     def test_none_returns_none_string(self):
         """None proxy returns the string 'none'."""
-        assert DownloadRunner._mask_proxy_credentials(None) == "none"  # noqa: SLF001
+        assert DownloadRunner._mask_proxy_credentials(None) == "none"
 
     def test_proxy_without_credentials_returned_as_is(self):
         """Proxy URL without credentials is returned unchanged."""
         url = "http://proxy.example.com:8080"
-        assert DownloadRunner._mask_proxy_credentials(url) == url  # noqa: SLF001
+        assert DownloadRunner._mask_proxy_credentials(url) == url
 
     def test_credentials_are_masked(self):
         """User and password in proxy URL are replaced with ***."""
         url = "http://user:secret@proxy.example.com:8080"
-        masked = DownloadRunner._mask_proxy_credentials(url)  # noqa: SLF001
+        masked = DownloadRunner._mask_proxy_credentials(url)
         assert "secret" not in masked
         assert "user" not in masked
         assert "proxy.example.com" in masked
@@ -470,7 +468,7 @@ class TestDownloadRunnerMaskProxyCredentials:
     def test_only_username_masked(self):
         """A URL with only a username (no password) is also masked."""
         url = "http://user@proxy.example.com:3128"
-        masked = DownloadRunner._mask_proxy_credentials(url)  # noqa: SLF001
+        masked = DownloadRunner._mask_proxy_credentials(url)
         assert "user" not in masked
         assert "***:***@" in masked
 
@@ -481,7 +479,7 @@ class TestDownloadRunnerMaskProxyCredentials:
             raise ValueError("boom")
 
         with patch("findpapers.runners.download_runner.urllib.parse.urlparse", _raising_urlparse):
-            result = DownloadRunner._mask_proxy_credentials("not-a-url")  # noqa: SLF001
+            result = DownloadRunner._mask_proxy_credentials("not-a-url")
         assert result == "not-a-url"
 
 
@@ -600,7 +598,7 @@ class TestDownloadRunnerEdgeCases:
         paper = make_paper(title="Already There")
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
         # Pre-create the file that _build_filename would generate
-        filename = runner._build_filename(paper)  # noqa: SLF001
+        filename = runner._build_filename(paper)
         filepath = tmp_path / filename
         filepath.write_bytes(b"%PDF-existing")
 
@@ -693,9 +691,7 @@ class TestDownloadRunnerEdgeCases:
 
     def test_proxy_with_port_masked(self):
         """Proxy URL with user:pass and port masks credentials but keeps port."""
-        masked = DownloadRunner._mask_proxy_credentials(  # noqa: SLF001
-            "http://myuser:mypass@proxy.local:9090"
-        )
+        masked = DownloadRunner._mask_proxy_credentials("http://myuser:mypass@proxy.local:9090")
         assert "myuser" not in masked
         assert "mypass" not in masked
         assert "9090" in masked

@@ -9,9 +9,9 @@ from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuild
 
 __all__ = [
     "ArxivQueryBuilder",
-    "PubmedQueryBuilder",
     "IEEEQueryBuilder",
-    "ScopusQueryBuilder",
     "OpenAlexQueryBuilder",
+    "PubmedQueryBuilder",
+    "ScopusQueryBuilder",
     "SemanticScholarQueryBuilder",
 ]

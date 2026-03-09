@@ -720,12 +720,12 @@ class TestPaperIdentityEdgeCases:
         # Both have a title so they compare via key
         assert p1 == p2
         # Now remove keys: monkeypatch _identity_key to return None
-        p1._Paper__doi = None  # type: ignore[attr-defined]  # noqa: SLF001
+        p1._Paper__doi = None  # type: ignore[attr-defined]
         p1.title = ""
         # With empty title and no DOI, _identity_key returns None
-        assert p1._identity_key() is None  # noqa: SLF001
+        assert p1._identity_key() is None
         # Identity comparison: p1 is only equal to itself
-        assert p1 == p1  # noqa: PLR0124
+        assert p1 == p1
         assert p1 != p2
 
     def test_hash_uses_id_when_no_key(self) -> None:
@@ -733,7 +733,7 @@ class TestPaperIdentityEdgeCases:
         p = Paper(title="temp", abstract="", authors=[], source=None, publication_date=None)
         p.title = ""
         p.doi = None
-        assert p._identity_key() is None  # noqa: SLF001
+        assert p._identity_key() is None
         assert hash(p) == id(p)
 
     def test_identity_key_returns_none_without_doi_or_title(self) -> None:
@@ -741,7 +741,7 @@ class TestPaperIdentityEdgeCases:
         p = Paper(title="temp", abstract="", authors=[], source=None, publication_date=None)
         p.title = ""
         p.doi = None
-        assert p._identity_key() is None  # noqa: SLF001
+        assert p._identity_key() is None
 
 
 class TestPaperFromDictEdgeCases:

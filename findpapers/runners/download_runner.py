@@ -394,7 +394,7 @@ class DownloadRunner:
             content_type,
             len(response.content),
         )
-        if response.status_code == 418:  # noqa: PLR2004
+        if response.status_code == 418:
             logger.warning(
                 "Server returned 418 (bot-detection) for %s — "
                 "the publisher is blocking automated requests.",
