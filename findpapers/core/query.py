@@ -198,7 +198,7 @@ class QueryNode:
             all_filters.add(self.filter_code)
         for child in self.children:
             all_filters.update(child.get_all_filters())
-        return list(all_filters)
+        return sorted(all_filters)
 
 
 @dataclass
