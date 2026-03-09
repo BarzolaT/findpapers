@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import requests
+
 from findpapers.runners.enrichment_runner import EnrichmentRunner
 
 # Minimal metadata dict that makes _fetch_url_metadata look successful (HTML with a title).
@@ -383,7 +385,7 @@ class TestEnrichmentRunnerCrossRef:
         with (
             patch(
                 "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
-                side_effect=RuntimeError("CrossRef timeout"),
+                side_effect=requests.RequestException("CrossRef timeout"),
             ),
             patch(
                 "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",

@@ -234,7 +234,7 @@ def _merge_ieee_metadata(content: str, metadata: dict[str, Any]) -> None:
         return
     try:
         data: dict = json.loads(match.group(1))
-    except Exception:  # noqa: BLE001
+    except (json.JSONDecodeError, TypeError):
         return
 
     def _set_if_absent(key: str, value: Any) -> None:

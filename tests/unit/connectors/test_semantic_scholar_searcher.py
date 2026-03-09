@@ -5,6 +5,8 @@ from __future__ import annotations
 import datetime
 from unittest.mock import MagicMock, patch
 
+import requests
+
 from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.core.paper import PaperType
 from findpapers.core.search_result import Database
@@ -383,7 +385,7 @@ class TestSemanticScholarConnectorSearch:
         searcher = SemanticScholarConnector()
 
         with (
-            patch.object(searcher, "_get", side_effect=Exception("network error")),
+            patch.object(searcher, "_get", side_effect=requests.RequestException("network error")),
             patch.object(searcher, "_rate_limit"),
         ):
             papers = searcher.search(simple_query)

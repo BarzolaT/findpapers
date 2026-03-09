@@ -334,7 +334,7 @@ class SnowballRunner:
         if self._direction in ("both", "backward"):
             try:
                 references = connector.fetch_references(paper)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 logger.warning(
                     "Error fetching references from %s for '%s'.",
                     connector.name,
@@ -345,7 +345,7 @@ class SnowballRunner:
         if self._direction in ("both", "forward"):
             try:
                 citing = connector.fetch_cited_by(paper)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 logger.warning(
                     "Error fetching cited-by from %s for '%s'.",
                     connector.name,
@@ -392,7 +392,7 @@ class SnowballRunner:
         for future in as_completed(futures):
             try:
                 results.append(future.result())
-            except Exception:
+            except Exception:  # noqa: BLE001
                 connector = futures[future]
                 logger.warning(
                     "Unexpected error querying %s for '%s'.",

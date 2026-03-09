@@ -228,7 +228,7 @@ class DownloadRunner:
                 if parsed.port:
                     masked_netloc += f":{parsed.port}"
                 return urllib.parse.urlunparse(parsed._replace(netloc=masked_netloc))
-        except Exception:  # noqa: BLE001
+        except (ValueError, AttributeError):
             pass
         return proxy
 
@@ -383,7 +383,7 @@ class DownloadRunner:
                 proxies=proxies,
                 verify=ssl_verify,
             )
-        except Exception:  # noqa: BLE001
+        except requests.RequestException:
             logger.debug("Request failed for %s", url, exc_info=True)
             return None
         content_type = response.headers.get("content-type", "unknown").split(";")[0].strip()

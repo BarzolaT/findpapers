@@ -9,6 +9,8 @@ import re
 from collections.abc import Callable
 from xml.etree import ElementTree as ET
 
+import requests
+
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
@@ -276,7 +278,7 @@ class ArxivConnector(SearchConnectorBase):
 
             try:
                 response = self._get(_BASE_URL, params)
-            except Exception:
+            except requests.RequestException:
                 logger.exception("arXiv request failed (offset=%d).", offset)
                 break
 

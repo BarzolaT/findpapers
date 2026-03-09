@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 from xml.etree import ElementTree as ET
 
 import pytest
+import requests
 
 from findpapers.connectors.pubmed import PubmedConnector, _normalize_month
 from findpapers.core.author import Author
@@ -577,7 +578,9 @@ class TestPubmedConnectorSearch:
         """Exception in _search_ids breaks the loop and returns empty list."""
         searcher = PubmedConnector()
 
-        with patch.object(searcher, "_search_ids", side_effect=Exception("network error")):
+        with patch.object(
+            searcher, "_search_ids", side_effect=requests.RequestException("network error")
+        ):
             papers = searcher.search(simple_query)
 
         assert papers == []
@@ -591,7 +594,9 @@ class TestPubmedConnectorSearch:
         searcher._http_session = MagicMock()
         searcher._http_session.get.return_value = esearch_mock
         with (
-            patch.object(searcher, "_fetch_details", side_effect=Exception("fetch error")),
+            patch.object(
+                searcher, "_fetch_details", side_effect=requests.RequestException("fetch error")
+            ),
             patch.object(searcher, "_rate_limit"),
         ):
             papers = searcher.search(simple_query)

@@ -8,6 +8,8 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
+import requests
+
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
@@ -206,7 +208,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         }
         try:
             response = self._get(url, params)
-        except Exception:
+        except requests.RequestException:
             logger.warning(
                 "Semantic Scholar: failed to fetch %s for DOI %s (offset=%d).",
                 endpoint,
@@ -461,7 +463,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
                     json_body={"ids": batch_ids},
                     params={"fields": "affiliations"},
                 )
-            except Exception:
+            except requests.RequestException:
                 logger.warning(
                     "Failed to fetch author affiliations batch (offset=%d).",
                     start,
@@ -536,7 +538,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
 
             try:
                 response = self._get(_BULK_SEARCH_URL, params)
-            except Exception:
+            except requests.RequestException:
                 logger.exception("Semantic Scholar request failed (token=%s).", token)
                 break
 

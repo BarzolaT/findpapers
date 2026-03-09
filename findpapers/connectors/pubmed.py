@@ -8,6 +8,8 @@ import logging
 from collections.abc import Callable
 from xml.etree import ElementTree as ET
 
+import requests
+
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
@@ -404,7 +406,7 @@ class PubmedConnector(SearchConnectorBase):
 
             try:
                 ids, total = self._search_ids(pubmed_query, offset, page_size, date_params)
-            except Exception:
+            except (requests.RequestException, ValueError):
                 logger.exception("PubMed esearch failed (offset=%d).", offset)
                 break
 
@@ -413,7 +415,7 @@ class PubmedConnector(SearchConnectorBase):
 
             try:
                 article_elements = self._fetch_details(ids)
-            except Exception:
+            except (requests.RequestException, ET.ParseError):
                 logger.exception("PubMed efetch failed (pmids=%s).", ids)
                 break
 

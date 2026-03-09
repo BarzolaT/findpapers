@@ -6,6 +6,8 @@ import datetime
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import requests
+
 from findpapers.connectors.openalex import (
     OpenAlexConnector,
     _reconstruct_abstract,
@@ -446,7 +448,7 @@ class TestOpenAlexConnectorSearch:
         searcher = OpenAlexConnector()
 
         with (
-            patch.object(searcher, "_get", side_effect=Exception("timeout")),
+            patch.object(searcher, "_get", side_effect=requests.RequestException("timeout")),
             patch.object(searcher, "_rate_limit"),
         ):
             papers = searcher.search(simple_query)

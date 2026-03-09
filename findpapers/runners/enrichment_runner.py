@@ -497,7 +497,7 @@ class EnrichmentRunner:
                         paper.merge(crossref_paper)
                         if _enrichment_snapshot(paper) != mid:
                             doi_contributed = True
-            except Exception:  # noqa: BLE001
+            except (requests.RequestException, KeyError, TypeError, ValueError):
                 logger.warning("CrossRef fetch error for DOI: %s", paper.doi)
 
         # ------------------------------------------------------------------
@@ -524,7 +524,7 @@ class EnrichmentRunner:
         for url in deduped:
             try:
                 metadata = self._fetch_url_metadata(url, timeout=timeout)
-            except Exception:  # noqa: BLE001
+            except requests.RequestException:
                 had_fetch_error = True
                 logger.warning("Fetch error for enrichment URL: %s", url)
                 continue

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import requests
+
 from findpapers.connectors.openalex import OpenAlexConnector
 
 
@@ -113,7 +115,7 @@ class TestOpenAlexFetchReferences:
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/error")
 
-        mock_get.side_effect = Exception("API error")
+        mock_get.side_effect = requests.RequestException("API error")
 
         refs = connector.fetch_references(paper)
 
@@ -219,7 +221,7 @@ class TestOpenAlexFetchCitedBy:
         connector = OpenAlexConnector()
         paper = make_paper(doi="10.1000/error")
 
-        mock_get.side_effect = Exception("Network error")
+        mock_get.side_effect = requests.RequestException("Network error")
 
         cited_by = connector.fetch_cited_by(paper)
 

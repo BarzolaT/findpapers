@@ -8,6 +8,8 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
+import requests
+
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
@@ -190,7 +192,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             response = self._get(url, params={"select": "id"})
             data = response.json()
             return (data.get("id") or "").strip() or None
-        except Exception:
+        except (requests.RequestException, ValueError):
             logger.debug("Failed to resolve OpenAlex ID for DOI %s.", paper.doi)
             return None
 
@@ -234,7 +236,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                     paper = self._parse_paper(work)
                     if paper is not None:
                         papers.append(paper)
-            except Exception:
+            except (requests.RequestException, ValueError, KeyError, TypeError):
                 logger.warning(
                     "Failed to fetch OpenAlex works batch (offset=%d, count=%d).",
                     start,
@@ -273,7 +275,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         }
         try:
             response = self._get(_BASE_URL, params)
-        except Exception:
+        except requests.RequestException:
             logger.warning(
                 "Failed to fetch cited-by page for %s (cursor=%s).",
                 openalex_id,
@@ -321,7 +323,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         try:
             response = self._get(url, params={"select": "id,referenced_works"})
             data = response.json()
-        except Exception:
+        except (requests.RequestException, ValueError):
             logger.warning("Failed to fetch OpenAlex work for DOI %s.", paper.doi)
             return []
 
@@ -598,7 +600,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
 
             try:
                 response = self._get(_BASE_URL, params)
-            except Exception:
+            except requests.RequestException:
                 logger.exception("OpenAlex request failed (cursor=%s).", cursor)
                 break
 
