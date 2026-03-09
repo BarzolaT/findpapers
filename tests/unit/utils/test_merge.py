@@ -64,6 +64,18 @@ def test_merge_value_combines_tuples_preserves_order():
     assert result == (1, 2, 3, 4)
 
 
+def test_merge_value_combines_tuples_unhashable():
+    """Test that merge_value handles unhashable items in tuples."""
+    result = merge_value(({"a": 1},), ({"a": 1}, {"b": 2}))
+    assert result == ({"a": 1}, {"b": 2})
+
+
+def test_merge_value_falls_back_to_base_for_unsupported_types():
+    """Test that merge_value returns base when types are unsupported or mismatched."""
+    sentinel = object()
+    assert merge_value(sentinel, "other") is sentinel
+
+
 def test_merge_value_combines_dicts():
     """Test that merge_value recursively merges dicts."""
     base = {"a": 1, "b": 2}
