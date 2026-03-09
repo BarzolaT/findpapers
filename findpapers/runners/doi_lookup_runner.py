@@ -122,8 +122,8 @@ class DOILookupRunner:
     # Private helpers
     # ------------------------------------------------------------------
 
-    @classmethod
-    def _sanitize_doi(cls, doi: str) -> str:
+    @staticmethod
+    def _sanitize_doi(doi: str) -> str:
         """Strip whitespace and common URL prefixes from a DOI string.
 
         Parameters
