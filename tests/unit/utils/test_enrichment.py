@@ -17,6 +17,7 @@ from findpapers.core.source import SourceType
 from findpapers.runners.enrichment_runner import build_paper_from_metadata
 from findpapers.utils.metadata_parser import (
     extract_metadata_from_html,
+    parse_affiliations,
     parse_authors,
     parse_keywords,
 )
@@ -809,3 +810,123 @@ class TestExtractAndBuildPipeline:
         assert len(result.authors) > 0
         assert result.keywords
         assert len(result.keywords) > 0
+
+
+# ---------------------------------------------------------------------------
+# Additional coverage for extract_metadata_from_html edge cases
+# ---------------------------------------------------------------------------
+
+
+class TestExtractMetadataEdgeCases:
+    """Tests covering defensive branches in extract_metadata_from_html."""
+
+    def test_ieee_invalid_json_blob_returns_meta_tags_only(self) -> None:
+        """Invalid JSON in the IEEE JS blob is silently ignored."""
+        html = (
+            "<html><head>"
+            '<meta name="citation_title" content="Good">'
+            "<script>xplGlobal.document.metadata = {INVALID JSON};</script>"
+            "</head></html>"
+        )
+        meta = extract_metadata_from_html(html)
+        assert meta.get("citation_title") == "Good"
+        # No IEEE fields since JSON was invalid.
+        assert "citation_doi" not in meta or meta["citation_doi"] == "Good"
+
+    def test_ieee_conference_content_type(self) -> None:
+        """IEEE JS blob with isConference=true maps to citation_conference_title."""
+        blob = (
+            '{"title":"My Paper","doi":"10.1109/test",'
+            '"displayPublicationTitle":"ICASSP 2024",'
+            '"isConference":true,"authors":[]}'
+        )
+        html = f"<html><head><script>xplGlobal.document.metadata = {blob};</script></head></html>"
+        meta = extract_metadata_from_html(html)
+        assert meta.get("citation_conference_title") == "ICASSP 2024"
+
+    def test_ieee_book_content_type(self) -> None:
+        """IEEE JS blob with isBook=true maps to citation_book_title."""
+        blob = (
+            '{"title":"My Paper","doi":"10.1109/test",'
+            '"displayPublicationTitle":"Deep Learning Book",'
+            '"isBook":true,"authors":[]}'
+        )
+        html = f"<html><head><script>xplGlobal.document.metadata = {blob};</script></head></html>"
+        meta = extract_metadata_from_html(html)
+        assert meta.get("citation_book_title") == "Deep Learning Book"
+
+    def test_ieee_book_without_chapters_content_type(self) -> None:
+        """IEEE JS blob with isBookWithoutChapters=true maps to citation_book_title."""
+        blob = (
+            '{"title":"My Paper","doi":"10.1109/test",'
+            '"displayPublicationTitle":"A Monograph",'
+            '"isBookWithoutChapters":true,"authors":[]}'
+        )
+        html = f"<html><head><script>xplGlobal.document.metadata = {blob};</script></head></html>"
+        meta = extract_metadata_from_html(html)
+        assert meta.get("citation_book_title") == "A Monograph"
+
+    def test_ieee_author_affiliation_as_list(self) -> None:
+        """IEEE JS blob with affiliation as a list is joined with semicolons.
+
+        Also includes an author entry with no name to exercise the ``continue``
+        guard in the affiliations loop.
+        """
+        blob = (
+            '{"title":"Test","doi":"10.1109/x",'
+            '"authors":[{"affiliation":"Ignored"},'
+            '{"name":"Alice","affiliation":["MIT","Stanford"]}]}'
+        )
+        html = f"<html><head><script>xplGlobal.document.metadata = {blob};</script></head></html>"
+        meta = extract_metadata_from_html(html)
+        assert meta.get("citation_author_institution") == "MIT; Stanford"
+
+    def test_ieee_single_author_affiliation_as_string(self) -> None:
+        """IEEE JS blob with affiliation as a string is stored directly."""
+        blob = (
+            '{"title":"Test","doi":"10.1109/x","authors":[{"name":"Bob","affiliation":"Harvard"}]}'
+        )
+        html = f"<html><head><script>xplGlobal.document.metadata = {blob};</script></head></html>"
+        meta = extract_metadata_from_html(html)
+        assert meta.get("citation_author_institution") == "Harvard"
+
+    def test_ieee_pub_title_fallback_to_journal(self) -> None:
+        """IEEE JS blob without isConference/isBook defaults to journal title."""
+        blob = (
+            '{"title":"Test","doi":"10.1109/x",'
+            '"displayPublicationTitle":"Some Publication","authors":[]}'
+        )
+        html = f"<html><head><script>xplGlobal.document.metadata = {blob};</script></head></html>"
+        meta = extract_metadata_from_html(html)
+        assert meta.get("citation_journal_title") == "Some Publication"
+
+
+# ---------------------------------------------------------------------------
+# parse_affiliations
+# ---------------------------------------------------------------------------
+
+
+class TestParseAffiliations:
+    """Tests for the parse_affiliations() helper."""
+
+    def test_none_returns_empty_list(self) -> None:
+        """None value returns an empty list."""
+        assert parse_affiliations(None) == []
+
+    def test_single_string_returned(self) -> None:
+        """A plain string is returned as a single-element list."""
+        assert parse_affiliations("MIT") == ["MIT"]
+
+    def test_semicolon_separated_string_split(self) -> None:
+        """Semicolon-separated string is split into individual items."""
+        result = parse_affiliations("MIT; Stanford; Harvard")
+        assert result == ["MIT", "Stanford", "Harvard"]
+
+    def test_list_of_strings_returned(self) -> None:
+        """A list is returned with items stripped."""
+        result = parse_affiliations(["  MIT ", "Stanford"])
+        assert result == ["MIT", "Stanford"]
+
+    def test_empty_string_returns_empty_list(self) -> None:
+        """Empty string returns an empty list."""
+        assert parse_affiliations("") == []

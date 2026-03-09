@@ -176,10 +176,10 @@ def extract_metadata_from_html(content: str) -> dict[str, Any]:
     doc = html.fromstring(content)
     metadata: dict[str, Any] = {}
     elements = doc.xpath("//meta[@name or @property or @itemprop]")
-    if not isinstance(elements, list):
+    if not isinstance(elements, list):  # pragma: no cover – lxml xpath always returns a list
         return metadata
     for element in elements:
-        if not isinstance(element, HtmlElement):
+        if not isinstance(element, HtmlElement):  # pragma: no cover – defensive guard
             continue
         raw_key = (
             (element.get("name") or element.get("property") or element.get("itemprop") or "")
