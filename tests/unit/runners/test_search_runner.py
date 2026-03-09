@@ -158,6 +158,41 @@ class TestSearchRunnerPipeline:
         assert result.runtime_seconds is not None
         assert result.runtime_seconds >= 0
 
+    def test_runtime_seconds_per_database_populated(self, make_paper):
+        """run() populates runtime_seconds_per_database for each queried database."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.return_value = [make_paper()]
+        runner._searchers = [mock_searcher]
+        result = runner.run()
+        assert "arxiv" in result.runtime_seconds_per_database
+        assert result.runtime_seconds_per_database["arxiv"] >= 0
+
+    def test_runtime_seconds_per_database_multiple_databases(self, make_paper):
+        """run() records per-database timing for every successful database."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_arxiv = MagicMock()
+        mock_arxiv.name = Database.ARXIV
+        mock_arxiv.search.return_value = [make_paper(title="A")]
+        mock_pubmed = MagicMock()
+        mock_pubmed.name = Database.PUBMED
+        mock_pubmed.search.return_value = [make_paper(title="B")]
+        runner._searchers = [mock_arxiv, mock_pubmed]
+        result = runner.run()
+        assert "arxiv" in result.runtime_seconds_per_database
+        assert "pubmed" in result.runtime_seconds_per_database
+
+    def test_runtime_seconds_per_database_empty_on_all_failures(self):
+        """run() returns empty runtime_seconds_per_database when all searchers fail."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        mock_searcher.search.side_effect = RuntimeError("network error")
+        runner._searchers = [mock_searcher]
+        result = runner.run()
+        assert result.runtime_seconds_per_database == {}
+
     def test_metrics_include_zero_for_skipped_databases(self, make_paper):
         """Skipped databases (no API key) do not break the run."""
         runner = SearchRunner(query="[ml]", databases=["arxiv", "ieee"])

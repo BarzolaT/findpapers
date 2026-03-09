@@ -169,8 +169,11 @@ class SearchRunner:
             metrics[f"total_papers_from_{_skipped}"] = 0
 
         failed_databases: list[str] = []
+        db_runtimes: dict[str, float] = {}
         try:
-            failed_databases = self._fetch_papers(metrics, verbose, show_progress=show_progress)
+            failed_databases, db_runtimes = self._fetch_papers(
+                metrics, verbose, show_progress=show_progress
+            )
         finally:
             for searcher in self._searchers:
                 searcher.close()
@@ -205,6 +208,7 @@ class SearchRunner:
             databases=[s.name for s in self._searchers],
             papers=list(self._results),
             runtime_seconds=self._metrics.get("runtime_in_seconds"),
+            runtime_seconds_per_database=db_runtimes or None,
             since=self._since,
             until=self._until,
             failed_databases=failed_databases or None,
@@ -306,7 +310,7 @@ class SearchRunner:
         verbose: bool = False,
         *,
         show_progress: bool = True,
-    ) -> list[str]:
+    ) -> tuple[list[str], dict[str, float]]:
         """Fetch papers from all configured searchers.
 
         Updates *metrics* with per-database paper counts.
@@ -322,13 +326,15 @@ class SearchRunner:
 
         Returns
         -------
-        list[str]
-            Names of databases that failed during the search (network or
-            connector errors).  Databases skipped due to unsupported
-            queries are **not** included.
+        tuple[list[str], dict[str, float]]
+            A pair of (names of databases that failed during the search,
+            per-database wall-clock runtime in seconds).  Databases skipped
+            due to unsupported queries are **not** included in failures.
         """
 
-        def _run_searcher(searcher: SearchConnectorBase) -> list[Paper]:
+        def _run_searcher(
+            searcher: SearchConnectorBase,
+        ) -> tuple[list[Paper], float]:
             """Run a single searcher with a per-database tqdm bar.
 
             Parameters
@@ -338,8 +344,8 @@ class SearchRunner:
 
             Returns
             -------
-            list[Paper]
-                Retrieved papers.
+            tuple[list[Paper], float]
+                Retrieved papers and wall-clock runtime in seconds.
             """
             with make_progress_bar(
                 desc=searcher.name, unit="paper", disable=not show_progress
@@ -350,18 +356,22 @@ class SearchRunner:
                     pbar.n = current
                     pbar.refresh()
 
-                return searcher.search(
+                db_start = perf_counter()
+                papers = searcher.search(
                     self._query,
                     max_papers=self._max_papers_per_database,
                     progress_callback=_cb,
                     since=self._since,
                     until=self._until,
                 )
+                elapsed = perf_counter() - db_start
+                return papers, elapsed
 
         num_searchers = len(self._searchers)
         num_workers = min(self._num_workers, num_searchers)
 
         failed: list[str] = []
+        db_runtimes: dict[str, float] = {}
         for searcher, result, error in execute_tasks(
             self._searchers,
             _run_searcher,
@@ -378,10 +388,12 @@ class SearchRunner:
                     if verbose:
                         logger.warning("Error fetching from %s: %s", searcher.name, error)
                 continue
-            metrics[f"total_papers_from_{searcher.name}"] = len(result)
-            self._results.extend(result)
+            papers, elapsed = result
+            db_runtimes[searcher.name] = elapsed
+            metrics[f"total_papers_from_{searcher.name}"] = len(papers)
+            self._results.extend(papers)
 
-        return failed
+        return failed, db_runtimes
 
     def _deduplicate_and_merge(self, metrics: dict[str, int | float]) -> None:
         """Collapse duplicate papers in two passes.
