@@ -36,7 +36,7 @@ help:
 	@echo "make test_integration [PYTEST_ARGS='args']"
 	@echo "       run integration/smoke tests that hit real external APIs"
 	@echo "make test_report"
-	@echo "       run tests and save tests and coverag reports"
+	@echo "       run tests and save tests and coverage reports"
 
 setup:
 	@python -m venv $(VENV)
