@@ -319,12 +319,17 @@ class IEEEConnector(SearchConnectorBase):
             remaining = (max_papers - len(papers)) if max_papers is not None else _PAGE_SIZE
             page_size = min(_PAGE_SIZE, remaining)
 
+            # NOTE: The IEEE API only supports sort_field values:
+            # article_number, article_title, publication_title.
+            # None of these sort by date or relevance.  Omitting
+            # sort_field/sort_order lets the API use its default
+            # relevance-based ordering, which yields a better mix of
+            # recent and older papers.  Additionally, sort_order
+            # (asc/desc) is silently ignored by the API as of 2026.
             params = {
                 **ieee_params,
                 "start_record": offset,
                 "max_records": page_size,
-                "sort_field": "article_number",
-                "sort_order": "desc",
             }
 
             try:
