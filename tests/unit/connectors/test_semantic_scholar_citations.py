@@ -295,3 +295,90 @@ class TestSemanticScholarFetchPaperCounts:
         assert cit == 1
         assert ref == 5
         assert mock_get.call_count == 1
+
+
+# ---------------------------------------------------------------------------
+# Tests with real API response data
+# ---------------------------------------------------------------------------
+
+_SPRINGER_DOI = "10.3758/s13428-022-02028-7"
+
+
+class TestSemanticScholarRealDataParsing:
+    """Tests using real Semantic Scholar API responses."""
+
+    def test_parse_paper_counts(self, ss_citation_samples: dict) -> None:
+        """Parse real paper-counts response for reference/citation counts."""
+        counts = ss_citation_samples[_SPRINGER_DOI]["paper_counts"]
+
+        assert counts["referenceCount"] == 40
+        assert counts["citationCount"] == 3
+
+    @patch.object(SemanticScholarConnector, "_get")
+    def test_fetch_references_with_real_data(
+        self,
+        mock_get: MagicMock,
+        make_paper,
+        ss_citation_samples: dict,
+    ) -> None:
+        """Feed real references response to fetch_references and verify parsing."""
+        connector = SemanticScholarConnector()
+        paper = make_paper(doi=_SPRINGER_DOI)
+        refs_response = ss_citation_samples[_SPRINGER_DOI]["references"]
+
+        response = MagicMock()
+        response.json.return_value = refs_response
+        mock_get.return_value = response
+
+        refs = connector.fetch_references(paper)
+
+        # All 40 records have a title and should parse successfully.
+        assert len(refs) == 40
+        # Verify they are actual Paper objects with meaningful attributes.
+        for ref in refs:
+            assert ref.title
+            assert "semantic_scholar" in ref.databases
+
+    @patch.object(SemanticScholarConnector, "_get")
+    def test_fetch_cited_by_with_real_data(
+        self,
+        mock_get: MagicMock,
+        make_paper,
+        ss_citation_samples: dict,
+    ) -> None:
+        """Feed real citations response to fetch_cited_by and verify parsing."""
+        connector = SemanticScholarConnector()
+        paper = make_paper(doi=_SPRINGER_DOI)
+        cits_response = ss_citation_samples[_SPRINGER_DOI]["citations"]
+
+        response = MagicMock()
+        response.json.return_value = cits_response
+        mock_get.return_value = response
+
+        cited_by = connector.fetch_cited_by(paper)
+
+        assert len(cited_by) == 3
+        for p in cited_by:
+            assert p.title
+            assert "semantic_scholar" in p.databases
+
+    @patch.object(SemanticScholarConnector, "_get")
+    def test_get_expected_counts_with_real_data(
+        self,
+        mock_get: MagicMock,
+        make_paper,
+        ss_citation_samples: dict,
+    ) -> None:
+        """get_expected_counts with real paper-counts response."""
+        connector = SemanticScholarConnector()
+        paper = make_paper(doi=_SPRINGER_DOI)
+        counts_response = ss_citation_samples[_SPRINGER_DOI]["paper_counts"]
+
+        response = MagicMock()
+        response.json.return_value = counts_response
+        mock_get.return_value = response
+
+        cit, ref = connector.get_expected_counts(paper)
+
+        assert cit == 3
+        assert ref == 40

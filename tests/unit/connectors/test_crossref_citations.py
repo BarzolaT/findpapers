@@ -186,3 +186,64 @@ class TestCrossRefFetchCitedBy:
         result = connector.fetch_cited_by(paper)
 
         assert result == []
+
+
+# ---------------------------------------------------------------------------
+# Tests with real API response data
+# ---------------------------------------------------------------------------
+
+_NATURE_DOI = "10.1038/nature12373"
+
+
+class TestCrossRefRealDataParsing:
+    """Tests using real CrossRef API responses from sample_responses.json."""
+
+    def test_real_work_has_references(self, crossref_sample_json: dict) -> None:
+        """Verify real CrossRef work contains a non-empty reference array."""
+        work = crossref_sample_json[_NATURE_DOI]
+        refs = work.get("reference", [])
+
+        assert len(refs) == 30
+        # Most references in this paper have DOIs.
+        with_doi = [r for r in refs if r.get("DOI")]
+        assert len(with_doi) == 29
+
+    @patch.object(CrossRefConnector, "fetch_work")
+    def test_fetch_references_with_real_seed_work(
+        self,
+        mock_fetch: MagicMock,
+        make_paper,
+        crossref_sample_json: dict,
+    ) -> None:
+        """Use real CrossRef work as the seed and build_paper for each ref DOI."""
+        connector = CrossRefConnector()
+        paper = make_paper(doi=_NATURE_DOI)
+
+        seed_work = crossref_sample_json[_NATURE_DOI]
+        ref_dois = [r["DOI"] for r in seed_work.get("reference", []) if r.get("DOI")]
+
+        # First call returns the real seed work; subsequent calls return
+        # the seed work as a stand-in (CrossRef works are structurally
+        # identical so this validates parsing).
+        mock_fetch.side_effect = [seed_work] + [seed_work] * len(ref_dois)
+
+        refs = connector.fetch_references(paper)
+
+        # Each ref DOI gets a fetch_work call; the seed work has a title
+        # so build_paper should succeed for all of them.
+        assert len(refs) == len(ref_dois)
+        assert len(refs) == 29
+        for ref in refs:
+            assert ref.title
+
+    def test_build_paper_with_real_work(self, crossref_sample_json: dict) -> None:
+        """build_paper converts a real CrossRef work record to a Paper."""
+        connector = CrossRefConnector()
+        work = crossref_sample_json[_NATURE_DOI]
+
+        paper = connector.build_paper(work)
+
+        assert paper is not None
+        assert paper.title
+        assert paper.doi == _NATURE_DOI
+        assert paper.authors

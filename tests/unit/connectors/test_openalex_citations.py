@@ -299,3 +299,115 @@ class TestFetchWorksByIds:
 
         assert len(result) == 2
         assert mock_get.call_count == 1
+
+
+# ---------------------------------------------------------------------------
+# Tests with real API response data
+# ---------------------------------------------------------------------------
+
+_SPRINGER_DOI = "10.3758/s13428-022-02028-7"
+
+
+class TestOpenAlexRealDataParsing:
+    """Tests using real OpenAlex API responses."""
+
+    @patch.object(OpenAlexConnector, "_get")
+    def test_resolve_openalex_id_with_real_data(
+        self,
+        mock_get: MagicMock,
+        make_paper,
+        oa_citation_samples: dict,
+    ) -> None:
+        """Resolve DOI to OpenAlex ID using real API response."""
+        connector = OpenAlexConnector()
+        paper = make_paper(doi=_SPRINGER_DOI)
+        doi_data = oa_citation_samples[_SPRINGER_DOI]["doi_resolution"]
+
+        response = MagicMock()
+        response.json.return_value = doi_data
+        mock_get.return_value = response
+
+        oa_id = connector._resolve_openalex_id(paper)
+
+        assert oa_id == "https://openalex.org/W4312081276"
+
+    @patch.object(OpenAlexConnector, "_get")
+    def test_fetch_references_with_real_data(
+        self,
+        mock_get: MagicMock,
+        make_paper,
+        oa_citation_samples: dict,
+    ) -> None:
+        """Full fetch_references with real referenced_works + batch_works data."""
+        connector = OpenAlexConnector()
+        paper = make_paper(doi=_SPRINGER_DOI)
+        sample = oa_citation_samples[_SPRINGER_DOI]
+
+        # First call: resolve DOI → referenced_works
+        ref_response = MagicMock()
+        ref_response.json.return_value = sample["referenced_works"]
+
+        # Second call: batch-fetch works by IDs
+        batch_response = MagicMock()
+        batch_response.json.return_value = sample["works_by_ids"]
+
+        mock_get.side_effect = [ref_response, batch_response]
+
+        refs = connector.fetch_references(paper)
+
+        # 17 referenced_works IDs → 13 results from API (some IDs may not resolve).
+        assert len(refs) == 13
+        for ref in refs:
+            assert ref.title
+            assert "openalex" in ref.databases
+
+    @patch.object(OpenAlexConnector, "_get")
+    def test_fetch_works_by_ids_with_real_data(
+        self,
+        mock_get: MagicMock,
+        oa_citation_samples: dict,
+    ) -> None:
+        """Batch-fetch works using real API response."""
+        connector = OpenAlexConnector()
+        sample = oa_citation_samples[_SPRINGER_DOI]
+        ref_ids = sample["referenced_works"]["referenced_works"]
+
+        response = MagicMock()
+        response.json.return_value = sample["works_by_ids"]
+        mock_get.return_value = response
+
+        papers = connector._fetch_works_by_ids(ref_ids)
+
+        assert len(papers) == 13
+        titles = {p.title for p in papers}
+        # Verify a known paper from the reference list is present.
+        assert any("GloVe" in t or "Global Vectors" in t for t in titles)
+
+    @patch.object(OpenAlexConnector, "_get")
+    def test_fetch_cited_by_with_real_data(
+        self,
+        mock_get: MagicMock,
+        make_paper,
+        oa_citation_samples: dict,
+    ) -> None:
+        """Full fetch_cited_by with real ID resolution + cited-by page."""
+        connector = OpenAlexConnector()
+        paper = make_paper(doi=_SPRINGER_DOI)
+        sample = oa_citation_samples[_SPRINGER_DOI]
+
+        # First call: resolve DOI → OpenAlex ID
+        id_response = MagicMock()
+        id_response.json.return_value = sample["doi_resolution"]
+
+        # Second call: cited-by results
+        cite_response = MagicMock()
+        cite_response.json.return_value = sample["cited_by"]
+
+        mock_get.side_effect = [id_response, cite_response]
+
+        cited_by = connector.fetch_cited_by(paper)
+
+        assert len(cited_by) == 2
+        for p in cited_by:
+            assert p.title
+            assert "openalex" in p.databases

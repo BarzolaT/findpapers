@@ -34,6 +34,7 @@ COLLECTORS = {
     "scopus": "scopus/collect_sample.py",
     "openalex": "openalex/collect_sample.py",
     "semanticscholar": "semanticscholar/collect_sample.py",
+    "citations": "collect_citation_samples.py",
 }
 
 DATA_DIR = Path(__file__).parent

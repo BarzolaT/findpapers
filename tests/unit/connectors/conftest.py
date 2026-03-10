@@ -131,3 +131,19 @@ def crossref_sample_json():
 def semantic_scholar_sample_json():
     """Read Semantic Scholar bulk search sample JSON response."""
     return json.loads((DATA_DIR / "semanticscholar" / "bulk_search_response.json").read_text())
+
+
+@pytest.fixture
+def ss_citation_samples():
+    """Read Semantic Scholar citation API responses (keyed by DOI)."""
+    return json.loads(
+        (DATA_DIR / "semanticscholar" / "citation_responses.json").read_text(encoding="utf-8")
+    )
+
+
+@pytest.fixture
+def oa_citation_samples():
+    """Read OpenAlex citation API responses (keyed by DOI)."""
+    return json.loads(
+        (DATA_DIR / "openalex" / "citation_responses.json").read_text(encoding="utf-8")
+    )
