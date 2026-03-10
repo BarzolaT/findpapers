@@ -541,7 +541,7 @@ class TestArxivConnectorSearch:
         call_args = searcher._http_session.get.call_args
         params = call_args.kwargs.get("params") or call_args[1].get("params", {})
         search_query = params.get("search_query", "")
-        assert "submittedDate:[000001010000 TO 202203152359]" in search_query
+        assert "submittedDate:[199101010000 TO 202203152359]" in search_query
 
 
 class TestArxivConnectorFieldsOfStudyAndSubjects:

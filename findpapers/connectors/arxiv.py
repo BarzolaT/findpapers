@@ -276,8 +276,10 @@ class ArxivConnector(SearchConnectorBase):
         # which is what the arXiv API expects.  Literal ``+`` characters were
         # previously double-encoded as ``%2B``, causing the filter to be
         # silently ignored.
+        # When ``since`` is not provided we default to 1991-01-01 (arXiv
+        # launch year) because year 0000 causes a server error.
         if since or until:
-            from_date = since.strftime("%Y%m%d") + "0000" if since else "000001010000"
+            from_date = since.strftime("%Y%m%d") + "0000" if since else "199101010000"
             to_date = until.strftime("%Y%m%d") + "2359" if until else "999912312359"
             date_filter = f"submittedDate:[{from_date} TO {to_date}]"
             arxiv_query = f"{arxiv_query} AND {date_filter}" if arxiv_query else date_filter
