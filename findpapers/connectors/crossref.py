@@ -14,6 +14,7 @@ from __future__ import annotations
 import datetime
 import logging
 import re
+from collections.abc import Callable
 from typing import Any
 from urllib.parse import quote as _url_quote
 
@@ -177,7 +178,11 @@ class CrossRefConnector(CitationConnectorBase):
     # Citation interface (CitationConnectorBase)
     # ------------------------------------------------------------------
 
-    def fetch_references(self, paper: Paper) -> list[Paper]:
+    def fetch_references(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Fetch papers referenced by *paper* via the CrossRef ``reference`` list.
 
         Each CrossRef work record may contain a ``reference`` array whose
@@ -189,6 +194,8 @@ class CrossRefConnector(CitationConnectorBase):
         ----------
         paper : Paper
             The paper whose references should be retrieved.
+        progress_callback : Callable[[int], None] | None
+            Optional callback for per-page progress reporting.
 
         Returns
         -------
@@ -231,7 +238,11 @@ class CrossRefConnector(CitationConnectorBase):
 
         return papers
 
-    def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+    def fetch_cited_by(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Return papers that cite *paper*.
 
         The CrossRef REST API does not provide a direct endpoint for
@@ -243,6 +254,8 @@ class CrossRefConnector(CitationConnectorBase):
         ----------
         paper : Paper
             Ignored.
+        progress_callback : Callable[[int], None] | None
+            Unused.  Accepted for interface compatibility.
 
         Returns
         -------

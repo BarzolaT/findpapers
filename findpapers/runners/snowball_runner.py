@@ -7,10 +7,14 @@ depth, producing a :class:`~findpapers.core.citation_graph.CitationGraph`.
 
 from __future__ import annotations
 
+import contextlib
 import logging
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import perf_counter
 from typing import Literal
+
+from tqdm import tqdm
 
 from findpapers.connectors import CITATION_REGISTRY, CitationSource
 from findpapers.connectors.citation_base import CitationConnectorBase
@@ -174,7 +178,12 @@ class SnowballRunner:
                     disable=not show_progress,
                 ) as pbar:
                     for paper in frontier:
-                        discovered = self._expand_paper(paper, graph, pool)
+                        discovered = self._expand_paper(
+                            paper,
+                            graph,
+                            pool,
+                            show_progress=show_progress,
+                        )
                         next_frontier.extend(discovered)
                         pbar.update(1)
 
@@ -257,6 +266,8 @@ class SnowballRunner:
         paper: Paper,
         graph: CitationGraph,
         pool: ThreadPoolExecutor | None = None,
+        *,
+        show_progress: bool = True,
     ) -> list[Paper]:
         """Expand one paper by fetching its references and/or citing papers.
 
@@ -274,6 +285,9 @@ class SnowballRunner:
         pool : ThreadPoolExecutor | None
             Optional shared thread pool for parallel connector queries.
             When ``None``, connectors are called sequentially.
+        show_progress : bool
+            When ``True``, display per-connector progress bars for
+            long pagination operations.
 
         Returns
         -------
@@ -285,7 +299,11 @@ class SnowballRunner:
 
         # Collect results from each connector — either sequentially or in
         # parallel depending on num_workers.
-        connector_results = self._query_connectors(paper, pool)
+        connector_results = self._query_connectors(
+            paper,
+            pool,
+            show_progress=show_progress,
+        )
 
         for _connector_name, references, citing in connector_results:
             # Backward: paper cites these references
@@ -312,8 +330,14 @@ class SnowballRunner:
         self,
         connector: CitationConnectorBase,
         paper: Paper,
+        *,
+        show_progress: bool = True,
     ) -> tuple[str, list[Paper] | None, list[Paper] | None]:
         """Query a single connector for references and/or citing papers.
+
+        When *show_progress* is ``True``, a nested tqdm progress bar is
+        created for each fetch direction using the expected total from
+        :meth:`~CitationConnectorBase.get_expected_counts`.
 
         Parameters
         ----------
@@ -321,6 +345,8 @@ class SnowballRunner:
             The connector to query.
         paper : Paper
             The paper to look up.
+        show_progress : bool
+            Display per-connector progress bars for long pagination.
 
         Returns
         -------
@@ -331,9 +357,33 @@ class SnowballRunner:
         references: list[Paper] | None = None
         citing: list[Paper] | None = None
 
+        def _pbar_callback(pbar: tqdm) -> Callable[[int], None]:
+            """Return a typed callback wrapping ``pbar.update``."""
+
+            def _cb(n: int) -> None:
+                pbar.update(n)
+
+            return _cb
+
+        # Fetch expected counts for determinate progress bars.
+        cit_count: int | None = None
+        ref_count: int | None = None
+        if show_progress:
+            with contextlib.suppress(Exception):
+                cit_count, ref_count = connector.get_expected_counts(paper)
+
         if self._direction in ("both", "backward"):
             try:
-                references = connector.fetch_references(paper)
+                with make_progress_bar(
+                    desc=f"  {connector.name} refs",
+                    total=ref_count,
+                    unit="paper",
+                    disable=not show_progress,
+                ) as pbar:
+                    references = connector.fetch_references(
+                        paper,
+                        progress_callback=_pbar_callback(pbar),
+                    )
             except Exception:
                 logger.warning(
                     "Error fetching references from %s for '%s'.",
@@ -344,7 +394,16 @@ class SnowballRunner:
 
         if self._direction in ("both", "forward"):
             try:
-                citing = connector.fetch_cited_by(paper)
+                with make_progress_bar(
+                    desc=f"  {connector.name} cites",
+                    total=cit_count,
+                    unit="paper",
+                    disable=not show_progress,
+                ) as pbar:
+                    citing = connector.fetch_cited_by(
+                        paper,
+                        progress_callback=_pbar_callback(pbar),
+                    )
             except Exception:
                 logger.warning(
                     "Error fetching cited-by from %s for '%s'.",
@@ -359,6 +418,8 @@ class SnowballRunner:
         self,
         paper: Paper,
         pool: ThreadPoolExecutor | None = None,
+        *,
+        show_progress: bool = True,
     ) -> list[tuple[str, list[Paper] | None, list[Paper] | None]]:
         """Query all connectors, optionally in parallel.
 
@@ -373,6 +434,8 @@ class SnowballRunner:
         pool : ThreadPoolExecutor | None
             Optional shared thread pool.  When ``None``, connectors are
             called sequentially.
+        show_progress : bool
+            Display per-connector progress bars.
 
         Returns
         -------
@@ -381,12 +444,22 @@ class SnowballRunner:
         """
         if pool is None:
             return [
-                self._query_single_connector(connector, paper) for connector in self._connectors
+                self._query_single_connector(
+                    connector,
+                    paper,
+                    show_progress=show_progress,
+                )
+                for connector in self._connectors
             ]
 
         results: list[tuple[str, list[Paper] | None, list[Paper] | None]] = []
         futures = {
-            pool.submit(self._query_single_connector, connector, paper): connector
+            pool.submit(
+                self._query_single_connector,
+                connector,
+                paper,
+                show_progress=show_progress,
+            ): connector
             for connector in self._connectors
         }
         for future in as_completed(futures):

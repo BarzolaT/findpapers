@@ -298,7 +298,11 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
 
         return papers, next_cursor
 
-    def fetch_references(self, paper: Paper) -> list[Paper]:
+    def fetch_references(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Return papers cited *by* the given paper (backward snowballing).
 
         Queries OpenAlex for the full work record (which includes the
@@ -309,6 +313,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         ----------
         paper : Paper
             The paper whose references should be fetched.  Must have a DOI.
+        progress_callback : Callable[[int], None] | None
+            Optional callback for per-page progress reporting.
 
         Returns
         -------
@@ -338,7 +344,11 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         )
         return self._fetch_works_by_ids(referenced_ids)
 
-    def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+    def fetch_cited_by(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Return papers that cite the given paper (forward snowballing).
 
         Uses the OpenAlex ``cites`` filter to paginate through all papers
@@ -348,6 +358,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         ----------
         paper : Paper
             The paper whose citing papers should be fetched.  Must have a DOI.
+        progress_callback : Callable[[int], None] | None
+            Optional callback for per-page progress reporting.
 
         Returns
         -------

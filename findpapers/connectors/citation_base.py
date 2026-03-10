@@ -8,6 +8,7 @@ snowballing).
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -28,7 +29,32 @@ class CitationConnectorBase(ConnectorBase):
     returning an empty list.  Vice-versa for forward-only connectors.
     """
 
-    def fetch_references(self, paper: Paper) -> list[Paper]:
+    def get_expected_counts(self, paper: Paper) -> tuple[int | None, int | None]:
+        """Return expected citation and reference counts for *paper*.
+
+        Used by the snowball runner to display determinate progress bars.
+        The default implementation returns ``(None, None)``.  Subclasses
+        may override this to provide counts from the API or from the
+        paper's metadata.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper whose counts are requested.
+
+        Returns
+        -------
+        tuple[int | None, int | None]
+            ``(citation_count, reference_count)``.  Either may be ``None``
+            when the information is unavailable.
+        """
+        return None, None
+
+    def fetch_references(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Return papers cited *by* the given paper (backward snowballing).
 
         The default implementation returns an empty list.  Subclasses that
@@ -39,6 +65,10 @@ class CitationConnectorBase(ConnectorBase):
         paper : Paper
             The paper whose references should be fetched.
             Must have a DOI to be resolved.
+        progress_callback : Callable[[int], None] | None
+            Optional callback invoked with the number of new papers
+            fetched after each page/batch.  Used by the runner to
+            update a progress bar.
 
         Returns
         -------
@@ -48,7 +78,11 @@ class CitationConnectorBase(ConnectorBase):
         """
         return []
 
-    def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+    def fetch_cited_by(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Return papers that cite the given paper (forward snowballing).
 
         The default implementation returns an empty list.  Subclasses that
@@ -59,6 +93,10 @@ class CitationConnectorBase(ConnectorBase):
         paper : Paper
             The paper whose citing papers should be fetched.
             Must have a DOI to be resolved.
+        progress_callback : Callable[[int], None] | None
+            Optional callback invoked with the number of new papers
+            fetched after each page/batch.  Used by the runner to
+            update a progress bar.
 
         Returns
         -------

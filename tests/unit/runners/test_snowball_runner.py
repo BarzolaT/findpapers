@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import pytest
 
 from findpapers.connectors.citation_base import CitationConnectorBase
@@ -52,13 +54,19 @@ class FakeCitationConnector(CitationConnectorBase):
         """
         return 0.0
 
-    def fetch_references(self, paper: Paper) -> list[Paper]:
+    def fetch_references(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Return pre-configured references for the given paper.
 
         Parameters
         ----------
         paper : Paper
             Paper to look up.
+        progress_callback : Callable[[int], None] | None
+            Ignored in fake connector.
 
         Returns
         -------
@@ -67,13 +75,19 @@ class FakeCitationConnector(CitationConnectorBase):
         """
         return list(self._references.get(paper.doi or "", []))
 
-    def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+    def fetch_cited_by(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Return pre-configured citing papers.
 
         Parameters
         ----------
         paper : Paper
             Paper to look up.
+        progress_callback : Callable[[int], None] | None
+            Ignored in fake connector.
 
         Returns
         -------
@@ -319,12 +333,18 @@ class TestSnowballRunnerRun:
                 """
                 return 0.0
 
-            def fetch_references(self, paper: Paper) -> list[Paper]:
+            def fetch_references(
+                self,
+                paper: Paper,
+                progress_callback: Callable[[int], None] | None = None,
+            ) -> list[Paper]:
                 """Always raise.
 
                 Parameters
                 ----------
                 paper : Paper
+                    Ignored.
+                progress_callback : Callable[[int], None] | None
                     Ignored.
 
                 Raises
@@ -334,12 +354,18 @@ class TestSnowballRunnerRun:
                 """
                 raise RuntimeError("boom")
 
-            def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+            def fetch_cited_by(
+                self,
+                paper: Paper,
+                progress_callback: Callable[[int], None] | None = None,
+            ) -> list[Paper]:
                 """Always raise.
 
                 Parameters
                 ----------
                 paper : Paper
+                    Ignored.
+                progress_callback : Callable[[int], None] | None
                     Ignored.
 
                 Raises
@@ -514,12 +540,18 @@ class TestSnowballRunnerParallelErrors:
                 """
                 return 0.0
 
-            def fetch_references(self, paper: Paper) -> list[Paper]:
+            def fetch_references(
+                self,
+                paper: Paper,
+                progress_callback: Callable[[int], None] | None = None,
+            ) -> list[Paper]:
                 """Always raise.
 
                 Parameters
                 ----------
                 paper : Paper
+                    Ignored.
+                progress_callback : Callable[[int], None] | None
                     Ignored.
 
                 Raises
@@ -529,12 +561,18 @@ class TestSnowballRunnerParallelErrors:
                 """
                 raise RuntimeError("boom")
 
-            def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+            def fetch_cited_by(
+                self,
+                paper: Paper,
+                progress_callback: Callable[[int], None] | None = None,
+            ) -> list[Paper]:
                 """Always raise.
 
                 Parameters
                 ----------
                 paper : Paper
+                    Ignored.
+                progress_callback : Callable[[int], None] | None
                     Ignored.
 
                 Raises
@@ -583,12 +621,15 @@ class TestSnowballRunnerParallelErrors:
         original = runner._query_single_connector
 
         def patched(
-            connector: CitationConnectorBase, paper: Paper
+            connector: CitationConnectorBase,
+            paper: Paper,
+            *,
+            show_progress: bool = True,
         ) -> tuple[str, list[Paper] | None, list[Paper] | None]:
             """Raise for the 'bad' connector, delegate otherwise."""
             if connector is bad:
                 raise RuntimeError("unexpected crash")
-            return original(connector, paper)
+            return original(connector, paper, show_progress=show_progress)
 
         with patch.object(runner, "_query_single_connector", side_effect=patched):
             graph = runner.run(show_progress=False)

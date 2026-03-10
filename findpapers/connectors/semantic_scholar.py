@@ -235,7 +235,40 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
 
         return papers, next_offset
 
-    def _fetch_all_citation_pages(self, doi: str, endpoint: str) -> list[Paper]:
+    def _fetch_paper_counts(self, doi: str) -> tuple[int | None, int | None]:
+        """Fetch citation and reference counts for a paper (lightweight).
+
+        Makes a single request with minimal fields to obtain
+        ``citationCount`` and ``referenceCount``.
+
+        Parameters
+        ----------
+        doi : str
+            DOI of the paper.
+
+        Returns
+        -------
+        tuple[int | None, int | None]
+            ``(citation_count, reference_count)``.  Either may be ``None``
+            on failure.
+        """
+        url = f"{_PAPER_URL}/DOI:{doi}"
+        params = {"fields": "citationCount,referenceCount"}
+        try:
+            response = self._get(url, params)
+            data = response.json()
+            return data.get("citationCount"), data.get("referenceCount")
+        except Exception:
+            logger.debug("Semantic Scholar: could not fetch counts for DOI %s.", doi)
+            return None, None
+
+    def _fetch_all_citation_pages(
+        self,
+        doi: str,
+        endpoint: str,
+        *,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Paginate through all references or citations for a paper.
 
         Parameters
@@ -244,6 +277,9 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
             DOI of the paper.
         endpoint : str
             ``"references"`` or ``"citations"``.
+        progress_callback : Callable[[int], None] | None
+            Optional callback invoked after each page with the number
+            of new papers fetched in that page.
 
         Returns
         -------
@@ -252,15 +288,56 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         """
         all_papers: list[Paper] = []
         offset = 0
+        page_num = 0
 
         while offset >= 0:
+            page_num += 1
             page_papers, next_offset = self._fetch_citation_page(doi, endpoint, offset)
             all_papers.extend(page_papers)
+            if progress_callback is not None:
+                progress_callback(len(page_papers))
             offset = next_offset
+
+        logger.info(
+            "Semantic Scholar: DOI %s %s — %d pages, %d papers total.",
+            doi,
+            endpoint,
+            page_num,
+            len(all_papers),
+        )
 
         return all_papers
 
-    def fetch_references(self, paper: Paper) -> list[Paper]:
+    def get_expected_counts(self, paper: Paper) -> tuple[int | None, int | None]:
+        """Return expected citation and reference counts for *paper*.
+
+        Uses the locally known ``paper.citations`` when available,
+        otherwise makes a lightweight API call to fetch both counts.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper whose counts are requested.
+
+        Returns
+        -------
+        tuple[int | None, int | None]
+            ``(citation_count, reference_count)``.
+        """
+        if not paper.doi:
+            return None, None
+        local_citations = paper.citations
+        cit_count, ref_count = self._fetch_paper_counts(paper.doi)
+        # Prefer local citation count if we already have it.
+        if local_citations is not None:
+            cit_count = local_citations
+        return cit_count, ref_count
+
+    def fetch_references(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Return papers cited *by* the given paper (backward snowballing).
 
         Uses the Semantic Scholar ``/paper/{id}/references`` endpoint.
@@ -269,6 +346,8 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         ----------
         paper : Paper
             The paper whose references should be fetched.  Must have a DOI.
+        progress_callback : Callable[[int], None] | None
+            Optional callback for per-page progress reporting.
 
         Returns
         -------
@@ -279,9 +358,17 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
             return []
 
         logger.debug("Semantic Scholar: fetching references for DOI %s.", paper.doi)
-        return self._fetch_all_citation_pages(paper.doi, "references")
+        return self._fetch_all_citation_pages(
+            paper.doi,
+            "references",
+            progress_callback=progress_callback,
+        )
 
-    def fetch_cited_by(self, paper: Paper) -> list[Paper]:
+    def fetch_cited_by(
+        self,
+        paper: Paper,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Return papers that cite the given paper (forward snowballing).
 
         Uses the Semantic Scholar ``/paper/{id}/citations`` endpoint.
@@ -290,6 +377,8 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         ----------
         paper : Paper
             The paper whose citing papers should be fetched.  Must have a DOI.
+        progress_callback : Callable[[int], None] | None
+            Optional callback for per-page progress reporting.
 
         Returns
         -------
@@ -300,7 +389,11 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
             return []
 
         logger.debug("Semantic Scholar: fetching citations for DOI %s.", paper.doi)
-        return self._fetch_all_citation_pages(paper.doi, "citations")
+        return self._fetch_all_citation_pages(
+            paper.doi,
+            "citations",
+            progress_callback=progress_callback,
+        )
 
     def _parse_paper(self, item: dict[str, Any]) -> Paper | None:
         """Parse a single Semantic Scholar paper record.

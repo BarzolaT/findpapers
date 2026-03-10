@@ -147,7 +147,8 @@ class TestSemanticScholarFetchCitedBy:
     def test_paginates_through_multiple_pages(self, mock_get: MagicMock, make_paper) -> None:
         """Follows offset-based pagination until exhausted."""
         connector = SemanticScholarConnector()
-        paper = make_paper(doi="10.1000/popular")
+        # Set citations so _fetch_paper_counts is skipped (uses local count).
+        paper = make_paper(doi="10.1000/popular", citations=1001)
 
         # Page 1: returns 1000 items (full page) with next offset
         page1 = MagicMock()
@@ -210,3 +211,87 @@ class TestSemanticScholarFetchCitedBy:
 
         assert len(cited_by) == 1
         assert cited_by[0].title == "Good Paper"
+
+
+# ---------------------------------------------------------------------------
+# Tests: _fetch_paper_counts
+# ---------------------------------------------------------------------------
+
+
+class TestSemanticScholarFetchPaperCounts:
+    """Tests for SemanticScholarConnector._fetch_paper_counts."""
+
+    @patch.object(SemanticScholarConnector, "_get")
+    def test_returns_counts(self, mock_get: MagicMock) -> None:
+        """Returns (citationCount, referenceCount) from the API."""
+        connector = SemanticScholarConnector()
+
+        response = MagicMock()
+        response.json.return_value = {
+            "paperId": "abc",
+            "citationCount": 500,
+            "referenceCount": 42,
+        }
+        mock_get.return_value = response
+
+        cit, ref = connector._fetch_paper_counts("10.1000/test")
+
+        assert cit == 500
+        assert ref == 42
+
+    @patch.object(SemanticScholarConnector, "_get")
+    def test_returns_none_on_error(self, mock_get: MagicMock) -> None:
+        """Returns (None, None) when the API request fails."""
+        connector = SemanticScholarConnector()
+        mock_get.side_effect = requests.RequestException("fail")
+
+        cit, ref = connector._fetch_paper_counts("10.1000/bad")
+
+        assert cit is None
+        assert ref is None
+
+    @patch.object(SemanticScholarConnector, "_get")
+    def test_get_expected_counts_uses_local_citations(
+        self, mock_get: MagicMock, make_paper
+    ) -> None:
+        """get_expected_counts prefers paper.citations over API citationCount."""
+        connector = SemanticScholarConnector()
+        paper = make_paper(doi="10.1000/known", citations=100)
+
+        response = MagicMock()
+        response.json.return_value = {
+            "paperId": "abc",
+            "citationCount": 500,
+            "referenceCount": 42,
+        }
+        mock_get.return_value = response
+
+        cit, ref = connector.get_expected_counts(paper)
+
+        # Local citation count (100) takes precedence over API (500).
+        assert cit == 100
+        assert ref == 42
+
+    @patch.object(SemanticScholarConnector, "_get")
+    def test_get_expected_counts_fetches_from_api(
+        self,
+        mock_get: MagicMock,
+        make_paper,
+    ) -> None:
+        """get_expected_counts calls _fetch_paper_counts when paper.citations is None."""
+        connector = SemanticScholarConnector()
+        paper = make_paper(doi="10.1000/unknown")  # citations=None
+
+        response = MagicMock()
+        response.json.return_value = {
+            "paperId": "abc",
+            "citationCount": 1,
+            "referenceCount": 5,
+        }
+        mock_get.return_value = response
+
+        cit, ref = connector.get_expected_counts(paper)
+
+        assert cit == 1
+        assert ref == 5
+        assert mock_get.call_count == 1
