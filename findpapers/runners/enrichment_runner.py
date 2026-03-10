@@ -49,26 +49,18 @@ class EnrichmentOutcome(Enum):
 
     Attributes
     ----------
-    ENRICHED_DOI : str
-        At least one field was updated, with CrossRef contributing data.
     ENRICHED : str
-        At least one field was updated via URL scraping.
-    NO_CHANGE : str
+        At least one field was updated.
+    UNCHANGED : str
         Metadata was fetched but mirrored existing data.
-    NO_METADATA : str
-        URLs were reachable but returned no parseable metadata.
-    FETCH_ERROR : str
-        All sources raised HTTP/network errors.
-    NO_URLS : str
-        Paper has no usable URL and no DOI.
+    FAILED : str
+        Enrichment could not be performed (no URLs, fetch errors,
+        or no parseable metadata).
     """
 
-    ENRICHED_DOI = "enriched+doi"
     ENRICHED = "enriched"
-    NO_CHANGE = "no_change"
-    NO_METADATA = "no_metadata"
-    FETCH_ERROR = "fetch_error"
-    NO_URLS = "no_urls"
+    UNCHANGED = "unchanged"
+    FAILED = "failed"
 
 
 def _enrichment_snapshot(paper: Paper) -> tuple:
@@ -294,11 +286,8 @@ class EnrichmentRunner:
             "total_papers": len(self._results),
             "runtime_in_seconds": 0.0,
             "enriched_papers": 0,
-            "doi_enriched_papers": 0,
-            "fetch_error_papers": 0,
-            "no_metadata_papers": 0,
-            "no_change_papers": 0,
-            "no_urls_papers": 0,
+            "unchanged_papers": 0,
+            "failed_papers": 0,
         }
 
         try:
@@ -313,11 +302,8 @@ class EnrichmentRunner:
             logger.info("=== Enrichment Summary ===")
             logger.info("Total papers: %d", int(metrics["total_papers"]))
             logger.info("Enriched: %d", int(metrics["enriched_papers"]))
-            logger.info("  via DOI (CrossRef): %d", int(metrics["doi_enriched_papers"]))
-            logger.info("Fetch errors: %d", int(metrics["fetch_error_papers"]))
-            logger.info("No metadata: %d", int(metrics["no_metadata_papers"]))
-            logger.info("No change: %d", int(metrics["no_change_papers"]))
-            logger.info("No URLs: %d", int(metrics["no_urls_papers"]))
+            logger.info("Unchanged: %d", int(metrics["unchanged_papers"]))
+            logger.info("Failed: %d", int(metrics["failed_papers"]))
             logger.info("Runtime: %.2f s", metrics["runtime_in_seconds"])
             logger.info("==========================")
 
@@ -355,11 +341,8 @@ class EnrichmentRunner:
         num_workers = self._num_workers
         timeout = self._timeout
         enriched = 0
-        doi_enriched = 0
-        fetch_errors = 0
-        no_metadata = 0
-        no_change = 0
-        no_urls = 0
+        unchanged = 0
+        failed = 0
 
         def _enrich_task(paper: Paper) -> EnrichmentOutcome:
             return self._enrich_paper(paper, timeout=timeout)
@@ -377,27 +360,18 @@ class EnrichmentRunner:
             if error is not None:
                 if verbose:
                     logger.warning("Error enriching paper: %s", error)
-                fetch_errors += 1
+                failed += 1
                 continue
-            if result in (EnrichmentOutcome.ENRICHED, EnrichmentOutcome.ENRICHED_DOI):
+            if result == EnrichmentOutcome.ENRICHED:
                 enriched += 1
-                if result == EnrichmentOutcome.ENRICHED_DOI:
-                    doi_enriched += 1
-            elif result == EnrichmentOutcome.FETCH_ERROR:
-                fetch_errors += 1
-            elif result == EnrichmentOutcome.NO_METADATA:
-                no_metadata += 1
-            elif result == EnrichmentOutcome.NO_CHANGE:
-                no_change += 1
-            elif result == EnrichmentOutcome.NO_URLS:
-                no_urls += 1
+            elif result == EnrichmentOutcome.UNCHANGED:
+                unchanged += 1
+            elif result == EnrichmentOutcome.FAILED:
+                failed += 1
 
         metrics["enriched_papers"] = enriched
-        metrics["doi_enriched_papers"] = doi_enriched
-        metrics["fetch_error_papers"] = fetch_errors
-        metrics["no_metadata_papers"] = no_metadata
-        metrics["no_change_papers"] = no_change
-        metrics["no_urls_papers"] = no_urls
+        metrics["unchanged_papers"] = unchanged
+        metrics["failed_papers"] = failed
 
     def _build_proxies(self) -> dict[str, str] | None:
         """Build a proxies dict for *requests* if a proxy is configured.
@@ -482,7 +456,6 @@ class EnrichmentRunner:
             The outcome of the enrichment attempt.
         """
         before = _enrichment_snapshot(paper)
-        doi_contributed = False
 
         # ------------------------------------------------------------------
         # Phase 1: CrossRef API (structured metadata via DOI)
@@ -493,10 +466,7 @@ class EnrichmentRunner:
                 if work:
                     crossref_paper = self._crossref.build_paper(work)
                     if crossref_paper is not None:
-                        mid = _enrichment_snapshot(paper)
                         paper.merge(crossref_paper)
-                        if _enrichment_snapshot(paper) != mid:
-                            doi_contributed = True
             except (requests.RequestException, KeyError, TypeError, ValueError):
                 logger.warning("CrossRef fetch error for DOI: %s", paper.doi)
 
@@ -519,13 +489,11 @@ class EnrichmentRunner:
                 seen.add(u)
                 deduped.append(u)
 
-        had_fetch_error = False
         had_url_metadata = False
         for url in deduped:
             try:
                 metadata = self._fetch_url_metadata(url, timeout=timeout)
             except requests.RequestException:
-                had_fetch_error = True
                 logger.warning("Fetch error for enrichment URL: %s", url)
                 continue
             if not metadata:
@@ -542,17 +510,13 @@ class EnrichmentRunner:
         # ------------------------------------------------------------------
         changed = _enrichment_snapshot(paper) != before
 
-        if not paper.doi and not deduped:
-            return EnrichmentOutcome.NO_URLS
         if changed:
-            return EnrichmentOutcome.ENRICHED_DOI if doi_contributed else EnrichmentOutcome.ENRICHED
-        # Nothing changed from here on — classify the reason.
-        if had_url_metadata or doi_contributed:
+            return EnrichmentOutcome.ENRICHED
+        if had_url_metadata or paper.doi:
             # Sources returned data but it mirrored what we already had.
-            return EnrichmentOutcome.NO_CHANGE
-        if had_fetch_error and not paper.doi:
-            return EnrichmentOutcome.FETCH_ERROR
-        if deduped and not had_fetch_error and not had_url_metadata:
-            # URLs were reachable but returned no parseable metadata.
-            return EnrichmentOutcome.NO_METADATA
-        return EnrichmentOutcome.NO_CHANGE
+            return EnrichmentOutcome.UNCHANGED
+        if deduped or paper.doi:
+            # Had URLs/DOI but couldn't extract useful metadata.
+            return EnrichmentOutcome.FAILED
+        # No DOI and no URLs — nothing to try.
+        return EnrichmentOutcome.FAILED

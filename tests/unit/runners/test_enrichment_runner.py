@@ -46,11 +46,8 @@ class TestEnrichmentRunnerRun:
             metrics = runner.run()
         assert "total_papers" in metrics
         assert "enriched_papers" in metrics
-        assert "doi_enriched_papers" in metrics
-        assert "fetch_error_papers" in metrics
-        assert "no_metadata_papers" in metrics
-        assert "no_change_papers" in metrics
-        assert "no_urls_papers" in metrics
+        assert "unchanged_papers" in metrics
+        assert "failed_papers" in metrics
         assert "runtime_in_seconds" in metrics
 
     def test_enriched_count_incremented_on_success(self, make_paper):
@@ -121,7 +118,7 @@ class TestEnrichmentRunnerRun:
         mock_fetch.assert_not_called()
         mock_crossref.assert_not_called()
         assert metrics["enriched_papers"] == 0
-        assert metrics["no_urls_papers"] == 1
+        assert metrics["failed_papers"] == 1
 
     def test_run_twice_resets(self, make_paper):
         """run() can be called multiple times; metrics are fresh each time."""
@@ -152,7 +149,7 @@ class TestEnrichmentRunnerRun:
         assert metrics["total_papers"] == 5
 
     def test_fetch_error_counted_when_url_raises(self, make_paper):
-        """fetch_error_papers counts papers whose URL fetch raised an HTTP/network error."""
+        """failed_papers counts papers whose URL fetch raised an HTTP/network error."""
         paper = make_paper()
         paper.doi = None  # no DOI so CrossRef is skipped
         runner = EnrichmentRunner(papers=[paper])
@@ -161,11 +158,11 @@ class TestEnrichmentRunnerRun:
             side_effect=RuntimeError("network error"),
         ):
             metrics = runner.run()
-        assert metrics["fetch_error_papers"] == 1
+        assert metrics["failed_papers"] == 1
         assert metrics["enriched_papers"] == 0
 
     def test_no_metadata_counted_when_fetch_returns_none(self, make_paper):
-        """no_metadata_papers counts papers whose URL returned non-HTML content."""
+        """failed_papers counts papers whose URL returned non-HTML content."""
         paper = make_paper()
         paper.doi = None  # no DOI so CrossRef is skipped
         runner = EnrichmentRunner(papers=[paper])
@@ -174,11 +171,11 @@ class TestEnrichmentRunnerRun:
             return_value=None,
         ):
             metrics = runner.run()
-        assert metrics["no_metadata_papers"] == 1
+        assert metrics["failed_papers"] == 1
         assert metrics["enriched_papers"] == 0
 
     def test_no_change_counted_when_merge_changes_nothing(self, make_paper):
-        """no_change_papers counts papers where HTML was fetched but added no new data."""
+        """unchanged_papers counts papers where HTML was fetched but added no new data."""
         same_paper = make_paper()
         with (
             patch(
@@ -196,7 +193,7 @@ class TestEnrichmentRunnerRun:
         ):
             runner = EnrichmentRunner(papers=[make_paper()])
             metrics = runner.run()
-        assert metrics["no_change_papers"] == 1
+        assert metrics["unchanged_papers"] == 1
         assert metrics["enriched_papers"] == 0
 
     def test_doi_url_added_as_candidate(self, make_paper):
@@ -268,7 +265,7 @@ class TestEnrichmentRunnerVerbose:
         assert "Runtime" in messages
 
     def test_verbose_true_tracks_fetch_errors(self, make_paper):
-        """Fetch errors are counted in fetch_error_papers when URLs raise."""
+        """Fetch errors are counted in failed_papers when URLs raise."""
         paper = make_paper()
         paper.doi = None  # no DOI so CrossRef is skipped
         runner = EnrichmentRunner(papers=[paper])
@@ -277,7 +274,7 @@ class TestEnrichmentRunnerVerbose:
             side_effect=RuntimeError("network error"),
         ):
             metrics = runner.run(verbose=True)
-        assert metrics["fetch_error_papers"] == 1
+        assert metrics["failed_papers"] == 1
 
     def test_verbose_false_emits_no_configuration_log(self, make_paper, caplog):
         """verbose=False (default) does not log the configuration header."""
@@ -351,7 +348,7 @@ class TestEnrichmentRunnerCrossRef:
             metrics = runner.run()
 
         assert metrics["enriched_papers"] == 1
-        assert metrics["doi_enriched_papers"] == 1
+        assert metrics["unchanged_papers"] == 0
         assert paper.citations == 42
 
     def test_crossref_not_called_without_doi(self, make_paper):
@@ -400,7 +397,7 @@ class TestEnrichmentRunnerCrossRef:
             metrics = runner.run()
 
         assert metrics["enriched_papers"] == 1
-        assert metrics["doi_enriched_papers"] == 0
+        assert metrics["failed_papers"] == 0
         assert paper.citations == 10
 
     def test_crossref_and_scraping_both_contribute(self, make_paper):
@@ -442,7 +439,6 @@ class TestEnrichmentRunnerCrossRef:
             metrics = runner.run()
 
         assert metrics["enriched_papers"] == 1
-        assert metrics["doi_enriched_papers"] == 1
         assert paper.citations == 100
         assert paper.pdf_url == "https://example.com/paper.pdf"
 
@@ -473,8 +469,7 @@ class TestEnrichmentRunnerCrossRef:
             metrics = runner.run()
 
         assert metrics["enriched_papers"] == 1
-        assert metrics["doi_enriched_papers"] == 1
-        assert metrics["no_urls_papers"] == 0
+        assert metrics["failed_papers"] == 0
 
 
 class TestFetchUrlMetadata:
