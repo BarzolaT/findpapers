@@ -634,8 +634,12 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
                 **ss_params,
                 "fields": _PAPER_FIELDS,
                 "limit": page_size,
-                "sort": "publicationDate:desc",
             }
+            # Only sort by publicationDate when a date range is provided.
+            # The Semantic Scholar bulk API returns 500 when sorting by
+            # date without a publicationDateOrYear filter.
+            if "publicationDateOrYear" in ss_params or since or until:
+                params["sort"] = "publicationDate:desc"
             if token:
                 params["token"] = token
 
