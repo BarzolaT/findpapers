@@ -9,15 +9,15 @@
 * All methods must have type hints.
 * The names of variables, functions, classes, files and modules should be descriptive.
 * Keep functions and methods focused on a single task; avoid large monolithic functions.
+* Use environment variables or configuration files (e.g., `.env`) to manage sensitive data.
+* No secret keys, passwords, or sensitive information should be committed to the repository.
+* Use the python virtual environment (in `.venv`). Do not use global Python.
+* When adding new dependencies, add them to the `pyproject.toml` file using Poetry.
 * Whenever possible, use the Makefile to run commands. This ensures that the commands are run with the correct environment and settings.
 * If you changed any code, run `make format`, `make lint` and `make test` before committing.
 * Aim to keep test coverage as close to 100% as possible.
-* When adding new dependencies, add them to the `pyproject.toml` file using Poetry.
-* No secret keys, passwords, or sensitive information should be committed to the repository.
-* Use environment variables or configuration files (e.g., `.env`) to manage sensitive data.
 * We follow the [PEP8 Style Guide][https://peps.python.org/pep-0008/] for general coding.
 * We follow the [Numpy Docstring Style Guide](https://numpydoc.readthedocs.io/en/latest/format.html) for code documentation.
-* Use the python venv and Poetry for dependency management. Do not use global Python packages.
 * The commit message should be concise and follow the format: `<type>: <short description>`. For example: `feat: add new API endpoint for user authentication`.
 * Use the appropriate commit type (feat, fix, perf, docs, test, chore) to indicate the nature of the change.
 * Always make sure you're following the guidelines described in the CONTRIBUTING.md file.

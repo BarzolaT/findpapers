@@ -1,6 +1,6 @@
 .PHONY: help clean setup test test_integration test_report lint format
 
-VENV ?= venv
+VENV ?= .venv
 VENV_BIN = $(VENV)/bin
 PYTHON = $(VENV_BIN)/python
 PIP = $(VENV_BIN)/pip
@@ -9,7 +9,7 @@ PYTEST_ARGS ?=
 TARGET ?= .
 
 # Ensure poetry run uses our local venv even when the shell has not
-# been activated with ``source venv/bin/activate``.
+# been activated with ``source .venv/bin/activate``.
 export VIRTUAL_ENV := $(abspath $(VENV))
 export POETRY_VIRTUALENVS_CREATE := false
 
