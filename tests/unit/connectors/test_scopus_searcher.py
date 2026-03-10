@@ -416,3 +416,29 @@ class TestScopusConnectorSearch:
         assert len(get_calls) >= 1
         params = get_calls[0]
         assert params["date"] == "2019-2023"
+
+    def test_same_year_uses_single_year_format(
+        self, simple_query, scopus_sample_json, mock_response
+    ):
+        """When since and until are in the same year, date=YYYY is used instead of YYYY-YYYY."""
+        searcher = ScopusConnector()
+        response = mock_response(json_data=scopus_sample_json)
+        response.raise_for_status = MagicMock()
+        get_calls: list = []
+
+        def _fake_get(url, params=None, headers=None):
+            get_calls.append(params)
+            return response
+
+        since = datetime.date(2020, 1, 1)
+        until = datetime.date(2020, 6, 30)
+
+        with (
+            patch.object(searcher, "_get", side_effect=_fake_get),
+            patch.object(searcher, "_rate_limit"),
+        ):
+            searcher.search(simple_query, max_papers=5, since=since, until=until)
+
+        assert len(get_calls) >= 1
+        params = get_calls[0]
+        assert params["date"] == "2020"

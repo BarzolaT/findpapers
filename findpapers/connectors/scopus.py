@@ -321,11 +321,16 @@ class ScopusConnector(SearchConnectorBase):
             }
 
             # Scopus supports date filtering via the ``date`` parameter.
-            # Format: ``YYYY-YYYY`` (start year – end year).
+            # Format: ``YYYY-YYYY`` (start year – end year) or ``YYYY``
+            # for a single year.  The API rejects ``YYYY-YYYY`` when both
+            # years are the same, so we use the single-year form instead.
             if since is not None or until is not None:
                 from_year = str(since.year) if since else "1900"
                 to_year = str(until.year) if until else "9999"
-                params["date"] = f"{from_year}-{to_year}"
+                if from_year == to_year:
+                    params["date"] = from_year
+                else:
+                    params["date"] = f"{from_year}-{to_year}"
 
             try:
                 response = self._get(_BASE_URL, params)
