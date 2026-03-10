@@ -258,17 +258,21 @@ class PubmedConnector(SearchConnectorBase):
             authors.append(Author(name=name, affiliation=affiliation))
 
         # Publication date
-        pub_date_el = article.find(".//PubDate")
+        # Prefer ArticleDate (electronic publication) over Journal/JournalIssue/PubDate
+        # (print issue date).  PubMed's esearch ``pdat`` filter matches against
+        # the electronic publication date, so using the same date here avoids a
+        # mismatch where esearch returns a paper within the requested range but
+        # the parsed date falls outside it (common with epub-ahead-of-print).
         pub_date: datetime.date | None = None
-        if pub_date_el is not None:
-            year = pub_date_el.findtext("Year") or ""
-            month = pub_date_el.findtext("Month") or "01"
-            day = pub_date_el.findtext("Day") or "01"
-            # Month may be abbreviated name
-            month = _normalize_month(month)
-            if year:
-                with contextlib.suppress(ValueError):
-                    pub_date = datetime.date.fromisoformat(f"{year}-{month}-{day}")
+
+        article_date_el = article.find("ArticleDate")
+        if article_date_el is not None:
+            pub_date = _parse_date_element(article_date_el)
+
+        if pub_date is None:
+            pub_date_el = article.find(".//PubDate")
+            if pub_date_el is not None:
+                pub_date = _parse_date_element(pub_date_el)
 
         # DOI
         doi: str | None = None
@@ -474,3 +478,27 @@ def _normalize_month(month: str) -> str:
         return f"{int(month):02d}"
     except ValueError:
         return "01"
+
+
+def _parse_date_element(el: ET.Element) -> datetime.date | None:
+    """Parse a date from a PubMed XML element containing Year/Month/Day children.
+
+    Parameters
+    ----------
+    el : ET.Element
+        XML element with optional ``Year``, ``Month``, and ``Day`` sub-elements.
+
+    Returns
+    -------
+    datetime.date | None
+        Parsed date, or ``None`` when the year is missing or unparseable.
+    """
+    year = (el.findtext("Year") or "").strip()
+    if not year:
+        return None
+    month = (el.findtext("Month") or "01").strip()
+    day = (el.findtext("Day") or "01").strip()
+    month = _normalize_month(month)
+    with contextlib.suppress(ValueError):
+        return datetime.date.fromisoformat(f"{year}-{month}-{day}")
+    return None

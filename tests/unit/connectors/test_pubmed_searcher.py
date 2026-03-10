@@ -9,7 +9,11 @@ from xml.etree import ElementTree as ET
 import pytest
 import requests
 
-from findpapers.connectors.pubmed import PubmedConnector, _normalize_month
+from findpapers.connectors.pubmed import (
+    PubmedConnector,
+    _normalize_month,
+    _parse_date_element,
+)
 from findpapers.core.author import Author
 from findpapers.core.paper import PaperType
 from findpapers.core.search_result import Database
@@ -42,6 +46,45 @@ class TestNormalizeMonth:
     def test_invalid_returns_01(self):
         """Non-numeric, non-abbreviated input returns '01'."""
         assert _normalize_month("Spring") == "01"
+
+
+class TestParseDateElement:
+    """Tests for _parse_date_element helper."""
+
+    def test_full_date_with_numeric_month(self):
+        """Element with Year, Month (numeric), Day returns correct date."""
+        el = ET.fromstring("<PubDate><Year>2023</Year><Month>11</Month><Day>17</Day></PubDate>")
+        assert _parse_date_element(el) == datetime.date(2023, 11, 17)
+
+    def test_full_date_with_abbreviated_month(self):
+        """Element with Year, abbreviated Month, Day returns correct date."""
+        el = ET.fromstring("<PubDate><Year>2024</Year><Month>Dec</Month><Day>05</Day></PubDate>")
+        assert _parse_date_element(el) == datetime.date(2024, 12, 5)
+
+    def test_year_and_month_only(self):
+        """Missing Day defaults to 01."""
+        el = ET.fromstring("<PubDate><Year>2023</Year><Month>Mar</Month></PubDate>")
+        assert _parse_date_element(el) == datetime.date(2023, 3, 1)
+
+    def test_year_only(self):
+        """Missing Month and Day default to 01."""
+        el = ET.fromstring("<PubDate><Year>2022</Year></PubDate>")
+        assert _parse_date_element(el) == datetime.date(2022, 1, 1)
+
+    def test_missing_year_returns_none(self):
+        """Element without Year returns None."""
+        el = ET.fromstring("<PubDate><Month>03</Month></PubDate>")
+        assert _parse_date_element(el) is None
+
+    def test_empty_year_returns_none(self):
+        """Element with empty Year text returns None."""
+        el = ET.fromstring("<PubDate><Year>  </Year></PubDate>")
+        assert _parse_date_element(el) is None
+
+    def test_invalid_date_returns_none(self):
+        """Unparseable date returns None (e.g. Feb 30)."""
+        el = ET.fromstring("<PubDate><Year>2023</Year><Month>02</Month><Day>30</Day></PubDate>")
+        assert _parse_date_element(el) is None
 
 
 class TestPubmedConnectorInit:
@@ -510,6 +553,83 @@ class TestPubmedConnectorParsePaper:
         paper = PubmedConnector()._parse_paper(el)
         assert paper is not None
         assert paper.paper_type is None
+
+    def test_date_prefers_article_date_over_pubdate(self):
+        """ArticleDate (electronic) is preferred over PubDate (print issue)."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>1</PMID>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <Journal>
+                        <JournalIssue>
+                            <PubDate>
+                                <Year>2026</Year><Month>Mar</Month>
+                            </PubDate>
+                        </JournalIssue>
+                    </Journal>
+                    <ArticleDate DateType="Electronic">
+                        <Year>2023</Year><Month>11</Month><Day>17</Day>
+                    </ArticleDate>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(el)
+        assert paper is not None
+        assert paper.publication_date == datetime.date(2023, 11, 17)
+
+    def test_date_falls_back_to_pubdate_when_no_article_date(self):
+        """PubDate is used when ArticleDate is absent."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>2</PMID>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                    <Journal>
+                        <JournalIssue>
+                            <PubDate>
+                                <Year>2024</Year><Month>Dec</Month>
+                            </PubDate>
+                        </JournalIssue>
+                    </Journal>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(el)
+        assert paper is not None
+        assert paper.publication_date == datetime.date(2024, 12, 1)
+
+    def test_date_none_when_no_date_elements(self):
+        """Publication date is None when neither ArticleDate nor PubDate exist."""
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>3</PMID>
+                <Article>
+                    <ArticleTitle>T</ArticleTitle>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        el = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(el)
+        assert paper is not None
+        assert paper.publication_date is None
+
+    def test_date_from_sample_data_uses_article_date(self, pubmed_efetch_xml):
+        """First article in sample data has ArticleDate 2022-08-25, not PubDate 2024-Dec."""
+        tree = ET.fromstring(pubmed_efetch_xml)
+        articles = tree.findall(".//PubmedArticle")
+        paper = PubmedConnector()._parse_paper(articles[0])
+        assert paper is not None
+        # ArticleDate is 2022-08-25; PubDate is 2024-Dec
+        assert paper.publication_date == datetime.date(2022, 8, 25)
 
 
 class TestPubmedConnectorSearch:
