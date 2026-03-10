@@ -297,8 +297,8 @@ class Engine:
         For each paper, all known URLs are tried and HTML landing pages are
         followed to resolve the actual PDF link.  Downloaded files are saved
         to *output_directory* with a ``year-title.pdf`` naming scheme.  When
-        a download fails the paper is logged to ``download_errors.txt`` inside
-        *output_directory*.
+        a download fails the paper is logged to ``download_log.txt`` inside
+        *output_directory*.  Successful downloads are also logged.
 
         Parameters
         ----------

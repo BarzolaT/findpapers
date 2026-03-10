@@ -25,8 +25,9 @@ class DownloadRunner:
 
     For each paper, the runner tries all known URLs and follows HTML landing
     pages to resolve the actual PDF URL.  Downloaded files are saved to
-    *output_directory* with a ``year-title.pdf`` naming scheme.  Failures are
-    appended to ``download_errors.txt`` inside *output_directory*.
+    *output_directory* with a ``year-title.pdf`` naming scheme.  Both
+    successful and failed downloads are logged to ``download_log.txt``
+    inside *output_directory*.
 
     Parameters
     ----------
@@ -114,8 +115,8 @@ class DownloadRunner:
         }
 
         os.makedirs(self._output_directory, exist_ok=True)
-        error_log_path = os.path.join(self._output_directory, "download_errors.txt")
-        with open(error_log_path, "a", encoding="utf-8") as fp:
+        log_path = os.path.join(self._output_directory, "download_log.txt")
+        with open(log_path, "a", encoding="utf-8") as fp:
             now = datetime.datetime.now(UTC)
             fp.write(
                 "------- A new download process started at: "
@@ -147,15 +148,16 @@ class DownloadRunner:
             use_progress=show_progress,
         ):
             if error is not None or result is None:
-                self._log_download_error(error_log_path, paper.title, [])
+                self._log_download_error(log_path, paper.title, [])
                 if verbose:
                     logger.warning("Error downloading '%s': %s", paper.title, error)
                 continue
             downloaded, attempted_urls = result
             if downloaded:
                 metrics["downloaded_papers"] += 1
+                self._log_download_success(log_path, paper.title, attempted_urls)
             else:
-                self._log_download_error(error_log_path, paper.title, attempted_urls)
+                self._log_download_error(log_path, paper.title, attempted_urls)
 
         metrics["runtime_in_seconds"] = perf_counter() - start
         self._metrics = metrics
@@ -232,18 +234,18 @@ class DownloadRunner:
             pass
         return proxy
 
-    def _log_download_error(
+    def _log_download_success(
         self,
-        error_log_path: str,
+        log_path: str,
         title: str,
         attempted_urls: list[str],
     ) -> None:
-        """Append a failure entry to the error log file.
+        """Append a success entry to the download log file.
 
         Parameters
         ----------
-        error_log_path : str
-            Path to the error log file.
+        log_path : str
+            Path to the download log file.
         title : str
             Paper title.
         attempted_urls : list[str]
@@ -253,7 +255,33 @@ class DownloadRunner:
         -------
         None
         """
-        with open(error_log_path, "a", encoding="utf-8") as fp:
+        with open(log_path, "a", encoding="utf-8") as fp:
+            fp.write(f"[OK] {title}\n")
+            for url in attempted_urls:
+                fp.write(f"{url}\n")
+
+    def _log_download_error(
+        self,
+        log_path: str,
+        title: str,
+        attempted_urls: list[str],
+    ) -> None:
+        """Append a failure entry to the download log file.
+
+        Parameters
+        ----------
+        log_path : str
+            Path to the download log file.
+        title : str
+            Paper title.
+        attempted_urls : list[str]
+            URLs that were tried.
+
+        Returns
+        -------
+        None
+        """
+        with open(log_path, "a", encoding="utf-8") as fp:
             fp.write(f"[FAILED] {title}\n")
             if not attempted_urls:
                 fp.write("Empty URL list\n")

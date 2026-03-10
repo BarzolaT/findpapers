@@ -150,9 +150,34 @@ class TestDownloadRunnerRun:
         with patch.object(runner, "_download_paper", return_value=(False, ["http://url"])):
             metrics = runner.run()
         assert metrics["downloaded_papers"] == 0
-        # Error log must exist
-        error_log = os.path.join(str(tmp_path), "download_errors.txt")
-        assert os.path.exists(error_log)
+        # Log file must exist with a [FAILED] entry
+        log_file = os.path.join(str(tmp_path), "download_log.txt")
+        assert os.path.exists(log_file)
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "[FAILED]" in content
+
+    def test_download_success_logged(self, make_paper, tmp_path):
+        """Successful download is logged with [OK] prefix."""
+        paper = make_paper(title="Good Paper")
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_download_paper", return_value=(True, ["http://ok-url"])):
+            runner.run()
+        log_file = os.path.join(str(tmp_path), "download_log.txt")
+        assert os.path.exists(log_file)
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "[OK] Good Paper" in content
+        assert "http://ok-url" in content
+
+    def test_log_contains_both_success_and_failure(self, make_paper, tmp_path):
+        """Download log contains both [OK] and [FAILED] entries."""
+        papers = [make_paper(title="Success Paper"), make_paper(title="Failure Paper")]
+        runner = DownloadRunner(papers=papers, output_directory=str(tmp_path))
+        results = iter([(True, ["http://ok"]), (False, ["http://fail"])])
+        with patch.object(runner, "_download_paper", side_effect=lambda *a, **kw: next(results)):
+            runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "[OK] Success Paper" in content
+        assert "[FAILED] Failure Paper" in content
 
 
 class TestDownloadRunnerVerbose:
