@@ -76,6 +76,11 @@ class ArxivQueryBuilder(QueryBuilder):
             ConnectorType.AND_NOT: "ANDNOT",
         }
 
+        # NOTE: arXiv uses Apache Lucene internally, which applies stemming to
+        # all text searches (ti:, abs:, all:, etc.). This means a search like
+        # ti:"transformer" will also match "transformations", "transformed", etc.
+        # This is a server-side behavior that cannot be disabled via the API,
+        # and is most noticeable in title filters where exact matches are expected.
         def convert_term(term_node: QueryNode) -> str:
             term = quote_term(term_node.value or "")
             filter_code = get_effective_filter(term_node)
