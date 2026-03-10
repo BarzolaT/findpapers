@@ -200,10 +200,17 @@ class IEEEConnector(SearchConnectorBase):
         url: str | None = (item.get("html_url") or item.get("pdf_url") or "").strip() or None
         pdf_url: str | None = (item.get("pdf_url") or "").strip() or None
 
-        # Keywords — ieee_terms, author_terms, etc. are nested inside index_terms
+        # Keywords and subjects from index_terms
+        # ieee_terms are INSPEC controlled vocabulary → subjects
+        # author_terms and mesh_terms → keywords
         keywords: set[str] = set()
+        subjects: set[str] = set()
         index_terms = item.get("index_terms") or {}
-        for kw_group in ["ieee_terms", "author_terms", "mesh_terms"]:
+        for kw_el in index_terms.get("ieee_terms", {}).get("terms", []):
+            term = kw_el.strip()
+            if term:
+                subjects.add(term)
+        for kw_group in ["author_terms", "mesh_terms"]:
             for kw_el in index_terms.get(kw_group, {}).get("terms", []):
                 kw = kw_el.strip()
                 if kw:
@@ -258,6 +265,7 @@ class IEEEConnector(SearchConnectorBase):
                 doi=doi,
                 citations=citations,
                 keywords=keywords if keywords else None,
+                subjects=subjects,
                 page_range=pages,
                 databases={self.name},
                 paper_type=paper_type,

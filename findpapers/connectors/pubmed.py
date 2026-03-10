@@ -298,6 +298,14 @@ class PubmedConnector(SearchConnectorBase):
             if kw:
                 keywords.add(kw)
 
+        # Subjects: MeSH descriptors marked as major topics of the paper.
+        subjects: set[str] = set()
+        for mh_el in article_el.findall(".//MeshHeading/DescriptorName"):
+            if mh_el.get("MajorTopicYN") == "Y":
+                descriptor = (mh_el.text or "").strip()
+                if descriptor:
+                    subjects.add(descriptor)
+
         # Pages
         pages: str | None = None
         pagination_el = article.find(".//Pagination")
@@ -354,6 +362,7 @@ class PubmedConnector(SearchConnectorBase):
                 page_range=pages,
                 databases={self.name},
                 paper_type=paper_type,
+                subjects=subjects if subjects else None,
             )
         except ValueError:
             return None

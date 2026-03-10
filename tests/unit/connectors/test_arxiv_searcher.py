@@ -542,3 +542,61 @@ class TestArxivConnectorSearch:
         params = call_args.kwargs.get("params") or call_args[1].get("params", {})
         search_query = params.get("search_query", "")
         assert "submittedDate:[000001010000 TO 202203152359]" in search_query
+
+
+class TestArxivConnectorFieldsOfStudyAndSubjects:
+    """Tests for fields_of_study and subjects extraction from arXiv categories."""
+
+    def test_categories_extracted_as_fields_and_subjects(self):
+        """arXiv categories populate fields_of_study and subjects."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>A Paper About AI</title>
+            <summary>Abstract.</summary>
+            <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+            <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+            <category term="math.OC" scheme="http://arxiv.org/schemas/atom"/>
+            <arxiv:primary_category term="cs.AI"/>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivConnector()._parse_paper(entry)
+        assert paper is not None
+        assert "Computer Science" in paper.fields_of_study
+        assert "Mathematics" in paper.fields_of_study
+        assert "Artificial Intelligence" in paper.subjects
+        assert "Machine Learning" in paper.subjects
+        assert "Optimization and Control" in paper.subjects
+
+    def test_no_categories_empty_sets(self):
+        """Paper without categories has empty fields_of_study and subjects."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>A Paper</title>
+            <summary>Abstract.</summary>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivConnector()._parse_paper(entry)
+        assert paper is not None
+        assert paper.fields_of_study == set()
+        assert paper.subjects == set()
+
+    def test_sample_xml_has_fields_of_study(self, arxiv_sample_xml):
+        """Papers parsed from sample XML have non-empty fields_of_study."""
+        from xml.etree import ElementTree as ET
+
+        from findpapers.connectors.arxiv import _NS
+
+        tree = ET.fromstring(arxiv_sample_xml)
+        entries = tree.findall("atom:entry", _NS)
+        papers = [ArxivConnector()._parse_paper(e) for e in entries]
+        valid_papers = [p for p in papers if p is not None]
+        papers_with_fos = [p for p in valid_papers if p.fields_of_study]
+        assert len(papers_with_fos) > 0

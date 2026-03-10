@@ -835,3 +835,62 @@ class TestPubmedConnectorSearch:
         # Should have fetched 2 pages to reach 3 successfully parsed papers.
         assert call_count == 2
         assert len(papers) == 3
+
+
+class TestPubmedSubjectsExtraction:
+    """Tests for subjects extraction from MeSH headings."""
+
+    def test_major_mesh_topics_as_subjects(self, pubmed_efetch_xml):
+        """MeSH descriptors with MajorTopicYN='Y' are extracted as subjects."""
+        from xml.etree import ElementTree as ET
+
+        tree = ET.fromstring(pubmed_efetch_xml)
+        articles = tree.findall(".//PubmedArticle")
+        assert len(articles) > 0
+
+        paper = PubmedConnector()._parse_paper(articles[0])
+        assert paper is not None
+        # The sample data has MeSH headings with MajorTopicYN="Y"
+        assert len(paper.subjects) > 0
+
+    def test_mesh_major_topic_inline_xml(self):
+        """Inline XML with MeSH MajorTopicYN='Y' populates subjects."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>12345</PMID>
+                <Article>
+                    <Journal>
+                        <Title>Test Journal</Title>
+                        <JournalIssue><PubDate><Year>2023</Year></PubDate></JournalIssue>
+                    </Journal>
+                    <ArticleTitle>Test Paper</ArticleTitle>
+                    <Abstract><AbstractText>An abstract.</AbstractText></Abstract>
+                    <AuthorList><Author><LastName>Doe</LastName><ForeName>John</ForeName></Author></AuthorList>
+                </Article>
+                <MeshHeadingList>
+                    <MeshHeading>
+                        <DescriptorName MajorTopicYN="Y">Machine Learning</DescriptorName>
+                    </MeshHeading>
+                    <MeshHeading>
+                        <DescriptorName MajorTopicYN="N">Humans</DescriptorName>
+                    </MeshHeading>
+                    <MeshHeading>
+                        <DescriptorName MajorTopicYN="Y">Natural Language Processing</DescriptorName>
+                    </MeshHeading>
+                </MeshHeadingList>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert "Machine Learning" in paper.subjects
+        assert "Natural Language Processing" in paper.subjects
+        # Humans is MajorTopicYN="N", should NOT be in subjects
+        assert "Humans" not in paper.subjects
+        # But all descriptors should still be in keywords
+        assert "Machine Learning" in paper.keywords
+        assert "Humans" in paper.keywords

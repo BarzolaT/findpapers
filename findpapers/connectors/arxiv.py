@@ -19,6 +19,7 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
+from findpapers.utils.arxiv_taxonomy import arxiv_category_to_field, arxiv_category_to_subject
 from findpapers.utils.metadata_parser import parse_date
 
 logger = logging.getLogger(__name__)
@@ -205,6 +206,20 @@ class ArxivConnector(SearchConnectorBase):
         if source is not None and source.source_type is not None:
             paper_type = _ARXIV_PAPER_TYPE_MAP.get(source.source_type)
 
+        # Extract arXiv categories → fields_of_study and subjects.
+        fields_of_study: set[str] = set()
+        subjects: set[str] = set()
+        for cat_el in entry.findall("atom:category", _NS):
+            term = (cat_el.get("term") or "").strip()
+            if not term:
+                continue
+            field = arxiv_category_to_field(term)
+            if field:
+                fields_of_study.add(field)
+            subject = arxiv_category_to_subject(term)
+            if subject:
+                subjects.add(subject)
+
         try:
             paper = Paper(
                 title=title,
@@ -218,6 +233,8 @@ class ArxivConnector(SearchConnectorBase):
                 comments=comment,
                 databases={self.name},
                 paper_type=paper_type,
+                fields_of_study=fields_of_study if fields_of_study else None,
+                subjects=subjects if subjects else None,
             )
         except ValueError:
             return None

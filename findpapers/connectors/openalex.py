@@ -226,7 +226,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 "select": (
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
-                    "primary_location,concepts,keywords,type,biblio"
+                    "primary_location,concepts,keywords,type,biblio,primary_topic"
                 ),
             }
             try:
@@ -270,7 +270,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             "select": (
                 "id,doi,title,display_name,publication_date,authorships,"
                 "abstract_inverted_index,cited_by_count,open_access,locations,"
-                "primary_location,concepts,keywords,type,biblio"
+                "primary_location,concepts,keywords,type,biblio,primary_topic"
             ),
         }
         try:
@@ -509,6 +509,31 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         ):
             paper_type = PaperType.INPROCEEDINGS
 
+        # Extract fields_of_study and subjects from primary_topic.
+        fields_of_study: set[str] = set()
+        subjects: set[str] = set()
+        primary_topic = work.get("primary_topic") or {}
+        if primary_topic:
+            # field → fields_of_study (broad area)
+            field_info = primary_topic.get("field") or {}
+            field_name = (field_info.get("display_name") or "").strip()
+            if field_name:
+                fields_of_study.add(field_name)
+            # domain can serve as an additional broad classifier
+            domain_info = primary_topic.get("domain") or {}
+            domain_name = (domain_info.get("display_name") or "").strip()
+            if domain_name and domain_name != field_name:
+                fields_of_study.add(domain_name)
+            # subfield → subjects (specific)
+            subfield_info = primary_topic.get("subfield") or {}
+            subfield_name = (subfield_info.get("display_name") or "").strip()
+            if subfield_name:
+                subjects.add(subfield_name)
+            # topic display_name → subjects (even more specific)
+            topic_name = (primary_topic.get("display_name") or "").strip()
+            if topic_name:
+                subjects.add(topic_name)
+
         try:
             paper = Paper(
                 title=title,
@@ -524,6 +549,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 page_range=pages,
                 databases={self.name},
                 paper_type=paper_type,
+                fields_of_study=fields_of_study if fields_of_study else None,
+                subjects=subjects if subjects else None,
             )
         except ValueError:
             return None
@@ -579,7 +606,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 "select": (
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
-                    "primary_location,concepts,keywords,type,biblio"
+                    "primary_location,concepts,keywords,type,biblio,primary_topic"
                 ),
             }
 

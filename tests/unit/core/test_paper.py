@@ -122,6 +122,75 @@ def test_paper_add_and_merge():
     assert paper.pdf_url == "https://example.com/paper.pdf"
 
 
+def test_paper_fields_of_study_and_subjects_defaults():
+    """fields_of_study and subjects default to empty sets."""
+    paper = Paper(
+        title="T",
+        abstract="",
+        authors=[],
+        source=None,
+        publication_date=None,
+    )
+    assert paper.fields_of_study == set()
+    assert paper.subjects == set()
+
+
+def test_paper_fields_of_study_and_subjects_set_at_construction():
+    """fields_of_study and subjects can be set at construction."""
+    paper = Paper(
+        title="T",
+        abstract="",
+        authors=[],
+        source=None,
+        publication_date=None,
+        fields_of_study={"Computer Science"},
+        subjects={"Machine Learning", "Artificial Intelligence"},
+    )
+    assert paper.fields_of_study == {"Computer Science"}
+    assert paper.subjects == {"Machine Learning", "Artificial Intelligence"}
+
+
+def test_paper_fields_of_study_and_subjects_in_to_dict():
+    """to_dict includes fields_of_study and subjects."""
+    paper = Paper(
+        title="T",
+        abstract="",
+        authors=[],
+        source=None,
+        publication_date=None,
+        fields_of_study={"Mathematics", "Computer Science"},
+        subjects={"Optimization and Control"},
+    )
+    d = paper.to_dict()
+    assert d["fields_of_study"] == ["Computer Science", "Mathematics"]
+    assert d["subjects"] == ["Optimization and Control"]
+
+
+def test_paper_merge_accumulates_fields_of_study_and_subjects():
+    """merge() unions fields_of_study and subjects from both papers."""
+    base = Paper(
+        title="T",
+        abstract="",
+        authors=[],
+        source=None,
+        publication_date=None,
+        fields_of_study={"Computer Science"},
+        subjects={"Machine Learning"},
+    )
+    incoming = Paper(
+        title="T",
+        abstract="",
+        authors=[],
+        source=None,
+        publication_date=None,
+        fields_of_study={"Mathematics"},
+        subjects={"Optimization and Control"},
+    )
+    base.merge(incoming)
+    assert base.fields_of_study == {"Computer Science", "Mathematics"}
+    assert base.subjects == {"Machine Learning", "Optimization and Control"}
+
+
 def test_paper_merge_keeps_larger_author_list():
     """Paper.merge keeps whichever author list is longer.
 
@@ -800,3 +869,39 @@ class TestPaperFromDictEdgeCases:
         d = {"title": "T", "databases": "scopus"}
         paper = Paper.from_dict(d)
         assert paper.databases == {"scopus"}
+
+    def test_fields_of_study_deserialized(self) -> None:
+        """from_dict restores fields_of_study from a list."""
+        d = {"title": "T", "fields_of_study": ["Computer Science", "Mathematics"]}
+        paper = Paper.from_dict(d)
+        assert paper.fields_of_study == {"Computer Science", "Mathematics"}
+
+    def test_subjects_deserialized(self) -> None:
+        """from_dict restores subjects from a list."""
+        d = {"title": "T", "subjects": ["Artificial Intelligence", "Machine Learning"]}
+        paper = Paper.from_dict(d)
+        assert paper.subjects == {"Artificial Intelligence", "Machine Learning"}
+
+    def test_fields_of_study_missing_defaults_empty(self) -> None:
+        """from_dict defaults fields_of_study to empty set."""
+        d = {"title": "T"}
+        paper = Paper.from_dict(d)
+        assert paper.fields_of_study == set()
+
+    def test_subjects_missing_defaults_empty(self) -> None:
+        """from_dict defaults subjects to empty set."""
+        d = {"title": "T"}
+        paper = Paper.from_dict(d)
+        assert paper.subjects == set()
+
+    def test_scalar_fields_of_study_wrapped(self) -> None:
+        """A single scalar fields_of_study is wrapped into a set."""
+        d = {"title": "T", "fields_of_study": "Computer Science"}
+        paper = Paper.from_dict(d)
+        assert paper.fields_of_study == {"Computer Science"}
+
+    def test_scalar_subjects_wrapped(self) -> None:
+        """A single scalar subjects is wrapped into a set."""
+        d = {"title": "T", "subjects": "Artificial Intelligence"}
+        paper = Paper.from_dict(d)
+        assert paper.subjects == {"Artificial Intelligence"}

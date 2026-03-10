@@ -149,6 +149,8 @@ class Paper:
         page_range: str | None = None,
         databases: set[str] | None = None,
         paper_type: PaperType | None = None,
+        fields_of_study: set[str] | None = None,
+        subjects: set[str] | None = None,
     ) -> None:
         """Create a Paper instance.
 
@@ -184,6 +186,11 @@ class Paper:
             Databases where found.
         paper_type : PaperType | None
             BibTeX-aligned paper type (informational, not used for filtering).
+        fields_of_study : set[str] | None
+            Broad knowledge areas (e.g. "Computer Science", "Mathematics").
+        subjects : set[str] | None
+            More specific disciplinary classifications
+            (e.g. "Artificial Intelligence", "Optimization and Control").
 
         Raises
         ------
@@ -210,6 +217,8 @@ class Paper:
         self.page_range = page_range
         self.databases = databases if databases is not None else set()
         self.paper_type = paper_type
+        self.fields_of_study = fields_of_study if fields_of_study is not None else set()
+        self.subjects = subjects if subjects is not None else set()
 
     def __eq__(self, other: object) -> bool:
         """Check equality by DOI (case-insensitive) or title.
@@ -420,6 +429,8 @@ class Paper:
         # when different sources represent the name as "First Last" vs "Last, First".
         self.authors = merge_authors(self.authors or [], paper.authors or [])
         self.keywords = merge_value(self.keywords, paper.keywords)
+        self.fields_of_study |= paper.fields_of_study
+        self.subjects |= paper.subjects
 
         # Always accumulate databases for traceability.
         self.databases |= paper.databases
@@ -504,6 +515,18 @@ class Paper:
             with contextlib.suppress(ValueError):
                 paper_type = PaperType(raw_paper_type)
 
+        raw_fos = paper_dict.get("fields_of_study") or []
+        if isinstance(raw_fos, (list, set, tuple)):
+            fields_of_study = {str(f) for f in raw_fos}
+        else:
+            fields_of_study = {str(raw_fos)} if raw_fos else set()
+
+        raw_subjects = paper_dict.get("subjects") or []
+        if isinstance(raw_subjects, (list, set, tuple)):
+            subjects = {str(s) for s in raw_subjects}
+        else:
+            subjects = {str(raw_subjects)} if raw_subjects else set()
+
         return cls(
             title=title,
             abstract=abstract,
@@ -520,6 +543,8 @@ class Paper:
             page_range=page_range,
             databases=databases,
             paper_type=paper_type,
+            fields_of_study=fields_of_study,
+            subjects=subjects,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -548,4 +573,6 @@ class Paper:
             "page_range": self.page_range,
             "databases": sorted(self.databases),
             "paper_type": self.paper_type.value if self.paper_type else None,
+            "fields_of_study": sorted(self.fields_of_study),
+            "subjects": sorted(self.subjects),
         }

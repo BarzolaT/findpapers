@@ -38,7 +38,7 @@ _MIN_REQUEST_INTERVAL_WITH_KEY = 1.1  # respects 1 RPS introductory limit
 _PAPER_FIELDS = (
     "paperId,externalIds,title,abstract,authors,year,publicationDate,"
     "journal,venue,citationCount,openAccessPdf,url,fieldsOfStudy,"
-    "publicationTypes,publicationVenue"
+    "s2FieldsOfStudy,publicationTypes,publicationVenue"
 )
 
 # Mapping from Semantic Scholar publicationVenue.type to SourceType.
@@ -362,9 +362,20 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
 
         # Keywords from fields of study
         keywords: set[str] = set()
+
+        # fields_of_study: broad areas from fieldsOfStudy
+        fields_of_study: set[str] = set()
         for field in item.get("fieldsOfStudy") or []:
             if isinstance(field, str) and field.strip():
-                keywords.add(field.strip())
+                fields_of_study.add(field.strip())
+
+        # subjects: more specific categories from s2FieldsOfStudy
+        subjects: set[str] = set()
+        for entry in item.get("s2FieldsOfStudy") or []:
+            if isinstance(entry, dict):
+                cat = (entry.get("category") or "").strip()
+                if cat and cat not in fields_of_study:
+                    subjects.add(cat)
 
         # Source
         source: Source | None = None
@@ -424,6 +435,8 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
                 page_range=pages,
                 databases={self.name},
                 paper_type=paper_type,
+                fields_of_study=fields_of_study if fields_of_study else None,
+                subjects=subjects if subjects else None,
             )
         except ValueError:  # pragma: no cover — title already validated above
             return None

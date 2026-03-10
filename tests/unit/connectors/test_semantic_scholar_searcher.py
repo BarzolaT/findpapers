@@ -97,15 +97,15 @@ class TestSemanticScholarConnectorParsePaper:
         assert paper.pdf_url == "https://example.com/paper.pdf"
 
     def test_keywords_from_fields_of_study(self):
-        """fieldsOfStudy strings are collected as keywords."""
+        """fieldsOfStudy strings are collected as fields_of_study, not keywords."""
         item = {
             "title": "A Paper",
             "fieldsOfStudy": ["Computer Science", "Biology"],
         }
         paper = SemanticScholarConnector()._parse_paper(item)
         assert paper is not None
-        assert paper.keywords is not None
-        assert "Computer Science" in paper.keywords
+        assert "Computer Science" in paper.fields_of_study
+        assert "Biology" in paper.fields_of_study
 
     def test_source_from_journal(self):
         """Source is built from journal.name."""
@@ -617,3 +617,43 @@ class TestSemanticScholarAffiliationEnrichment:
             searcher._enrich_author_affiliations(id_map)
 
         assert author.affiliation == "Existing"
+
+
+class TestSemanticScholarFieldsOfStudyAndSubjects:
+    """Tests for fields_of_study and subjects extraction."""
+
+    def test_fields_of_study_from_fieldsOfStudy(self):
+        """fieldsOfStudy populates fields_of_study."""
+        item = {
+            "title": "A Paper",
+            "fieldsOfStudy": ["Computer Science", "Biology"],
+        }
+        paper = SemanticScholarConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.fields_of_study == {"Computer Science", "Biology"}
+
+    def test_subjects_from_s2FieldsOfStudy(self):
+        """s2FieldsOfStudy categories not in fieldsOfStudy go to subjects."""
+        item = {
+            "title": "A Paper",
+            "fieldsOfStudy": ["Computer Science"],
+            "s2FieldsOfStudy": [
+                {"category": "Computer Science", "source": "external"},
+                {"category": "Engineering", "source": "s2-fos-model"},
+            ],
+        }
+        paper = SemanticScholarConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.fields_of_study == {"Computer Science"}
+        # Engineering is in s2FieldsOfStudy but not in fieldsOfStudy → subjects
+        assert "Engineering" in paper.subjects
+        # Computer Science is already in fields_of_study, not duplicated in subjects
+        assert "Computer Science" not in paper.subjects
+
+    def test_no_fields_empty_sets(self):
+        """Paper without fieldsOfStudy or s2FieldsOfStudy has empty sets."""
+        item = {"title": "A Paper"}
+        paper = SemanticScholarConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.fields_of_study == set()
+        assert paper.subjects == set()

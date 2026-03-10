@@ -67,7 +67,7 @@ class TestIEEEConnectorParsePaper:
         assert paper is None
 
     def test_parse_with_all_keyword_groups(self):
-        """Keywords from ieee_terms, author_terms and mesh_terms (nested in index_terms)."""
+        """ieee_terms go to subjects; author_terms and mesh_terms go to keywords."""
         item = {
             "title": "A Paper",
             "index_terms": {
@@ -78,8 +78,8 @@ class TestIEEEConnectorParsePaper:
         }
         paper = IEEEConnector()._parse_paper(item)
         assert paper is not None
-        assert paper.keywords is not None
-        assert len(paper.keywords) == 3
+        assert paper.subjects == {"term1"}
+        assert paper.keywords == {"term2", "term3"}
 
     def test_index_terms_explicit_none_does_not_crash(self):
         """When index_terms is explicitly None (not just absent), parsing should not crash."""
@@ -88,6 +88,28 @@ class TestIEEEConnectorParsePaper:
         assert paper is not None
         # No keywords should be extracted, but no AttributeError either.
         assert not paper.keywords
+        assert not paper.subjects
+
+    def test_subjects_from_ieee_terms_only(self):
+        """Only ieee_terms populate subjects; author_terms stay in keywords."""
+        item = {
+            "title": "A Paper",
+            "index_terms": {
+                "ieee_terms": {"terms": ["Signal processing", "Frequency estimation"]},
+                "author_terms": {"terms": ["my keyword"]},
+            },
+        }
+        paper = IEEEConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.subjects == {"Signal processing", "Frequency estimation"}
+        assert paper.keywords == {"my keyword"}
+
+    def test_no_index_terms_gives_empty_subjects(self):
+        """When no index_terms are present, subjects is empty."""
+        item = {"title": "A Paper"}
+        paper = IEEEConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.subjects == set()
 
     def test_pages_start_end(self):
         """start_page and end_page are combined into page_range field."""
@@ -132,15 +154,16 @@ class TestIEEEConnectorParsePaper:
         assert paper.source.title == "IEEE Trans."
 
     def test_keywords_from_sample_data(self, ieee_sample_json):
-        """Keywords are extracted from nested index_terms in real sample data."""
+        """Author terms go to keywords; IEEE terms go to subjects."""
         articles = ieee_sample_json["articles"]
         # articles[2] is the first entry with index_terms (ieee_terms + author_terms)
         paper = IEEEConnector()._parse_paper(articles[2])
         assert paper is not None
+        # ieee_terms → subjects
+        assert "Natural language processing" in paper.subjects
+        # author_terms → keywords
         assert paper.keywords is not None
         assert len(paper.keywords) > 0
-        # Verify a known IEEE term from the sample
-        assert "Natural language processing" in paper.keywords
 
     def test_source_type_journal(self):
         """content_type 'Journals' maps to SourceType.JOURNAL."""

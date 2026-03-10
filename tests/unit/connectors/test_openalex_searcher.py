@@ -592,3 +592,58 @@ class TestOpenAlexConnectorSearch:
         filter_str = params.get("filter", "")
         assert "from_publication_date:2022-01-01" in filter_str
         assert "to_publication_date:2023-06-30" in filter_str
+
+
+class TestOpenAlexFieldsOfStudyAndSubjects:
+    """Tests for fields_of_study and subjects extraction from primary_topic."""
+
+    def test_primary_topic_extracted(self):
+        """primary_topic populates fields_of_study and subjects."""
+        work: dict[str, Any] = {
+            "title": "A Paper",
+            "primary_topic": {
+                "display_name": "Technology-Enhanced Education Studies",
+                "score": 0.9,
+                "subfield": {"display_name": "Education"},
+                "field": {"display_name": "Social Sciences"},
+                "domain": {"display_name": "Social Sciences"},
+            },
+        }
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert "Social Sciences" in paper.fields_of_study
+        assert "Education" in paper.subjects
+        assert "Technology-Enhanced Education Studies" in paper.subjects
+
+    def test_different_domain_and_field(self):
+        """When domain and field differ, both go to fields_of_study."""
+        work: dict[str, Any] = {
+            "title": "A Paper",
+            "primary_topic": {
+                "display_name": "Machine Learning Algorithms",
+                "subfield": {"display_name": "Artificial Intelligence"},
+                "field": {"display_name": "Computer Science"},
+                "domain": {"display_name": "Physical Sciences"},
+            },
+        }
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert "Computer Science" in paper.fields_of_study
+        assert "Physical Sciences" in paper.fields_of_study
+        assert "Artificial Intelligence" in paper.subjects
+
+    def test_no_primary_topic_empty_sets(self):
+        """Paper without primary_topic has empty fields_of_study and subjects."""
+        work: dict[str, Any] = {"title": "A Paper"}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.fields_of_study == set()
+        assert paper.subjects == set()
+
+    def test_sample_json_has_fields_of_study(self, openalex_sample_json):
+        """Papers from sample JSON have non-empty fields_of_study."""
+        results = openalex_sample_json.get("results", [])
+        papers = [OpenAlexConnector()._parse_paper(r) for r in results]
+        valid = [p for p in papers if p is not None]
+        papers_with_fos = [p for p in valid if p.fields_of_study]
+        assert len(papers_with_fos) > 0
