@@ -18,8 +18,10 @@ from findpapers.exceptions import ExportError
 from findpapers.utils.export import (
     _escape_bibtex,
     _extract_papers,
+    _sanitize_csv_value,
     _serialize_to_dict,
     _unescape_bibtex,
+    _unsanitize_csv_value,
     bibtex_how_published,
     bibtex_note,
     citation_key_for,
@@ -1322,3 +1324,84 @@ class TestLoadPapersFromCsv:
         """FileNotFoundError is raised for non-existent paths."""
         with pytest.raises(FileNotFoundError):
             load_papers_from_csv("/tmp/nonexistent_csv_file.csv")
+
+
+# ---------------------------------------------------------------------------
+# CSV formula injection sanitization
+# ---------------------------------------------------------------------------
+
+
+class TestSanitizeCsvValue:
+    """Tests for _sanitize_csv_value()."""
+
+    @pytest.mark.parametrize("prefix", ["=", "+", "-", "@"])
+    def test_prefixes_dangerous_characters(self, prefix):
+        """Values starting with formula-trigger characters get a quote prefix."""
+        value = f"{prefix}SUM(A1:A10)"
+        assert _sanitize_csv_value(value) == f"'{value}"
+
+    def test_leaves_safe_values_unchanged(self):
+        """Regular text is not modified."""
+        assert _sanitize_csv_value("Deep Learning Survey") == "Deep Learning Survey"
+
+    def test_leaves_empty_string_unchanged(self):
+        """Empty strings pass through unchanged."""
+        assert _sanitize_csv_value("") == ""
+
+    def test_leaves_numeric_string_unchanged(self):
+        """Numeric strings that don't start with formula chars are untouched."""
+        assert _sanitize_csv_value("10.1038/nature12373") == "10.1038/nature12373"
+
+
+class TestUnsanitizeCsvValue:
+    """Tests for _unsanitize_csv_value()."""
+
+    @pytest.mark.parametrize("prefix", ["=", "+", "-", "@"])
+    def test_removes_quote_before_dangerous_characters(self, prefix):
+        """Strip the protective quote prefix added by _sanitize_csv_value."""
+        sanitized = f"'{prefix}SUM(A1:A10)"
+        assert _unsanitize_csv_value(sanitized) == f"{prefix}SUM(A1:A10)"
+
+    def test_leaves_safe_values_unchanged(self):
+        """Regular text that happens to start with a quote is left as-is if not a formula char."""
+        assert _unsanitize_csv_value("'Hello") == "'Hello"
+
+    def test_leaves_empty_string_unchanged(self):
+        """Empty strings pass through unchanged."""
+        assert _unsanitize_csv_value("") == ""
+
+    def test_round_trip(self):
+        """Sanitize then unsanitize restores the original value."""
+        for value in ["=cmd|'calc'", "+1-2", "-negative", "@mention", "safe", ""]:
+            assert _unsanitize_csv_value(_sanitize_csv_value(value)) == value
+
+
+class TestCsvFormulaInjectionRoundTrip:
+    """End-to-end CSV round-trip with formula-trigger values."""
+
+    def test_dangerous_title_survives_round_trip(self):
+        """A title starting with '=' survives export→import without formula injection."""
+        paper = Paper(
+            title="=SUM(A1:A10)",
+            abstract="+abstract with plus",
+            authors=[Author("-Author, A.")],
+            source=None,
+            publication_date=datetime.date(2023, 1, 1),
+            comments="@dangerous comment",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([paper], path)
+
+            # Verify the raw CSV does not contain unsanitized formula triggers
+            raw = Path(path).read_text(encoding="utf-8")
+            lines = raw.strip().splitlines()
+            # The data line should not start a cell with '=' directly
+            data_line = lines[1]
+            assert not data_line.startswith("=")
+
+            loaded = load_papers_from_csv(path)
+            assert len(loaded) == 1
+            assert loaded[0].title == paper.title
+            assert loaded[0].abstract == paper.abstract
+            assert loaded[0].comments == paper.comments

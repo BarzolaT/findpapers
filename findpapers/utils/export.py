@@ -555,6 +555,61 @@ def load_papers_from_bibtex(path: str) -> list[Paper]:
 # CSV export / import
 # ---------------------------------------------------------------------------
 
+# Characters that trigger formula interpretation in spreadsheet applications
+# (Excel, LibreOffice Calc, Google Sheets).  Values starting with any of
+# these are prefixed with a single quote on export and stripped on import
+# so that round-trips are transparent while preventing formula injection.
+# The single quote is the OWASP-recommended prefix (CWE-1236) and is
+# natively recognised by Excel as a text-indicator — it hides the quote
+# from the displayed cell value.
+_CSV_FORMULA_CHARS = frozenset("=+-@")
+
+
+def _sanitize_csv_value(value: str) -> str:
+    """Prevent CSV formula injection in spreadsheet applications.
+
+    If *value* starts with a character that spreadsheet programs interpret
+    as a formula (``=``, ``+``, ``-``, ``@``), a leading single quote is
+    prepended.  Excel natively recognises ``'`` as a text-indicator and
+    hides it from the displayed cell value.  The prefix is transparently
+    stripped by :func:`_unsanitize_csv_value` on import.
+
+    Parameters
+    ----------
+    value : str
+        Raw cell value.
+
+    Returns
+    -------
+    str
+        Sanitized value safe for CSV export.
+    """
+    if value and value[0] in _CSV_FORMULA_CHARS:
+        return "'" + value
+    return value
+
+
+def _unsanitize_csv_value(value: str) -> str:
+    """Reverse the sanitization applied by :func:`_sanitize_csv_value`.
+
+    Strips the leading single quote that was prepended to prevent formula
+    injection, restoring the original value.
+
+    Parameters
+    ----------
+    value : str
+        Sanitized cell value read from a CSV file.
+
+    Returns
+    -------
+    str
+        Original value with the protective quote prefix removed.
+    """
+    if value and value[0] == "'" and len(value) > 1 and value[1] in _CSV_FORMULA_CHARS:
+        return value[1:]
+    return value
+
+
 #: Columns written by :func:`export_papers_to_csv`.
 _CSV_COLUMNS: list[str] = [
     "title",
@@ -614,26 +669,27 @@ def _paper_to_csv_row(paper: Paper) -> dict[str, str]:
     dict[str, str]
         Column name → string value mapping.
     """
+    s = _sanitize_csv_value
     return {
-        "title": paper.title or "",
-        "authors": "; ".join(a.name for a in paper.authors),
-        "abstract": paper.abstract or "",
+        "title": s(paper.title or ""),
+        "authors": s("; ".join(a.name for a in paper.authors)),
+        "abstract": s(paper.abstract or ""),
         "publication_date": (paper.publication_date.isoformat() if paper.publication_date else ""),
-        "doi": paper.doi or "",
-        "url": paper.url or "",
-        "pdf_url": paper.pdf_url or "",
-        "source": paper.source.title if paper.source else "",
-        "publisher": (paper.source.publisher if paper.source and paper.source.publisher else ""),
+        "doi": s(paper.doi or ""),
+        "url": s(paper.url or ""),
+        "pdf_url": s(paper.pdf_url or ""),
+        "source": s(paper.source.title if paper.source else ""),
+        "publisher": s(paper.source.publisher if paper.source and paper.source.publisher else ""),
         "citations": str(paper.citations) if paper.citations is not None else "",
-        "keywords": "; ".join(sorted(paper.keywords)) if paper.keywords else "",
+        "keywords": s("; ".join(sorted(paper.keywords)) if paper.keywords else ""),
         "paper_type": paper.paper_type.value if paper.paper_type else "",
         "page_range": paper.page_range or "",
         "databases": "; ".join(sorted(paper.databases)) if paper.databases else "",
         "fields_of_study": (
-            "; ".join(sorted(paper.fields_of_study)) if paper.fields_of_study else ""
+            s("; ".join(sorted(paper.fields_of_study))) if paper.fields_of_study else ""
         ),
-        "subjects": "; ".join(sorted(paper.subjects)) if paper.subjects else "",
-        "comments": paper.comments or "",
+        "subjects": s("; ".join(sorted(paper.subjects)) if paper.subjects else ""),
+        "comments": s(paper.comments or ""),
     }
 
 
@@ -676,14 +732,16 @@ def _csv_row_to_paper(row: dict[str, str]) -> Paper | None:
     Paper | None
         A :class:`Paper` instance, or ``None`` if the row has no title.
     """
-    title = row.get("title", "").strip()
+    u = _unsanitize_csv_value
+
+    title = u(row.get("title", "")).strip()
     if not title:
         return None
 
-    raw_authors = row.get("authors", "")
+    raw_authors = u(row.get("authors", ""))
     authors = [Author(name=a.strip()) for a in raw_authors.split(";") if a.strip()]
 
-    abstract = row.get("abstract", "")
+    abstract = u(row.get("abstract", ""))
 
     publication_date: datetime.date | None = None
     raw_date = row.get("publication_date", "").strip()
@@ -691,12 +749,12 @@ def _csv_row_to_paper(row: dict[str, str]) -> Paper | None:
         with contextlib.suppress(ValueError):
             publication_date = datetime.date.fromisoformat(raw_date)
 
-    doi = row.get("doi", "").strip() or None
-    url = row.get("url", "").strip() or None
-    pdf_url = row.get("pdf_url", "").strip() or None
+    doi = u(row.get("doi", "")).strip() or None
+    url = u(row.get("url", "")).strip() or None
+    pdf_url = u(row.get("pdf_url", "")).strip() or None
 
-    source_title = row.get("source", "").strip()
-    publisher = row.get("publisher", "").strip() or None
+    source_title = u(row.get("source", "")).strip()
+    publisher = u(row.get("publisher", "")).strip() or None
     source: Source | None = None
     if source_title:
         source = Source(title=source_title, publisher=publisher)
@@ -707,7 +765,7 @@ def _csv_row_to_paper(row: dict[str, str]) -> Paper | None:
         with contextlib.suppress(ValueError):
             citations = int(raw_citations)
 
-    raw_keywords = row.get("keywords", "")
+    raw_keywords = u(row.get("keywords", ""))
     keywords = {k.strip() for k in raw_keywords.split(";") if k.strip()} or None
 
     raw_paper_type = row.get("paper_type", "").strip()
@@ -721,13 +779,13 @@ def _csv_row_to_paper(row: dict[str, str]) -> Paper | None:
     raw_databases = row.get("databases", "")
     databases = {d.strip() for d in raw_databases.split(";") if d.strip()} or None
 
-    raw_fos = row.get("fields_of_study", "")
+    raw_fos = u(row.get("fields_of_study", ""))
     fields_of_study = {f.strip() for f in raw_fos.split(";") if f.strip()} or None
 
-    raw_subjects = row.get("subjects", "")
+    raw_subjects = u(row.get("subjects", ""))
     subjects = {s.strip() for s in raw_subjects.split(";") if s.strip()} or None
 
-    comments = row.get("comments", "").strip() or None
+    comments = u(row.get("comments", "")).strip() or None
 
     return Paper(
         title=title,
