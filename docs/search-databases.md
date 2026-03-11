@@ -119,7 +119,7 @@ Register at the [Elsevier Developer Portal](https://dev.elsevier.com/) and creat
 ### Limitations
 
 - Only the first author is returned per result
-- Most 
+- No abstracts are returned by the API; enrichment is recommended to fill in missing metadata
 - Rate limits depend on institutional subscription
 
 ---
