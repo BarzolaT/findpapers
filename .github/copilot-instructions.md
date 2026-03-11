@@ -20,4 +20,5 @@
 * We follow the [Numpy Docstring Style Guide](https://numpydoc.readthedocs.io/en/latest/format.html) for code documentation.
 * The commit message should be concise and follow the format: `<type>: <short description>`. For example: `feat: add new API endpoint for user authentication`.
 * Use the appropriate commit type (feat, fix, perf, docs, test, chore) to indicate the nature of the change.
+* Remember to update the documentation (e.g., README.md, docs/) whenever you add new features or change existing ones.
 * Always make sure you're following the guidelines described in the CONTRIBUTING.md file.
