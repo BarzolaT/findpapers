@@ -40,12 +40,19 @@ result = engine.search(
     since=datetime.date(2022, 1, 1),
 )
 
+# Enrich papers with additional metadata (abstracts, keywords, citations)
+engine.enrich(result.papers)
+
 # Download PDFs
 engine.download(result.papers, "./pdfs")
+
+# Build a citation graph from the top results
+graph = engine.snowball(result.papers[:5], max_depth=1, direction="both")
 
 # Export results
 findpapers.export_to_json(result, "results.json")
 findpapers.export_papers_to_bibtex(result.papers, "references.bib")
+findpapers.export_to_json(graph, "citation_graph.json")
 ```
 
 ## Documentation
