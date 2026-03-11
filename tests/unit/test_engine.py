@@ -634,3 +634,38 @@ class TestEngineLoadFromJson:
         loaded = Engine.load_from_json(path)
         assert isinstance(loaded, CitationGraph)
         assert loaded.paper_count == 1
+
+
+class TestEngineExportPapersToCsv:
+    """Tests for Engine.export_papers_to_csv static method."""
+
+    def test_export_paper_list(self, make_paper, tmp_path):
+        """A plain list of papers is exported to a CSV file."""
+        papers = [make_paper(doi="10.1/a")]
+        path = str(tmp_path / "papers.csv")
+        Engine.export_papers_to_csv(papers, path)
+        with open(path, encoding="utf-8") as fh:
+            content = fh.read()
+        assert "title" in content
+        assert "Test Paper" in content
+
+    def test_empty_list_produces_header_only(self, tmp_path):
+        """An empty paper list creates a CSV with only the header."""
+        path = str(tmp_path / "empty.csv")
+        Engine.export_papers_to_csv([], path)
+        with open(path, encoding="utf-8") as fh:
+            lines = fh.read().strip().splitlines()
+        assert len(lines) == 1
+
+
+class TestEngineLoadPapersFromCsv:
+    """Tests for Engine.load_papers_from_csv static method."""
+
+    def test_round_trip(self, make_paper, tmp_path):
+        """Papers survive export -> load round-trip via Engine."""
+        papers = [make_paper(doi="10.1/a")]
+        path = str(tmp_path / "papers.csv")
+        Engine.export_papers_to_csv(papers, path)
+        loaded = Engine.load_papers_from_csv(path)
+        assert len(loaded) == 1
+        assert loaded[0].title == papers[0].title

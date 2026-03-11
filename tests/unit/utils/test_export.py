@@ -24,9 +24,11 @@ from findpapers.utils.export import (
     bibtex_note,
     citation_key_for,
     export_papers_to_bibtex,
+    export_papers_to_csv,
     export_to_json,
     load_from_json,
     load_papers_from_bibtex,
+    load_papers_from_csv,
     paper_to_bibtex,
 )
 
@@ -1143,3 +1145,180 @@ class TestLoadFromJson:
 
             with pytest.raises(ExportError, match="Unrecognised"):
                 load_from_json(path)
+
+
+# ---------------------------------------------------------------------------
+# export_papers_to_csv
+# ---------------------------------------------------------------------------
+
+
+class TestExportPapersToCsv:
+    """Tests for export_papers_to_csv()."""
+
+    def test_creates_file(self, full_paper: Paper) -> None:
+        """CSV file is created from a list of papers."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            assert Path(path).exists()
+            content = Path(path).read_text(encoding="utf-8")
+            assert "title" in content
+            assert full_paper.title in content
+
+    def test_row_count(self, sample_search: SearchResult) -> None:
+        """Number of data rows equals the number of papers."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv(sample_search.papers, path)
+            lines = Path(path).read_text(encoding="utf-8").strip().splitlines()
+            # header + one row per paper
+            assert len(lines) == len(sample_search.papers) + 1
+
+    def test_empty_list(self) -> None:
+        """Empty paper list produces a CSV with only the header."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([], path)
+            lines = Path(path).read_text(encoding="utf-8").strip().splitlines()
+            assert len(lines) == 1  # header only
+
+    def test_authors_semicolon_separated(self, full_paper: Paper) -> None:
+        """Multiple authors are joined with '; '."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            content = Path(path).read_text(encoding="utf-8")
+            assert "LeCun, Y.; Bengio, Y.; Hinton, G." in content
+
+    def test_keywords_semicolon_separated(self, full_paper: Paper) -> None:
+        """Keywords are joined with '; ' and sorted."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            content = Path(path).read_text(encoding="utf-8")
+            assert "AI; deep learning; neural networks" in content
+
+
+# ---------------------------------------------------------------------------
+# load_papers_from_csv
+# ---------------------------------------------------------------------------
+
+
+class TestLoadPapersFromCsv:
+    """Tests for load_papers_from_csv()."""
+
+    def test_round_trip(self, full_paper: Paper) -> None:
+        """Papers survive export -> load round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            loaded = load_papers_from_csv(path)
+            assert len(loaded) == 1
+            assert loaded[0].title == full_paper.title
+
+    def test_preserves_authors(self, full_paper: Paper) -> None:
+        """Author names are preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            loaded = load_papers_from_csv(path)
+            original_names = [a.name for a in full_paper.authors]
+            loaded_names = [a.name for a in loaded[0].authors]
+            assert loaded_names == original_names
+
+    def test_preserves_doi(self, full_paper: Paper) -> None:
+        """DOI is preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            loaded = load_papers_from_csv(path)
+            assert loaded[0].doi == full_paper.doi
+
+    def test_preserves_publication_date(self, full_paper: Paper) -> None:
+        """Publication date is preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            loaded = load_papers_from_csv(path)
+            assert loaded[0].publication_date == full_paper.publication_date
+
+    def test_preserves_paper_type(self) -> None:
+        """Paper type is preserved across the round-trip."""
+        paper = Paper(
+            title="Test Article",
+            abstract="",
+            authors=[Author("Smith, John")],
+            source=None,
+            publication_date=datetime.date(2023, 6, 15),
+            paper_type=PaperType.ARTICLE,
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([paper], path)
+            loaded = load_papers_from_csv(path)
+            assert loaded[0].paper_type == PaperType.ARTICLE
+
+    def test_preserves_keywords(self, full_paper: Paper) -> None:
+        """Keywords are preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            loaded = load_papers_from_csv(path)
+            assert loaded[0].keywords == full_paper.keywords
+
+    def test_preserves_citations(self, full_paper: Paper) -> None:
+        """Citations count is preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            loaded = load_papers_from_csv(path)
+            assert loaded[0].citations == full_paper.citations
+
+    def test_preserves_source(self, full_paper: Paper) -> None:
+        """Source title and publisher are preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            loaded = load_papers_from_csv(path)
+            assert loaded[0].source is not None
+            assert full_paper.source is not None
+            assert loaded[0].source.title == full_paper.source.title
+            assert loaded[0].source.publisher == full_paper.source.publisher
+
+    def test_preserves_databases(self, full_paper: Paper) -> None:
+        """Databases are preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv([full_paper], path)
+            loaded = load_papers_from_csv(path)
+            assert loaded[0].databases == full_paper.databases
+
+    def test_multiple_papers(self, sample_search: SearchResult) -> None:
+        """Multiple papers survive the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            export_papers_to_csv(sample_search.papers, path)
+            loaded = load_papers_from_csv(path)
+            assert len(loaded) == len(sample_search.papers)
+
+    def test_empty_file_returns_empty_list(self) -> None:
+        """A CSV with only a header produces an empty list."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "empty.csv")
+            export_papers_to_csv([], path)
+            loaded = load_papers_from_csv(path)
+            assert loaded == []
+
+    def test_skips_rows_without_title(self) -> None:
+        """Rows without a title are skipped."""
+        csv_content = "title,authors,abstract\n,John,Some abstract\n"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "notitle.csv")
+            Path(path).write_text(csv_content, encoding="utf-8")
+            loaded = load_papers_from_csv(path)
+            assert loaded == []
+
+    def test_file_not_found(self) -> None:
+        """FileNotFoundError is raised for non-existent paths."""
+        with pytest.raises(FileNotFoundError):
+            load_papers_from_csv("/tmp/nonexistent_csv_file.csv")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import csv
 import datetime
 import json
 import re
@@ -548,3 +549,201 @@ def load_papers_from_bibtex(path: str) -> list[Paper]:
         )
 
     return papers
+
+
+# ---------------------------------------------------------------------------
+# CSV export / import
+# ---------------------------------------------------------------------------
+
+#: Columns written by :func:`export_papers_to_csv`.
+_CSV_COLUMNS: list[str] = [
+    "title",
+    "authors",
+    "abstract",
+    "publication_date",
+    "doi",
+    "url",
+    "pdf_url",
+    "source",
+    "publisher",
+    "citations",
+    "keywords",
+    "paper_type",
+    "page_range",
+    "databases",
+    "fields_of_study",
+    "subjects",
+    "comments",
+]
+
+
+def export_papers_to_csv(papers: list[Paper], path: str) -> None:
+    """Write a list of papers to a CSV file.
+
+    Each row represents one paper.  Multi-valued fields (authors,
+    keywords, databases, etc.) are joined with ``"; "``.
+
+    Parameters
+    ----------
+    papers : list[Paper]
+        Papers to export.
+    path : str
+        Output file path.
+
+    Returns
+    -------
+    None
+    """
+    with Path(path).open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=_CSV_COLUMNS)
+        writer.writeheader()
+        for paper in papers:
+            writer.writerow(_paper_to_csv_row(paper))
+
+
+def _paper_to_csv_row(paper: Paper) -> dict[str, str]:
+    """Convert a paper to a flat CSV row dictionary.
+
+    Parameters
+    ----------
+    paper : Paper
+        Paper instance.
+
+    Returns
+    -------
+    dict[str, str]
+        Column name → string value mapping.
+    """
+    return {
+        "title": paper.title or "",
+        "authors": "; ".join(a.name for a in paper.authors),
+        "abstract": paper.abstract or "",
+        "publication_date": (paper.publication_date.isoformat() if paper.publication_date else ""),
+        "doi": paper.doi or "",
+        "url": paper.url or "",
+        "pdf_url": paper.pdf_url or "",
+        "source": paper.source.title if paper.source else "",
+        "publisher": (paper.source.publisher if paper.source and paper.source.publisher else ""),
+        "citations": str(paper.citations) if paper.citations is not None else "",
+        "keywords": "; ".join(sorted(paper.keywords)) if paper.keywords else "",
+        "paper_type": paper.paper_type.value if paper.paper_type else "",
+        "page_range": paper.page_range or "",
+        "databases": "; ".join(sorted(paper.databases)) if paper.databases else "",
+        "fields_of_study": (
+            "; ".join(sorted(paper.fields_of_study)) if paper.fields_of_study else ""
+        ),
+        "subjects": "; ".join(sorted(paper.subjects)) if paper.subjects else "",
+        "comments": paper.comments or "",
+    }
+
+
+def load_papers_from_csv(path: str) -> list[Paper]:
+    """Load papers from a CSV file.
+
+    Expects a header row with column names matching those produced by
+    :func:`export_papers_to_csv`.  Unknown columns are silently ignored.
+
+    Parameters
+    ----------
+    path : str
+        Path to a ``.csv`` file.
+
+    Returns
+    -------
+    list[Paper]
+        Papers reconstructed from CSV rows.
+
+    Raises
+    ------
+    FileNotFoundError
+        If *path* does not exist.
+    """
+    with Path(path).open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        return [paper for row in reader if (paper := _csv_row_to_paper(row)) is not None]
+
+
+def _csv_row_to_paper(row: dict[str, str]) -> Paper | None:
+    """Convert a CSV row dictionary back into a Paper.
+
+    Parameters
+    ----------
+    row : dict[str, str]
+        Column name → string value mapping.
+
+    Returns
+    -------
+    Paper | None
+        A :class:`Paper` instance, or ``None`` if the row has no title.
+    """
+    title = row.get("title", "").strip()
+    if not title:
+        return None
+
+    raw_authors = row.get("authors", "")
+    authors = [Author(name=a.strip()) for a in raw_authors.split(";") if a.strip()]
+
+    abstract = row.get("abstract", "")
+
+    publication_date: datetime.date | None = None
+    raw_date = row.get("publication_date", "").strip()
+    if raw_date:
+        with contextlib.suppress(ValueError):
+            publication_date = datetime.date.fromisoformat(raw_date)
+
+    doi = row.get("doi", "").strip() or None
+    url = row.get("url", "").strip() or None
+    pdf_url = row.get("pdf_url", "").strip() or None
+
+    source_title = row.get("source", "").strip()
+    publisher = row.get("publisher", "").strip() or None
+    source: Source | None = None
+    if source_title:
+        source = Source(title=source_title, publisher=publisher)
+
+    raw_citations = row.get("citations", "").strip()
+    citations: int | None = None
+    if raw_citations:
+        with contextlib.suppress(ValueError):
+            citations = int(raw_citations)
+
+    raw_keywords = row.get("keywords", "")
+    keywords = {k.strip() for k in raw_keywords.split(";") if k.strip()} or None
+
+    raw_paper_type = row.get("paper_type", "").strip()
+    paper_type: PaperType | None = None
+    if raw_paper_type:
+        with contextlib.suppress(ValueError):
+            paper_type = PaperType(raw_paper_type)
+
+    page_range = row.get("page_range", "").strip() or None
+
+    raw_databases = row.get("databases", "")
+    databases = {d.strip() for d in raw_databases.split(";") if d.strip()} or None
+
+    raw_fos = row.get("fields_of_study", "")
+    fields_of_study = {f.strip() for f in raw_fos.split(";") if f.strip()} or None
+
+    raw_subjects = row.get("subjects", "")
+    subjects = {s.strip() for s in raw_subjects.split(";") if s.strip()} or None
+
+    comments = row.get("comments", "").strip() or None
+
+    return Paper(
+        title=title,
+        abstract=abstract,
+        authors=authors,
+        source=source,
+        publication_date=publication_date,
+        url=url,
+        pdf_url=pdf_url,
+        doi=doi,
+        citations=citations,
+        keywords=keywords,
+        comments=comments,
+        page_range=page_range,
+        databases=databases,
+        paper_type=paper_type,
+        fields_of_study=fields_of_study,
+        subjects=subjects,
+    )

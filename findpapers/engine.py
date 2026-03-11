@@ -786,3 +786,72 @@ class Engine:
         from findpapers.utils.export import load_papers_from_bibtex
 
         return load_papers_from_bibtex(path)
+
+    @staticmethod
+    def export_papers_to_csv(
+        papers: list[Paper],
+        path: str,
+    ) -> None:
+        """Export a list of papers to a CSV file.
+
+        Each row represents one paper.  Multi-valued fields (authors,
+        keywords, databases, etc.) are joined with ``"; "``.
+
+        Parameters
+        ----------
+        papers : list[Paper]
+            Papers to export.
+        path : str
+            Output file path.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        Export papers from a search:
+
+        >>> result = engine.search("[deep learning]")
+        >>> Engine.export_papers_to_csv(result.papers, "papers.csv")
+        """
+        from findpapers.utils.export import export_papers_to_csv
+
+        export_papers_to_csv(papers, path)
+
+    @staticmethod
+    def load_papers_from_csv(
+        path: str,
+    ) -> list[Paper]:
+        """Load papers from a CSV file.
+
+        Expects a header row with column names matching those produced by
+        :meth:`export_papers_to_csv`.
+
+        Parameters
+        ----------
+        path : str
+            Path to a ``.csv`` file.
+
+        Returns
+        -------
+        list[Paper]
+            Papers reconstructed from CSV rows.
+
+        Raises
+        ------
+        FileNotFoundError
+            If *path* does not exist.
+
+        Examples
+        --------
+        Round-trip papers through CSV:
+
+        >>> Engine.export_papers_to_csv(result.papers, "papers.csv")
+        >>> loaded = Engine.load_papers_from_csv("papers.csv")
+        >>> len(loaded)
+        5
+        """
+        from findpapers.utils.export import load_papers_from_csv
+
+        return load_papers_from_csv(path)
