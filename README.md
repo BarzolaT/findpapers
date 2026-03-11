@@ -62,13 +62,9 @@ findpapers.Engine.export_papers_to_bibtex(result.papers, "references.bib")
 ## Want to help?
 
 See the [contribution guidelines](CONTRIBUTING.md) if you'd like to contribute to the project.
-Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). You don't need to know how to code to contribute, even improving documentation is a valuable contribution.
 
-You don't need to know how to code to contribute, even improving documentation is a valuable contribution.
-
-If this project has been useful for you, please share it with your friends and give us a :star:
-
-You can also [sponsor me](https://github.com/sponsors/jonatasgrosman) :heart_eyes:
+If this project has been useful for you, please share it with your friends and give us a star on GitHub to help others discover it. You can also [sponsor me](https://github.com/sponsors/jonatasgrosman) to support the development of Findpapers.
 
 ## Citation
 
