@@ -66,6 +66,8 @@ Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). You don't need to know 
 
 If this project has been useful for you, please share it with your friends and give us a star on GitHub to help others discover it. You can also [sponsor me](https://github.com/sponsors/jonatasgrosman) to support the development of Findpapers.
 
+![Support the project by starring and sponsoring](support.gif)
+
 ## Citation
 
 If you use Findpapers in your research, please cite it:
