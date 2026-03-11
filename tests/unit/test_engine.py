@@ -563,24 +563,14 @@ class TestEngineExportJson:
         assert os.path.exists(path)
 
 
-class TestEngineExportBibtex:
-    """Tests for Engine.export_to_bibtex static method."""
-
-    def test_export_search_result(self, make_paper, tmp_path):
-        """SearchResult is exported to a BibTeX file."""
-        search = SearchResult(query="[test]", databases=["arxiv"])
-        search.add_paper(make_paper(doi="10.1/a"))
-        path = str(tmp_path / "refs.bib")
-        Engine.export_to_bibtex(search, path)
-        with open(path, encoding="utf-8") as file_handle:
-            content = file_handle.read()
-        assert "@" in content
+class TestEngineExportPapersToBibtex:
+    """Tests for Engine.export_papers_to_bibtex static method."""
 
     def test_export_paper_list(self, make_paper, tmp_path):
         """A plain list of papers is exported to a BibTeX file."""
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "refs.bib")
-        Engine.export_to_bibtex(papers, path)
+        Engine.export_papers_to_bibtex(papers, path)
         with open(path, encoding="utf-8") as file_handle:
             content = file_handle.read()
         assert "@" in content
@@ -588,10 +578,23 @@ class TestEngineExportBibtex:
     def test_empty_list_produces_empty_file(self, tmp_path):
         """An empty paper list creates an empty file."""
         path = str(tmp_path / "empty.bib")
-        Engine.export_to_bibtex([], path)
+        Engine.export_papers_to_bibtex([], path)
         with open(path, encoding="utf-8") as file_handle:
             content = file_handle.read()
         assert content == ""
+
+
+class TestEngineLoadPapersFromBibtex:
+    """Tests for Engine.load_papers_from_bibtex static method."""
+
+    def test_round_trip(self, make_paper, tmp_path):
+        """Papers survive export -> load round-trip via Engine."""
+        papers = [make_paper(doi="10.1/a")]
+        path = str(tmp_path / "refs.bib")
+        Engine.export_papers_to_bibtex(papers, path)
+        loaded = Engine.load_papers_from_bibtex(path)
+        assert len(loaded) == 1
+        assert loaded[0].title == papers[0].title
 
 
 class TestEngineLoadFromJson:

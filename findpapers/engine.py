@@ -226,7 +226,7 @@ class Engine:
             whose ``papers`` attribute contains the collected
             :class:`~findpapers.core.paper.Paper` instances.  Export via
             ``engine.export_to_json(result, path)`` or
-            ``engine.export_to_bibtex(result, path)``.
+            ``engine.export_papers_to_bibtex(result.papers, path)``.
 
         Raises
         ------
@@ -264,7 +264,7 @@ class Engine:
         Export results to a file:
 
         >>> Engine.export_to_json(result, "my_search.json")
-        >>> Engine.export_to_bibtex(result, "my_search.bib")
+        >>> Engine.export_papers_to_bibtex(result.papers, "my_search.bib")
         """
         runner = SearchRunner(
             query=query,
@@ -666,20 +666,16 @@ class Engine:
         export_to_json(data, path)
 
     @staticmethod
-    def export_to_bibtex(
-        data: SearchResult | CitationGraph | list[Paper],
+    def export_papers_to_bibtex(
+        papers: list[Paper],
         path: str,
     ) -> None:
-        """Export data to a BibTeX file.
-
-        Accepts a :class:`~findpapers.core.search_result.SearchResult`,
-        a :class:`~findpapers.core.citation_graph.CitationGraph`, or a
-        plain ``list[Paper]``.
+        """Export a list of papers to a BibTeX file.
 
         Parameters
         ----------
-        data : SearchResult | CitationGraph | list[Paper]
-            Data to export.
+        papers : list[Paper]
+            Papers to export.
         path : str
             Output file path.
 
@@ -687,25 +683,21 @@ class Engine:
         -------
         None
 
-        Raises
-        ------
-        TypeError
-            If *data* is not a supported type.
-
         Examples
         --------
-        Export search results:
+        Export papers from a search:
 
-        >>> Engine.export_to_bibtex(result, "refs.bib")
+        >>> result = engine.search("[deep learning]")
+        >>> Engine.export_papers_to_bibtex(result.papers, "refs.bib")
 
         Export a filtered list:
 
         >>> filtered = [p for p in result.papers if "deep learning" in (p.title or "")]
-        >>> Engine.export_to_bibtex(filtered, "filtered.bib")
+        >>> Engine.export_papers_to_bibtex(filtered, "filtered.bib")
         """
-        from findpapers.utils.export import export_to_bibtex
+        from findpapers.utils.export import export_papers_to_bibtex
 
-        export_to_bibtex(data, path)
+        export_papers_to_bibtex(papers, path)
 
     @staticmethod
     def load_from_json(
@@ -756,3 +748,41 @@ class Engine:
         from findpapers.utils.export import load_from_json
 
         return load_from_json(path)
+
+    @staticmethod
+    def load_papers_from_bibtex(
+        path: str,
+    ) -> list[Paper]:
+        """Load papers from a BibTeX file.
+
+        Parses BibTeX entries and reconstructs
+        :class:`~findpapers.core.paper.Paper` instances.  Fields that
+        cannot be represented are silently ignored.
+
+        Parameters
+        ----------
+        path : str
+            Path to a ``.bib`` file.
+
+        Returns
+        -------
+        list[Paper]
+            Papers reconstructed from BibTeX entries.
+
+        Raises
+        ------
+        FileNotFoundError
+            If *path* does not exist.
+
+        Examples
+        --------
+        Round-trip papers through BibTeX:
+
+        >>> Engine.export_papers_to_bibtex(result.papers, "refs.bib")
+        >>> loaded = Engine.load_papers_from_bibtex("refs.bib")
+        >>> len(loaded)
+        5
+        """
+        from findpapers.utils.export import load_papers_from_bibtex
+
+        return load_papers_from_bibtex(path)

@@ -215,7 +215,7 @@ class TestExport:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             bib_path = os.path.join(tmpdir, "results.bib")
-            Engine.export_to_bibtex(result, bib_path)
+            Engine.export_papers_to_bibtex(result.papers, bib_path)
 
             assert os.path.isfile(bib_path), "BibTeX file was not created"
             content = Path(bib_path).read_text(encoding="utf-8")

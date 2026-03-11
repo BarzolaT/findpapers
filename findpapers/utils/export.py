@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import contextlib
+import datetime
 import json
 import re
 from pathlib import Path
 from typing import TypeAlias
 
+from findpapers.core.author import Author
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.search_result import SearchResult
+from findpapers.core.source import Source
 from findpapers.exceptions import ExportError
 from findpapers.utils.version import package_version
 
@@ -110,17 +114,13 @@ def export_to_json(data: Exportable, path: str) -> None:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
 
 
-def export_to_bibtex(data: Exportable, path: str) -> None:
-    """Write data to a BibTeX file.
-
-    Accepts a :class:`~findpapers.core.search_result.SearchResult`,
-    a :class:`~findpapers.core.citation_graph.CitationGraph`, or a
-    plain ``list[Paper]``.
+def export_papers_to_bibtex(papers: list[Paper], path: str) -> None:
+    """Write a list of papers to a BibTeX file.
 
     Parameters
     ----------
-    data : SearchResult | CitationGraph | list[Paper]
-        Data to export.
+    papers : list[Paper]
+        Papers to export.
     path : str
         Output file path.
 
@@ -128,7 +128,6 @@ def export_to_bibtex(data: Exportable, path: str) -> None:
     -------
     None
     """
-    papers = _extract_papers(data)
     bibtex_output = "".join(paper_to_bibtex(paper) for paper in papers)
     with Path(path).open("w", encoding="utf-8") as handle:
         handle.write(bibtex_output)
@@ -365,3 +364,187 @@ def bibtex_how_published(paper: Paper) -> str:
         return ""
     date = paper.publication_date.strftime("%Y/%m/%d")
     return f"Available at {paper.url} ({date})"
+
+
+# ---------------------------------------------------------------------------
+# BibTeX import
+# ---------------------------------------------------------------------------
+
+# Reverse of _BIBTEX_ESCAPE_MAP for unescaping BibTeX field values.
+# Order matters: LaTeX commands must be replaced before the backslash char
+# so that intermediate results are not mangled.
+_BIBTEX_UNESCAPE_MAP: list[tuple[str, str]] = [
+    (r"\textasciicircum{}", "^"),
+    (r"\textasciitilde{}", "~"),
+    (r"\textbackslash{}", "\\"),
+    (r"\&", "&"),
+    (r"\%", "%"),
+    (r"\$", "$"),
+    (r"\#", "#"),
+    (r"\_", "_"),
+]
+
+
+def _unescape_bibtex(text: str) -> str:
+    r"""Reverse LaTeX escapes produced by :func:`_escape_bibtex`.
+
+    Parameters
+    ----------
+    text : str
+        Escaped BibTeX field value.
+
+    Returns
+    -------
+    str
+        Plain-text value.
+    """
+    for escaped, raw in _BIBTEX_UNESCAPE_MAP:
+        text = text.replace(escaped, raw)
+    return text
+
+
+def _parse_bibtex_entries(raw: str) -> list[dict[str, str]]:
+    """Parse raw BibTeX text into a list of field dictionaries.
+
+    Each returned dictionary contains the lowercased field names as keys
+    and the brace-delimited values (with outer braces stripped). A special
+    ``"_entry_type"`` key holds the entry type (e.g. ``"article"``).
+
+    Parameters
+    ----------
+    raw : str
+        Full contents of a BibTeX file.
+
+    Returns
+    -------
+    list[dict[str, str]]
+        One dict per entry found.
+    """
+    entries: list[dict[str, str]] = []
+    # Match entries like @article{key, ... }
+    entry_pattern = re.compile(r"@(\w+)\s*\{([^,]*),", re.IGNORECASE)
+
+    pos = 0
+    while pos < len(raw):
+        match = entry_pattern.search(raw, pos)
+        if match is None:
+            break
+
+        entry_type = match.group(1).lower()
+        # Find the balanced closing brace for this entry
+        body_start = match.end()
+        depth = 1
+        i = body_start
+        while i < len(raw) and depth > 0:
+            if raw[i] == "{":
+                depth += 1
+            elif raw[i] == "}":
+                depth -= 1
+            i += 1
+        body = raw[body_start : i - 1] if depth == 0 else raw[body_start:]
+
+        fields: dict[str, str] = {"_entry_type": entry_type}
+        # Parse individual fields: name = {value} or name = "value"
+        field_pattern = re.compile(
+            r"(\w+)\s*=\s*(?:\{([^}]*(?:\{[^}]*\}[^}]*)*)\}|\"([^\"]*)\")",
+            re.DOTALL,
+        )
+        for field_match in field_pattern.finditer(body):
+            name = field_match.group(1).lower()
+            value = (
+                field_match.group(2) if field_match.group(2) is not None else field_match.group(3)
+            )
+            fields[name] = value.strip()
+        entries.append(fields)
+        pos = i
+
+    return entries
+
+
+def load_papers_from_bibtex(path: str) -> list[Paper]:
+    """Load papers from a BibTeX file.
+
+    Parses the BibTeX entries and reconstructs
+    :class:`~findpapers.core.paper.Paper` instances.  Fields that cannot
+    be represented (e.g. custom BibTeX fields) are silently ignored.
+
+    Parameters
+    ----------
+    path : str
+        Path to a ``.bib`` file.
+
+    Returns
+    -------
+    list[Paper]
+        Papers reconstructed from BibTeX entries.
+
+    Raises
+    ------
+    FileNotFoundError
+        If *path* does not exist.
+    """
+    content = Path(path).read_text(encoding="utf-8")
+    entries = _parse_bibtex_entries(content)
+
+    papers: list[Paper] = []
+    for fields in entries:
+        title = _unescape_bibtex(fields.get("title", "")).strip()
+        if not title:
+            continue
+
+        # Authors: BibTeX uses " and " as separator
+        raw_authors = fields.get("author", "")
+        authors = [
+            Author(name=_unescape_bibtex(a.strip()))
+            for a in raw_authors.split(" and ")
+            if a.strip()
+        ]
+
+        abstract = _unescape_bibtex(fields.get("abstract", ""))
+
+        # Publication date from year field
+        publication_date: datetime.date | None = None
+        year_str = fields.get("year", "").strip()
+        if year_str.isdigit():
+            publication_date = datetime.date(int(year_str), 1, 1)
+
+        doi = fields.get("doi")
+        url = fields.get("url")
+        page_range = fields.get("pages")
+        keywords_raw = fields.get("keywords", "")
+        keywords = {
+            _unescape_bibtex(k.strip()) for k in keywords_raw.split(",") if k.strip()
+        } or None
+
+        # Source from journal, booktitle, or institution
+        source_title = fields.get("journal") or fields.get("booktitle") or fields.get("institution")
+        publisher = fields.get("publisher")
+        source: Source | None = None
+        if source_title:
+            source = Source(
+                title=_unescape_bibtex(source_title),
+                publisher=_unescape_bibtex(publisher) if publisher else None,
+            )
+
+        # PaperType from entry type
+        entry_type = fields.get("_entry_type", "misc")
+        paper_type: PaperType | None = None
+        with contextlib.suppress(ValueError):
+            paper_type = PaperType(entry_type)
+
+        papers.append(
+            Paper(
+                title=title,
+                abstract=abstract,
+                authors=authors,
+                source=source,
+                publication_date=publication_date,
+                url=url,
+                doi=doi,
+                page_range=page_range,
+                keywords=keywords,
+                paper_type=paper_type,
+            )
+        )
+
+    return papers

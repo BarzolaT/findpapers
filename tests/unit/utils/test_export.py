@@ -19,12 +19,14 @@ from findpapers.utils.export import (
     _escape_bibtex,
     _extract_papers,
     _serialize_to_dict,
+    _unescape_bibtex,
     bibtex_how_published,
     bibtex_note,
     citation_key_for,
-    export_to_bibtex,
+    export_papers_to_bibtex,
     export_to_json,
     load_from_json,
+    load_papers_from_bibtex,
     paper_to_bibtex,
 )
 
@@ -883,35 +885,26 @@ class TestExportToJson:
 
 
 # ---------------------------------------------------------------------------
-# export_to_bibtex
+# export_papers_to_bibtex
 # ---------------------------------------------------------------------------
 
 
-class TestExportToBibtex:
-    """Tests for export_to_bibtex()."""
-
-    def test_creates_file_from_search(self, sample_search: SearchResult) -> None:
-        """File is created from a SearchResult."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            path = str(Path(tmpdir) / "out.bib")
-            export_to_bibtex(sample_search, path)
-            assert Path(path).exists()
-            content = Path(path).read_text(encoding="utf-8")
-            assert "@" in content
+class TestExportPapersToBibtex:
+    """Tests for export_papers_to_bibtex()."""
 
     def test_creates_file_from_paper_list(self, full_paper: Paper) -> None:
         """File is created from a list of papers."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_to_bibtex([full_paper], path)
+            export_papers_to_bibtex([full_paper], path)
             content = Path(path).read_text(encoding="utf-8")
             assert "@" in content
 
-    def test_entry_count_from_search(self, sample_search: SearchResult) -> None:
+    def test_entry_count(self, sample_search: SearchResult) -> None:
         """Number of '@' entry markers equals the number of papers."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_to_bibtex(sample_search, path)
+            export_papers_to_bibtex(sample_search.papers, path)
             content = Path(path).read_text(encoding="utf-8")
             entries = [line for line in content.splitlines() if line.startswith("@")]
             assert len(entries) == len(sample_search.papers)
@@ -920,9 +913,157 @@ class TestExportToBibtex:
         """Empty paper list produces an empty file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_to_bibtex([], path)
+            export_papers_to_bibtex([], path)
             content = Path(path).read_text(encoding="utf-8")
             assert content == ""
+
+
+# ---------------------------------------------------------------------------
+# load_papers_from_bibtex
+# ---------------------------------------------------------------------------
+
+
+class TestLoadPapersFromBibtex:
+    """Tests for load_papers_from_bibtex()."""
+
+    def test_round_trip(self, full_paper: Paper) -> None:
+        """Papers survive export -> load round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.bib")
+            export_papers_to_bibtex([full_paper], path)
+            loaded = load_papers_from_bibtex(path)
+            assert len(loaded) == 1
+            assert loaded[0].title == full_paper.title
+
+    def test_preserves_authors(self, full_paper: Paper) -> None:
+        """Author names are preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.bib")
+            export_papers_to_bibtex([full_paper], path)
+            loaded = load_papers_from_bibtex(path)
+            original_names = [a.name for a in full_paper.authors]
+            loaded_names = [a.name for a in loaded[0].authors]
+            assert loaded_names == original_names
+
+    def test_preserves_doi(self, full_paper: Paper) -> None:
+        """DOI is preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.bib")
+            export_papers_to_bibtex([full_paper], path)
+            loaded = load_papers_from_bibtex(path)
+            assert loaded[0].doi == full_paper.doi
+
+    def test_preserves_year(self, full_paper: Paper) -> None:
+        """Publication year is preserved across the round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.bib")
+            export_papers_to_bibtex([full_paper], path)
+            loaded = load_papers_from_bibtex(path)
+            assert loaded[0].publication_date is not None
+            assert full_paper.publication_date is not None
+            assert loaded[0].publication_date.year == full_paper.publication_date.year
+
+    def test_preserves_paper_type(self) -> None:
+        """Paper type is preserved across the round-trip."""
+        paper = Paper(
+            title="Test Article",
+            abstract="",
+            authors=[Author("Smith, John")],
+            source=None,
+            publication_date=datetime.date(2023, 6, 15),
+            paper_type=PaperType.ARTICLE,
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.bib")
+            export_papers_to_bibtex([paper], path)
+            loaded = load_papers_from_bibtex(path)
+            assert loaded[0].paper_type == PaperType.ARTICLE
+
+    def test_empty_file(self) -> None:
+        """Loading an empty file returns an empty list."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "empty.bib")
+            Path(path).write_text("", encoding="utf-8")
+            loaded = load_papers_from_bibtex(path)
+            assert loaded == []
+
+    def test_unescape_special_characters(self) -> None:
+        """Special LaTeX characters are unescaped during load."""
+        bib_content = (
+            "@article{test2023foo,\n"
+            "    title = {Deep Learning \\& Neural Networks},\n"
+            "    author = {Smith, John},\n"
+            "    year = {2023},\n"
+            "}\n"
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "special.bib")
+            Path(path).write_text(bib_content, encoding="utf-8")
+            loaded = load_papers_from_bibtex(path)
+            assert len(loaded) == 1
+            assert loaded[0].title == "Deep Learning & Neural Networks"
+
+    def test_multiple_entries(self) -> None:
+        """Multiple BibTeX entries produce multiple papers."""
+        bib_content = (
+            "@article{a2020x,\n    title = {Paper One},\n    year = {2020},\n}\n\n"
+            "@inproceedings{b2021y,\n    title = {Paper Two},\n    year = {2021},\n}\n"
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "multi.bib")
+            Path(path).write_text(bib_content, encoding="utf-8")
+            loaded = load_papers_from_bibtex(path)
+            assert len(loaded) == 2
+            assert loaded[0].title == "Paper One"
+            assert loaded[1].title == "Paper Two"
+
+    def test_skips_entries_without_title(self) -> None:
+        """Entries without a title field are skipped."""
+        bib_content = "@misc{nokey,\n    author = {Test},\n    year = {2020},\n}\n"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "notitle.bib")
+            Path(path).write_text(bib_content, encoding="utf-8")
+            loaded = load_papers_from_bibtex(path)
+            assert loaded == []
+
+    def test_file_not_found(self) -> None:
+        """FileNotFoundError is raised for non-existent paths."""
+        with pytest.raises(FileNotFoundError):
+            load_papers_from_bibtex("/tmp/nonexistent_bibtex_file.bib")
+
+
+# ---------------------------------------------------------------------------
+# _unescape_bibtex
+# ---------------------------------------------------------------------------
+
+
+class TestUnescapeBibtex:
+    """Tests for _unescape_bibtex()."""
+
+    def test_unescape_ampersand(self) -> None:
+        """LaTeX ampersand is unescaped."""
+        assert _unescape_bibtex(r"\&") == "&"
+
+    def test_unescape_percent(self) -> None:
+        """LaTeX percent is unescaped."""
+        assert _unescape_bibtex(r"\%") == "%"
+
+    def test_unescape_underscore(self) -> None:
+        """LaTeX underscore is unescaped."""
+        assert _unescape_bibtex(r"\_") == "_"
+
+    def test_unescape_backslash(self) -> None:
+        r"""LaTeX backslash command is unescaped."""
+        assert _unescape_bibtex(r"\textbackslash{}") == "\\"
+
+    def test_round_trip_with_escape(self) -> None:
+        """Escaping then unescaping returns the original text."""
+        original = "R&D costs: 100% of $budget #1 for A_B"
+        assert _unescape_bibtex(_escape_bibtex(original)) == original
+
+    def test_empty_string(self) -> None:
+        """Empty string is returned unchanged."""
+        assert _unescape_bibtex("") == ""
 
 
 # ---------------------------------------------------------------------------
