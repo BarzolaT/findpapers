@@ -79,13 +79,13 @@ Enrichment can fill in missing abstracts, keywords, citation counts, PDF URLs, a
 
 ```python
 # JSON (preserves all metadata, can be reloaded later)
-findpapers.Engine.export_to_json(result, "results.json")
+findpapers.export_to_json(result, "results.json")
 
 # BibTeX (for LaTeX references)
-findpapers.Engine.export_papers_to_bibtex(result.papers, "references.bib")
+findpapers.export_papers_to_bibtex(result.papers, "references.bib")
 
 # CSV (for spreadsheets)
-findpapers.Engine.export_papers_to_csv(result.papers, "papers.csv")
+findpapers.export_papers_to_csv(result.papers, "papers.csv")
 ```
 
 See [Export Formats](export-formats.md) for details on each format.
@@ -94,11 +94,11 @@ See [Export Formats](export-formats.md) for details on each format.
 
 ```python
 # Reload a previously saved search
-result = findpapers.Engine.load_from_json("results.json")
+result = findpapers.load_from_json("results.json")
 
 # Reload papers from BibTeX or CSV
-papers = findpapers.Engine.load_papers_from_bibtex("references.bib")
-papers = findpapers.Engine.load_papers_from_csv("papers.csv")
+papers = findpapers.load_papers_from_bibtex("references.bib")
+papers = findpapers.load_papers_from_csv("papers.csv")
 ```
 
 ## Citation Snowballing
@@ -115,7 +115,7 @@ graph = engine.snowball(
 print(f"Graph has {len(graph.papers)} papers and {len(graph.edges)} citation edges")
 
 # Export the citation graph
-findpapers.Engine.export_to_json(graph, "citation_graph.json")
+findpapers.export_to_json(graph, "citation_graph.json")
 ```
 
 Snowballing uses OpenAlex, Semantic Scholar, and CrossRef to traverse citations. Papers must have a DOI to be included.

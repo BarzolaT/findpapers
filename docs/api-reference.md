@@ -108,18 +108,22 @@ graph = engine.snowball(
 
 **Returns:** `CitationGraph`
 
-### Static Export/Import Methods
+### Export/Import Functions
+
+Export and import functions are available as top-level functions in the `findpapers` package:
 
 ```python
+import findpapers
+
 # Export
-Engine.export_to_json(data, path)              # data: SearchResult | CitationGraph | list[Paper]
-Engine.export_papers_to_bibtex(papers, path)   # papers: list[Paper]
-Engine.export_papers_to_csv(papers, path)      # papers: list[Paper]
+findpapers.export_to_json(data, path)              # data: SearchResult | CitationGraph | list[Paper]
+findpapers.export_papers_to_bibtex(papers, path)   # papers: list[Paper]
+findpapers.export_papers_to_csv(papers, path)      # papers: list[Paper]
 
 # Import
-data = Engine.load_from_json(path)             # Returns SearchResult | CitationGraph | list[Paper]
-papers = Engine.load_papers_from_bibtex(path)  # Returns list[Paper]
-papers = Engine.load_papers_from_csv(path)     # Returns list[Paper]
+data = findpapers.load_from_json(path)             # Returns SearchResult | CitationGraph | list[Paper]
+papers = findpapers.load_papers_from_bibtex(path)  # Returns list[Paper]
+papers = findpapers.load_papers_from_csv(path)     # Returns list[Paper]
 ```
 
 ---

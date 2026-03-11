@@ -225,8 +225,8 @@ class Engine:
             A :class:`~findpapers.core.search_result.SearchResult` object
             whose ``papers`` attribute contains the collected
             :class:`~findpapers.core.paper.Paper` instances.  Export via
-            ``engine.export_to_json(result, path)`` or
-            ``engine.export_papers_to_bibtex(result.papers, path)``.
+            :func:`findpapers.export_to_json` or
+            :func:`findpapers.export_papers_to_bibtex`.
 
         Raises
         ------
@@ -263,8 +263,9 @@ class Engine:
 
         Export results to a file:
 
-        >>> Engine.export_to_json(result, "my_search.json")
-        >>> Engine.export_papers_to_bibtex(result.papers, "my_search.bib")
+        >>> import findpapers
+        >>> findpapers.export_to_json(result, "my_search.json")
+        >>> findpapers.export_papers_to_bibtex(result.papers, "my_search.bib")
         """
         runner = SearchRunner(
             query=query,
@@ -437,7 +438,8 @@ class Engine:
         >>> engine = Engine()
         >>> result = engine.search("[transformers]")
         >>> engine.enrich(result.papers)
-        >>> Engine.export_to_json(result, "enriched_results.json")
+        >>> import findpapers
+        >>> findpapers.export_to_json(result, "enriched_results.json")
         """
         runner = EnrichmentRunner(
             papers=papers,
@@ -590,7 +592,8 @@ class Engine:
 
         Export the graph to JSON:
 
-        >>> Engine.export_to_json(graph, "citation_graph.json")
+        >>> import findpapers
+        >>> findpapers.export_to_json(graph, "citation_graph.json")
 
         Snowball from search results with only backward direction:
 
@@ -611,247 +614,3 @@ class Engine:
             num_workers=num_workers,
         )
         return runner.run(verbose=verbose, show_progress=show_progress)
-
-    # ------------------------------------------------------------------
-    # Export / Import
-    # ------------------------------------------------------------------
-
-    @staticmethod
-    def export_to_json(
-        data: SearchResult | CitationGraph | list[Paper],
-        path: str,
-    ) -> None:
-        """Export data to a JSON file.
-
-        Accepts a :class:`~findpapers.core.search_result.SearchResult`,
-        a :class:`~findpapers.core.citation_graph.CitationGraph`, or a
-        plain ``list[Paper]``.  A ``"type"`` discriminator is embedded in
-        the JSON so that :meth:`load_from_json` can reconstruct the
-        original object.
-
-        Parameters
-        ----------
-        data : SearchResult | CitationGraph | list[Paper]
-            Data to export.
-        path : str
-            Output file path.
-
-        Returns
-        -------
-        None
-
-        Raises
-        ------
-        TypeError
-            If *data* is not a supported type.
-
-        Examples
-        --------
-        Export an entire search result:
-
-        >>> Engine.export_to_json(result, "search.json")
-
-        Export only a filtered subset of papers:
-
-        >>> recent = [p for p in result.papers if p.citations and p.citations > 10]
-        >>> Engine.export_to_json(recent, "top_cited.json")
-
-        Export a citation graph:
-
-        >>> graph = engine.snowball(seed, max_depth=1)
-        >>> Engine.export_to_json(graph, "graph.json")
-        """
-        from findpapers.utils.export import export_to_json
-
-        export_to_json(data, path)
-
-    @staticmethod
-    def export_papers_to_bibtex(
-        papers: list[Paper],
-        path: str,
-    ) -> None:
-        """Export a list of papers to a BibTeX file.
-
-        Parameters
-        ----------
-        papers : list[Paper]
-            Papers to export.
-        path : str
-            Output file path.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        Export papers from a search:
-
-        >>> result = engine.search("[deep learning]")
-        >>> Engine.export_papers_to_bibtex(result.papers, "refs.bib")
-
-        Export a filtered list:
-
-        >>> filtered = [p for p in result.papers if "deep learning" in (p.title or "")]
-        >>> Engine.export_papers_to_bibtex(filtered, "filtered.bib")
-        """
-        from findpapers.utils.export import export_papers_to_bibtex
-
-        export_papers_to_bibtex(papers, path)
-
-    @staticmethod
-    def load_from_json(
-        path: str,
-    ) -> SearchResult | CitationGraph | list[Paper]:
-        """Load data previously exported with :meth:`export_to_json`.
-
-        The ``"type"`` key embedded in the JSON payload determines which
-        Python type is returned:
-
-        * ``"search_result"`` → :class:`~findpapers.core.search_result.SearchResult`
-        * ``"citation_graph"`` → :class:`~findpapers.core.citation_graph.CitationGraph`
-        * ``"paper_list"`` → ``list[Paper]``
-
-        Files exported before the ``"type"`` key was introduced are
-        auto-detected by structure.
-
-        Parameters
-        ----------
-        path : str
-            Path to a JSON file created by :meth:`export_to_json`.
-
-        Returns
-        -------
-        SearchResult | CitationGraph | list[Paper]
-            The reconstructed object.
-
-        Raises
-        ------
-        ValueError
-            If the file format cannot be identified.
-
-        Examples
-        --------
-        Round-trip a search result:
-
-        >>> Engine.export_to_json(result, "search.json")
-        >>> loaded = Engine.load_from_json("search.json")
-        >>> isinstance(loaded, SearchResult)
-        True
-
-        Load a previously saved paper list:
-
-        >>> papers = Engine.load_from_json("top_cited.json")
-        >>> isinstance(papers, list)
-        True
-        """
-        from findpapers.utils.export import load_from_json
-
-        return load_from_json(path)
-
-    @staticmethod
-    def load_papers_from_bibtex(
-        path: str,
-    ) -> list[Paper]:
-        """Load papers from a BibTeX file.
-
-        Parses BibTeX entries and reconstructs
-        :class:`~findpapers.core.paper.Paper` instances.  Fields that
-        cannot be represented are silently ignored.
-
-        Parameters
-        ----------
-        path : str
-            Path to a ``.bib`` file.
-
-        Returns
-        -------
-        list[Paper]
-            Papers reconstructed from BibTeX entries.
-
-        Raises
-        ------
-        FileNotFoundError
-            If *path* does not exist.
-
-        Examples
-        --------
-        Round-trip papers through BibTeX:
-
-        >>> Engine.export_papers_to_bibtex(result.papers, "refs.bib")
-        >>> loaded = Engine.load_papers_from_bibtex("refs.bib")
-        >>> len(loaded)
-        5
-        """
-        from findpapers.utils.export import load_papers_from_bibtex
-
-        return load_papers_from_bibtex(path)
-
-    @staticmethod
-    def export_papers_to_csv(
-        papers: list[Paper],
-        path: str,
-    ) -> None:
-        """Export a list of papers to a CSV file.
-
-        Each row represents one paper.  Multi-valued fields (authors,
-        keywords, databases, etc.) are joined with ``"; "``.
-
-        Parameters
-        ----------
-        papers : list[Paper]
-            Papers to export.
-        path : str
-            Output file path.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        Export papers from a search:
-
-        >>> result = engine.search("[deep learning]")
-        >>> Engine.export_papers_to_csv(result.papers, "papers.csv")
-        """
-        from findpapers.utils.export import export_papers_to_csv
-
-        export_papers_to_csv(papers, path)
-
-    @staticmethod
-    def load_papers_from_csv(
-        path: str,
-    ) -> list[Paper]:
-        """Load papers from a CSV file.
-
-        Expects a header row with column names matching those produced by
-        :meth:`export_papers_to_csv`.
-
-        Parameters
-        ----------
-        path : str
-            Path to a ``.csv`` file.
-
-        Returns
-        -------
-        list[Paper]
-            Papers reconstructed from CSV rows.
-
-        Raises
-        ------
-        FileNotFoundError
-            If *path* does not exist.
-
-        Examples
-        --------
-        Round-trip papers through CSV:
-
-        >>> Engine.export_papers_to_csv(result.papers, "papers.csv")
-        >>> loaded = Engine.load_papers_from_csv("papers.csv")
-        >>> len(loaded)
-        5
-        """
-        from findpapers.utils.export import load_papers_from_csv
-
-        return load_papers_from_csv(path)

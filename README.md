@@ -44,8 +44,8 @@ result = engine.search(
 engine.download(result.papers, "./pdfs")
 
 # Export results
-findpapers.Engine.export_to_json(result, "results.json")
-findpapers.Engine.export_papers_to_bibtex(result.papers, "references.bib")
+findpapers.export_to_json(result, "results.json")
+findpapers.export_papers_to_bibtex(result.papers, "references.bib")
 ```
 
 ## Documentation

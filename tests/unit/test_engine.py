@@ -529,121 +529,179 @@ class TestSnowballImport:
         assert findpapers.SnowballRunner is SnowballRunner
 
 
+class TestExportFunctionsImport:
+    """Verify export/import functions are accessible from findpapers namespace."""
+
+    def test_export_to_json_importable(self):
+        """findpapers.export_to_json is accessible."""
+        import findpapers
+
+        assert callable(findpapers.export_to_json)
+
+    def test_load_from_json_importable(self):
+        """findpapers.load_from_json is accessible."""
+        import findpapers
+
+        assert callable(findpapers.load_from_json)
+
+    def test_export_papers_to_bibtex_importable(self):
+        """findpapers.export_papers_to_bibtex is accessible."""
+        import findpapers
+
+        assert callable(findpapers.export_papers_to_bibtex)
+
+    def test_load_papers_from_bibtex_importable(self):
+        """findpapers.load_papers_from_bibtex is accessible."""
+        import findpapers
+
+        assert callable(findpapers.load_papers_from_bibtex)
+
+    def test_export_papers_to_csv_importable(self):
+        """findpapers.export_papers_to_csv is accessible."""
+        import findpapers
+
+        assert callable(findpapers.export_papers_to_csv)
+
+    def test_load_papers_from_csv_importable(self):
+        """findpapers.load_papers_from_csv is accessible."""
+        import findpapers
+
+        assert callable(findpapers.load_papers_from_csv)
+
+
 # ---------------------------------------------------------------------------
-# Export / Load
+# Export / Load (top-level functions)
 # ---------------------------------------------------------------------------
 
 
-class TestEngineExportJson:
-    """Tests for Engine.export_to_json static method."""
+class TestExportToJson:
+    """Tests for findpapers.export_to_json top-level function."""
 
     def test_export_search_result(self, make_paper, tmp_path):
         """SearchResult is exported to a JSON file."""
+        import findpapers
+
         search = SearchResult(query="[test]", databases=["arxiv"])
         search.add_paper(make_paper(doi="10.1/a"))
         path = str(tmp_path / "search.json")
-        Engine.export_to_json(search, path)
+        findpapers.export_to_json(search, path)
         assert os.path.exists(path)
 
     def test_export_paper_list(self, make_paper, tmp_path):
         """A plain list of papers is exported to a JSON file."""
+        import findpapers
+
         papers = [make_paper(doi="10.1/a"), make_paper(title="Paper B", doi="10.1/b")]
         path = str(tmp_path / "papers.json")
-        Engine.export_to_json(papers, path)
+        findpapers.export_to_json(papers, path)
         assert os.path.exists(path)
 
     def test_export_citation_graph(self, make_paper, tmp_path):
         """A CitationGraph is exported to a JSON file."""
+        import findpapers
         from findpapers.core.citation_graph import CitationGraph
 
         seed = make_paper(doi="10.1/seed")
         graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
         path = str(tmp_path / "graph.json")
-        Engine.export_to_json(graph, path)
+        findpapers.export_to_json(graph, path)
         assert os.path.exists(path)
 
 
-class TestEngineExportPapersToBibtex:
-    """Tests for Engine.export_papers_to_bibtex static method."""
+class TestExportPapersToBibtex:
+    """Tests for findpapers.export_papers_to_bibtex top-level function."""
 
     def test_export_paper_list(self, make_paper, tmp_path):
         """A plain list of papers is exported to a BibTeX file."""
+        import findpapers
+
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "refs.bib")
-        Engine.export_papers_to_bibtex(papers, path)
+        findpapers.export_papers_to_bibtex(papers, path)
         with open(path, encoding="utf-8") as file_handle:
             content = file_handle.read()
         assert "@" in content
 
     def test_empty_list_produces_empty_file(self, tmp_path):
         """An empty paper list creates an empty file."""
+        import findpapers
+
         path = str(tmp_path / "empty.bib")
-        Engine.export_papers_to_bibtex([], path)
+        findpapers.export_papers_to_bibtex([], path)
         with open(path, encoding="utf-8") as file_handle:
             content = file_handle.read()
         assert content == ""
 
 
-class TestEngineLoadPapersFromBibtex:
-    """Tests for Engine.load_papers_from_bibtex static method."""
+class TestLoadPapersFromBibtex:
+    """Tests for findpapers.load_papers_from_bibtex top-level function."""
 
     def test_round_trip(self, make_paper, tmp_path):
-        """Papers survive export -> load round-trip via Engine."""
+        """Papers survive export -> load round-trip."""
+        import findpapers
+
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "refs.bib")
-        Engine.export_papers_to_bibtex(papers, path)
-        loaded = Engine.load_papers_from_bibtex(path)
+        findpapers.export_papers_to_bibtex(papers, path)
+        loaded = findpapers.load_papers_from_bibtex(path)
         assert len(loaded) == 1
         assert loaded[0].title == papers[0].title
 
 
-class TestEngineLoadFromJson:
-    """Tests for Engine.load_from_json static method."""
+class TestLoadFromJson:
+    """Tests for findpapers.load_from_json top-level function."""
 
     def test_round_trip_search_result(self, make_paper, tmp_path):
-        """SearchResult survives export -> load round-trip via Engine."""
+        """SearchResult survives export -> load round-trip."""
+        import findpapers
+
         search = SearchResult(query="[test]", databases=["arxiv"])
         search.add_paper(make_paper(doi="10.1/a"))
         path = str(tmp_path / "search.json")
-        Engine.export_to_json(search, path)
+        findpapers.export_to_json(search, path)
 
-        loaded = Engine.load_from_json(path)
+        loaded = findpapers.load_from_json(path)
         assert isinstance(loaded, SearchResult)
         assert len(loaded.papers) == 1
 
     def test_round_trip_paper_list(self, make_paper, tmp_path):
-        """Paper list survives export -> load round-trip via Engine."""
+        """Paper list survives export -> load round-trip."""
+        import findpapers
+
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.json")
-        Engine.export_to_json(papers, path)
+        findpapers.export_to_json(papers, path)
 
-        loaded = Engine.load_from_json(path)
+        loaded = findpapers.load_from_json(path)
         assert isinstance(loaded, list)
         assert len(loaded) == 1
         assert loaded[0].title == "Test Paper"
 
     def test_round_trip_citation_graph(self, make_paper, tmp_path):
-        """CitationGraph survives export -> load round-trip via Engine."""
+        """CitationGraph survives export -> load round-trip."""
+        import findpapers
         from findpapers.core.citation_graph import CitationGraph
 
         seed = make_paper(doi="10.1/seed")
         graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
         path = str(tmp_path / "graph.json")
-        Engine.export_to_json(graph, path)
+        findpapers.export_to_json(graph, path)
 
-        loaded = Engine.load_from_json(path)
+        loaded = findpapers.load_from_json(path)
         assert isinstance(loaded, CitationGraph)
         assert loaded.paper_count == 1
 
 
-class TestEngineExportPapersToCsv:
-    """Tests for Engine.export_papers_to_csv static method."""
+class TestExportPapersToCsv:
+    """Tests for findpapers.export_papers_to_csv top-level function."""
 
     def test_export_paper_list(self, make_paper, tmp_path):
         """A plain list of papers is exported to a CSV file."""
+        import findpapers
+
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.csv")
-        Engine.export_papers_to_csv(papers, path)
+        findpapers.export_papers_to_csv(papers, path)
         with open(path, encoding="utf-8") as fh:
             content = fh.read()
         assert "title" in content
@@ -651,21 +709,25 @@ class TestEngineExportPapersToCsv:
 
     def test_empty_list_produces_header_only(self, tmp_path):
         """An empty paper list creates a CSV with only the header."""
+        import findpapers
+
         path = str(tmp_path / "empty.csv")
-        Engine.export_papers_to_csv([], path)
+        findpapers.export_papers_to_csv([], path)
         with open(path, encoding="utf-8") as fh:
             lines = fh.read().strip().splitlines()
         assert len(lines) == 1
 
 
-class TestEngineLoadPapersFromCsv:
-    """Tests for Engine.load_papers_from_csv static method."""
+class TestLoadPapersFromCsv:
+    """Tests for findpapers.load_papers_from_csv top-level function."""
 
     def test_round_trip(self, make_paper, tmp_path):
-        """Papers survive export -> load round-trip via Engine."""
+        """Papers survive export -> load round-trip."""
+        import findpapers
+
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.csv")
-        Engine.export_papers_to_csv(papers, path)
-        loaded = Engine.load_papers_from_csv(path)
+        findpapers.export_papers_to_csv(papers, path)
+        loaded = findpapers.load_papers_from_csv(path)
         assert len(loaded) == 1
         assert loaded[0].title == papers[0].title

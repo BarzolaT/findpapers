@@ -31,7 +31,7 @@ from pathlib import Path
 
 import pytest
 
-from findpapers import Engine
+from findpapers import Engine, export_papers_to_bibtex, export_to_json, load_from_json
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import SearchResult
 
@@ -188,7 +188,7 @@ class TestExport:
         with tempfile.TemporaryDirectory() as tmpdir:
             json_path = os.path.join(tmpdir, "results.json")
 
-            Engine.export_to_json(result, json_path)
+            export_to_json(result, json_path)
             assert os.path.isfile(json_path), "JSON file was not created"
 
             # Validate the file is valid JSON.
@@ -197,7 +197,7 @@ class TestExport:
             assert "papers" in data
 
             # Round-trip: load back and compare paper count.
-            loaded = Engine.load_from_json(json_path)
+            loaded = load_from_json(json_path)
             assert isinstance(loaded, SearchResult)
             assert len(loaded.papers) == len(result.papers)
 
@@ -215,7 +215,7 @@ class TestExport:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             bib_path = os.path.join(tmpdir, "results.bib")
-            Engine.export_papers_to_bibtex(result.papers, bib_path)
+            export_papers_to_bibtex(result.papers, bib_path)
 
             assert os.path.isfile(bib_path), "BibTeX file was not created"
             content = Path(bib_path).read_text(encoding="utf-8")

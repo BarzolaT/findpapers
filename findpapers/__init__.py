@@ -19,6 +19,14 @@ from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
 from findpapers.runners.search_runner import SearchRunner
 from findpapers.runners.snowball_runner import SnowballRunner
+from findpapers.utils.export import (
+    export_papers_to_bibtex,
+    export_papers_to_csv,
+    export_to_json,
+    load_from_json,
+    load_papers_from_bibtex,
+    load_papers_from_csv,
+)
 
 __all__ = [
     "Author",
@@ -41,4 +49,10 @@ __all__ = [
     "Source",
     "SourceType",
     "UnsupportedQueryError",
+    "export_papers_to_bibtex",
+    "export_papers_to_csv",
+    "export_to_json",
+    "load_from_json",
+    "load_papers_from_bibtex",
+    "load_papers_from_csv",
 ]

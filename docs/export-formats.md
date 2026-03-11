@@ -1,6 +1,6 @@
 # Export Formats
 
-Findpapers supports three export formats: **JSON**, **BibTeX**, and **CSV**. All export/import functions are static methods on the `Engine` class.
+Findpapers supports three export formats: **JSON**, **BibTeX**, and **CSV**. All export/import functions are available as top-level functions in the `findpapers` package.
 
 ## JSON
 
@@ -9,23 +9,23 @@ JSON is the recommended format for preserving all metadata. It supports exportin
 ### Export
 
 ```python
-from findpapers import Engine
+import findpapers
 
 # Export a SearchResult (includes query, dates, database info, and all papers)
-Engine.export_to_json(result, "search_result.json")
+findpapers.export_to_json(result, "search_result.json")
 
 # Export a CitationGraph (includes seed papers, edges, and all discovered papers)
-Engine.export_to_json(graph, "citation_graph.json")
+findpapers.export_to_json(graph, "citation_graph.json")
 
 # Export a plain list of papers
-Engine.export_to_json(papers, "papers.json")
+findpapers.export_to_json(papers, "papers.json")
 ```
 
 ### Import
 
 ```python
 # Automatically detects the type and returns the correct object
-data = Engine.load_from_json("search_result.json")
+data = findpapers.load_from_json("search_result.json")
 # Returns SearchResult, CitationGraph, or list[Paper] depending on file contents
 ```
 
@@ -48,13 +48,13 @@ BibTeX export generates standard `.bib` files compatible with LaTeX.
 ### Export
 
 ```python
-Engine.export_papers_to_bibtex(papers, "references.bib")
+findpapers.export_papers_to_bibtex(papers, "references.bib")
 ```
 
 ### Import
 
 ```python
-papers = Engine.load_papers_from_bibtex("references.bib")
+papers = findpapers.load_papers_from_bibtex("references.bib")
 ```
 
 ### Format Details
@@ -77,13 +77,13 @@ CSV export creates spreadsheet-compatible files with one paper per row.
 ### Export
 
 ```python
-Engine.export_papers_to_csv(papers, "papers.csv")
+findpapers.export_papers_to_csv(papers, "papers.csv")
 ```
 
 ### Import
 
 ```python
-papers = Engine.load_papers_from_csv("papers.csv")
+papers = findpapers.load_papers_from_csv("papers.csv")
 ```
 
 ### Columns
