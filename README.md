@@ -22,7 +22,7 @@ Findpapers is a Python library that helps researchers search for academic papers
 
 ## Installation
 
-```console
+```bash
 pip install findpapers
 ```
 

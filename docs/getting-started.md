@@ -8,13 +8,13 @@ This guide walks you through installing Findpapers, configuring API keys, and ru
 
 ## Installation
 
-```console
+```bash
 pip install findpapers
 ```
 
 For development, clone the repository and run:
 
-```console
+```bash
 make setup
 ```
 
