@@ -129,12 +129,14 @@ def execute_tasks(
                         _update_progress(item, fut_result, fut_error)
                         yield item, fut_result, fut_error
                 except FuturesTimeoutError:
-                    # Global timeout reached: yield remaining as timed out.
+                    # Global timeout reached: cancel pending work so the
+                    # executor doesn't block on shutdown waiting for futures.
                     timeout_error = TimeoutError("Global timeout exceeded.")
                     for future, item in futures.items():
                         if future in yielded_futures:
                             continue
                         if not future.done():
+                            future.cancel()
                             _update_progress(item, None, timeout_error)
                             yield item, None, timeout_error
                             continue
@@ -146,6 +148,8 @@ def execute_tasks(
                             fut_error = exc
                         _update_progress(item, fut_result, fut_error)
                         yield item, fut_result, fut_error
+                    # Shut down without waiting for cancelled/running futures.
+                    executor.shutdown(wait=False, cancel_futures=True)
     finally:
         if progress_bar is not None:
             progress_bar.close()

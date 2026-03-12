@@ -88,7 +88,7 @@ Two wildcards are available:
 - Only **one** wildcard per term
 - Can only be used in **single-word** terms
 
-> **Database support:** IEEE and PubMed support only `*`. arXiv and Scopus support both `?` and `*`. OpenAlex and Semantic Scholar have limited wildcard support.
+> **Database support:** IEEE and PubMed support only `*`. Scopus supports both `?` and `*`. arXiv does **not** support wildcards. OpenAlex and Semantic Scholar have limited wildcard support.
 
 ## Examples
 

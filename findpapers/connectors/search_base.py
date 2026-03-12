@@ -105,8 +105,8 @@ class SearchConnectorBase(ConnectorBase):
     ) -> list[Paper]:
         """Execute search and return a list of papers.
 
-        Validates the query first.  If validation fails the search is skipped
-        for this database and an empty list is returned (warning is logged).
+        Validates the query first.  If validation fails, an
+        ``UnsupportedQueryError`` is raised.
 
         Parameters
         ----------
@@ -124,7 +124,12 @@ class SearchConnectorBase(ConnectorBase):
         Returns
         -------
         list[Paper]
-            Retrieved papers, or empty list when query is incompatible.
+            Retrieved papers.
+
+        Raises
+        ------
+        UnsupportedQueryError
+            If the query is incompatible with this database.
         """
         validation: QueryValidationResult = self.query_builder.validate_query(query)
 

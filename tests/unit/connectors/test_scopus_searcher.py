@@ -40,6 +40,11 @@ class TestScopusConnectorInit:
         """is_available is True when an API key is provided."""
         assert ScopusConnector(api_key="key").is_available is True
 
+    def test_is_available_with_empty_api_key(self):
+        """is_available is False when an empty/blank API key is provided."""
+        assert ScopusConnector(api_key="").is_available is False
+        assert ScopusConnector(api_key="   ").is_available is False
+
 
 class TestScopusConnectorParsePaper:
     """Tests for _parse_paper."""

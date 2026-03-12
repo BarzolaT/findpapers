@@ -23,7 +23,7 @@ Findpapers supports six academic databases for searching and three connectors fo
 
 ### Features
 
-- Full boolean query support with wildcards
+- Full boolean query support (wildcards are **not** supported)
 - Extracts title, abstract, authors (with affiliations), publication date, DOI, URLs, comments, and source/journal info
 - Papers are typed as repository source
 

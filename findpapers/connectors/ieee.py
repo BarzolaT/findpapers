@@ -100,9 +100,9 @@ class IEEEConnector(SearchConnectorBase):
         Returns
         -------
         bool
-            ``True`` if an API key is set, ``False`` otherwise.
+            ``True`` if a non-blank API key is set, ``False`` otherwise.
         """
-        return self._api_key is not None
+        return bool(self._api_key and self._api_key.strip())
 
     @property
     def query_builder(self) -> QueryBuilder:
