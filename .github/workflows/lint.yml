@@ -43,6 +43,8 @@ jobs:
       - name: Ensure cache is healthy
         if: steps.cache.outputs.cache-hit == 'true'
         run: python -m poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+      - name: Install system dependencies for lxml
+        run: sudo apt-get update && sudo apt-get install -y libxml2-dev libxslt-dev
       - name: Install Dependencies
         run: python -m poetry install
       - name: Run ruff (lint)
