@@ -31,7 +31,7 @@ export FINDPAPERS_IEEE_API_TOKEN="your-ieee-key"
 export FINDPAPERS_SCOPUS_API_TOKEN="your-scopus-key"
 ```
 
-See [Configuration](configuration.md) for the full list of environment variables.
+See [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for the full list of environment variables.
 
 ## Your First Search
 
@@ -88,7 +88,7 @@ findpapers.export_papers_to_bibtex(result.papers, "references.bib")
 findpapers.export_papers_to_csv(result.papers, "papers.csv")
 ```
 
-See [Export Formats](export-formats.md) for details on each format.
+See [Export Formats](https://github.com/jonatasgrosman/findpapers/blob/main/docs/export-formats.md) for details on each format.
 
 ## Reloading Results
 
@@ -132,7 +132,7 @@ if paper:
 
 ## Next Steps
 
-- [Query Syntax](query-syntax.md) - learn how to write powerful search queries with boolean operators, wildcards, and field filters
-- [Search Databases](search-databases.md) - details on each supported database
-- [API Reference](api-reference.md) - complete reference for all classes and methods
-- [Configuration](configuration.md) - environment variables and advanced settings
+- [Query Syntax](https://github.com/jonatasgrosman/findpapers/blob/main/docs/query-syntax.md) - learn how to write powerful search queries with boolean operators, wildcards, and field filters
+- [Search Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/search-databases.md) - details on each supported database
+- [API Reference](https://github.com/jonatasgrosman/findpapers/blob/main/docs/api-reference.md) - complete reference for all classes and methods
+- [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) - environment variables and advanced settings

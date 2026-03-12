@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="Findpapers Logo" width="400">
+  <img src="https://raw.githubusercontent.com/jonatasgrosman/findpapers/main/logo.png" alt="Findpapers Logo" width="400">
 </p>
 
 <p align="center">
@@ -63,21 +63,21 @@ findpapers.export_to_json(graph, "citation_graph.json")
 
 | Document | Description |
 |----------|-------------|
-| [Getting Started](docs/getting-started.md) | Installation, configuration, and first search |
-| [Query Syntax](docs/query-syntax.md) | How to write search queries, boolean operators, wildcards, and filter codes |
-| [Search Databases](docs/search-databases.md) | Supported databases, authentication, and per-database details |
-| [API Reference](docs/api-reference.md) | Complete reference for the `Engine` class and data models |
-| [Export Formats](docs/export-formats.md) | JSON, BibTeX, and CSV export/import details |
-| [Configuration](docs/configuration.md) | Environment variables, proxy, SSL, and API keys |
+| [Getting Started](https://github.com/jonatasgrosman/findpapers/blob/main/docs/getting-started.md) | Installation, configuration, and first search |
+| [Query Syntax](https://github.com/jonatasgrosman/findpapers/blob/main/docs/query-syntax.md) | How to write search queries, boolean operators, wildcards, and filter codes |
+| [Search Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/search-databases.md) | Supported databases, authentication, and per-database details |
+| [API Reference](https://github.com/jonatasgrosman/findpapers/blob/main/docs/api-reference.md) | Complete reference for the `Engine` class and data models |
+| [Export Formats](https://github.com/jonatasgrosman/findpapers/blob/main/docs/export-formats.md) | JSON, BibTeX, and CSV export/import details |
+| [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) | Environment variables, proxy, SSL, and API keys |
 
 ## Want to help?
 
-See the [contribution guidelines](CONTRIBUTING.md) if you'd like to contribute to the project.
-Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). You don't need to know how to code to contribute, even improving documentation is a valuable contribution.
+See the [contribution guidelines](https://github.com/jonatasgrosman/findpapers/blob/main/CONTRIBUTING.md) if you'd like to contribute to the project.
+Please follow the [Code of Conduct](https://github.com/jonatasgrosman/findpapers/blob/main/CODE_OF_CONDUCT.md). You don't need to know how to code to contribute, even improving documentation is a valuable contribution.
 
 If this project has been useful for you, please share it with your friends and give us a star on GitHub to help others discover it. You can also [sponsor me](https://github.com/sponsors/jonatasgrosman) to support the development of Findpapers.
 
-![Support the project by starring and sponsoring](support.gif)
+![Support the project by starring and sponsoring](https://raw.githubusercontent.com/jonatasgrosman/findpapers/main/support.gif)
 
 ## Citation
 
