@@ -27,7 +27,7 @@ Findpapers is a Python library that helps researchers search for academic papers
 ## Installation
 
 ```bash
-pip install findpapers
+pip install git+https://github.com/jonatasgrosman/findpapers.git
 ```
 
 ## Quick Start

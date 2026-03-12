@@ -9,7 +9,7 @@ This guide walks you through installing Findpapers, configuring API keys, and ru
 ## Installation
 
 ```bash
-pip install findpapers
+pip install git+https://github.com/jonatasgrosman/findpapers.git
 ```
 
 For development, clone the repository and run:
