@@ -2,8 +2,6 @@
   <img src="logo.png" alt="Findpapers Logo" width="400">
 </p>
 
-<h1 align="center">Findpapers</h1>
-
 <p align="center">
   <a href="https://github.com/jonatasgrosman/findpapers/blob/master/LICENSE"><img src="https://img.shields.io/pypi/l/findpapers" alt="PyPI - License"></a>
   <a href="https://pypi.org/project/findpapers"><img src="https://img.shields.io/pypi/v/findpapers" alt="PyPI"></a>
