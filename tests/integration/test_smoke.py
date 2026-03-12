@@ -48,8 +48,8 @@ _KNOWN_DOI = "10.1038/nature12373"
 # A simple query that should return results on every free database.
 _SEARCH_QUERY = "[machine learning]"
 
-# Databases that never require an API key.
-_FREE_DATABASES = ["arxiv", "openalex", "pubmed", "semantic_scholar"]
+# All supported databases.  The Engine skips any that lack a configured API key.
+_ALL_DATABASES = ["arxiv", "ieee", "openalex", "pubmed", "scopus", "semantic_scholar"]
 
 
 def _build_engine() -> Engine:
@@ -78,9 +78,9 @@ def _build_engine() -> Engine:
 class TestSearch:
     """Verify that ``Engine.search`` returns papers from live databases."""
 
-    @pytest.mark.parametrize("database", _FREE_DATABASES)
+    @pytest.mark.parametrize("database", _ALL_DATABASES)
     def test_search_single_database(self, database: str) -> None:
-        """Search a single free database and assert we get at least one paper.
+        """Search a single database and assert we get at least one paper.
 
         Parameters
         ----------
@@ -104,11 +104,11 @@ class TestSearch:
             assert paper.title, "Paper is missing a title"
 
     def test_search_multiple_databases(self) -> None:
-        """Search across multiple free databases simultaneously."""
+        """Search across all available databases simultaneously."""
         engine = _build_engine()
         result = engine.search(
             _SEARCH_QUERY,
-            databases=_FREE_DATABASES,
+            databases=_ALL_DATABASES,
             max_papers_per_database=3,
             show_progress=False,
         )
@@ -163,7 +163,7 @@ class TestSnowball:
 
         assert seed is not None, "Seed paper not found; cannot test snowball"
 
-        graph = engine.snowball(seed, depth=1, show_progress=False)
+        graph = engine.snowball(seed, max_depth=1, show_progress=False)
 
         assert graph is not None, "Snowball returned None"
         # The seed itself should always be in the graph.
