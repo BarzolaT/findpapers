@@ -1,7 +1,13 @@
-# Findpapers
+<p align="center">
+  <img src="logo.png" alt="Findpapers Logo" width="400">
+</p>
 
-[![PyPI - License](https://img.shields.io/pypi/l/findpapers)](https://github.com/jonatasgrosman/findpapers/blob/master/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/findpapers)](https://pypi.org/project/findpapers)
+<h1 align="center">Findpapers</h1>
+
+<p align="center">
+  <a href="https://github.com/jonatasgrosman/findpapers/blob/master/LICENSE"><img src="https://img.shields.io/pypi/l/findpapers" alt="PyPI - License"></a>
+  <a href="https://pypi.org/project/findpapers"><img src="https://img.shields.io/pypi/v/findpapers" alt="PyPI"></a>
+</p>
 
 Findpapers is a Python library that helps researchers search for academic papers across multiple databases from a single query. It provides a unified interface for **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, and **Semantic Scholar**, with built-in support for paper enrichment, PDF downloading, citation graph building (snowballing), and export to multiple formats.
 
