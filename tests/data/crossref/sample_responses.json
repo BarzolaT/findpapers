@@ -1,0 +1,5516 @@
+{
+  "10.1038/nature12373": {
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          2,
+          28
+        ]
+      ],
+      "date-time": "2026-02-28T07:48:59Z",
+      "timestamp": 1772264939532,
+      "version": "3.50.1"
+    },
+    "reference-count": 30,
+    "publisher": "Springer Science and Business Media LLC",
+    "issue": "7460",
+    "license": [
+      {
+        "start": {
+          "date-parts": [
+            [
+              2013,
+              7,
+              31
+            ]
+          ],
+          "date-time": "2013-07-31T00:00:00Z",
+          "timestamp": 1375228800000
+        },
+        "content-version": "tdm",
+        "delay-in-days": 0,
+        "URL": "http://www.springer.com/tdm"
+      }
+    ],
+    "content-domain": {
+      "domain": [],
+      "crossmark-restriction": false
+    },
+    "short-container-title": [
+      "Nature"
+    ],
+    "published-print": {
+      "date-parts": [
+        [
+          2013,
+          8
+        ]
+      ]
+    },
+    "DOI": "10.1038/nature12373",
+    "type": "journal-article",
+    "created": {
+      "date-parts": [
+        [
+          2013,
+          7,
+          30
+        ]
+      ],
+      "date-time": "2013-07-30T12:59:50Z",
+      "timestamp": 1375189190000
+    },
+    "page": "54-58",
+    "source": "Crossref",
+    "is-referenced-by-count": 1730,
+    "title": [
+      "Nanometre-scale thermometry in a living cell"
+    ],
+    "prefix": "10.1038",
+    "volume": "500",
+    "author": [
+      {
+        "given": "G.",
+        "family": "Kucsko",
+        "sequence": "first",
+        "affiliation": []
+      },
+      {
+        "given": "P. C.",
+        "family": "Maurer",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "N. Y.",
+        "family": "Yao",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "M.",
+        "family": "Kubo",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "H. J.",
+        "family": "Noh",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "P. K.",
+        "family": "Lo",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "H.",
+        "family": "Park",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "M. D.",
+        "family": "Lukin",
+        "sequence": "additional",
+        "affiliation": []
+      }
+    ],
+    "member": "297",
+    "published-online": {
+      "date-parts": [
+        [
+          2013,
+          7,
+          31
+        ]
+      ]
+    },
+    "reference": [
+      {
+        "key": "BFnature12373_CR1",
+        "doi-asserted-by": "publisher",
+        "unstructured": "Yue, Y. & Wang, X. Nanoscale thermal probing. Nano Rev. \n                    http://dx.doi.org/10.3402/nano.v3i0.11586\n                    \n                   (2012)",
+        "DOI": "10.3402/nano.v3i0.11586"
+      },
+      {
+        "key": "BFnature12373_CR2",
+        "doi-asserted-by": "publisher",
+        "first-page": "1134",
+        "DOI": "10.1038/nature03509",
+        "volume": "434",
+        "author": "E Lucchetta",
+        "year": "2005",
+        "unstructured": "Lucchetta, E., Lee, J., Fu, L., Patel, N. & Ismagilov, R. Dynamics of Drosophila embryonic patterning network perturbed in space and time using microfluidics. Nature 434, 1134\u20131138 (2005)",
+        "journal-title": "Nature"
+      },
+      {
+        "key": "BFnature12373_CR3",
+        "doi-asserted-by": "publisher",
+        "first-page": "136",
+        "DOI": "10.1016/j.cell.2009.11.006",
+        "volume": "140",
+        "author": "SV Kumar",
+        "year": "2010",
+        "unstructured": "Kumar, S. V. & Wigge, P. A. H2A.Z-containing nucleosomes mediate the thermosensory response in Arabidopsis. Cell 140, 136\u2013147 (2010)",
+        "journal-title": "Cell"
+      },
+      {
+        "key": "BFnature12373_CR4",
+        "doi-asserted-by": "publisher",
+        "first-page": "101",
+        "DOI": "10.1038/nature11804",
+        "volume": "493",
+        "author": "VM Lauschke",
+        "year": "2012",
+        "unstructured": "Lauschke, V. M., Tsiairis, C. D., Fran\u00e7ois, P. & Aulehla, A. Scaling of embryonic patterning based on phase-gradient encoding. Nature 493, 101\u2013105 (2012)",
+        "journal-title": "Nature"
+      },
+      {
+        "key": "BFnature12373_CR5",
+        "doi-asserted-by": "publisher",
+        "first-page": "79",
+        "DOI": "10.1038/nmeth.1278",
+        "volume": "6",
+        "author": "Y Kamei",
+        "year": "2009",
+        "unstructured": "Kamei, Y. et al. Infrared laser-mediated gene induction in targeted single cells in vivo. Nature Methods 6, 79\u201381 (2009)",
+        "journal-title": "Nature Methods"
+      },
+      {
+        "key": "BFnature12373_CR6",
+        "doi-asserted-by": "publisher",
+        "first-page": "665",
+        "DOI": "10.1007/s10549-012-2393-x",
+        "volume": "137",
+        "author": "T Vreugdenburg",
+        "year": "2013",
+        "unstructured": "Vreugdenburg, T., Willis, C., Mundy, L. & Hiller, J. A systematic review of elastography, electrical impedance scanning, and digital infrared thermography for breast cancer screening and diagnosis. Breast Cancer Res. Treat. 137, 665\u2013676 (2013)",
+        "journal-title": "Breast Cancer Res. Treat."
+      },
+      {
+        "key": "BFnature12373_CR7",
+        "doi-asserted-by": "publisher",
+        "first-page": "39",
+        "DOI": "10.1038/nrc3180",
+        "volume": "12",
+        "author": "A Schroeder",
+        "year": "2011",
+        "unstructured": "Schroeder, A. et al. Treating metastatic cancer with nanotechnology. Nature Rev. Cancer 12, 39\u201350 (2011)",
+        "journal-title": "Nature Rev. Cancer"
+      },
+      {
+        "key": "BFnature12373_CR8",
+        "doi-asserted-by": "publisher",
+        "first-page": "171",
+        "DOI": "10.1016/j.canlet.2004.02.004",
+        "volume": "209",
+        "author": "DP O\u2019Neal",
+        "year": "2004",
+        "unstructured": "O\u2019Neal, D. P., Hirsch, L. R., Halas, N. J., Payne, J. D. & West, J. L. Photo-thermal tumor ablation in mice using near infrared-absorbing nanoparticles. Cancer Lett. 209, 171\u2013176 (2004)",
+        "journal-title": "Cancer Lett."
+      },
+      {
+        "key": "BFnature12373_CR9",
+        "doi-asserted-by": "publisher",
+        "first-page": "505",
+        "DOI": "10.1146/annurev.matsci.29.1.505",
+        "volume": "29",
+        "author": "A Majumdar",
+        "year": "1999",
+        "unstructured": "Majumdar, A. Scanning thermal microscopy. Annu. Rev. Mater. Sci. 29, 505\u2013585 (1999)",
+        "journal-title": "Annu. Rev. Mater. Sci."
+      },
+      {
+        "key": "BFnature12373_CR10",
+        "doi-asserted-by": "publisher",
+        "first-page": "526",
+        "DOI": "10.1088/0960-1317/16/3/007",
+        "volume": "16",
+        "author": "SH Kim",
+        "year": "2006",
+        "unstructured": "Kim, S. H. et al. Micro-Raman thermometry for measuring the temperature distribution inside the microchannel of a polymerase chain reaction chip. J. Micromech. Microeng. 16, 526 (2006)",
+        "journal-title": "J. Micromech. Microeng."
+      },
+      {
+        "key": "BFnature12373_CR11",
+        "doi-asserted-by": "publisher",
+        "first-page": "5067",
+        "DOI": "10.1021/nn201142f",
+        "volume": "5",
+        "author": "J Yang",
+        "year": "2011",
+        "unstructured": "Yang, J., Yang, H. & Lin, L. Quantum dot nano thermometers reveal heterogeneous local thermogenesis in living cells. ACS Nano 5, 5067\u20135071 (2011)",
+        "journal-title": "ACS Nano"
+      },
+      {
+        "key": "BFnature12373_CR12",
+        "doi-asserted-by": "publisher",
+        "first-page": "3254",
+        "DOI": "10.1021/nn100244a",
+        "volume": "4",
+        "author": "F Vetrone",
+        "year": "2010",
+        "unstructured": "Vetrone, F. et al. Temperature sensing using fluorescent nanothermometers. ACS Nano 4, 3254\u20133258 (2010)",
+        "journal-title": "ACS Nano"
+      },
+      {
+        "key": "BFnature12373_CR13",
+        "doi-asserted-by": "publisher",
+        "first-page": "705",
+        "DOI": "10.1038/ncomms1714",
+        "volume": "3",
+        "author": "K Okabe",
+        "year": "2012",
+        "unstructured": "Okabe, K. et al. Intracellular temperature mapping with a fluorescent polymeric thermometer and fluorescence lifetime imaging microscopy. Nature Commun. 3, 705 (2012)",
+        "journal-title": "Nature Commun."
+      },
+      {
+        "key": "BFnature12373_CR14",
+        "doi-asserted-by": "publisher",
+        "first-page": "2107",
+        "DOI": "10.1021/nl300389y",
+        "volume": "12",
+        "author": "J Donner",
+        "year": "2012",
+        "unstructured": "Donner, J., Thompson, S., Kreuzer, M., Baffou, G. & Quidant, R. Mapping intracellular temperature using green fluorescent protein. Nano Lett. 12, 2107\u20132111 (2012)",
+        "journal-title": "Nano Lett."
+      },
+      {
+        "key": "BFnature12373_CR15",
+        "doi-asserted-by": "publisher",
+        "first-page": "1870",
+        "DOI": "10.1073/pnas.0909350107",
+        "volume": "107",
+        "author": "AK Shalek",
+        "year": "2010",
+        "unstructured": "Shalek, A. K. et al. Vertical silicon nanowires as a universal platform for delivering biomolecules into living cells. Proc. Natl Acad. Sci. USA 107, 1870\u20131875 (2010)",
+        "journal-title": "Proc. Natl Acad. Sci. USA"
+      },
+      {
+        "key": "BFnature12373_CR16",
+        "doi-asserted-by": "publisher",
+        "first-page": "070801",
+        "DOI": "10.1103/PhysRevLett.104.070801",
+        "volume": "104",
+        "author": "V Acosta",
+        "year": "2010",
+        "unstructured": "Acosta, V. et al. Temperature dependence of the nitrogen-vacancy magnetic resonance in diamond. Phys. Rev. Lett. 104, 070801 (2010)",
+        "journal-title": "Phys. Rev. Lett."
+      },
+      {
+        "key": "BFnature12373_CR17",
+        "first-page": "031001",
+        "volume": "2",
+        "author": "D Toyli",
+        "year": "2012",
+        "unstructured": "Toyli, D. et al. Measurement and control of single nitrogen-vacancy center spins above 600 K. Phys. Rev. X 2, 031001 (2012)",
+        "journal-title": "Phys. Rev. X"
+      },
+      {
+        "key": "BFnature12373_CR18",
+        "doi-asserted-by": "publisher",
+        "first-page": "161903",
+        "DOI": "10.1063/1.3652910",
+        "volume": "99",
+        "author": "X-D Chen",
+        "year": "2011",
+        "unstructured": "Chen, X.-D. et al. Temperature dependent energy level shifts of nitrogen-vacancy centers in diamond. Appl. Phys. Lett. 99, 161903\u2013161903 (2011)",
+        "journal-title": "Appl. Phys. Lett."
+      },
+      {
+        "key": "BFnature12373_CR19",
+        "doi-asserted-by": "publisher",
+        "first-page": "810",
+        "DOI": "10.1038/nphys1075",
+        "volume": "4",
+        "author": "J Taylor",
+        "year": "2008",
+        "unstructured": "Taylor, J. et al. High-sensitivity diamond magnetometer with nanoscale resolution. Nature Phys. 4, 810\u2013816 (2008)",
+        "journal-title": "Nature Phys."
+      },
+      {
+        "key": "BFnature12373_CR20",
+        "doi-asserted-by": "publisher",
+        "first-page": "4818",
+        "DOI": "10.1021/nl2026585",
+        "volume": "11",
+        "author": "C Jin",
+        "year": "2011",
+        "unstructured": "Jin, C., Li, Z., Williams, R., Lee, K. & Park, I. Localized temperature and chemical reaction control in nanoscale space by nanowire array. Nano Lett. 11, 4818\u20134825 (2011)",
+        "journal-title": "Nano Lett."
+      },
+      {
+        "key": "BFnature12373_CR21",
+        "doi-asserted-by": "publisher",
+        "first-page": "644",
+        "DOI": "10.1038/nature07279",
+        "volume": "455",
+        "author": "J Maze",
+        "year": "2008",
+        "unstructured": "Maze, J. et al. Nanoscale magnetic sensing with an individual electronic spin in diamond. Nature 455, 644\u2013647 (2008)",
+        "journal-title": "Nature"
+      },
+      {
+        "key": "BFnature12373_CR22",
+        "doi-asserted-by": "publisher",
+        "first-page": "648",
+        "DOI": "10.1038/nature07278",
+        "volume": "455",
+        "author": "G Balasubramanian",
+        "year": "2008",
+        "unstructured": "Balasubramanian, G. et al. Nanoscale imaging magnetometry with diamond spins under ambient conditions. Nature 455, 648\u2013651 (2008)",
+        "journal-title": "Nature"
+      },
+      {
+        "key": "BFnature12373_CR23",
+        "doi-asserted-by": "publisher",
+        "first-page": "032118",
+        "DOI": "10.1103/PhysRevA.87.032118",
+        "volume": "87",
+        "author": "J Hodges",
+        "year": "2013",
+        "unstructured": "Hodges, J. et al. Time keeping with electron spin states in diamond. Phys. Rev. A 87, 032118 (2013)",
+        "journal-title": "Phys. Rev. A"
+      },
+      {
+        "key": "BFnature12373_CR24",
+        "doi-asserted-by": "publisher",
+        "first-page": "383",
+        "DOI": "10.1038/nmat2420",
+        "volume": "8",
+        "author": "G Balasubramanian",
+        "year": "2009",
+        "unstructured": "Balasubramanian, G. et al. Ultralong spin coherence time in isotopically engineered diamond. Nature Mater. 8, 383\u2013387 (2009)",
+        "journal-title": "Nature Mater."
+      },
+      {
+        "key": "BFnature12373_CR25",
+        "doi-asserted-by": "publisher",
+        "first-page": "459",
+        "DOI": "10.1038/nphys1969",
+        "volume": "7",
+        "author": "F Dolde",
+        "year": "2011",
+        "unstructured": "Dolde, F. et al. Electric-field sensing using single diamond spins. Nature Phys. 7, 459\u2013463 (2011)",
+        "journal-title": "Nature Phys."
+      },
+      {
+        "key": "BFnature12373_CR26",
+        "doi-asserted-by": "publisher",
+        "first-page": "912",
+        "DOI": "10.1038/nphys1774",
+        "volume": "6",
+        "author": "P Maurer",
+        "year": "2010",
+        "unstructured": "Maurer, P. et al. Far-field optical imaging and manipulation of individual spins with nanoscale resolution. Nature Phys. 6, 912\u2013918 (2010)",
+        "journal-title": "Nature Phys."
+      },
+      {
+        "key": "BFnature12373_CR27",
+        "doi-asserted-by": "publisher",
+        "first-page": "e49021",
+        "DOI": "10.1371/journal.pone.0049021",
+        "volume": "7",
+        "author": "G Xu",
+        "year": "2012",
+        "unstructured": "Xu, G. et al. Identification of proteins sensitive to thermal stress in human neuroblastoma and glioma cell lines. PLoS ONE 7, e49021 (2012)",
+        "journal-title": "PLoS ONE"
+      },
+      {
+        "key": "BFnature12373_CR28",
+        "doi-asserted-by": "publisher",
+        "first-page": "932",
+        "DOI": "10.1038/nmeth818",
+        "volume": "2",
+        "author": "F Helmchen",
+        "year": "2005",
+        "unstructured": "Helmchen, F. & Denk, W. Deep tissue two-photon microscopy. Nature Methods 2, 932\u2013940 (2005)",
+        "journal-title": "Nature Methods"
+      },
+      {
+        "key": "BFnature12373_CR29",
+        "doi-asserted-by": "publisher",
+        "first-page": "9379",
+        "DOI": "10.1021/jp073938o",
+        "volume": "111",
+        "author": "T-L Wee",
+        "year": "2007",
+        "unstructured": "Wee, T.-L. et al. Two-photon excited fluorescence of nitrogen-vacancy centers in proton-irradiated type Ib diamond. J. Phys. Chem. A 111, 9379\u20139386 (2007)",
+        "journal-title": "J. Phys. Chem. A"
+      },
+      {
+        "key": "BFnature12373_CR30",
+        "doi-asserted-by": "publisher",
+        "first-page": "4372",
+        "DOI": "10.1158/0008-5472.CAN-11-3536",
+        "volume": "72",
+        "author": "M Tsoli",
+        "year": "2012",
+        "unstructured": "Tsoli, M. et al. Activation of thermogenesis in brown adipose tissue and dysregulated lipid metabolism associated with cancer cachexia in mice. Cancer Res. 72, 4372\u20134382 (2012)",
+        "journal-title": "Cancer Res."
+      }
+    ],
+    "container-title": [
+      "Nature"
+    ],
+    "original-title": [],
+    "language": "en",
+    "link": [
+      {
+        "URL": "http://www.nature.com/articles/nature12373.pdf",
+        "content-type": "application/pdf",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      },
+      {
+        "URL": "http://www.nature.com/articles/nature12373",
+        "content-type": "text/html",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      },
+      {
+        "URL": "http://www.nature.com/articles/nature12373.pdf",
+        "content-type": "application/pdf",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2023,
+          5,
+          18
+        ]
+      ],
+      "date-time": "2023-05-18T18:13:47Z",
+      "timestamp": 1684433627000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://www.nature.com/articles/nature12373"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2013,
+          7,
+          31
+        ]
+      ]
+    },
+    "references-count": 30,
+    "journal-issue": {
+      "issue": "7460",
+      "published-print": {
+        "date-parts": [
+          [
+            2013,
+            8
+          ]
+        ]
+      }
+    },
+    "alternative-id": [
+      "BFnature12373"
+    ],
+    "URL": "https://doi.org/10.1038/nature12373",
+    "relation": {},
+    "ISSN": [
+      "0028-0836",
+      "1476-4687"
+    ],
+    "issn-type": [
+      {
+        "value": "0028-0836",
+        "type": "print"
+      },
+      {
+        "value": "1476-4687",
+        "type": "electronic"
+      }
+    ],
+    "subject": [],
+    "published": {
+      "date-parts": [
+        [
+          2013,
+          7,
+          31
+        ]
+      ]
+    }
+  },
+  "10.1145/3292500.3330648": {
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          2,
+          21
+        ]
+      ],
+      "date-time": "2026-02-21T18:59:38Z",
+      "timestamp": 1771700378750,
+      "version": "3.50.1"
+    },
+    "publisher-location": "New York, NY, USA",
+    "reference-count": 50,
+    "publisher": "ACM",
+    "license": [
+      {
+        "start": {
+          "date-parts": [
+            [
+              2019,
+              7,
+              25
+            ]
+          ],
+          "date-time": "2019-07-25T00:00:00Z",
+          "timestamp": 1564012800000
+        },
+        "content-version": "vor",
+        "delay-in-days": 0,
+        "URL": "https://www.acm.org/publications/policies/copyright_policy#Background"
+      }
+    ],
+    "funder": [
+      {
+        "name": "DARPA",
+        "award": [
+          "#FA8750-17- 2-0116"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "#FA8750-17- 2-0116"
+            ]
+          }
+        ]
+      },
+      {
+        "DOI": "10.13039/100000001",
+        "name": "NSF",
+        "doi-asserted-by": "publisher",
+        "award": [
+          "#IIS-1750074"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "#IIS-1750074"
+            ]
+          }
+        ],
+        "id": [
+          {
+            "id": "10.13039/100000001",
+            "id-type": "DOI",
+            "asserted-by": "publisher"
+          }
+        ]
+      },
+      {
+        "DOI": "10.13039/100000001",
+        "name": "NSF",
+        "doi-asserted-by": "publisher",
+        "award": [
+          "#IIS-1718840"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "#IIS-1718840"
+            ]
+          }
+        ],
+        "id": [
+          {
+            "id": "10.13039/100000001",
+            "id-type": "DOI",
+            "asserted-by": "publisher"
+          }
+        ]
+      }
+    ],
+    "content-domain": {
+      "domain": [
+        "dl.acm.org"
+      ],
+      "crossmark-restriction": true
+    },
+    "short-container-title": [],
+    "published-print": {
+      "date-parts": [
+        [
+          2019,
+          7,
+          25
+        ]
+      ]
+    },
+    "DOI": "10.1145/3292500.3330648",
+    "type": "proceedings-article",
+    "created": {
+      "date-parts": [
+        [
+          2019,
+          7,
+          26
+        ]
+      ],
+      "date-time": "2019-07-26T13:17:26Z",
+      "timestamp": 1564147046000
+    },
+    "page": "1946-1956",
+    "update-policy": "https://doi.org/10.1145/crossmark-policy",
+    "source": "Crossref",
+    "is-referenced-by-count": 612,
+    "title": [
+      "Auto-Keras: An Efficient Neural Architecture Search System"
+    ],
+    "prefix": "10.1145",
+    "author": [
+      {
+        "given": "Haifeng",
+        "family": "Jin",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Texas A&amp;M University, College Station, TX, USA"
+          }
+        ]
+      },
+      {
+        "given": "Qingquan",
+        "family": "Song",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Texas A&amp;M University, College Station, TX, USA"
+          }
+        ]
+      },
+      {
+        "given": "Xia",
+        "family": "Hu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Texas A&amp;M University, College Station, TX, USA"
+          }
+        ]
+      }
+    ],
+    "member": "320",
+    "published-online": {
+      "date-parts": [
+        [
+          2019,
+          7,
+          25
+        ]
+      ]
+    },
+    "reference": [
+      {
+        "key": "e_1_3_2_2_1_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1023/A:1013689704352"
+      },
+      {
+        "key": "e_1_3_2_2_2_1",
+        "volume-title": "Designing neural network architectures using reinforcement learning. arXiv preprint arXiv:1611.02167",
+        "author": "Baker Bowen",
+        "year": "2016"
+      },
+      {
+        "key": "e_1_3_2_2_3_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.25080/Majora-8b375195-003"
+      },
+      {
+        "key": "e_1_3_2_2_4_1",
+        "volume-title": "On Lipschitz embedding of finite metric spaces in Hilbert space. Israel Journal of Mathematics",
+        "author": "Bourgain Jean",
+        "year": "1985"
+      },
+      {
+        "key": "e_1_3_2_2_5_1",
+        "volume-title": "SMASH: one-shot model architecture search through hypernetworks. arXiv preprint arXiv:1708.05344",
+        "author": "Brock Andrew",
+        "year": "2017"
+      },
+      {
+        "key": "e_1_3_2_2_6_1",
+        "volume-title": "ECML PKDD Workshop: Languages for Data Mining and Machine Learning .",
+        "author": "Buitinck Lars",
+        "year": "2013"
+      },
+      {
+        "key": "e_1_3_2_2_7_1",
+        "volume-title": "AAAI Conference on Artificial Intelligence .",
+        "author": "Cai Han",
+        "year": "2018"
+      },
+      {
+        "key": "e_1_3_2_2_8_1",
+        "volume-title": "International Conference on Learning Representations .",
+        "author": "Cai Han",
+        "year": "2019"
+      },
+      {
+        "key": "e_1_3_2_2_9_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/ICC.2012.6364125"
+      },
+      {
+        "key": "e_1_3_2_2_10_1",
+        "volume-title": "Net2net: Accelerating learning via knowledge transfer. arXiv preprint arXiv:1511.05641",
+        "author": "Chen Tianqi",
+        "year": "2015"
+      },
+      {
+        "key": "e_1_3_2_2_11_1",
+        "volume-title": "mbox",
+        "author": "Franccois Chollet",
+        "year": "2015"
+      },
+      {
+        "key": "e_1_3_2_2_12_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/3067695.3076002"
+      },
+      {
+        "key": "e_1_3_2_2_13_1",
+        "volume-title": "Simple And Efficient Architecture Search for Convolutional Neural Networks. arXiv preprint arXiv:1711.04528",
+        "author": "Elsken Thomas",
+        "year": "2017"
+      },
+      {
+        "key": "e_1_3_2_2_14_1",
+        "volume-title": "Jan Hendrik Metzen, and Frank Hutter",
+        "author": "Elsken Thomas",
+        "year": "2018"
+      },
+      {
+        "key": "e_1_3_2_2_15_1",
+        "unstructured": "Matthias Feurer Aaron Klein Katharina Eggensperger Jost Springenberg Manuel Blum and Frank Hutter. 2015. Efficient and robust automated machine learning. In Advances in Neural Information Processing Systems .   Matthias Feurer Aaron Klein Katharina Eggensperger Jost Springenberg Manuel Blum and Frank Hutter. 2015. Efficient and robust automated machine learning. In Advances in Neural Information Processing Systems ."
+      },
+      {
+        "key": "e_1_3_2_2_16_1",
+        "volume-title": "NAS-FPN: Learning Scalable Feature Pyramid Architecture for Object Detection. arXiv preprint arXiv:1904.07392",
+        "author": "Ghiasi Golnaz",
+        "year": "2019"
+      },
+      {
+        "key": "e_1_3_2_2_17_1",
+        "volume-title": "Single Path One-Shot Neural Architecture Search with Uniform Sampling. arXiv preprint arXiv:1904.00420",
+        "author": "Guo Zichao",
+        "year": "2019"
+      },
+      {
+        "key": "e_1_3_2_2_18_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/978-3-540-28649-3_27"
+      },
+      {
+        "key": "e_1_3_2_2_19_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/TSSC.1968.300136"
+      },
+      {
+        "key": "e_1_3_2_2_20_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1609/aaai.v33i01.33013878"
+      },
+      {
+        "key": "e_1_3_2_2_21_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/978-3-642-25566-3_40"
+      },
+      {
+        "key": "e_1_3_2_2_22_1",
+        "volume-title": "Neural Architecture Search with Bayesian Optimisation and Optimal Transport. Advances in Neural Information Processing Systems",
+        "author": "Kandasamy Kirthevasan",
+        "year": "2018"
+      },
+      {
+        "key": "e_1_3_2_2_23_1",
+        "volume-title": "Optimization by simulated annealing. science",
+        "author": "Kirkpatrick Scott",
+        "year": "1983"
+      },
+      {
+        "key": "e_1_3_2_2_24_1",
+        "volume-title": "Automatic model selection and hyperparameter optimization in WEKA. Journal of Machine Learning Research",
+        "author": "Kotthoff Lars",
+        "year": "2016"
+      },
+      {
+        "key": "e_1_3_2_2_26_1",
+        "volume-title": "The Hungarian method for the assignment problem. Naval Research Logistics",
+        "author": "Kuhn Harold W",
+        "year": "1955"
+      },
+      {
+        "key": "e_1_3_2_2_27_1",
+        "volume-title": "Gradient-based learning applied to document recognition. Proc",
+        "author": "LeCun Yann",
+        "year": "1998"
+      },
+      {
+        "key": "e_1_3_2_2_28_1",
+        "volume-title": "Auto-DeepLab: Hierarchical Neural Architecture Search for Semantic Image Segmentation. arXiv preprint arXiv:1901.02985",
+        "author": "Liu Chenxi",
+        "year": "2019"
+      },
+      {
+        "key": "e_1_3_2_2_29_1",
+        "volume-title": "European Conference on Computer Vision .",
+        "author": "Liu Chenxi",
+        "year": "2017"
+      },
+      {
+        "key": "e_1_3_2_2_30_1",
+        "volume-title": "Hierarchical representations for efficient architecture search. arXiv preprint arXiv:1711.00436",
+        "author": "Liu Hanxiao",
+        "year": "2017"
+      },
+      {
+        "key": "e_1_3_2_2_31_1",
+        "volume-title": "Darts: Differentiable architecture search. arXiv preprint arXiv:1806.09055",
+        "author": "Liu Hanxiao",
+        "year": "2018"
+      },
+      {
+        "key": "e_1_3_2_2_32_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/978-3-319-46448-0_2"
+      },
+      {
+        "key": "e_1_3_2_2_33_1",
+        "unstructured": "Renqian Luo Fei Tian Tao Qin Enhong Chen and Tie-Yan Liu. 2018. Neural architecture optimization. In Advances in Neural Information Processing Systems .   Renqian Luo Fei Tian Tao Qin Enhong Chen and Tie-Yan Liu. 2018. Neural architecture optimization. In Advances in Neural Information Processing Systems ."
+      },
+      {
+        "key": "e_1_3_2_2_34_1",
+        "volume-title": "Euclidean embeddings of finite metric spaces. Discrete Mathematics",
+        "author": "Maehara Hiroshi",
+        "year": "2013"
+      },
+      {
+        "key": "e_1_3_2_2_35_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/2908812.2908918"
+      },
+      {
+        "key": "e_1_3_2_2_36_1",
+        "volume-title": "et almbox",
+        "author": "Pedregosa Fabian",
+        "year": "2011"
+      },
+      {
+        "key": "e_1_3_2_2_37_1",
+        "volume-title": "Efficient Neural Architecture Search via Parameter Sharing. arXiv preprint arXiv:1802.03268",
+        "author": "Pham Hieu",
+        "year": "2018"
+      },
+      {
+        "key": "e_1_3_2_2_38_1",
+        "volume-title": "Regularized Evolution for Image Classifier Architecture Search. arXiv preprint arXiv:1802.01548",
+        "author": "Real Esteban",
+        "year": "2018"
+      },
+      {
+        "key": "e_1_3_2_2_39_1",
+        "volume-title": "International Conference on Machine Learning. arXiv preprint arXiv:1703",
+        "author": "Real Esteban",
+        "year": "2017"
+      },
+      {
+        "key": "e_1_3_2_2_40_1",
+        "unstructured": "Jasper Snoek Hugo Larochelle and Ryan P Adams. 2012. Practical bayesian optimization of machine learning algorithms. In Advances in Neural Information Processing Systems .   Jasper Snoek Hugo Larochelle and Ryan P Adams. 2012. Practical bayesian optimization of machine learning algorithms. In Advances in Neural Information Processing Systems ."
+      },
+      {
+        "key": "e_1_3_2_2_41_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/3071178.3071229"
+      },
+      {
+        "key": "e_1_3_2_2_42_1",
+        "volume-title": "Mnasnet: Platform-aware neural architecture search for mobile. arXiv preprint arXiv:1807.11626",
+        "author": "Tan Mingxing",
+        "year": "2018"
+      },
+      {
+        "key": "e_1_3_2_2_43_1",
+        "volume-title": "Deep Representation Learning for Social Network Analysis. arXiv preprint arXiv:1904.08547",
+        "author": "Tan Qiaoyu",
+        "year": "2019"
+      },
+      {
+        "key": "e_1_3_2_2_44_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/2487575.2487629"
+      },
+      {
+        "key": "e_1_3_2_2_45_1",
+        "volume-title": "International Conference on Machine Learning .",
+        "author": "Wei Tao",
+        "year": "2016"
+      },
+      {
+        "key": "e_1_3_2_2_46_1",
+        "unstructured": "Han Xiao Kashif Rasul and Roland Vollgraf. 2017. Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms. showeprint{arXiv}cs.LG/cs.LG/1708.07747  Han Xiao Kashif Rasul and Roland Vollgraf. 2017. Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms. showeprint{arXiv}cs.LG/cs.LG/1708.07747"
+      },
+      {
+        "key": "e_1_3_2_2_47_1",
+        "volume-title": "International Conference on Learning Representations .",
+        "author": "Xie Sirui",
+        "year": "2019"
+      },
+      {
+        "key": "e_1_3_2_2_48_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/2783258.2783417"
+      },
+      {
+        "key": "e_1_3_2_2_49_1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.14778/1687627.1687631"
+      },
+      {
+        "key": "e_1_3_2_2_50_1",
+        "volume-title": "Practical Network Blocks Design with Q-Learning. arXiv preprint arXiv:1708.05552",
+        "author": "Zhong Zhao",
+        "year": "2017"
+      },
+      {
+        "key": "e_1_3_2_2_51_1",
+        "volume-title": "International Conference on Learning Representations .",
+        "author": "Zoph Barret",
+        "year": "2016"
+      }
+    ],
+    "event": {
+      "name": "KDD '19: The 25th ACM SIGKDD Conference on Knowledge Discovery and Data Mining",
+      "location": "Anchorage AK USA",
+      "acronym": "KDD '19",
+      "sponsor": [
+        "SIGMOD ACM Special Interest Group on Management of Data",
+        "SIGKDD ACM Special Interest Group on Knowledge Discovery in Data"
+      ]
+    },
+    "container-title": [
+      "Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining"
+    ],
+    "original-title": [],
+    "link": [
+      {
+        "URL": "https://dl.acm.org/doi/10.1145/3292500.3330648",
+        "content-type": "unspecified",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      },
+      {
+        "URL": "https://dl.acm.org/doi/pdf/10.1145/3292500.3330648",
+        "content-type": "application/pdf",
+        "content-version": "vor",
+        "intended-application": "syndication"
+      },
+      {
+        "URL": "https://dl.acm.org/doi/pdf/10.1145/3292500.3330648",
+        "content-type": "unspecified",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2025,
+          6,
+          18
+        ]
+      ],
+      "date-time": "2025-06-18T01:02:09Z",
+      "timestamp": 1750208529000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://dl.acm.org/doi/10.1145/3292500.3330648"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2019,
+          7,
+          25
+        ]
+      ]
+    },
+    "references-count": 50,
+    "alternative-id": [
+      "10.1145/3292500.3330648",
+      "10.1145/3292500"
+    ],
+    "URL": "https://doi.org/10.1145/3292500.3330648",
+    "relation": {},
+    "subject": [],
+    "published": {
+      "date-parts": [
+        [
+          2019,
+          7,
+          25
+        ]
+      ]
+    },
+    "assertion": [
+      {
+        "value": "2019-07-25",
+        "order": 2,
+        "name": "published",
+        "label": "Published",
+        "group": {
+          "name": "publication_history",
+          "label": "Publication History"
+        }
+      }
+    ]
+  },
+  "10.1007/978-3-030-58452-8_13": {
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          3,
+          3
+        ]
+      ],
+      "date-time": "2026-03-03T06:46:24Z",
+      "timestamp": 1772520384140,
+      "version": "3.50.1"
+    },
+    "publisher-location": "Cham",
+    "reference-count": 52,
+    "publisher": "Springer International Publishing",
+    "isbn-type": [
+      {
+        "value": "9783030584511",
+        "type": "print"
+      },
+      {
+        "value": "9783030584528",
+        "type": "electronic"
+      }
+    ],
+    "license": [
+      {
+        "start": {
+          "date-parts": [
+            [
+              2020,
+              1,
+              1
+            ]
+          ],
+          "date-time": "2020-01-01T00:00:00Z",
+          "timestamp": 1577836800000
+        },
+        "content-version": "tdm",
+        "delay-in-days": 0,
+        "URL": "https://www.springernature.com/gp/researchers/text-and-data-mining"
+      },
+      {
+        "start": {
+          "date-parts": [
+            [
+              2020,
+              1,
+              1
+            ]
+          ],
+          "date-time": "2020-01-01T00:00:00Z",
+          "timestamp": 1577836800000
+        },
+        "content-version": "vor",
+        "delay-in-days": 0,
+        "URL": "https://www.springernature.com/gp/researchers/text-and-data-mining"
+      }
+    ],
+    "content-domain": {
+      "domain": [
+        "link.springer.com"
+      ],
+      "crossmark-restriction": false
+    },
+    "short-container-title": [],
+    "published-print": {
+      "date-parts": [
+        [
+          2020
+        ]
+      ]
+    },
+    "DOI": "10.1007/978-3-030-58452-8_13",
+    "type": "book-chapter",
+    "created": {
+      "date-parts": [
+        [
+          2020,
+          11,
+          3
+        ]
+      ],
+      "date-time": "2020-11-03T00:34:03Z",
+      "timestamp": 1604363643000
+    },
+    "page": "213-229",
+    "update-policy": "https://doi.org/10.1007/springer_crossmark_policy",
+    "source": "Crossref",
+    "is-referenced-by-count": 11579,
+    "title": [
+      "End-to-End Object Detection with Transformers"
+    ],
+    "prefix": "10.1007",
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-2308-9680",
+        "authenticated-orcid": false,
+        "given": "Nicolas",
+        "family": "Carion",
+        "sequence": "first",
+        "affiliation": []
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-0697-6664",
+        "authenticated-orcid": false,
+        "given": "Francisco",
+        "family": "Massa",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-1715-3356",
+        "authenticated-orcid": false,
+        "given": "Gabriel",
+        "family": "Synnaeve",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-9324-1457",
+        "authenticated-orcid": false,
+        "given": "Nicolas",
+        "family": "Usunier",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-3169-3199",
+        "authenticated-orcid": false,
+        "given": "Alexander",
+        "family": "Kirillov",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-9684-5240",
+        "authenticated-orcid": false,
+        "given": "Sergey",
+        "family": "Zagoruyko",
+        "sequence": "additional",
+        "affiliation": []
+      }
+    ],
+    "member": "297",
+    "published-online": {
+      "date-parts": [
+        [
+          2020,
+          11,
+          3
+        ]
+      ]
+    },
+    "reference": [
+      {
+        "key": "13_CR1",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Al-Rfou, R., Choe, D., Constant, N., Guo, M., Jones, L.: Character-level language modeling with deeper self-attention. In: AAAI Conference on Artificial Intelligence (2019)",
+        "DOI": "10.1609/aaai.v33i01.33013159"
+      },
+      {
+        "key": "13_CR2",
+        "unstructured": "Bahdanau, D., Cho, K., Bengio, Y.: Neural machine translation by jointly learning to align and translate. In: ICLR (2015)"
+      },
+      {
+        "key": "13_CR3",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Bello, I., Zoph, B., Vaswani, A., Shlens, J., Le, Q.V.: Attention augmented convolutional networks. In: ICCV (2019)",
+        "DOI": "10.1109/ICCV.2019.00338"
+      },
+      {
+        "key": "13_CR4",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Bodla, N., Singh, B., Chellappa, R., Davis, L.S.: Soft-NMS\u2014improving object detection with one line of code. In: ICCV (2017)",
+        "DOI": "10.1109/ICCV.2017.593"
+      },
+      {
+        "key": "13_CR5",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Cai, Z., Vasconcelos, N.: Cascade R-CNN: high quality object detection and instance segmentation. PAMI (2019)",
+        "DOI": "10.1109/CVPR.2018.00644"
+      },
+      {
+        "key": "13_CR6",
+        "unstructured": "Chan, W., Saharia, C., Hinton, G., Norouzi, M., Jaitly, N.: Imputer: sequence modelling via imputation and dynamic programming. arXiv:2002.08926 (2020)"
+      },
+      {
+        "key": "13_CR7",
+        "unstructured": "Devlin, J., Chang, M.W., Lee, K., Toutanova, K.: BERT: pre-training of deep bidirectional transformers for language understanding. In: NAACL-HLT (2019)"
+      },
+      {
+        "key": "13_CR8",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Erhan, D., Szegedy, C., Toshev, A., Anguelov, D.: Scalable object detection using deep neural networks. In: CVPR (2014)",
+        "DOI": "10.1109/CVPR.2014.276"
+      },
+      {
+        "key": "13_CR9",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Ghazvininejad, M., Levy, O., Liu, Y., Zettlemoyer, L.: Mask-predict: parallel decoding of conditional masked language models. arXiv:1904.09324 (2019)",
+        "DOI": "10.18653/v1/D19-1633"
+      },
+      {
+        "key": "13_CR10",
+        "unstructured": "Glorot, X., Bengio, Y.: Understanding the difficulty of training deep feedforward neural networks. In: AISTATS (2010)"
+      },
+      {
+        "key": "13_CR11",
+        "unstructured": "Gu, J., Bradbury, J., Xiong, C., Li, V.O., Socher, R.: Non-autoregressive neural machine translation. In: ICLR (2018)"
+      },
+      {
+        "key": "13_CR12",
+        "doi-asserted-by": "crossref",
+        "unstructured": "He, K., Girshick, R., Doll\u00e1r, P.: Rethinking imagenet pre-training. In: ICCV (2019)",
+        "DOI": "10.1109/ICCV.2019.00502"
+      },
+      {
+        "key": "13_CR13",
+        "doi-asserted-by": "crossref",
+        "unstructured": "He, K., Gkioxari, G., Doll\u00e1r, P., Girshick, R.B.: Mask R-CNN. In: ICCV (2017)",
+        "DOI": "10.1109/ICCV.2017.322"
+      },
+      {
+        "key": "13_CR14",
+        "doi-asserted-by": "crossref",
+        "unstructured": "He, K., Zhang, X., Ren, S., Sun, J.: Deep residual learning for image recognition. In: CVPR (2016)",
+        "DOI": "10.1109/CVPR.2016.90"
+      },
+      {
+        "key": "13_CR15",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Hosang, J.H., Benenson, R., Schiele, B.: Learning non-maximum suppression. In: CVPR (2017)",
+        "DOI": "10.1109/CVPR.2017.685"
+      },
+      {
+        "key": "13_CR16",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Hu, H., Gu, J., Zhang, Z., Dai, J., Wei, Y.: Relation networks for object detection. In: CVPR (2018)",
+        "DOI": "10.1109/CVPR.2018.00378"
+      },
+      {
+        "key": "13_CR17",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Kirillov, A., Girshick, R., He, K., Doll\u00e1r, P.: Panoptic feature pyramid networks. In: CVPR (2019)",
+        "DOI": "10.1109/CVPR.2019.00656"
+      },
+      {
+        "key": "13_CR18",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Kirillov, A., He, K., Girshick, R., Rother, C., Dollar, P.: Panoptic segmentation. In: CVPR (2019)",
+        "DOI": "10.1109/CVPR.2019.00963"
+      },
+      {
+        "key": "13_CR19",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Kuhn, H.W.: The Hungarian method for the assignment problem (1955)",
+        "DOI": "10.1002/nav.3800020109"
+      },
+      {
+        "key": "13_CR20",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Li, Y., Qi, H., Dai, J., Ji, X., Wei, Y.: Fully convolutional instance-aware semantic segmentation. In: CVPR (2017)",
+        "DOI": "10.1109/CVPR.2017.472"
+      },
+      {
+        "key": "13_CR21",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Lin, T.Y., Doll\u00e1r, P., Girshick, R., He, K., Hariharan, B., Belongie, S.: Feature pyramid networks for object detection. In: CVPR (2017)",
+        "DOI": "10.1109/CVPR.2017.106"
+      },
+      {
+        "key": "13_CR22",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Lin, T.Y., Goyal, P., Girshick, R.B., He, K., Doll\u00e1r, P.: Focal loss for dense object detection. In: ICCV (2017)",
+        "DOI": "10.1109/ICCV.2017.324"
+      },
+      {
+        "key": "13_CR23",
+        "series-title": "Lecture Notes in Computer Science",
+        "doi-asserted-by": "publisher",
+        "first-page": "740",
+        "DOI": "10.1007/978-3-319-10602-1_48",
+        "volume-title": "Computer Vision \u2013 ECCV 2014",
+        "author": "T-Y Lin",
+        "year": "2014",
+        "unstructured": "Lin, T.-Y., et al.: Microsoft COCO: common objects in context. In: Fleet, D., Pajdla, T., Schiele, B., Tuytelaars, T. (eds.) ECCV 2014. LNCS, vol. 8693, pp. 740\u2013755. Springer, Cham (2014). https://doi.org/10.1007/978-3-319-10602-1_48"
+      },
+      {
+        "key": "13_CR24",
+        "series-title": "Lecture Notes in Computer Science",
+        "doi-asserted-by": "publisher",
+        "first-page": "21",
+        "DOI": "10.1007/978-3-319-46448-0_2",
+        "volume-title": "Computer Vision \u2013 ECCV 2016",
+        "author": "W Liu",
+        "year": "2016",
+        "unstructured": "Liu, W., et al.: SSD: single shot multibox detector. In: Leibe, B., Matas, J., Sebe, N., Welling, M. (eds.) ECCV 2016. LNCS, vol. 9905, pp. 21\u201337. Springer, Cham (2016). https://doi.org/10.1007/978-3-319-46448-0_2"
+      },
+      {
+        "key": "13_CR25",
+        "unstructured": "Loshchilov, I., Hutter, F.: Decoupled weight decay regularization. In: ICLR (2017)"
+      },
+      {
+        "key": "13_CR26",
+        "doi-asserted-by": "crossref",
+        "unstructured": "L\u00fcscher, C., et al.: RWTH ASR systems for LibriSpeech: hybrid vs attention - w/o data augmentation. arXiv:1905.03072 (2019)",
+        "DOI": "10.21437/Interspeech.2019-1780"
+      },
+      {
+        "key": "13_CR27",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Milletari, F., Navab, N., Ahmadi, S.A.: V-net: Fully convolutional neural networks for volumetric medical image segmentation. In: 3DV (2016)",
+        "DOI": "10.1109/3DV.2016.79"
+      },
+      {
+        "key": "13_CR28",
+        "unstructured": "Oord, A., et al.: Parallel wavenet: fast high-fidelity speech synthesis. arXiv:1711.10433 (2017)"
+      },
+      {
+        "key": "13_CR29",
+        "unstructured": "Park, E., Berg, A.C.: Learning to decompose for object detection and instance segmentation. arXiv:1511.06449 (2015)"
+      },
+      {
+        "key": "13_CR30",
+        "unstructured": "Parmar, N., et al.: Image transformer. In: ICML (2018)"
+      },
+      {
+        "key": "13_CR31",
+        "unstructured": "Paszke, A., et al.: Pytorch: an imperative style, high-performance deep learning library. In: NeurIPS (2019)"
+      },
+      {
+        "key": "13_CR32",
+        "unstructured": "Pineda, L., Salvador, A., Drozdzal, M., Romero, A.: Elucidating image-to-set prediction: an analysis of models, losses and datasets. arXiv:1904.05709 (2019)"
+      },
+      {
+        "key": "13_CR33",
+        "unstructured": "Radford, A., Wu, J., Child, R., Luan, D., Amodei, D., Sutskever, I.: Language models are unsupervised multitask learners (2019)"
+      },
+      {
+        "key": "13_CR34",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Redmon, J., Divvala, S., Girshick, R., Farhadi, A.: You only look once: unified, real-time object detection. In: CVPR (2016)",
+        "DOI": "10.1109/CVPR.2016.91"
+      },
+      {
+        "key": "13_CR35",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Ren, M., Zemel, R.S.: End-to-end instance segmentation with recurrent attention. In: CVPR (2017)",
+        "DOI": "10.1109/CVPR.2017.39"
+      },
+      {
+        "key": "13_CR36",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Ren, S., He, K., Girshick, R.B., Sun, J.: Faster R-CNN: towards real-time object detection with region proposal networks. PAMI 39 (2015)",
+        "DOI": "10.1109/TPAMI.2016.2577031"
+      },
+      {
+        "key": "13_CR37",
+        "unstructured": "Rezatofighi, H., Tsoi, N., Gwak, J., Sadeghian, A., Reid, I., Savarese, S.: Generalized intersection over union. In: CVPR (2019)"
+      },
+      {
+        "key": "13_CR38",
+        "unstructured": "Rezatofighi, S.H., et al.: Deep perm-set net: learn to predict sets with unknown permutation and cardinality using deep neural networks. arXiv:1805.00613 (2018)"
+      },
+      {
+        "key": "13_CR39",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Rezatofighi, S.H., et al.: Deepsetnet: predicting sets with deep neural networks. In: ICCV (2017)",
+        "DOI": "10.1109/ICCV.2017.561"
+      },
+      {
+        "key": "13_CR40",
+        "series-title": "Lecture Notes in Computer Science",
+        "doi-asserted-by": "publisher",
+        "first-page": "312",
+        "DOI": "10.1007/978-3-319-46466-4_19",
+        "volume-title": "Computer Vision \u2013 ECCV 2016",
+        "author": "B Romera-Paredes",
+        "year": "2016",
+        "unstructured": "Romera-Paredes, B., Torr, P.H.S.: Recurrent instance segmentation. In: Leibe, B., Matas, J., Sebe, N., Welling, M. (eds.) ECCV 2016. LNCS, vol. 9910, pp. 312\u2013329. Springer, Cham (2016). https://doi.org/10.1007/978-3-319-46466-4_19"
+      },
+      {
+        "key": "13_CR41",
+        "unstructured": "Salvador, A., Bellver, M., Baradad, M., Marqu\u00e9s, F., Torres, J., Gir\u00f3, X.: Recurrent neural networks for semantic instance segmentation. arXiv:1712.00617 (2017)"
+      },
+      {
+        "key": "13_CR42",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Stewart, R.J., Andriluka, M., Ng, A.Y.: End-to-end people detection in crowded scenes. In: CVPR (2015)",
+        "DOI": "10.1109/CVPR.2016.255"
+      },
+      {
+        "key": "13_CR43",
+        "unstructured": "Sutskever, I., Vinyals, O., Le, Q.V.: Sequence to sequence learning with neural networks. In: NeurIPS (2014)"
+      },
+      {
+        "key": "13_CR44",
+        "unstructured": "Synnaeve, G., et al.: End-to-end ASR: from supervised to semi-supervised learning with modern architectures. arXiv:1911.08460 (2019)"
+      },
+      {
+        "key": "13_CR45",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Tian, Z., Shen, C., Chen, H., He, T.: FCOS: fully convolutional one-stage object detection. In: ICCV (2019)",
+        "DOI": "10.1109/ICCV.2019.00972"
+      },
+      {
+        "key": "13_CR46",
+        "unstructured": "Vaswani, A., et al.: Attention is all you need. In: NeurIPS (2017)"
+      },
+      {
+        "key": "13_CR47",
+        "unstructured": "Vinyals, O., Bengio, S., Kudlur, M.: Order matters: sequence to sequence for sets. In: ICLR (2016)"
+      },
+      {
+        "key": "13_CR48",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Wang, X., Girshick, R.B., Gupta, A., He, K.: Non-local neural networks. In: CVPR (2018)",
+        "DOI": "10.1109/CVPR.2018.00813"
+      },
+      {
+        "key": "13_CR49",
+        "unstructured": "Wu, Y., Kirillov, A., Massa, F., Lo, W.Y., Girshick, R.: Detectron2 (2019). https://github.com/facebookresearch/detectron2"
+      },
+      {
+        "key": "13_CR50",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Xiong, Y., et al.: Upsnet: a unified panoptic segmentation network. In: CVPR (2019)",
+        "DOI": "10.1109/CVPR.2019.00902"
+      },
+      {
+        "key": "13_CR51",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Zhang, S., Chi, C., Yao, Y., Lei, Z., Li, S.Z.: Bridging the gap between anchor-based and anchor-free detection via adaptive training sample selection. arXiv:1912.02424 (2019)",
+        "DOI": "10.1109/CVPR42600.2020.00978"
+      },
+      {
+        "key": "13_CR52",
+        "unstructured": "Zhou, X., Wang, D., Kr\u00e4henb\u00fchl, P.: Objects as points. arXiv:1904.07850 (2019)"
+      }
+    ],
+    "container-title": [
+      "Lecture Notes in Computer Science",
+      "Computer Vision \u2013 ECCV 2020"
+    ],
+    "original-title": [],
+    "language": "en",
+    "link": [
+      {
+        "URL": "https://link.springer.com/content/pdf/10.1007/978-3-030-58452-8_13",
+        "content-type": "unspecified",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2024,
+          11,
+          3
+        ]
+      ],
+      "date-time": "2024-11-03T00:08:22Z",
+      "timestamp": 1730592502000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://link.springer.com/10.1007/978-3-030-58452-8_13"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2020
+        ]
+      ]
+    },
+    "ISBN": [
+      "9783030584511",
+      "9783030584528"
+    ],
+    "references-count": 52,
+    "URL": "https://doi.org/10.1007/978-3-030-58452-8_13",
+    "relation": {},
+    "ISSN": [
+      "0302-9743",
+      "1611-3349"
+    ],
+    "issn-type": [
+      {
+        "value": "0302-9743",
+        "type": "print"
+      },
+      {
+        "value": "1611-3349",
+        "type": "electronic"
+      }
+    ],
+    "subject": [],
+    "published": {
+      "date-parts": [
+        [
+          2020
+        ]
+      ]
+    },
+    "assertion": [
+      {
+        "value": "3 November 2020",
+        "order": 1,
+        "name": "first_online",
+        "label": "First Online",
+        "group": {
+          "name": "ChapterHistory",
+          "label": "Chapter History"
+        }
+      },
+      {
+        "value": "ECCV",
+        "order": 1,
+        "name": "conference_acronym",
+        "label": "Conference Acronym",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "European Conference on Computer Vision",
+        "order": 2,
+        "name": "conference_name",
+        "label": "Conference Name",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "Glasgow",
+        "order": 3,
+        "name": "conference_city",
+        "label": "Conference City",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "United Kingdom",
+        "order": 4,
+        "name": "conference_country",
+        "label": "Conference Country",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "2020",
+        "order": 5,
+        "name": "conference_year",
+        "label": "Conference Year",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "23 August 2020",
+        "order": 7,
+        "name": "conference_start_date",
+        "label": "Conference Start Date",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "28 August 2020",
+        "order": 8,
+        "name": "conference_end_date",
+        "label": "Conference End Date",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "16",
+        "order": 9,
+        "name": "conference_number",
+        "label": "Conference Number",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "eccv2020",
+        "order": 10,
+        "name": "conference_id",
+        "label": "Conference ID",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "https://eccv2020.eu/",
+        "order": 11,
+        "name": "conference_url",
+        "label": "Conference URL",
+        "group": {
+          "name": "ConferenceInfo",
+          "label": "Conference Information"
+        }
+      },
+      {
+        "value": "Double-blind",
+        "order": 1,
+        "name": "type",
+        "label": "Type",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      },
+      {
+        "value": "OpenReview",
+        "order": 2,
+        "name": "conference_management_system",
+        "label": "Conference Management System",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      },
+      {
+        "value": "5025",
+        "order": 3,
+        "name": "number_of_submissions_sent_for_review",
+        "label": "Number of Submissions Sent for Review",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      },
+      {
+        "value": "1360",
+        "order": 4,
+        "name": "number_of_full_papers_accepted",
+        "label": "Number of Full Papers Accepted",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      },
+      {
+        "value": "0",
+        "order": 5,
+        "name": "number_of_short_papers_accepted",
+        "label": "Number of Short Papers Accepted",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      },
+      {
+        "value": "27% - The value is computed by the equation \"Number of Full Papers Accepted / Number of Submissions Sent for Review * 100\" and then rounded to a whole number.",
+        "order": 6,
+        "name": "acceptance_rate_of_full_papers",
+        "label": "Acceptance Rate of Full Papers",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      },
+      {
+        "value": "3",
+        "order": 7,
+        "name": "average_number_of_reviews_per_paper",
+        "label": "Average Number of Reviews per Paper",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      },
+      {
+        "value": "7",
+        "order": 8,
+        "name": "average_number_of_papers_per_reviewer",
+        "label": "Average Number of Papers per Reviewer",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      },
+      {
+        "value": "Yes",
+        "order": 9,
+        "name": "external_reviewers_involved",
+        "label": "External Reviewers Involved",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      },
+      {
+        "value": "The conference was held virtually due to the COVID-19 pandemic.",
+        "order": 10,
+        "name": "additional_info_on_review_process",
+        "label": "Additional Info on Review Process",
+        "group": {
+          "name": "ConfEventPeerReviewInformation",
+          "label": "Peer Review Information (provided by the conference organizers)"
+        }
+      }
+    ]
+  },
+  "10.1371/journal.pone.0185542": {
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          1,
+          19
+        ]
+      ],
+      "date-time": "2026-01-19T11:46:45Z",
+      "timestamp": 1768823205486,
+      "version": "3.49.0"
+    },
+    "reference-count": 44,
+    "publisher": "Public Library of Science (PLoS)",
+    "issue": "10",
+    "license": [
+      {
+        "start": {
+          "date-parts": [
+            [
+              2017,
+              10,
+              4
+            ]
+          ],
+          "date-time": "2017-10-04T00:00:00Z",
+          "timestamp": 1507075200000
+        },
+        "content-version": "vor",
+        "delay-in-days": 0,
+        "URL": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    ],
+    "funder": [
+      {
+        "DOI": "10.13039/100000968",
+        "name": "American Heart Association",
+        "doi-asserted-by": "publisher",
+        "award": [
+          "16SDG276000026"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "16SDG276000026"
+            ]
+          }
+        ],
+        "id": [
+          {
+            "id": "10.13039/100000968",
+            "id-type": "DOI",
+            "asserted-by": "publisher"
+          }
+        ]
+      },
+      {
+        "DOI": "10.13039/100000968",
+        "name": "American Heart Association",
+        "doi-asserted-by": "publisher",
+        "award": [
+          "16PRE30830010"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "16PRE30830010"
+            ]
+          }
+        ],
+        "id": [
+          {
+            "id": "10.13039/100000968",
+            "id-type": "DOI",
+            "asserted-by": "publisher"
+          }
+        ]
+      },
+      {
+        "DOI": "10.13039/100000057",
+        "name": "National Institute of General Medical Sciences",
+        "doi-asserted-by": "publisher",
+        "award": [
+          "GM106999"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "GM106999"
+            ]
+          }
+        ],
+        "id": [
+          {
+            "id": "10.13039/100000057",
+            "id-type": "DOI",
+            "asserted-by": "publisher"
+          }
+        ]
+      },
+      {
+        "DOI": "10.13039/100000057",
+        "name": "National Institute of General Medical Sciences",
+        "doi-asserted-by": "publisher",
+        "award": [
+          "GM106999"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "GM106999"
+            ]
+          }
+        ],
+        "id": [
+          {
+            "id": "10.13039/100000057",
+            "id-type": "DOI",
+            "asserted-by": "publisher"
+          }
+        ]
+      }
+    ],
+    "content-domain": {
+      "domain": [
+        "www.plosone.org"
+      ],
+      "crossmark-restriction": false
+    },
+    "short-container-title": [
+      "PLoS ONE"
+    ],
+    "DOI": "10.1371/journal.pone.0185542",
+    "type": "journal-article",
+    "created": {
+      "date-parts": [
+        [
+          2017,
+          10,
+          4
+        ]
+      ],
+      "date-time": "2017-10-04T13:40:12Z",
+      "timestamp": 1507124412000
+    },
+    "page": "e0185542",
+    "update-policy": "https://doi.org/10.1371/journal.pone.corrections_policy",
+    "source": "Crossref",
+    "is-referenced-by-count": 30,
+    "title": [
+      "Renal cold storage followed by transplantation impairs expression of key mitochondrial fission and fusion proteins"
+    ],
+    "prefix": "10.1371",
+    "volume": "12",
+    "author": [
+      {
+        "given": "Nirmala",
+        "family": "Parajuli",
+        "sequence": "first",
+        "affiliation": []
+      },
+      {
+        "given": "Stephen",
+        "family": "Shrum",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "Julia",
+        "family": "Tobacyk",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "Alex",
+        "family": "Harb",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "John M.",
+        "family": "Arthur",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-1715-6402",
+        "authenticated-orcid": true,
+        "given": "Lee Ann",
+        "family": "MacMillan-Crow",
+        "sequence": "additional",
+        "affiliation": []
+      }
+    ],
+    "member": "340",
+    "published-online": {
+      "date-parts": [
+        [
+          2017,
+          10,
+          4
+        ]
+      ]
+    },
+    "reference": [
+      {
+        "key": "ref1",
+        "first-page": "1",
+        "article-title": "The UNOS Scientific Renal Transplant Registry",
+        "author": "JM Cecka",
+        "year": "1993"
+      },
+      {
+        "key": "ref2",
+        "first-page": "605",
+        "article-title": "Improved graft survival after renal transplantation in the United States, 1988 to 1996",
+        "volume": "342",
+        "author": "S Hariharan",
+        "year": "2000"
+      },
+      {
+        "key": "ref3",
+        "first-page": "843",
+        "article-title": "Trends and results for organ donation and transplantation in the United States, 2004",
+        "volume": "5",
+        "author": "FK Port",
+        "year": "2005"
+      },
+      {
+        "key": "ref4",
+        "first-page": "F181",
+        "article-title": "Cold ischemic injury of transplanted kidneys: new insights from experimental studies",
+        "volume": "287",
+        "author": "AK Salahudeen",
+        "year": "2004"
+      },
+      {
+        "key": "ref5",
+        "first-page": "968",
+        "article-title": "Delayed graft function: risk factors and implications for renal allograft survival",
+        "volume": "63",
+        "author": "AO Ojo",
+        "year": "1997"
+      },
+      {
+        "key": "ref6",
+        "first-page": "1697",
+        "article-title": "Deleterious effects of delayed graft function in cadaveric renal transplant recipients independent of acute rejection",
+        "volume": "66",
+        "author": "DA Shoskes",
+        "year": "1998"
+      },
+      {
+        "key": "ref7",
+        "first-page": "713",
+        "article-title": "Cold ischemia and the reduced long-term survival of cadaveric renal allografts",
+        "volume": "65",
+        "author": "AK Salahudeen",
+        "year": "2004"
+      },
+      {
+        "key": "ref8",
+        "first-page": "343",
+        "article-title": "Each additional hour of cold ischemia time significantly increases the risk of graft failure and mortality following renal transplantation",
+        "volume": "87",
+        "author": "A Debout",
+        "year": "2015"
+      },
+      {
+        "key": "ref9",
+        "first-page": "105",
+        "article-title": "Influence of colloid, preservation medium and trimetazidine on renal medulla injury",
+        "volume": "1673",
+        "author": "C Doucet",
+        "year": "2004"
+      },
+      {
+        "key": "ref10",
+        "first-page": "861",
+        "article-title": "Polyethylene glycol reduces early and long-term cold ischemia-reperfusion and renal medulla injury",
+        "volume": "302",
+        "author": "JP Faure",
+        "year": "2002"
+      },
+      {
+        "key": "ref11",
+        "first-page": "946",
+        "article-title": "Protective effect of polyethylene glycol against prolonged cold ischemia and reperfusion injury: study in the isolated perfused rat kidney",
+        "volume": "297",
+        "author": "T Hauet",
+        "year": "2001"
+      },
+      {
+        "key": "ref12",
+        "first-page": "147",
+        "article-title": "Different patterns of renal cell killing after warm and cold ischemia",
+        "volume": "24",
+        "author": "M Yin",
+        "year": "2002"
+      },
+      {
+        "key": "ref13",
+        "first-page": "273",
+        "article-title": "Involvement of the mitochondrial pathway in cold storage and rewarming-associated apoptosis of human renal proximal tubular cells",
+        "volume": "3",
+        "author": "AK Salahudeen",
+        "year": "2003"
+      },
+      {
+        "key": "ref14",
+        "first-page": "1424",
+        "article-title": "Mechanism and prevention of cold storage-induced human renal tubular cell injury",
+        "volume": "70",
+        "author": "AK Salahudeen",
+        "year": "2000"
+      },
+      {
+        "key": "ref15",
+        "first-page": "798",
+        "article-title": "Apoptosis versus necrosis during cold storage and rewarming of human renal proximal tubular cells",
+        "volume": "72",
+        "author": "AK Salahudeen",
+        "year": "2001"
+      },
+      {
+        "key": "ref16",
+        "first-page": "805",
+        "article-title": "Heat shock-induced protection of renal proximal tubular epithelial cells from cold storage and rewarming injury",
+        "volume": "17",
+        "author": "DA Healy",
+        "year": "2006"
+      },
+      {
+        "key": "ref17",
+        "first-page": "1529",
+        "article-title": "Protective effect of PEG 35,000 Da on renal cells: paradoxical activation of JNK signaling pathway during cold storage",
+        "volume": "6",
+        "author": "D Dutheil",
+        "year": "2006"
+      },
+      {
+        "key": "ref18",
+        "first-page": "1273",
+        "article-title": "Role of mitochondrial-derived oxidants in renal tubular cell cold-storage injury",
+        "volume": "49",
+        "author": "T Mitchell",
+        "year": "2010"
+      },
+      {
+        "key": "ref19",
+        "first-page": "e48590",
+        "article-title": "MitoQ blunts mitochondrial and renal damage during cold preservation of porcine kidneys",
+        "volume": "7",
+        "author": "N Parajuli",
+        "year": "2012"
+      },
+      {
+        "key": "ref20",
+        "first-page": "125",
+        "article-title": "Cold preservation mediated renal injury: involvement of mitochondrial oxidative stress",
+        "volume": "30",
+        "author": "H Saba",
+        "year": "2008"
+      },
+      {
+        "key": "ref21",
+        "first-page": "1246",
+        "article-title": "Caspase inhibition prevents the increase in caspase-3, -2, -8 and -9 activity and apoptosis in the cold ischemic mouse kidney",
+        "volume": "4",
+        "author": "A Jani",
+        "year": "2004"
+      },
+      {
+        "key": "ref22",
+        "first-page": "682",
+        "article-title": "The mitochondria-targeted antioxidant mitoquinone protects against cold storage injury of renal tubular cells and rat kidneys",
+        "volume": "336",
+        "author": "T Mitchell",
+        "year": "2011"
+      },
+      {
+        "key": "ref23",
+        "first-page": "114",
+        "article-title": "Cold Storage Exacerbates Renal and Mitochondrial Dysfunction Following Transplantation",
+        "volume": "2",
+        "author": "S Shrum",
+        "year": "2016"
+      },
+      {
+        "key": "ref24",
+        "first-page": "e64019",
+        "article-title": "Peroxisome proliferator-activated receptor (PPAR) gamma and PPARalpha agonists modulate mitochondrial fusion-fission dynamics: relevance to reactive oxygen species (ROS)-related neurodegenerative disorders?",
+        "volume": "8",
+        "author": "JM Zolezzi",
+        "year": "2013"
+      },
+      {
+        "key": "ref25",
+        "first-page": "293",
+        "article-title": "Short- and long-term alterations of mitochondrial morphology, dynamics and mtDNA after transient oxidative stress",
+        "volume": "8",
+        "author": "M Jendrach",
+        "year": "2008"
+      },
+      {
+        "key": "ref26",
+        "first-page": "1646",
+        "article-title": "H2O2-induced mitochondrial fragmentation in C2C12 myocytes",
+        "volume": "49",
+        "author": "X Fan",
+        "year": "2010"
+      },
+      {
+        "key": "ref27",
+        "first-page": "314",
+        "article-title": "Roles of mitochondrial fragmentation and reactive oxygen species in mitochondrial dysfunction and myocardial insulin resistance",
+        "volume": "323",
+        "author": "T Watanabe",
+        "year": "2014"
+      },
+      {
+        "key": "ref28",
+        "first-page": "348",
+        "article-title": "Quantitative analysis of mitochondrial morphology and membrane potential in living cells using high-content imaging, machine learning, and morphological binning",
+        "volume": "1853",
+        "author": "AP Leonard",
+        "year": "2015"
+      },
+      {
+        "key": "ref29",
+        "first-page": "919",
+        "article-title": "The i-AAA protease YME1L and OMA1 cleave OPA1 to balance mitochondrial fusion and fission",
+        "volume": "204",
+        "author": "R Anand",
+        "year": "2014"
+      },
+      {
+        "key": "ref30",
+        "first-page": "578",
+        "article-title": "Stress-induced OMA1 activation and autocatalytic turnover regulate OPA1-dependent mitochondrial dynamics",
+        "volume": "33",
+        "author": "MJ Baker",
+        "year": "2014"
+      },
+      {
+        "key": "ref31",
+        "first-page": "2041",
+        "article-title": "Reciprocal Degradation of YME1L and OMA1 Adapts Mitochondrial Proteolytic Activity during Stress",
+        "volume": "14",
+        "author": "TK Rainbolt",
+        "year": "2016"
+      },
+      {
+        "key": "ref32",
+        "first-page": "F1318",
+        "article-title": "OMA1 mediates OPA1 proteolysis and mitochondrial fragmentation in experimental models of ischemic kidney injury",
+        "volume": "306",
+        "author": "X Xiao",
+        "year": "2014"
+      },
+      {
+        "key": "ref33",
+        "first-page": "97",
+        "article-title": "YME1L degradation reduces mitochondrial proteolytic capacity during oxidative stress",
+        "volume": "16",
+        "author": "TK Rainbolt",
+        "year": "2015"
+      },
+      {
+        "key": "ref34",
+        "first-page": "F734",
+        "article-title": "Inactivation of renal mitochondrial respiratory complexes and manganese superoxide dismutase during sepsis: mitochondria-targeted antioxidant mitigates injury",
+        "volume": "306",
+        "author": "NK Patil",
+        "year": "2014"
+      },
+      {
+        "key": "ref35",
+        "first-page": "25",
+        "article-title": "High-resolution respirometry: OXPHOS protocols for human cells and permeabilized fibers from small biopsies of human muscle",
+        "volume": "810",
+        "author": "D Pesta",
+        "year": "2012"
+      },
+      {
+        "key": "ref36",
+        "first-page": "1010",
+        "article-title": "YME1L controls the accumulation of respiratory chain subunits and is required for apoptotic resistance, cristae morphogenesis, and cell proliferation",
+        "volume": "23",
+        "author": "L Stiburek",
+        "year": "2012"
+      },
+      {
+        "key": "ref37",
+        "first-page": "576",
+        "article-title": "Membrane depolarization activates the mitochondrial protease OMA1 by stimulating self-cleavage",
+        "volume": "15",
+        "author": "K Zhang",
+        "year": "2014"
+      },
+      {
+        "key": "ref38",
+        "first-page": "7289",
+        "article-title": "Selective Oma1 protease-mediated proteolysis of Cox1 subunit of cytochrome oxidase in assembly mutants",
+        "volume": "287",
+        "author": "O Khalimonchuk",
+        "year": "2012"
+      },
+      {
+        "key": "ref39",
+        "first-page": "13259",
+        "article-title": "Stress-triggered activation of the metalloprotease Oma1 involves its C-terminal region and is important for mitochondrial stress protection in yeast",
+        "volume": "289",
+        "author": "I Bohovych",
+        "year": "2014"
+      },
+      {
+        "key": "ref40",
+        "first-page": "F853",
+        "article-title": "Persistent disruption of mitochondrial homeostasis after acute kidney injury",
+        "volume": "302",
+        "author": "JA Funk",
+        "year": "2012"
+      },
+      {
+        "key": "ref41",
+        "first-page": "408",
+        "article-title": "Distinct types of protease systems are involved in homeostasis regulation of mitochondrial morphology via balanced fusion and fission",
+        "volume": "21",
+        "author": "S Saita",
+        "year": "2016"
+      },
+      {
+        "key": "ref42",
+        "first-page": "148",
+        "article-title": "Effects of hypothermia on canine kidney mitochondria",
+        "volume": "17",
+        "author": "JH Southard",
+        "year": "1980"
+      },
+      {
+        "key": "ref43",
+        "first-page": "395",
+        "article-title": "Comparison of the effect of temperature on kidney cortex mitochondria from rabbit, dog, pig, and human: Arrhenius plots of ADP-stimulated respiration",
+        "volume": "20",
+        "author": "JH Southard",
+        "year": "1983"
+      },
+      {
+        "key": "ref44",
+        "first-page": "13",
+        "article-title": "Stimulation of ATP synthesis in hypothermically perfused dog kidneys by adenosine and PO4",
+        "volume": "21",
+        "author": "JH Southard",
+        "year": "1984"
+      }
+    ],
+    "container-title": [
+      "PLOS ONE"
+    ],
+    "original-title": [],
+    "language": "en",
+    "link": [
+      {
+        "URL": "http://dx.plos.org/10.1371/journal.pone.0185542",
+        "content-type": "unspecified",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2018,
+          10,
+          24
+        ]
+      ],
+      "date-time": "2018-10-24T00:26:31Z",
+      "timestamp": 1540340791000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://dx.plos.org/10.1371/journal.pone.0185542"
+      }
+    },
+    "subtitle": [],
+    "editor": [
+      {
+        "given": "Stanislaw",
+        "family": "Stepkowski",
+        "sequence": "first",
+        "affiliation": []
+      }
+    ],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2017,
+          10,
+          4
+        ]
+      ]
+    },
+    "references-count": 44,
+    "journal-issue": {
+      "issue": "10",
+      "published-online": {
+        "date-parts": [
+          [
+            2017,
+            10,
+            4
+          ]
+        ]
+      }
+    },
+    "URL": "https://doi.org/10.1371/journal.pone.0185542",
+    "relation": {},
+    "ISSN": [
+      "1932-6203"
+    ],
+    "issn-type": [
+      {
+        "value": "1932-6203",
+        "type": "electronic"
+      }
+    ],
+    "subject": [],
+    "published": {
+      "date-parts": [
+        [
+          2017,
+          10,
+          4
+        ]
+      ]
+    }
+  },
+  "10.1109/CVPR.2016.90": {
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          3,
+          3
+        ]
+      ],
+      "date-time": "2026-03-03T09:32:01Z",
+      "timestamp": 1772530321641,
+      "version": "3.50.1"
+    },
+    "reference-count": 49,
+    "publisher": "IEEE",
+    "content-domain": {
+      "domain": [],
+      "crossmark-restriction": false
+    },
+    "short-container-title": [],
+    "published-print": {
+      "date-parts": [
+        [
+          2016,
+          6
+        ]
+      ]
+    },
+    "DOI": "10.1109/cvpr.2016.90",
+    "type": "proceedings-article",
+    "created": {
+      "date-parts": [
+        [
+          2016,
+          12,
+          13
+        ]
+      ],
+      "date-time": "2016-12-13T01:38:49Z",
+      "timestamp": 1481593129000
+    },
+    "page": "770-778",
+    "source": "Crossref",
+    "is-referenced-by-count": 158582,
+    "title": [
+      "Deep Residual Learning for Image Recognition"
+    ],
+    "prefix": "10.1109",
+    "author": [
+      {
+        "given": "Kaiming",
+        "family": "He",
+        "sequence": "first",
+        "affiliation": []
+      },
+      {
+        "given": "Xiangyu",
+        "family": "Zhang",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "Shaoqing",
+        "family": "Ren",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "Jian",
+        "family": "Sun",
+        "sequence": "additional",
+        "affiliation": []
+      }
+    ],
+    "member": "263",
+    "reference": [
+      {
+        "key": "ref39",
+        "article-title": "Overfeat: Integrated recognition, localization and detection using convolutional networks",
+        "author": "sermanet",
+        "year": "2014",
+        "journal-title": "ICLRE"
+      },
+      {
+        "key": "ref38",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/3-540-49430-8_11"
+      },
+      {
+        "key": "ref33",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1017/CBO9780511812651"
+      },
+      {
+        "key": "ref32",
+        "article-title": "Faster R-CNN: Towards real-time object detection with region proposal networks",
+        "author": "ren",
+        "year": "2015",
+        "journal-title": "NIPS"
+      },
+      {
+        "key": "ref31",
+        "article-title": "Deep learning made easier by linear transformations in perceptrons",
+        "author": "raiko",
+        "year": "2012",
+        "journal-title": "AISTATS"
+      },
+      {
+        "key": "ref30",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/CVPR.2007.383266"
+      },
+      {
+        "key": "ref37",
+        "article-title": "Accelerated gradient descent by factor-centering decomposition",
+        "author": "schraudolph",
+        "year": "1998",
+        "journal-title": "Technical Report"
+      },
+      {
+        "key": "ref36",
+        "author": "saxe",
+        "year": "2013",
+        "journal-title": "Exact solutions to the nonlinear dynamics of learning in deep linear neural networks"
+      },
+      {
+        "key": "ref35",
+        "author": "russakovsky",
+        "year": "2014",
+        "journal-title": "Imagenet Large Scale Visual Recognition Challenge"
+      },
+      {
+        "key": "ref34",
+        "article-title": "Fitnets: Hints for thin deep nets",
+        "author": "romero",
+        "year": "2015",
+        "journal-title": "ICLRE"
+      },
+      {
+        "key": "ref28",
+        "article-title": "On the number of linear regions of deep neural networks",
+        "author": "mont\u00fafar",
+        "year": "2014",
+        "journal-title": "NIPS"
+      },
+      {
+        "key": "ref27",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/CVPR.2015.7298965"
+      },
+      {
+        "key": "ref29",
+        "article-title": "Rectified linear units improve restricted boltzmann machines",
+        "author": "nair",
+        "year": "2010",
+        "journal-title": "ICML"
+      },
+      {
+        "key": "ref2",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1093/oso/9780198538493.001.0001",
+        "author": "bishop",
+        "year": "1995",
+        "journal-title": "Neural Networks for Pattern Recognition"
+      },
+      {
+        "key": "ref1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/72.279181"
+      },
+      {
+        "key": "ref20",
+        "article-title": "Learning multiple layers of features from tiny images",
+        "author": "krizhevsky",
+        "year": "2009",
+        "journal-title": "Tech Report"
+      },
+      {
+        "key": "ref22",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1162/neco.1989.1.4.541"
+      },
+      {
+        "key": "ref21",
+        "article-title": "Imagenet classification with deep convolutional neural networks",
+        "author": "krizhevsky",
+        "year": "2012",
+        "journal-title": "NIPS"
+      },
+      {
+        "key": "ref24",
+        "author": "lee",
+        "year": "2014",
+        "journal-title": "Deeply-supervised nets"
+      },
+      {
+        "key": "ref23",
+        "doi-asserted-by": "crossref",
+        "first-page": "9",
+        "DOI": "10.1007/3-540-49430-8_2",
+        "article-title": "Efficient backprop",
+        "author": "lecun",
+        "year": "1998",
+        "journal-title": "Neural Networks Tricks of the Trade"
+      },
+      {
+        "key": "ref26",
+        "article-title": "Microsoft COCO: Common objects in context",
+        "author": "lin",
+        "year": "2014",
+        "journal-title": "ECCV"
+      },
+      {
+        "key": "ref25",
+        "author": "lin",
+        "year": "2013",
+        "journal-title": "Network in Network"
+      },
+      {
+        "key": "ref10",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/CVPR.2015.7299173"
+      },
+      {
+        "key": "ref11",
+        "article-title": "Spatial pyramid pooling in deep convolutional networks for visual recognition",
+        "author": "he",
+        "year": "2014",
+        "journal-title": "ECCV"
+      },
+      {
+        "key": "ref40",
+        "article-title": "Very deep convolutional networks for large-scale image recognition",
+        "author": "simonyan",
+        "year": "2015",
+        "journal-title": "ICLRE"
+      },
+      {
+        "key": "ref12",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/ICCV.2015.123"
+      },
+      {
+        "key": "ref13",
+        "article-title": "Improving neural networks by preventing coadaptation of feature detectors",
+        "author": "hinton",
+        "year": "2012"
+      },
+      {
+        "key": "ref14",
+        "author": "hochreiter",
+        "year": "1991",
+        "journal-title": "Untersuchungen zu dynamischen neuronalen Netzen"
+      },
+      {
+        "key": "ref15",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1162/neco.1997.9.8.1735"
+      },
+      {
+        "key": "ref16",
+        "article-title": "Batch normalization: Accelerating deep network training by reducing internal covariate shift",
+        "author": "ioffe",
+        "year": "2015",
+        "journal-title": "ICML"
+      },
+      {
+        "key": "ref17",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/TPAMI.2010.57"
+      },
+      {
+        "key": "ref18",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/TPAMI.2011.235"
+      },
+      {
+        "key": "ref19",
+        "author": "jia",
+        "year": "2014",
+        "journal-title": "Caffe Convolutional Architecture for Fast Feature Embedding"
+      },
+      {
+        "key": "ref4",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.5244/C.25.76"
+      },
+      {
+        "key": "ref3",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1137/1.9780898719505"
+      },
+      {
+        "key": "ref6",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/ICCV.2015.169"
+      },
+      {
+        "key": "ref5",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/s11263-009-0275-4"
+      },
+      {
+        "key": "ref8",
+        "article-title": "Understanding the difficulty of training deep feedforward neural networks",
+        "author": "glorot",
+        "year": "2010",
+        "journal-title": "AISTATS"
+      },
+      {
+        "key": "ref7",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/CVPR.2014.81"
+      },
+      {
+        "key": "ref49",
+        "article-title": "Visualizing and understanding convolutional neural networks",
+        "author": "zeiler",
+        "year": "2014",
+        "journal-title": "ECCV"
+      },
+      {
+        "key": "ref9",
+        "author": "goodfellow",
+        "year": "2013",
+        "journal-title": "Maxout Networks"
+      },
+      {
+        "key": "ref46",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/978-3-642-42054-2_55"
+      },
+      {
+        "key": "ref45",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/1179352.1142005"
+      },
+      {
+        "key": "ref48",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/978-1-4757-3121-7"
+      },
+      {
+        "key": "ref47",
+        "author": "vedaldi",
+        "year": "2008",
+        "journal-title": "Vlfeat An Open and Portable Library of Computer Vision Algorithms"
+      },
+      {
+        "key": "ref42",
+        "article-title": "Training very deep networks",
+        "author": "srivastava",
+        "year": "2015",
+        "journal-title": "1507 06228"
+      },
+      {
+        "key": "ref41",
+        "author": "srivastava",
+        "year": "2015",
+        "journal-title": "Highway networks"
+      },
+      {
+        "key": "ref44",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/34.56188"
+      },
+      {
+        "key": "ref43",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/CVPR.2015.7298594"
+      }
+    ],
+    "event": {
+      "name": "2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)",
+      "location": "Las Vegas, NV, USA",
+      "start": {
+        "date-parts": [
+          [
+            2016,
+            6,
+            27
+          ]
+        ]
+      },
+      "end": {
+        "date-parts": [
+          [
+            2016,
+            6,
+            30
+          ]
+        ]
+      }
+    },
+    "container-title": [
+      "2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)"
+    ],
+    "original-title": [],
+    "link": [
+      {
+        "URL": "http://xplorestaging.ieee.org/ielx7/7776647/7780329/07780459.pdf?arnumber=7780459",
+        "content-type": "unspecified",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2025,
+          6,
+          13
+        ]
+      ],
+      "date-time": "2025-06-13T14:31:40Z",
+      "timestamp": 1749825100000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "http://ieeexplore.ieee.org/document/7780459/"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2016,
+          6
+        ]
+      ]
+    },
+    "references-count": 49,
+    "URL": "https://doi.org/10.1109/cvpr.2016.90",
+    "relation": {},
+    "subject": [],
+    "published": {
+      "date-parts": [
+        [
+          2016,
+          6
+        ]
+      ]
+    }
+  },
+  "10.1109/ACCESS.2021.3119621": {
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          2,
+          28
+        ]
+      ],
+      "date-time": "2026-02-28T22:59:35Z",
+      "timestamp": 1772319575748,
+      "version": "3.50.1"
+    },
+    "reference-count": 196,
+    "publisher": "Institute of Electrical and Electronics Engineers (IEEE)",
+    "license": [
+      {
+        "start": {
+          "date-parts": [
+            [
+              2021,
+              1,
+              1
+            ]
+          ],
+          "date-time": "2021-01-01T00:00:00Z",
+          "timestamp": 1609459200000
+        },
+        "content-version": "vor",
+        "delay-in-days": 0,
+        "URL": "https://creativecommons.org/licenses/by/4.0/legalcode"
+      }
+    ],
+    "content-domain": {
+      "domain": [],
+      "crossmark-restriction": false
+    },
+    "short-container-title": [
+      "IEEE Access"
+    ],
+    "published-print": {
+      "date-parts": [
+        [
+          2021
+        ]
+      ]
+    },
+    "DOI": "10.1109/access.2021.3119621",
+    "type": "journal-article",
+    "created": {
+      "date-parts": [
+        [
+          2021,
+          10,
+          14
+        ]
+      ],
+      "date-time": "2021-10-14T01:35:03Z",
+      "timestamp": 1634175303000
+    },
+    "page": "140628-140653",
+    "source": "Crossref",
+    "is-referenced-by-count": 95,
+    "title": [
+      "Machine Learning Techniques for Biomedical Natural Language Processing: A Comprehensive Review"
+    ],
+    "prefix": "10.1109",
+    "volume": "9",
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-8127-7233",
+        "authenticated-orcid": false,
+        "given": "Essam H.",
+        "family": "Houssein",
+        "sequence": "first",
+        "affiliation": []
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-4840-260X",
+        "authenticated-orcid": false,
+        "given": "Rehab E.",
+        "family": "Mohamed",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "Abdelmgeid A.",
+        "family": "Ali",
+        "sequence": "additional",
+        "affiliation": []
+      }
+    ],
+    "member": "263",
+    "reference": [
+      {
+        "key": "ref170",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jvs.2016.11.031"
+      },
+      {
+        "key": "ref172",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1515/cait-2015-0055"
+      },
+      {
+        "key": "ref171",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/978-3-319-13987-6_21"
+      },
+      {
+        "key": "ref174",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.cmpb.2020.105383"
+      },
+      {
+        "key": "ref173",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/BIBM47256.2019.8983095"
+      },
+      {
+        "key": "ref176",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.2196/medinform.9150"
+      },
+      {
+        "key": "ref175",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1177/0193945916668493"
+      },
+      {
+        "key": "ref178",
+        "first-page": "16",
+        "article-title": "Automated extraction and classification of cancer stage mentions fromunstructured text fields in a central cancer registry",
+        "volume": "2018",
+        "author": "aalabdulsalam",
+        "year": "2018",
+        "journal-title": "AMIA Summits Transl Sci Proc"
+      },
+      {
+        "key": "ref177",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/jamia/ocw006"
+      },
+      {
+        "key": "ref168",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1371/journal.pone.0212778"
+      },
+      {
+        "key": "ref169",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.procs.2019.08.189"
+      },
+      {
+        "key": "ref39",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/amiajnl-2011-000153"
+      },
+      {
+        "key": "ref38",
+        "article-title": "Proceedings of the main conference on human language technology conference of the north American chapter of the association of computational linguistics",
+        "author": "shinyama",
+        "year": "2006"
+      },
+      {
+        "key": "ref33",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1146/annurev-publhealth-032315-021353"
+      },
+      {
+        "key": "ref32",
+        "article-title": "Institute of medicine (US) committee on quality of health care in America",
+        "author": "kohn",
+        "year": "2000",
+        "journal-title": "To Err Is Human Building a Safer Health System"
+      },
+      {
+        "key": "ref31",
+        "first-page": "375",
+        "article-title": "Towards the named entity recognition methods in biomedical field",
+        "author": "?niegula",
+        "year": "2020",
+        "journal-title": "Proc Int Conf Current Trends Theory Pract Inform"
+      },
+      {
+        "key": "ref30",
+        "article-title": "A brief survey of text mining: Classification, clustering and extraction techniques",
+        "author": "allahyari",
+        "year": "2017",
+        "journal-title": "arXiv 1707 02919"
+      },
+      {
+        "key": "ref37",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.jbi.2020.103526",
+        "article-title": "Clinical concept extraction: A methodology review",
+        "volume": "109",
+        "author": "fu",
+        "year": "2020",
+        "journal-title": "J Biomed Informat"
+      },
+      {
+        "key": "ref36",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/jamia/ocz141"
+      },
+      {
+        "key": "ref35",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.07.012"
+      },
+      {
+        "key": "ref34",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.11.011"
+      },
+      {
+        "key": "ref181",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.04.015"
+      },
+      {
+        "key": "ref180",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/aje/kwt441"
+      },
+      {
+        "key": "ref185",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.2196/17984"
+      },
+      {
+        "key": "ref184",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.21437/Interspeech.2017-1746"
+      },
+      {
+        "key": "ref183",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/amiajnl-2014-003009"
+      },
+      {
+        "key": "ref182",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2009.07.007"
+      },
+      {
+        "key": "ref189",
+        "year": "2017",
+        "journal-title": "Montreal Declaration for a Responsible Development of Artificial Intelligence Forum on the Socially Responsible Development of AI 2017 Nov 2-3 Montreal (QC)"
+      },
+      {
+        "key": "ref188",
+        "year": "2019",
+        "journal-title": "Treasury Board Secretariat Directive on Automated Decision-Making Ottawa (on) Government of Canada"
+      },
+      {
+        "key": "ref187",
+        "author": "gramlich",
+        "year": "2020",
+        "journal-title": "10 Facts About Americans and Facebook Washington (DC) Pew Research Center"
+      },
+      {
+        "key": "ref186",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.7326/M18-1990"
+      },
+      {
+        "key": "ref28",
+        "first-page": "151",
+        "article-title": "Enhancing medical word sense inventories using word sense induction: A preliminary study",
+        "author": "dong",
+        "year": "2020",
+        "journal-title": "Heterogeneous Data Management Polystores and Analytics for Healthcare"
+      },
+      {
+        "key": "ref27",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1186/1471-2105-7-334"
+      },
+      {
+        "key": "ref179",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2019.103301"
+      },
+      {
+        "key": "ref29",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1155/2018/4302425"
+      },
+      {
+        "key": "ref20",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1038/srep46226"
+      },
+      {
+        "key": "ref22",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1197/jamia.M3096"
+      },
+      {
+        "key": "ref21",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/amiajnl-2014-002702"
+      },
+      {
+        "key": "ref24",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/amiajnl-2012-001244"
+      },
+      {
+        "key": "ref23",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1002/pds.1981"
+      },
+      {
+        "key": "ref26",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1089/cmb.2005.12.554"
+      },
+      {
+        "key": "ref25",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1197/jamia.M1533"
+      },
+      {
+        "key": "ref50",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/bioinformatics/btx228"
+      },
+      {
+        "key": "ref51",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/N16-1030"
+      },
+      {
+        "key": "ref154",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.eswa.2007.01.009"
+      },
+      {
+        "key": "ref153",
+        "first-page": "110",
+        "article-title": "Ensemble learning",
+        "volume": "2",
+        "author": "dietterich",
+        "year": "2002",
+        "journal-title": "The Handbook of Brain Theory and Neural Networks"
+      },
+      {
+        "key": "ref156",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1186/s12918-016-0358-0"
+      },
+      {
+        "key": "ref155",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/bioinformatics/btw539"
+      },
+      {
+        "key": "ref150",
+        "first-page": "247",
+        "article-title": "A natural language understanding system combining syntactic and semantic techniques",
+        "author": "haug",
+        "year": "1994",
+        "journal-title": "Proc Annu Symp Comput Appl Med Care"
+      },
+      {
+        "key": "ref152",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/jamia.2009.002733"
+      },
+      {
+        "key": "ref151",
+        "first-page": "103",
+        "article-title": "The role of lexical knowledge in biomedical text understanding",
+        "author": "mcgray",
+        "year": "1987",
+        "journal-title": "Proc Annu Symp Comput Appl Med Care"
+      },
+      {
+        "key": "ref146",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/jamia.1994.95236145"
+      },
+      {
+        "key": "ref147",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1055/s-0038-1634579"
+      },
+      {
+        "key": "ref148",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/jamia.2009.001560"
+      },
+      {
+        "key": "ref149",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.3115/1118149.1118154"
+      },
+      {
+        "key": "ref59",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1186/s12911-015-0149-3"
+      },
+      {
+        "key": "ref58",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1371/journal.pone.0164680"
+      },
+      {
+        "key": "ref57",
+        "first-page": "72",
+        "article-title": "Detecting gene symbols and names in biological texts a first step toward pertinent information extraction",
+        "volume": "9",
+        "author": "proux",
+        "year": "1998",
+        "journal-title": "Genome Inform"
+      },
+      {
+        "key": "ref56",
+        "first-page": "707",
+        "article-title": "Toward information extraction: Identifying protein names from biological papers",
+        "volume": "707",
+        "author": "fukuda",
+        "year": "1998",
+        "journal-title": "Proc Pac Symp Biocomput"
+      },
+      {
+        "key": "ref55",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1186/1472-6947-15-S1-S9"
+      },
+      {
+        "key": "ref54",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/bioinformatics/btp535"
+      },
+      {
+        "key": "ref53",
+        "first-page": "219",
+        "article-title": "Natural language processing and data mining for clinical text",
+        "volume": "36",
+        "author": "raja",
+        "year": "2015",
+        "journal-title": "Healthcare Data Anal"
+      },
+      {
+        "key": "ref52",
+        "first-page": "39",
+        "article-title": "Distributional semantics resources for biomedical text processing",
+        "author": "moen",
+        "year": "2013",
+        "journal-title": "Proc LBM"
+      },
+      {
+        "key": "ref40",
+        "first-page": "1236",
+        "article-title": "Relation extraction from clinical narratives using pre-trained language models",
+        "author": "wei",
+        "year": "2019",
+        "journal-title": "Proc AMIA Annu Symp"
+      },
+      {
+        "key": "ref167",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jstrokecerebrovasdis.2019.02.004"
+      },
+      {
+        "key": "ref166",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1186/s12911-019-1010-x"
+      },
+      {
+        "key": "ref165",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2015.06.013"
+      },
+      {
+        "key": "ref164",
+        "first-page": "1880",
+        "article-title": "Ensembles of NLP tools for data element extraction from clinical notes",
+        "author": "kuo",
+        "year": "2016",
+        "journal-title": "Proc AMIA Annu Symp"
+      },
+      {
+        "key": "ref163",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2011.12.009"
+      },
+      {
+        "key": "ref162",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1186/1472-6947-12-36"
+      },
+      {
+        "key": "ref161",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/amiajnl-2011-000155"
+      },
+      {
+        "key": "ref160",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1197/jamia.M2844"
+      },
+      {
+        "key": "ref4",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/jamia/ocv130"
+      },
+      {
+        "key": "ref3",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2009.08.007"
+      },
+      {
+        "key": "ref6",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2013.06.004"
+      },
+      {
+        "key": "ref5",
+        "year": "2020",
+        "journal-title": "Natural Language Processing&#x2014;Wikipedia the Free Encyclopedia"
+      },
+      {
+        "key": "ref8",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1186/s12887-016-0592-z"
+      },
+      {
+        "key": "ref159",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.ymeth.2017.06.010"
+      },
+      {
+        "key": "ref7",
+        "first-page": "1",
+        "article-title": "Adoption of electronic health record systems among US non-federal acute care hospitals: 2008&#x2013;2015",
+        "volume": "35",
+        "author": "henry",
+        "year": "2016",
+        "journal-title": "ONC Data Brief"
+      },
+      {
+        "key": "ref49",
+        "article-title": "Recurrent neural network models for disease name recognition using domain invariant features",
+        "author": "kumar sahu",
+        "year": "2016",
+        "journal-title": "arXiv 1606 09371"
+      },
+      {
+        "key": "ref157",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/bioinformatics/bty995"
+      },
+      {
+        "key": "ref9",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/JBHI.2016.2636665"
+      },
+      {
+        "key": "ref158",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1038/nmeth.3773"
+      },
+      {
+        "key": "ref46",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/S16-1165"
+      },
+      {
+        "key": "ref45",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/amiajnl-2011-000203"
+      },
+      {
+        "key": "ref48",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.ijmedinf.2017.06.004"
+      },
+      {
+        "key": "ref47",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/jamia/ocz166"
+      },
+      {
+        "key": "ref42",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/amiajnl-2013-001628"
+      },
+      {
+        "key": "ref41",
+        "first-page": "1524",
+        "article-title": "A frame-based nlp system for cancer-related information extraction",
+        "author": "si",
+        "year": "2018",
+        "journal-title": "Proc AMIA Annu Symp"
+      },
+      {
+        "key": "ref44",
+        "first-page": "739",
+        "article-title": "Extraction of adverse drug effects from clinical records",
+        "author": "aramaki",
+        "year": "2010",
+        "journal-title": "Proc Medinfo"
+      },
+      {
+        "key": "ref43",
+        "first-page": "1",
+        "article-title": "UTH_CCB system for adverse drug reaction extraction from drug labels at TAC-ADR 2017",
+        "author": "xu",
+        "year": "2017",
+        "journal-title": "Proc TAC"
+      },
+      {
+        "key": "ref73",
+        "author": "nilsson",
+        "year": "1998",
+        "journal-title": "Artificial Intelligence A New Synthesis"
+      },
+      {
+        "key": "ref72",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/amiajnl-2011-000464"
+      },
+      {
+        "key": "ref71",
+        "first-page": "1",
+        "article-title": "Natural language processing (NLP) a subfield of artificial intelligence",
+        "volume": "46",
+        "author": "baclic",
+        "year": "2020",
+        "journal-title": "CCDR"
+      },
+      {
+        "key": "ref70",
+        "author": "murphy",
+        "year": "2012",
+        "journal-title": "Machine Learning A Probabilistic Perspective"
+      },
+      {
+        "key": "ref76",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1613/jair.4992"
+      },
+      {
+        "key": "ref77",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/2347736.2347755"
+      },
+      {
+        "key": "ref74",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/TPAMI.2013.50"
+      },
+      {
+        "key": "ref75",
+        "author": "goodfellow",
+        "year": "2016",
+        "journal-title": "Deep Learning"
+      },
+      {
+        "key": "ref78",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/1390156.1390294"
+      },
+      {
+        "key": "ref79",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1002/sim.4780030207"
+      },
+      {
+        "key": "ref60",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.06.016"
+      },
+      {
+        "key": "ref62",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1038/srep26094"
+      },
+      {
+        "key": "ref61",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.4338/ACI-2013-10-RA-0080"
+      },
+      {
+        "key": "ref63",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.ijmedinf.2017.12.024"
+      },
+      {
+        "key": "ref64",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1371/journal.pone.0063499"
+      },
+      {
+        "key": "ref65",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.cardfail.2014.03.008"
+      },
+      {
+        "key": "ref66",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1097/MLR.0000000000000346"
+      },
+      {
+        "key": "ref67",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2011.03.011"
+      },
+      {
+        "key": "ref68",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1038/s41598-017-07111-0"
+      },
+      {
+        "key": "ref69",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1371/journal.pone.0153749"
+      },
+      {
+        "key": "ref193",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.2196/12942"
+      },
+      {
+        "key": "ref194",
+        "author": "erlingsson",
+        "year": "2020",
+        "journal-title": "Introducing tensorflow privacy Learning with differential privacy for training data"
+      },
+      {
+        "key": "ref195",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jclinepi.2020.01.009"
+      },
+      {
+        "key": "ref196",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1126/science.aax2342"
+      },
+      {
+        "key": "ref95",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/s10916-016-0548-8"
+      },
+      {
+        "key": "ref94",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1186/s12911-017-0418-4"
+      },
+      {
+        "key": "ref190",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1038/s41591-019-0649-2"
+      },
+      {
+        "key": "ref93",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1155/2015/636371"
+      },
+      {
+        "key": "ref191",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1038/s41591-019-0726-6"
+      },
+      {
+        "key": "ref92",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1177/0272989X11400418"
+      },
+      {
+        "key": "ref192",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/3290605.3300830"
+      },
+      {
+        "key": "ref91",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2015.08.011"
+      },
+      {
+        "key": "ref90",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.04.011"
+      },
+      {
+        "key": "ref98",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2015.09.002"
+      },
+      {
+        "key": "ref99",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2015.09.013"
+      },
+      {
+        "key": "ref96",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2016.01.008"
+      },
+      {
+        "key": "ref97",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.artmed.2016.06.001"
+      },
+      {
+        "key": "ref82",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/bmjopen-2013-003482"
+      },
+      {
+        "key": "ref81",
+        "first-page": "189",
+        "article-title": "Na&#x00EF;ve electronic health record phenotype identification for rheumatoid arthritis",
+        "author": "carroll",
+        "year": "2011",
+        "journal-title": "Proc AMIA Annu Symp"
+      },
+      {
+        "key": "ref84",
+        "doi-asserted-by": "crossref",
+        "first-page": "22",
+        "DOI": "10.1109/JBHI.2016.2633963",
+        "article-title": "Deepr: A convolutional net for medical records",
+        "volume": "21",
+        "author": "wickramasinghe",
+        "year": "2017",
+        "journal-title": "IEEE Journal of Biomedical and Health Informatics"
+      },
+      {
+        "key": "ref83",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1371/journal.pmed.1002695"
+      },
+      {
+        "key": "ref80",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.eswa.2006.09.004"
+      },
+      {
+        "key": "ref89",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.06.019"
+      },
+      {
+        "key": "ref85",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.04.001"
+      },
+      {
+        "key": "ref86",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1038/s41746-018-0029-1"
+      },
+      {
+        "key": "ref87",
+        "doi-asserted-by": "crossref",
+        "first-page": "436",
+        "DOI": "10.1038/nature14539",
+        "article-title": "Deep learning",
+        "volume": "521",
+        "author": "lecun",
+        "year": "2015",
+        "journal-title": "Nature"
+      },
+      {
+        "key": "ref88",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2015.09.006"
+      },
+      {
+        "key": "ref101",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.04.008"
+      },
+      {
+        "key": "ref100",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1002/asi.23937"
+      },
+      {
+        "key": "ref127",
+        "article-title": "Brundlefly at SemEval-2016 task 12: Recurrent neural networks vs. joint inference for clinical temporal information extraction",
+        "author": "alan fries",
+        "year": "2016",
+        "journal-title": "arXiv 1606 01433"
+      },
+      {
+        "key": "ref126",
+        "first-page": "624",
+        "article-title": "Named entity recognition in Chinese clinical text using deep neural network",
+        "volume": "216",
+        "author": "wu",
+        "year": "2015",
+        "journal-title": "Stud Health Technol Inform"
+      },
+      {
+        "key": "ref125",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/D16-1082"
+      },
+      {
+        "key": "ref124",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/E17-1014"
+      },
+      {
+        "key": "ref129",
+        "article-title": "Exploiting task-oriented resources to learn word embeddings for clinical abbreviation expansion",
+        "author": "liu",
+        "year": "2018",
+        "journal-title": "arXiv 1804 04225"
+      },
+      {
+        "key": "ref128",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.14257/ijhit.2016.9.7.22"
+      },
+      {
+        "key": "ref130",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2015.01.012"
+      },
+      {
+        "key": "ref133",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/BIBM.2014.6999219"
+      },
+      {
+        "key": "ref134",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.ymeth.2014.06.011"
+      },
+      {
+        "key": "ref131",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/jamia/ocw112"
+      },
+      {
+        "key": "ref132",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1109/ICHI.2015.58"
+      },
+      {
+        "key": "ref136",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1137/1.9781611974348.49"
+      },
+      {
+        "key": "ref135",
+        "first-page": "301",
+        "article-title": "Doctor AI: Predicting clinical events via recurrent neural networks",
+        "author": "choi",
+        "year": "2016",
+        "journal-title": "Proc Mach Learn Healthcare Conf"
+      },
+      {
+        "key": "ref138",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2016.10.007"
+      },
+      {
+        "key": "ref137",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1038/s41598-018-24271-9"
+      },
+      {
+        "key": "ref139",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1371/journal.pone.0066341"
+      },
+      {
+        "key": "ref140",
+        "article-title": "Efficient estimation of word representations in vector space",
+        "author": "mikolov",
+        "year": "2013",
+        "journal-title": "arXiv 1301 3781 [cs]"
+      },
+      {
+        "key": "ref141",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/2783258.2783365"
+      },
+      {
+        "key": "ref142",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/jamia/ocw156"
+      },
+      {
+        "key": "ref143",
+        "first-page": "235",
+        "article-title": "Lexical methods for managing variation in biomedical terminologies",
+        "author": "mccray",
+        "year": "1994",
+        "journal-title": "Proc Annu Symp Comput Appl Med Care"
+      },
+      {
+        "key": "ref2",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1055/s-0038-1638592"
+      },
+      {
+        "key": "ref144",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1197/jamia.M3378"
+      },
+      {
+        "key": "ref1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/978-3-030-05249-2_5"
+      },
+      {
+        "key": "ref145",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/jamia.2010.003855"
+      },
+      {
+        "key": "ref109",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/W17-2328"
+      },
+      {
+        "key": "ref108",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/W17-2341"
+      },
+      {
+        "key": "ref107",
+        "first-page": "1",
+        "article-title": "Cancer hallmark text classification using convolutional neural networks",
+        "author": "baker",
+        "year": "2017",
+        "journal-title": "Proc 5th Workshop Building Evaluating Resour Biomed Text Mining (BioTxtM)"
+      },
+      {
+        "key": "ref106",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.14745/ccdr.v46i06a02"
+      },
+      {
+        "key": "ref105",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.3389/fgene.2019.00214"
+      },
+      {
+        "key": "ref104",
+        "article-title": "Medical concept representation learning from electronic health records and its application on heart failure prediction",
+        "author": "choi",
+        "year": "2016",
+        "journal-title": "arXiv 1602 03686"
+      },
+      {
+        "key": "ref103",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.eng.2019.12.014"
+      },
+      {
+        "key": "ref102",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1093/jamia/ocw071"
+      },
+      {
+        "key": "ref111",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/W17-2302"
+      },
+      {
+        "key": "ref112",
+        "doi-asserted-by": "crossref",
+        "first-page": "845",
+        "DOI": "10.1148/radiol.2017171115",
+        "article-title": "Deep learning to classify radiology free-text reports",
+        "volume": "286",
+        "author": "chen",
+        "year": "2017",
+        "journal-title": "Radiology"
+      },
+      {
+        "key": "ref110",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/W17-2304"
+      },
+      {
+        "key": "ref10",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1146/annurev-bioeng-071516-044442"
+      },
+      {
+        "key": "ref11",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.15252/msb.20156651"
+      },
+      {
+        "key": "ref12",
+        "first-page": "1",
+        "article-title": "Secondary use of EHR: Data quality issues and informatics opportunities",
+        "volume": "2010",
+        "author": "botsis",
+        "year": "2010",
+        "journal-title": "Summit on Transla t Bioinforma"
+      },
+      {
+        "key": "ref13",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1038/nrg3208"
+      },
+      {
+        "key": "ref14",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1136/amiajnl-2011-000163"
+      },
+      {
+        "key": "ref15",
+        "first-page": "192",
+        "article-title": "Predicting patient&#x2019;s trajectory of physiological data using temporal trends in similar patients: A system for near-term prognostics",
+        "author": "ebadollahi",
+        "year": "2010",
+        "journal-title": "Proc AMIA Annu Symp"
+      },
+      {
+        "key": "ref16",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2011.05.004"
+      },
+      {
+        "key": "ref118",
+        "first-page": "32",
+        "article-title": "Deep learning architecture for patient data de-identification in clinical records",
+        "author": "yadav",
+        "year": "2016",
+        "journal-title": "Proc Clin Natural Lang Process Workshop (ClinicalNLP)"
+      },
+      {
+        "key": "ref17",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jclinepi.2012.11.008"
+      },
+      {
+        "key": "ref117",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/N16-1056"
+      },
+      {
+        "key": "ref18",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1197/jamia.M2170"
+      },
+      {
+        "key": "ref19",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.2196/12239"
+      },
+      {
+        "key": "ref119",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/W17-2319"
+      },
+      {
+        "key": "ref114",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1186/s12859-017-1776-8"
+      },
+      {
+        "key": "ref113",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.08.014"
+      },
+      {
+        "key": "ref116",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1145/2783258.2788608"
+      },
+      {
+        "key": "ref115",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/W17-2342"
+      },
+      {
+        "key": "ref120",
+        "article-title": "Biomedical event trigger identification using bidirectional recurrent neural network based models",
+        "author": "v s s rahul",
+        "year": "2017",
+        "journal-title": "arXiv 1705 09516"
+      },
+      {
+        "key": "ref121",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.18653/v1/D17-1285"
+      },
+      {
+        "key": "ref122",
+        "article-title": "Bidirectional LSTM-CRF for clinical concept extraction",
+        "author": "chalapathy",
+        "year": "2016",
+        "journal-title": "arXiv 1611 08373"
+      },
+      {
+        "key": "ref123",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.jbi.2017.11.007"
+      }
+    ],
+    "container-title": [
+      "IEEE Access"
+    ],
+    "original-title": [],
+    "link": [
+      {
+        "URL": "http://xplorestaging.ieee.org/ielx7/6287639/9312710/09568778.pdf?arnumber=9568778",
+        "content-type": "unspecified",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2021,
+          12,
+          17
+        ]
+      ],
+      "date-time": "2021-12-17T19:55:57Z",
+      "timestamp": 1639770957000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://ieeexplore.ieee.org/document/9568778/"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2021
+        ]
+      ]
+    },
+    "references-count": 196,
+    "URL": "https://doi.org/10.1109/access.2021.3119621",
+    "relation": {},
+    "ISSN": [
+      "2169-3536"
+    ],
+    "issn-type": [
+      {
+        "value": "2169-3536",
+        "type": "electronic"
+      }
+    ],
+    "subject": [],
+    "published": {
+      "date-parts": [
+        [
+          2021
+        ]
+      ]
+    }
+  },
+  "10.3758/s13428-022-02028-7": {
+    "indexed": {
+      "date-parts": [
+        [
+          2025,
+          10,
+          15
+        ]
+      ],
+      "date-time": "2025-10-15T18:10:40Z",
+      "timestamp": 1760551840493
+    },
+    "reference-count": 35,
+    "publisher": "Springer Science and Business Media LLC",
+    "issue": "8",
+    "license": [
+      {
+        "start": {
+          "date-parts": [
+            [
+              2022,
+              12,
+              22
+            ]
+          ],
+          "date-time": "2022-12-22T00:00:00Z",
+          "timestamp": 1671667200000
+        },
+        "content-version": "tdm",
+        "delay-in-days": 0,
+        "URL": "https://creativecommons.org/licenses/by/4.0"
+      },
+      {
+        "start": {
+          "date-parts": [
+            [
+              2022,
+              12,
+              22
+            ]
+          ],
+          "date-time": "2022-12-22T00:00:00Z",
+          "timestamp": 1671667200000
+        },
+        "content-version": "vor",
+        "delay-in-days": 0,
+        "URL": "https://creativecommons.org/licenses/by/4.0"
+      }
+    ],
+    "content-domain": {
+      "domain": [
+        "link.springer.com"
+      ],
+      "crossmark-restriction": false
+    },
+    "short-container-title": [
+      "Behav Res"
+    ],
+    "abstract": "<jats:title>Abstract</jats:title><jats:p>When one studies fake news or false reviews, the first step to take is to find a corpus of text samples to work with. However, most deceptive corpora suffer from an intrinsic problem: there is little incentive for the providers of the deception to put their best effort, which risks lowering the quality and realism of the deception. The corpus described in this project, the Motivated Deception Corpus, aims to rectify this problem by gamifying the process of deceptive text collection. By having subjects play the game Two Truths and a Lie, and by rewarding those subjects that successfully fool their peers, we collect samples in such a way that the process itself improves the quality of the text. We have amassed a large corpus of deceptive text that is strongly incentivized to be convincing, and thus more reflective of real deceptive text. We provide results from several configurations of neural network prediction models to establish machine learning benchmarks on the data. This new corpus is demonstratively more challenging to classify with the current state of the art than previous corpora.</jats:p>",
+    "DOI": "10.3758/s13428-022-02028-7",
+    "type": "journal-article",
+    "created": {
+      "date-parts": [
+        [
+          2022,
+          12,
+          22
+        ]
+      ],
+      "date-time": "2022-12-22T16:02:48Z",
+      "timestamp": 1671724968000
+    },
+    "page": "4478-4488",
+    "update-policy": "http://dx.doi.org/10.1007/springer_crossmark_policy",
+    "source": "Crossref",
+    "is-referenced-by-count": 1,
+    "title": [
+      "Building and benchmarking the motivated deception corpus: Improving the quality of deceptive text through gaming"
+    ],
+    "prefix": "10.3758",
+    "volume": "55",
+    "author": [
+      {
+        "given": "Dan",
+        "family": "Barsever",
+        "sequence": "first",
+        "affiliation": []
+      },
+      {
+        "given": "Mark",
+        "family": "Steyvers",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "given": "Emre",
+        "family": "Neftci",
+        "sequence": "additional",
+        "affiliation": []
+      }
+    ],
+    "member": "297",
+    "published-online": {
+      "date-parts": [
+        [
+          2022,
+          12,
+          22
+        ]
+      ]
+    },
+    "reference": [
+      {
+        "issue": "5",
+        "key": "2028_CR1",
+        "doi-asserted-by": "publisher",
+        "first-page": "1042",
+        "DOI": "10.1109/TIFS.2016.2639344",
+        "volume": "12",
+        "author": "M Abouelenien",
+        "year": "2016",
+        "unstructured": "Abouelenien, M., P\u00e9rez-Rosas, V., Mihalcea, R., & Burzo, M. (2016). Detecting deceptive behavior via integration of discriminative features from multiple modalities. IEEE Transactions on Information Forensics and Security, 12(5), 1042\u20131055.",
+        "journal-title": "IEEE Transactions on Information Forensics and Security"
+      },
+      {
+        "key": "2028_CR2",
+        "unstructured": "Amazon, A. (2014). Amazon customer reviews dataset. https://s3.amazonaws.com/amazon-reviews-pds/readme.html Aphiwongsophon,S.,&Chongstitvatana,P.(2018)Detectingfakenewswithmachinelearningmethod,528\u2013531. Barsever,D.,Singh,S.,&Neftci,E.(2020)BuildingaBetterLieDetectorwithBERT:TheDifference BetweenTruthandLies,1\u20137."
+      },
+      {
+        "issue": "11",
+        "key": "2028_CR3",
+        "first-page": "1377",
+        "volume": "28",
+        "author": "V Carrieri",
+        "year": "2019",
+        "unstructured": "Carrieri,V.,Madio,L.,&Principe,F.(2019).Vaccinehesitancyand(fake)news:Quasi-experimentalevidence fromItaly.Healtheconomics,28(11),1377\u20131382.",
+        "journal-title": "Healtheconomics"
+      },
+      {
+        "key": "2028_CR4",
+        "first-page": "88",
+        "volume": "9",
+        "author": "DL Chen",
+        "year": "2016",
+        "unstructured": "Chen,D.L.,Schonger,M.,&Wickens,C.(2016).oTree\u2014Anopen-sourceplatformforlaboratory,online, andfieldexperiments.JournalofBehavioralandExperimentalFinance,9,88\u201397.",
+        "journal-title": "JournalofBehavioralandExperimentalFinance"
+      },
+      {
+        "key": "2028_CR5",
+        "volume-title": "Thepolygraphandliedetection",
+        "author": "NR Council",
+        "year": "2003",
+        "unstructured": "Council,N.R.(2003)Thepolygraphandliedetection.Washington:NationalAcademiesPress."
+      },
+      {
+        "key": "2028_CR6",
+        "unstructured": "Devlin,J.,Chang,M.-W.,Lee,K.,&Toutanova,K.(2018).Bert:Pre-trainingofdeepbidirectional transformersforlanguageunderstanding.arXiv:1810.04805."
+      },
+      {
+        "key": "2028_CR7",
+        "unstructured": "Feng,S.,Banerjee,R.,&Choi,Y.(2012).Syntacticstylometryfordeceptiondetection.InProceedings ofthe50thAnnualMeetingoftheAssociationforComputationalLinguistics:ShortPapers-Volume2(pp. 171\u2013175): AssociationforComputationalLinguistics."
+      },
+      {
+        "key": "2028_CR8",
+        "unstructured": "Filatova,E.(2012).Ironyandsarcasm:Corpusgenerationandanalysisusingcrowdsourcing.InLrec(pp. 392\u2013398):Citeseer."
+      },
+      {
+        "issue": "3",
+        "key": "2028_CR9",
+        "first-page": "1",
+        "volume": "8",
+        "author": "E Fitzpatrick",
+        "year": "2015",
+        "unstructured": "Fitzpatrick,E.,Bachenko,J.,&Fornaciari,T.(2015).Automaticdetectionofverbaldeception. SynthesisLecturesonHumanLanguageTechnologies,8(3),1\u2013119.",
+        "journal-title": "SynthesisLecturesonHumanLanguageTechnologies"
+      },
+      {
+        "issue": "4",
+        "key": "2028_CR10",
+        "first-page": "1019",
+        "volume": "54",
+        "author": "T Fornaciari",
+        "year": "2020",
+        "unstructured": "Fornaciari,T.,Cagnina,L.,Rosso,P.,&Poesio,M.(2020).Fakeopiniondetection:howsimilarare crowdsourceddatasetstorealdata?LanguageResourcesandEvaluation,54(4),1019\u20131058.",
+        "journal-title": "LanguageResourcesandEvaluation"
+      },
+      {
+        "key": "2028_CR11",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Fornaciari,T.,&Poesio,M.(2014).IdentifyingfakeAmazonreviewsaslearningfromcrowds.InProceedings ofthe14thConferenceoftheEuropeanChapteroftheAssociationforComputationalLinguistics(pp. 279\u2013287): AssociationforComputationalLinguistics.",
+        "DOI": "10.3115/v1/E14-1030"
+      },
+      {
+        "issue": "2",
+        "key": "2028_CR12",
+        "doi-asserted-by": "publisher",
+        "first-page": "176",
+        "DOI": "10.3758/BF03204306",
+        "volume": "27",
+        "author": "J Frijters",
+        "year": "1980",
+        "unstructured": "Frijters,J.,Kooistra,A.,&Vereijken,P.(1980).Tablesofd\u2019forthetriangularmethodandthe3-AFCsignal detectionprocedure.Perception&Psychophysics,27(2),176\u2013178.",
+        "journal-title": "Perception&Psychophysics"
+      },
+      {
+        "key": "2028_CR13",
+        "unstructured": "Hovy,D.(2016).Theenemyinyourowncamp:Howwellcanwedetectstatistically-generatedfakereviews\u2013an adversarialstudy.InProceedingsofthe54thAnnualMeetingoftheAssociationforComputationalLinguistics(Volume 2:ShortPapers)(pp. 351\u2013356)."
+      },
+      {
+        "key": "2028_CR14",
+        "unstructured": "Hu,S.(2019).Detectingconcealedinformationintextandspeech.InProceedingsofthe57thAnnualMeetingof theAssociationforComputationalLinguistics(pp. 402\u2013412)."
+      },
+      {
+        "key": "2028_CR15",
+        "unstructured": "Kalsnes,B.(2018).Fakenews.InOxfordResearchEncyclopediaofCommunication."
+      },
+      {
+        "key": "2028_CR16",
+        "unstructured": "Khodak,M.,Saunshi,N.,&Vodrahalli,K.(2017).Alargeself-annotatedcorpusforsarcasm. arXiv:1704.05579."
+      },
+      {
+        "issue": "10",
+        "key": "2028_CR17",
+        "first-page": "1960",
+        "volume": "25",
+        "author": "TR Levine",
+        "year": "2014",
+        "unstructured": "Levine,T.R.,&Bond,C.F.(2014).Directandindirectmeasuresofliedetectiontellthesamestory:Areply totenBrinke,Stimson,andCarney(2014).PsychologicalScience,25(10),1960\u20131961.",
+        "journal-title": "PsychologicalScience"
+      },
+      {
+        "key": "2028_CR18",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Li,J.,Ott,M.,Cardie,C.,&Hovy,E.(2014).Towardsageneralruleforidentifyingdeceptiveopinionspam. InProceedingsofthe52ndannualmeetingoftheassociationforcomputationallinguistics(Volume1:LongPapers),(Vol. 1pp. 1566\u20131576).",
+        "DOI": "10.3115/v1/P14-1147"
+      },
+      {
+        "issue": "1",
+        "key": "2028_CR19",
+        "first-page": "429",
+        "volume": "51",
+        "author": "EP Lloyd",
+        "year": "2019",
+        "unstructured": "Lloyd,E.P.,Deska,J.C.,Hugenberg,K.,McConnell,A.R.,Humphrey,B.T.,&Kunstman,J.W. (2019).MiamiUniversitydeceptiondetectiondatabase.BehaviorResearchMethods,51(1),429\u2013439.",
+        "journal-title": "BehaviorResearchMethods"
+      },
+      {
+        "key": "2028_CR20",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Loper,E.,&Bird,S.(2002).NLTK:thenaturallanguagetoolkit.arXiv:cs/0205028.",
+        "DOI": "10.3115/1118108.1118117"
+      },
+      {
+        "issue": "5",
+        "key": "2028_CR21",
+        "first-page": "665",
+        "volume": "29",
+        "author": "ML Newman",
+        "year": "2003",
+        "unstructured": "Newman,M.L.,Pennebaker,J.W.,Berry,D.S.,&Richards,J.M.(2003).Lyingwords:Predicting deceptionfromlinguisticstyles.PersonalityandSocialPsychologyBulletin,29(5),665\u2013675.",
+        "journal-title": "PersonalityandSocialPsychologyBulletin"
+      },
+      {
+        "key": "2028_CR22",
+        "unstructured": "Ott,M.,Cardie,C.,&Hancock,J.T.(2013).Negativedeceptiveopinionspam.InProceedingsofthe 2013conferenceoftheNorthAmericanChapterOfTheAssociationForComputationalLinguistics:humanlanguage technologies(pp. 497\u2013501)."
+      },
+      {
+        "key": "2028_CR23",
+        "unstructured": "Ott,M.,Choi,Y.,Cardie,C.,&Hancock,J.T.(2011).Findingdeceptiveopinionspambyanystretch oftheimagination.InProceedingsofthe49thannualmeetingoftheassociationforcomputationallinguistics:Human languagetechnologies-volume1(pp. 309\u2013319):AssociationforComputationalLinguistics."
+      },
+      {
+        "issue": "3",
+        "key": "2028_CR24",
+        "first-page": "184",
+        "volume": "23",
+        "author": "G Paolacci",
+        "year": "2014",
+        "unstructured": "Paolacci,G.,&Chandler,J.(2014).InsidetheTurk:UnderstandingMechanicalTurkasaparticipantpool. CurrentDirectionsinPsychologicalScience,23(3),184\u2013188.",
+        "journal-title": "CurrentDirectionsinPsychologicalScience"
+      },
+      {
+        "key": "2028_CR25",
+        "first-page": "2825",
+        "volume": "12",
+        "author": "F Pedregosa",
+        "year": "2011",
+        "unstructured": "Pedregosa,F.,Varoquaux,G.,Gramfort,A.,Michel,V.,Thirion,B.,Grisel,O., ..., etal.(2011).Scikit-learn:MachinelearninginPython.TheJournalofMachineLearningResearch, 12,2825\u20132830.",
+        "journal-title": "TheJournalofMachineLearningResearch"
+      },
+      {
+        "key": "2028_CR26",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Pennington,J.,Socher,R.,&Manning,C.(2014).Glove:Globalvectorsforwordrepresentation.InProceedings ofthe2014conferenceonempiricalmethodsinnaturallanguageprocessing(EMNLP)(pp. 1532\u20131543).",
+        "DOI": "10.3115/v1/D14-1162"
+      },
+      {
+        "key": "2028_CR27",
+        "first-page": "213",
+        "volume": "385",
+        "author": "Y Ren",
+        "year": "2017",
+        "unstructured": "Ren,Y.,&Ji,D.(2017).Neuralnetworksfordeceptiveopinionspamdetection:Anempiricalstudy. InformationSciences,385,213\u2013224.",
+        "journal-title": "InformationSciences"
+      },
+      {
+        "issue": "3",
+        "key": "2028_CR28",
+        "first-page": "257",
+        "volume": "25",
+        "author": "P Robert",
+        "year": "1976",
+        "unstructured": "Robert,P.,&Escoufier,Y.(1976).Aunifyingtoolforlinearmultivariatestatisticalmethods:theRV-coefficient. JournaloftheRoyalStatisticalSociety:SeriesC(AppliedStatistics),25(3),257\u2013265.",
+        "journal-title": "JournaloftheRoyalStatisticalSociety:SeriesC(AppliedStatistics)"
+      },
+      {
+        "issue": "1",
+        "key": "2028_CR29",
+        "first-page": "22",
+        "volume": "19",
+        "author": "K Shu",
+        "year": "2017",
+        "unstructured": "Shu,K.,Sliva,A.,Wang,S.,Tang,J.,&Liu,H.(2017).Fakenewsdetectiononsocialmedia:Adata miningperspective.ACMSIGKDDExplorationsNewsletter,19(1),22\u201336.",
+        "journal-title": "ACMSIGKDDExplorationsNewsletter"
+      },
+      {
+        "issue": "3",
+        "key": "2028_CR30",
+        "first-page": "171",
+        "volume": "53",
+        "author": "S Tasnim",
+        "year": "2020",
+        "unstructured": "Tasnim,S.,Hossain,M.M.,&Mazumder,H.(2020).ImpactofrumorsandmisinformationonCOVID-19 insocialmedia.JournalofPreventiveMedicineandPublicHealth,53(3),171\u2013174.",
+        "journal-title": "JournalofPreventiveMedicineandPublicHealth"
+      },
+      {
+        "key": "2028_CR31",
+        "unstructured": "Vaswani,A.,Shazeer,N.,Parmar,N.,Uszkoreit,J.,Jones,L.,Gomez,A.N., ..., etal. (2017).Attentionisallyouneed.InAdvancesinneuralinformationprocessingsystems(pp. 5998\u20136008)."
+      },
+      {
+        "issue": "1",
+        "key": "2028_CR32",
+        "first-page": "1",
+        "volume": "1",
+        "author": "N Vogler",
+        "year": "2019",
+        "unstructured": "Vogler,N.,&Pearl,L.(2019).Usinglinguistically-definedspecificdetailstodetectdeceptionacrossdomains. NaturalLanguageEngineering,1(1),1\u201332.",
+        "journal-title": "NaturalLanguageEngineering"
+      },
+      {
+        "key": "2028_CR33",
+        "volume-title": "Detectingliesanddeceit:Pitfallsandopportunities",
+        "author": "A Vrij",
+        "year": "2008",
+        "unstructured": "Vrij,A.(2008)Detectingliesanddeceit:Pitfallsandopportunities.Hoboken:Wiley."
+      },
+      {
+        "key": "2028_CR34",
+        "unstructured": "Wang,W.Y.(2017).\u201cliar,liarpantsonfire\u201d:Anewbenchmarkdatasetforfakenewsdetection.arXiv:1705.00648. Wolf,T.,Chaumond,J.,Debut,L.,Sanh,V.,Delangue,C.,Moi,A., ..., etal.(2020) Transformers:State-of-the-artnaturallanguageprocessing,38\u201345."
+      },
+      {
+        "key": "2028_CR35",
+        "unstructured": "Xu,Q.,&Zhao,H.(2012).Usingdeeplinguisticfeaturesforfindingdeceptiveopinionspam.Proceedingsof COLING2012:Posters1341\u20131350."
+      }
+    ],
+    "container-title": [
+      "Behavior Research Methods"
+    ],
+    "original-title": [],
+    "language": "en",
+    "link": [
+      {
+        "URL": "https://link.springer.com/content/pdf/10.3758/s13428-022-02028-7.pdf",
+        "content-type": "application/pdf",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      },
+      {
+        "URL": "https://link.springer.com/article/10.3758/s13428-022-02028-7/fulltext.html",
+        "content-type": "text/html",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      },
+      {
+        "URL": "https://link.springer.com/content/pdf/10.3758/s13428-022-02028-7.pdf",
+        "content-type": "application/pdf",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2023,
+          12,
+          6
+        ]
+      ],
+      "date-time": "2023-12-06T16:06:23Z",
+      "timestamp": 1701878783000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://link.springer.com/10.3758/s13428-022-02028-7"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2022,
+          12,
+          22
+        ]
+      ]
+    },
+    "references-count": 35,
+    "journal-issue": {
+      "issue": "8",
+      "published-online": {
+        "date-parts": [
+          [
+            2023,
+            12
+          ]
+        ]
+      }
+    },
+    "alternative-id": [
+      "2028"
+    ],
+    "URL": "https://doi.org/10.3758/s13428-022-02028-7",
+    "relation": {},
+    "ISSN": [
+      "1554-3528"
+    ],
+    "issn-type": [
+      {
+        "value": "1554-3528",
+        "type": "electronic"
+      }
+    ],
+    "subject": [],
+    "published": {
+      "date-parts": [
+        [
+          2022,
+          12,
+          22
+        ]
+      ]
+    },
+    "assertion": [
+      {
+        "value": "14 November 2022",
+        "order": 1,
+        "name": "accepted",
+        "label": "Accepted",
+        "group": {
+          "name": "ArticleHistory",
+          "label": "Article History"
+        }
+      },
+      {
+        "value": "22 December 2022",
+        "order": 2,
+        "name": "first_online",
+        "label": "First Online",
+        "group": {
+          "name": "ArticleHistory",
+          "label": "Article History"
+        }
+      }
+    ]
+  },
+  "10.1016/j.apenergy.2023.121323": {
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          2,
+          14
+        ]
+      ],
+      "date-time": "2026-02-14T03:19:30Z",
+      "timestamp": 1771039170621,
+      "version": "3.50.1"
+    },
+    "reference-count": 65,
+    "publisher": "Elsevier BV",
+    "license": [
+      {
+        "start": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              1
+            ]
+          ],
+          "date-time": "2023-09-01T00:00:00Z",
+          "timestamp": 1693526400000
+        },
+        "content-version": "tdm",
+        "delay-in-days": 0,
+        "URL": "https://www.elsevier.com/tdm/userlicense/1.0/"
+      },
+      {
+        "start": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              1
+            ]
+          ],
+          "date-time": "2023-09-01T00:00:00Z",
+          "timestamp": 1693526400000
+        },
+        "content-version": "tdm",
+        "delay-in-days": 0,
+        "URL": "https://www.elsevier.com/legal/tdmrep-license"
+      },
+      {
+        "start": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              1
+            ]
+          ],
+          "date-time": "2023-09-01T00:00:00Z",
+          "timestamp": 1693526400000
+        },
+        "content-version": "stm-asf",
+        "delay-in-days": 0,
+        "URL": "https://doi.org/10.15223/policy-017"
+      },
+      {
+        "start": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              1
+            ]
+          ],
+          "date-time": "2023-09-01T00:00:00Z",
+          "timestamp": 1693526400000
+        },
+        "content-version": "stm-asf",
+        "delay-in-days": 0,
+        "URL": "https://doi.org/10.15223/policy-037"
+      },
+      {
+        "start": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              1
+            ]
+          ],
+          "date-time": "2023-09-01T00:00:00Z",
+          "timestamp": 1693526400000
+        },
+        "content-version": "stm-asf",
+        "delay-in-days": 0,
+        "URL": "https://doi.org/10.15223/policy-012"
+      },
+      {
+        "start": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              1
+            ]
+          ],
+          "date-time": "2023-09-01T00:00:00Z",
+          "timestamp": 1693526400000
+        },
+        "content-version": "stm-asf",
+        "delay-in-days": 0,
+        "URL": "https://doi.org/10.15223/policy-029"
+      },
+      {
+        "start": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              1
+            ]
+          ],
+          "date-time": "2023-09-01T00:00:00Z",
+          "timestamp": 1693526400000
+        },
+        "content-version": "stm-asf",
+        "delay-in-days": 0,
+        "URL": "https://doi.org/10.15223/policy-004"
+      }
+    ],
+    "content-domain": {
+      "domain": [
+        "elsevier.com",
+        "sciencedirect.com"
+      ],
+      "crossmark-restriction": true
+    },
+    "short-container-title": [
+      "Applied Energy"
+    ],
+    "published-print": {
+      "date-parts": [
+        [
+          2023,
+          9
+        ]
+      ]
+    },
+    "DOI": "10.1016/j.apenergy.2023.121323",
+    "type": "journal-article",
+    "created": {
+      "date-parts": [
+        [
+          2023,
+          6,
+          8
+        ]
+      ],
+      "date-time": "2023-06-08T13:15:51Z",
+      "timestamp": 1686230151000
+    },
+    "page": "121323",
+    "update-policy": "https://doi.org/10.1016/elsevier_cm_policy",
+    "source": "Crossref",
+    "is-referenced-by-count": 48,
+    "special_numbering": "C",
+    "title": [
+      "MERLIN: Multi-agent offline and transfer learning for occupant-centric operation of grid-interactive communities"
+    ],
+    "prefix": "10.1016",
+    "volume": "346",
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0003-1239-5540",
+        "authenticated-orcid": false,
+        "given": "Kingsley",
+        "family": "Nweye",
+        "sequence": "first",
+        "affiliation": []
+      },
+      {
+        "given": "Siva",
+        "family": "Sankaranarayanan",
+        "sequence": "additional",
+        "affiliation": []
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-6014-3228",
+        "authenticated-orcid": false,
+        "given": "Zoltan",
+        "family": "Nagy",
+        "sequence": "additional",
+        "affiliation": []
+      }
+    ],
+    "member": "78",
+    "reference": [
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b1",
+        "series-title": "2022 Monthly energy review",
+        "author": "Energy Information Administration",
+        "year": "2022"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b2",
+        "doi-asserted-by": "crossref",
+        "first-page": "19122",
+        "DOI": "10.1073/pnas.1922205117",
+        "article-title": "The carbon footprint of household energy use in the united states",
+        "volume": "117",
+        "author": "Goldstein",
+        "year": "2020",
+        "journal-title": "Proc Natl Acad Sci"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b3",
+        "doi-asserted-by": "crossref",
+        "first-page": "1311",
+        "DOI": "10.1016/j.apenergy.2018.09.046",
+        "article-title": "Optimal decarbonization pathways for urban residential building energy services",
+        "volume": "230",
+        "author": "Leibowicz",
+        "year": "2018",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b4",
+        "doi-asserted-by": "crossref",
+        "first-page": "499",
+        "DOI": "10.1016/j.rser.2014.04.009",
+        "article-title": "Energy storage systems for renewable energy power sector integration and mitigation of intermittency",
+        "volume": "35",
+        "author": "Yekini Suberu",
+        "year": "2014",
+        "journal-title": "Renew Sustain Energy Rev"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b5",
+        "doi-asserted-by": "crossref",
+        "first-page": "1187",
+        "DOI": "10.1086/686733",
+        "article-title": "Intermittency and the value of renewable energy",
+        "volume": "124",
+        "author": "Gowrisankaran",
+        "year": "2016",
+        "journal-title": "J Polit Econ"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b6",
+        "series-title": "Grid-interactive efficient buildings",
+        "author": "Neukomm",
+        "year": "2019"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b7",
+        "doi-asserted-by": "crossref",
+        "first-page": "83",
+        "DOI": "10.1016/j.ijepes.2013.10.007",
+        "article-title": "Reliability assessment of incentive- and priced-based demand response programs in restructured power systems",
+        "volume": "56",
+        "author": "Nikzad",
+        "year": "2014",
+        "journal-title": "Int J Electr Power Energy Syst"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b8",
+        "doi-asserted-by": "crossref",
+        "first-page": "166",
+        "DOI": "10.1016/j.rser.2016.01.016",
+        "article-title": "A review of residential demand response of smart grid",
+        "volume": "59",
+        "author": "Haider",
+        "year": "2016",
+        "journal-title": "Renew Sustain Energy Rev"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b9",
+        "doi-asserted-by": "crossref",
+        "first-page": "22",
+        "DOI": "10.1016/j.scs.2013.11.001",
+        "article-title": "Demand side management in smart grid: A review and proposals for future direction",
+        "volume": "11",
+        "author": "Gelazanskas",
+        "year": "2014",
+        "journal-title": "Sustainable Cities Soc"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b10",
+        "doi-asserted-by": "crossref",
+        "first-page": "395",
+        "DOI": "10.1016/j.rser.2017.04.014",
+        "article-title": "A review of the value of aggregators in electricity systems",
+        "volume": "77",
+        "author": "Burger",
+        "year": "2017",
+        "journal-title": "Renew Sustain Energy Rev"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b11",
+        "doi-asserted-by": "crossref",
+        "first-page": "190",
+        "DOI": "10.1016/j.arcontrol.2020.09.001",
+        "article-title": "All you need to know about model predictive control for buildings",
+        "volume": "50",
+        "author": "Drgo\u0148a",
+        "year": "2020",
+        "journal-title": "Annu Rev Control"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b12",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.apenergy.2020.115036",
+        "article-title": "Reinforcement learning for building controls: The opportunities and challenges",
+        "volume": "269",
+        "author": "Wang",
+        "year": "2020",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b13",
+        "doi-asserted-by": "crossref",
+        "first-page": "1248",
+        "DOI": "10.1016/j.enbuild.2006.03.007",
+        "article-title": "Multiple-zone ventilation and temperature control of a single-duct vav system using model predictive strategy",
+        "volume": "38",
+        "author": "Yuan",
+        "year": "2006",
+        "journal-title": "Energy Build"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b14",
+        "doi-asserted-by": "crossref",
+        "first-page": "556",
+        "DOI": "10.1016/j.buildenv.2010.08.014",
+        "article-title": "Application of model based predictive control for water-based floor heating in low energy residential buildings",
+        "volume": "46",
+        "author": "Karlsson",
+        "year": "2011",
+        "journal-title": "Build Environ"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b15",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.apenergy.2022.120621",
+        "article-title": "Quantum computing for future real-time building HVAC controls",
+        "volume": "334",
+        "author": "Deng",
+        "year": "2023",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b16",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.apenergy.2023.120913",
+        "article-title": "Optimal dispatch of a multi-energy system microgrid under uncertainty: A renewable energy community in Austria",
+        "volume": "337",
+        "author": "Houben",
+        "year": "2023",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b17",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.apenergy.2022.119104",
+        "article-title": "Field demonstration and implementation analysis of model predictive control in an office HVAC system",
+        "volume": "318",
+        "author": "Blum",
+        "year": "2022",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b18",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Park JY, Nagy Z. HVACLearn: A reinforcement learning based occupant-centric control for thermostat set-points. In: Proceedings of the eleventh ACM international conference on future energy systems, E-energy \u201920, association for computing machinery. p. 434\u20137. http://dx.doi.org/10.1145/3396851.3402364.",
+        "DOI": "10.1145/3396851.3402364"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b19",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.energy.2021.120725",
+        "article-title": "Coordinated energy management for a cluster of buildings through deep reinforcement learning",
+        "volume": "229",
+        "author": "Pinto",
+        "year": "2021",
+        "journal-title": "Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b20",
+        "article-title": "Deep reinforcement learning for energy management in a microgrid with flexible demand",
+        "volume": "25",
+        "author": "Nakabi",
+        "year": "2021",
+        "journal-title": "Sustain Energy Grids Netw"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b21",
+        "doi-asserted-by": "crossref",
+        "first-page": "213",
+        "DOI": "10.1109/TSG.2021.3119972",
+        "article-title": "Multi-stage real-time operation of a multi-energy microgrid with electrical and thermal energy storage assets: A data-driven MPC-ADP approach",
+        "volume": "13",
+        "author": "Li",
+        "year": "2022",
+        "journal-title": "IEEE Trans Smart Grid"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b22",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.ijepes.2019.105776",
+        "article-title": "Real-time optimization of the integrated gas and power systems using hybrid approximate dynamic programming",
+        "volume": "118",
+        "author": "Shuai",
+        "year": "2020",
+        "journal-title": "Int J Electr Power Energy Syst"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b23",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.enbuild.2021.110992",
+        "article-title": "Physics-constrained deep learning of multi-zone building thermal dynamics",
+        "volume": "243",
+        "author": "Drgo\u0148a",
+        "year": "2021",
+        "journal-title": "Energy Build"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b24",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.apenergy.2021.118346",
+        "article-title": "Reinforced model predictive control (RL-MPC) for building energy management",
+        "volume": "309",
+        "author": "Arroyo",
+        "year": "2022",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b25",
+        "series-title": "Reinforcement learning, second edition an introduction",
+        "author": "Sutton",
+        "year": "2018"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b26",
+        "doi-asserted-by": "crossref",
+        "first-page": "354",
+        "DOI": "10.1038/nature24270",
+        "article-title": "Article mastering the game of go without human knowledge",
+        "volume": "550",
+        "author": "Silver",
+        "year": "2017",
+        "journal-title": "Nature"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b27",
+        "doi-asserted-by": "crossref",
+        "first-page": "350",
+        "DOI": "10.1038/s41586-019-1724-z",
+        "article-title": "Grandmaster level in StarCraft II using multi-agent reinforcement learning",
+        "volume": "575",
+        "author": "Vinyals",
+        "year": "2019",
+        "journal-title": "Nature"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b28",
+        "doi-asserted-by": "crossref",
+        "first-page": "223",
+        "DOI": "10.1038/s41586-021-04357-7",
+        "article-title": "Outracing champion gran turismo drivers with deep reinforcement learning",
+        "volume": "602",
+        "author": "Wurman",
+        "year": "2022",
+        "journal-title": "Nature"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b29",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.apenergy.2020.115036",
+        "article-title": "Reinforcement learning for building controls: The opportunities and challenges",
+        "volume": "269",
+        "author": "Wang",
+        "year": "2020",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b30",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.egyai.2022.100202",
+        "article-title": "Real-world challenges for multi-agent reinforcement learning in grid-interactive buildings",
+        "volume": "10",
+        "author": "Nweye",
+        "year": "2022",
+        "journal-title": "Energy AI"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b31",
+        "series-title": "Proceedings of the 9th ACM international conference on systems for energy-efficient buildings, cities, and transportation",
+        "first-page": "208",
+        "article-title": "On the use of conditional timegan to enhance the robustness of a reinforcement learning agent in the building domain",
+        "author": "Fochesato",
+        "year": "2022"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b32",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.adapen.2022.100084",
+        "article-title": "Transfer learning for smart buildings: A critical review of algorithms, applications, and future perspectives",
+        "author": "Pinto",
+        "year": "2022",
+        "journal-title": "Adv Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b33",
+        "series-title": "CityLearn: Standardizing research in multi-agent reinforcement learning for demand response and urban energy management",
+        "author": "Vazquez-Canteli",
+        "year": "2020"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b34",
+        "doi-asserted-by": "crossref",
+        "first-page": "586",
+        "DOI": "10.1080/19401493.2021.1986574",
+        "article-title": "Building optimization testing framework (boptest) for simulation-based benchmarking of control strategies in buildings",
+        "volume": "14",
+        "author": "Blum",
+        "year": "2021",
+        "journal-title": "J Build Perform Simulat"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b35",
+        "doi-asserted-by": "crossref",
+        "first-page": "379",
+        "DOI": "10.1080/19401493.2022.2058091",
+        "article-title": "A high-fidelity building performance simulation test bed for the development and evaluation of advanced controls",
+        "volume": "15",
+        "author": "Marzullo",
+        "year": "2022",
+        "journal-title": "J Build Perform Simulat"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b36",
+        "doi-asserted-by": "crossref",
+        "first-page": "3518",
+        "DOI": "10.3390/app11083518",
+        "article-title": "Energym: A building model library for controller benchmarking",
+        "volume": "11",
+        "author": "Scharnhorst",
+        "year": "2021",
+        "journal-title": "Appl Sci"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b37",
+        "series-title": "Grid integration of zero net energy communities",
+        "author": "Electric Power Research Institute",
+        "year": "2017"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b38",
+        "article-title": "Grid integration of zero net energy communities",
+        "author": "Narayanamurthy",
+        "year": "2016",
+        "journal-title": "ACEEE Summer Study Energy Effic Build"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b39",
+        "series-title": "The CityLearn Challenge 2022",
+        "author": "Nweye",
+        "year": "2023"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b40",
+        "series-title": "NeurIPS 2022 \u2013The CityLearn Challenge 2022",
+        "year": "2022"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b41",
+        "series-title": "Proceedings of the 7th ACM international conference on systems for energy-efficient buildings, cities, and transportation",
+        "first-page": "320",
+        "article-title": "The CityLearn challenge 2020",
+        "author": "V\u00e1zquez-Canteli",
+        "year": "2020"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b42",
+        "series-title": "Proceedings of the 8th ACM international conference on systems for energy-efficient buildings, cities, and transportation",
+        "first-page": "218",
+        "article-title": "The citylearn challenge 2021",
+        "author": "Nagy",
+        "year": "2021"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b43",
+        "series-title": "Southern California Edison time-of-use residential rate plans, time-of-use (tou) rate plans",
+        "year": "2022"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b44",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.3390/en14102933",
+        "article-title": "Exploring the potentialities of deep reinforcement learning for incentive-based demand response in a cluster of small commercial buildings",
+        "volume": "14",
+        "author": "Deltetto",
+        "year": "2021",
+        "journal-title": "Energies"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b45",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Glatt R, Silva FLd, Soper B, Dawson WA, Rusu E, Goldhahn RA. Collaborative energy demand response with decentralized actor and centralized critic. In: Proceedings of the 8th ACM international conference on systems for energy-efficient buildings, cities, and transportation. ACM, New York, NY, USA; 2021, p. 333\u20137. http://dx.doi.org/10.1145/3486611.3488732,.",
+        "DOI": "10.1145/3486611.3488732"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b46",
+        "series-title": "Proceedings of the 1st international workshop on reinforcement learning for energy management in buildings & cities",
+        "first-page": "11",
+        "article-title": "A centralised soft actor critic deep reinforcement learning approach to district demand side management through CityLearn",
+        "author": "Kathirgamanathan",
+        "year": "2020"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b47",
+        "series-title": "NeoRL: A near real-world benchmark for offline reinforcement learning",
+        "author": "Qin",
+        "year": "2021"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b48",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.epsr.2022.108521",
+        "article-title": "Gridlearn: Multiagent reinforcement learning for grid-aware building energy management",
+        "volume": "213",
+        "author": "Pigott",
+        "year": "2022",
+        "journal-title": "Electr Power Syst Res"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b49",
+        "series-title": "ICML",
+        "article-title": "Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor",
+        "author": "Haarnoja",
+        "year": "2018"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b50",
+        "series-title": "Soft actor-critic algorithms and applications",
+        "author": "Haarnoja",
+        "year": "2018"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b51",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Vazquez-Canteli JR, Henze G, Nagy Z. MARLISA: Multi-Agent Reinforcement Learning with Iterative Sequential Action Selection for Load Shaping of Grid-Interactive Connected Buildings. In: BuildSys 2020 - proceedings of the 7th ACM international conference on systems for energy-efficient buildings, cities, and transportation. 2020, p. 170\u20139.",
+        "DOI": "10.1145/3408308.3427604"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b52",
+        "series-title": "Pretraining in deep reinforcement learning: A survey",
+        "author": "Xie",
+        "year": "2022"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b53",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.apenergy.2022.120598",
+        "article-title": "Online transfer learning strategy for enhancing the scalability and deployment of deep reinforcement learning control in smart buildings",
+        "volume": "333",
+        "author": "Coraci",
+        "year": "2023",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b54",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.enbuild.2021.111334",
+        "article-title": "Using generative adversarial networks to evaluate robustness of reinforcement learning agents against uncertainties",
+        "volume": "251",
+        "author": "Khayatian",
+        "year": "2021",
+        "journal-title": "Energy Build"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b55",
+        "series-title": "A survey of meta-reinforcement learning",
+        "author": "Beck",
+        "year": "2023"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b56",
+        "unstructured": "Yu T, Quillen D, He Z, Julian R, Hausman K, Finn C, et al. Meta-world: A benchmark and evaluation for multi-task and meta reinforcement learning. In: Kaelbling L P, Kragic D, Sugiura K, editors. Proceedings of the conference on robot learning, volume 100 of proceedings of machine learning research. p. 1094\u2013100,."
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b57",
+        "series-title": "CARL: A benchmark for contextual and adaptive reinforcement learning",
+        "author": "Benjamins",
+        "year": "2021"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b58",
+        "series-title": "Using meta reinforcement learning to bridge the gap between simulation and experiment in energy demand response",
+        "first-page": "483",
+        "author": "Jang",
+        "year": "2021"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b59",
+        "series-title": "MetaEMS: A Meta reinforcement learning-based control framework for building energy management system",
+        "author": "Zhang",
+        "year": "2022"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b60",
+        "series-title": "Tutor4RL: Guiding reinforcement learning with external knowledge",
+        "author": "Argerich",
+        "year": "2020"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b61",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.buildenv.2019.106351",
+        "article-title": "A critical review of field implementations of occupant-centric building controls",
+        "volume": "165",
+        "author": "Park",
+        "year": "2019",
+        "journal-title": "Build Environ"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b62",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.apenergy.2021.117642",
+        "article-title": "Data-driven district energy management with surrogate models and deep reinforcement learning",
+        "volume": "304",
+        "author": "Pinto",
+        "year": "2021",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b63",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1016/j.apenergy.2021.118497",
+        "article-title": "Enhancing energy management in grid-interactive buildings: A comparison among cooperative and coordinated architectures",
+        "volume": "310",
+        "author": "Pinto",
+        "year": "2022",
+        "journal-title": "Appl Energy"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b64",
+        "doi-asserted-by": "crossref",
+        "first-page": "2419",
+        "DOI": "10.1007/s10994-021-05961-4",
+        "article-title": "Challenges of real-world reinforcement learning: definitions, benchmarks and analysis",
+        "volume": "110",
+        "author": "Dulac-Arnold",
+        "year": "2021",
+        "journal-title": "Mach Learn"
+      },
+      {
+        "key": "10.1016/j.apenergy.2023.121323_b65",
+        "article-title": "Deciphering optimal mixed-mode ventilation in the tropics using reinforcement learning with explainable artificial intelligence",
+        "volume": "278",
+        "author": "Xilei",
+        "year": "2022",
+        "journal-title": "Energy Build"
+      }
+    ],
+    "container-title": [
+      "Applied Energy"
+    ],
+    "original-title": [],
+    "language": "en",
+    "link": [
+      {
+        "URL": "https://api.elsevier.com/content/article/PII:S0306261923006876?httpAccept=text/xml",
+        "content-type": "text/xml",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      },
+      {
+        "URL": "https://api.elsevier.com/content/article/PII:S0306261923006876?httpAccept=text/plain",
+        "content-type": "text/plain",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2025,
+          10,
+          5
+        ]
+      ],
+      "date-time": "2025-10-05T14:39:31Z",
+      "timestamp": 1759675171000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://linkinghub.elsevier.com/retrieve/pii/S0306261923006876"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2023,
+          9
+        ]
+      ]
+    },
+    "references-count": 65,
+    "alternative-id": [
+      "S0306261923006876"
+    ],
+    "URL": "https://doi.org/10.1016/j.apenergy.2023.121323",
+    "relation": {},
+    "ISSN": [
+      "0306-2619"
+    ],
+    "issn-type": [
+      {
+        "value": "0306-2619",
+        "type": "print"
+      }
+    ],
+    "subject": [],
+    "published": {
+      "date-parts": [
+        [
+          2023,
+          9
+        ]
+      ]
+    },
+    "assertion": [
+      {
+        "value": "Elsevier",
+        "name": "publisher",
+        "label": "This article is maintained by"
+      },
+      {
+        "value": "MERLIN: Multi-agent offline and transfer learning for occupant-centric operation of grid-interactive communities",
+        "name": "articletitle",
+        "label": "Article Title"
+      },
+      {
+        "value": "Applied Energy",
+        "name": "journaltitle",
+        "label": "Journal Title"
+      },
+      {
+        "value": "https://doi.org/10.1016/j.apenergy.2023.121323",
+        "name": "articlelink",
+        "label": "CrossRef DOI link to publisher maintained version"
+      },
+      {
+        "value": "article",
+        "name": "content_type",
+        "label": "Content Type"
+      },
+      {
+        "value": "\u00a9 2023 Elsevier Ltd. All rights reserved.",
+        "name": "copyright",
+        "label": "Copyright"
+      }
+    ],
+    "article-number": "121323"
+  }
+}

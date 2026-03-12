@@ -1,0 +1,4230 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]> <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]> <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!-- Consider adding an manifest.appcache: h5bp.com/d/Offline -->
+<!--[if gt IE 8]><!-->
+
+<html class="no-js" lang="en" xmlns:m="http://www.w3.org/1998/Math/MathML">
+<!--<![endif]-->
+
+  <head>
+
+  <!-- TC-2195 ID5 Implementierung -->
+  <script src="https://cdn.id5-sync.com/api/1.0/id5-api.js"></script>
+
+<script>
+
+    var id5id;
+    var id5eid;
+    var id5linktype;
+
+    window.setTimeout(function(){
+
+    var id5Callback = function (id5Status) {
+        // do something with the ID5 ID
+        id5id = id5Status.getUserId();
+        id5eid = id5Status.getUserIdAsEid();
+        id5linktype = id5Status.getLinkType();
+
+        //console.log(id5id);
+        //console.log(id5eid);
+        //console.log(id5linktype);
+
+        window._adftrack = Array.isArray(window._adftrack) ? window._adftrack : (window._adftrack ? [window._adftrack] : []);
+        window._adftrack.push({
+            HttpHost: 'track.adform.net',
+            pm: 2389978,
+            divider: encodeURIComponent('|'),
+            pagename: encodeURIComponent('Thieme'),
+            //gdpr: 1, // GDPR Consent given 1/0
+            //gdpr_consent: '', // GDPR Consent String Value Macro should be put here, if not filled out automatically by the CMP
+            eids: [{
+                'source': 'id5-sync.com',
+                'uids': [
+                    {
+                        "id": id5id,
+                        "atype": 1,
+                        "ext": {
+                            "linkType": id5linktype,
+                            "abTestingControlGroup": false
+                        }
+                    }
+                ]
+                // Extended identifier setup end
+            }],
+            order : {
+                sv1: '',
+                sv2: '',
+                sv3: 'use of natural language processing to identify sexual and reproductive health information in clinical text',
+                sv4: 'methods of information in medicine',
+                sv5: '',
+                sv6: '',
+                sv7: id5id, // please dont edit this line
+                sv8: id5linktype // please dont edit this line
+            }
+        });
+
+        var adformtag = adformtag || [];
+        adformtag.push(setEIDs);
+
+        (function () { var s = document.createElement('script'); s.type = 'text/javascript'; s.async = true; s.src = 'https://s2.adform.net/banners/scripts/st/trackpoint-async.js'; var x = document.getElementsByTagName('script')[0]; x.parentNode.insertBefore(s, x); })();
+
+        function setEIDs() {
+            var eids = [{
+                'source': 'id5-sync.com',
+                'uids': [
+                    {
+                        "id": id5id,
+                        "atype": 1,
+                        "ext": {
+                            "linkType": id5linktype,
+                            "abTestingControlGroup": false
+                        }
+                    }
+                ]
+            }];
+            adformtag.setExtendedIDs(eids);
+        };
+
+    };
+
+    //ID5.debug = true;
+    var id5Status = ID5.init({ partnerId: 988, refreshInSeconds: 3600, pd: "OD1odHRwcyUzQSUyRiUyRnd3dy50aGllbWUtY29ubmVjdC5kZSUyRnByb2R1Y3RzJTJGZWpvdXJuYWxzJTJGYWJzdHJhY3QlMkYxMC4xMDU1JTJGYS0yMjMzLTI3MzYmMTA9MTc5LjIxOC45LjQxJjEyPWZpbmRwYXBlcnMlMkZ0ZXN0LWNvbGxlY3RvcislMjhhY2FkZW1pYytyZXNlYXJjaCUyOQ==" }).onAvailable(id5Callback, 10000);
+
+//        var id5Status = ID5.init({
+//            partnerId: 988, // modify with your own partnerId
+//            refreshInSeconds: 3600,
+//            pd: "OD1odHRwcyUzQSUyRiUyRnd3dy50aGllbWUtY29ubmVjdC5kZSUyRnByb2R1Y3RzJTJGZWpvdXJuYWxzJTJGYWJzdHJhY3QlMkYxMC4xMDU1JTJGYS0yMjMzLTI3MzYmMTA9MTc5LjIxOC45LjQxJjEyPWZpbmRwYXBlcnMlMkZ0ZXN0LWNvbGxlY3RvcislMjhhY2FkZW1pYytyZXNlYXJjaCUyOQ==", // this is the section to put hashed hard signals - check the guideline.
+//        });
+
+        }, 1000);
+</script>
+
+<!-- Adform Tracking Code BEGIN -->
+
+<!-- Adform Tracking Code END -->
+
+
+
+    
+        
+            <script src="https://cdn.thieme.de/cookie-consent_TCF/dist/tcfutility.min.js" type="text/javascript"></script>
+
+            <!-- OneTrust Cookie-Einwilligungshinweis – Anfang für www.thieme-connect.de -->
+            <script type="text/javascript" src="https://cdn.cookielaw.org/consent/44f8d424-ad11-4554-bf4d-b6b42f260cf6/OtAutoBlock.js"></script>
+            <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" data-document-language="true" type="text/javascript" charset="UTF-8" data-domain-script="44f8d424-ad11-4554-bf4d-b6b42f260cf6"></script>
+            <script type="text/javascript">
+            /* Nach Änderung der Zustimmung Seite neu laden */
+            function OptanonWrapper(e) {
+              OneTrust.OnConsentChanged(function() {
+                window.location.reload();
+              });
+            }
+            /* function OptanonWrapper() { } */
+            </script>
+            <!-- OneTrust-Cookie-Einwilligungshinweis – Ende für www.thieme-connect.de -->
+        
+    
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-PMWN2TQ');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Start Piwik PRO Tag Manager code -->
+    <!--script type="text/javascript">
+    (function(window, document, script, dataLayer, id) {
+    function stgCreateCookie(a,b,c){var d="";if(c){var e=new Date;e.setTime(e.getTime()+24*c*60*60*1e3),d="; expires="+e.toUTCString()}document.cookie=a+"="+b+d+"; path=/"}var isStgDebug=(window.location.href.match("stg_debug")||window.document.cookie.match("stg_debug"))&&!window.location.href.match("stg_disable_debug");stgCreateCookie("stg_debug",isStgDebug?1:"",isStgDebug?365:-1);
+    window[dataLayer]=window[dataLayer]||[],window[dataLayer].push({start:(new Date).getTime(),event:"stg.start"});var scripts=document.getElementsByTagName(script)[0],tags=document.createElement(script),dl="dataLayer"!=dataLayer?"?dataLayer="+dataLayer:"";tags.async=!0,tags.src="//tag.aumago.com/d79e0982-d118-4c32-bf33-db3a291dbf63.js"+dl,isStgDebug&&(tags.src=tags.src+"?stg_debug"),scripts.parentNode.insertBefore(tags,scripts);
+    })(window, document, 'script', 'dataLayer', 'd79e0982-d118-4c32-bf33-db3a291dbf63');
+    </script-->
+    <noscript><iframe src="//tag.aumago.com/d79e0982-d118-4c32-bf33-db3a291dbf63/noscript.html" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Piwik PRO Tag Manager code -->
+
+    <meta name="viewport" content=""/>
+    <meta charset="utf-8"/>
+    <meta node="02"/>
+
+    <meta name="description" content="Thieme E-Books &amp; E-Journals"/>
+
+    <meta name="format-detection" content="telephone=no"/>
+
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+
+
+
+
+    <meta http-equiv="X-UA-Compatible" content="IE=8"/>
+
+    <title>Thieme E-Journals - Methods of Information in Medicine / Abstract</title>
+
+	<link rel="shortcut icon" href="/products/assets/favicon-e6861aa09fc6a3a946cb99117c7bbb6d.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="/products/assets/css/style-426adbde81086a1b3689b395e85af798.css" type="text/css"/>
+    <link rel="stylesheet" href="/products/assets/style-changes-6b8c679ecb93eac2d026efa9ffe1b752.css" type="text/css"/>
+    <link rel="stylesheet" href="/products/assets/todo-marker-ccf30c6d95b56ca3d0f1d359619ebfa6.css" type="text/css"/>
+    <link rel="stylesheet" href="/products/assets/dark-bottom-dc8bcb8668797957a5a4cb83a4a02f16.css" type="text/css"/>
+    <link rel="stylesheet" href="/products/assets/css/all.min-9217594d9c115167a1ae704d5c8e49f0.css" type="text/css"/>
+    <link rel="stylesheet" href="/products/assets/facetsWidget-dd6e8b8bfc33434685f4295799e04c31.css" type="text/css"/>
+    <script type="text/javascript" src="/products/assets/libs/jquery-3.7.1.min-ecee19a383efd22bd54981b27926f724.js" ></script>
+    <script type="text/javascript" src="/products/assets/libs/jquery-ui-1.13.2.min-420ad961fc6b8b370f1626592817b9f7.js" ></script>
+    <script type="text/javascript" src="/products/assets/browser-0dfb93a20cd2c1005028985f8b717b78.js" ></script>
+    <script type="text/javascript" src="/products/assets/libs/modernizr-2.0.6.min-6ea2093737335d9243d37880279e1bca.js" ></script>
+    <script type="text/javascript" src="/products/assets/js/plugins-4e60cc754d04fb5f811ad13176538668.js" ></script>
+    <script type="text/javascript" src="/products/assets/js/script-e1e08428953e2b2d714d9ad194951742.js" ></script>
+    <script type="text/javascript" src="/products/assets/js/tablet.slideinmenu-751be01aad2c02aefad271ddd174d0b1.js" ></script>
+    <script type="text/javascript" src="/products/assets/tooltip-10f19c131f09a88f0056410b04ef5223.js" ></script>
+    <script type="text/javascript" src="/products/assets/commons-aa4b995a09a64935d02de28acdf73502.js" ></script>
+    <script type="text/javascript" src="/products/assets/script-changes-972a33908c51934e76741677ab1f7bce.js" ></script>
+    <script type="text/javascript" src="/products/assets/cookieconsent-7b8defe1dfad48394a313e1a58223a28.js" ></script>
+    <script type="text/javascript" src="/products/assets/paginator-d6dc1b0f4b0612746dd756940885c539.js" ></script>
+    <!-- Aufruf fetchResultsList aus paginator.js ist bei Home anders als bei Suchergebnissen implementiert -->
+    
+    
+      <script type="text/javascript" src="/products/assets/searchResults-e9cb3f42ba8a08cf861622a5b8c13267.js" ></script>
+    
+    <script type="text/javascript" src="/products/assets/bookToc-98c12cb878c3cc2c75df563456fe4b56.js" ></script>
+
+  <!-- TC-1884 Altmetrics Badge -->
+  <script type='text/javascript' src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
+
+  <script type="text/javascript">
+
+    (function() {
+
+      window._adexc = window._adexc || [];
+
+      // custom KV example
+      window._adexc.push([
+        '/506/3014/',
+        'ut',
+        '_kv',
+        {
+          'IpLoggedIn':'false',
+          'LoggedIn':'false',
+          'isFulltext':'false',
+          'JournalDoi': '00035037',
+        }
+      ]);
+
+      var axd = document.createElement('script'); axd.type = 'text/javascript'; axd.async = 1;
+      axd.src = "https://dmp.theadex.com/d/506/3014/s/adex.js";
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(axd, s);
+    })();
+
+  </script>
+
+  <!-- TC-1735 MathML -->
+  
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-chtml.js"></script>
+  
+
+    
+  
+
+  <meta name="page" content="abstract"/>
+  <meta name="layout" content="main"/>
+
+  
+
+
+
+
+  
+    
+    <meta name="prism:publicationName" content="Methods of Information in Medicine" />
+  
+
+    
+    <meta name="prism:issn" content="0026-1270" />
+  
+
+    
+    <meta name="prism:eissn" content="2511-705X" />
+  
+
+    
+    <meta name="prism:distributor" content="Georg Thieme Verlag KG" />
+  
+
+  
+  
+
+    
+    <meta name="prism:copyright" content="Georg Thieme Verlag KG Rüdigerstraße 14, 70469 Stuttgart, Germany" />
+    
+
+    
+    <meta name="prism:doi" content="10.1055/a-2233-2736" />
+  
+
+    
+    <meta name="prism:academicField" content="Original Article" />
+  
+
+    
+    <meta name="prism:contentType" content="Original Article" />
+  
+
+   
+
+  
+    <meta name="prism:person" content="Elizabeth I. Harrison" />
+  
+    <meta name="prism:person" content="Laura A. Kirkpatrick" />
+  
+    <meta name="prism:person" content="Patrick W. Harrison" />
+  
+    <meta name="prism:person" content="Traci M. Kazmerski" />
+  
+    <meta name="prism:person" content="Yoshimi Sogawa" />
+  
+    <meta name="prism:person" content="Harry S. Hochheiser" />
+  
+
+   
+    <meta name="prism:copyrightYear" content="2024" />
+  
+
+   
+    <meta name="prism:copyrighEntity" content="Georg Thieme Verlag KG" />
+  
+
+  
+    <meta name="prism:publicationDate" content="2024/02/20" />
+  
+
+  
+    <meta name="prism:creationDate" content="2023/12/20" />
+  
+
+  
+    <meta name="prism:coverDate" content="2023/12" />
+  
+
+  
+    <meta name="prism:volume" content="62" />
+  
+
+  
+    
+      <meta name="prism:issueIdentifier" content="05/06" />
+    
+  
+
+    
+    <meta name="prism:startingPage" content="193" />
+  
+
+    
+    <meta name="prism:endingPage" content="201" />
+    
+    
+    
+  
+    
+    <meta name="prism:url" content="http://www.thieme-connect.de/products/ejournals/html/10.1055/a-2233-2736" />
+  
+
+
+  
+
+
+
+
+
+
+
+  
+    
+    <meta name="citation_language" content="en" />
+  
+
+    
+   <meta name="citation_journal_title" content="Methods of Information in Medicine" />
+  
+  
+    
+   <meta name="citation_journal_abbrev" content="Methods Inf Med" />
+  
+  
+  
+    <meta name="citation_issn" content="0026-1270" />
+  
+
+  
+    <meta name="citation_issn" content="2511-705X" />
+  
+  
+  
+    <meta name="citation_publisher" content="Georg Thieme Verlag KG" />
+  
+
+  
+    <meta name="citation_doi" content="10.1055/a-2233-2736" />
+  
+
+  
+    <meta name="citation_article_type" content="Original Article" />
+  
+
+  
+    <meta name="citation_title" content="Use of Natural Language Processing to Identify Sexual and Reproductive Health Information in Clinical Text" />
+  
+
+  
+    
+      <meta name="citation_author" content="Elizabeth I. Harrison" />
+      
+        <meta name="citation_author_institution" content="Department of Pediatrics, UPMC Children's Hospital of Pittsburgh, Pittsburgh, Pennsylvania, United States" />
+      
+      
+        <meta name="citation_author_email" content="harrisonei2@upmc.edu" />
+      
+      
+    
+      <meta name="citation_author" content="Laura A. Kirkpatrick" />
+      
+        <meta name="citation_author_institution" content="Department of Pediatrics, UPMC Children's Hospital of Pittsburgh, Pittsburgh, Pennsylvania, United States" />
+      
+      
+      
+    
+      <meta name="citation_author" content="Patrick W. Harrison" />
+      
+        <meta name="citation_author_institution" content="Data Theoretic, Pittsburgh, Pennsylvania, United States" />
+      
+      
+      
+    
+      <meta name="citation_author" content="Traci M. Kazmerski" />
+      
+        <meta name="citation_author_institution" content="Department of Pediatrics, UPMC Children's Hospital of Pittsburgh, Pittsburgh, Pennsylvania, United States" />
+      
+      
+      
+    
+      <meta name="citation_author" content="Yoshimi Sogawa" />
+      
+        <meta name="citation_author_institution" content="Department of Pediatrics, UPMC Children's Hospital of Pittsburgh, Pittsburgh, Pennsylvania, United States" />
+      
+      
+      
+    
+      <meta name="citation_author" content="Harry S. Hochheiser" />
+      
+        <meta name="citation_author_institution" content="Department of Biomedical Informatics, University of Pittsburgh School of Medicine, Pittsburgh, Pennsylvania, United States" />
+      
+      
+      
+    
+  
+
+  
+    <meta name="citation_online_date" content="2024/02/20" />
+  
+
+  
+    <meta name="citation_publication_date" content="2023/12" />
+  
+
+  
+    <meta name="citation_volume" content="62" />
+  
+
+  
+    
+      <meta name="citation_issue" content="05/06" />
+    
+  
+
+  
+    <meta name="citation_firstpage" content="193" />
+  
+
+  
+    <meta name="citation_lastpage" content="201" />
+  
+
+  
+
+  
+
+  
+    
+    <meta name="citation_pdf_url" content="http://www.thieme-connect.de/products/ejournals/pdf/10.1055/a-2233-2736.pdf" />
+  
+
+  
+    
+    <meta name="citation_fulltext_html_url" content="http://www.thieme-connect.de/products/ejournals/html/10.1055/a-2233-2736" />
+    
+      
+      <meta name="citation_xml_url" content="http://www.thieme-connect.de/products/ejournals/xml/10.1055/a-2233-2736.xml" format_fulltext="jats1.3" />
+    
+  
+  
+  <meta name="citation_abstract_html_url" content="http://www.thieme-connect.de/DOI/DOI?10.1055/a-2233-2736" />
+  
+    
+    <meta name="citation_license" content="[null, null]" />
+  
+
+  
+    <meta name="citation_abstract" content="
+&lt;p&gt;
+   &lt;b&gt;Objectives&lt;/b&gt; This study aimed to enable clinical researchers without expertise in natural language processing (NLP) to extract and analyze information about sexual and reproductive health (SRH), or other sensitive health topics, from large sets of clinical notes.&lt;/p&gt;
+ 
+&lt;p&gt;
+   &lt;b&gt;Methods&lt;/b&gt; (1) We retrieved text from the electronic health record as individual notes. (2) We segmented notes into sentences using one of scispaCy&#39;s NLP toolkits. (3) We exported sentences to the labeling application Watchful and annotated subsets of these as relevant or irrelevant to various SRH categories by applying a combination of regular expressions and manual annotation. (4) The labeled sentences served as training data to create machine learning models for classifying text; specifically, we used spaCy&#39;s default text classification ensemble, comprising a bag-of-words model and a neural network with attention. (5) We applied each model to unlabeled sentences to identify additional references to SRH with novel relevant vocabulary. We used this information and repeated steps 3 to 5 iteratively until the models identified no new relevant sentences for each topic. Finally, we aggregated the labeled data for analysis.&lt;/p&gt;
+ 
+&lt;p&gt;
+   &lt;b&gt;Results&lt;/b&gt; This methodology was applied to 3,663 Child Neurology notes for 971 female patients. Our search focused on six SRH categories. We validated the approach using two subject matter experts, who independently labeled a sample of 400 sentences. Cohen&#39;s kappa values were calculated for each category between the reviewers (menstruation: 1, sexual activity: 0.9499, contraception: 0.9887, folic acid: 1, teratogens: 0.8864, pregnancy: 0.9499). After removing the sentences on which reviewers did not agree, we compared the reviewers&#39; labels to those produced via our methodology, again using Cohen&#39;s kappa (menstruation: 1, sexual activity: 1, contraception: 0.9885, folic acid: 1, teratogens: 0.9841, pregnancy: 0.9871).&lt;/p&gt;
+ 
+&lt;p&gt;
+   &lt;b&gt;Conclusion&lt;/b&gt; Our methodology is reproducible, enables analysis of large amounts of text, and has produced results that are highly comparable to subject matter expert manual review.&lt;/p&gt;
+ " />
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <meta name="citation_reference" content="citation_author=J A Singh; citation_author=M Siddiqi; citation_author=P Parameshwar; citation_author=V Chandra-Mouli; citation_publication_date=2019; citation_title=World Health Organization guidance on ethical considerations in planning and reviewing research studies on sexual and reproductive health in adolescents; citation_firstpage=427; citation_lastpage=429; citation_issue=04; citation_journal_title=J Adolesc Health; citation_volume=64; " />
+  
+    <meta name="citation_reference" content="citation_author=S Flicker; citation_author=A Guta; citation_publication_date=2008; citation_title=Ethical approaches to adolescent participation in sexual health research; citation_firstpage=3; citation_lastpage=10; citation_issue=01; citation_journal_title=J Adolesc Health; citation_volume=42; " />
+  
+    <meta name="citation_reference" content="citation_author=V Dickson-Swift; citation_author=E L James; citation_author=S Kippen; citation_publication_date=2007; citation_title=Doing sensitive research: what challenges do qualitative researchers face?; citation_firstpage=327; citation_lastpage=353; citation_journal_title=Qual Res; citation_volume=7; " />
+  
+    <meta name="citation_reference" content="citation_author=N Vaci; citation_author=Q Liu; citation_author=A Kormilitzin; citation_publication_date=2020; citation_title=Natural language processing for structuring clinical text data on depression using UK-CRIS; citation_firstpage=21; citation_lastpage=26; citation_issue=01; citation_journal_title=Evid Based Ment Health; citation_volume=23; " />
+  
+    <meta name="citation_reference" content="citation_author=L Kirkpatrick; citation_author=A Collins; citation_author=Y Sogawa; citation_author=M Birru Talabi; citation_author=E Harrison; citation_author=T M Kazmerski; citation_publication_date=2020; citation_title=Sexual and reproductive healthcare for adolescent and young adult women with epilepsy: a qualitative study of pediatric neurologists and epileptologists; citation_firstpage=106911; citation_journal_title=Epilepsy Behav; citation_volume=104; " />
+  
+    <meta name="citation_reference" content="citation_author=L Kirkpatrick; citation_author=E Harrison; citation_author=S Khalil; citation_publication_date=2021; citation_title=A survey of child neurologists about reproductive healthcare for adolescent women with epilepsy; citation_firstpage=108001; citation_journal_title=Epilepsy Behav; citation_volume=120; " />
+  
+    <meta name="citation_reference" content="citation_author=L Kirkpatrick; citation_author=E Harrison; citation_author=S Borrero; citation_publication_date=2022; citation_title=Preferences and experiences of women with epilepsy regarding sexual and reproductive healthcare provision; citation_firstpage=108631; citation_journal_title=Epilepsy Behav; citation_volume=129; " />
+  
+    <meta name="citation_reference" content="citation_author=S Pradhan; citation_author=N Elhadad; citation_author=B R South; citation_publication_date=2015; citation_title=Evaluating the state of the art in disorder recognition and normalization of the clinical narrative; citation_firstpage=143; citation_lastpage=154; citation_issue=01; citation_journal_title=J Am Med Inform Assoc; citation_volume=22; " />
+  
+    <meta name="citation_reference" content="citation_author=M Bada; citation_author=M Eckert; citation_author=D Evans; citation_publication_date=2012; citation_title=Concept annotation in the CRAFT corpus; citation_firstpage=161; citation_journal_title=BMC Bioinformatics; citation_volume=13; " />
+  
+    <meta name="citation_reference" content="citation_author=I Spasic; citation_author=G Nenadic; citation_publication_date=2020; citation_title=Clinical text data in machine learning: systematic review; citation_firstpage=e17984; citation_issue=03; citation_journal_title=JMIR Med Inform; citation_volume=8; " />
+  
+    <meta name="citation_reference" content="citation_author=R M Monarch; citation_publication_date=2021; citation_title=Human-in-the-Loop Machine Learning: Active Learning and Annotation for Human-centered AI; citation_inbook_title=: ; citation_publisher=Manning; " />
+  
+    <meta name="citation_reference" content="citation_author=G Van Rossum; citation_author=F L Drake; " />
+  
+    <meta name="citation_reference" content="citation_author=T Kluyver; citation_author=B Ragan-Kelley; citation_author=P Fernando; citation_publication_date=2016; citation_title=Jupyter Notebooks – a publishing format for reproducible computational workflows; citation_firstpage=87; citation_lastpage=90; citation_inbook_title=: Positioning and Power in Academic Publishing: Players; citation_publisher=Agents and Agendas; " />
+  
+    <meta name="citation_reference" content="citation_author=W McKinney; " />
+  
+    <meta name="citation_reference" content="citation_author=M Honnibal; citation_author=I Montani; " />
+  
+    <meta name="citation_reference" content="citation_author=M Neumann; citation_author=D King; citation_author=I Beltagy; " />
+  
+    <meta name="citation_reference" content="citation_author=S Mohanty; citation_author=J Singleton; " />
+  
+    <meta name="citation_reference" content="citation_author=F Pedregosa; citation_author=G Varoquaux; citation_author=A Gramfort; citation_publication_date=2011; citation_title=Scikit-Learn: machine learning in Python; citation_firstpage=2825; citation_lastpage=2830; citation_journal_title=J Mach Learn Res; citation_volume=12; " />
+  
+    <meta name="citation_reference" content="citation_author=L S Bickley; citation_author=P G Szilagyi; citation_author=B Bates; citation_publication_date=2007; citation_title=Bates&#39; Guide to Physical Examination and History Taking; citation_inbook_title=: ; citation_publisher=Lippincott Williams &amp; Wilkins; " />
+  
+    <meta name="citation_reference" content="citation_author=R Perotte; citation_author=C Hajicharalambous; citation_author=G Sugalski; citation_author=J P Underwood; citation_publication_date=2022; citation_title=Characterization of electronic health record documentation shortcuts: does the use of dotphrases increase efficiency in the Emergency Department?; citation_firstpage=969; citation_lastpage=978; citation_journal_title=AMIA Annu Symp Proc; citation_volume=2021; " />
+  
+    <meta name="citation_reference" content="citation_author=R Mitkov; citation_publication_date=2004; citation_title=The Oxford Handbook of Computational Linguistics; citation_firstpage=754; citation_inbook_title=: ; citation_publisher=Oxford University Press; " />
+  
+    <meta name="citation_reference" content="citation_author=L A Kirkpatrick; citation_author=H S Hochheiser; citation_author=Y Sogawa; citation_author=T M Kazmerski; citation_publication_date=2023; citation_title=A retrospective textual analysis of sexual and reproductive health counseling for adolescent and young adult people with epilepsy of gestational capacity; citation_firstpage=109321; citation_journal_title=Epilepsy Behav; citation_volume=145; " />
+  
+    <meta name="citation_reference" content="citation_author=M Yetisgen; citation_author=L Vanderwende; citation_author=T Black; citation_publication_date=2016; citation_title=A New Way of Representing Clinical Reports for Rapid Phenotyping; citation_inbook_title=: ; citation_publisher=AMIA 2016 Joint Summits on Translational Science; " />
+  
+    <meta name="citation_reference" content="citation_author=A Pomares-Quimbaya; citation_author=M Kreuzthaler; citation_author=S Schulz; citation_publication_date=2019; citation_title=Current approaches to identify sections within clinical narratives from electronic health records: a systematic review; citation_firstpage=155; citation_issue=01; citation_journal_title=BMC Med Res Methodol; citation_volume=19; " />
+  
+    <meta name="citation_reference" content="citation_author=Q Chen; citation_author=Y Peng; citation_author=Z Lu; " />
+  
+   
+
+  
+
+  
+    
+    <meta name="dc:medium" content="Methods of Information in Medicine" />
+  
+
+  
+    <meta name="dc:language" content="en" />
+  
+
+  
+    <meta name="dc:rights" content="Georg Thieme Verlag KG Rüdigerstraße 14, 70469 Stuttgart, Germany" />
+  
+
+  
+    <meta name="dc:publisher" content="Georg Thieme Verlag KG" />
+  
+
+  
+    <meta name="dc:identifier" content="10.1055/a-2233-2736" />
+  
+
+  
+    <meta name="dc:subject" content="Original Article" />
+  
+
+  
+    <meta name="dc:title" content="Use of Natural Language Processing to Identify Sexual and Reproductive Health Information in Clinical Text" />
+  
+
+  
+
+  
+    <meta name="dc:creator" content="Elizabeth I. Harrison" />
+  
+    <meta name="dc:creator" content="Laura A. Kirkpatrick" />
+  
+    <meta name="dc:creator" content="Patrick W. Harrison" />
+  
+    <meta name="dc:creator" content="Traci M. Kazmerski" />
+  
+    <meta name="dc:creator" content="Yoshimi Sogawa" />
+  
+    <meta name="dc:creator" content="Harry S. Hochheiser" />
+  
+
+    
+    <meta name="dc:rightsHolder" content="Georg Thieme Verlag KG" />
+  
+
+   
+
+  
+    <meta name="dc:date" content="2024/02/20" />
+  
+
+  
+    <meta name="dcterms:created" content="2023/12/20" />
+  
+
+  
+    <meta name="dcterms:issued" content="2023/12" />
+  
+
+  
+
+  
+    <meta name="dcterms:abstract" content="
+
+   Objectives This study aimed to enable clinical researchers without expertise in natural language processing (NLP) to extract and analyze information about sexual and reproductive health (SRH), or other sensitive health topics, from large sets of clinical notes.
+ 
+
+   Methods (1) We retrieved text from the electronic health record as individual notes. (2) We segmented notes into sentences using one of scispaCy&#39;s NLP toolkits. (3) We exported sentences to the labeling application Watchful and annotated subsets of these as relevant or irrelevant to various SRH categories by applying a combination of regular expressions and manual annotation. (4) The labeled sentences served as training data to create machine learning models for classifying text; specifically, we used spaCy&#39;s default text classification ensemble, comprising a bag-of-words model and a neural network with attention. (5) We applied each model to unlabeled sentences to identify additional references to SRH with novel relevant vocabulary. We used this information and repeated steps 3 to 5 iteratively until the models identified no new relevant sentences for each topic. Finally, we aggregated the labeled data for analysis.
+ 
+
+   Results This methodology was applied to 3,663 Child Neurology notes for 971 female patients. Our search focused on six SRH categories. We validated the approach using two subject matter experts, who independently labeled a sample of 400 sentences. Cohen&#39;s kappa values were calculated for each category between the reviewers (menstruation: 1, sexual activity: 0.9499, contraception: 0.9887, folic acid: 1, teratogens: 0.8864, pregnancy: 0.9499). After removing the sentences on which reviewers did not agree, we compared the reviewers&#39; labels to those produced via our methodology, again using Cohen&#39;s kappa (menstruation: 1, sexual activity: 1, contraception: 0.9885, folic acid: 1, teratogens: 0.9841, pregnancy: 0.9871).
+ 
+
+   Conclusion Our methodology is reproducible, enables analysis of large amounts of text, and has produced results that are highly comparable to subject matter expert manual review.
+ " />
+  
+
+  
+    <meta name="dc:description" content="" />
+  
+
+  
+    <meta name="dc:format" content="XML"/>
+    
+    
+    <meta name="dc:relation" content="http://www.thieme-connect.de/products/ejournals/html/10.1055/a-2233-2736" />
+  
+
+  
+    <meta name="dc:format" content="PDF"/>
+    
+    <meta name="dc:relation" content="http://www.thieme-connect.de/products/ejournals/pdf/10.1055/a-2233-2736.pdf" />
+  
+
+  
+
+
+  
+  
+    
+  
+  <meta name="dc:relation" content="https://www.thieme-connect.com/media/10.1055-s-00035037/20230506/10-1055-a-2233-2736-i22010121-1.jpg"/>
+
+  
+  
+  <meta name="dc:relation" content=""/>
+
+
+
+  <meta name="article_crawling_links_url" content="http://www.thieme-connect.de/products/ejournals/article-xml/10.1055/a-2233-2736" article-type="scientific" publication_type="issue">
+
+    
+  </head>
+
+  
+
+  
+  
+
+  
+
+  
+  
+    
+    
+  
+
+  <body id="body" class="    ">
+    
+    
+
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PMWN2TQ" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- TC-2122 -->
+    
+    
+      
+    
+    <div id="journalname" style="display: none">methods of information in medicine</div>
+
+    <!-- TC-2220 -->
+    
+    
+    <div id="themeid" style="display: none"></div>
+
+
+    <div id="application">
+
+      <!-- start general/_header.gsp -->
+<header id="pageHeader">
+  
+
+
+
+
+
+
+
+  <div id="topHeaderBar" role="navigation">
+    <nav id="navigation" aria-label="Meta navigation">
+      <ul id="metaNavigation">
+
+        <!-- Language Switch -->
+        
+
+        
+          <li>
+            <a href="/products/ejournals/abstract/10.1055/a-2233-2736?id=&amp;lang=de" class="" aria-current="false" aria-label="Switch to German">
+              DE
+            </a>
+          </li>
+          <li>
+            <a href="/products/ejournals/abstract/10.1055/a-2233-2736?id=&amp;lang=en" class=" language-current" aria-current="true" aria-label="Current language: English">
+              EN
+            </a>
+          </li>
+        
+
+
+        <!-- Home -->
+        <li>
+          <a href="/products/all/home.html" tabindex="0">
+            Home
+          </a>
+        </li>
+
+        <!-- Products submenu -->
+        <li class="hasChildren">
+          <button class="disclosure-button"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  aria-controls="productsMenu">
+            Products
+            <i class="fa fa-chevron-down" aria-hidden="true"></i> 
+          </button>
+          <ul id="productsMenu"
+              class="disclosure-container linkList dropMenu"
+              role="menu"
+              hidden>
+            <li role="none"><a href="/products/ejournals/journals" role="menuitem" tabindex="-1"><i class="fa fa-chevron-right" aria-hidden="true"></i>Journals</a></li>
+            <li role="none"><a href="/products/ebooks/books" role="menuitem" tabindex="-1"><i class="fa fa-chevron-right" aria-hidden="true"></i>Books</a></li>
+            <li role="none"><a href="/products/ebooks/series" role="menuitem" tabindex="-1"><i class="fa fa-chevron-right" aria-hidden="true"></i>Book Series</a></li>
+          </ul>
+        </li>
+
+        <!-- Service submenu -->
+        <li class="hasChildren">
+          <button class="disclosure-button"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  aria-controls="serviceMenu">
+            Service
+             <i class="fa fa-chevron-down" aria-hidden="true"></i> 
+          </button>
+          <ul id="serviceMenu"
+              class="disclosure-container linkList dropMenu"
+              role="menu"
+              hidden>
+            <li role="none"><a href="/products/libraryservice" role="menuitem" tabindex="-1"><i class="fa fa-chevron-right" aria-hidden="true"></i>Library Service</a></li>
+          </ul>
+        </li>
+
+        <!-- Help, Contact, External portal -->
+        <li><a href="/products/all/help" tabindex="0">Help</a></li>
+        <li><a href="/products/all/contact" tabindex="0">Contact</a></li>
+        <li><a href="https://www.thieme.de/en/thieme-connect/home-3939.htm"
+               target="_blank" rel="noopener noreferrer"
+               tabindex="0">
+               Portal
+               <span class="visually-hidden">(opens in new window)</span>
+        </a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div id="middleHeaderBar">
+    <a id="header-logo" href="/products/all/home.html">
+      
+      
+      <img src="/products/assets/desktop/img/thiemelogo-db985e5ef53f6cd8a707ed19b49085d1.webp" class="thieme-logo" alt="Thieme Logo"/>
+    </a>
+
+    <div id="siteTitle">
+      
+        Methods of Information in Medicine
+      
+    </div>
+
+    
+
+<div id="searchBar" class="">
+  <form action="/products/all/search" method="get" name="headerSearch" id="headerSearch" >
+<label for="query" class="visually-hidden">
+  Search
+</label>    <input type="text" name="query" id="query" placeholder="Search" class="searchField" value="">
+<div id="searchFilter" class="pseudoSelect searchFilter">
+  <label for="searchFilterSelect" class="visually-hidden">
+    Search filter
+  </label>
+  <select id="searchFilterSelect" name="searchFilter" class="pseudoSelect searchFilter">
+    <option value="fulltext">
+      Full-text search
+    </option>
+    <option value="author">
+      Author Search
+    </option>
+    <option value="title">
+      Title Search
+    </option>
+    <option value="doi">
+      DOI Search
+    </option>
+    <option value="metadata">
+      Metadata Search
+    </option>
+  </select>
+</div>
+
+    <input type="hidden" name="radius" id="navSearchRadius" value="fulltext">
+    <input type="hidden" name="option" value="AND">
+    <input type="hidden" name="clearSavedProfileSearch" value="true">
+<button type="submit" class="searchButton" >
+  <span class="visually-hidden">Search</span>
+<i class="fa-solid fa-chevron-right"></i>
+</button>  </form>
+</div>
+
+  </div>
+
+  <div id="bottomHeaderBar">
+    <!-- start general/_navHeader.gsp -->
+
+
+  
+
+
+
+  <ul id="headerNavigation" role="menubar" aria-label="Journal navigation">
+
+    
+
+    
+      <!-- Journal Links -->
+      <li class="tab hasChildren" role="none">
+        <button class="disclosure-button linkBlue"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="journalMenu"
+                role="menuitem"
+                tabindex="0">
+          Journal
+          <i class="fa fa-chevron-down" aria-hidden="true"></i>
+        </button>
+        <ul id="journalMenu" class="dropMenu linkList" role="menu" hidden>
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://lp.thieme.de/journals/details.php?issn=0026-1270" role="menuitem">Aims and Scope</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://lp.thieme.de/open-access-files/183/editorial_board.pdf" role="menuitem">Editorial Board</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://www.thieme-connect.com/products/ejournals/html/10.1055/s-0040-1715580" role="menuitem">Methods Refocused</a>
+              </li>
+            
+          
+        </ul>
+      </li>
+
+      <!-- Authors -->
+      <li class="tab hasChildren" role="none">
+        <button class="disclosure-button linkBlue"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="authorsMenu2"
+                role="menuitem"
+                tabindex="0">
+          Authors
+          <i class="fa fa-chevron-down" aria-hidden="true"></i>
+        </button>
+        <ul id="authorsMenu2" class="dropMenu linkList" role="menu" hidden>
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://lp.thieme.de/open-access-files/183/author_instructions.pdf" role="menuitem">Instructions for Authors</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://mc.manuscriptcentral.com/methods" role="menuitem">Submit Manuscript</a>
+              </li>
+            
+          
+        </ul>
+      </li>
+
+      <!-- Abos -->
+      
+        <li class="tab hasChildren" role="none">
+          <button class="disclosure-button linkBlue"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  aria-controls="abosMenu"
+                  role="menuitem"
+                  tabindex="0">
+            Subscription
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <ul id="abosMenu" class="dropMenu linkList" role="menu" hidden>
+            
+              
+            
+              
+                <li role="none">
+                  <a href="https://shop.thieme.com/Methods-of-Information-in-Medicine/0026-1270" role="menuitem">Subscription Information &amp; Contacts</a>
+                </li>
+              
+            
+              
+            
+              
+                <li role="none">
+                  <a href="https://shop.thieme.com/Methods-of-Information-in-Medicine/0026-1270" role="menuitem">Institutional Licensing</a>
+                </li>
+              
+            
+          </ul>
+        </li>
+      
+    
+
+    
+      <li class="tab hasChildren" role="none">
+        <button class="disclosure-button linkBlue"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="optionalTab1Menu"
+                role="menuitem"
+                tabindex="0">
+          
+          
+            
+          
+            
+              Focus Themes
+              
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+          <i class="fa fa-chevron-down" aria-hidden="true"></i>
+        </button>
+        <ul id="optionalTab1Menu" class="dropMenu linkList" role="menu" hidden>
+          
+            
+          
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://www.thieme-connect.de/products/ejournals/issue/10.1055/s-011-50674" role="menuitem">FAIR Principles in Health Research</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://www.thieme-connect.de/products/ejournals/issue/10.1055/s-011-50675" role="menuitem">Patient Rehabilitation Techniques</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href=" https://www.thieme-connect.de/products/ejournals/issue/10.1055/s-015-61690" role="menuitem">Security and Privacy in Distributed Health Care Environments</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href=" https://www.thieme-connect.de/products/ejournals/issue/10.1055/s-015-61697" role="menuitem">Applying the FAIR principles to accelerate health research in the post-Covid19 era</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href=" " role="menuitem">High-Quality Data for Health Care and Health Research</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href=" " role="menuitem">Current Trends and New Approaches in Participatory Health Informatics</a>
+              </li>
+            
+          
+        </ul>
+      </li>
+    
+
+    
+      <li class="tab hasChildren" role="none">
+        <button class="disclosure-button linkBlue"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="optionalTab2Menu"
+                role="menuitem"
+                tabindex="0">
+          
+          
+            
+          
+            
+              Social Media
+              
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+          <i class="fa fa-chevron-down" aria-hidden="true"></i>
+        </button>
+        <ul id="optionalTab2Menu" class="dropMenu linkList" role="menu" hidden>
+          
+            
+          
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://www.facebook.com/MethodsInfMed/" role="menuitem">Facebook</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://www.linkedin.com/showcase/methods-of-information-in-medicine-journal/posts" role="menuitem">LinkedIn</a>
+              </li>
+            
+          
+            
+          
+            
+              <li role="none">
+                <a href="https://bsky.app/profile/methodsinfmed.bsky.social" role="menuitem">Bluesky</a>
+              </li>
+            
+          
+        </ul>
+      </li>
+    
+
+    <!-- Optional tabs follow same button/dropdown pattern -->
+  </ul>
+
+<!-- end general/_navHeader.gsp -->
+
+    <div class="inst-text">
+      <ul id="userFunctions">
+        <li id="userAccount">
+          
+          
+
+          <!-- When NOT logged in -->
+          
+            
+
+            
+              <div class="login-container">
+              <div class="login-container">
+                <button type="button"
+                      id="userMenuToggleLoggedOut"
+                      class="headerFunctionTitle disclosure-button"
+                      aria-expanded="false"
+                      aria-controls="userMenuPanelLoggedOut"
+                      aria-label="User account menu">
+                  <i class="fa-regular fa-user"></i>Not Logged In
+                </button>
+
+                <div id="userMenuPanelLoggedOut" class="disclosure-panel" hidden="">
+                  <ul id="headerAccountForm" class="disclosure-nav">
+                  <li>
+                    
+                    
+                        <form action="https://profile.thieme.de/HTML/sso/THIEME/login.htm" method="post" name="headerLogin" id="headerLogin">
+                            <input type="hidden" name="action" value="login" tabindex="-1">
+                            <input type="hidden" name="rdeLocaleAttr" value="en" tabindex="-1">
+                            <input type="hidden" name="hook_url" value="https://www.thieme-connect.de/products/ejournals/abstract/10.1055/a-2233-2736" tabindex="-1">
+                            <div class="formLine">
+                                <label for="usernameLocal">
+                                    Username or e-mail address:
+                                </label>
+                                <input class="textfield mf-excluded" type="text" name="username" id="usernameLocal" tabindex="-1">
+                            </div>
+                            <div class="formLine">
+                                <label for="passwordLocal">
+                                    Password:
+                                </label>
+                                <input class="textfield mf-excluded" type="password" name="password" id="passwordLocal" tabindex="-1">
+                            </div>
+                            <div class="submitLine">
+                                <input class="button submitButton" type="submit" name="submitButton" value="Login" tabindex="-1">
+                            </div>
+                            <div class="linksUserOptions">
+                                <a href="https://profile.thieme.de/HTML/sso/THIEME/thieme_forgotten_access_data.htm?hook_url=https://www.thieme-connect.de/products/ejournals/abstract/10.1055/a-2233-2736&amp;rdeLocaleAttr=en" class="optionLink" rel="nofollow" tabindex="-1">
+                                    Forgot Access Data?
+                                </a>
+                                <a href="/products/all/registration" class="optionLink" rel="nofollow" tabindex="-1">
+                                    Register Now
+                                </a>
+                            </div>
+                        </form>
+                    
+                  </li>
+                </ul>
+              </div>
+            
+          
+
+          <!-- When LOGGED in -->
+          
+        </li>
+      </ul>
+
+      
+        <div id="institutionName" class="mf-excluded">
+          
+        </div>
+        
+        
+          
+        
+        
+        
+        
+        
+        
+        
+        
+        
+          
+            <div id="institutionName">
+              
+            </div>
+          
+        
+      
+  </div>
+  </div>
+</header>
+<!-- end general/_header.gsp -->
+
+
+      
+
+      
+
+      <div id="main" role="main">
+        
+
+<!-- Accessibility: Skip to main content -->
+<a href="#content" class="skip-link visually-hidden">Skip to main content</a>
+
+<!-- start general/_navPanel.gsp -->
+
+
+  
+
+
+<div id="navPanel">
+  <a id="navPanelHandle" onclick="tabletSlideMenu.toggle()"
+   tabindex="-1" 
+   aria-hidden="true" 
+   style="display: none;">
+</a>
+  <div id="navPanelContent">
+    
+    <div id="cover" style="position: relative">
+      <img src="
+      
+        https://www.thieme-connect.de/media/10.1055-s-00035037/cover_big.jpg
+      
+    " pixelX="171" width="171" height="220" class="journalCover small" border="0" alt="Methods of Information in Medicine">
+      
+    </div>
+    
+    <div id="leftNavigation">
+      
+        <form action="/products/issue/jsonLoadIssues" method="post" name="toc" id="toc" >
+          <input type="hidden" name="shortname" value="10.1055-s-00035037">
+          <input type="hidden" name="year">
+          <input type="hidden" name="isDisplayVolume" value="false">
+          <fieldset id="yearSelect">
+            <legend class="label-looklike">
+              Year (Archive)
+            </legend>
+
+            <div id="yearSelectContainer">
+              <label for="yearDropdown" class="visually-hidden">
+                Year (Archive)
+              </label>
+
+              <select id="yearDropdown" name="year"
+                      onchange="
+                        if(this.value){
+                          document.getElementById('issueSelect').style.display='inline';
+                          document.toc.action='#';
+                          document.toc.year.value=this.value;
+                          getIssues(this.value);
+                        }
+                      ">
+
+                
+                  
+                    
+                    
+                    
+                      <option value="2024"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2024">
+                        2024
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                      
+                    
+                    
+                      <option value="2023" selected=&quot;selected&quot; data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2023">
+                        2023
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2022"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2022">
+                        2022
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2021"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2021">
+                        2021
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2020"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2020">
+                        2020
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2019"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2019">
+                        2019
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2018"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2018">
+                        2018
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2017"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2017">
+                        2017
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2016"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2016">
+                        2016
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2015"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2015">
+                        2015
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2014"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2014">
+                        2014
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2013"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2013">
+                        2013
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2012"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2012">
+                        2012
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2011"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2011">
+                        2011
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2010"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2010">
+                        2010
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2009"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2009">
+                        2009
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2008"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2008">
+                        2008
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2007"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2007">
+                        2007
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2006"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2006">
+                        2006
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2005"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2005">
+                        2005
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2004"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2004">
+                        2004
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2003"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2003">
+                        2003
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2002"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2002">
+                        2002
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2001"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2001">
+                        2001
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="2000"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/2000">
+                        2000
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1999"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1999">
+                        1999
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1998"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1998">
+                        1998
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1997"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1997">
+                        1997
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1996"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1996">
+                        1996
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1995"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1995">
+                        1995
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1994"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1994">
+                        1994
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1993"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1993">
+                        1993
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1992"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1992">
+                        1992
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1991"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1991">
+                        1991
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1990"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1990">
+                        1990
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1989"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1989">
+                        1989
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1988"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1988">
+                        1988
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1987"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1987">
+                        1987
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1986"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1986">
+                        1986
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1985"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1985">
+                        1985
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1984"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1984">
+                        1984
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1983"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1983">
+                        1983
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1982"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1982">
+                        1982
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1981"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1981">
+                        1981
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1980"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1980">
+                        1980
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1979"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1979">
+                        1979
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1978"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1978">
+                        1978
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1977"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1977">
+                        1977
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1976"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1976">
+                        1976
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1975"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1975">
+                        1975
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1974"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1974">
+                        1974
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1973"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1973">
+                        1973
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1972"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1972">
+                        1972
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1971"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1971">
+                        1971
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1970"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1970">
+                        1970
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1969"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1969">
+                        1969
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1968"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1968">
+                        1968
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1967"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1967">
+                        1967
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1966"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1966">
+                        1966
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1965"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1965">
+                        1965
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1964"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1964">
+                        1964
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1963"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1963">
+                        1963
+                      </option>
+                    
+                  
+                
+                  
+                    
+                    
+                    
+                      <option value="1962"  data-issue-url="/products/ejournals/issues/10.1055/s-00035037/1962">
+                        1962
+                      </option>
+                    
+                  
+                
+              </select>
+            </div>
+        </fieldset>
+
+
+          
+          
+          <fieldset id="issueSelect" style="display: inline">
+            <legend class="visually-hidden">Issues</legend>
+            <legend class="label-looklike" for="issue">Issues  </legend>
+              <ul class="selectList" id="issue">
+              </ul>
+          
+          </fieldset>
+        </form>
+
+        <ul class="linkList">
+          
+            
+              <li>
+                <a href="/products/ejournals/issue/10.1055/s-014-59106">Table of Contents</a>
+              </li>
+            
+          
+          <li>
+            <a href="/products/ejournals/journal/10.1055/s-00035037">
+              
+                Current Issue
+              
+            </a>
+          </li>
+          
+          
+            <li>
+              <a href="/products/ejournals/sampleIssue/10.1055/s-00035037">
+                Free Sample Issue (01/02/2024)
+              </a>
+            </li>
+          
+        </ul>
+      
+    </div>
+    
+    
+      <!-- start general/_adBoxPanel.gsp -->
+
+  
+  
+    
+      
+      
+    
+    
+      <div id="adSidebarLeft">
+        <script type="text/javascript">
+          window.TCFUtility.writeScript([
+            'https://adfarm1.adition.com/js?wp_id=568835&gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_39}&prf[DOI]=10.1055-s-00035037&prf[UserLogin]=false&prf[IPLogin]=false&prf[MASTERKEY]=10.1055-s-00035037, false, false&prf[HWG]=false'
+          ]);
+        </script>
+        
+      </div>
+    
+  
+
+<!-- end general/_adBoxPanel.gsp -->
+
+    
+    
+    <div id="pdoptionalLinks" class="box standardBox"></div>
+    <div id="pdrelatedJournal" class="box linkBox"></div>
+    <div id="pdrelatedBook" class="box linkBox"></div>
+    
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+          
+            
+          
+          
+          
+        
+      
+    
+      
+    
+      
+        
+      
+    
+      
+        
+          <div class="box linkBox">
+            <h2 class="boxHeader">
+              Related Journals
+            </h2>
+            <div class="boxContent">
+              <ul class="linkList">
+                
+                  
+                
+                  
+                    <li>
+                      <a href="https://www.thieme-connect.de/products/ejournals/journal/10.1055/s-00035026?lang=en" 
+                         target="_blank" 
+                         rel="noopener noreferrer">
+                        <i class="fa-solid fa-chevron-right"></i> Applied Clinical Informatics
+                      </a>
+                    </li>
+                  
+                
+                  
+                
+                  
+                    <li>
+                      <a href="https://www.thieme-connect.de/products/ejournals/journal/10.1055/s-00034612?lang=en" 
+                         target="_blank" 
+                         rel="noopener noreferrer">
+                        <i class="fa-solid fa-chevron-right"></i> ACI Open
+                      </a>
+                    </li>
+                  
+                
+                  
+                
+                  
+                    <li>
+                      <a href="https://www.thieme-connect.de/products/ejournals/journal/10.1055/s-00034925?lang=de" 
+                         target="_blank" 
+                         rel="noopener noreferrer">
+                        <i class="fa-solid fa-chevron-right"></i> Yearbook of Medical Informatics
+                      </a>
+                    </li>
+                  
+                
+              </ul>
+            </div>
+          </div>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+    
+  
+
+  <script type="text/javascript" src="/products/assets/js/plugins-4e60cc754d04fb5f811ad13176538668.js" ></script>
+  
+  
+</div>
+<!-- end general/_navPanel.gsp -->
+
+
+<div id="content">
+  
+  
+
+  <article>
+    <!-- start general/_adBoxPanel.gsp -->
+
+  
+  
+    
+      
+      
+    
+    
+      <script type="text/javascript">
+        window.TCFUtility.writeScript([
+          'https://adfarm1.adition.com/js?wp_id=3412883&gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_39}&prf[DOI]=10.1055-s-00035037&prf[UserLogin]=false&prf[IPLogin]=false&prf[MASTERKEY]=10.1055-s-00035037, false, false&prf[HWG]=false'
+        ]);
+      </script>
+      
+    
+  
+
+<!-- end general/_adBoxPanel.gsp -->
+
+    <!-- start general/_tocIcons.gsp -->
+<div class="pageFunctions">
+
+  <div class="actionButtons">
+
+    
+
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+
+    
+    
+    
+
+    
+      <div id="setRSSLink" class="toggleButton" title="Subscribe to RSS">
+        <div class="toggleContent">
+          <h4>Subscribe to RSS</h4>
+          <div>Please copy the URL and add it into your RSS Feed Reader.</div>
+          
+          <a href="https://www.thieme-connect.de/rss/thieme/en/10.1055-s-00035037.xml" target="_blank">https://www.thieme-connect.de/rss/thieme/en/10.1055-s-00035037.xml</a>
+        </div>
+      </div>
+    
+
+    
+
+    
+
+    
+      
+        <a href="/products/ejournals/ris/10.1055/a-2233-2736/BIB" id="saveLink" name="saveLink" class="functionItem" title="Download Bibliographical Data"></a>
+      
+    
+
+    
+      
+        
+      
+
+      
+        
+      
+
+     <button id="setShareLink" class="toggleButton" title="Share / Bookmark" title="Share / Bookmark">
+        <div class="toggleContent">
+          <h4>Share / Bookmark</h4>
+          <a href="#" class="shareMenuItem" onclick="facebook('http://www.thieme-connect.de/products/ejournals/abstract/10.1055/a-2233-2736')"><i class="fa-brands fa-facebook"></i>Facebook</a>
+          <a href="#" class="shareMenuItem" onclick="linkedin('http://www.thieme-connect.de/products/ejournals/abstract/10.1055/a-2233-2736')"><i class="fa-brands fa-linkedin"></i>Linkedin</a>
+          <a href="#" class="shareMenuItem" onclick="weibo('http://www.thieme-connect.de/products/ejournals/abstract/10.1055/a-2233-2736')"><i class="fa-brands fa-weibo"></i>Weibo</a>
+        </div>
+      </button>
+    
+
+    
+
+    
+
+    
+      
+          
+              <a id="emailLink" class="functionItem" title="Recommend Article" href="mailto:?subject=Recommendation: Methods of Information in Medicine&body=I would like to recommend this article in Methods of Information in Medicine: %0D%0A %0D%0AUse of Natural Language Processing to Identify Sexual and Reproductive Health Information in Clinical Text %0D%0A %0D%0AAbstract: http://www.thieme-connect.de/products/ejournals/abstract/10.1055/a-2233-2736 %0D%0AFull text HTML: http://www.thieme-connect.de/products/ejournals/html/10.1055/a-2233-2736 %0D%0AFull text PDF: http://www.thieme-connect.de/products/ejournals/pdf/10.1055%2Fa-2233-2736.pdf %0D%0A %0D%0AFree sample issue %0D%0Ahttp://www.thieme-connect.de/products/ejournals/sampleIssue/10.1055/s-00035037"></a>
+          
+      
+    
+
+    
+
+    
+
+    
+      
+        
+        
+          
+          
+          <a href="https://profile.thieme.de/HTML/sso/THIEME/login.htm?hook_url=https://www.thieme-connect.de/products/all/alerts&amp;rdeLocaleAttr=en" id="setAlertLink" class="functionItem" title="Subscribe to Alert Service"></a>
+        
+      
+    
+  </div>
+
+  
+    <div class="divPdfIcon">
+      
+<a href="
+        
+          
+            /products/ejournals/pdf/10.1055/a-2233-2736.pdf
+          
+        
+      " class="pdf-download-link styled-pdf-link" title="PDF Download">
+    <img src="/products/assets/desktop/img/file-pdf-o.svg" class="pdf-icon-link"alt="" class="pdf-icon" />
+    Download PDF
+</a>
+    </div> 
+    
+    </a>
+  
+
+  <input type="hidden" name="ebookDoi" value="">
+
+  
+  
+    
+  
+  <script type="text/javascript">
+
+  function facebook(url) {
+    ajaxSubmitStatisticEvent("10.1055/a-2233-2736", "facebook")
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url));
+    return false;
+  }
+  
+  function linkedin(url) {
+    ajaxSubmitStatisticEvent("10.1055/a-2233-2736", "linkedin")
+    window.open('https://www.linkedin.com/cws/share?url=' + encodeURIComponent(url));
+    return false;
+  }
+  
+  function weibo(url) {
+    ajaxSubmitStatisticEvent("10.1055/a-2233-2736", "weibo")
+    window.open('http://service.weibo.com/share/share.php?title=' + encodeURIComponent("I'm reading") + '&url=' + encodeURIComponent(url));
+    return false;
+  }
+
+  $(document).ready(function() {
+    $('#emailLink').click(function(){
+      ajaxSubmitStatisticEvent("10.1055/a-2233-2736", "recommend")
+    });
+    $('#recommend').click(function(){
+      ajaxSubmitStatisticEvent("10.1055/a-2233-2736", "recommend")
+    });
+  });
+
+  function ajaxSubmitStatisticEvent(doi, type) {
+    var url = jsContextPath + "/json/submitStatisticEvent?doi=" + doi + "&type=" + type;
+    var request = $.ajax({
+      type : 'GET',
+      dataType : 'json',
+      async : true,
+      cache: false,
+      url : url,
+      success : function(data) {
+      }
+    });
+  }
+document.getElementById('setShareLink').addEventListener('click', function(){
+    const content = this.querySelector('.toggleContent');
+    content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+});
+
+
+</script>
+</div>
+<!-- end general/_tocIcons.gsp -->
+
+    <!-- start abstractText -->
+    <div class="articleHeader">
+   <div xmlns:exsl="http://exslt.org/common" class="doi">Methods Inf Med 2023; 62(05/06): 193-201<br>DOI: 10.1055/a-2233-2736</div>
+   <div xmlns:exsl="http://exslt.org/common" class="articleType">
+      <div>Original Article</div>
+   </div>
+   <h1 xmlns:exsl="http://exslt.org/common">Use of Natural Language Processing to Identify Sexual and Reproductive Health Information
+      in Clinical Text</h1>
+   <h2 xmlns:exsl="http://exslt.org/common" class="heading4">Authors</h2>
+   <div xmlns:exsl="http://exslt.org/common" id="authorlist"><button type="button" class="toggle-affiliation-infos" aria-expanded="false" aria-controls="affiliations-1"><i class="fa fa-chevron-down" aria-hidden="true"></i>Author Affiliations</button><ul id="affiliations-1" class="affiliations-list" aria-live="polite" hidden></ul>
+      <ul id="authorsList" aria-live="polite">
+         <li class="author">
+            <p class="name">Elizabeth I. Harrison</p>
+            <div class="affiliation"><sup>1
+                   
+                  </sup>Department of Pediatrics, UPMC Children's Hospital of Pittsburgh, Pittsburgh, Pennsylvania,
+               United States</div>
+            <div class="affiliation"></div>
+         </li>
+         <li class="author">
+            <p class="name">Laura A. Kirkpatrick</p>
+            <div class="affiliation"><sup>1
+                   
+                  </sup>Department of Pediatrics, UPMC Children's Hospital of Pittsburgh, Pittsburgh, Pennsylvania,
+               United States</div>
+         </li>
+         <li class="author">
+            <p class="name">Patrick W. Harrison</p>
+            <div class="affiliation"><sup>2
+                   
+                  </sup>Data Theoretic, Pittsburgh, Pennsylvania, United States</div>
+         </li>
+         <li class="author">
+            <p class="name">Traci M. Kazmerski</p>
+            <div class="affiliation"><sup>1
+                   
+                  </sup>Department of Pediatrics, UPMC Children's Hospital of Pittsburgh, Pittsburgh, Pennsylvania,
+               United States</div>
+         </li>
+         <li class="author">
+            <p class="name">Yoshimi Sogawa</p>
+            <div class="affiliation"><sup>1
+                   
+                  </sup>Department of Pediatrics, UPMC Children's Hospital of Pittsburgh, Pittsburgh, Pennsylvania,
+               United States</div>
+         </li>
+         <li class="author">
+            <p class="name">Harry S. Hochheiser</p>
+            <div class="affiliation"><sup>3
+                   
+                  </sup>Department of Biomedical Informatics, University of Pittsburgh School of Medicine,
+               Pittsburgh, Pennsylvania, United States</div>
+         </li>
+      </ul>
+   </div><br xmlns:exsl="http://exslt.org/common">
+   <span xmlns:exsl="http://exslt.org/common" class="b" style="color: #013476">Funding</span> Funding for this study came from the American Academy of Neurology Resident Research
+   Scholarship (Grant #1212269). University of Pittsburgh Medical Center (UPMC) clinical
+   data used for this research were provided by Health Record Research Request (R3).
+   <div class="toggleMenu articleToggleMenu"><a href="#publication-history-container" class="anchorLink" style="text-decoration: none" onclick="openToggleAndScroll('publication-history-container');"><i class="fa fa-chevron-down" aria-hidden="true"></i>Further Information<span class="visually-hidden">(opens Publication History section)</span></a></div>
+</div><div id="articleTabs" class="tabBar borderBottom" role="tablist" aria-label="Article Navigation Tabs"><button class="tabBarButton active" role="tab" id="tab-abstract" aria-selected="true" tabindex="0" onclick="var sectionId='abstract'; var sections=['htmlfulltext','references','images','supmat']; sections.forEach(function(id){var el=document.getElementById(id); if(el){el.style.display='none';}}); var targetEl=document.getElementById(sectionId); if(targetEl){targetEl.style.display='block'; targetEl.scrollIntoView();} document.querySelectorAll('.tabBarButton').forEach(function(btn){btn.classList.remove('active'); btn.setAttribute('aria-selected','false'); btn.setAttribute('tabindex','-1');}); this.classList.add('active'); this.setAttribute('aria-selected','true'); this.setAttribute('tabindex','0');">Abstract</button><button class="tabBarButton" role="tab" id="tab-fulltext" aria-selected="false" tabindex="-1" onclick="location.href='/products/ejournals/html/10.1055/a-2233-2736';">Full Text</button><button class="tabBarButton" role="tab" id="referencesLink" aria-selected="false" tabindex="-1" onclick="var sectionId='references'; var sections=['htmlfulltext','references','images','supmat']; sections.forEach(function(id){var el=document.getElementById(id); if(el){el.style.display='none';}}); var targetEl=document.getElementById(sectionId); if(targetEl){targetEl.style.display='block'; targetEl.scrollIntoView();} document.querySelectorAll('.tabBarButton').forEach(function(btn){btn.classList.remove('active'); btn.setAttribute('aria-selected','false'); btn.setAttribute('tabindex','-1');}); this.classList.add('active'); this.setAttribute('aria-selected','true'); this.setAttribute('tabindex','0');">References</button></div><div id="sections">
+   <section id="abstract">
+      <div class="articleFunctions">&nbsp;<input type="hidden" name="ai" value="ai10.1055/a-2233-2736,10.1055/a-2233-2736"><div id="sfx10.1055/a-2233-2736" style="display: none"><a target="sfx" data-href="?id=doi:10.1055/a-2233-2736&amp;sid=Thieme:Connect&amp;jtitle=Methods of Information in Medicine&amp;issue=05/06&amp;volume=62&amp;date=2023&amp;issn=0026-1270&amp;spage=193&amp;epage=201&amp;aulast=Harrison&amp;aufirst=Elizabeth I.&amp;__char_set=utf8&amp;atitle=Use of Natural Language Processing to Identify Sexual and Reproductive Health Information in Clinical Text" id="sfxServer"><span class="articleAccessLabel sfx"><img width="52" height="15" alt="SFX Search" src="" id="sfxImageUrl"></span></a></div>&nbsp;<a id="sasLink" class="gotoLink" href="/products/ejournals/buyDocument/10.1055/a-2233-2736" style="display: none" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>Buy Article<span class="visually-hidden">(opens in new window)</span></a>&nbsp;<a href="javascript:;" class="gotoLink linkFunction" onClick="RightslinkPopUp(&#34;2511-705X&#34;, &#34;Use of Natural Language Processing to Identify Sexual and Reproductive Health Information in Clinical Text&#34;, &#34;02/20/2024&#34;, &#34;Elizabeth I. Harrison, Laura A. Kirkpatrick, Patrick W. Harrison, Traci M. Kazmerski, Yoshimi Sogawa, Harry S. Hochheiser&#34;, &#34;&#34;, &#34;10.1055/a-2233-2736&#34;, &#34;193&#34;, &#34;201&#34;, &#34;62&#34;, &#34;05/06&#34;, &#34;&#34;)" data-target="CCC RightsLink" data-id="CCC RightsLink" data-url="https://s100.copyright.com/AppDispatchServlet" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>Permissions and Reprints<span class="visually-hidden">(opens in new window)</span></a></div>
+      <figure class="lookInsidePreview"><button type="button" class="zoomFunction" data-href="https://www.thieme-connect.de/media/10.1055-s-00035037/20230506/lookinside/10-1055-a-2233-2736_22010121-1.jpg" data-cssClass="previewOverlay" data-id="10-1055-a-2233-2736_22010121-1.jpg" data-caption="" data-doi="10.1055/a-2233-2736" aria-label="Enlarge preview image"><img src="https://www.thieme-connect.de/media/10.1055-s-00035037/20230506/lookinside/thumbnails/10-1055-a-2233-2736_22010121-1.jpg" alt="Article preview thumbnail"></button><figcaption></figcaption>
+      </figure>
+      <a xmlns:exsl="http://exslt.org/common" name="jumpto-abstract"></a><h2 xmlns:exsl="http://exslt.org/common" class="heading3">Abstract</h2>
+      
+      <p xmlns:exsl="http://exslt.org/common">
+         <span class="b" style="">Objectives</span> This study aimed to enable clinical researchers without expertise in natural language
+         processing (NLP) to extract and analyze information about sexual and reproductive
+         health (SRH), or other sensitive health topics, from large sets of clinical notes.</p>
+      
+      <p xmlns:exsl="http://exslt.org/common">
+         <span class="b" style="">Methods</span> (1) We retrieved text from the electronic health record as individual notes. (2)
+         We segmented notes into sentences using one of scispaCy's NLP toolkits. (3) We exported
+         sentences to the labeling application Watchful and annotated subsets of these as relevant
+         or irrelevant to various SRH categories by applying a combination of regular expressions
+         and manual annotation. (4) The labeled sentences served as training data to create
+         machine learning models for classifying text; specifically, we used spaCy's default
+         text classification ensemble, comprising a bag-of-words model and a neural network
+         with attention. (5) We applied each model to unlabeled sentences to identify additional
+         references to SRH with novel relevant vocabulary. We used this information and repeated
+         steps 3 to 5 iteratively until the models identified no new relevant sentences for
+         each topic. Finally, we aggregated the labeled data for analysis.</p>
+      
+      <p xmlns:exsl="http://exslt.org/common">
+         <span class="b" style="">Results</span> This methodology was applied to 3,663 Child Neurology notes for 971 female patients.
+         Our search focused on six SRH categories. We validated the approach using two subject
+         matter experts, who independently labeled a sample of 400 sentences. Cohen's kappa
+         values were calculated for each category between the reviewers (menstruation: 1, sexual
+         activity: 0.9499, contraception: 0.9887, folic acid: 1, teratogens: 0.8864, pregnancy:
+         0.9499). After removing the sentences on which reviewers did not agree, we compared
+         the reviewers' labels to those produced via our methodology, again using Cohen's kappa
+         (menstruation: 1, sexual activity: 1, contraception: 0.9885, folic acid: 1, teratogens:
+         0.9841, pregnancy: 0.9871).</p>
+      
+      <p xmlns:exsl="http://exslt.org/common">
+         <span class="b" style="">Conclusion</span> Our methodology is reproducible, enables analysis of large amounts of text, and has
+         produced results that are highly comparable to subject matter expert manual review.</p>
+      <i></i><i></i><div xmlns:exsl="http://exslt.org/common" class="articleKeywords">
+         <a name="jumpto-keywords"></a><h2 class="heading3">Keywords</h2>
+         clinical research informatics - 
+         machine learning - 
+         natural language processing - 
+         methodologies - 
+         sexual and reproductive health
+         </div><a xmlns:exsl="http://exslt.org/common" name="jumpto-note"></a><h2 xmlns:exsl="http://exslt.org/common" class="heading3">Note</h2><a xmlns:exsl="http://exslt.org/common" name="FN22010121-3"></a>
+      
+      <p xmlns:exsl="http://exslt.org/common">This work was presented as a poster at the American Epilepsy Society 2022 Annual Meeting.</p>
+      <br xmlns:exsl="http://exslt.org/common"><br xmlns:exsl="http://exslt.org/common"><br xmlns:exsl="http://exslt.org/common"><a xmlns:exsl="http://exslt.org/common" name="info"></a><h2 xmlns:exsl="http://exslt.org/common" id="publication-history-container" class="heading3">Publication History</h2>
+      <p xmlns:exsl="http://exslt.org/common">Received: 31 December 2022<br><br>Accepted: 19 December 2023<br><br>Accepted Manuscript online:<br>20 December 2023<br><br>Article published online:<br>20 February 2024<br></p>
+      <p xmlns:exsl="http://exslt.org/common">© 2024. Thieme. All rights reserved.</p>
+      <p xmlns:exsl="http://exslt.org/common">Georg Thieme Verlag KG<br>Rüdigerstraße 14, 70469 Stuttgart, Germany</p>
+      <div xmlns:exsl="http://exslt.org/common" id="trendmd-suggestions"></div>
+   </section>
+   <section id="htmlfulltext">&nbsp;</section>
+   <section id="references"><a xmlns:exsl="http://exslt.org/common" name=""></a><ul xmlns:exsl="http://exslt.org/common" class="literaturliste">
+         <a name="jumpto-references"></a><li>
+            <h3>References</h3>
+         </li>
+         
+         <li><a name="JR22010121-1"></a><strong>1</strong> 
+            
+            Singh JA, 
+            
+            
+            Siddiqi M, 
+            
+            
+            Parameshwar P, 
+            
+            
+            Chandra-Mouli V. 
+            
+            World Health Organization guidance on ethical considerations in planning and reviewing
+            research studies on sexual and reproductive health in adolescents. J Adolesc Health
+            2019; 64 (04) 427-429 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1016/j.jadohealth.2019.01.008" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1016/j.jadohealth.2019.01.008">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/30904091" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/30904091">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=World Health Organization guidance on ethical considerations in planning and reviewing research studies on sexual and reproductive health in adolescents&amp;publication_year=2019" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupWorld Health Organization guidance on ethical considerations in planning and reviewing research studies on sexual and reproductive health in adolescents">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-1/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-2"></a><strong>2</strong> 
+            
+            Flicker S, 
+            
+            
+            Guta A. 
+            
+            Ethical approaches to adolescent participation in sexual health research. J Adolesc
+            Health 2008; 42 (01) 3-10 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1016/j.jadohealth.2007.07.017" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1016/j.jadohealth.2007.07.017">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/18155024" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/18155024">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Ethical approaches to adolescent participation in sexual health research&amp;publication_year=2008" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupEthical approaches to adolescent participation in sexual health research">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-2/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-3"></a><strong>3</strong> 
+            
+            Dickson-Swift V, 
+            
+            
+            James EL, 
+            
+            
+            Kippen S. 
+            
+            et al. 
+            Doing sensitive research: what challenges do qualitative researchers face?. Qual Res
+            2007; 7: 327-353 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1177/1468794107078515" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1177/1468794107078515">Crossref</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Doing sensitive research: what challenges do qualitative researchers face?&amp;publication_year=2007" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupDoing sensitive research: what challenges do qualitative researchers face?">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-3/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-4"></a><strong>4</strong> 
+            
+            Vaci N, 
+            
+            
+            Liu Q, 
+            
+            
+            Kormilitzin A. 
+            
+            et al. 
+            Natural language processing for structuring clinical text data on depression using
+            UK-CRIS. Evid Based Ment Health 2020; 23 (01) 21-26 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1136/ebmental-2019-300134" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1136/ebmental-2019-300134">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/32046989" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/32046989">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Natural language processing for structuring clinical text data on depression using UK-CRIS&amp;publication_year=2020" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupNatural language processing for structuring clinical text data on depression using UK-CRIS">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-4/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-5"></a><strong>5</strong> 
+            
+            Kirkpatrick L, 
+            
+            
+            Collins A, 
+            
+            
+            Sogawa Y, 
+            
+            
+            Birru Talabi M, 
+            
+            
+            Harrison E, 
+            
+            
+            Kazmerski TM. 
+            
+            Sexual and reproductive healthcare for adolescent and young adult women with epilepsy:
+            a qualitative study of pediatric neurologists and epileptologists. Epilepsy Behav
+            2020; 104 (Pt A): 106911 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1016/j.yebeh.2020.106911" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1016/j.yebeh.2020.106911">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/31986439" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/31986439">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Sexual and reproductive healthcare for adolescent and young adult women with epilepsy: a qualitative study of pediatric neurologists and epileptologists&amp;publication_year=2020" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupSexual and reproductive healthcare for adolescent and young adult women with epilepsy: a qualitative study of pediatric neurologists and epileptologists">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-5/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-6"></a><strong>6</strong> 
+            
+            Kirkpatrick L, 
+            
+            
+            Harrison E, 
+            
+            
+            Khalil S. 
+            
+            et al. 
+            A survey of child neurologists about reproductive healthcare for adolescent women
+            with epilepsy. Epilepsy Behav 2021; 120: 108001 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1016/j.yebeh.2021.108001" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1016/j.yebeh.2021.108001">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/33964536" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/33964536">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=A survey of child neurologists about reproductive healthcare for adolescent women with epilepsy&amp;publication_year=2021" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupA survey of child neurologists about reproductive healthcare for adolescent women with epilepsy">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-6/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-7"></a><strong>7</strong> 
+            
+            Kirkpatrick L, 
+            
+            
+            Harrison E, 
+            
+            
+            Borrero S. 
+            
+            et al. 
+            Preferences and experiences of women with epilepsy regarding sexual and reproductive
+            healthcare provision. Epilepsy Behav 2022; 129: 108631 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1016/j.yebeh.2022.108631" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1016/j.yebeh.2022.108631">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/35247834" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/35247834">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Preferences and experiences of women with epilepsy regarding sexual and reproductive healthcare provision&amp;publication_year=2022" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupPreferences and experiences of women with epilepsy regarding sexual and reproductive healthcare provision">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-7/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-8"></a><strong>8</strong> 
+            
+            Pradhan S, 
+            
+            
+            Elhadad N, 
+            
+            
+            South BR. 
+            
+            et al. 
+            Evaluating the state of the art in disorder recognition and normalization of the clinical
+            narrative. J Am Med Inform Assoc 2015; 22 (01) 143-154 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1136/amiajnl-2013-002544" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1136/amiajnl-2013-002544">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/25147248" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/25147248">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Evaluating the state of the art in disorder recognition and normalization of the clinical narrative&amp;publication_year=2015" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupEvaluating the state of the art in disorder recognition and normalization of the clinical narrative">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-8/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-9"></a><strong>9</strong> 
+            
+            Bada M, 
+            
+            
+            Eckert M, 
+            
+            
+            Evans D. 
+            
+            et al. 
+            Concept annotation in the CRAFT corpus. BMC Bioinformatics 2012; 13: 161 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1186/1471-2105-13-161" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1186/1471-2105-13-161">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/22776079" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/22776079">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Concept annotation in the CRAFT corpus&amp;publication_year=2012" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupConcept annotation in the CRAFT corpus">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-9/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-10"></a><strong>10</strong> 
+            
+            Spasic I, 
+            
+            
+            Nenadic G. 
+            
+            Clinical text data in machine learning: systematic review. JMIR Med Inform 2020; 8
+            (03) e17984 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.2196/17984" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.2196/17984">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/32229465" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/32229465">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Clinical text data in machine learning: systematic review&amp;publication_year=2020" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupClinical text data in machine learning: systematic review">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-10/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="BR22010121-11"></a><strong>11</strong> 
+            
+            Monarch RM. 
+            
+            Human-in-the-Loop Machine Learning: Active Learning and Annotation for Human-centered
+            AI. New York: Manning; 2021 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Human-in-the-Loop Machine Learning: Active Learning and Annotation for Human-centered AI&amp;publication_year=2021" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupHuman-in-the-Loop Machine Learning: Active Learning and Annotation for Human-centered AI">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/BR22010121-11/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="OR22010121-12"></a><strong>12</strong> 
+            
+            Van Rossum G, 
+            
+            
+            Drake Jr FL. 
+            
+            Python reference manual. Centrum voor Wiskunde en Informatica Amsterdam. 1995. Accessed
+            October 1, 2022, at:  <a href="https://ir.cwi.nl/pub/5008">https://ir.cwi.nl/pub/5008</a> <a href="https://www.python.org">https://www.python.org</a> 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/OR22010121-12/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="BR22010121-13"></a><strong>13</strong> 
+            
+            Kluyver T, 
+            
+            
+            Ragan-Kelley B, 
+            
+            
+            Fernando P. 
+            
+            et al. 
+            Jupyter Notebooks – a publishing format for reproducible computational workflows.
+            In: Positioning and Power in Academic Publishing: Players. Agents and Agendas; . Amsterdam,
+            Netherlands: Fernando Loizides and Birgit Scmidt. IOS Press;  2016: 87-90 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Jupyter Notebooks %E2%80%93 a publishing format for reproducible computational workflows&amp;publication_year=2016" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupJupyter Notebooks – a publishing format for reproducible computational workflows">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/BR22010121-13/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="OR22010121-14"></a><strong>14</strong> 
+            
+            McKinney W. 
+            
+            Data structures for statistical computing in python. Proc of the 9th Python in Science
+            Conf. 2010;51–56. Accessed October 1, 2022, at:  <a href="https://conference.scipy.org/proceedings/scipy2010/pdfs/mckinney.pdf">https://conference.scipy.org/proceedings/scipy2010/pdfs/mckinney.pdf</a> 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/OR22010121-14/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="OR22010121-15"></a><strong>15</strong> 
+            
+            Honnibal M, 
+            
+            
+            Montani I. 
+            
+            spaCy 2: Natural language understanding with Bloom embeddings, convolutional neural
+            networks and incremental parsing. 2017. Accessed October 1, 2022, at:  <a href="https://spacy.io/">https://spacy.io/</a> 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/OR22010121-15/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="OR22010121-16"></a><strong>16</strong> 
+            
+            Neumann M, 
+            
+            
+            King D, 
+            
+            
+            Beltagy I. 
+            
+            et al. ScispaCy: Fast and Robust Models for Biomedical Natural Language Processing.
+            Paper presented at: Proceedings of the 18th BioNLP Workshop and Shared Task. Association
+            for Computational Linguistics; Italy. 2019;319–327 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/OR22010121-16/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="OR22010121-17"></a><strong>17</strong> 
+            
+            Mohanty S, 
+            
+            
+            Singleton J. 
+            
+            Watchful. San Francisco, CA; 2016. Accessed July 10, 2022, at:  <a href="https://www.watchful.io/">https://www.watchful.io/</a> 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/OR22010121-17/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-18"></a><strong>18</strong> 
+            
+            Pedregosa F, 
+            
+            
+            Varoquaux G, 
+            
+            
+            Gramfort A. 
+            
+            et al. 
+            Scikit-Learn: machine learning in Python. J Mach Learn Res 2011; 12: 2825-2830 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Scikit-Learn: machine learning in Python&amp;publication_year=2011" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupScikit-Learn: machine learning in Python">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-18/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="BR22010121-19"></a><strong>19</strong> 
+            
+            Bickley LS, 
+            
+            
+            Szilagyi PG, 
+            
+            
+            Bates B. 
+            
+            Bates' Guide to Physical Examination and History Taking. Philadelphia: Lippincott
+            Williams &amp; Wilkins; 2007 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Bates' Guide to Physical Examination and History Taking&amp;publication_year=2007" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupBates' Guide to Physical Examination and History Taking">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/BR22010121-19/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-20"></a><strong>20</strong> 
+            
+            Perotte R, 
+            
+            
+            Hajicharalambous C, 
+            
+            
+            Sugalski G, 
+            
+            
+            Underwood JP. 
+            
+            Characterization of electronic health record documentation shortcuts: does the use
+            of dotphrases increase efficiency in the Emergency Department?. AMIA Annu Symp Proc
+            2022; 2021: 969-978 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/35308917" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/35308917">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Characterization of electronic health record documentation shortcuts: does the use of dotphrases increase efficiency in the Emergency Department?&amp;publication_year=2022" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupCharacterization of electronic health record documentation shortcuts: does the use of dotphrases increase efficiency in the Emergency Department?">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-20/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="BR22010121-21"></a><strong>21</strong> 
+            
+            Mitkov R. 
+            
+            The Oxford Handbook of Computational Linguistics. Oxford, UK: Oxford University Press;
+            2004: 754 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=The Oxford Handbook of Computational Linguistics&amp;publication_year=2004" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupThe Oxford Handbook of Computational Linguistics">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/BR22010121-21/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-22"></a><strong>22</strong> 
+            I Harrison E, 
+            
+            Kirkpatrick LA, 
+            
+            
+            Hochheiser HS, 
+            
+            
+            Sogawa Y, 
+            
+            
+            Kazmerski TM. 
+            
+            A retrospective textual analysis of sexual and reproductive health counseling for
+            adolescent and young adult people with epilepsy of gestational capacity. Epilepsy
+            Behav 2023; 145: 109321 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1016/j.yebeh.2023.109321" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1016/j.yebeh.2023.109321">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/37348408" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/37348408">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=A retrospective textual analysis of sexual and reproductive health counseling for adolescent and young adult people with epilepsy of gestational capacity&amp;publication_year=2023" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupA retrospective textual analysis of sexual and reproductive health counseling for adolescent and young adult people with epilepsy of gestational capacity">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-22/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="BR22010121-23"></a><strong>23</strong> 
+            
+            Yetisgen M, 
+            
+            
+            Vanderwende L, 
+            
+            
+            Black T. 
+            
+            et al. 
+            A New Way of Representing Clinical Reports for Rapid Phenotyping. San Francisco, CA:
+            AMIA 2016 Joint Summits on Translational Science; 2016 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=A New Way of Representing Clinical Reports for Rapid Phenotyping&amp;publication_year=2016" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupA New Way of Representing Clinical Reports for Rapid Phenotyping">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/BR22010121-23/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="JR22010121-24"></a><strong>24</strong> 
+            
+            Pomares-Quimbaya A, 
+            
+            
+            Kreuzthaler M, 
+            
+            
+            Schulz S. 
+            
+            Current approaches to identify sections within clinical narratives from electronic
+            health records: a systematic review. BMC Med Res Methodol 2019; 19 (01) 155 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"><a class="linkFunction" href="https://doi.org/10.1186/s12874-019-0792-y" target="linkout" data-target="CrossRef" data-id="CrossRef" data-url="https://doi.org/10.1186/s12874-019-0792-y">Crossref</a><a class="linkFunction" href="https://pubmed.ncbi.nlm.nih.gov/31319802" target="linkout" data-target="PubMed" data-id="PubMed" data-url="https://pubmed.ncbi.nlm.nih.gov/31319802">PubMed</a><a class="linkFunction" href="https://scholar.google.com/scholar_lookup?title=Current approaches to identify sections within clinical narratives from electronic health records: a systematic review&amp;publication_year=2019" target="linkout" data-target="Google Scholar" data-id="Google Scholar" data-url="https://scholar.google.com/scholar_lookupCurrent approaches to identify sections within clinical narratives from electronic health records: a systematic review">Search in Google Scholar</a></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/JR22010121-24/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         
+         <li><a name="OR22010121-25"></a><strong>25</strong> 
+            
+            Chen Q, 
+            
+            
+            Peng Y, 
+            
+            
+            Lu Z. 
+            
+            BioSentVec: creating sentence embeddings for biomedical texts. Paper presented at:
+            2019 IEEE International Conference on Healthcare Informatics (ICHI); June 10--13,
+            2009; Xi'an, China. 
+            <div class="referenceLinks">
+               <div class="referenceLinkText"></div><a href="/products/ejournals/ris/10.1055/a-2233-2736/id/OR22010121-25/BIB" class="referenceLinkRis" role="button" aria-label="Download RIS citation"><span class="visually-hidden">Download RIS citation</span></a></div>
+         </li>
+         </ul><br xmlns:exsl="http://exslt.org/common"></section>
+   <section id="images">&nbsp;</section>
+   <section id="supmat">
+      <ul id="supmatTabs" class="tabBar borderBottom"></ul>
+      <div class="tabContentContainer"></div>
+   </section>
+</div>
+    <!-- end abstractText -->
+  </article>
+
+  <div class="metrics-container-main">
+    <div class="metrics-container-left">
+      <div class="metrics-container-cell">
+        <div class="metrics-altmetrics"></div>
+      </div>
+    </div>
+    <div class="metrics-container-right">
+      <div class="metrics-container-cell">
+        <!--TC-1960-->
+        <div id="crossrefcites" class="crossrefcites" data-doi="10.1055/a-2233-2736"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- start general/_adBoxPanel.gsp -->
+
+  
+  
+    
+      
+      
+    
+    
+      <div id="adSidebarOverBottom">
+        <script type="text/javascript">
+          window.TCFUtility.writeScript([
+            'https://adfarm1.adition.com/js?wp_id=4863507&gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_39}&prf[DOI]=10.1055-s-00035037&prf[UserLogin]=false&prf[IPLogin]=false&prf[MASTERKEY]=10.1055-s-00035037, false, false&prf[HWG]=false'
+          ]);
+        </script>
+        
+      </div>
+    
+  
+
+<!-- end general/_adBoxPanel.gsp -->
+<!-- start general/_adBoxPanel.gsp -->
+
+  
+  
+    
+      
+      
+    
+    
+      <div id="adSidebarBottom">
+        <script type="text/javascript">
+          window.TCFUtility.writeScript([
+            'https://adfarm1.adition.com/js?wp_id=568876&gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_39}&prf[DOI]=10.1055-s-00035037&prf[UserLogin]=false&prf[IPLogin]=false&prf[MASTERKEY]=10.1055-s-00035037, false, false&prf[HWG]=false'
+          ]);
+        </script>
+        
+      </div>
+    
+  
+
+<!-- end general/_adBoxPanel.gsp -->
+<!-- start general/_adBoxPanel.gsp -->
+
+  
+  
+    
+      
+      
+    
+    
+      <div id="adSidebarUnderBottom">
+        <script type="text/javascript">
+          window.TCFUtility.writeScript([
+            'https://adfarm1.adition.com/js?wp_id=5242896&gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_39}&prf[DOI]=10.1055-s-00035037&prf[UserLogin]=false&prf[IPLogin]=false&prf[MASTERKEY]=10.1055-s-00035037, false, false&prf[HWG]=false'
+          ]);
+        </script>
+        
+      </div>
+    
+  
+
+<!-- end general/_adBoxPanel.gsp -->
+
+  <div id="div_vgwpixel" style="display: none;"></div>
+</div>
+
+<!-- start article/jsAbstract.gsp -->
+
+
+    <script type="text/javascript">
+        window.TCFUtility.writeScript([
+            'https://imagesrv.adition.com/js/adition.js'
+        ]);
+    </script>
+    
+
+
+<script type="text/javascript">
+
+  var jsContextPath = "/products";
+  var jsIsMobile = false;
+  var jsWasMobileFlagAlreadyAsked = false;
+  
+  // Facetten Aufbau Desktop
+  var inPageFacetsEndPoint = $("#navPanel").attr("data-inPageFacetsEndPoint");
+  // Facetten Aufbau Mobile
+  if ($("#content").attr("data-inPageFacetsEndPoint") != null) {
+    inPageFacetsEndPoint = $("#content").attr("data-inPageFacetsEndPoint");
+  }
+  var inPageFacetsEndPoint = jsContextPath + "/" + inPageFacetsEndPoint;
+
+  $(document).ready(function() {
+
+    $('.hwgBoxOverlay').delay(5000).css({
+      width : screen.width + 'px',
+      height : $(document).height() + 'px'
+    });
+
+    const setCookie = function(cname, cvalue) {
+      const d = new Date();
+      d.setTime(d.getTime() + ((21) * 24 * 60 * 60 * 1000)); // days to ms
+      let expires = "expires=" + d.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+    const getCookie = function(cname) {
+      let name = cname + "=";
+      let decodedCookie = decodeURIComponent(document.cookie);
+      let ca = decodedCookie.split(';');
+      for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    let selectedFeedback = -1;
+    // satisfactionPopup
+    const buildFeedback = function() {
+      const votes = 10;
+
+      if (document.getElementById("feedbackBlock").innerHTML.length == 0) {
+        for (let i = -1; i < votes; i++) {
+          let newDiv = document.createElement("div");
+          newDiv.className = "feedback-value";
+          newDiv.innerHTML = i + 1;
+          newDiv.setAttribute("data-value", i + 1);
+          document.getElementById("feedbackBlock").appendChild(newDiv);
+        }
+        $("#hgwSubmit").val('true');
+      }
+    };
+
+    const buildDoctorFeedback = function() {
+      const options = [
+        'Arzt', 'Pflegekraft', 'Therapeut', 'Hebamme', 'Student', 'SonstigesSelect'
+      ];
+
+      const selectOptions = [
+        'SonstigesSelect', 'Apotheker', 'Chemiker', 'Pharmaunternehmen', 'Assistenz', 'Fachangestellter', 'Rettungssanitaeter', 'Verwaltungsdienst', 'Wirtschaftsdienst', 'TechnischerDienst', 'Sonstiges'
+      ];
+
+      if (document.getElementById("doctorFeedbackBlock").innerHTML.length == 0) {
+        for (let i = 0; i < options.length; i++) {
+          let parentDiv = document.createElement("div");
+          parentDiv.className = "doctorFeedbackElement";
+          let newDiv = document.createElement("input");
+          newDiv.className = "doctor-feedback-value";
+          newDiv.type = 'radio';
+          newDiv.name = 'doctorRadio';
+          if (options[i] == 'SonstigesSelect') {
+            newDiv.value = "";
+          } else {
+            newDiv.value = options[i];
+          }
+          if (i == 0) {
+            newDiv.checked = 'true';
+          }
+
+          let newLabel = document.createElement("label");
+          if (i == 0) {
+            newLabel.style = "font-weight: bold"
+          }
+          var text = "Physician";
+          if (options[i] == 'Pflegekraft') {
+            text = "Health and care worker";
+          } else if (options[i] == 'Therapeut') {
+            text = "Therapist";
+          } else if (options[i] == 'Hebamme') {
+            text = "Midwife/delivery nurse";
+          } else if (options[i] == 'Student') {
+            text = "Student (human medicine, dentistry, veterinary medicine)";
+          } else if (options[i] == 'SonstigesSelect') {
+            text = "&nbsp;";
+          }
+          newLabel.innerHTML = " " + text;
+
+          parentDiv.appendChild(newDiv);
+          parentDiv.appendChild(newLabel);
+
+          let selectList = document.createElement("select");
+          selectList.id = "doctorSelect";
+          selectList.setAttribute("onfocus", "this.size=10;");
+          selectList.setAttribute("onblur", "this.size=0;");
+          selectList.setAttribute("onchange", "this.size=1; this.blur();");
+          //selectList.name = "doctorSelect";
+          if (options[i] == 'SonstigesSelect') {
+            for (let j = 0; j < selectOptions.length; j++) {
+              var option = document.createElement("option");
+              if (selectOptions[j] == 'SonstigesSelect') {
+                option.value = "";
+              } else {
+                option.value = selectOptions[j];
+              }
+              //option.setAttribute("class", "b");
+              var text = "other, please select";
+              if (selectOptions[j] == 'Apotheker') {
+                text = "Pharmacist";
+              } else if (selectOptions[j] == 'Chemiker') {
+                text = "Chemist";
+              } else if (selectOptions[j] == 'Pharmaunternehmen') {
+                text = "Employee of pharmaceutical company / wholesaler";
+              } else if (selectOptions[j] == 'Assistenz') {
+                text = "Medical technical assistant";
+              } else if (selectOptions[j] == 'Fachangestellter') {
+                text = "Med. Medical Assistant";
+              } else if (selectOptions[j] == 'Rettungssanitaeter') {
+                text = "Paramedic";
+              } else if (selectOptions[j] == 'Verwaltungsdienst') {
+                text = "Administrative service in hospital";
+              } else if (selectOptions[j] == 'Wirtschaftsdienst') {
+                text = "Economic and supply service in the hospital";
+              } else if (selectOptions[j] == 'TechnischerDienst') {
+                text = "Technical service in the hospital";
+              } else if (selectOptions[j] == 'Sonstiges') {
+                text = "Other";
+              }
+              option.text = text;
+              selectList.appendChild(option);
+            }
+          }
+          if (selectList.length > 0) {
+            parentDiv.appendChild(selectList);
+          }
+          document.getElementById("doctorFeedbackBlock").appendChild(parentDiv);
+        }
+      }
+    };
+
+    $('#doctorFeedbackBlock').on('click', '.doctor-feedback-value', function() {
+      var job = $('input[name="doctorRadio"]:checked').val();
+      if (job !== undefined && job.length > 0) {
+        $('#doctorSelect').val('');
+      }
+    });
+
+    //$('#doctorFeedbackBlock').on('change', '.doctorFeedbackElement', function() {
+    //  $('input[name="doctorRadio"]').filter('[value=""]').prop('checked', true);
+    //});
+
+    $('#doctorFeedbackBlock').on('click', '.doctorFeedbackElement', function() {
+      $(this).find('input').prop('checked', true);
+      $('#doctorFeedbackBlock').find('label').removeAttr('style');
+      $(this).find('label').attr('style', 'font-weight: bold');
+      var job = $('input[name="doctorRadio"]:checked').val();
+      if (job !== undefined && job.length > 0) {
+        $('#doctorSelect').val('');
+        $('#doctorSelect').removeClass("b");
+        $('#doctorSelect').find('option').removeAttr('class');
+      }
+    });
+
+    $('#doctorFeedbackBlock').on('focus', '.doctorFeedbackElement', function() {
+      $('#doctorSelect').val('');
+    });
+
+    $('#doctorFeedbackBlock').on('blur', '#doctorSelect', function() {
+      $('#doctorSelect').addClass("b");
+      for (var i = 0; i < this.length; i++) {
+        if (this.value == this.options[i].value) {
+          this.options[i].setAttribute("class", "bold");
+        } else {
+          this.options[i].setAttribute("class", "normal");
+        }
+      }
+    });
+
+    $('#feedbackBlock').on('click', '.feedback-value', function() {
+      const that = this;
+      $(".feedback-value").each(function(index, element) {
+        element.className = "feedback-value";
+      });
+      that.className += " feedback-selected"
+      selectedFeedback = parseInt(this.getAttribute('data-value'));
+    });
+
+    $("#hwgOk").click(function() {
+      var hwgSubmit = $("#hgwSubmit").val();
+      // Feedback "Zufriedenheit"
+      if (hwgSubmit === 'true') {
+        if (selectedFeedback >= 0 && selectedFeedback < 11) {
+          $("#hgwSubmit").val('false');
+          // send request
+          const begrundung = $("#begrundung").val();
+          const url = '/products/json/addHwgValue?value=' + selectedFeedback + '&text=' + begrundung;
+          const request = $.ajax({
+            type : 'GET',
+            async : true,
+            cache: false,
+            url,
+            success : function(data) {
+              // close popup
+              setCookie('hwg_value', false);
+              $('#hwg-popover').css('display', 'none');
+              $("#begrundung").val("");
+            }
+          });
+        }
+      }
+    });
+
+    $("#hwgCloseLink").click(function() {
+      var hwgSubmit = $("#hgwSubmit").val();
+      $("#hgwSubmit").val('false');
+      if (hwgSubmit === 'true') {
+        // send request
+        const url = '/products/json/addHwgValue?value=keine Angabe&text=';
+        const request = $.ajax({
+          type : 'GET',
+          async : true,
+          cache: false,
+          url,
+          success : function(data) {
+            // close popup
+            setCookie('hwg_value', false);
+            $('#hwg-popover').css('display', 'none');
+            $("#begrundung").val("");
+          }
+        });
+      }
+    });
+
+    $("#hwgDoctorOk").click(function() {
+      // send request
+      var job = $('input[name="doctorRadio"]:checked').val()
+      if (job == undefined || job.length == 0) {
+        job = $('#doctorSelect').val();
+      }
+
+      if (job !== undefined && job.length > 0) {
+        //if($('input[name="doctorRadio"]:checked').val() === "Sonstiges") {
+        if(job === "Arzt" || $('#doctorSelect').val() === "Apotheker" || $('#doctorSelect').val() === "Pharmaunternehmen") {
+          setCookie('hwg_job_value', true);
+        } else {
+          setCookie('hwg_job_value', false);
+        }
+        $('#hwg-popover').css('display', 'none');
+
+        // TC-2224: Store profession
+        const url = '/products/json/addHwgValue?value=profession&text=' + job;
+        const request = $.ajax({
+          type : 'GET',
+          async : true,
+          cache: false,
+          url,
+          success : function(data) {
+            // close popup
+            $('#hwg-popover').css('display', 'none');
+            $("#begrundung").val("");
+          }
+        });
+      }
+
+      window.location.reload();
+    });
+
+    
+
+    $("#doctorCloseLink").click(function() {
+      // send request
+      setCookie('hwg_job_value', false);
+      $('#hwg-popover').css('display', 'none');
+    });
+
+    $("#currentYearCopyright").text(new Date().getFullYear());
+  });
+  
+  $(function(){
+    $('.selectList.dropMenu>li>a').click(function(e){
+      e.preventDefault();
+      var selectedId = $(this).attr('id');
+      $('#navSearchRadius').val(selectedId);
+      $(this).closest('form').submit();
+    });     
+  });
+
+  
+  
+  function open_fg(url, id) {
+    fgwindow = window.open(url, id);
+    fgwindow.focus();
+  }
+  
+  function showElement(div) {
+    with(document.getElementById(div).style){
+      if(display == "none"){
+        display = "inline";
+      } else {
+        display = "none";
+      }
+    }
+  }
+        
+	function openImage(content) {
+		var myWindow = window.open("", "newWindow", "width=600,height=300,left=100,top=200,scrollbars=1");
+		myWindow.document.write('<img src="' + content + '"/>');
+		myWindow.document.close();
+		myWindow.focus();		
+	}
+
+	//Gets the parameters from a URL
+	function getUrlParam(name){
+	  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+	  var regexS = "[\\?&]" + name + "=([^&#]*)";
+	  var regex = new RegExp(regexS);
+	  var results = regex.exec(window.location.hash);
+
+	  if(results === null) {
+	    results = regex.exec(window.location.search);
+	  }
+
+	  if(results === null) {
+	    return "";
+	  }else{
+	    return decodeURIComponent(results[1].replace(/\+/g, " "));
+	  }
+	}
+
+  $(function(){
+    $("#pdfLink").click(function(evt){
+        evt.preventDefault();
+        var link = $(this).attr("href");
+        setTimeout(function() {
+            window.location.href = link;
+        }, 200);
+    });
+    $("#pdfLinkTab").click(function(evt){
+      evt.preventDefault();
+      var link = $(this).attr("href");
+      setTimeout(function() {
+          window.location.href = link;
+      }, 200);
+    });
+  });
+
+  function pubmed(au, publ, yr, vol, pgss) {
+    au_string = '';
+    if (au != '') {
+      au = au.replace(/\./g, "");
+      au = au.replace(/ /g, "+");
+      au_string = '+AND+' + au + '[auth]';
+    }
+    vol = vol + '*';
+    pubmed_window = window.open(
+            'https://pubmed.ncbi.nlm.nih.gov/?term='
+            + vol
+            + '[volume]+AND+'
+            + pgss
+            + '[page]+AND+'
+            + yr + '[pdat]' + au_string, "linkout");
+    pubmed_window.focus();
+  }
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.accordion-toggle').forEach(button => {
+    button.addEventListener('click', () => {
+      const content = document.getElementById(button.getAttribute('aria-controls'));
+      const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+      // toggle aria attribute
+      button.setAttribute('aria-expanded', String(!isExpanded));
+
+      // toggle class
+      content.classList.toggle('active', !isExpanded);
+
+      // optional: fetch content if empty
+      if (content.querySelector('.ajaxcomponent').innerHTML.trim() === '') {
+        const url = button.dataset.href;
+        fetchResultsListAccordionTab(content.id, url);
+      }
+    });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const buttons = document.querySelectorAll(".disclosure-button");
+
+  buttons.forEach(button => {
+    const panelId = button.getAttribute("aria-controls");
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+
+    // Open/close functions
+    const openPanel = () => {
+      button.setAttribute("aria-expanded", "true");
+      panel.hidden = false;
+      // Make all focusable links tabbable
+      panel.querySelectorAll("a, button, input, [tabindex]").forEach(el => el.tabIndex = 0);
+    };
+
+    const closePanel = () => {
+      button.setAttribute("aria-expanded", "false");
+      panel.hidden = true;
+      // Remove focusability when closed
+      panel.querySelectorAll("a, button, input, [tabindex]").forEach(el => el.tabIndex = -1);
+    };
+
+    let isMouseOverButtonOrPanel = false;
+
+    // Mouse tracking
+    const mouseEnter = () => {
+      isMouseOverButtonOrPanel = true;
+      openPanel();
+    };
+    const mouseLeave = () => {
+      isMouseOverButtonOrPanel = false;
+      setTimeout(() => {
+        if (!isMouseOverButtonOrPanel) closePanel();
+      }, 100); // small delay to allow moving between button and panel
+    };
+
+    button.addEventListener("mouseenter", mouseEnter);
+    panel.addEventListener("mouseenter", mouseEnter);
+
+    button.addEventListener("mouseleave", mouseLeave);
+    panel.addEventListener("mouseleave", mouseLeave);
+
+    // Toggle on click
+    button.addEventListener("click", () => {
+      if (button.getAttribute("aria-expanded") === "true") {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    });
+
+    // Keyboard support
+    button.addEventListener("focus", openPanel);
+    button.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        closePanel();
+        button.focus();
+      }
+    });
+
+    // Keep panel open when tabbing inside
+    panel.addEventListener("focusin", openPanel);
+    panel.addEventListener("focusout", e => {
+      if (!button.contains(e.relatedTarget) && !panel.contains(e.relatedTarget)) {
+        closePanel();
+      }
+    });
+  });
+});
+(function () {
+  const header = document.getElementById('pageHeader');
+  if (!header) return;
+
+  const topLevelItems = header.querySelectorAll(
+    '#metaNavigation > li > a, #metaNavigation > li > button, #userFunctions > li > button, #userFunctions > li > a'
+  );
+
+  // Helper to move focus in top-level
+  function focusTopLevel(current, direction) {
+    const items = [...topLevelItems];
+    let index = items.indexOf(current);
+    if (index === -1) return;
+    if (direction === 'next') index = (index + 1) % items.length;
+    if (direction === 'prev') index = (index - 1 + items.length) % items.length;
+    items[index].focus();
+  }
+
+  // Add listeners to top-level items
+  topLevelItems.forEach(item => {
+    item.addEventListener('keydown', e => {
+      const isButton = item.tagName === 'BUTTON';
+      const submenuId = item.getAttribute('aria-controls');
+      const submenu = submenuId ? document.getElementById(submenuId) : null;
+
+      // Horizontal nav between main items
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        focusTopLevel(item, 'next');
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        focusTopLevel(item, 'prev');
+      }
+
+      // Toggle submenu with Enter / Down
+      if ((e.key === 'Enter' || e.key === 'ArrowDown') && isButton && submenu) {
+        e.preventDefault();
+        item.setAttribute('aria-expanded', 'true');
+        submenu.hidden = false;
+        submenu.querySelector('a, button')?.focus();
+      }
+
+      // Close submenu with Escape / Up
+      if (e.key === 'Escape' && isButton && submenu) {
+        e.preventDefault();
+        item.setAttribute('aria-expanded', 'false');
+        submenu.hidden = true;
+        item.focus();
+      }
+    });
+  });
+
+  // Inside dropdown menus: Up/Down to move
+  header.querySelectorAll('.dropMenu').forEach(menu => {
+    const items = menu.querySelectorAll('a, button');
+    items.forEach((link, index) => {
+      link.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          items[(index + 1) % items.length].focus();
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          items[(index - 1 + items.length) % items.length].focus();
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          // allow moving back to top-level with Left/Right
+          e.preventDefault();
+          const parentButton = menu.closest('li.hasChildren')?.querySelector('button');
+          if (parentButton) {
+            focusTopLevel(parentButton, e.key === 'ArrowRight' ? 'next' : 'prev');
+          }
+        }
+      });
+    });
+  });
+})();
+
+// When the user scrolls down 20px from the top of the document, show the button
+window.onscroll = function() {
+  scrollFunction();
+};
+
+function scrollFunction() {
+  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    document.getElementById("jumbTop").style.display = "block";
+  } else {
+    document.getElementById("jumbTop").style.display = "none";
+  }
+}
+
+// When the user clicks on the button, scroll to the top of the document
+function topFunction() {
+  document.body.scrollTop = 0; // For Safari
+  document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+}
+</script>
+
+
+
+<script type="text/javascript">
+
+    function vgwPixelCall(articleDoi, free) {
+      var prefix = ""
+      if (!free) {
+        prefix = "pw-"
+      }
+      var url = "https://ssl-thieme.met.vgwort.de/na/" + prefix + "vgzm.437450-" + encodeURIComponent(articleDoi);
+      var html = "<img src=\"" + url + "\" width=\"1\" height=\"1\" alt=\"VG Wort\"/>";
+      document.getElementById("div_vgwpixel").innerHTML = html;
+    }
+
+</script>
+<script type="text/javascript">
+(function(a){(jQuery.browser=jQuery.browser||{}).mobile=/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))})(navigator.userAgent||navigator.vendor||window.opera);
+
+  
+  if(typeof jsWasMobileFlagAlreadyAsked !== "undefined" && !jsWasMobileFlagAlreadyAsked){
+    if ($.browser.mobile && !navigator.userAgent.match(/iPad/i)) {
+      //$.cookie("thiememobile", "mobile", { path: jsContextPath });
+      var uri = "/products/ejournals/abstract/10.1055/a-2233-2736";
+      window.location = uri + '?device=mobile&innerWidth=' + window.innerWidth + '&offsetWidth=' + document.body.offsetWidth + window.location.hash;
+      //window.location = jsContextPath+'/?device=mobile&innerWidth=' + window.innerWidth + '&offsetWidth=' + document.body.offsetWidth;
+    }
+  }
+</script>
+
+<script type="text/javascript">
+
+  function loadAccess() {
+    // Artikel auf der Seite abholen
+    var articlesToCheck = document.getElementsByName("ai");
+
+    if (articlesToCheck.length == 0) {
+      return;
+    }
+
+    loadAccessFromList(articlesToCheck)
+  }
+
+  function loadAccessFromList(articlesToCheck) {
+    if (articlesToCheck.length == 0) {
+      return;
+    }
+
+    var dois = [];
+    for (var i = 0; i < articlesToCheck.length; i++) {
+      dois[i] = articlesToCheck[i].value;
+    }
+
+    //Query String Array zusammenbauen
+    var query = [];
+    var j = -1;
+    for (var i = 0; i < dois.length; i++) {
+      if (i % 20 == 0) {
+        j++;
+        query[j] = "";
+      }
+      if (i == 0) {
+        query[j] += 'doi=';
+      } else {
+        query[j] += '&doi=';
+      }
+      query[j] += dois[i];
+    }
+
+    // URL zum Abholen der Ausgaben zusammenbauen
+    var url = jsContextPath + '/json/articles';
+
+    // URL abschicken
+    var http = null;
+    http = sendQuery(http, url, query, -1, true);
+
+  }
+
+  function sendQuery(xmlHttp, url, query, count, isNewRequest) {
+
+      if (isNewRequest) {
+
+        count++;
+
+        if (!xmlHttp) {
+          // Mozilla, Opera, Safari sowie Internet Explorer (ab v7)
+          if (typeof XMLHttpRequest != 'undefined') {
+            xmlHttp = new XMLHttpRequest();
+          }
+
+          if (!xmlHttp) {
+            // Internet Explorer 6 und älter
+            try {
+              xmlHttp  = new ActiveXObject("Msxml2.XMLHTTP");
+            } catch(e) {
+              try {
+                xmlHttp  = new ActiveXObject("Microsoft.XMLHTTP");
+              } catch(e) {
+                xmlHttp  = null;
+              }
+            }
+          }
+        }
+
+        if (xmlHttp) {
+          xmlHttp.open('POST', url, true);
+
+          //Send the proper header information along with the request
+          xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+          xmlHttp.onreadystatechange = function () {
+          if (xmlHttp.readyState == 4) {
+            var articles = eval('(' + xmlHttp.responseText + ')');
+            for (var i = 0; i < articles.length; i++) {
+              var article = articles[i];
+              if (article['authorized']) {
+                // Access Indikatoren setzen
+                for (var j = 0; j < article['div'].length; j++) {
+                  var div = article['div'][j];
+                  var attr = 'ul[data-doi="' + div + '"]'
+                  if ($(attr) != null) {
+                    $(attr).addClass("splitButton accessOptions open");
+                  }
+                }
+              } else {
+                // SFX Logo ausblenden
+                var sfx = "sfx" + article['doi'];
+                var sfxlink = "sfxlink" + article['doi'];
+                // in article-lists the wrapper puts the sfx data on the page and id sfxImageUrl is not available, in article view check also if sfx data is available before fading in
+                if (document.getElementById(sfx) != null && (document.getElementById("sfxImageUrl") == null) || (document.getElementById("sfxImageUrl") != null && document.getElementById("sfxImageUrl").getAttribute("src") != null && document.getElementById("sfxImageUrl").getAttribute("src").length > 0)) {
+                  document.getElementById(sfx).style.display = "inline";
+                  if (document.getElementById(sfxlink) != null && document.getElementById(sfxlink).getAttribute('data-href') != null) {
+                    document.getElementById(sfxlink).setAttribute("href", document.getElementById(sfxlink).getAttribute('data-href'));
+                    document.getElementById(sfxlink).removeAttribute("data-href");
+                  }
+                }
+              }
+            }
+          }
+        };
+
+        xmlHttp.send(query[count]);
+        }
+
+      }
+
+      // Antwort des aktuellen Requests abwarten bevor der nächste gestartet wird
+      if (xmlHttp && xmlHttp.readyState != 4) {
+        window.setTimeout(function () { sendQuery(xmlHttp, url, query, count, false) }, 1000);
+      // neue Anfrage starten falls nch weitere Elemente vorhanden sind
+      } else if (query.length - count > 1){
+        window.setTimeout(function () { sendQuery(xmlHttp, url, query, count++, true) }, 1000);
+      }
+
+    return xmlHttp;
+  }
+
+
+</script>
+<script type="text/javascript">
+
+function RightslinkPopUp(publication, title, publicationDate, author, copyright, contentID, startPage, endPage, volumeNum, issueNum, license) {
+    
+    var url = "https://s100.copyright.com/AppDispatchServlet"; 
+    var location = url 
+      + "?publisherName=georgthieme"
+      + "&publication=" + encodeURI (publication)
+      + "&title=" + encodeURI (title) 
+      + "&publicationDate=" + encodeURI (publicationDate) 
+      + "&author=" + encodeURI (author)
+      + "&copyright=" + encodeURI (copyright)
+      + "&contentID=" + encodeURI (contentID)
+      + "&startPage=" + encodeURI (startPage)
+      + "&endPage=" + encodeURI (endPage)
+      + "&volumeNum=" + encodeURI (volumeNum)
+      + "&issueNum=" + encodeURI (issueNum)
+      + "&orderSource="
+      + "&orderBeanReset=true";
+    if (license.length > 0) {
+        location += "&oa=" + encodeURI (license)
+    }
+
+      PopUp = window.open(location, 'Rightslink', 'location=no,toolbar=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=650,height=550');
+  }
+
+  function RightslinkPopUpForBooks(publicationDate, author, contentId, bookTitle, title, isbn, sp, rpt) {
+    
+    var url = "https://s100.copyright.com/AppDispatchServlet"; 
+    var location = url 
+      + "?publisherName=georgthiemebks"
+      + "&publicationDate=" + encodeURI (publicationDate)
+      + "&author=" + encodeURI (author)
+      + "&contentid=" + encodeURI (contentId)
+      + "&bookTitle=" + encodeURI (bookTitle) 
+      + "&title=" + encodeURI (title)
+      + "&ISBN=" + encodeURI (isbn)
+      + "&sp=" + encodeURI (sp)
+      + "&rpt=" + encodeURI (rpt)
+      + "&publication=BOOK"
+      + "&copyright="
+      + "&orderSource="
+      + "&orderBeanReset=true"
+      
+      PopUp = window.open(location, 'Rightslink', 'location=no,toolbar=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=650,height=550');
+  }
+
+</script>
+
+
+<script type="text/javascript">
+  // holt sich das json Objekt und fuellt die Ausgaben-Dropdownbox
+  function loadIssues(shortname, year) {
+
+    // Volume-Anzeige in Abhängigkeit zur Zeitschrift anzeigen
+    var isDisplayVolume = JSON.parse(document.toc.isDisplayVolume.value);
+
+    // URL zum Abholen der Ausgaben zusammenbauen
+    var url = jsContextPath + '/json/issues?shortname=' + shortname + '&year='
+        + year;
+
+    // Request vorbereiten
+    var xmlHttp = null;
+
+    // Mozilla, Opera, Safari sowie Internet Explorer (ab v7)
+    if (typeof XMLHttpRequest != 'undefined') {
+      xmlHttp = new XMLHttpRequest();
+    }
+
+    if (!xmlHttp) {
+      // Internet Explorer 6 und älter
+      try {
+        xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+      } catch (e) {
+        try {
+          xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+        } catch (e) {
+          xmlHttp = null;
+        }
+      }
+    }
+
+    // URL abschicken und Dropdownbox fuellen
+    if (xmlHttp) {
+      xmlHttp.open('GET', url, true);
+      xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4) {
+          var issues = eval('(' + xmlHttp.responseText + ')');
+          if (isDisplayVolume == true) {
+            if (issues.length > 1) {
+              var showVolume = false;
+              var comparedIssue = null;
+              var ids = [];
+              for (var i = 0; i < issues.length; i++) {
+                if (issues[i]['number'].indexOf('S ') > -1 || issues[i]['number'].toLowerCase() == issues[i]['number'].toUpperCase()) {
+                  if (comparedIssue == null) {
+                    comparedIssue = issues[i];
+                  }
+                  ids.push(i);
+                }
+              }
+              for (var i = 0; i < ids.length; i++) {
+                if (issues[i]['volume'] != comparedIssue['volume']) {
+                  showVolume = true;
+                  break;
+                }
+              }
+            }
+          }
+          var html = "";
+          for (var i = 0; i < issues.length; i++) {
+
+            html += "<a href='"+jsContextPath+"/ejournals/issue/" + issues[i]['doi'] + "'>";
+            if (showVolume == true && issues[i]['volume'] != null && issues[i]['volume'].length > 0) {
+              html += "Vol " + issues[i]['volume'] + " (";
+            }
+            html += "Issue: " + issues[i]['number'];
+            if (showVolume == true && issues[i]['volume'] != null && issues[i]['volume'].length > 0) {
+              html += ")";
+            }
+            html +=  " | Pages ";
+            if(issues[i]['pages'] != null) {
+                html += issues[i]['pages'];
+              }
+            html += "</a></li>" ;
+
+          }
+          $('#issue').html(html);
+          $('#currentYear').html(year);
+        }
+      };
+
+      xmlHttp.send(null);
+    }
+  }
+
+  // laedt beim Wechsel des Jahres die Dropdownboxen
+  function getIssues(year) {
+    // Ausgabenliste holen
+    loadIssues(document.toc.shortname.value, year);
+  }
+
+  // laedt beim Refresh der Seite die Ausgabenliste
+  function setIssues(year) {
+
+    // falls nur eFirst vorhanden gar keine Ausgaben laden
+    if (year > 0) {
+      // Ausgabenliste holen
+      loadIssues(document.toc.shortname.value, year);
+    }else{
+
+
+    }
+  }
+</script>
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        if ($("#crossrefcites").length > 0) {
+            var doi = $("#crossrefcites").data("doi");
+            var ajaxUrl = jsContextPath + "/json/getCrossrefCites?doi=" + doi;
+            $.ajax({
+                url: ajaxUrl,
+                type: "GET",
+                dataType: "html",
+                success: function (data) {
+                    $('#crossrefcites').html(data);
+                },
+                error: function (xhr, status) {
+                    console.log("Cannot retrieve crossref cites for the doi " + doi + ".");
+                },
+                complete: function (xhr, status) {
+                }
+            });
+        }
+    });
+
+    $('#crossrefcites').click(function(e){
+        var doi = $("#crossrefcites").data("doi");
+
+        var citesHTMLContent = "<div style=\"font-family: sans-serif; font-size: 12px; line-height: 140%\">";
+        citesHTMLContent += document.getElementById('crossrefCitesDetails').innerHTML;
+        citesHTMLContent += "</div>";
+
+        var crossrefCitesWindowHeight = Math.floor($(window).height() / 2);
+        var crossrefCitesWindowWidth = Math.floor($(window).width() / 2);
+        var crossrefCitesWindowTop = Math.floor($(window).height() / 4);
+        var crossrefCitesWindowLeft = Math.floor($(window).width() / 4);
+        var crossrefCitesSize = "width=";
+        crossrefCitesSize += crossrefCitesWindowWidth;
+        crossrefCitesSize += ",height=";
+        crossrefCitesSize += crossrefCitesWindowHeight;
+        crossrefCitesSize += ",left=";
+        crossrefCitesSize += crossrefCitesWindowLeft;
+        crossrefCitesSize += ",top=";
+        crossrefCitesSize += crossrefCitesWindowTop;
+        crossrefCitesSize += ",scrollbars=1";
+
+        var crossrefCitesWindow = window.open("", "newWindow", crossrefCitesSize);
+        crossrefCitesWindow.focus();
+        crossrefCitesWindow.document.writeln();
+        crossrefCitesWindow.document.writeln(citesHTMLContent);
+        document.head.insertAdjacentHTML("afterbegin", "<style>body { font-size: 12px; line-height: 140%; font-family: sans-serif; color: #000; }");
+        crossrefCitesWindow.document.title = doi + " Crossref Cited-by";
+        crossrefCitesWindow.document.close();
+    });
+
+</script>
+<script type="text/javascript">
+    $(".zoomFunction, .imageFunction, .audioFunction, .videoFunction, .podcastFunction").click(function() {
+        var id = $(this).attr("data-id");
+        var caption = encodeURIComponent($(this).attr("data-caption"));
+        var doi = $(this).attr("data-doi");
+        var mediaType = "image";
+        if ($(this).attr('class').indexOf('podcastFunction') > -1) {
+            mediaType = "podcast";
+        } else if ($(this).attr('class').indexOf('audioFunction') > -1) {
+            mediaType = "audio";
+        } else if ($(this).attr('class').indexOf('videoFunction') > -1) {
+            mediaType = "video";
+        }
+        submitMediaEvent(mediaType, id, caption, doi);
+    });
+
+    function submitMediaEvent(mediaType, id, caption, doi) {
+    const url = '/products/json/submitMediaStatisticsEvent?mediaType=' + mediaType + '&id=' + id + '&caption=' + caption + '&doi=' + doi;
+        const request = $.ajax({
+            type : 'GET',
+            async : true,
+            cache: false,
+            url,
+            success : function(data) {
+            }
+        });
+    }
+
+    $(".linkFunction").click(function() {
+        var target = $(this).attr("data-target");
+        var id = $(this).attr("data-id");
+        var uri = encodeURIComponent($(this).attr("data-url"));
+        const url = '/products/json/submitLinkStatisticsEvent?target=' + target + '&id=' + id + '&url=' + uri;
+        const request = $.ajax({
+            type : 'GET',
+            async : true,
+            cache: false,
+            url,
+            success : function(data) {
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        window.addEventListener('blur',function() {
+            window.setTimeout(function () {
+                var iframes = document.querySelectorAll('.playerIframe');
+                for (var i = 0, len = iframes.length; i < len; i++) {
+                    if (document.activeElement == iframes[i]) {
+                        submitMediaEvent(iframes[i].getAttribute("data-mediaType"), iframes[i].getAttribute("data-id"), iframes[i].getAttribute("data-caption"), iframes[i].getAttribute("data-doi"));
+                        break;
+                    }
+                }
+                document.activeElement.blur();
+            }, 0);
+        });
+    });
+
+</script>
+
+
+
+
+
+  
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    
+      setIssues("2023");
+      loadAccess();
+      
+      var free = false;
+      if (false || false) {
+          free = true;
+      }
+      vgwPixelCall("10.1055-a-2233-2736", free);
+
+      initTabBar({
+        objID : 'articleTabs'
+      });
+      initTabBar({
+        open : 0,
+        objID : 'supmatTabs'
+      });
+
+      var sasLink =  $("#sasLink");
+      if (sasLink.length > 0) {
+        $("#sasLink").css('display', 'inline');
+      }
+      
+      if (false) {
+        var sfxServer =  $("#sfxServer");
+        var sfxImageUrl =  $("#sfxImageUrl");
+        if (sfxServer.length > 0 && sfxImageUrl.length > 0) {
+          sfxServer.attr('href', sfxServer.attr('data-href'));
+          sfxServer.removeAttr('data-href');
+          sfxServer.attr('href', "" + sfxServer.attr('href'));
+          sfxImageUrl.attr('src', "");
+        }
+      }
+      
+      $(function() {
+        $('.toggle-affiliation-infos').click(function(e) {
+            e.preventDefault();
+            $(this).parent('#authorlist').toggleClass('expanded');
+            const expanded = $(this).parent().hasClass('expanded');
+            $(this).attr('aria-expanded', expanded);
+            console.log($(this).parent('.expanded').length);
+
+        });
+    });
+
+      // da bei den Autoren zum Auf/Zuklappen und Verlinkungen mehrere <div> enthalten sind
+      // werden vom Browser generierte "Leerraum" Passagen damit gelöscht
+      // 5.5.23: TC-2316: 5.5.23: vorerst wieder auskommentiert
+      /*$( "#authorlist" ).each(function( index ) {
+          var html = $(this).html().replace(/\s+/g, ' ').trim();
+          html = html.replaceAll('</div> <div ', '</div><div ');
+          $(this).html(html);
+      });*/
+
+    });
+</script>
+<!-- end article/jsAbstract.gsp -->
+
+
+      </div>
+      <footer>
+  <div id="pageEnd">
+  </div>
+  <div class="clearfix">
+    <div id="footerCenter" style="margin-left:40px">
+      &copy; <span id="currentYearCopyright"></span> Georg Thieme Verlag KG 
+
+      
+
+      
+        <a href="https://thieme.com/impressum-gtv-en">Imprint</a>
+        <a href="https://thieme.com/data-privacy-gtv-en">Privacy policy statement</a>
+      
+
+      <a href="/products/" id="switchToMobile">
+        Smartphone Version
+      </a>
+
+      <br/>
+      <div style="padding-top: 10px" class="mf-excluded">
+        Your Current IP Address: 179.218.9.41
+      </div>
+    </div>
+    <div id="footerRight"></div>
+  </div>
+</footer>
+
+      <!-- start general/_adSideBarPanel.gsp -->
+<div id="adSidebar">
+
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+        
+        
+      
+      <script type="text/javascript">
+        window.TCFUtility.writeScript([
+          'https://adfarm1.adition.com/js?wp_id=568900&gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_39}&prf[DOI]=10.1055-s-00035037&prf[UserLogin]=false&prf[IPLogin]=false&prf[MASTERKEY]=10.1055-s-00035037, false, false&prf[HWG]=false'
+        ]);
+      </script>
+      <script type="text/javascript">
+        window.TCFUtility.writeScript([
+          'https://adfarm1.adition.com/js?wp_id=543154&gdpr=${GDPR}&gdpr_consent=${GDPR_CONSENT_39}&prf[DOI]=10.1055-s-00035037&prf[UserLogin]=false&prf[IPLogin]=false&prf[MASTERKEY]=10.1055-s-00035037, false, false&prf[HWG]=false'
+        ]);
+      </script>
+      
+    
+  
+  
+</div>
+<!-- end general/_adSideBarPanel.gsp -->
+
+    </div>
+
+    <!-- start general/_jsVariables.gsp -->
+<div id="globalJsVariables" class="off"
+    data-js-context-path="/products"
+    data-js-ismobile="false"
+    data-js-wasmobileasked="false"
+    >
+</div>
+<!-- end general/_jsVariables.gsp -->
+
+
+    
+    
+
+    
+      
+        <script defer src='//js.trendmd.com/trendmd.min.js' data-trendmdconfig='{"journal_id":"72955","element":"#trendmd-suggestions"}'></script>
+      
+    
+
+    
+    
+
+
+    
+        
+        <div class="bottom-container">
+
+        <button onclick="topFunction()" id="jumbTop" title="Go to top"><i class="fa-solid fa-arrow-up"></i></button>
+              <!-- „OneTrust Cookie-Einstellungen“ – Schaltfläche – Anfang -->
+          <button id="ot-sdk-btn" class="ot-sdk-show-settings"> </button>
+          <!-- „OneTrust Cookie-Einstellungen“ – Schaltfläche – Ende -->
+         </div>
+
+        
+    
+
+  </body>
+</html>

@@ -1,0 +1,5 @@
+name: "FindPapers CodeQL config"
+
+paths-ignore:
+  - tests
+  - "**/*_test.py"

@@ -1,0 +1,925 @@
+
+	
+<!DOCTYPE html>
+<html lang="en-US" xml:lang="en-US">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>
+		Feature-Based Opinion Classification Using the KPCA Technique: Concept and Performance Evaluation
+							| International Journal on Recent and Innovation Trends in Computing and Communication
+			</title>
+
+	
+<link rel="icon" href="https://ijritcc.org/public/journals/1/favicon_en_US.png">
+<meta name="generator" content="Open Journal Systems 3.2.1.4">
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+<script>
+
+$(document).ready(function(){
+
+    var maxLength = 300;
+
+    $(".show-read-more").each(function(){
+
+        var myStr = $(this).text();
+
+        if($.trim(myStr).length > maxLength){
+
+            var newStr = myStr.substring(0, maxLength);
+
+            var removedStr = myStr.substring(maxLength, $.trim(myStr).length);
+
+            $(this).empty().html(newStr);
+
+            $(this).append(' <a href="javascript:void(0);" class="read-more">read more...</a>');
+
+            $(this).append('<span class="more-text">' + removedStr + '</span>');
+
+        }
+
+    });
+
+    $(".read-more").click(function(){
+
+        $(this).siblings(".more-text").contents().unwrap();
+
+        $(this).remove();
+
+    });
+
+});
+
+</script>
+
+<style>
+
+    .show-read-more .more-text{
+
+        display: none;
+
+    }
+
+</style>
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+<meta name="DC.Creator.PersonalName" content="Sandeep  Kumar "/>
+<meta name="DC.Creator.PersonalName" content="Bindiya  Ahuja"/>
+<meta name="DC.Date.created" scheme="ISO8601" content="2022-12-31"/>
+<meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="2022-12-30"/>
+<meta name="DC.Date.issued" scheme="ISO8601" content="2022-12-31"/>
+<meta name="DC.Date.modified" scheme="ISO8601" content="2023-01-18"/>
+<meta name="DC.Description" xml:lang="en" content="Over the last several years, a widespread trend on the internet has been the proliferation of online evaluations written by people with whom they share their ideas, interests, experiences, and opinions. Opinion mining, also known as sentiment analysis, is the process of classifying pieces of text written in a natural language on a subject into positive, negative, or neutral categories according to the human emotions, views, and feelings that are communicated in that text. The field of sentiment analysis has progressed to the point that it can now analyse internet evaluations and provide significant information to people as well as corporations, which may assist these parties in the decision-making process. In the proposed model, feature extraction extracts the collection of features that are both semantically and statistically significant using the kernel principal component analysis (KPCA) method. According to the findings of the simulations, the suggested model performs better than other existing models."/>
+<meta name="DC.Format" scheme="IMT" content="application/pdf"/>
+<meta name="DC.Identifier" content="5914"/>
+<meta name="DC.Identifier.pageNumber" content="89 - 98"/>
+<meta name="DC.Identifier.DOI" content="10.17762/ijritcc.v10i2s.5914"/>
+<meta name="DC.Identifier.URI" content="https://ijritcc.org/index.php/ijritcc/article/view/5914"/>
+<meta name="DC.Language" scheme="ISO639-1" content="en"/>
+<meta name="DC.Rights" content="Copyright (c) 2022 "/>
+<meta name="DC.Rights" content=""/>
+<meta name="DC.Source" content="International Journal on Recent and Innovation Trends in Computing and Communication"/>
+<meta name="DC.Source.ISSN" content="2321-8169"/>
+<meta name="DC.Source.Issue" content="2s"/>
+<meta name="DC.Source.Volume" content="10"/>
+<meta name="DC.Source.URI" content="https://ijritcc.org/index.php/ijritcc"/>
+<meta name="DC.Subject" xml:lang="en" content="Feature Extraction."/>
+<meta name="DC.Title" content="Feature-Based Opinion Classification Using the KPCA Technique: Concept and Performance Evaluation"/>
+<meta name="DC.Type" content="Text.Serial.Journal"/>
+<meta name="DC.Type.articleType" content="Articles"/>
+<meta name="gs_meta_revision" content="1.1"/>
+<meta name="citation_journal_title" content="International Journal on Recent and Innovation Trends in Computing and Communication"/>
+<meta name="citation_journal_abbrev" content="IJRITCC"/>
+<meta name="citation_issn" content="2321-8169"/> 
+<meta name="citation_author" content="Sandeep  Kumar "/>
+<meta name="citation_author_institution" content="Department of Computer Science and Engineering Lingaya’s Vidyapeeth Faridabad, India"/>
+<meta name="citation_author" content="Bindiya  Ahuja"/>
+<meta name="citation_author_institution" content="Department of Computer Science and Engineering Lingaya’s Vidyapeeth Faridabad, India"/>
+<meta name="citation_title" content="Feature-Based Opinion Classification Using the KPCA Technique: Concept and Performance Evaluation"/>
+<meta name="citation_language" content="en"/>
+<meta name="citation_date" content="2022/12/31"/>
+<meta name="citation_volume" content="10"/>
+<meta name="citation_issue" content="2s"/>
+<meta name="citation_firstpage" content="89"/>
+<meta name="citation_lastpage" content="98"/>
+<meta name="citation_doi" content="10.17762/ijritcc.v10i2s.5914"/>
+<meta name="citation_abstract_html_url" content="https://ijritcc.org/index.php/ijritcc/article/view/5914"/>
+<meta name="citation_keywords" xml:lang="en" content="Opinion Mining"/>
+<meta name="citation_keywords" xml:lang="en" content="Feature-based Opinion"/>
+<meta name="citation_keywords" xml:lang="en" content="Kernel principal component analysis"/>
+<meta name="citation_keywords" xml:lang="en" content="CNN"/>
+<meta name="citation_keywords" xml:lang="en" content="Sentimental Analysis"/>
+<meta name="citation_keywords" xml:lang="en" content="LSTM"/>
+<meta name="citation_keywords" xml:lang="en" content="Feature Extraction."/>
+<meta name="citation_pdf_url" content="https://ijritcc.org/index.php/ijritcc/article/download/5914/5591"/>
+<meta name="citation_reference" content="Liu, Bing. &quot;Sentiment analysis and opinion mining.&quot; Synthesis lectures on human language technologies 5, no. 1 (2012): 1-167."/>
+<meta name="citation_reference" content="Zhu, Jingbo, Huizhen Wang, Muhua Zhu, Benjamin K. Tsou, and Matthew Ma. &quot;Aspect-based opinion polling from customer reviews.&quot; IEEE Transactions on affective computing 2, no. 1 (2011): 37-49."/>
+<meta name="citation_reference" content="Medhat, Walaa, Ahmed Hassan, and HodaKorashy. &quot;Sentiment analysis algorithms and applications: A survey.&quot; Ain Shams engineering journal 5, no. 4 (2014): 1093-1113."/>
+<meta name="citation_reference" content="Eirinaki, Magdalini, ShamitaPisal, and Japinder Singh. &quot;Feature-based opinion mining and ranking.&quot; Journal of Computer and System Sciences 78, no. 4 (2012): 1175-1184."/>
+<meta name="citation_reference" content="Dubey Veena, G. D. &quot;Sentiment Analysis Based on Opinion Classification Techniques: A Survey.&quot; International Journal of Advanced Research in Computer Science and Software Engineering (2016): 53-58."/>
+<meta name="citation_reference" content="Hemmatian, Fatemeh, and Mohammad Karim Sohrabi. &quot;A survey on classification techniques for opinion mining and sentiment analysis.&quot; Artificial intelligence review 52, no. 3 (2019): 1495-1545."/>
+<meta name="citation_reference" content="Wójcik, Katarzyna, and JanuszTuchowski. &quot;Comparison analysis of chosen approaches to sentiment analysis.&quot; IT for practice (2012): 187-192."/>
+<meta name="citation_reference" content="Wójcik, Katarzyna, and Pawe?Wo?oszyn. &quot;Opinion Mining Framework and Its Applications.&quot; CONTEMPORARY ISSUES IN ECONOMICS, BUSINESS, AND MANAGEMENT (2016): 341."/>
+<meta name="citation_reference" content="Wójcik, K., and J. Tuchowski. &quot;Sentiment Analysis of Opinions about Hotels Extracted from the Internet [in:] Knowledge–Economy–Society.&quot; Global and Regional Challenges of the 21st Century Economy (2013): 755-771."/>
+<meta name="citation_reference" content="Kontopoulos, Efstratios, Christos Berberidis, TheologosDergiades, and Nick Bassiliades. &quot;Ontology-based sentiment analysis of Twitter posts.&quot; Expert systems with applications 40, no. 10 (2013): 4065-4074."/>
+<meta name="citation_reference" content="Srivastava, Durgesh, and Vijay Kumar Soni. &quot;A Systematic Review On Sentiment Analysis Approaches.&quot; In 2022 2nd International Conference on Advance Computing and Innovative Technologies in Engineering (ICACITE), pp. 01-06. IEEE, 2022."/>
+<meta name="citation_reference" content="Kumar, R. Satheesh, A. Francis Saviour Devaraj, M. Rajeswari, E. Golden Julie, Y. Harold Robinson, and Vimal Shanmuganathan. &quot;Exploration of sentiment analysis and legitimate artistry for opinion mining.&quot; Multimedia Tools and Applications 81, no. 9 (2022): 11989-12004."/>
+<meta name="citation_reference" content="Pradeepa, S., N. Sasikaladevi, and K. R. Manjula. &quot;Emotion aware feature based opening mining on large scale data by exploring hypergraph with Helly property.&quot; Multimedia Tools and Applications 80, no. 20 (2021): 30919-30938."/>
+<meta name="citation_reference" content="Alamoudi, Eman Saeed, and Norah Saleh Alghamdi. &quot;Sentiment classification and aspect-based sentiment analysis on yelp reviews using deep learning and word embeddings.&quot; Journal of Decision Systems 30, no. 2-3 (2021): 259-281."/>
+<meta name="citation_reference" content="Ahamed, Shoieb, AjitDanti, and S. P. Raghavendra. &quot;Feature-Based Fuzzy Framework for Sentimental Analysis of Web Data.&quot; In 2019 International Conference on Data Science and Communication (IconDSC), pp. 1-5. IEEE, 2019."/>
+<meta name="citation_reference" content="Zainuddin, Nurulhuda, Ali Selamat, and Roliana Ibrahim. &quot;Hybrid sentiment classification on Twitter aspect-based sentiment analysis.&quot; Applied Intelligence 48, no. 5 (2018): 1218-1232."/>
+<meta name="citation_reference" content="Babu, Anjan G., Surya S. Kumari, and K. Kamakshaiah. &quot;An experimental analysis of clustering sentiments for opinion mining.&quot; In Proceedings of the 2017 International Conference on Machine Learning and Soft Computing, pp. 53-57. 2017."/>
+<meta name="citation_reference" content="Zhao, Yanyan, Bing Qin, and Ting Liu. &quot;Clustering product aspects using two effective aspect relations for opinion mining.&quot; In Chinese Computational Linguistics and Natural Language Processing Based on Naturally Annotated Big Data, pp. 120-130. Springer, Cham, 2014."/>
+<meta name="citation_reference" content="Shobana, J., and M. Murali. &quot;An efficient sentiment analysis methodology based on long short-term memory networks.&quot; Complex &amp; Intelligent Systems 7, no. 5 (2021): 2485-2501."/>
+<meta name="citation_reference" content="O'Shea, Timothy, and Jakob Hoydis. &quot;An introduction to deep learning for the physical layer.&quot; IEEE Transactions on Cognitive Communications and Networking 3, no. 4 (2017): 563-575."/>
+<meta name="citation_reference" content="Lima, Amaro, Heiga Zen, Yoshihiko Nankaku, ChiyomiMiyajima, Keiichi Tokuda, and Tadashi Kitamura. &quot;On the use of kernel PCA for feature extraction in speech recognition.&quot; IEICE TRANSACTIONS on Information and Systems 87, no. 12 (2004): 2802-2811"/>
+<meta name="citation_reference" content="IMDB Dataset of 50K Movie Reviews. (2022). Retrieved from https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews"/>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+	<link rel="stylesheet" href="https://ijritcc.org/index.php/ijritcc/$$$call$$$/page/page/css?name=bootstrapTheme-yeti" type="text/css" /><link rel="stylesheet" href="https://ijritcc.org/plugins/generic/orcidProfile/css/orcidProfile.css?v=3.2.1.4" type="text/css" /><link rel="stylesheet" href="https://ijritcc.org/plugins/generic/publons/styles/publons.css?v=3.2.1.4" type="text/css" /><link rel="stylesheet" href="https://ijritcc.org/public/journals/1/styleSheet.css?v=3.2.1.4" type="text/css" />
+</head>
+<body class="pkp_page_article pkp_op_view">
+	<div class="pkp_structure_page">
+
+		<nav id="accessibility-nav" class="sr-only" role="navigation" aria-label="Quick jump to page content">
+			<ul>
+			  <li><a href="#main-navigation">Main Navigation</a></li>
+			  <li><a href="#main-content">Main Content</a></li>
+			  <li><a href="#sidebar">Sidebar</a></li>
+			</ul>
+		</nav>
+
+				<header class="navbar navbar-default" id="headerNavigationContainer" role="banner">
+
+						<div class="container-fluid">
+				<div class="row">
+					<nav aria-label="User Navigation">
+							<ul id="navigationUser" class="nav nav-pills tab-list pull-right">
+														<li class="">
+				<a href="https://ijritcc.org/index.php/ijritcc/user/register">
+					Register
+									</a>
+							</li>
+														<li class="">
+				<a href="https://ijritcc.org/index.php/ijritcc/login">
+					Login
+									</a>
+							</li>
+										</ul>
+
+					</nav>
+				</div><!-- .row -->
+			</div><!-- .container-fluid -->
+
+			<div class="container-fluid">
+
+				<div class="row">
+				<div style="margin-left: 20px;padding-bottom: 60px;">
+                    <img src="/images/logo/logo_IJRITCC.png" class="img-responsive" style="margin-left: auto; margin-right: auto; width: 20%;">
+
+					
+
+																<div class="site-name">
+																								<a href="															https://ijritcc.org/index.php/index
+													" class="navbar-brand">International Journal on Recent and Innovation Trends in Computing and Communication</a>
+																	</div>
+										
+										<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#nav-menu" aria-expanded="false" aria-controls="nav-menu">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+
+				</div></div>
+
+								
+									<nav id="nav-menu" class="navbar-collapse collapse" aria-label="Site Navigation">
+																		<ul id="main-navigation" class="nav navbar-nav">
+														<li class="">
+				<a href="http://ijritcc.org/index.php/ijritcc">
+					Home
+									</a>
+							</li>
+														<li class="">
+				<a href="https://ijritcc.org/index.php/ijritcc/about/editorialTeam">
+					Editorial Board
+									</a>
+							</li>
+																					<li class=" dropdown">
+				<a href="https://ijritcc.org/index.php/ijritcc/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					Call For Papers
+											<span class="caret"></span>
+									</a>
+									<ul class="dropdown-menu ">
+																					<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/upcoming_issue">
+										Upcoming Issue
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/ethics_policy">
+										Ethics Policy
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/special_issue_proposal">
+										Special Issue Proposals
+									</a>
+								</li>
+																		</ul>
+							</li>
+																					<li class=" dropdown">
+				<a href="https://ijritcc.org/index.php/ijritcc/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					For Authors
+											<span class="caret"></span>
+									</a>
+									<ul class="dropdown-menu ">
+																					<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/guidline_for_authors">
+										Guideline for Authors
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/submit_manuscript">
+										Submit Manuscript
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/downloads">
+										Downloads
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/author_faqs">
+										FAQ
+									</a>
+								</li>
+																		</ul>
+							</li>
+														<li class="">
+				<a href="https://ijritcc.org/index.php/ijritcc/special_issues">
+					Special Issue
+									</a>
+							</li>
+														<li class="">
+				<a href="https://ijritcc.org/index.php/ijritcc/issue/archive">
+					Archives
+									</a>
+							</li>
+																					<li class=" dropdown">
+				<a href="https://ijritcc.org/index.php/ijritcc/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					Peer Review
+											<span class="caret"></span>
+									</a>
+									<ul class="dropdown-menu ">
+																					<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/peer_review">
+										Peer Review
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/guide_to_reviewing">
+										Guide to Reviewing
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/peer_review_faqs">
+										Reviewer's FAQ
+									</a>
+								</li>
+																		</ul>
+							</li>
+																					<li class=" dropdown">
+				<a href="https://ijritcc.org/index.php/ijritcc/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					About Us
+											<span class="caret"></span>
+									</a>
+									<ul class="dropdown-menu ">
+																					<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/about">
+										About the Journal
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ijritcc.org/index.php/ijritcc/about/privacy">
+										Privacy Statement
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://www.agser.org/contact.html">
+										Contact Us
+									</a>
+								</li>
+																		</ul>
+							</li>
+			</ul>
+
+				
+
+																			<div class="pull-md-right">
+								<form class="navbar-form navbar-left" role="search" method="post" action="https://ijritcc.org/index.php/ijritcc/search/search">
+  <div class="form-group">
+    <input class="form-control" name="query" value="" type="text" aria-label="Search Query" placeholder="">
+  </div>
+  <button type="submit" class="btn btn-default">Search</button>
+</form>
+							</div>
+											</nav>
+				
+			</div><!-- .pkp_head_wrapper -->
+		</header><!-- .pkp_structure_head -->
+
+				<div class="pkp_structure_content container">
+			<main class="pkp_structure_main col-xs-12 col-sm-10 col-md-8" role="main">
+
+<div class="page page_article">
+			<nav class="cmp_breadcrumbs" role="navigation" aria-label="You are here:">
+	<ol class="breadcrumb">
+		<li>
+			<a href="https://ijritcc.org/index.php/ijritcc/index">
+				Home
+			</a>
+		</li>
+		<li>
+			<a href="https://ijritcc.org/index.php/ijritcc/issue/archive">
+				Archives
+			</a>
+		</li>
+		<li>
+			<a href="https://ijritcc.org/index.php/ijritcc/issue/view/125">
+				Vol. 10 No. 2s (2022): Computer Science Applications: Innovation and Trends
+			</a>
+		</li>
+		<li class="active">
+							Articles
+					</li>
+	</ol>
+</nav>
+	
+		<article class="article-details">
+
+		
+	<header>
+		<h1 class="page-header">
+			Feature-Based Opinion Classification Using the KPCA Technique: Concept and Performance Evaluation
+					</h1>
+	</header>
+
+	<div class="row">
+
+		<section class="article-sidebar col-md-4">
+
+						<h2 class="sr-only">Article Sidebar</h2>
+
+										<div class="cover-image">
+																	<img
+							class="img-responsive"
+							src="https://ijritcc.org/public/journals/1/submission_5914_5861_coverImage_en_US.png"
+							alt="The Basic Architecture of CNN"
+						>
+									</div>
+			
+										<div class="download">
+																		
+	
+		
+
+<a class="galley-link btn btn-primary pdf" role="button" href="https://ijritcc.org/index.php/ijritcc/article/view/5914/5591">
+
+		
+	PDF
+
+	</a>
+																				</div>
+			
+			<div class="list-group">
+
+													<div class="list-group-item date-published">
+												<strong>Published:</strong>
+						Dec 31, 2022
+					</div>
+																								
+																																														<div class="list-group-item doi">
+														<strong>DOI:</strong>
+							<a href="https://doi.org/10.17762/ijritcc.v10i2s.5914">
+								https://doi.org/10.17762/ijritcc.v10i2s.5914
+							</a>
+						</div>
+									
+													<div class="list-group-item keywords">
+						<strong>							Keywords:</strong>
+						<div class="">
+								<span class="value">
+																														Opinion Mining, 																					Feature-based Opinion, 																					Kernel principal component analysis, 																					CNN, 																					Sentimental Analysis, 																					LSTM, 																					Feature Extraction.																											</span>
+						</div>
+					</div>
+							</div>
+
+		</section><!-- .article-sidebar -->
+
+		<div class="col-md-8">
+			<section class="article-main">
+
+								<h2 class="sr-only">Main Article Content</h2>
+
+									<div class="authors">
+													<div class="author">
+								<strong>Sandeep  Kumar </strong>
+																	<div class="article-author-affilitation">
+										Department of Computer Science and Engineering Lingaya’s Vidyapeeth Faridabad, India
+									</div>
+																							</div>
+													<div class="author">
+								<strong>Bindiya  Ahuja</strong>
+																	<div class="article-author-affilitation">
+										Department of Computer Science and Engineering Lingaya’s Vidyapeeth Faridabad, India
+									</div>
+																							</div>
+											</div>
+				
+													<div class="article-summary" id="summary">
+						<h2>Abstract</h2>
+						<div class="article-abstract">
+							<p>Over the last several years, a widespread trend on the internet has been the proliferation of online evaluations written by people with whom they share their ideas, interests, experiences, and opinions. Opinion mining, also known as sentiment analysis, is the process of classifying pieces of text written in a natural language on a subject into positive, negative, or neutral categories according to the human emotions, views, and feelings that are communicated in that text. The field of sentiment analysis has progressed to the point that it can now analyse internet evaluations and provide significant information to people as well as corporations, which may assist these parties in the decision-making process. In the proposed model, feature extraction extracts the collection of features that are both semantically and statistically significant using the kernel principal component analysis (KPCA) method. According to the findings of the simulations, the suggested model performs better than other existing models.</p>
+						</div>
+					</div>
+				
+				
+
+			</section><!-- .article-main -->
+
+			<section class="article-more-details">
+
+								<h2 class="sr-only">Article Details</h2>
+
+													<div class="panel panel-default how-to-cite">
+						<div class="panel-heading">
+							How to Cite
+						</div>
+						<div class="panel-body">
+							<div id="citationOutput" role="region" aria-live="polite">
+								<div class="csl-bib-body">
+  <div class="csl-entry">Kumar , S. ., &#38; Ahuja, B. . (2022). Feature-Based Opinion Classification Using the KPCA Technique: Concept and Performance Evaluation. <i>International Journal on Recent and Innovation Trends in Computing and Communication</i>, <i>10</i>(2s), 89–98. https://doi.org/10.17762/ijritcc.v10i2s.5914</div>
+</div>
+							</div>
+							<div class="btn-group">
+							  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-controls="cslCitationFormats">
+							    More Citation Formats
+									<span class="caret"></span>
+							  </button>
+							  <ul class="dropdown-menu" role="menu">
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/acm-sig-proceedings?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/acm-sig-proceedings?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												ACM
+											</a>
+										</li>
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/acs-nano?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/acs-nano?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												ACS
+											</a>
+										</li>
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/apa?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/apa?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												APA
+											</a>
+										</li>
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												ABNT
+											</a>
+										</li>
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/chicago-author-date?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/chicago-author-date?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												Chicago
+											</a>
+										</li>
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/harvard-cite-them-right?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/harvard-cite-them-right?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												Harvard
+											</a>
+										</li>
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/ieee?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/ieee?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												IEEE
+											</a>
+										</li>
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/modern-language-association?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/modern-language-association?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												MLA
+											</a>
+										</li>
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												Turabian
+											</a>
+										</li>
+																			<li>
+											<a
+												aria-controls="citationOutput"
+												href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/vancouver?submissionId=5914&amp;publicationId=5861"
+												data-load-citation
+												data-json-href="https://ijritcc.org/index.php/ijritcc/citationstylelanguage/get/vancouver?submissionId=5914&amp;publicationId=5861&amp;return=json"
+											>
+												Vancouver
+											</a>
+										</li>
+																  </ul>
+							</div>
+						</div>
+					</div>
+				
+																			
+								<div class="panel panel-default issue">
+					<div class="panel-heading">
+						Issue
+					</div>
+					<div class="panel-body">
+						<a class="title" href="https://ijritcc.org/index.php/ijritcc/issue/view/125">
+							Vol. 10 No. 2s (2022): Computer Science Applications: Innovation and Trends
+						</a>
+
+					</div>
+				</div>
+
+									<div class="panel panel-default section">
+						<div class="panel-heading">
+							Section
+						</div>
+						<div class="panel-body">
+							Articles
+						</div>
+					</div>
+				
+								
+																																		
+				
+
+													<div class="article-references">
+						<h2>References</h2>
+						<div class="article-references-content">
+																								<p>Liu, Bing. "Sentiment analysis and opinion mining." Synthesis lectures on human language technologies 5, no. 1 (2012): 1-167. </p>
+																	<p>Zhu, Jingbo, Huizhen Wang, Muhua Zhu, Benjamin K. Tsou, and Matthew Ma. "Aspect-based opinion polling from customer reviews." IEEE Transactions on affective computing 2, no. 1 (2011): 37-49. </p>
+																	<p>Medhat, Walaa, Ahmed Hassan, and HodaKorashy. "Sentiment analysis algorithms and applications: A survey." Ain Shams engineering journal 5, no. 4 (2014): 1093-1113. </p>
+																	<p>Eirinaki, Magdalini, ShamitaPisal, and Japinder Singh. "Feature-based opinion mining and ranking." Journal of Computer and System Sciences 78, no. 4 (2012): 1175-1184. </p>
+																	<p>Dubey Veena, G. D. "Sentiment Analysis Based on Opinion Classification Techniques: A Survey." International Journal of Advanced Research in Computer Science and Software Engineering (2016): 53-58. </p>
+																	<p>Hemmatian, Fatemeh, and Mohammad Karim Sohrabi. "A survey on classification techniques for opinion mining and sentiment analysis." Artificial intelligence review 52, no. 3 (2019): 1495-1545. </p>
+																	<p>Wójcik, Katarzyna, and JanuszTuchowski. "Comparison analysis of chosen approaches to sentiment analysis." IT for practice (2012): 187-192. </p>
+																	<p>Wójcik, Katarzyna, and Pawe?Wo?oszyn. "Opinion Mining Framework and Its Applications." CONTEMPORARY ISSUES IN ECONOMICS, BUSINESS, AND MANAGEMENT (2016): 341. </p>
+																	<p>Wójcik, K., and J. Tuchowski. "Sentiment Analysis of Opinions about Hotels Extracted from the Internet [in:] Knowledge–Economy–Society." Global and Regional Challenges of the 21st Century Economy (2013): 755-771. </p>
+																	<p>Kontopoulos, Efstratios, Christos Berberidis, TheologosDergiades, and Nick Bassiliades. "Ontology-based sentiment analysis of Twitter posts." Expert systems with applications 40, no. 10 (2013): 4065-4074. </p>
+																	<p>Srivastava, Durgesh, and Vijay Kumar Soni. "A Systematic Review On Sentiment Analysis Approaches." In 2022 2nd International Conference on Advance Computing and Innovative Technologies in Engineering (ICACITE), pp. 01-06. IEEE, 2022. </p>
+																	<p>Kumar, R. Satheesh, A. Francis Saviour Devaraj, M. Rajeswari, E. Golden Julie, Y. Harold Robinson, and Vimal Shanmuganathan. "Exploration of sentiment analysis and legitimate artistry for opinion mining." Multimedia Tools and Applications 81, no. 9 (2022): 11989-12004. </p>
+																	<p>Pradeepa, S., N. Sasikaladevi, and K. R. Manjula. "Emotion aware feature based opening mining on large scale data by exploring hypergraph with Helly property." Multimedia Tools and Applications 80, no. 20 (2021): 30919-30938. </p>
+																	<p>Alamoudi, Eman Saeed, and Norah Saleh Alghamdi. "Sentiment classification and aspect-based sentiment analysis on yelp reviews using deep learning and word embeddings." Journal of Decision Systems 30, no. 2-3 (2021): 259-281. </p>
+																	<p>Ahamed, Shoieb, AjitDanti, and S. P. Raghavendra. "Feature-Based Fuzzy Framework for Sentimental Analysis of Web Data." In 2019 International Conference on Data Science and Communication (IconDSC), pp. 1-5. IEEE, 2019. </p>
+																	<p>Zainuddin, Nurulhuda, Ali Selamat, and Roliana Ibrahim. "Hybrid sentiment classification on Twitter aspect-based sentiment analysis." Applied Intelligence 48, no. 5 (2018): 1218-1232. </p>
+																	<p>Babu, Anjan G., Surya S. Kumari, and K. Kamakshaiah. "An experimental analysis of clustering sentiments for opinion mining." In Proceedings of the 2017 International Conference on Machine Learning and Soft Computing, pp. 53-57. 2017. </p>
+																	<p>Zhao, Yanyan, Bing Qin, and Ting Liu. "Clustering product aspects using two effective aspect relations for opinion mining." In Chinese Computational Linguistics and Natural Language Processing Based on Naturally Annotated Big Data, pp. 120-130. Springer, Cham, 2014. </p>
+																	<p>Shobana, J., and M. Murali. "An efficient sentiment analysis methodology based on long short-term memory networks." Complex &amp; Intelligent Systems 7, no. 5 (2021): 2485-2501. </p>
+																	<p>O'Shea, Timothy, and Jakob Hoydis. "An introduction to deep learning for the physical layer." IEEE Transactions on Cognitive Communications and Networking 3, no. 4 (2017): 563-575. </p>
+																	<p>Lima, Amaro, Heiga Zen, Yoshihiko Nankaku, ChiyomiMiyajima, Keiichi Tokuda, and Tadashi Kitamura. "On the use of kernel PCA for feature extraction in speech recognition." IEICE TRANSACTIONS on Information and Systems 87, no. 12 (2004): 2802-2811 </p>
+																	<p>IMDB Dataset of 50K Movie Reviews. (2022). Retrieved from <a href="https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews">https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews</a> </p>
+																					</div>
+					</div>
+				
+			</section><!-- .article-details -->
+		</div><!-- .col-md-8 -->
+	</div><!-- .row -->
+
+</article>
+
+	<div id="articlesBySimilarityList">
+	</div>
+
+
+</div><!-- .page -->
+
+	</main>
+
+									<aside id="sidebar" class="pkp_structure_sidebar left col-xs-12 col-sm-2 col-md-4" role="complementary" aria-label="Sidebar">
+				 
+<div class="pkp_block block_make_submission">
+	<h2 class="pkp_screen_reader">
+		Make a Submission
+	</h2>
+
+	<div class="content">
+		<a class="block_make_submission_link" href="https://ijritcc.org/index.php/ijritcc/about/submissions">
+			Make a Submission
+		</a>
+	</div>
+</div>
+	<style type="text/css">
+		.block_announcements_article:not(:last-child) {
+			padding-bottom: 1.5em;
+			border-bottom: 1px solid;
+
+		}
+
+		.block_announcements_article {
+			text-align: justify;
+		}
+	</style>
+	<div class="pkp_block block_announcements">
+		<h2 class="title">Announcements</h2>
+		<div class="content">
+							<article class="block_announcements_article">
+					<h3 class="block_announcements_article_headline">
+						<a href="https://ijritcc.org/index.php/ijritcc/announcement/view/13">
+							Call for Papers
+						</a>
+					</h3>
+					<time class="block_announcements_article_date" datetime="2026-01-05">
+						<strong>January  5, 2026</strong>
+					</time>
+					<div class="block_announcements_article_content">
+																			
+
+<p><strong>Call for Papers for the New Issue.<br></strong><strong>Last Date of Submission:</strong> <em>January 31<sup>st</sup>, 2026</em></p>
+
+
+											</div>
+				</article>
+							<article class="block_announcements_article">
+					<h3 class="block_announcements_article_headline">
+						<a href="https://ijritcc.org/index.php/ijritcc/announcement/view/6">
+							Imp. Announcement
+						</a>
+					</h3>
+					<time class="block_announcements_article_date" datetime="2022-04-15">
+						<strong>April 15, 2022</strong>
+					</time>
+					<div class="block_announcements_article_content">
+																			<p>Dear Authors, <br>We are feeling proud congratulations to all the contributors of <strong>IJRITCC</strong>. Because The <strong>"International Journal on Recent and Innovation Trends in Computing and Communication"</strong> has been accepted for <strong>Scopus</strong>.</p>
+											</div>
+				</article>
+					</div>
+	</div>
+<div class="pkp_block block_custom" id="customblock-youtube">
+	<div class="content">
+		<p><strong>Like, Subscribe and Share This Video</strong></p>
+<p style="text-align: center;"><iframe title="YouTube video player" src="https://www.youtube.com/embed/nvESKDAjFlk?si=jgF-hdzbrqXDljQb" frameborder="0" allowfullscreen=""></iframe></p>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-Left_Menu_Table">
+	<div class="content">
+		<div class="title"><a title="Google Scholar Citation Index" href="https://scholar.google.co.in/citations?user=2YiCZVsAAAAJ&amp;hl=en" target="_blank" rel="noopener">Citation Index</a></div>
+<table class="table table-hover" style="border: 1px solid #ddd;">
+<thead>
+<tr>
+<th class="text-center" scope="col">Citation Indices</th>
+<th class="text-center" scope="col">All</th>
+<th class="text-center" scope="col">Since 2018</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th class="text-center" scope="row">Citation</th>
+<td class="text-center">5854</td>
+<td class="text-center">3996</td>
+</tr>
+<tr>
+<th class="text-center" scope="row">h-index</th>
+<td class="text-center">28</td>
+<td class="text-center">23</td>
+</tr>
+<tr>
+<th class="text-center" scope="row">i10-index</th>
+<td class="text-center">119</td>
+<td class="text-center">72</td>
+</tr>
+</tbody>
+</table>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-Acceptane_Rate_Graph">
+	<div class="content">
+		<div class="title">Acceptance Rate <small>(By Year)</small></div>
+<table class="table table-hover" style="border: 1px solid #ddd;">
+<thead>
+<tr>
+<th class="text-center" scope="col">Year</th>
+<th class="text-center" scope="col">Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th class="text-center" scope="row">2019</th>
+<td class="text-center">12.6%</td>
+</tr>
+<tr>
+<th class="text-center" scope="row">2018</th>
+<td class="text-center">18.3%</td>
+</tr>
+<tr>
+<th class="text-center" scope="row">2017</th>
+<td class="text-center">16.9%</td>
+</tr>
+<tr>
+<th class="text-center" scope="row">2016</th>
+<td class="text-center">18.8%</td>
+</tr>
+<tr>
+<th class="text-center" scope="row">2015</th>
+<td class="text-center">22.9%</td>
+</tr>
+<tr>
+<th class="text-center" scope="row">2014</th>
+<td class="text-center">28.9%</td>
+</tr>
+<tr>
+<th class="text-center" scope="row">2013</th>
+<td class="text-center">26.1%</td>
+</tr>
+</tbody>
+</table>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-Right_Sidebar">
+	<div class="content">
+		<h3>Important Links</h3>
+<div style="border: 1px solid #000;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc">Home</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/aims_and_scope">Aims and Scope</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/call_for_papers">Call for Papers</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/guidline_for_authors">Instructions for Authors</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/about/editorialTeam">Editorial Board</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/issue/archive">Archive</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/downloads">Download</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/ethics_and_policies">Ethics &amp; Policies</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/publication_ethics">Publication Ethics and Publication Malpractice Statement</a></p>
+<hr style="margin: 5px 0 5px 0;"><!--<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/review_process">Peer Review Policy</a></p><hr style="margin: 5px 0 5px 0;" />  -->
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/plagiarism_policy">Plagiarism Policy</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/copyright_grants_ownership_declaration">Copyright, Grants and Ownership Declaration</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/refund_policy">Refund Policy</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/open_access_overview">Open Access Overview</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/open_access_license">Open Access License</a></p>
+<hr style="margin: 5px 0 5px 0;">
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/index.php/ijritcc/permissions">Permissions</a></p>
+</div>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-Downloads">
+	<div class="content">
+		<h3>Downloads</h3>
+<p style="margin: 5px 0px 5px 10px;"><a href="https://ijritcc.org/downloads/Paper_Template.docx" target="_blank" rel="noopener">Paper Template</a></p>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-indexed-by">
+	<div class="content">
+		<h2 class="title">Indexed by</h2>
+<p><a title="Scopus Indexed" href="https://www.scopus.com/sourceid/21101089961" target="_blank" rel="noopener"><img style="display: block; margin-left: auto; margin-right: auto;" src="https://ijritcc.org/public/site/images/editor_ijritcc/elsevier-scopus.png" alt="Indexed by Scopus " width="150" height="150"></a></p>
+<p><a href="https://hjrs.hec.gov.pk/index.php?r=site%2Fresult&amp;id=1080285#journal_result"><img style="display: block; margin-left: auto; margin-right: auto;" src="https://ijritcc.org/public/site/images/editor_ijritcc/hec.jpg" alt="" width="199" height="230"></a></p>
+	</div>
+</div>
+<div class="pkp_block block_developed_by">
+	<div class="content">
+		<span class="title">Most Viewed Articles Today</span>
+			<ul class="most_read">
+							<li class="most_read_article">
+					<div class="most_read_article_title"><a href="https://ijritcc.org/index.php/ijritcc/article/view/5481">Access Android Device Using The FatRat and Metasploit</a></div>
+					<div class="most_read_article_journal"><span class="fa fa-eye"></span> 5026</div>
+				</li>
+							<li class="most_read_article">
+					<div class="most_read_article_title"><a href="https://ijritcc.org/index.php/ijritcc/article/view/8119">Predicting Outcomes of Horse Racing using Machine Learning</a></div>
+					<div class="most_read_article_journal"><span class="fa fa-eye"></span> 4976</div>
+				</li>
+							<li class="most_read_article">
+					<div class="most_read_article_title"><a href="https://ijritcc.org/index.php/ijritcc/article/view/2920">Research Paper on Basic of Artificial Neural Network</a></div>
+					<div class="most_read_article_journal"><span class="fa fa-eye"></span> 3236</div>
+				</li>
+							<li class="most_read_article">
+					<div class="most_read_article_title"><a href="https://ijritcc.org/index.php/ijritcc/article/view/11454"> Evaluating the TOE Framework for Technology Adoption: A Systematic Review of Its Strengths and Limitations</a></div>
+					<div class="most_read_article_journal"><span class="fa fa-eye"></span> 2403</div>
+				</li>
+							<li class="most_read_article">
+					<div class="most_read_article_title"><a href="https://ijritcc.org/index.php/ijritcc/article/view/821">Phishing: A Continual Threat for Cyber World</a></div>
+					<div class="most_read_article_journal"><span class="fa fa-eye"></span> 1237</div>
+				</li>
+						</ul>
+	</div>
+</div>
+
+			</aside><!-- pkp_sidebar.left -->
+				</div><!-- pkp_structure_content -->
+
+	<footer class="footer" role="contentinfo">
+
+		<div class="container">
+
+			<div class="row">
+								<div class="col-md-12">
+					<div class="col-md-12">
+<div class="container" style="width: auto; margin-top: 1px; margin-bottom: 25px;">
+<div class="row text-sm-left text-md-left">
+<div class="col-sm-12 col-md-4">
+<div class="col-xs-12 mt-2 mt-sm-2 text-white" style="margin-top: 5px; margin-bottom: 15px;">
+<div class="card-body" style="text-align: left;">
+<h4 class="card-subtitle mb-2 text-muted"><strong>Contact Us:</strong></h4>
+<h4 class="card-title" style="margin-bottom: 5px;">Auricle Global Society of Education and Research</h4>
+<h5 class="card-text" style="margin-top: 5px; margin-bottom: 5px;">Y-18-A, Near Sanskar Play School, Sudarshana Nagar,</h5>
+<h5 class="card-text" style="margin-top: 5px; margin-bottom: 5px;">Bikaner, Rajasthan (India). Pin 334003</h5>
+<h5 class="card-text" style="margin-top: 5px; margin-bottom: 5px;"><em><img src="https://ijritcc.org/images/mail.png" width="15" height="15" /> </em>:<em> editor@ijritcc.org</em></h5>
+</div>
+</div>
+</div>
+<div class="col-sm-6 col-md-2" style="margin-bottom: 15px;">
+<div class="col-xs-12" style="margin-top: 15px;">
+<h4 class="card-subtitle mb-2 text-muted" style="margin-top: 0px;"><strong>Quick Links:</strong></h4>
+<ul class="list-unstyled quick-links">
+<li class="show" style="font-size: 14px;"><a href="https://ijritcc.org/index.php/ijritcc/guidline_for_authors">Author's Guideline</a></li>
+<li class="show" style="font-size: 14px;"><a href="https://ijritcc.org/index.php/ijritcc/guide_to_reviewing">Reviewers Guideline</a></li>
+<li class="show" style="font-size: 14px;"><a href="https://ijritcc.org/index.php/ijritcc/review_process">Peer Review and Publication Policy</a></li>
+</ul>
+</div>
+</div>
+<div class="col-sm-6 col-md-2" style="margin-top: 34px; margin-bottom: 25px;">
+<div class="col-xs-12" style="margin-top: 12px;">
+<ul class="list-unstyled quick-links">
+<li class="show" style="font-size: 14px;"><a href="https://ijritcc.org/index.php/ijritcc/author_faqs">FAQ's</a></li>
+<li class="show" style="font-size: 14px;"><a href="https://ijritcc.org/index.php/ijritcc/about/privacy">Privacy Policy</a></li>
+<li class="show" style="font-size: 14px;"><a href="https://ijritcc.org/index.php/ijritcc/refund-and-cancellation-policies">Refund and Cancellation Policy</a></li>
+<li class="show" style="font-size: 14px;"><a href="https://ijritcc.org/index.php/ijritcc/terms_and_conditions">Terms and Conditions</a></li>
+</ul>
+</div>
+</div>
+<div class="col-xs-12 col-sm-12 col-md-4" style="margin-top: 5px;">
+<div class="img_content" style="text-align: center; margin-top: 10px; border-left: 2px solid #eee; height: auto; display: block;" align="right"><a title="Scopus Indexed" href="https://www.scopus.com/sourceid/21101089961" target="_blank" rel="noopener"><img style="margin: 5px;" src="https://ijritcc.org/public/site/images/editor_ijritcc/scopus.png" alt="Scopus" width="200" height="58" /></a> <a title="Scilit" href="https://www.scilit.net/journal/2415509" target="_blank" rel="noopener"><img style="margin: 5px;" src="https://ijritcc.org/public/site/images/editor_ijritcc/scilit.png" alt="Scilit - Scientific Literature" width="100" height="45" /></a> <a title="Index Copernicus International ICV 5.75" href="https://journals.indexcopernicus.com/search/formjml?q=ijritcc" target="_blank" rel="noopener"><img style="margin: 5px;" src="https://ijritcc.org/public/site/images/editor_ijritcc/index-copernicus.png" alt="Index Copernicus International ICV 5.75" width="218" height="50" /></a> <a title="Microsoft Academics" href="https://academic.microsoft.com/journal/2764488870" target="_blank" rel="noopener"><img style="margin: 5px;" src="https://ijritcc.org/public/site/images/editor_ijritcc/microsoft-acadmics.png" alt="Microsoft Academics" width="150" height="65" /></a> <a title="Google Scholar" href="https://scholar.google.co.in/citations?user=2YiCZVsAAAAJ" target="_blank" rel="noopener"><img style="margin: 5px; border: 1px solid $f00;" src="https://ijritcc.org/public/site/images/editor_ijritcc/google-scholar.png" alt="Google Scholar" width="100" height="38" /></a> <a title="Academia.edu" href="http://ijritcc.academia.edu/ijritcc" target="_blank" rel="noopener"><img style="margin: 5px;" src="https://ijritcc.org/public/site/images/editor_ijritcc/academia.png" alt="Academia.edu" width="80" height="80" /></a><a title="Scribd" href="https://www.scribd.com/user/227678342/Editor-IJRITCC" target="_blank" rel="noopener"> <img style="margin: 5px;" src="https://ijritcc.org/public/site/images/editor_ijritcc/scribd.png" alt="Scribd" width="151" height="33" /></a> <a title="CrossRef Member" href="https://search.crossref.org/?q=2321-8169&amp;from_ui=yes" target="_blank" rel="noopener"><img style="margin: 5px;" src="https://ijritcc.org/public/site/images/editor_ijritcc/crossref.png" alt="CrossRef Member" width="100" height="65" /></a> <a title="BibSonomy" href="https://www.bibsonomy.org/user/ijritcc" target="_blank" rel="noopener"> <img style="margin: 5px;" src="https://ijritcc.org/public/site/images/editor_ijritcc/bibsonomy-logo.png" alt="BibSonomy" width="150" height="33" /></a> <img style="margin: 5px;" src="https://ijritcc.org/public/site/images/editor_ijritcc/base.png" alt="BASE (Bielefeld Academic Search Engine)" width="120" height="68" /></div>
+</div>
+</div>
+</div>
+</div>
+				</div>
+				
+				
+
+			</div> <!-- .row -->
+		</div><!-- .container -->
+	</footer>
+</div><!-- pkp_structure_page -->
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js?v=3.2.1.4" type="text/javascript"></script><script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.js?v=3.2.1.4" type="text/javascript"></script><script src="https://ijritcc.org/lib/pkp/js/lib/jquery/plugins/jquery.tag-it.js?v=3.2.1.4" type="text/javascript"></script><script src="https://ijritcc.org/plugins/themes/bootstrap3/bootstrap/js/bootstrap.min.js?v=3.2.1.4" type="text/javascript"></script><script src="https://ijritcc.org/plugins/generic/citationStyleLanguage/js/articleCitation.js?v=3.2.1.4" type="text/javascript"></script>
+
+
+</body>
+</html>

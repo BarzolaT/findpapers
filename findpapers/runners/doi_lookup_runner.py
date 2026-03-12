@@ -1,0 +1,152 @@
+"""DOILookupRunner: fetches a single paper by its DOI via CrossRef."""
+
+from __future__ import annotations
+
+import logging
+from time import perf_counter
+
+from findpapers.connectors.crossref import CrossRefConnector
+from findpapers.core.paper import Paper
+from findpapers.utils.logging_config import configure_verbose_logging
+from findpapers.utils.metadata_parser import DOI_URL_PREFIXES
+
+logger = logging.getLogger(__name__)
+
+
+class DOILookupRunner:
+    """Runner that fetches a single paper by DOI using the CrossRef API.
+
+    The runner queries CrossRef's ``/works/{doi}`` endpoint and converts the
+    response into a :class:`~findpapers.core.paper.Paper` instance.
+
+    Parameters
+    ----------
+    doi : str
+        A bare DOI identifier (e.g. ``"10.1038/nature12373"``).  Leading
+        ``"https://doi.org/"`` prefixes are stripped automatically.
+    email : str | None
+        Contact email for CrossRef polite-pool access.  When provided
+        CrossRef grants higher rate-limits.
+    timeout : float | None
+        HTTP request timeout in seconds.  ``None`` uses the ``requests``
+        default.
+
+    Raises
+    ------
+    ValueError
+        If *doi* is empty or blank after stripping whitespace and prefix.
+
+    Examples
+    --------
+    >>> runner = DOILookupRunner(doi="10.1038/nature12373")
+    >>> paper = runner.run()
+    >>> print(paper.title)
+    Experimental ...
+    """
+
+    def __init__(
+        self,
+        doi: str,
+        email: str | None = None,
+        timeout: float | None = 10.0,
+    ) -> None:
+        """Initialise DOI lookup configuration.
+
+        Parameters
+        ----------
+        doi : str
+            A bare DOI identifier or full DOI URL.
+        email : str | None
+            Contact email for CrossRef polite-pool access.
+        timeout : float | None
+            HTTP request timeout in seconds.
+
+        Raises
+        ------
+        ValueError
+            If *doi* is empty or blank.
+        """
+        self._doi = self._sanitize_doi(doi)
+        self._timeout = timeout
+        self._connector = CrossRefConnector(email=email)
+        if timeout is not None:
+            self._connector._timeout = timeout
+        self._result: Paper | None = None
+
+    # ------------------------------------------------------------------
+    # Public interface
+    # ------------------------------------------------------------------
+
+    def run(self, verbose: bool = False) -> Paper | None:
+        """Execute the DOI lookup and return the paper.
+
+        Parameters
+        ----------
+        verbose : bool
+            When ``True``, emit detailed log messages at DEBUG level.
+
+        Returns
+        -------
+        Paper | None
+            A :class:`~findpapers.core.paper.Paper` populated with CrossRef
+            metadata, or ``None`` when the DOI is not found or the response
+            cannot be parsed into a valid paper.
+        """
+        if verbose:
+            configure_verbose_logging()
+            logger.info("=== DOILookupRunner ===")
+            logger.info("DOI: %s", self._doi)
+            logger.info("Timeout: %s", self._timeout or "default")
+            logger.info("=======================")
+
+        start = perf_counter()
+
+        try:
+            work = self._connector.fetch_work(self._doi)
+            if work is not None:
+                self._result = self._connector.build_paper(work)
+            else:
+                self._result = None
+        finally:
+            self._connector.close()
+
+        runtime = perf_counter() - start
+
+        if verbose:
+            status = "found" if self._result is not None else "not found"
+            logger.info("DOI lookup %s (%.2f s)", status, runtime)
+
+        return self._result
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _sanitize_doi(doi: str) -> str:
+        """Strip whitespace and common URL prefixes from a DOI string.
+
+        Parameters
+        ----------
+        doi : str
+            Raw DOI input from the user.
+
+        Returns
+        -------
+        str
+            Bare DOI identifier.
+
+        Raises
+        ------
+        ValueError
+            If the result is empty after sanitization.
+        """
+        cleaned = doi.strip()
+        for prefix in DOI_URL_PREFIXES:
+            if cleaned.lower().startswith(prefix.lower()):
+                cleaned = cleaned[len(prefix) :]
+                break
+        cleaned = cleaned.strip()
+        if not cleaned:
+            raise ValueError("DOI must not be empty.")
+        return cleaned

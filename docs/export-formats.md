@@ -1,0 +1,137 @@
+# Export Formats
+
+Findpapers supports three export formats: **JSON**, **BibTeX**, and **CSV**. All export/import functions are available as top-level functions in the `findpapers` package.
+
+## JSON
+
+JSON is the recommended format for preserving all metadata. It supports exporting and reimporting `SearchResult`, `CitationGraph`, and plain `list[Paper]` objects.
+
+### Export
+
+```python
+import findpapers
+
+# Export a SearchResult (includes query, dates, database info, and all papers)
+findpapers.export_to_json(result, "search_result.json")
+
+# Export a CitationGraph (includes seed papers, edges, and all discovered papers)
+findpapers.export_to_json(graph, "citation_graph.json")
+
+# Export a plain list of papers
+findpapers.export_to_json(papers, "papers.json")
+```
+
+### Import
+
+```python
+# Automatically detects the type and returns the correct object
+data = findpapers.load_from_json("search_result.json")
+# Returns SearchResult, CitationGraph, or list[Paper] depending on file contents
+```
+
+### Format Details
+
+The JSON file includes a `"type"` discriminator field:
+
+- `"search_result"` - contains query metadata and a list of papers
+- `"citation_graph"` - contains seed papers, edges, depth, direction, and all papers
+- `"paper_list"` - contains a plain list of papers
+
+Each paper is serialized with all its attributes, including nested `Author` and `Source` objects. The format is stable and can be used for long-term storage and exchange.
+
+---
+
+## BibTeX
+
+BibTeX export generates standard `.bib` files compatible with LaTeX.
+
+### Export
+
+```python
+findpapers.export_papers_to_bibtex(papers, "references.bib")
+```
+
+### Import
+
+```python
+papers = findpapers.load_papers_from_bibtex("references.bib")
+```
+
+### Format Details
+
+- Each paper becomes a BibTeX entry with a type matching its `PaperType` (`@article`, `@inproceedings`, `@book`, etc.). Papers without a type default to `@misc`.
+- **Citation keys** are auto-generated from the first author's last name and the publication year (e.g., `smith2023`). Duplicates are made unique with a suffix.
+- LaTeX special characters (`&`, `%`, `$`, `#`, `_`, `{`, `}`, `~`, `^`) are escaped automatically.
+- Fields included: `title`, `author`, `abstract`, `year`, `month`, `doi`, `url`, `keywords`, `journal`/`booktitle`, `publisher`, `issn`, `isbn`, `pages`, `note`.
+
+### Limitations
+
+- Some metadata is lost during BibTeX export (e.g., `citation count`, `databases`, `pdf_url`, `fields_of_study`, `subjects`). Use JSON for lossless round-trips.
+
+---
+
+## CSV
+
+CSV export creates spreadsheet-compatible files with one paper per row.
+
+### Export
+
+```python
+findpapers.export_papers_to_csv(papers, "papers.csv")
+```
+
+### Import
+
+```python
+papers = findpapers.load_papers_from_csv("papers.csv")
+```
+
+### Columns
+
+| Column | Description |
+|--------|-------------|
+| `title` | Paper title |
+| `authors` | Authors, separated by `"; "` |
+| `abstract` | Paper abstract |
+| `publication_date` | Publication date (ISO format) |
+| `doi` | Digital Object Identifier |
+| `url` | Paper URL |
+| `pdf_url` | Direct PDF URL |
+| `source` | Publication source title |
+| `publisher` | Publisher name |
+| `citations` | Citation count |
+| `keywords` | Keywords, separated by `"; "` |
+| `paper_type` | BibTeX publication type |
+| `page_range` | Page range |
+| `databases` | Database names, separated by `"; "` |
+| `fields_of_study` | Fields of study, separated by `"; "` |
+| `subjects` | Subjects, separated by `"; "` |
+| `comments` | Free-text comments |
+
+### Format Details
+
+- Multi-valued fields (authors, keywords, databases, fields_of_study, subjects) are joined with `"; "` as separator
+- CSV formula injection is prevented by prefixing cells starting with `=`, `+`, `-`, or `@` with a single quote (`'`)
+- The single-quote prefix is automatically removed when importing
+
+### Limitations
+
+- Nested objects like `Source` are flattened (only `source` title and `publisher` are exported)
+- Author affiliations are not included in CSV export
+- Use JSON for lossless round-trips
+
+---
+
+## Format Comparison
+
+| Feature | JSON | BibTeX | CSV |
+|---------|------|--------|-----|
+| Lossless round-trip | Yes | No | No |
+| Supports SearchResult | Yes | No | No |
+| Supports CitationGraph | Yes | No | No |
+| LaTeX-compatible | No | Yes | No |
+| Spreadsheet-compatible | No | No | Yes |
+| Author affiliations | Yes | No | No |
+| Citation count | Yes | No | Yes |
+| Database provenance | Yes | No | Yes |
+| Fields of study | Yes | No | Yes |

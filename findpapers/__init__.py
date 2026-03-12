@@ -1,12 +1,58 @@
-from findpapers.tools.bibtex_generator_tool import generate_bibtex
-from findpapers.tools.downloader_tool import download
-from findpapers.tools.search_runner_tool import search
+"""Findpapers - Academic paper search and management tool."""
 
-__all__ = ["generate_bibtex", "download", "search"]
+from findpapers.core.author import Author
+from findpapers.core.citation_graph import CitationGraph
+from findpapers.core.paper import Paper, PaperType
+from findpapers.core.query import ConnectorType, FilterCode
+from findpapers.core.search_result import SearchResult
+from findpapers.core.source import Source, SourceType
+from findpapers.engine import Engine
+from findpapers.exceptions import (
+    ConnectorError,
+    ExportError,
+    FindpapersError,
+    QueryValidationError,
+    UnsupportedQueryError,
+)
+from findpapers.runners.doi_lookup_runner import DOILookupRunner
+from findpapers.runners.download_runner import DownloadRunner
+from findpapers.runners.enrichment_runner import EnrichmentRunner
+from findpapers.runners.search_runner import SearchRunner
+from findpapers.runners.snowball_runner import SnowballRunner
+from findpapers.utils.export import (
+    export_papers_to_bibtex,
+    export_papers_to_csv,
+    export_to_json,
+    load_from_json,
+    load_papers_from_bibtex,
+    load_papers_from_csv,
+)
 
-try:
-    import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:
-    import importlib_metadata
-
-__version__ = importlib_metadata.version(__name__)
+__all__ = [
+    "Author",
+    "CitationGraph",
+    "ConnectorError",
+    "ConnectorType",
+    "DOILookupRunner",
+    "DownloadRunner",
+    "Engine",
+    "EnrichmentRunner",
+    "ExportError",
+    "FilterCode",
+    "FindpapersError",
+    "Paper",
+    "PaperType",
+    "QueryValidationError",
+    "SearchResult",
+    "SearchRunner",
+    "SnowballRunner",
+    "Source",
+    "SourceType",
+    "UnsupportedQueryError",
+    "export_papers_to_bibtex",
+    "export_papers_to_csv",
+    "export_to_json",
+    "load_from_json",
+    "load_papers_from_bibtex",
+    "load_papers_from_csv",
+]

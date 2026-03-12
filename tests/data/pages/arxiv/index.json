@@ -1,0 +1,102 @@
+[
+  {
+    "key": "abs_2301.00306v4",
+    "url": "https://arxiv.org/abs/2301.00306v4",
+    "doi": null,
+    "final_url": "https://arxiv.org/abs/2301.00306v4",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 47495,
+    "error": null
+  },
+  {
+    "key": "abs_2301.01286v3",
+    "url": "https://arxiv.org/abs/2301.01286v3",
+    "doi": null,
+    "final_url": "https://arxiv.org/abs/2301.01286v3",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 47083,
+    "error": null
+  },
+  {
+    "key": "abs_2301.00301v1",
+    "url": "https://arxiv.org/abs/2301.00301v1",
+    "doi": null,
+    "final_url": "https://arxiv.org/abs/2301.00301v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 44955,
+    "error": null
+  },
+  {
+    "key": "10.1016/j.apenergy.2023.121323",
+    "url": "https://arxiv.org/abs/2301.01148v1",
+    "doi": "10.1016/j.apenergy.2023.121323",
+    "final_url": "https://arxiv.org/abs/2301.01148v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 51241,
+    "error": null
+  },
+  {
+    "key": "abs_2301.00281v1",
+    "url": "https://arxiv.org/abs/2301.00281v1",
+    "doi": null,
+    "final_url": "https://arxiv.org/abs/2301.00281v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 44311,
+    "error": null
+  },
+  {
+    "key": "abs_2301.00280v2",
+    "url": "https://arxiv.org/abs/2301.00280v2",
+    "doi": null,
+    "final_url": "https://arxiv.org/abs/2301.00280v2",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 47738,
+    "error": null
+  },
+  {
+    "key": "10.1007/978-3-031-15471-3_32",
+    "url": "https://arxiv.org/abs/2301.01212v1",
+    "doi": "10.1007/978-3-031-15471-3_32",
+    "final_url": "https://arxiv.org/abs/2301.01212v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 47462,
+    "error": null
+  },
+  {
+    "key": "abs_2301.00270v3",
+    "url": "https://arxiv.org/abs/2301.00270v3",
+    "doi": null,
+    "final_url": "https://arxiv.org/abs/2301.00270v3",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 46247,
+    "error": null
+  },
+  {
+    "key": "abs_2301.03359v1",
+    "url": "https://arxiv.org/abs/2301.03359v1",
+    "doi": null,
+    "final_url": "https://arxiv.org/abs/2301.03359v1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 46594,
+    "error": null
+  },
+  {
+    "key": "abs_2301.00265v2",
+    "url": "https://arxiv.org/abs/2301.00265v2",
+    "doi": null,
+    "final_url": "https://arxiv.org/abs/2301.00265v2",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 46523,
+    "error": null
+  }
+]

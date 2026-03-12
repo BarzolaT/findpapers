@@ -1,0 +1,21 @@
+{
+  "collected_at": "2026-03-10T16:23:43.562416+00:00",
+  "dois": [
+    "10.3758/s13428-022-02028-7",
+    "10.1016/j.apenergy.2023.121323"
+  ],
+  "description": "Real API responses for citation-related endpoints (Semantic Scholar + OpenAlex). Used for unit testing citation connector methods.",
+  "endpoints": {
+    "semantic_scholar": [
+      "paper counts (citationCount, referenceCount)",
+      "references (/paper/DOI:{doi}/references)",
+      "citations (/paper/DOI:{doi}/citations)"
+    ],
+    "openalex": [
+      "DOI→ID resolution (/works/doi:{doi}?select=id)",
+      "referenced_works (/works/doi:{doi}?select=id,referenced_works)",
+      "batch works (/works?filter=openalex:{ids})",
+      "cited-by (/works?filter=cites:{id})"
+    ]
+  }
+}

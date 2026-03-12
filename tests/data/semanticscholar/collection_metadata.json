@@ -1,0 +1,15 @@
+{
+  "collected_at": "2026-03-03T12:34:12.032989",
+  "api_url": "https://api.semanticscholar.org/graph/v1/paper/search/bulk",
+  "query": "(\"machine learning\" | \"deep learning\") \"natural language processing\"",
+  "year_range": "2020-2022",
+  "limit": 50,
+  "total_results": 8490,
+  "results_returned": 50,
+  "api_key_used": true,
+  "fields_requested": "paperId,corpusId,externalIds,url,title,abstract,venue,year,referenceCount,citationCount,isOpenAccess,openAccessPdf,fieldsOfStudy,s2FieldsOfStudy,publicationTypes,publicationDate,journal,authors",
+  "files_created": [
+    "bulk_search_response.json",
+    "collection_metadata.json"
+  ]
+}

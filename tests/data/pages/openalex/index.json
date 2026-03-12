@@ -1,0 +1,103 @@
+[
+  {
+    "key": "10.3126/nelta.v27i1-2.53203",
+    "url": "http://dx.doi.org/10.3126/nelta.v27i1-2.53203",
+    "doi": "10.3126/nelta.v27i1-2.53203",
+    "final_url": "https://www.nepjol.info/index.php/NELTA/article/view/53203",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 29739,
+    "error": null
+  },
+  {
+    "key": "10.12928/tefl.v1i2.249",
+    "url": "https://doi.org/10.12928/tefl.v1i2.249",
+    "doi": "10.12928/tefl.v1i2.249",
+    "final_url": "https://journal1.uad.ac.id/index.php/tefl/article/view/249",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 48025,
+    "error": null
+  },
+  {
+    "key": "10.31400/dh-hun.2022.6.4576",
+    "url": "http://dx.doi.org/10.31400/dh-hun.2022.6.4576",
+    "doi": "10.31400/dh-hun.2022.6.4576",
+    "final_url": "https://ojs.elte.hu/digitalisbolcseszet/article/view/4576",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 31395,
+    "error": null
+  },
+  {
+    "key": "10.31130/ud-jst.2022.310ict",
+    "url": "http://dx.doi.org/10.31130/ud-jst.2022.310ict",
+    "doi": "10.31130/ud-jst.2022.310ict",
+    "final_url": "https://jst-ud.vn/jst-ud/article/view/7963",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 49550,
+    "error": null
+  },
+  {
+    "key": "10.18280/mmc_c.831-402",
+    "url": "http://dx.doi.org/10.18280/mmc_c.831-402",
+    "doi": "10.18280/mmc_c.831-402",
+    "final_url": "https://iieta.org/journals/mmc_c/paper/10.18280/mmc_c.831-402",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 84520,
+    "error": null
+  },
+  {
+    "key": "10.17576/apjitm-2022-1102-09",
+    "url": "http://dx.doi.org/10.17576/apjitm-2022-1102-09",
+    "doi": "10.17576/apjitm-2022-1102-09",
+    "final_url": "https://www.ukm.my/apjitm/article/335f5352088d7d9bf74191e006d8e24c/KT",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 45840,
+    "error": null
+  },
+  {
+    "key": "10.35219/eai15840409289",
+    "url": "http://doi.org/10.35219/eai15840409289",
+    "doi": "10.35219/eai15840409289",
+    "final_url": "http://eia.feaa.ugal.ro/images/eia/2022_3/Enache.pdf",
+    "status": 200,
+    "content_type": "application/pdf",
+    "size_bytes": 671437,
+    "error": null,
+    "truncated": true
+  },
+  {
+    "key": "10.5281/zenodo.7602012",
+    "url": "https://doi.org/10.5281/zenodo.7602012",
+    "doi": "10.5281/zenodo.7602012",
+    "final_url": "https://zenodo.org/records/7602012",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 75614,
+    "error": null
+  },
+  {
+    "key": "10.17762/ijritcc.v10i2s.5914",
+    "url": "http://dx.doi.org/10.17762/ijritcc.v10i2s.5914",
+    "doi": "10.17762/ijritcc.v10i2s.5914",
+    "final_url": "https://ijritcc.org/index.php/ijritcc/article/view/5914",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 51557,
+    "error": null
+  },
+  {
+    "key": "10.29304/jqcm.2022.14.4.1116",
+    "url": "http://dx.doi.org/10.29304/jqcm.2022.14.4.1116",
+    "doi": "10.29304/jqcm.2022.14.4.1116",
+    "final_url": "https://jqcsm.qu.edu.iq/index.php/journalcm/article/view/1116",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 38793,
+    "error": null
+  }
+]

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="hu-HU" xml:lang="hu-HU">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>
+		Humán annotált emóciókorpusz létrehozása aktorokhoz köthető érzelmek detektálására
+							| Digitális Bölcsészet
+			</title>
+
+	
+<link rel="icon" href="https://ojs.elte.hu/public/journals/3/favicon_hu_HU.jpg">
+<meta name="generator" content="Open Journal Systems 3.3.0.20">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+<meta name="DC.Creator.PersonalName" content="Árpád Knap"/>
+<meta name="DC.Creator.PersonalName" content="Tímea Emese Tóth"/>
+<meta name="DC.Creator.PersonalName" content="Zsófia Rakovics"/>
+<meta name="DC.Date.created" scheme="ISO8601" content="2022-12-31"/>
+<meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="2022-09-09"/>
+<meta name="DC.Date.issued" scheme="ISO8601" content="2022-12-31"/>
+<meta name="DC.Date.modified" scheme="ISO8601" content="2023-09-14"/>
+<meta name="DC.Description" xml:lang="en" content="In our study, we present an ongoing research project in which our goal is to create a language model capable of classifying sentiments and specific emotions related to actors (e.g., institutions, persons). The training database of the model is a human-annotated text corpus consisting of ten thousand articles from online newspapers, compiled using statistical sampling methods. In the project, we employ a two-phase annotation design. First, we annotate named entities and common names that function as actors. Second, we annotate sentiments and specific emotions found in the context of the previously marked actors. Such a database of annotated texts can provide excellent input for creating supervised classification models. In this article, we describe the corpus of the project, the characteristics of supervised and unsupervised text classification procedures, and possible methods for sentiment and emotion detection. After that, we present the two-phase annotation methodology used in our research, the problems and challenges that arose during its development, as well as the research decisions that we made to create a model that can  be used as a capable research tool in social sciences."/>
+<meta name="DC.Description" xml:lang="hu" content="Tanulmányunkban egy olyan kutatási projektet mutatunk be, amelyben egy aktorokhoz (pl. intézményekhez, személyekhez) kapcsolódó, szentimentek és konkrét érzelmek klasszifikációjára képes nyelvi modell létrehozása a célunk. A modell tanítóadatbázisát egy tízezer cikkből álló, online újságokból származó, statisztikai mintavétel segítségével összeállított, humán annotált szövegkorpusz jelenti. Az annotálás során két lépcsőben először az előforduló névelemeket, illetve aktorként funkcionáló közneveket, majd ezt követően a névelemek szövegkörnyezetében megtalálható szentiment- és érzelmi tölteteket annotáljuk. Az annotált szövegek adatbázisa jó bemeneti adatot jelenthet felügyelt klasszifikációs modellek létrehozásához. Cikkünkben ismertetjük a projekt korpuszát, a felügyelt és nem felügyelt szövegklasszifikációs eljárások sajátosságait, valamint a szentiment- és érzelemdetektálás lehetséges módszereit. Ezt követően bemutatjuk a kutatásunkban alkalmazott kétlépcsős annotálási módszertant, az ennek kialakítása során felmerült problémákat és kihívásokat, illetve azokat a kutatói döntéseket, amelyeket a létrehozni kívánt modell társadalomtudományos felhasználhatóságának érdekében hoztunk meg."/>
+<meta name="DC.Format" scheme="IMT" content="application/pdf"/>
+<meta name="DC.Identifier" content="4576"/>
+<meta name="DC.Identifier.pageNumber" content="M:3-M:17"/>
+<meta name="DC.Identifier.DOI" content="10.31400/dh-hun.2022.6.4576"/>
+<meta name="DC.Identifier.URI" content="https://ojs.elte.hu/digitalisbolcseszet/article/view/4576"/>
+<meta name="DC.Language" scheme="ISO639-1" content="hu"/>
+<meta name="DC.Rights" content="Copyright (c) 2022 a szerző(k)"/>
+<meta name="DC.Rights" content="http://creativecommons.org/licenses/by-nc-sa/4.0"/>
+<meta name="DC.Source" content="Digitális Bölcsészet"/>
+<meta name="DC.Source.ISSN" content="2630-9696"/>
+<meta name="DC.Source.Issue" content="6"/>
+<meta name="DC.Source.URI" content="https://ojs.elte.hu/digitalisbolcseszet"/>
+<meta name="DC.Subject" xml:lang="hu" content="szentimentdetektálás"/>
+<meta name="DC.Subject" xml:lang="hu" content="érzelemdetektálás"/>
+<meta name="DC.Subject" xml:lang="hu" content="szövegklasszifikáció"/>
+<meta name="DC.Subject" xml:lang="hu" content="BERT"/>
+<meta name="DC.Subject" xml:lang="hu" content="felügyelt modell"/>
+<meta name="DC.Subject" xml:lang="hu" content="humán annotáció"/>
+<meta name="DC.Title" content="Humán annotált emóciókorpusz létrehozása aktorokhoz köthető érzelmek detektálására"/>
+<meta name="DC.Title.Alternative" xml:lang="en" content="Creating a Human Annotated Emotion Corpus for the Detection of Actor-related Emotions"/>
+<meta name="DC.Type" content="Text.Serial.Journal"/>
+<meta name="DC.Type.articleType" content="Műhely"/>
+<meta name="gs_meta_revision" content="1.1"/>
+<meta name="citation_journal_title" content="Digitális Bölcsészet"/>
+<meta name="citation_journal_abbrev" content="dh-hun"/>
+<meta name="citation_issn" content="2630-9696"/> 
+<meta name="citation_author" content="Árpád Knap"/>
+<meta name="citation_author_institution" content="ELTE TÁTK"/>
+<meta name="citation_author" content="Tímea Emese Tóth"/>
+<meta name="citation_author_institution" content="ELTE TÁTK"/>
+<meta name="citation_author" content="Zsófia Rakovics"/>
+<meta name="citation_author_institution" content="ELTE TÁTK"/>
+<meta name="citation_title" content="Humán annotált emóciókorpusz létrehozása aktorokhoz köthető érzelmek detektálására"/>
+<meta name="citation_language" content="hu"/>
+<meta name="citation_date" content="2022/12/31"/>
+<meta name="citation_issue" content="6"/>
+<meta name="citation_firstpage" content="M:3"/>
+<meta name="citation_lastpage" content="M:17"/>
+<meta name="citation_doi" content="10.31400/dh-hun.2022.6.4576"/>
+<meta name="citation_abstract_html_url" content="https://ojs.elte.hu/digitalisbolcseszet/article/view/4576"/>
+<meta name="citation_keywords" xml:lang="hu" content="szentimentdetektálás"/>
+<meta name="citation_keywords" xml:lang="hu" content="érzelemdetektálás"/>
+<meta name="citation_keywords" xml:lang="hu" content="szövegklasszifikáció"/>
+<meta name="citation_keywords" xml:lang="hu" content="BERT"/>
+<meta name="citation_keywords" xml:lang="hu" content="felügyelt modell"/>
+<meta name="citation_keywords" xml:lang="hu" content="humán annotáció"/>
+<meta name="citation_pdf_url" content="https://ojs.elte.hu/digitalisbolcseszet/article/download/4576/4821"/>
+	<link rel="stylesheet" href="https://ojs.elte.hu/digitalisbolcseszet/$$$call$$$/page/page/css?name=stylesheet" type="text/css" /><link rel="stylesheet" href="https://ojs.elte.hu/digitalisbolcseszet/$$$call$$$/page/page/css?name=font" type="text/css" /><link rel="stylesheet" href="https://ojs.elte.hu/lib/pkp/styles/fontawesome/fontawesome.css?v=3.3.0.20" type="text/css" /><link rel="stylesheet" href="https://ojs.elte.hu/public/site/styleSheet.css?v=3.3.0.20" type="text/css" />
+</head>
+<body class="pkp_page_article pkp_op_view has_site_logo" dir="ltr">
+
+	<div class="pkp_structure_page">
+
+				<header class="pkp_structure_head" id="headerNavigationContainer" role="banner">
+						
+ <nav class="cmp_skip_to_content" aria-label="##navigation.skip.description##">
+	<a href="#pkp_content_main">Ugrás a fő tartalmi részhez</a>
+	<a href="#siteNav">Ugrás a főmenübe</a>
+		<a href="#pkp_content_footer">Ugrás az oldal lábrészéhez</a>
+</nav>
+
+			<div class="pkp_head_wrapper">
+
+				<div class="pkp_site_name_wrapper">
+					<button class="pkp_site_nav_toggle">
+						<span>Open Menu</span>
+					</button>
+										<div class="pkp_site_name">
+																<a href="						https://ojs.elte.hu/digitalisbolcseszet/index
+					" class="is_img">
+							<img src="https://ojs.elte.hu/public/journals/3/pageHeaderLogoImage_hu_HU.jpg" width="860" height="84" alt="db_logo" />
+						</a>
+										</div>
+				</div>
+
+				
+				<nav class="pkp_site_nav_menu" aria-label="Oldal navigáció">
+					<a id="siteNav"></a>
+					<div class="pkp_navigation_primary_row">
+						<div class="pkp_navigation_primary_wrapper">
+																				<ul id="navigationPrimary" class="pkp_navigation_primary pkp_nav_list">
+								<li class="">
+				<a href="https://ojs.elte.hu/digitalisbolcseszet/issue/current">
+					Aktuális szám
+				</a>
+							</li>
+								<li class="">
+				<a href="https://ojs.elte.hu/digitalisbolcseszet/issue/archive">
+					Archívum
+				</a>
+							</li>
+								<li class="">
+				<a href="https://ojs.elte.hu/digitalisbolcseszet/about">
+					Rólunk
+				</a>
+									<ul>
+																					<li class="">
+									<a href="https://ojs.elte.hu/digitalisbolcseszet/about">
+										A folyóiratról
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ojs.elte.hu/digitalisbolcseszet/about/editorialTeam">
+										Impresszum
+									</a>
+								</li>
+																												<li class="">
+									<a href="http://ojs.elte.hu/index.php/digitalisbolcseszet/intro">
+										Szerkesztők
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ojs.elte.hu/digitalisbolcseszet/about/aims-and-scope">
+										Célok és profil
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ojs.elte.hu/digitalisbolcseszet/about/peer-review-policy">
+										Bírálati folyamat elvei
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://ojs.elte.hu/digitalisbolcseszet/about/publication-ethics">
+										Publikációs etika
+									</a>
+								</li>
+																												<li class="">
+									<a href="http://ojs.elte.hu/index.php/digitalisbolcseszet/tamogatoink">
+										Támogatóink
+									</a>
+								</li>
+																		</ul>
+							</li>
+								<li class="">
+				<a href="https://ojs.elte.hu/digitalisbolcseszet/about/submissions">
+					Cikk beküldése
+				</a>
+							</li>
+								<li class="">
+				<a href="https://ojs.elte.hu/digitalisbolcseszet/announcement">
+					Hírek
+				</a>
+							</li>
+			</ul>
+
+				
+
+																						<div class="pkp_navigation_search_wrapper">
+									<a href="https://ojs.elte.hu/digitalisbolcseszet/search" class="pkp_search pkp_search_desktop">
+										<span class="fa fa-search" aria-hidden="true"></span>
+										Keresés
+									</a>
+								</div>
+													</div>
+					</div>
+					<div class="pkp_navigation_user_wrapper" id="navigationUserWrapper">
+							<ul id="navigationUser" class="pkp_navigation_user pkp_nav_list">
+								<li class="profile">
+				<a href="https://ojs.elte.hu/digitalisbolcseszet/user/register">
+					Regisztráció
+				</a>
+							</li>
+								<li class="profile">
+				<a href="https://ojs.elte.hu/digitalisbolcseszet/login">
+					Bejelentkezés
+				</a>
+							</li>
+										</ul>
+
+					</div>
+				</nav>
+			</div><!-- .pkp_head_wrapper -->
+		</header><!-- .pkp_structure_head -->
+
+						<div class="pkp_structure_content has_sidebar">
+			<div class="pkp_structure_main" role="main">
+				<a id="pkp_content_main"></a>
+
+<div class="page page_article">
+			<nav class="cmp_breadcrumbs" role="navigation" aria-label="Jelenleg itt van:">
+	<ol>
+		<li>
+			<a href="https://ojs.elte.hu/digitalisbolcseszet/index">
+				Főoldal
+			</a>
+			<span class="separator">/</span>
+		</li>
+		<li>
+			<a href="https://ojs.elte.hu/digitalisbolcseszet/issue/archive">
+				Archívum
+			</a>
+			<span class="separator">/</span>
+		</li>
+					<li>
+				<a href="https://ojs.elte.hu/digitalisbolcseszet/issue/view/328">
+					szám 6 (2022): Digitális Bölcsészet
+				</a>
+				<span class="separator">/</span>
+			</li>
+				<li class="current" aria-current="page">
+			<span aria-current="page">
+									Műhely
+							</span>
+		</li>
+	</ol>
+</nav>
+	
+		  	 <article class="obj_article_details">
+
+		
+	<h1 class="page_title">
+		Humán annotált emóciókorpusz létrehozása aktorokhoz köthető érzelmek detektálására
+	</h1>
+
+	
+	<div class="row">
+		<div class="main_entry">
+
+							<section class="item authors">
+					<h2 class="pkp_screen_reader">Szerzők</h2>
+					<ul class="authors">
+											<li>
+							<span class="name">
+								Árpád Knap
+							</span>
+															<span class="affiliation">
+									ELTE TÁTK
+																	</span>
+																						<span class="orcid">
+																		<a href="https://orcid.org/0000-0002-4290-6025" target="_blank">
+										https://orcid.org/0000-0002-4290-6025
+									</a>
+								</span>
+													</li>
+											<li>
+							<span class="name">
+								Tímea Emese Tóth
+							</span>
+															<span class="affiliation">
+									ELTE TÁTK
+																	</span>
+																						<span class="orcid">
+																		<a href="https://orcid.org/0000-0002-3584-118X" target="_blank">
+										https://orcid.org/0000-0002-3584-118X
+									</a>
+								</span>
+													</li>
+											<li>
+							<span class="name">
+								Zsófia Rakovics
+							</span>
+															<span class="affiliation">
+									ELTE TÁTK
+																	</span>
+																						<span class="orcid">
+																		<a href="https://orcid.org/0000-0002-9903-9348" target="_blank">
+										https://orcid.org/0000-0002-9903-9348
+									</a>
+								</span>
+													</li>
+										</ul>
+				</section>
+			
+																												<section class="item doi">
+						<h2 class="label">
+														DOI:
+						</h2>
+						<span class="value">
+							<a href="https://doi.org/10.31400/dh-hun.2022.6.4576">
+								https://doi.org/10.31400/dh-hun.2022.6.4576
+							</a>
+						</span>
+					</section>
+							
+									<section class="item keywords">
+				<h2 class="label">
+										Kulcsszavak:
+				</h2>
+				<span class="value">
+											szentimentdetektálás, 											érzelemdetektálás, 											szövegklasszifikáció, 											BERT, 											felügyelt modell, 											humán annotáció									</span>
+			</section>
+			
+										<section class="item abstract">
+					<h2 class="label">Absztrakt</h2>
+					<p>Tanulmányunkban egy olyan kutatási projektet mutatunk be, amelyben egy aktorokhoz (pl. intézményekhez, személyekhez) kapcsolódó, szentimentek és konkrét érzelmek klasszifikációjára képes nyelvi modell létrehozása a célunk. A modell tanítóadatbázisát egy tízezer cikkből álló, online újságokból származó, statisztikai mintavétel segítségével összeállított, humán annotált szövegkorpusz jelenti. Az annotálás során két lépcsőben először az előforduló névelemeket, illetve aktorként funkcionáló közneveket, majd ezt követően a névelemek szövegkörnyezetében megtalálható szentiment- és érzelmi tölteteket annotáljuk. Az annotált szövegek adatbázisa jó bemeneti adatot jelenthet felügyelt klasszifikációs modellek létrehozásához. Cikkünkben ismertetjük a projekt korpuszát, a felügyelt és nem felügyelt szövegklasszifikációs eljárások sajátosságait, valamint a szentiment- és érzelemdetektálás lehetséges módszereit. Ezt követően bemutatjuk a kutatásunkban alkalmazott kétlépcsős annotálási módszertant, az ennek kialakítása során felmerült problémákat és kihívásokat, illetve azokat a kutatói döntéseket, amelyeket a létrehozni kívánt modell társadalomtudományos felhasználhatóságának érdekében hoztunk meg.</p>
+				</section>
+			
+			
+
+																																	
+						
+		</div><!-- .main_entry -->
+
+		<div class="entry_details">
+
+						
+										<div class="item galleys">
+					<h2 class="pkp_screen_reader">
+						##submission.downloads##
+					</h2>
+					<ul class="value galleys_links">
+													<li>
+								
+	
+							
+
+<a class="obj_galley_link pdf" href="https://ojs.elte.hu/digitalisbolcseszet/article/view/4576/4821">
+
+		
+	PDF
+
+	</a>
+							</li>
+											</ul>
+				</div>
+						
+						<div class="item published">
+				<section class="sub_item">
+					<h2 class="label">
+						Megjelent
+					</h2>
+					<div class="value">
+																			<span>2022-12-31</span>
+																	</div>
+				</section>
+							</div>
+			
+										<div class="item citation">
+					<section class="sub_item citation_display">
+						<h2 class="label">
+							Hogyan kell idézni
+						</h2>
+						<div class="value">
+							<div id="citationOutput" role="region" aria-live="polite">
+								<div class="csl-bib-body">
+  <div class="csl-entry">Knap, Árpád, Tímea Emese Tóth, és Zsófia Rakovics. 2022. „Humán annotált emóciókorpusz létrehozása Aktorokhoz köthető érzelmek detektálására”. <i>Digitális Bölcsészet</i>, sz. 6 (december):M:3-M:17. https://doi.org/10.31400/dh-hun.2022.6.4576.</div>
+</div>
+							</div>
+							<div class="citation_formats">
+								<button class="cmp_button citation_formats_button" aria-controls="cslCitationFormats" aria-expanded="false" data-csl-dropdown="true">
+									Idézet formátumok
+								</button>
+								<div id="cslCitationFormats" class="citation_formats_list" aria-hidden="true">
+									<ul class="citation_formats_styles">
+																					<li>
+												<a
+													rel="nofollow"
+													aria-controls="citationOutput"
+													href="https://ojs.elte.hu/digitalisbolcseszet/citationstylelanguage/get/apa?submissionId=4576&amp;publicationId=4232"
+													data-load-citation
+													data-json-href="https://ojs.elte.hu/digitalisbolcseszet/citationstylelanguage/get/apa?submissionId=4576&amp;publicationId=4232&amp;return=json"
+												>
+													APA
+												</a>
+											</li>
+																					<li>
+												<a
+													rel="nofollow"
+													aria-controls="citationOutput"
+													href="https://ojs.elte.hu/digitalisbolcseszet/citationstylelanguage/get/modern-language-association?submissionId=4576&amp;publicationId=4232"
+													data-load-citation
+													data-json-href="https://ojs.elte.hu/digitalisbolcseszet/citationstylelanguage/get/modern-language-association?submissionId=4576&amp;publicationId=4232&amp;return=json"
+												>
+													MLA
+												</a>
+											</li>
+																			</ul>
+																			<div class="label">
+											Idézés letöltése
+										</div>
+										<ul class="citation_formats_styles">
+																							<li>
+													<a href="https://ojs.elte.hu/digitalisbolcseszet/citationstylelanguage/download/ris?submissionId=4576&amp;publicationId=4232">
+														<span class="fa fa-download"></span>
+														Endnote/Zotero/Mendeley (RIS)
+													</a>
+												</li>
+																							<li>
+													<a href="https://ojs.elte.hu/digitalisbolcseszet/citationstylelanguage/download/bibtex?submissionId=4576&amp;publicationId=4232">
+														<span class="fa fa-download"></span>
+														BibTeX
+													</a>
+												</li>
+																					</ul>
+																	</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			
+										<div class="item issue">
+
+											<section class="sub_item">
+							<h2 class="label">
+								Folyóirat szám
+							</h2>
+							<div class="value">
+								<a class="title" href="https://ojs.elte.hu/digitalisbolcseszet/issue/view/328">
+									szám 6 (2022): Digitális Bölcsészet
+								</a>
+							</div>
+						</section>
+					
+											<section class="sub_item">
+							<h2 class="label">
+								Rovat
+							</h2>
+							<div class="value">
+								Műhely
+							</div>
+						</section>
+					
+									</div>
+			
+															
+										<div class="item copyright">
+					<h2 class="label">
+						License
+					</h2>
+																										<p>Copyright (c) 2022 a szerző(k)</p>
+														<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" src="//i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><p>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
+																
+				</div>
+			
+			
+
+		</div><!-- .entry_details -->
+	</div><!-- .row -->
+
+</article>
+
+	<div id="articlesBySameAuthorList">
+				</div>
+
+
+</div><!-- .page -->
+
+	</div><!-- pkp_structure_main -->
+
+									<div class="pkp_structure_sidebar left" role="complementary" aria-label="Oldalsáv">
+				<div class="pkp_block block_language">
+	<h2 class="title">
+		Nyelv
+	</h2>
+
+	<div class="content">
+		<ul>
+							<li class="locale_en_US" lang="en-US">
+					<a href="https://ojs.elte.hu/digitalisbolcseszet/user/setLocale/en_US?source=%2Fdigitalisbolcseszet%2Farticle%2Fview%2F4576">
+						English
+					</a>
+				</li>
+							<li class="locale_hu_HU current" lang="hu-HU">
+					<a href="https://ojs.elte.hu/digitalisbolcseszet/user/setLocale/hu_HU?source=%2Fdigitalisbolcseszet%2Farticle%2Fview%2F4576">
+						Magyar
+					</a>
+				</li>
+					</ul>
+	</div>
+</div><!-- .block_language -->
+<div class="pkp_block block_Keywordcloud">
+	<h2 class="title">##plugins.block.keywordCloud.title##</h2>
+	<div class="content" id='wordcloud'></div>
+
+	<script>
+		function randomColor() {
+			var colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];
+			return colors[Math.floor(Math.random()*colors.length)];
+		}
+
+					document.addEventListener("DOMContentLoaded", function() {
+				var keywords = [{"text":"adatvizualiz\u00e1ci\u00f3","size":1},{"text":"digit\u00e1lis b\u00f6lcs\u00e9szet","size":1},{"text":"digit\u00e1lis irodalomtudom\u00e1ny","size":1},{"text":"kritika","size":1},{"text":"neoliberalizmus","size":1},{"text":"stilometria","size":1},{"text":"t\u00e9rk\u00e9pes\u00edt\u00e9s","size":1},{"text":"vizualiz\u00e1ci\u00f3","size":1},{"text":"vita","size":1},{"text":"m\u0171v\u00e9szett\u00f6rt\u00e9net, recepci\u00f3t\u00f6rt\u00e9net, modern magyar m\u0171v\u00e9szet, grafika, statisztika, m\u0171v\u00e9szek kultusza","size":1},{"text":"interj\u00fa","size":1},{"text":"kvantitat\u00edv dr\u00e1maelemz\u00e9s","size":1},{"text":"shakespeare","size":1},{"text":"sbert","size":1},{"text":"innov\u00e1ci\u00f3","size":1},{"text":"ism\u00e9tl\u00e9s","size":1},{"text":"kiterjesztett olvas\u00e1s","size":1},{"text":"voyant tools","size":1},{"text":"digit\u00e1lis folklorisztika","size":1},{"text":"folkl\u00f3rsz\u00f6vegek","size":1},{"text":"r\u00e1olvas\u00e1sadatb\u00e1zis","size":1},{"text":"sz\u00e1m\u00edt\u00f3g\u00e9pes folklorisztika","size":1},{"text":"dr\u00e1mat\u00f6rt\u00e9net","size":1},{"text":"klaszterez\u00e9s","size":1},{"text":"h\u00e1l\u00f3zatelemz\u00e9s","size":1},{"text":"m\u0171faj","size":1},{"text":"adattudom\u00e1ny","size":1},{"text":"t\u00f6rt\u00e9nelem","size":1},{"text":"irodalomtudom\u00e1ny","size":1},{"text":"sz\u00f6vegelemz\u00e9s","size":1},{"text":"t\u00f6rt\u00e9nettudom\u00e1ny","size":1},{"text":"h\u00e1l\u00f3zatkutat\u00e1s","size":1},{"text":"inform\u00e1ci\u00f3tudom\u00e1ny","size":1},{"text":"m\u0171v\u00e9szetek","size":1},{"text":"szentimentdetekt\u00e1l\u00e1s","size":1},{"text":"\u00e9rzelemdetekt\u00e1l\u00e1s","size":1},{"text":"sz\u00f6vegklasszifik\u00e1ci\u00f3","size":1},{"text":"bert","size":1},{"text":"fel\u00fcgyelt modell","size":1},{"text":"hum\u00e1n annot\u00e1ci\u00f3","size":1},{"text":"megszem\u00e9lyes\u00edt\u00e9s","size":1},{"text":"korpusz","size":1},{"text":"annot\u00e1l\u00e1s","size":1},{"text":"elemz\u00e9s","size":1},{"text":"h\u00e1l\u00f3zattudom\u00e1ny","size":1},{"text":"gazdas\u00e1g","size":1},{"text":"gerard vissering","size":1},{"text":"heged\u00fcs lor\u00e1nt","size":1},{"text":"sz\u00f6veg- \u00e9s adatb\u00e1ny\u00e1szat","size":1},{"text":"term\u00e9szetesnyelv-feldolgoz\u00e1s","size":1}];
+				var totalWeight = 0;
+				var width = 300;
+				var height = 200;
+				var transitionDuration = 200;
+				var length_keywords = keywords.length;
+				var layout = d3.layout.cloud();
+
+				layout.size([width, height])
+					.words(keywords)
+					.fontSize(function(d)
+					{
+						return fontSize(+d.size);
+					})
+					.on('end', draw);
+
+				var svg = d3.select("#wordcloud").append("svg")
+					.attr("viewBox", "0 0 " + width + " " + height)
+					.attr("width", '100%');
+
+				function update() {
+					var words = layout.words();
+					fontSize = d3.scaleLinear().range([16, 34]);
+					if (words.length) {
+						fontSize.domain([+words[words.length - 1].size || 1, +words[0].size]);
+					}
+				}
+
+				keywords.forEach(function(item,index){totalWeight += item.size;});
+
+				update();
+
+				function draw(words, bounds) {
+					var w = layout.size()[0],
+						h = layout.size()[1];
+
+					scaling = bounds
+						? Math.min(
+							w / Math.abs(bounds[1].x - w / 2),
+							w / Math.abs(bounds[0].x - w / 2),
+							h / Math.abs(bounds[1].y - h / 2),
+							h / Math.abs(bounds[0].y - h / 2),
+						) / 2
+						: 1;
+
+					svg
+					.append("g")
+					.attr(
+						"transform",
+						"translate(" + [w >> 1, h >> 1] + ")scale(" + scaling + ")",
+					)
+					.selectAll("text")
+						.data(words)
+					.enter().append("text")
+						.style("font-size", function(d) { return d.size + "px"; })
+						.style("font-family", 'serif')
+						.style("fill", randomColor)
+						.style('cursor', 'pointer')
+						.style('opacity', 0.7)
+						.attr('class', 'keyword')
+						.attr("text-anchor", "middle")
+						.attr("transform", function(d) {
+							return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+						})
+						.text(function(d) { return d.text; })
+						.on("click", function(d, i){
+							window.location = "https://ojs.elte.hu/digitalisbolcseszet/search?query=QUERY_SLUG".replace(/QUERY_SLUG/, encodeURIComponent(''+d.text+''));
+						})
+						.on("mouseover", function(d, i) {
+							d3.select(this).transition()
+								.duration(transitionDuration)
+								.style('font-size',function(d) { return (d.size + 3) + "px"; })
+								.style('opacity', 1);
+						})
+						.on("mouseout", function(d, i) {
+							d3.select(this).transition()
+								.duration(transitionDuration)
+								.style('font-size',function(d) { return d.size + "px"; })
+								.style('opacity', 0.7);
+						})
+						.on('resize', function() { update() });
+				}
+
+				layout.start();
+
+			});
+			</script>
+</div>
+<div class="pkp_block block_information">
+	<h2 class="title">Információ</h2>
+	<div class="content">
+		<ul>
+							<li>
+					<a href="https://ojs.elte.hu/digitalisbolcseszet/information/readers">
+						Olvasóknak
+					</a>
+				</li>
+										<li>
+					<a href="https://ojs.elte.hu/digitalisbolcseszet/information/authors">
+						Szerzőknek
+					</a>
+				</li>
+										<li>
+					<a href="https://ojs.elte.hu/digitalisbolcseszet/information/librarians">
+						Könyvtárosoknak
+					</a>
+				</li>
+					</ul>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-szerzoindex">
+	<h2 class="title pkp_screen_reader">szerzoindex</h2>
+	<div class="content">
+		<p><a title="Böngészés szerzők alapján" href="http://ojs.elte.hu/index.php/digitalisbolcseszet/search/authors">Böngészés szerzők alapján</a><strong><a title="Böngészés szerzők alapján" href="http://ojs.elte.hu/index.php/digitalisbolcseszet/search/authors"></a></strong></p>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-donate">
+	<h2 class="title pkp_screen_reader">donate</h2>
+	<div class="content">
+		<p align="center"><a href="http://ojs.elte.hu/index.php/digitalisbolcseszet/announcement/view/17"><img src="/public/site/images/marothy_szilvia/donate-vector-sign_s1.jpg"></a></p>
+<p align="center"><a href="http://ojs.elte.hu/index.php/digitalisbolcseszet/announcement/view/17"><strong>Támogassa folyóiratunkat!</strong></a></p>
+	</div>
+</div>
+
+			</div><!-- pkp_sidebar.left -->
+			</div><!-- pkp_structure_content -->
+
+<div class="pkp_structure_footer_wrapper" role="contentinfo">
+	<a id="pkp_content_footer"></a>
+
+	<div class="pkp_structure_footer">
+
+					<div class="pkp_footer_content">
+				<p>Digitális Bölcsészet folyóirat <a href="http://creativecommons.org/licenses/by-nc-sa/2.5/hu/" rel="license"><img style="border-width: 0;" src="https://i.creativecommons.org/l/by-nc-sa/2.5/hu/80x15.png" alt="Creative Commons Licenc"></a><br>Ez a Mű a <a href="http://creativecommons.org/licenses/by-nc-sa/2.5/hu/" rel="license">Creative Commons Nevezd meg! - Ne add el! - Így add tovább! 2.5 Magyarország Licenc</a> feltételeinek megfelelően felhasználható.</p>
+<p>ISSN 2630-9696 // DOI 10.31400/dh-<wbr>hun</p>
+<p><a href="http://ojs.elte.hu/index.php/digitalisbolcseszet/about/contact">Kapcsolat</a> //&nbsp;<a href="http://ojs.elte.hu/index.php/digitalisbolcseszet/about/privacy">Adatvédelmi nyilatkozat</a></p>
+<p align="center"><a href="http://ojs.elte.hu/index.php/digitalisbolcseszet/announcement/view/17"><img src="/public/site/images/marothy_szilvia/donate-vector-sign_xs1.jpg"></a></p>
+<p align="center"><strong><a href="http://ojs.elte.hu/index.php/digitalisbolcseszet/announcement/view/17">Támogassa folyóiratunkat!</a></strong></p>
+			</div>
+		
+		<div class="pkp_brand_footer" role="complementary">
+			<a href="https://ojs.elte.hu/digitalisbolcseszet/about/aboutThisPublishingSystem">
+				<img alt="A kiadói rendszerről" src="https://ojs.elte.hu/templates/images/ojs_brand.png">
+			</a>
+		</div>
+	</div>
+</div><!-- pkp_structure_footer_wrapper -->
+
+</div><!-- pkp_structure_page -->
+
+<script src="https://ojs.elte.hu/lib/pkp/lib/vendor/components/jquery/jquery.min.js?v=3.3.0.20" type="text/javascript"></script><script src="https://ojs.elte.hu/lib/pkp/lib/vendor/components/jqueryui/jquery-ui.min.js?v=3.3.0.20" type="text/javascript"></script><script src="https://ojs.elte.hu/plugins/themes/default/js/lib/popper/popper.js?v=3.3.0.20" type="text/javascript"></script><script src="https://ojs.elte.hu/plugins/themes/default/js/lib/bootstrap/util.js?v=3.3.0.20" type="text/javascript"></script><script src="https://ojs.elte.hu/plugins/themes/default/js/lib/bootstrap/dropdown.js?v=3.3.0.20" type="text/javascript"></script><script src="https://ojs.elte.hu/plugins/themes/default/js/main.js?v=3.3.0.20" type="text/javascript"></script><script src="https://ojs.elte.hu/plugins/generic/citationStyleLanguage/js/articleCitation.js?v=3.3.0.20" type="text/javascript"></script><script src="https://d3js.org/d3.v4.js?v=3.3.0.20" type="text/javascript"></script><script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js?v=3.3.0.20" type="text/javascript"></script><script type="text/javascript">
+(function (w, d, s, l, i) { w[l] = w[l] || []; var f = d.getElementsByTagName(s)[0],
+j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
+j.src = 'https://www.googletagmanager.com/gtag/js?id=' + i + dl; f.parentNode.insertBefore(j, f); 
+function gtag(){dataLayer.push(arguments)}; gtag('js', new Date()); gtag('config', i); })
+(window, document, 'script', 'dataLayer', 'UA-126732631-1');
+</script>
+
+
+</body>
+</html>

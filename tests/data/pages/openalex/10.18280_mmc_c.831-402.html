@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/terms/"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:og="http://ogp.me/ns#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:sioc="http://rdfs.org/sioc/ns#"
+  xmlns:sioct="http://rdfs.org/sioc/types#"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+
+<head profile="http://www.w3.org/1999/xhtml/vocab">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  extensions: ['tex2jax.js'],
+  jax: ['input/TeX','output/HTML-CSS'],
+  tex2jax: {
+    inlineMath: [ ['$','$'], ['\\(','\\)'] ],
+    processEscapes: true,
+    processClass: 'tex2jax',
+    ignoreClass: 'html'
+  },
+  showProcessingMessages: false,
+  messageStyle: 'none'
+});
+</script><meta name="HandheldFriendly" content="true" />
+<link rel="shortlink" href="/node/12873" />
+<meta name="Generator" content="Drupal 7 (http://drupal.org)" />
+<link rel="canonical" href="/journals/mmc_c/paper/10.18280/mmc_c.831-402" />
+<meta name="MobileOptimized" content="width" />
+  <title>Towards a GUI Gesture Control Using the Leap Motion Controller | IIETA</title>
+  <style type="text/css" media="all">
+@import url("https://iieta.org/modules/system/system.base.css?tb93nr");
+@import url("https://iieta.org/modules/system/system.menus.css?tb93nr");
+@import url("https://iieta.org/modules/system/system.messages.css?tb93nr");
+@import url("https://iieta.org/modules/system/system.theme.css?tb93nr");
+</style>
+<style type="text/css" media="all">
+@import url("https://iieta.org/modules/comment/comment.css?tb93nr");
+@import url("https://iieta.org/sites/all/modules/date/date_api/date.css?tb93nr");
+@import url("https://iieta.org/modules/field/theme/field.css?tb93nr");
+@import url("https://iieta.org/modules/node/node.css?tb93nr");
+@import url("https://iieta.org/modules/search/search.css?tb93nr");
+@import url("https://iieta.org/modules/user/user.css?tb93nr");
+@import url("https://iieta.org/sites/all/modules/views/css/views.css?tb93nr");
+@import url("https://iieta.org/sites/all/modules/ckeditor/css/ckeditor.css?tb93nr");
+@import url("https://iieta.org/sites/all/modules/media/modules/media_wysiwyg/css/media_wysiwyg.base.css?tb93nr");
+</style>
+<style type="text/css" media="all">
+@import url("https://iieta.org/sites/all/modules/ctools/css/ctools.css?tb93nr");
+@import url("https://iieta.org/sites/all/modules/custom_search/custom_search.css?tb93nr");
+@import url("https://iieta.org/sites/all/modules/field_collection/field_collection.theme.css?tb93nr");
+@import url("https://iieta.org/sites/all/themes/mytheme/js/meanmenu/meanmenu.css?tb93nr");
+@import url("https://iieta.org/sites/all/libraries/superfish/css/superfish.css?tb93nr");
+</style>
+<style type="text/css" media="all">
+@import url("https://iieta.org/sites/all/themes/mytheme/bootstrap/css/bootstrap.css?tb93nr");
+@import url("https://iieta.org/sites/all/themes/mytheme/js/flexslider/flexslider.css?tb93nr");
+@import url("https://iieta.org/sites/all/themes/mytheme/css/style.css?tb93nr");
+@import url("https://iieta.org/sites/all/themes/mytheme/css/style-blue.css?tb93nr");
+@import url("https://iieta.org/sites/all/themes/mytheme/css/custom.css?tb93nr");
+@import url("https://iieta.org/sites/all/themes/mytheme/css/custom2.css?tb93nr");
+@import url("https://iieta.org/sites/all/themes/mytheme/css/custom_laoge.css?tb93nr");
+@import url("https://iieta.org/sites/all/themes/mytheme/css/cus_hy.css?tb93nr");
+</style>
+<style type="text/css" media="all">
+@import url("https://iieta.org/sites/all/themes/mytheme/css/font-awesome.min.css?tb93nr");
+</style>
+
+<!--[if (IE 9)&(!IEMobile)]>
+<link type="text/css" rel="stylesheet" href="https://iieta.org/sites/all/themes/mytheme/css/ie9.css?tb93nr" media="all" />
+<![endif]-->
+<style type="text/css" media="all">
+@import url("https://iieta.org/sites/all/themes/mytheme/css/local.css?tb93nr");
+</style>
+
+  <!-- HTML5 element support for IE6-8 -->
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <script type="text/javascript" src="https://iieta.org/sites/all/modules/jquery_update/replace/jquery/1.10/jquery.min.js?v=1.10.2"></script>
+<script type="text/javascript" src="https://iieta.org/misc/jquery.once.js?v=1.2"></script>
+<script type="text/javascript" src="https://iieta.org/misc/drupal.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/misc/form.js?v=7.65"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/modules/spamspan/spamspan.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/modules/mathjax/mathjax.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/modules/custom_search/js/custom_search.js?tb93nr"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery(document).ready(function($) { 
+		$(window).scroll(function() {
+			if($(this).scrollTop() != 0) {
+				$("#toTop").addClass("show");	
+			} else {
+				$("#toTop").removeClass("show");
+			}
+		});
+		
+		$("#toTop").click(function() {
+			$("body,html").animate({scrollTop:0},800);
+		});	
+		
+		});
+//--><!]]>
+</script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery(document).ready(function($) { 
+
+			var	headerTopHeight = $("#header-top").outerHeight(),
+			headerHeight = $("#header").outerHeight();
+			
+			$(window).scroll(function() {
+			if(($(this).scrollTop() > headerTopHeight+headerHeight) && ($(window).width() > 767)) {
+				$("body").addClass("onscroll");
+				if (($("#site-name").length > 0) && ($("#logo").length > 0)) {
+					$(".onscroll #logo").addClass("hide");
+				}
+
+				if ($("#banner").length > 0) { 
+ 					$("#banner").css("marginTop", (headerHeight)+"px");
+				} else if ($("#page-intro").length > 0) {
+					$("#page-intro").css("marginTop", (headerHeight)+"px");
+				} else {
+					$("#page").css("marginTop", (headerHeight)+"px");
+				}
+			} else {
+				$("body").removeClass("onscroll");
+				$("#logo").removeClass("hide");
+				$("#page,#banner,#page-intro").css("marginTop", (0)+"px");
+			}
+			});
+		});
+//--><!]]>
+</script>
+<script type="text/javascript" src="https://iieta.org/sites/all/themes/mytheme/js/meanmenu/jquery.meanmenu.fork.js?tb93nr"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery(document).ready(function($) {
+
+			$("#main-navigation .sf-menu, #main-navigation .content>ul.menu, #main-navigation ul.main-menu").wrap("<div class='meanmenu-wrapper'></div>");
+			$("#main-navigation .meanmenu-wrapper").meanmenu({
+				meanScreenWidth: "767",
+				meanRemoveAttrs: true,
+				meanMenuContainer: "#header-inside",
+				meanMenuClose: ""
+			});
+
+			$("#header-top .sf-menu, #header-top .content>ul.menu").wrap("<div class='header-top-meanmenu-wrapper'></div>");
+			$("#header-top .header-top-meanmenu-wrapper").meanmenu({
+				meanScreenWidth: "767",
+				meanRemoveAttrs: true,
+				meanMenuContainer: "#header-top-inside",
+				meanMenuClose: ""
+			});
+
+		});
+//--><!]]>
+</script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+
+        (function($) {
+		Drupal.FieldGroup = Drupal.FieldGroup || {};
+		Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
+
+            Drupal.FieldGroup.Effects.processAccordion = {
+              execute: function (context, settings, type) {
+                $("div.field-group-accordion-wrapper", context).once("fieldgroup-effects", function () {
+                  var wrapper = $(this);
+
+                  wrapper.accordion({
+                    heightStyle: "content",
+                    autoHeight: true,
+                    active: ".field-group-accordion-active",
+                    collapsible: true,
+                    changestart: function(event, ui) {
+                      if ($(this).hasClass("effect-none")) {
+                        ui.options.animated = false;
+                      }
+                      else {
+                        ui.options.animated = "slide";
+                      }
+                    }
+                  });
+                });
+              }
+            }
+	
+    	})(jQuery);
+//--><!]]>
+</script>
+<script type="text/javascript" src="https://iieta.org/sites/all/libraries/superfish/jquery.hoverIntent.minified.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/libraries/superfish/supposition.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/libraries/superfish/superfish.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/libraries/superfish/supersubs.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/modules/superfish/superfish.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/themes/mytheme/js/flexslider/jquery.flexslider.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/themes/mytheme/js/jquery.browser.min.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/themes/mytheme/bootstrap/js/popper.min.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/themes/mytheme/bootstrap/js/bootstrap.min.js?tb93nr"></script>
+<script type="text/javascript" src="https://iieta.org/sites/all/themes/mytheme/js/custom.js?tb93nr"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery.extend(Drupal.settings, {"basePath":"\/","pathPrefix":"","ajaxPageState":{"theme":"mytheme","theme_token":"K4k4g7lRqsFkeKmyyf1OWkX4tt-P4h9XM-ScY3A4FyU","js":{"sites\/all\/modules\/jquery_update\/replace\/jquery\/1.10\/jquery.min.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"misc\/form.js":1,"sites\/all\/modules\/spamspan\/spamspan.js":1,"sites\/all\/modules\/mathjax\/mathjax.js":1,"sites\/all\/modules\/custom_search\/js\/custom_search.js":1,"https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/mathjax\/2.7.0\/MathJax.js?config=TeX-AMS-MML_HTMLorMML":1,"0":1,"1":1,"sites\/all\/themes\/mytheme\/js\/meanmenu\/jquery.meanmenu.fork.js":1,"2":1,"3":1,"sites\/all\/libraries\/superfish\/jquery.hoverIntent.minified.js":1,"sites\/all\/libraries\/superfish\/supposition.js":1,"sites\/all\/libraries\/superfish\/superfish.js":1,"sites\/all\/libraries\/superfish\/supersubs.js":1,"sites\/all\/modules\/superfish\/superfish.js":1,"sites\/all\/themes\/mytheme\/js\/flexslider\/jquery.flexslider.js":1,"sites\/all\/themes\/mytheme\/js\/jquery.browser.min.js":1,"sites\/all\/themes\/mytheme\/bootstrap\/js\/popper.min.js":1,"sites\/all\/themes\/mytheme\/bootstrap\/js\/bootstrap.min.js":1,"sites\/all\/themes\/mytheme\/js\/custom.js":1},"css":{"modules\/system\/system.base.css":1,"modules\/system\/system.menus.css":1,"modules\/system\/system.messages.css":1,"modules\/system\/system.theme.css":1,"modules\/comment\/comment.css":1,"sites\/all\/modules\/date\/date_api\/date.css":1,"modules\/field\/theme\/field.css":1,"modules\/node\/node.css":1,"modules\/search\/search.css":1,"modules\/user\/user.css":1,"sites\/all\/modules\/views\/css\/views.css":1,"sites\/all\/modules\/ckeditor\/css\/ckeditor.css":1,"sites\/all\/modules\/media\/modules\/media_wysiwyg\/css\/media_wysiwyg.base.css":1,"sites\/all\/modules\/ctools\/css\/ctools.css":1,"sites\/all\/modules\/custom_search\/custom_search.css":1,"sites\/all\/modules\/field_collection\/field_collection.theme.css":1,"sites\/all\/themes\/mytheme\/js\/meanmenu\/meanmenu.css":1,"sites\/all\/libraries\/superfish\/css\/superfish.css":1,"sites\/all\/themes\/mytheme\/bootstrap\/css\/bootstrap.css":1,"sites\/all\/themes\/mytheme\/js\/flexslider\/flexslider.css":1,"sites\/all\/themes\/mytheme\/css\/style.css":1,"sites\/all\/themes\/mytheme\/css\/style-blue.css":1,"sites\/all\/themes\/mytheme\/css\/custom.css":1,"sites\/all\/themes\/mytheme\/css\/custom2.css":1,"sites\/all\/themes\/mytheme\/css\/custom_laoge.css":1,"sites\/all\/themes\/mytheme\/css\/cus_hy.css":1,"sites\/all\/themes\/mytheme\/css\/font-awesome.min.css":1,"sites\/all\/themes\/mytheme\/css\/ie9.css":1,"sites\/all\/themes\/mytheme\/css\/local.css":1}},"custom_search":{"form_target":"_self","solr":0},"superfish":{"1":{"id":"1","sf":{"animation":{"opacity":"show"},"speed":"\u0027fast\u0027","autoArrows":false,"dropShadows":false,"disableHI":false},"plugins":{"supposition":true,"bgiframe":false,"supersubs":{"minWidth":"13","maxWidth":"27","extraWidth":1}}}},"urlIsAjaxTrusted":{"\/journals\/mmc_c\/paper\/10.18280\/mmc_c.831-402":true}});
+//--><!]]>
+</script>
+</head>
+<body class="html not-front not-logged-in two-sidebars page-node page-node- page-node-12873 node-type-journal-paper no-banner sff-7 slff-7 hff-7 pff-7 form-style-1" >
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible element-focusable">Skip to main content</a>
+  </div>
+    <div id="toTop"><i class="fa fa-angle-up"></i></div>
+
+<!-- #header -->
+<header id="header"  role="banner" class="clearfix">
+    <div class="container">
+        
+        <!-- #header-inside -->
+        <div id="header-inside" class="clearfix">
+            <div class="row">
+            
+                <div class="col-sm-4">
+                    <!-- #header-inside-left -->
+                    <div id="header-inside-left" class="clearfix">
+
+                                        <div id="logo">
+                    <a href="/" title="Home" rel="home"> <img src="https://iieta.org/sites/default/files/logo2.jpg" alt="Home" /> </a>
+                    </div>
+                                        
+                                        
+                                        
+                      
+
+                    </div>
+                    <!-- EOF:#header-inside-left -->
+                </div>
+                
+                <div class="col-sm-6">
+                    <!-- #header-inside-right -->
+                    <div id="header-inside-right" class="clearfix">
+
+                        <!-- #main-navigation -->
+                        <div id="main-navigation" class="clearfix">
+                            <nav role="navigation"> 
+                                                                  <div class="region region-navigation">
+    <div id="block-superfish-1" class="block block-superfish clearfix">
+
+    
+  <div class="content">
+    <ul id="superfish-1" class="menu sf-menu sf-main-menu sf-horizontal sf-style-none sf-total-items-7 sf-parent-items-2 sf-single-items-5"><li id="menu-753-1" class="first odd sf-item-1 sf-depth-1 sf-total-children-2 sf-parent-children-1 sf-single-children-1 menuparent"><a href="/About" class="sf-depth-1 menuparent">About</a><ul><li id="menu-2773-1" class="first odd sf-item-1 sf-depth-2 sf-no-children"><a href="http://iieta.org/About/About Iieta" title="" class="sf-depth-2">About Iieta</a></li><li id="menu-2774-1" class="last even sf-item-2 sf-depth-2"><a href="/About/Policies" class="sf-depth-2">Policies</a></li></ul></li><li id="menu-754-1" class="middle even sf-item-2 sf-depth-1 sf-total-children-5 sf-parent-children-0 sf-single-children-5 menuparent"><a href="/Services" class="sf-depth-1 menuparent">Services</a><ul><li id="menu-1334-1" class="first odd sf-item-1 sf-depth-2 sf-no-children"><a href="/Services/Subscription" class="sf-depth-2">Subscription</a></li><li id="menu-1335-1" class="middle even sf-item-2 sf-depth-2 sf-no-children"><a href="/Services/Fast%20Track" class="sf-depth-2">Fast Track</a></li><li id="menu-1336-1" class="middle odd sf-item-3 sf-depth-2 sf-no-children"><a href="/Services/Language%20Support" class="sf-depth-2">Language Support</a></li><li id="menu-1337-1" class="middle even sf-item-4 sf-depth-2 sf-no-children"><a href="/Services/Conference%20Services" class="sf-depth-2">Conference Services</a></li><li id="menu-1338-1" class="last odd sf-item-5 sf-depth-2 sf-no-children"><a href="/Services/Publication%20Services" class="sf-depth-2">Publication Services</a></li></ul></li><li id="menu-2695-1" class="middle odd sf-item-3 sf-depth-1 sf-no-children"><a href="/Journals" title="" class="sf-depth-1">Journals</a></li><li id="menu-2761-1" class="middle even sf-item-4 sf-depth-1 sf-no-children"><a href="http://iieta.org/Conferences" title="" class="sf-depth-1">CONFERENCES</a></li><li id="menu-757-1" class="middle odd sf-item-5 sf-depth-1 sf-no-children"><a href="/Books" class="sf-depth-1">Books</a></li><li id="menu-908-1" class="middle even sf-item-6 sf-depth-1 sf-no-children"><a href="http://www.iieta.org/ojs/" title="" class="sf-depth-1">Submission</a></li><li id="menu-2940-1" class="last odd sf-item-7 sf-depth-1 sf-no-children"><a href="/Journals/ACSM/News%20/%20Announcements" class="sf-depth-1">News / Announcements</a></li></ul>  </div>
+</div>
+  </div>
+                                                            </nav>
+                        </div>
+                        <!-- EOF: #main-navigation -->
+
+                    </div>
+                    <!-- EOF:#header-inside-right -->                        
+                </div>
+				
+				<div class="col-sm-2">
+					
+						<!-- #header-inside-right2 -->
+						<div id="header-inside-right2" class="clearfix">
+							<div class="header-inside-right2-area">                    
+								  <div class="region region-header-inside-right2">
+    <div id="block-search-form" class="block block-search clearfix">
+
+    
+  <div class="content">
+    <form class="search-form" role="search" action="/journals/mmc_c/paper/10.18280/mmc_c.831-402" method="post" id="search-block-form" accept-charset="UTF-8"><div><div class="container-inline">
+      <h2 class="element-invisible">Search form</h2>
+    <div class="form-item form-type-textfield form-item-search-block-form">
+ <input onblur="if (this.value == &#039;&#039;) {this.value = &#039;Search for &#039;;}" onfocus="if (this.value == &#039;Search for &#039;) {this.value = &#039;&#039;;}" type="text" id="edit-search-block-form--2" name="search_block_form" value="Search for " size="15" maxlength="128" class="form-text" />
+</div>
+<div class="form-actions form-wrapper" id="edit-actions"><input value="" type="submit" id="edit-submit" name="op" class="form-submit" /></div><fieldset class="custom_search-popup form-wrapper" id="edit-popup"><div class="fieldset-wrapper"><div class="form-item form-type-select form-item-custom-search-types">
+  <label for="edit-custom-search-types">Search IIETA Content </label>
+ <select class="custom-search-selector custom-search-types form-select" id="edit-custom-search-types" name="custom_search_types"><option value="c-all" selected="selected">-Any-</option><option value="c-article">Article</option><option value="c-page">Basic page</option><option value="c-blog">Blog entry</option><option value="c-mt_course">Journal</option><option value="c-mt_event">Event</option><option value="c-mt_feature">Feature</option></select>
+</div>
+</div></fieldset>
+<input type="hidden" name="form_build_id" value="form-fVvmULen95pvIJv6I1JUKLGv2DG5PPJjciSnEnhyJ9c" />
+<input type="hidden" name="form_id" value="search_block_form" />
+</div>
+</div></form>  </div>
+</div>
+  </div>
+							</div>
+						</div>
+						<!-- EOF:#header-top-right -->
+									</div>
+				
+				
+         
+            </div>
+        </div>
+        <!-- EOF: #header-inside -->
+
+    </div>
+</header>
+<!-- EOF: #header -->
+
+
+<div id="page-intro" class="clearfix"> <div id="page-intro-inside" class="clearfix internal-banner no-internal-banner-image"><div class="container"><div class="row"><div class="col-md-12">
+	            <div id="breadcrumb" class="clearfix"><div id="breadcrumb-inside" class="clearfix"><div><a href="/">Home</a> <span class="breadcrumb-separator"></span><a href="/Journals">Journals</a> <span class="breadcrumb-separator"></span><a href="/Journals/MMC_C">MMC_C</a> <span class="breadcrumb-separator"></span>Towards a GUI Gesture Control Using the Leap Motion Controller</div></div></div></div></div></div></div></div>
+<!-- #page -->
+<div id="page" class="clearfix">
+
+    <!-- #messages-console -->
+        <!-- EOF: #messages-console -->
+
+    
+    <!-- #main-content -->
+    <div id="main-content">
+        <div class="container">
+
+            <div class="row">
+
+                                <aside class="col-md-2 sidebar-first">
+                    <!--#sidebar-->
+                    <section id="sidebar-first" class="sidebar clearfix">
+                      <div class="region region-sidebar-first">
+    <div id="block-menu-menu-mmc-c" class="block block-menu clearfix">
+
+    <h2 class="title">MMC_C</h2>
+  
+  <div class="content">
+    <ul class="menu"><li class="first leaf"><a href="/Journals/MMC_C" title="">About</a></li>
+<li class="leaf"><a href="/Journals/MMC_C/Aims%20And%20Scope" title="">Aims And Scope</a></li>
+<li class="leaf"><a href="/Journals/MMC_C/Editorial%20Board" title="">Editorial Board</a></li>
+<li class="leaf"><a href="/Journals/MMC_C/Instructions%20for%20Authors" title="">Instructions for Authors</a></li>
+<li class="leaf"><a href="/Journals/MMC_C/Publication%20Ethics%20and%20Malpractice%20Statement" title="">Publication Ethics</a></li>
+<li class="leaf"><a href="/Journals/MMC/MMC_C/Submission" title="">Submission</a></li>
+<li class="leaf"><a href="/Journals/MMC_C/Current" title="">Current Issue</a></li>
+<li class="leaf"><a href="/Journals/MMC_C/Archive/Vol-83-No-1-4-2022" title="">Archive</a></li>
+<li class="last leaf"><a href="http://iieta.org/sites/default/files/MMC citation list 2016.pdf" title="">Citation List</a></li>
+</ul>  </div>
+</div>
+<div id="block-block-70" class="block block-block clearfix">
+
+    
+  <div class="content">
+    <div class="tex2jax"><div id="block-block-31">
+<p><span style="font-size:14px;"><strong>JOURNAL METRICS</strong></span></p>
+<p class="rtejustify"><span style="font-size:12px;">CiteScore 2018: N/A </span><span class="tooltips">ℹ<span class="tooltiptext"><strong>CiteScore:</strong><br /><br />
+CiteScore is the number of citations received by a journal in one year to documents published in the three previous years, divided by the number of documents indexed in Scopus published in those same three years.</span></span></p>
+<p class="rtejustify"><span style="font-size:12px;">SCImago Journal Rank (SJR) 2018: N/A </span><span class="tooltips">ℹ<span class="tooltiptext"><strong>SCImago Journal Rank (SJR):</strong><br /><br />
+The SJR is a size-independent prestige indicator that ranks journals by their 'average prestige per article'. It is based on the idea that 'all citations are not created equal'. SJR is a measure of scientific influence of journals that accounts for both the number of citations received by a journal and the importance or prestige of the journals where such citations come from It measures the scientific influence of the average article in a journal, it expresses how central to the global scientific discussion an average article of the journal is.</span></span></p>
+<p class="rtejustify"><span style="font-size:12px;">Source Normalized Impact per Paper (SNIP): N/A </span><span class="tooltips">ℹ<span class="tooltiptext"><strong>Source Normalized Impact per Paper(SNIP):</strong><br /><br />
+SNIP measures a source’s contextual citation impact by weighting citations based on the total number of citations in a subject field. It helps you make a direct comparison of sources in different subject fields. SNIP takes into account characteristics of the source's subject field, which is the set of documents citing that source.</span></span></p>
+</div>
+</div>  </div>
+</div>
+<div id="block-block-32" class="block block-block clearfix">
+
+    
+  <div class="content">
+    <div class="tex2jax"><p><img alt="" data-delta="1" data-fid="162930" data-media-element="1" src="https://iieta.org/sites/default/files/styles/inline_image/public/medias/2025-04/1744106249035.jpg?itok=40Tu_JiS" typeof="foaf:Image" /></p>
+<style type="text/css">
+<!--/*--><![CDATA[/* ><!--*/
+#block-block-32 {
+    margin-top: -27px;
+    width: 100%;
+    padding-bottom: 0;
+    padding-top: 8px;
+}
+#block-block-32 .content {
+    display: block !important;
+}
+
+/*--><!]]>*/
+</style></div>  </div>
+</div>
+  </div>
+                    </section>
+                    <!--EOF:#sidebar-->
+                </aside>
+                
+                <section class="col-md-8">
+
+                    <!-- #promoted -->
+                                        <!-- EOF: #promoted -->
+
+                    <!-- #main -->
+                    <div id="main" class="clearfix">
+
+                                                <h1 class="title" id="page-title">Towards a GUI Gesture Control Using the Leap Motion Controller</h1>                        
+                        <!-- #tabs -->
+                                                    <div class="tabs">
+                                                        </div>
+                                                <!-- EOF: #tabs -->
+
+                        
+                        <!-- #action links -->
+                                                <!-- EOF: #action links -->
+
+                         
+                          <div class="region region-content">
+    <div id="block-system-main" class="block block-system clearfix">
+
+    
+  <div class="content">
+    <div class="row paper-wrapper">
+  <div class="col-sm-9 paper-left">
+    <div class="paper-title">
+	Towards a GUI Gesture Control Using the Leap Motion Controller	</div>
+	<div class="paper-author"><div class="field field-name-field-author-full field-type-text-long field-label-hidden"><div class="field-items"><div class="field-item even"><div class="tex2jax"><p><meta name="dc.identifier" content="doi:10.18280/mmc_c.831-402" /></p>
+<script src="https://crossmark-cdn.crossref.org/widget/v2.0/widget.js"></script><div style="float:right;"><a data-target="crossmark"><img src="https://crossmark-cdn.crossref.org/widget/v2.0/logos/CROSSMARK_Color_square.svg" width="60" /></a></div>
+<p><span class="popupWindowFrom" idval="1">Jean-Marc Vannobel<sup>*</sup></span> <strong>| </strong><span class="popupWindowFrom" idval="1">Marie-Hélène Bekaert</span> <strong>| </strong><span class="popupWindowFrom" idval="1">Jean Baumann</span></p>
+</div></div></div></div></div>
+	<div class="paper-author"><div class="field field-name-field-affiliation field-type-text-long field-label-hidden"><div class="field-items"><div class="field-item even"><div class="tex2jax"><div id="popupWindow1">Univ. Lille, CNRS, Centrale Lille, UMR 9189 CRIStAL, F-59000 Lille, France</div><br />
+</div></div></div></div></div>
+	<div class="paper-author"><div class="field field-name-field-corresponding-author-email field-type-text field-label-inline clearfix"><div class="field-label">Corresponding Author Email:&nbsp;</div><div class="field-items"><div class="field-item even">jean-marc.vannobel@univ-lille.fr</div></div></div></div>
+	<div class="pager-page-doi">
+	  <span class="paper-page" style="float:left;"><div class="field field-name-field-page field-type-text field-label-inline clearfix"><div class="field-label">Page:&nbsp;</div><div class="field-items"><div class="field-item even">7-13</div></div></div></span>
+	  <span class="split pager-split" style="float:left;margin-left:17px;margin-right:17px;">|</span>
+	  <span class="paper-doi" style="float:left;"><div class="field field-name-field-doi field-type-text field-label-inline clearfix"><div class="field-label">DOI:&nbsp;</div><div class="field-items"><div class="field-item even">https://doi.org/10.18280/mmc_c.831-402</div></div></div></span>
+	</div>
+		
+	<div class="paper-date" style="clear:both;">
+	<div class="field field-name-field-received-txt field-type-text field-label-inline clearfix"><div class="field-label">Received:&nbsp;</div><div class="field-items"><div class="field-item even">14 September 2022</div></div></div>	<span class="split">|</span>
+		<span class="split">|</span>
+	<div class="field field-name-field-accepted-txt field-type-text field-label-inline clearfix"><div class="field-label">Accepted:&nbsp;</div><div class="field-items"><div class="field-item even">10 November 2022</div></div></div>	<span class="split">|</span>
+		<span class="split">|</span>
+	
+	<a style="font-weight:bold;" href="javascript:;" data-toggle="popover" data-html="true" data-placement="top" data-content="Vannobel, J.M., Bekaert, M.H., Baumann, J. (2022). Towards a GUI gesture control using the leap motion controller. Modelling, Measurement and Control C, Vol. 83, No. 1-4, pp. 7-13. https://doi.org/10.18280/mmc_c.831-402
+<div class='copy'><buttom class='btn btn-primary'>Copy</buttom></div>" data-placement="left">Citation</a>	
+	</div>	
+	<div class="paper-special-txt"">
+	  	</div>
+  </div>
+  <div class="col-sm-3 paper-right">
+    <div class="paper-download"><div class="field field-name-field-pdf field-type-file field-label-hidden"><div class="field-items"><div class="field-item even"><div class="download-file clear-block"><a href="/download/file/fid/93180">83.1-4_02.pdf</a></div></div></div></div></div>
+	<div class="paper-access">
+			  <p><i class="fa fa-unlock-alt" aria-hidden="true"></i><span>OPEN ACCESS</span></p>
+     	
+	<div class="old-web-link" style="visibility: hidden;"></div>
+		
+	
+		
+
+	</div>
+  </div>
+</div>
+<div class="paper-abstract">
+  <div class="field field-name-field-abstract field-type-text-long field-label-above"><div class="field-label">Abstract:&nbsp;</div><div class="field-items"><div class="field-item even"><div class="tex2jax"><p class="rtejustify">The Leap Motion Controller is a small hand motion capture device that has been the subject of numerous studies since it was launched in 2013. This sensor is particularly used in the field of disability, diagnosis or functional rehabilitation. This article presents two preliminary studies on the use of this device as a gesture mouse and then as a gesture controller. If the Leap Motion Controller is simple to implement, its lack of precision in some gesture configurations and of reliability (outliers) is a barrier which could certainly be lifted in the context of a multimodal interaction.</p>
+</div></div></div></div></div>
+<div class="paper-abstract">
+  <div class="field field-name-field-keywords field-type-text-long field-label-above"><div class="field-label">Keywords:&nbsp;</div><div class="field-items"><div class="field-item even"><div class="tex2jax"><p class="rtejustify"><i>assistive technology, gesture mouse, gesture communication, leap motion, convolutional neural networks</i></p>
+</div></div></div></div></div>
+<div class="paper-html-content">
+  <div class="field-collection-container clearfix"><div class="field field-name-field-html-content field-type-field-collection field-label-hidden"><div class="field-items"><div class="field-item even"><div class="field-collection-view clearfix view-mode-full"><div class="entity entity-field-collection-item field-collection-item-field-html-content clearfix" about="/field-collection/field-html-content/55134" typeof="">
+  <div class="sub_item">
+  
+  <div class="sub_title"> <div class="field field-name-field-sub-title field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">1. Introduction</div></div></div> <span class="collepsed">  </span></div>
+  <div class="sub_content"> <div class="field field-name-field-sub-content field-type-text-long field-label-hidden"><div class="field-items"><div class="field-item even"><div class="tex2jax"><p class="rtejustify">Interaction between human and machine is nowadays commonly done through a graphical user interface (GUI) controlled by input (keyboard) and pointing (mouse) devices. On the other hand, smartphone allowed to democratize another mode of interaction still around the use of a GUI now directly controlled with a stylus or fingers through a touch screen [1]. Such a tactile interaction makes it possible to easily carry out continuous scrolling, a zoom action and even to draw in a much more natural way compared to the mouse even when used without the need of its push buttons [2].</p>
+<p class="rtejustify">Contactless interfaces are yet another possible mode of interaction with the machine to control a device by eye contact [3], by voice [4] or by gesture [5, 6]. Such an interaction would be of particular interest for hygiene or safety reasons, or even for communication through a natural language in the context of home automation or applications for the elderly, people with disabilities and maybe for those not used to computers.</p>
+<p class="rtejustify">In this paper we focus exclusively on gesture interaction, and more specifically on the use of a hand motion capture device, the Leap Motion Controller (LMC). We propose a quick overview of the LMC used as an assistive technology after having first presented the device main characteristics. We then propose two feasibility studies to realize a human-machine gestural interaction. These studies were carried out in an MS Windows environment during a research initiation internship.</p>
+<p class="rtejustify">Our first study aims the possibility of using an LMC instead of the computer mouse on a PC computer. Faced with the difficulties sometimes encountered by some people (very young, elderly or disabled) in using the mouse, such a more natural human-machine interaction could then help them. A second important specification is to facilitate the Leap Motion Controller integration in the MS Windows environment to make the mouse replacement completely transparent to the software used by the end user. A second study addresses the feasibility of using the LMC as a device to capture meaningful gestures for assistive purposes.</p>
+</div></div></div></div> </div>
+
+  </div>
+</div>
+</div></div><div class="field-item odd"><div class="field-collection-view clearfix view-mode-full"><div class="entity entity-field-collection-item field-collection-item-field-html-content clearfix" about="/field-collection/field-html-content/55135" typeof="">
+  <div class="sub_item">
+  
+  <div class="sub_title"> <div class="field field-name-field-sub-title field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">2. The Leap Motion Controller</div></div></div> <span class="collepsed">  </span></div>
+  <div class="sub_content"> <div class="field field-name-field-sub-content field-type-text-long field-label-hidden"><div class="field-items"><div class="field-item even"><div class="tex2jax"><p class="rtejustify"><strong>2.1 </strong><strong>Description</strong></p>
+<p class="rtejustify">The LMC commercialized by Ultraleap [7] is a hand motion capture device usually found in virtual reality environments [8]. Its main interest lies in its ability to return a data set characterizing the hands (orientation, coordinates of the palm and joints...). Figure 1 shows that it is made from two identical infrared cameras ($\lambda$=850nm) separated by 40mm along the x-axis. These 0.15MP (640x240) cameras provide stereo vision views of the region of interest corresponding to an inverted pyramid of 140x120° at a configurable frame rate of 20 to 200 FPS (Figure 2).</p>
+<p class="rtecenter"></p><div class="media media-element-container media-default"><div id="file-93138" class="file file-image file-image-png">
+
+        <h2 class="element-invisible"><a href="/file/93138">1.png</a></h2>
+    
+  
+  <div class="content">
+    <img class="media-element file-default" data-delta="1" typeof="foaf:Image" src="https://www.iieta.org/sites/default/files/styles/inline_image/public/medias/2023-04/1_11.png?itok=nwECrvAa" width="448" height="263" alt="" /></div>
+
+  
+</div>
+</div>
+<p class="rtecenter"><strong>Figure 1. </strong>The Leap Motion hand capture device and graphic rendering of points of interest (from ultraleap.com)</p>
+<p class="rtecenter"></p><div class="media media-element-container media-default"><div id="file-93139" class="file file-image file-image-png">
+
+        <h2 class="element-invisible"><a href="/file/93139">2.png</a></h2>
+    
+  
+  <div class="content">
+    <img class="media-element file-default" data-delta="2" typeof="foaf:Image" src="https://www.iieta.org/sites/default/files/styles/inline_image/public/medias/2023-04/2_6.png?itok=9jhiUeK_" width="480" height="244" alt="" /></div>
+
+  
+</div>
+</div>
+<p class="rtecenter"><strong>Figure 2. </strong>140° x-axis and 120° z-axis LMC measurement field (from ultraleap.com)</p>
+<p class="rtejustify">The LMC is a USB device compatible with Windows 7+, Mac OS X 10.7+ and Linux (Ubuntu 12). Development kits [9] help to use the LEAP Motion Controller with various popular programming languages including C++ for version 4 of the SDK. Finally, the LMC is also compatible with the 3D environments Unreal Engine and Unity.</p>
+<p class="rtejustify"><strong>2.2 Robustness: weaknesses and limitations of the Leap Motion Controller</strong></p>
+<p class="rtejustify">Just like the Microsoft Kinect which is no longer commercialized, the Ultraleap LMC can detect hand movements [10]. A first limitation that can be mentioned is that the Kinect allows detection inside a room while the LMC has a detection distance of only a few ten centimetres but with a precision 200 times higher.</p>
+<p class="rtejustify">The LMC seems at first sight to be well adapted to a sign language interaction [11, 12] but pointed out in the study [13] the weaknesses and limitations of the device for such a use because despite a resolution of the sensor lower than 1mm as announced by the manufacturer. Potter et al. insists also on the imprecision and the lack of reliability of the measurements. To Ultraleap's credit, unlike the information provided by data gloves thanks to an instrumentation of the user's hand and loss of freedom of movement [14], the LMC reconstructs the hand data solely from the images captured by its cameras. An inaccuracy inherent to the image processing algorithms used and to the computational assumptions thus appears.</p>
+<p class="rtejustify">As Potter et al. [13], we observed an inaccuracy of the fingertips position returned by the LMC. More embarrassingly, we found that the Ultraleap algorithms do not respect the real manual configuration of the index, middle and ring fingers and a movement dependence of these three fingers is imposed. Silva et al. [15] already reported that the piano may not be the ideal instrument to be simulated with a single LMC sensor because it requires a particular hand precision. We therefore conducted four campaigns of bending one of these fingers independently of the others by help of a pianist to obtain our own observational data. Figure 3 illustrates one of these campaigns. Starting from an initial position where the right hand is oriented horizontally over the sensor with the fingers outstretched (altitude 0 is attributed to the barycentre of the palm), fingers were individually flexed: first the index finger, then the middle finger and finally the ring finger, with the others remaining extended. Figure 3 shows that parasitic finger flexions are effectively returned by the LMC, mainly concerning the middle finger and at a lesser extent the ring finger.</p>
+<p class="rtejustify">As a result, it was decided not to use manual configuration involving more than one finger at a time, except for the thumb.</p>
+<p class="rtecenter"></p><div class="media media-element-container media-default"><div id="file-93140" class="file file-image file-image-png">
+
+        <h2 class="element-invisible"><a href="/file/93140">3.png</a></h2>
+    
+  
+  <div class="content">
+    <img class="media-element file-default" data-delta="3" typeof="foaf:Image" src="https://www.iieta.org/sites/default/files/styles/inline_image/public/medias/2023-04/3_5.png?itok=Z-Jtuky9" width="480" height="232" alt="" /></div>
+
+  
+</div>
+</div>
+<p class="rtecenter"><strong>Figure 3. </strong>Dynamic absolute value of the vertical position at the palm (mm) of the tips of the index finger (bold), middle finger (grey and bold) and ring finger (thin line)</p>
+</div></div></div></div> </div>
+
+  </div>
+</div>
+</div></div><div class="field-item even"><div class="field-collection-view clearfix view-mode-full"><div class="entity entity-field-collection-item field-collection-item-field-html-content clearfix" about="/field-collection/field-html-content/55136" typeof="">
+  <div class="sub_item">
+  
+  <div class="sub_title"> <div class="field field-name-field-sub-title field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">3. The LMC as an Assistive Technology</div></div></div> <span class="collepsed">  </span></div>
+  <div class="sub_content"> <div class="field field-name-field-sub-content field-type-text-long field-label-hidden"><div class="field-items"><div class="field-item even"><div class="tex2jax"><p class="rtejustify">The Leap Motion Controller can be easily integrated into virtual reality systems for hand tracking or to ensure immersive interaction [16, 17]. Alimanova et al. describe a hand rehabilitation game to assist in developing muscle tonus and increase precision in gestures (picking up and moving household goods, matching color blocks, throwing in the garbage…) [18]. Taylor and Curran rely on the LMC potential to enhance motivation and involvement of young adults, accustomed to video games, in their hand rehabilitation after trauma [19]. This is ascertained in a study conducted by Tarakci et al. [20] involving 103 patients trained in two games interfaced with the LMC. This study presents video games with LMC as an effective alternative treatment option in children and adolescents with physical disabilities. Similarly, Cortés-Pérez et al. [21] conclude that the LMC is useful and efficient as a haptic virtual reality device to boost various aspects of upper limb motor function in patients with central nervous system diseases.</p>
+<p class="rtejustify">Beyond video games, the Leap Motion Controller is also deployed to assess and analyze the hand movement in various pathologies. A hand gesture recognition algorithm dedicated to tracking the seven gestures for residential rehabilitation of post-stroke patients is developed by Li et al. [22]. Chopuk et al. [23] use the LMC to measure finger joint angles to assess abnormal finger motion (trigger finger). Four postures are evaluated (a flexion of thumb IP joint, a neutral position of finger PIP joint, a flexion of finger MP joint and a thumb radial abduction).</p>
+<p class="rtejustify">Two studies by Butt et al. [24, 25] include Parkinsonian patients (PwPD, Patient with Parkinson Disease). In the first one, the authors study the LMC potential for the objective assessment of motor dysfunction in PwPD and show a moderate potential of the LMC to extract the motor performance. The second study aims to achieve an objective and automatic classification of Parkinson's disease with the LMC. The results reveal that this system does not return clinically meaningful data for measuring postural tremor in PwPD, is irrelevant for measuring the forearm pronation or supination but is statistically and clinically significant for the finger tapping and hand opening or closing. Cotton et al. [26] do not advocate using the LMC in finger movement analysis (for item 18 of the Motor Function Measurement) due to a lack of robustness and precision.</p>
+<p class="rtejustify">Colombini et al. [27] review 19 studies objectively assessing the contribution of LMC in four specific psychological domains (autism spectrum disorder, attention-deficit or hyperactivity disorder, dementia, mild cognitive impairment). The LMC is also successfully used in music therapy sessions [28]. The proposed system captures the user's gesture via the LMC and the generated signals are sent to a software tool that converts the movements into musical notes.</p>
+<p class="rtejustify">From manual gesture to speech, numerous studies using the LMC to recognize finger and hand movements to transcribe sign language into text or speech are listed by Galván-Ruiz et al. [29]. The signer's training is a key factor in the sign recognition process and the order in which sign movements are performed affects accuracy [30] (American Sign Language). The LMC is also used for the recognition of other sign languages [31] (Arabic Sign Language), [32] (Chinese Sign Language), [33] (Indian Sign Language). In addition to speech, Škraba et al. [34] expect to use the LMC to pilot a wheelchair.</p>
+</div></div></div></div> </div>
+
+  </div>
+</div>
+</div></div><div class="field-item odd"><div class="field-collection-view clearfix view-mode-full"><div class="entity entity-field-collection-item field-collection-item-field-html-content clearfix" about="/field-collection/field-html-content/55137" typeof="">
+  <div class="sub_item">
+  
+  <div class="sub_title"> <div class="field field-name-field-sub-title field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">4. Study 1: The Gesture Mouse</div></div></div> <span class="collepsed">  </span></div>
+  <div class="sub_content"> <div class="field field-name-field-sub-content field-type-text-long field-label-hidden"><div class="field-items"><div class="field-item even"><div class="tex2jax"><p class="rtejustify"><strong>4.1 Introduction</strong></p>
+<p class="rtejustify">As mentioned earlier, a gestural mouse is expected to provide generic mouse features such as screen hovering, pointing, menu navigation as well as a classic mouse. The function chosen to illustrate our point is the drawing in Microsoft Paint but we could just as easily have generated a manual signature in Acrobat.</p>
+<p class="rtejustify">The characteristics of our gesture mouse must allow a movement in 2D space associated with the movement of the mouse cursor in a GUI and the definition of a symbolic gesture of "click". We have been inspired by the numerous works available in the literature to reproduce some elements [35-38].</p>
+<p class="rtejustify"><strong>4.2 </strong><strong>Methodology</strong></p>
+<p class="rtejustify">We retained the coordinates returned in the (xOy) plane (see illustration Figure 2) to move the mouse cursor on the screen. If tests were first carried out on the coordinates of the right index finger, we finally retained the values returned by the LMC for the right palm after normalization in the screen coordinate plane. This choice was made to avoid parasitic displacements of the mouse cursor, whereas the index finger and more particularly the thumb/index pinch allowed us to materialize the left mouse click. The z-axis was used to simulate the equivalent of the "in the air movements" of the mouse device to reposition the signer's hand in space.</p>
+<p class="rtejustify">A last manipulation allowed us to realize a gestural multi-touch intended in our study to resize the active window on the screen. Here we wanted to use both hands. Once the mouse cursor is positioned on the resizing icon, the mouse click is triggered by pinching the thumb and index finger of the secondary hand. The resizing is then done by simply moving the mouse cursor with the right hand.</p>
+<p class="rtejustify">The two possibilities of click, right hand and left hand, could thus materialize the two buttons of a mouse to complete this device of interaction "gestural mouse".</p>
+<p class="rtejustify"><strong>4.3 </strong><strong>Practical implementation</strong></p>
+<p class="rtejustify">Our software development has been done using an example program provided by Ultraleap, the Windows mouse control APIs and the INPUT_MOUSE data structure. The basic operation of the executable we generate is event-driven and uses callback functions provided by Ultraleap. This executable is used as a mouse driver which allows the LMC to replace the mouse.</p>
+<p class="rtejustify"><strong>4.4 </strong><strong>Results</strong></p>
+<p class="rtejustify">The tests were performed in the Paint drawing software. It was necessary to filter the data returned by the LMC. Low-pass filtering of the coordinate stream over a sliding window of about 15 measurements resolved the inaccuracy noise that manifested itself as spurious cursor tremors on the screen (Figure 4). It was sometimes also necessary to eliminate erroneously coordinates returned by the LMC because corresponding to a "ghost hand" in the background (Figure 4, middle).</p>
+<p class="rtecenter"></p><div class="media media-element-container media-default"><div id="file-93141" class="file file-image file-image-png">
+
+        <h2 class="element-invisible"><a href="/file/93141">4.png</a></h2>
+    
+  
+  <div class="content">
+    <img class="media-element file-default" data-delta="4" typeof="foaf:Image" src="https://www.iieta.org/sites/default/files/styles/inline_image/public/medias/2023-04/4_7.png?itok=Gqq-RCkr" width="299" height="480" alt="" /></div>
+
+  
+</div>
+</div>
+<p class="rtecenter"><strong>Figure 4.</strong> Drawing in Paint, from top to bottom: unfiltered coordinates, presence of a ghost hand, filtered coordinates</p>
+</div></div></div></div> </div>
+
+  </div>
+</div>
+</div></div><div class="field-item even"><div class="field-collection-view clearfix view-mode-full"><div class="entity entity-field-collection-item field-collection-item-field-html-content clearfix" about="/field-collection/field-html-content/55138" typeof="">
+  <div class="sub_item">
+  
+  <div class="sub_title"> <div class="field field-name-field-sub-title field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">5. Study 2: Communicative Gesture</div></div></div> <span class="collepsed">  </span></div>
+  <div class="sub_content"> <div class="field field-name-field-sub-content field-type-text-long field-label-hidden"><div class="field-items"><div class="field-item even"><div class="tex2jax"><p class="rtejustify"><strong>5.1 </strong><strong>Introduction</strong></p>
+<p class="rtejustify">To consider the LMC as a simple gesture mouse is very simplistic considering the possibilities offered by the device as well as by a sign language.</p>
+<p class="rtejustify">We then developed a second study with the aim of controlling an external device through gestural communication based on a sequence of basic gestures that become words or control commands. It is not necessary for such an activity to use a model as advanced as those used in sign languages such as French Sign Language (LSF) [39]. The language used and the notion of underlying grammar can remain very primitive.</p>
+<p class="rtejustify"><strong>5.2 </strong><strong>Pattern recognition methodology</strong></p>
+<p class="rtejustify">The analysis task here is very different from the one encountered in the case of the gesture mouse since it does not simply consist of moving a cursor on the screen or simulating a mouse click, but of executing significant gestures. In order to be able to isolate a significant sequence of transition movements, a command is composed of a starting clap, a sequence of signs made up of trajectories to be individually recognized and separated by a clap and a final validation gesture. The main difficulty of the operation is to recognize the different signs of the sequence. We have used two radically different methods for this purpose, which we will detail below.</p>
+<p class="rtejustify"><strong>5.3 </strong><strong>Recognition by geometric criteria</strong></p>
+<p class="rtejustify">The classification by geometric criteria that we have implemented corresponds to a method described by Jorge et al. [40]. It consists in extracting some criteria from the sign trajectory such as the perimeter and the area of its convex envelope (CE) as illustrated in Figure 5. Other criteria such as the perimeter and the area of the maximum surface triangle (MST) inscribed in the convex envelope or the length of the trajectory are used as proposed by Dobkin and Snyder [41]. Figure 6 illustrates the recognition by geometric criteria of three distinct signs: a line and a triangle to constitute a basic alphabet and a deletion to express the wish to delete the last completed gesture. Implemented in the Unity engine for a virtual reality application, the recognition is fast enough to be used in a real time application.</p>
+<p class="rtecenter"></p><div class="media media-element-container media-default"><div id="file-93142" class="file file-image file-image-png">
+
+        <h2 class="element-invisible"><a href="/file/93142">5.png</a></h2>
+    
+  
+  <div class="content">
+    <img class="media-element file-default" data-delta="5" typeof="foaf:Image" src="https://www.iieta.org/sites/default/files/styles/inline_image/public/medias/2023-04/5_5.png?itok=mB8q7KmA" width="243" height="156" alt="" /></div>
+
+  
+</div>
+</div>
+<p class="rtecenter"><strong>Figure 5.</strong> Convex envelope (CE) of a geometrical drawing</p>
+<p class="rtecenter"></p><div class="media media-element-container media-default"><div id="file-93143" class="file file-image file-image-png">
+
+        <h2 class="element-invisible"><a href="/file/93143">6.png</a></h2>
+    
+  
+  <div class="content">
+    <img class="media-element file-default" data-delta="6" typeof="foaf:Image" src="https://www.iieta.org/sites/default/files/styles/inline_image/public/medias/2023-04/6_4.png?itok=OoAAkz_u" width="193" height="480" alt="" /></div>
+
+  
+</div>
+</div>
+<p class="rtecenter"><strong>Figure 6.</strong> Gestural alphabet<em>. </em>From top to bottom: line, triangle, deletion</p>
+<p class="rtejustify"><strong>5.4 </strong><strong>Recognition by convolutional neural network</strong></p>
+<p class="rtejustify">Convolutional neural networks (CNNs) are neural networks inspired by the visual cortex of vertebrate animals and are based on a multilayer stack of single-layer perceptrons. A CNN is totally different from a multilayer perceptron (MLP) because unlike this one, a very small number of connections between a neuron and its neighbours in adjacent layers is used which greatly reduces the complexity of the network and the learning time. CNNs are typically used for image recognition [42] but also for natural language processing [43] where the CNN inputs correspond to words instead of pixels [44]. We therefore modified our mouse cursor control driver to generate pictures of the trajectories drawn on the screen. The convolutional neural network here implemented was created using Google's Tensorflow [45] and Keras [46] machine learning systems according to the example provided in the paper [47] and was trained on the three gestures, already used within the geometric method. The dataset used contained about 60 images for each of these 3 classes.</p>
+<p class="rtejustify"><strong>5.5 </strong><strong>Results, comparison of recognition methods</strong></p>
+<p class="rtejustify">Pattern recognition based on geometric criteria is very fast (a few milliseconds) but has the disadvantage not to be very flexible. Indeed, the user has to draw geometrical shapes close to what is expected, otherwise this one will not be recognized or could be confused with another one. One could try to make the system more tolerant to the sign realization variability but this would increase the risk of confusion. It is then not easy to correctly draw the signs so that they are recognized. Thus, to keep the interface easy to use, the vocabulary must be limited and restricted to very different gestures. One could consider several modes allowing a user to choose the extent of the vocabulary he wants to learn. Another limitation of this method is that to add a new element to the alphabet, and thus a new shape, it is necessary to find new specific characterization criteria.</p>
+<p class="rtejustify">Pattern recognition by convolutional neural network corrects the two main drawbacks of the geometric method:</p>
+<ul><li class="rtejustify">The system can adapt to the user by updating its data set as the user uses it. So if the user finds a more comfortable signing posture, the model will gradually follow.</li>
+<li class="rtejustify">It is easy to add a new word. It just requires creating a set of training examples large enough to train the model properly, which is expensive in terms of implementation time.</li>
+</ul><p class="rtejustify">This method is much less reliable than the previous one for reasons related to the description model and not to the user. Moreover, the number of training samples increases as expected with each added gesture.</p>
+<p class="rtejustify">Finally, it would be interesting to compare the execution speed performances of the two systems. However, since the recognition by CNN is offline and the two systems are not implemented in the same language, it is complicated at this point to have a relevant comparison.</p>
+<p class="rtejustify"><strong>5.6 Perspectives for improvement</strong></p>
+<p class="rtejustify">As shown in Figure 6, a color gradient was applied on the user screen in the case of the recognition by neural network to describe the direction and progression of the gesture. By choice, this feature was ignored by the neural network, although this new dimension would have allowed the vocabulary of the interface to be extended: a line from left to right would be differentiated from a line from right to left. Similarly, for recognition by geometric criteria, the orientation of the gesture is ignored: a vertical line and a horizontal line are not differentiated.</p>
+</div></div></div></div> </div>
+
+  </div>
+</div>
+</div></div><div class="field-item odd"><div class="field-collection-view clearfix view-mode-full"><div class="entity entity-field-collection-item field-collection-item-field-html-content clearfix" about="/field-collection/field-html-content/55139" typeof="">
+  <div class="sub_item">
+  
+  <div class="sub_title"> <div class="field field-name-field-sub-title field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">6. Conclusion and Prospects</div></div></div> <span class="collepsed">  </span></div>
+  <div class="sub_content"> <div class="field field-name-field-sub-content field-type-text-long field-label-hidden"><div class="field-items"><div class="field-item even"><div class="tex2jax"><p class="rtejustify">With the help of examples provided by Ultraleap and in particular the <em>imagesample.c</em> file as well as some Windows APIs, we have shown that the handling of a general public software such as "Paint", for example, could be done using a generic gesture interaction system that replaces the computer mouse. Totally independent from the final application and easy to install on a computer, this interface can represent an alternative mode of communication to the mouse for people having difficulties with its handling or simply for reasons of hygiene. However, we must remember that even if a gesture interaction seems at first sight more natural than the handling of a mouse, an information capture device must be adapted to the handling of the graphic interface of the software we use. A keyboard is adapted to alphanumeric characters, a mouse allows to navigate precisely in the menus, the content of a text document or a spreadsheet, but a mouse is much less adapted to handwriting or drawing on the screen. A digital tablet and a stylus would be much more suitable for this.</p>
+<p class="rtejustify">One could then imagine going much further than simply replacing GUI existing devices by elementary gesture controls. The goal would be to design dedicated gestural interfaces especially built for a natural language use and therefore using meaningful gestures.</p>
+<p class="rtejustify">Our second study was designed with this idea in mind and we proposed the basics of a semantic meaning gestural interaction using an alphabet reduced to a few number of elementary signs easy to produce. It makes then possible to create sign sequences that could be used in the case of assistive technologies or to control machines. Among the possible applications, we could for example consider driving a wheelchair or even easier professional integration of people with disabilities in an Augmented or Virtual Reality environment or even human-robot collaboration [48].</p>
+<p class="rtejustify">A final important aspect observed during our practical tests concerns the space limitations of the gestural communication. This is due to the LMC camera viewing angles and it is not easy to remain the hands in the sensor 140x120° conical detection space. For a better comfort of use and much less movements restrictions, one could prefer the IR 170 sensor [49] from the same manufacturer that covers a region of 170x170°. However, the IR 170 costs more than double the price of the LMC and is provided without housing case which can compromise its use.</p>
+<p class="rtejustify">At last if a gesture communication appears to be more natural, its constrained aspect quickly generates a significant fatigue at the arm level. A solution could be provided by resting the wrist on a transparent flat surface as suggested in [26].</p>
+</div></div></div></div> </div>
+
+  </div>
+</div>
+</div></div><div class="field-item even"><div class="field-collection-view clearfix view-mode-full field-collection-view-final"><div class="entity entity-field-collection-item field-collection-item-field-html-content clearfix" about="/field-collection/field-html-content/55140" typeof="">
+  <div class="sub_item">
+  
+  <div class="sub_title"> <div class="field field-name-field-sub-title field-type-text field-label-hidden"><div class="field-items"><div class="field-item even">Acknowledgment</div></div></div> <span class="collepsed">  </span></div>
+  <div class="sub_content"> <div class="field field-name-field-sub-content field-type-text-long field-label-hidden"><div class="field-items"><div class="field-item even"><div class="tex2jax"><p class="rtejustify">This work has been carried out by Jean Baumann, a student in 2nd year of engineering school at Polytech Lille as part of a 10-week research internship at the CRIStAL Laboratory.</p>
+</div></div></div></div> </div>
+
+  </div>
+</div>
+</div></div></div></div></div></div>
+<div class="paper-references">
+  <div class="field field-name-field-references field-type-text-with-summary field-label-above paper-html-content  clearfix">
+  <div class="sub_item">
+  <div class="sub_title">&nbsp;&nbsp;References <span class="collepsed">  </span></div>
+  <div class="sub_content">       <div class="field-item even"><div class="tex2jax"><p>[1] Martinet, A. (2011). Etude de l'infuence de la séparation des degrés de liberté pour la manipulation 3-D à l'aide de surfaces tactiles multipoints. Doctoral dissertation, Université des Sciences et Technologie de Lille-Lille I.<br /><br />
+[2] Deblonde, J.P. (2012). Exploitation de la dynamique du geste en IHM. Application aux fonctions de transfert pour le pointage et l'extraction d'évènements discrets. Doctoral dissertation, Université des Sciences et Technologie de Lille-Lille I.<br /><br />
+[3] Ju, Q. (2019). Utilisation de l'eye-tracking pour l'interaction mobile dans un environnement réel augmenté. Doctoral dissertation, Université de Lyon.<br /><br />
+[4] Hoy, M.B. (2018). Alexa, Siri, Cortana, and more: an introduction to voice assistants. Medical reference services quarterly, 37(1): 81-88. https://doi.org/10.1080/02763869.2018.1404391<br /><br />
+[5] Małecki, K., Nowosielski, A., Kowalicki, M. (2020). Gesture-based user interface for vehicle on-board system: a questionnaire and research approach. Applied Sciences, 10(18): 6620. https://doi.org/10.3390/app10186620<br /><br />
+[6] Belissen, V. (2020). From sign recognition to automatic sign language understanding: Addressing the non-conventionalized units. Doctoral dissertation, Université Paris-Saclay.<br /><br />
+[7] ULTRALEAP Inc, ULTRALEAP - hand tracking module. https://www.ultraleap.com/, accessed on Jan. 2, 2023.<br /><br />
+[8] Wozniak, P., Vauderwange, O., Mandal, A., Javahiraly, N., Curticapean, D. (2016). Possible applications of the LEAP motion controller for more interactive simulated experiments in augmented or virtual reality. In Optics Education and Outreach IV, 9946: 234-245. https://doi.org/10.1117/12.2237673<br /><br />
+[9] https://www.ultraleap.com/developers/.<br /><br />
+[10] Marin, G., Dominio, F., Zanuttigh, P. (2014). Hand gesture recognition with leap motion and kinect devices. In 2014 IEEE International Conference on Image Processing (ICIP), pp. 1565-1569.<br /><br />
+[11] Borysova, A. (2017). Leap motion controller for sign language recognition: A review of the literature. Univ. Cape Town, Cape Town, South Africa, Tech. Rep. HANDGR.<br /><br />
+[12] Galván-Ruiz, J., Travieso-González, C.M., Tejera-Fettmilch, A., Pinan-Roescher, A., Esteban-Hernández, L., Domínguez-Quintana, L. (2020). Perspective and evolution of gesture recognition for sign language: A review. Sensors, 20(12): 3571. https://doi.org/10.3390/s20123571<br /><br />
+[13] Potter, L.E., Araullo, J., Carter, L. (2013). The leap motion controller: a view on sign language. In Proceedings of the 25th Australian Computer-Human Interaction Conference: Augmentation, Application, Innovation, Collaboration, 175-178.<br /><br />
+[14] Gunawardane, P.D.S.H., Medagedara, N.T. (2017). Comparison of hand gesture inputs of leap motion controller &amp; data glove in to a soft finger. In 2017 IEEE International Symposium on Robotics and Intelligent Sensors, (IRIS), 62-68. https://doi.org/10.1109/IRIS.2017.8250099<br /><br />
+[15] Silva, E.S., de Abreu, J.A.O., de Almeida, J.H.P., Teichrieb, V., Ramalho, G.L. (2013). A preliminary evaluation of the leap motion sensor as controller of new digital musical instruments. Recife, Brasil, 59-70.<br /><br />
+[16] Scheggi, S., Meli, L., Pacchierotti, C., Prattichizzo, D. (2015). Touch the virtual reality: using the leap motion controller for hand tracking and wearable tactile devices for immersive haptic rendering. In ACM SIGGRAPH 2015 Posters,  1-1. https://doi.org/10.1145/2787626.2792651<br /><br />
+[17] Gusai, E., Bassano, C., Solari, F., Chessa, M. (2017). Interaction in an immersive collaborative virtual reality environment: a comparison between leap motion and HTC controllers. In International Conference on Image Analysis and Processing, 290-300. https://doi.org/10.1007/978-3-319-70742-6_27<br /><br />
+[18] Alimanova, M., Borambayeva, S., Kozhamzharova, D., Kurmangaiyeva, N., Ospanova, D., Tyulepberdinova, G., Kassenkhan, A. (2017). Gamification of hand rehabilitation process using virtual reality tools: Using leap motion for hand rehabilitation. In 2017 First IEEE International Conference on Robotic Computing (IRC), pp. 336-339. https://doi.org/10.1109/IRC.2017.76<br /><br />
+[19] Taylor, J., Curran, K. (2016). Using leap motion and gamification to facilitate and encourage rehabilitation for hand injuries: Leap motion for rehabilitation. In Handbook of Research on Holistic Perspectives in Gamification for Clinical Practice, pp. 183-192. https://doi.org/10.4018/978-1-4666-9522-1.ch009<br /><br />
+[20] Tarakci, E., Arman, N., Tarakci, D., Kasapcopur, O. (2020). Leap motion controller-based training for upper extremity rehabilitation in children and adolescents with physical disabilities: A randomized controlled trial. Journal of Hand Therapy, 33(2): 220-228. https://doi.org/10.1016/j.jht.2019.03.012<br /><br />
+[21] Cortés-Pérez, I., Zagalaz-Anula, N., Montoro-Cárdenas, D., Lomas-Vega, R., Obrero-Gaitán, E., Osuna-Pérez, M. C. (2021). Leap motion controller video game-based therapy for upper extremity motor recovery in patients with central nervous system diseases. A systematic review with meta-analysis. Sensors, 21(6): 2065. https://doi.org/10.3390/s21062065<br /><br />
+[22] Li, W.J., Hsieh, C.Y., Lin, L.F., Chu, W.C. (2017). Hand gesture recognition for post-stroke rehabilitation using leap motion. In 2017 International Conference on Applied System Innovation (ICASI), pp. 386-388. https://doi.org/10.1109/ICASI.2017.7988433<br /><br />
+[23] Chophuk, P., Chumpen, S., Tungjitkusolmun, S., Phasukkit, P. (2015). Hand postures for evaluating trigger finger using leap motion controller. In 2015 8th Biomedical Engineering International Conference (BMEiCON), pp. 1-4. https://doi.org/10.1109/BMEiCON.2015.7399560<br /><br />
+[24] Butt, A.H., Rovini, E., Dolciotti, C., Bongioanni, P., De Petris, G., Cavallo, F. (2017). Leap motion evaluation for assessment of upper limb motor skills in Parkinson's disease. In 2017 international conference on rehabilitation robotics (ICORR), pp. 116-121. https://doi.org/10.1109/ICORR.2017.8009232<br /><br />
+[25] Butt, A.H., Rovini, E., Dolciotti, C., De Petris, G., Bongioanni, P., Carboncini, M.C., Cavallo, F. (2018). Objective and automatic classification of Parkinson disease with Leap Motion controller. Biomedical engineering online, 17(1): 1-21. https://doi.org/10.1186/s12938-018-0600-7<br /><br />
+[26] Coton, J., Veytizou, J., Thomann, G., Villeneuve, F. (2016). Etude de faisabilité de l'analyse de mouvement de doigts par le capteur LeapMotion. In Conférence Handicap 2016-9ème édition.<br /><br />
+[27] Colombini, G., Duradoni, M., Carpi, F., Vagnoli, L., Guazzini, A. (2021). LEAP motion technology and psychology: A mini-review on hand movements sensing for neurodevelopmental and neurocognitive disorders. International Journal of Environmental Research and Public Health, 18(8): 4006.<br /><br />
+[28] Baratè, A., Elia, A., Ludovico, L.A., Oriolo, E. (2018). The leap motion controller in clinical music therapy: a computer-based approach to intellectual and motor disabilities. In International Conference on Computer Supported Education, pp. 461-469.<br /><br />
+[29] Galván-Ruiz, J., Travieso-González, C.M., Tejera-Fettmilch, A., Pinan-Roescher, A., Esteban-Hernández, L., &amp; Domínguez-Quintana, L. (2020). Perspective and evolution of gesture recognition for sign language: A review. Sensors, 20(12): 3571. https://doi.org/10.3390/s20123571<br /><br />
+[30] Quesada, L., López, G., Guerrero, L.A. (2015). Sign language recognition using leap motion. In International Conference on Ubiquitous Computing and Ambient Intelligence, pp. 277-288. https://doi.org/10.1007/978-3-319-26401-1_26<br /><br />
+[31] Deriche, M., Aliyu, S.O., Mohandes, M. (2019). An intelligent arabic sign language recognition system using a pair of LMCs with GMM based classification. IEEE Sensors Journal, 19(18): 8067-8078. https://doi.org/10.1109/JSEN.2019.2917525<br /><br />
+[32] Xue, Y., Gao, S., Sun, H., Qin, W. (2017). A Chinese sign language recognition system using leap motion. In 2017 International Conference on Virtual Reality and Visualization (ICVRV), pp. 180-185. https://doi.org/10.1109/ICVRV.2017.00044<br /><br />
+[33] Naglot, D., Kulkarni, M. (2016). ANN based Indian Sign Language numerals recognition using the leap motion controller. In 2016 international conference on inventive computation technologies (ICICT), 2: 1-6. https://doi.org/10.1109/INVENTIVE.2016.7824830<br /><br />
+[34] Škraba, A., Koložvari, A., Kofjač, D., Stojanović, R. (2015, June). Wheelchair maneuvering using leap motion controller and cloud based speech control: Prototype realization. In 2015 4th Mediterranean Conference on Embedded Computing (MECO), pp. 391-394. https://doi.org/10.1109/MECO.2015.7181952<br /><br />
+[35] Bachmann, D., Weichert, F., Rinkenauer, G. (2014). Evaluation of the leap motion controller as a new contact-free pointing device. Sensors, 15(1): 214-233. https://doi.org/10.3390/s150100214<br /><br />
+[36] Bessa Seixas, M.C.B., Cardoso, J.C.S., Galvão, T. (2015). The leap motion movement for 2D pointing tasks characterisation and comparison to other devices. "5th International Conference on Pervasive and Embedded Computing and Communication Systems (PECCS), pp. 15-24, January 2015.<br /><br />
+[37] Aswathi, T., Athira, S., Sowrabiya, G., Shanila, M.K., Cyriac, L., Saidas, S.R. (2019). A paradigm of sixth sense: Finger cursor. In 2019 2nd International Conference on Intelligent Computing, Instrumentation and Control Technologies (ICICICT), 1: 1558-1562. https://doi.org/10.1109/ICICICT46008.2019.8993112<br /><br />
+[38] Tung, J.Y., Lulic, T., Gonzalez, D.A., Tran, J., Dickerson, C.R., Roy, E.A. (2015). Evaluation of a portable markerless finger position capture device: accuracy of the Leap Motion controller in healthy adults. Physiological measurement, 36(5): 1025. https://doi.org/10.1088/0967-3334/36/5/1025<br /><br />
+[39] Losson, O., Vannobel, J.M. (1998). Sign language formal description and synthesis. International Journal of Virtual Reality, 3(4): 27-34. https://doi.org/10.20870/IJVR.1998.3.4.2634<br /><br />
+[40] Jorge, J.A., Fonseca, M.J. (1999). A simple approach to recognise geometric shapes interactively. In International Workshop on Graphics Recognition, Springer, Berlin, Heidelberg, 266-274. https://doi.org/10.1007/3-540-40953-X_23<br /><br />
+[41] Dobkin, D.P., Snyder, L. (1979). On a general method for maximizing and minimizing among certain geometric problems. In 20th Annual Symposium on Foundations of Computer Science (sfcs 1979), pp. 9-17. https://doi.org/10.1109/SFCS.1979.28<br /><br />
+[42] Zafar, I., Tzanidou, G., Burton, R., Patel, N., Araujo, L. (2018). Hands-on convolutional neural networks with TensorFlow: Solve computer vision problems with modeling in TensorFlow and Python. Packt Publishing Ltd.<br /><br />
+[43] Kim, Y. (2014). Convolutional neural networks for sentence classification. Conference on Empirical Methods in Natural Language Processing (EMNLP 2014), pp. 1746–1751.<br /><br />
+[44] Towards Data Science Inc. Taha Binhuraib - Machine learning engineer. https://towardsdatascience.com/nlp-with-cnns-a6aa743bdc1e, accessed on Jan. 2, 2023.<br /><br />
+[45] TensorFlow. an end-to-end open-source platform, https://github.com/tensorflow/tensorflows, accessed on Jan. 2, 2023.<br /><br />
+[46] © 2023 GitHub Inc. Keras – Deep Learning for humans, https://github.com/keras-team/keras, accessed on Jan. 2, 2023.<br /><br />
+[47] TensoFlow. An end-to-end open-source platform, https://www.tensorflow.org/tutorials/images/classification?hl=fr, accessed on Jan. 2, 2023.<br /><br />
+[48] Al, G.A., Estrela, P., Martinez-Hernandez, U. (2020). Towards an intuitive human-robot interaction based on hand gesture recognition and proximity sensors. In 2020 IEEE International Conference on Multisensor Fusion and Integration for Intelligent Systems (MFI), pp. 330-335. https://doi.org/10.1109/MFI49285.2020.9235264<br /><br />
+[49] ULTRALEAP Inc, ULTRALEAP - Camera Module, https://www.ultraleap.com/product/stereo-ir-170/, accessed on Jan. 2, 2023.</p>
+</div></div>
+     </div>
+  </div>
+</div></div>
+<script type="text/javascript">
+(function($) { 
+  $(function() {
+	var oldWebLink = $(this).find('.old-web-link').text();
+	if(oldWebLink !== null && typeof oldWebLink === "string" && oldWebLink.length) {
+	  console.log(oldWebLink);
+	  $(".paper-download a").attr("href",oldWebLink);
+	}
+  });
+})(jQuery);	
+</script>  </div>
+</div>
+  </div>
+                                                
+                    </div>
+                    <!-- EOF:#main -->
+
+                </section>
+
+                                <aside class="col-md-2 sidebar-second">
+                    <!--#sidebar-->
+                    <section id="sidebar-second" class="sidebar clearfix">
+                      <div class="region region-sidebar-second">
+    <div id="block-block-23" class="block block-block clearfix">
+
+    
+  <div class="content">
+    <div id="rightSidebar">
+	<div class="block" id="sidebarUser">
+		<form method="post" action="http://iieta.org/ojs/index.php/index/login/signIn">
+			<table>
+				<tbody>
+					<tr>
+						<td><label for="sidebar-username">Username</label></td>
+						<td><input id="sidebar-username" name="username" value="" size="12" maxlength="32" class="textField" type="text"></td>
+					</tr>
+					<tr>
+						<td><label for="sidebar-password">Password</label></td>
+						<td><input id="sidebar-password" name="password" value="" size="12" class="textField" type="password"></td>
+					</tr>
+					<tr>
+						<td colspan="2"><input id="remember" name="remember" value="1" type="checkbox"> <label for="remember">Remember me</label></td>
+					</tr>
+					<tr>
+						<td colspan="2"><input value="Login" class="button" type="submit"></td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+	<div class="block" id="sidebarNavigation">
+		<div class="blockTitle"><span>Journal Content</span></div>
+
+		<form id="simpleSearchForm" method="post" action="http://www.iieta.org/ojs/index.php/mmc_c/search/search">
+			<table id="simpleSearchInput">
+				<tbody>
+					<tr>
+						<td class="searchTd">
+							<select id="searchField" name="searchField" size="1" class="selectMenu">
+					<option label="All" value="query">All</option>
+<option label="Authors" value="authors">Authors</option>
+<option label="Title" value="title">Title</option>
+<option label="Abstract" value="abstract">Abstract</option>
+<option label="Index terms" value="indexTerms">Index terms</option>
+<option label="Full Text" value="galleyFullText">Full Text</option>
+
+				</select>
+					<input id="simpleQuery" name="simpleQuery" size="15" maxlength="255" value="" class="textField" type="text">
+						</td><td><input value="Search" class="button searchButton" type="submit"></td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+		<span class="blockSubtitle">Browse</span>
+		<ul>
+			<li>
+				<a href="http://www.iieta.org/ojs/index.php/mmc_c/issue/archive">By Issue</a>
+			</li>
+			<li>
+				<a href="http://www.iieta.org/ojs/index.php/mmc_c/issue/archive">By Title</a>
+			</li>
+			<li>
+				<a href="http://www.iieta.org/ojs/index.php/mmc_c/issue/archive">By Author</a>
+			</li>
+			<li>
+				<a href="http://www.iieta.org/ojs">Other Journals</a>
+			</li>
+		</ul>
+	</div>
+	<div class="block" id="sidebarInformation">
+		<div class="blockTitle"><span>Information</span></div>
+		<ul>
+			<li>
+				<a href="http://www.iieta.org/ojs/index.php/mmc_c/information/readers">For Readers</a>
+			</li>
+			<li>
+				<a href="http://www.iieta.org/ojs/index.php/mmc_c/information/authors">For Authors</a>
+			</li>
+			<li>
+				<a href="http://www.iieta.org/ojs/index.php/mmc_c/information/librarians">For Librarians</a>
+			</li>
+		</ul>
+	</div>
+
+</div>  </div>
+</div>
+<div id="block-mycustom-last-notice" class="block block-mycustom clearfix">
+
+    
+  <div class="content">
+    
+<div  id="rightSidebar" style="border-top-color:#F8F8F8;">
+<div style="font-size:18px;text-align:center;margin-bottom:15px;"><span>Latest News & Announcement</span></div>
+  <div id="annCarousel" class="carousel slide" data-ride="carousel">
+	<div class="carousel-inner" style="width:88%;margin:0 auto;">
+		<div class="item  active"><a href="https://www.iieta.org/Journals/MMC_C/news/10432"><img typeof="foaf:Image" src="https://iieta.org/sites/default/files/2_56.jpg" width="241" height="737" alt="" /></a></div>
+	</div>
+    <ol class="carousel-indicators">
+        <li data-target="#annCarousel" data-slide-to="0"  class="active"></li>
+    </ol>	
+  </div>
+  <div class="more18" style="text-align:right;margin:10px 20px 0 0;"><a href="/Journals/MMC_C/news">More </a></div>
+  </div>  
+    </div>
+</div>
+  </div>
+                    </section>
+                    <!--EOF:#sidebar-->
+                </aside>
+                                
+            </div>
+
+        </div>
+    </div>
+    <!-- EOF:#main-content -->
+
+</div>
+<!-- EOF: #page -->
+
+
+<div id="subfooter" class="clearfix">
+	<div class="container">
+		
+		<!-- #subfooter-inside -->
+		<div id="subfooter-inside" class="clearfix">
+            <div class="row">
+    			<div class="col-md-8">
+                    <!-- #subfooter-left -->
+                                        <div class="subfooter-area left">
+                      <div class="region region-sub-footer-left">
+    <div id="block-block-27" class="block block-block clearfix">
+
+    
+  <div class="content">
+    <div class="col-md-3">
+<p><strong><a href="http://www.iieta.org/contact">CONTACT</a></strong></p>
+
+<p>Phone: + 1 825 436 9306</p>
+
+<p>Email: info@iieta.org</p>
+</div>
+
+<div class="col-md-2">
+<p><strong><a href="http://www.iieta.org/about">ABOUT</a></strong></p>
+
+<p><a href="/Membership">Membership</a></p>
+
+<p><a href="/Societies">Societies</a></p>
+
+<p><a href="/Recruit">Recruit</a></p>
+
+<p><a href="/Contact">Contact</a></p>
+</div>
+
+<div class="col-md-2">
+<p><strong><a href="http://www.iieta.org/services">SERVICES</a></strong></p>
+
+<p><a href="/Services/Subscription">Subscription</a></p>
+
+<p><a href="/Services/Fast%20Track">Fast track</a></p>
+
+<p><a href="/Services/Language%20Support">Language support</a></p>
+
+<p><a href="/Services/Conference%20Services">Conference</a></p>
+</div>
+
+<div class="col-md-1">
+<p><strong><a href="http://www.iieta.org/journals">JOURNALS</a></strong></p>
+
+<p><a href="/Journals/TS">TS</a></p>
+
+<p><a href="/Journals/JNMES">JNMES</a></p>
+
+<p><a href="/Journals/IJHT">IJHT</a></p>
+
+<p><a href="/Journals/MMEP">MMEP</a></p>
+</div>
+
+<div class="col-md-1">
+<p>&nbsp;</p>
+
+<p><a href="/Journals/ACSM">ACSM</a></p>
+
+<p><a href="/Journals/EJEE">EJEE</a></p>
+
+<p><a href="/Journals/ISI">ISI</a></p>
+
+<p><a href="/Journals/I2M">I2M</a></p>
+</div>
+
+<div class="col-md-1">
+<p>&nbsp;</p>
+
+<p><a href="/Journals/JESA">JESA</a></p>
+
+<p><a href="/Journals/RCMA">RCMA</a></p>
+
+<p><a href="/Journals/RIA">RIA</a></p>
+
+<p><a href="/Journals/IJSDP">IJSDP</a></p>
+</div>
+
+<div class="col-md-1">
+<p>&nbsp;</p>
+
+<p><a href="/Journals/IJSSE">IJSSE</a></p>
+
+<p><a href="/Journals/IJDNE">IJDNE</a></p>
+
+<p><a href="/Journals/EESRJ">EESRJ</a></p>
+
+<p><a href="/Journals/RCES">RCES</a></p>
+</div>
+<div class="col-md-1">
+<p>&nbsp;</p>
+
+<p><a href="/Journals/AMA_A">AMA_A</a></p>
+
+<p><a href="/Journals/AMA_B">AMA_B</a></p>
+
+<p><a href="/Journals/MMC_A">MMC_A</a></p>
+
+<p><a href="/Journals/MMC_B">MMC_B</a></p>
+</div>  </div>
+</div>
+  </div>
+                    </div>
+                                        <!-- EOF: #subfooter-left -->
+    			</div>
+    			<div class="col-md-4">
+                    <!-- #subfooter-right -->
+                                        <div class="subfooter-area right">
+                      <div class="region region-footer">
+    <div id="block-block-28" class="block block-block clearfix">
+
+    
+  <div class="content">
+    <div class="tex2jax"><form action="" class="footer_form" method="get">
+<p>Please sign up to receive notifications on new issues and newsletters from IIETA</p>
+<p>Select Journal/Journals:</p>
+<select multiple="multiple" size="2"><option value="IJHT">IJHT</option><option value="MMEP">MMEP</option><option value="ACSM">ACSM</option><option value="EJEE">EJEE</option><option value="ISI">ISI</option><option value="I2M">I2M</option><option value="JESA">JESA</option><option value="RCMA">RCMA</option><option value="RIA">RIA</option><option value="TS">TS</option><option value="IJSDP">IJSDP</option><option value="IJSSE">IJSSE</option><option value="IJDNE">IJDNE</option><option value="JNMES">JNMES</option><option value="IJES">IJES</option><option value="EESRJ">EESRJ</option><option value="RCES">RCES</option><option value="AMA_A">AMA_A</option><option value="AMA_B">AMA_B</option><option value="AMA_C">AMA_C</option><option value="AMA_D">AMA_D</option><option value="MMC_A">MMC_A</option><option value="MMC_B">MMC_B</option><option value="MMC_C">MMC_C</option><option value="MMC_D">MMC_D</option></select><p> <input name="user-email" placeholder="Please enter your email address" type="email" /><input type="submit" value="Subscribe" /> </p></form>
+</div>  </div>
+</div>
+  </div>
+                    </div>
+                                        <!-- EOF: #subfooter-right -->
+    			</div>
+            </div>
+		</div> 
+		<!-- EOF: #subfooter-inside -->
+	
+	</div>
+</div><!-- EOF:#subfooter -->
+ <div class="footer_copyright">   <div class="region region-footer-copyright">
+    <div id="block-block-29" class="block block-block clearfix">
+
+    
+  <div class="content">
+    <div class="tex2jax"><p>Copyright © 2026 IIETA. All Rights Reserved.</p>
+</div>  </div>
+</div>
+  </div>
+</div>
+  </body>
+</html>

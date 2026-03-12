@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en-US" xml:lang="en-US">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>
+		Fake News Classification using Machine Learning: Count Vectorizer and Support Vector Machine
+							| Journal of Computing & Biomedical Informatics
+			</title>
+
+	
+<link rel="icon" href="https://jcbi.org/public/journals/1/favicon_en_US.png">
+<meta name="generator" content="Open Journal Systems 3.3.0.8">
+<meta name="gs_meta_revision" content="1.1"/>
+<meta name="citation_journal_title" content="Journal of Computing &amp; Biomedical Informatics"/>
+<meta name="citation_journal_abbrev" content="JCBI"/>
+<meta name="citation_issn" content="2710-1614"/> 
+<meta name="citation_author" content="Sajid Khan"/>
+<meta name="citation_author_institution" content="Department of Computer Science, University of Engineering &amp; Technology Taxila, Pakistan."/>
+<meta name="citation_author" content="Mehmoon Anwar"/>
+<meta name="citation_author_institution" content="Department of Computer Science, University of Engineering &amp; Technology Taxila, Pakistan."/>
+<meta name="citation_author" content="Huma Qayyum"/>
+<meta name="citation_author_institution" content="Department of Software Engineering, University of Engineering &amp; Technology Taxila, Pakistan. "/>
+<meta name="citation_author" content="Farooq Ali"/>
+<meta name="citation_author_institution" content="Department of Computer Science,University of Engineering &amp; Technology Taxila, Pakistan."/>
+<meta name="citation_author" content="Marriam Nawaz"/>
+<meta name="citation_author_institution" content="Department of Computer Science, University of Engineering &amp; Technology Taxila, Pakistan."/>
+<meta name="citation_title" content="Fake News Classification using Machine Learning: Count Vectorizer and Support Vector Machine"/>
+<meta name="citation_language" content="en"/>
+<meta name="citation_date" content="2022/12/29"/>
+<meta name="citation_volume" content="4"/>
+<meta name="citation_issue" content="01"/>
+<meta name="citation_firstpage" content="54"/>
+<meta name="citation_lastpage" content="63"/>
+<meta name="citation_doi" content="10.56979/401/2022/85"/>
+<meta name="citation_abstract_html_url" content="https://jcbi.org/index.php/Main/article/view/85"/>
+<meta name="citation_keywords" xml:lang="en" content="NLP, Fake Articles, Machine Learning, SVM"/>
+<meta name="citation_keywords" xml:lang="en" content="Classification"/>
+<meta name="citation_keywords" xml:lang="en" content=" Count vectorizer"/>
+<meta name="citation_pdf_url" content="https://jcbi.org/index.php/Main/article/download/85/41"/>
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+<meta name="DC.Creator.PersonalName" content="Sajid Khan"/>
+<meta name="DC.Creator.PersonalName" content="Mehmoon Anwar"/>
+<meta name="DC.Creator.PersonalName" content="Huma Qayyum"/>
+<meta name="DC.Creator.PersonalName" content="Farooq Ali"/>
+<meta name="DC.Creator.PersonalName" content="Marriam Nawaz"/>
+<meta name="DC.Date.created" scheme="ISO8601" content="2022-12-29"/>
+<meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="2022-11-03"/>
+<meta name="DC.Date.issued" scheme="ISO8601" content="2022-12-29"/>
+<meta name="DC.Date.modified" scheme="ISO8601" content="2023-01-06"/>
+<meta name="DC.Description" xml:lang="en" content="The quick advancement of the internet facility and rapid uptake of social networking sites like Twitter and Facebook has led to the generation of an extensive amount of data never seen previously in the history of humanity. Users are producing and disseminating more content than ever because of the widespread use of digital platforms, some of which are false and spreading wrong narratives. Accurate categorization of textual documents as fabrication or falsehood is a complicated job. The majority of the research emphasizes certain databases or topics, most notably the area of politics. As a result, the trained approaches perform effectively on a specific category of documents field and do not generate robust performance when evaluated to articles from other areas. We proposed a solution to the false news identification task in the presented study by combining NLP and machine learning technologies. In the first phase, the data is pre-processed by employing steps like removing null, duplicate, values, and punctuation marks. After this, the clean data is converted into numeric representation using a count vectorizer (CV) and Tf-Idf vectorizer. While for the classification task, we have used the SVM classifier. Our proposed solution performed well and catered to all possible fake news domains."/>
+<meta name="DC.Format" scheme="IMT" content="application/pdf"/>
+<meta name="DC.Identifier" content="85"/>
+<meta name="DC.Identifier.pageNumber" content="54-63"/>
+<meta name="DC.Identifier.DOI" content="10.56979/401/2022/85"/>
+<meta name="DC.Identifier.URI" content="https://jcbi.org/index.php/Main/article/view/85"/>
+<meta name="DC.Language" scheme="ISO639-1" content="en"/>
+<meta name="DC.Rights" content="Copyright (c) 2022 Journal of Computing &amp; Biomedical Informatics"/>
+<meta name="DC.Rights" content=""/>
+<meta name="DC.Source" content="Journal of Computing &amp; Biomedical Informatics"/>
+<meta name="DC.Source.ISSN" content="2710-1614"/>
+<meta name="DC.Source.Issue" content="01"/>
+<meta name="DC.Source.Volume" content="4"/>
+<meta name="DC.Source.URI" content="https://jcbi.org/index.php/Main"/>
+<meta name="DC.Subject" xml:lang="en" content=" Count vectorizer"/>
+<meta name="DC.Title" content="Fake News Classification using Machine Learning: Count Vectorizer and Support Vector Machine"/>
+<meta name="DC.Type" content="Text.Serial.Journal"/>
+<meta name="DC.Type.articleType" content="Articles"/>
+	<link rel="stylesheet" href="https://jcbi.org/index.php/Main/$$$call$$$/page/page/css?name=stylesheet" type="text/css" /><link rel="stylesheet" href="https://jcbi.org/index.php/Main/$$$call$$$/page/page/css?name=font" type="text/css" /><link rel="stylesheet" href="https://jcbi.org/lib/pkp/styles/fontawesome/fontawesome.css?v=3.3.0.8" type="text/css" /><link rel="stylesheet" href="https://jcbi.org/plugins/generic/publons/styles/publons.css?v=3.3.0.8" type="text/css" />
+</head>
+<body class="pkp_page_article pkp_op_view" dir="ltr">
+
+	<div class="pkp_structure_page">
+
+				<header class="pkp_structure_head" id="headerNavigationContainer" role="banner">
+						 <nav class="cmp_skip_to_content" aria-label="Jump to content links">
+	<a href="#pkp_content_main">Skip to main content</a>
+	<a href="#siteNav">Skip to main navigation menu</a>
+		<a href="#pkp_content_footer">Skip to site footer</a>
+</nav>
+
+			<div class="pkp_head_wrapper">
+
+				<div class="pkp_site_name_wrapper">
+					<button class="pkp_site_nav_toggle">
+						<span>Open Menu</span>
+					</button>
+										<div class="pkp_site_name">
+																<a href="						https://jcbi.org/index.php/Main/index
+					" class="is_text">Journal of Computing &amp; Biomedical Informatics</a>
+										</div>
+				</div>
+
+				
+				<nav class="pkp_site_nav_menu" aria-label="Site Navigation">
+					<a id="siteNav"></a>
+					<div class="pkp_navigation_primary_row">
+						<div class="pkp_navigation_primary_wrapper">
+																				<ul id="navigationPrimary" class="pkp_navigation_primary pkp_nav_list">
+								<li class="">
+				<a href="https://jcbi.org/index.php/Main/issue/current">
+					Current
+				</a>
+							</li>
+								<li class="">
+				<a href="https://jcbi.org/index.php/Main/issue/archive">
+					Archives
+				</a>
+							</li>
+								<li class="">
+				<a href="https://jcbi.org/index.php/Main/about/editorialTeam">
+					Editorial Board
+				</a>
+							</li>
+															<li class="">
+				<a href="https://jcbi.org/index.php/Main/about">
+					About
+				</a>
+									<ul>
+																					<li class="">
+									<a href="https://jcbi.org/index.php/Main/about">
+										About the Journal
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jcbi.org/index.php/Main/aim">
+										Aim & Scope
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jcbi.org/index.php/Main/Advisory">
+										Advisory Board
+									</a>
+								</li>
+																		</ul>
+							</li>
+								<li class="">
+				<a href="https://jcbi.org/index.php/Main/policies">
+					Policies
+				</a>
+									<ul>
+																					<li class="">
+									<a href="https://jcbi.org/index.php/Main/Open-Access-Policy">
+										Open Access Policy
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jcbi.org/index.php/Main/Ethical-Policy">
+										Publication Ethics
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jcbi.org/index.php/Main/Peer-Review-Policy">
+										Peer Review Policy
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jcbi.org/index.php/Main/APC">
+										Article Processing Charges (APC)
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jcbi.org/index.php/Main/Publishing-Policy">
+										Publishing Policy
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jcbi.org/index.php/Main/Privacy-Statement">
+										Privacy Statement
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jcbi.org/index.php/Main/Archiving-and-Preservation-Policy">
+										Archiving and Preservation Policy
+									</a>
+								</li>
+																		</ul>
+							</li>
+								<li class="">
+				<a href="https://jcbi.org/index.php/Main/author">
+					Guidelines
+				</a>
+							</li>
+								<li class="">
+				<a href="https://jcbi.org/index.php/Main/about/submissions">
+					Submissions
+				</a>
+							</li>
+								<li class="">
+				<a href="https://jcbi.org/index.php/Main/Conferences">
+					Conferences
+				</a>
+									<ul>
+																					<li class="">
+									<a href="http://techprojects.mnsuam.edu.pk/smarttrap/wp-content/uploads/2023/11/ICAIET_Call_for_Abstracts-.pdf">
+										ICAIET 2023
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://premium109.web-hosting.com:2096/webmaillogout.cgi">
+										Editor Login
+									</a>
+								</li>
+																		</ul>
+							</li>
+								<li class="">
+				<a href="https://jcbi.org/index.php/Main/Contact-us">
+					Contact
+				</a>
+							</li>
+			</ul>
+
+				
+
+																						<div class="pkp_navigation_search_wrapper">
+									<a href="https://jcbi.org/index.php/Main/search" class="pkp_search pkp_search_desktop">
+										<span class="fa fa-search" aria-hidden="true"></span>
+										Search
+									</a>
+								</div>
+													</div>
+					</div>
+					<div class="pkp_navigation_user_wrapper" id="navigationUserWrapper">
+							<ul id="navigationUser" class="pkp_navigation_user pkp_nav_list">
+								<li class="profile">
+				<a href="https://jcbi.org/index.php/Main/user/register">
+					Register
+				</a>
+							</li>
+								<li class="profile">
+				<a href="https://jcbi.org/index.php/Main/login">
+					Login
+				</a>
+							</li>
+										</ul>
+
+					</div>
+				</nav>
+			</div><!-- .pkp_head_wrapper -->
+		</header><!-- .pkp_structure_head -->
+
+						<div class="pkp_structure_content has_sidebar">
+			<div class="pkp_structure_main" role="main">
+				<a id="pkp_content_main"></a>
+
+<div class="page page_article">
+			<nav class="cmp_breadcrumbs" role="navigation" aria-label="You are here:">
+	<ol>
+		<li>
+			<a href="https://jcbi.org/index.php/Main/index">
+				Home
+			</a>
+			<span class="separator">/</span>
+		</li>
+		<li>
+			<a href="https://jcbi.org/index.php/Main/issue/archive">
+				Archives
+			</a>
+			<span class="separator">/</span>
+		</li>
+					<li>
+				<a href="https://jcbi.org/index.php/Main/issue/view/7">
+					Vol. 4 No. 01 (2022): Journal of Computing & Biomedical Informatics
+				</a>
+				<span class="separator">/</span>
+			</li>
+				<li class="current" aria-current="page">
+			<span aria-current="page">
+									Articles
+							</span>
+		</li>
+	</ol>
+</nav>
+	
+		  	 <article class="obj_article_details">
+
+		
+	<h1 class="page_title">
+		Fake News Classification using Machine Learning: Count Vectorizer and Support Vector Machine
+	</h1>
+
+	
+	<div class="row">
+		<div class="main_entry">
+
+							<section class="item authors">
+					<h2 class="pkp_screen_reader">Authors</h2>
+					<ul class="authors">
+											<li>
+							<span class="name">
+								Sajid Khan
+							</span>
+															<span class="affiliation">
+									Department of Computer Science, University of Engineering &amp; Technology Taxila, Pakistan.
+																	</span>
+																				</li>
+											<li>
+							<span class="name">
+								Mehmoon Anwar
+							</span>
+															<span class="affiliation">
+									Department of Computer Science, University of Engineering &amp; Technology Taxila, Pakistan.
+																	</span>
+																				</li>
+											<li>
+							<span class="name">
+								Huma Qayyum
+							</span>
+															<span class="affiliation">
+									Department of Software Engineering, University of Engineering &amp; Technology Taxila, Pakistan. 
+																	</span>
+																				</li>
+											<li>
+							<span class="name">
+								Farooq Ali
+							</span>
+															<span class="affiliation">
+									Department of Computer Science,University of Engineering &amp; Technology Taxila, Pakistan.
+																	</span>
+																				</li>
+											<li>
+							<span class="name">
+								Marriam Nawaz
+							</span>
+															<span class="affiliation">
+									Department of Computer Science, University of Engineering &amp; Technology Taxila, Pakistan.
+																	</span>
+																				</li>
+										</ul>
+				</section>
+			
+																												<section class="item doi">
+						<h2 class="label">
+														DOI:
+						</h2>
+						<span class="value">
+							<a href="https://doi.org/10.56979/401/2022/85">
+								https://doi.org/10.56979/401/2022/85
+							</a>
+						</span>
+					</section>
+							
+									<section class="item keywords">
+				<h2 class="label">
+										Keywords:
+				</h2>
+				<span class="value">
+											NLP, Fake Articles, Machine Learning, SVM, 											Classification, 											 Count vectorizer									</span>
+			</section>
+			
+										<section class="item abstract">
+					<h2 class="label">Abstract</h2>
+					<p>The quick advancement of the internet facility and rapid uptake of social networking sites like Twitter and Facebook has led to the generation of an extensive amount of data never seen previously in the history of humanity. Users are producing and disseminating more content than ever because of the widespread use of digital platforms, some of which are false and spreading wrong narratives. Accurate categorization of textual documents as fabrication or falsehood is a complicated job. The majority of the research emphasizes certain databases or topics, most notably the area of politics. As a result, the trained approaches perform effectively on a specific category of documents field and do not generate robust performance when evaluated to articles from other areas. We proposed a solution to the false news identification task in the presented study by combining NLP and machine learning technologies. In the first phase, the data is pre-processed by employing steps like removing null, duplicate, values, and punctuation marks. After this, the clean data is converted into numeric representation using a count vectorizer (CV) and Tf-Idf vectorizer. While for the classification task, we have used the SVM classifier. Our proposed solution performed well and catered to all possible fake news domains.</p>
+				</section>
+			
+			
+
+																																															
+						
+		</div><!-- .main_entry -->
+
+		<div class="entry_details">
+
+										<div class="item cover_image">
+					<div class="sub_item">
+													<a href="https://jcbi.org/index.php/Main/issue/view/7">
+								<img src="https://jcbi.org/public/journals/1/cover_issue_7_en_US.jpg" alt="">
+							</a>
+											</div>
+				</div>
+			
+										<div class="item galleys">
+					<h2 class="pkp_screen_reader">
+						Downloads
+					</h2>
+					<ul class="value galleys_links">
+													<li>
+								
+	
+							
+
+<a class="obj_galley_link pdf" href="https://jcbi.org/index.php/Main/article/view/85/41">
+
+		
+	PDF
+
+	</a>
+							</li>
+											</ul>
+				</div>
+						
+						<div class="item published">
+				<section class="sub_item">
+					<h2 class="label">
+						Published
+					</h2>
+					<div class="value">
+																			<span>2022-12-29</span>
+																	</div>
+				</section>
+							</div>
+			
+										<div class="item citation">
+					<section class="sub_item citation_display">
+						<h2 class="label">
+							How to Cite
+						</h2>
+						<div class="value">
+							<div id="citationOutput" role="region" aria-live="polite">
+								<div class="csl-bib-body">
+  <div class="csl-entry">Sajid Khan, Mehmoon Anwar, Huma Qayyum, Farooq Ali, &#38; Marriam Nawaz. (2022). Fake News Classification using Machine Learning: Count Vectorizer and Support Vector Machine. <i>Journal of Computing &amp; Biomedical Informatics</i>, <i>4</i>(01), 54–63. https://doi.org/10.56979/401/2022/85</div>
+</div>
+							</div>
+							<div class="citation_formats">
+								<button class="cmp_button citation_formats_button" aria-controls="cslCitationFormats" aria-expanded="false" data-csl-dropdown="true">
+									More Citation Formats
+								</button>
+								<div id="cslCitationFormats" class="citation_formats_list" aria-hidden="true">
+									<ul class="citation_formats_styles">
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/acm-sig-proceedings?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/acm-sig-proceedings?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													ACM
+												</a>
+											</li>
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/acs-nano?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/acs-nano?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													ACS
+												</a>
+											</li>
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/apa?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/apa?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													APA
+												</a>
+											</li>
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													ABNT
+												</a>
+											</li>
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/chicago-author-date?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/chicago-author-date?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													Chicago
+												</a>
+											</li>
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/harvard-cite-them-right?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/harvard-cite-them-right?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													Harvard
+												</a>
+											</li>
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/ieee?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/ieee?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													IEEE
+												</a>
+											</li>
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/modern-language-association?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/modern-language-association?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													MLA
+												</a>
+											</li>
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													Turabian
+												</a>
+											</li>
+																					<li>
+												<a
+													aria-controls="citationOutput"
+													href="https://jcbi.org/index.php/Main/citationstylelanguage/get/vancouver?submissionId=85&amp;publicationId=85"
+													data-load-citation
+													data-json-href="https://jcbi.org/index.php/Main/citationstylelanguage/get/vancouver?submissionId=85&amp;publicationId=85&amp;return=json"
+												>
+													Vancouver
+												</a>
+											</li>
+																			</ul>
+																			<div class="label">
+											Download Citation
+										</div>
+										<ul class="citation_formats_styles">
+																							<li>
+													<a href="https://jcbi.org/index.php/Main/citationstylelanguage/download/ris?submissionId=85&amp;publicationId=85">
+														<span class="fa fa-download"></span>
+														Endnote/Zotero/Mendeley (RIS)
+													</a>
+												</li>
+																							<li>
+													<a href="https://jcbi.org/index.php/Main/citationstylelanguage/download/bibtex?submissionId=85&amp;publicationId=85">
+														<span class="fa fa-download"></span>
+														BibTeX
+													</a>
+												</li>
+																					</ul>
+																	</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			
+										<div class="item issue">
+
+											<section class="sub_item">
+							<h2 class="label">
+								Issue
+							</h2>
+							<div class="value">
+								<a class="title" href="https://jcbi.org/index.php/Main/issue/view/7">
+									Vol. 4 No. 01 (2022): Journal of Computing & Biomedical Informatics
+								</a>
+							</div>
+						</section>
+					
+											<section class="sub_item">
+							<h2 class="label">
+								Section
+							</h2>
+							<div class="value">
+								Articles
+							</div>
+						</section>
+					
+									</div>
+			
+															
+										<div class="item copyright">
+					<h2 class="label">
+						License
+					</h2>
+										<p>This is an open Access Article published by Research Center of Computing &amp; Biomedical Informatics (RCBI), Lahore, Pakistan under<a href="http://creativecommons.org/licenses/by/4.0"> CCBY 4.0 International License</a></p>
+				</div>
+			
+			
+
+		</div><!-- .entry_details -->
+	</div><!-- .row -->
+
+</article>
+
+	<div id="articlesBySimilarityList">
+	</div>
+
+
+</div><!-- .page -->
+
+	</div><!-- pkp_structure_main -->
+
+									<div class="pkp_structure_sidebar left" role="complementary" aria-label="Sidebar">
+				<div class="pkp_block block_custom" id="customblock-scopus">
+	<h2 class="title pkp_screen_reader">SCOPUS</h2>
+	<div class="content">
+		<p><img src="https://jcbi.org/public/site/images/alikhan/scopus-jcbi.jpg" alt="" width="2133" height="1321"></p>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-hjrs">
+	<h2 class="title pkp_screen_reader">HJRS</h2>
+	<div class="content">
+		<p><a href="https://www.scopus.com/sourceid/21101375756"><img src="https://jcbi.org/public/site/images/alikhan/hjrs-2324.jpeg" alt="" width="596" height="770"></a></p>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-issn">
+	<h2 class="title pkp_screen_reader">ISSN</h2>
+	<div class="content">
+		<p><strong>DOI: 10.56979</strong></p>
+<p><a href="https://portal.issn.org/resource/ISSN/2710-1614"><strong>ISSN: 2710-1614 (Online)</strong></a></p>
+<p><a href="https://portal.issn.org/resource/ISSN/2710-1606"><strong>ISSN: 2710-1606 (Print)</strong></a></p>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-online-first">
+	<h2 class="title pkp_screen_reader">Online First</h2>
+	<div class="content">
+		<div style="background-color: #dcdcdc; padding-top: 10px; padding-bottom: 10px;">
+<p style="text-align: center; color: red; font-size: 16px;"><a href="https://jcbi.org/index.php/Main/issue/view/18"><strong>Online First</strong></a></p>
+</div>
+<p>Most articles accepted and ready for publication in JCBI are published Online First. <br>------------------------</p>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-call-for-papers">
+	<h2 class="title pkp_screen_reader">Call for Papers</h2>
+	<div class="content">
+		<div style="background-color: #dcdcdc; padding-top: 10px; padding-bottom: 10px;">
+<p style="text-align: center; color: red; font-size: 16px;"><strong>CALL FOR PAPERS</strong></p>
+</div>
+<div>
+<p style="text-align: center;"><strong>Volume 10, Issue 01<br><br></strong>Journal of Computing &amp; Biomedical Informatics (JCBI)<strong><br></strong></p>
+</div>
+<div>
+<p style="text-align: center;">Research Scholars to Submit their Manuscript/Article for Upcoming Issue.</p>
+</div>
+<div>
+<p style="text-align: center;"><strong>ONLINE SUBMISSION</strong></p>
+</div>
+<div>
+<p style="text-align: center;">Submit your article @</p>
+</div>
+<div>
+<p style="text-align: center;"><a href="https://jcbi.org/">https://www.jcbi.org/</a></p>
+</div>
+	</div>
+</div>
+<div class="pkp_block block_make_submission">
+	<h2 class="pkp_screen_reader">
+		Make a Submission
+	</h2>
+
+	<div class="content">
+		<a class="block_make_submission_link" href="https://jcbi.org/index.php/Main/about/submissions">
+			Make a Submission
+		</a>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-open-access">
+	<h2 class="title pkp_screen_reader">Open Access</h2>
+	<div class="content">
+		<p><img src="https://jcbi.org/public/site/images/oa.png" alt="" width="300" height="132"></p>
+	</div>
+</div>
+<div class="pkp_block block_information">
+	<h2 class="title">Information</h2>
+	<div class="content">
+		<ul>
+							<li>
+					<a href="https://jcbi.org/index.php/Main/information/readers">
+						For Readers
+					</a>
+				</li>
+										<li>
+					<a href="https://jcbi.org/index.php/Main/information/authors">
+						For Authors
+					</a>
+				</li>
+								</ul>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-conference">
+	<h2 class="title pkp_screen_reader">Conference</h2>
+	<div class="content">
+		<div style="background-color: #dcdcdc; padding-top: 10px; padding-bottom: 10px;">
+<p style="text-align: center; color: red; font-size: 16px;"><strong>Special Issue -&nbsp; (ICAIET)</strong></p>
+</div>
+<div>
+<p style="text-align: center;"><strong>Chair/Guest Editor : Prof. Dr. Salman Qadri</strong></p>
+</div>
+<div>
+<p style="text-align: center;">Submission Deadline: 31 Dec 2023<br>Publishing date: 31 Jan 2024</p>
+</div>
+<div>
+<p style="text-align: center;"><strong>ONLINE SUBMISSION</strong></p>
+</div>
+<div>
+<p style="text-align: center;">Submit your article @</p>
+</div>
+<div>
+<p style="text-align: center;"><a href="http://techprojects.mnsuam.edu.pk/smarttrap/conference/">https://www.jcbi.org/</a></p>
+</div>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-sc-2">
+	<h2 class="title pkp_screen_reader">SC-2</h2>
+	<div class="content">
+		<p><a href="https://www.scopus.com/sourceid/21101375756"><img src="https://jcbi.org/public/site/images/alikhan/scopus.jpg" alt="" width="227" height="222"></a></p>
+	</div>
+</div>
+
+			</div><!-- pkp_sidebar.left -->
+			</div><!-- pkp_structure_content -->
+
+<div class="pkp_structure_footer_wrapper" role="contentinfo">
+	<a id="pkp_content_footer"></a>
+
+	<div class="pkp_structure_footer">
+
+					<div class="pkp_footer_content">
+				<p align="center">Publisher: Research Center of Computing &amp; Biomedical Informatics © 2022, Lahore, Pakistan. <br />All Rights Reserved.</p>
+			</div>
+		
+		<div class="pkp_brand_footer" role="complementary">
+			<a href="https://jcbi.org/index.php/Main/about/aboutThisPublishingSystem">
+				<img alt="More information about the publishing system, Platform and Workflow by OJS/PKP." src="https://jcbi.org/templates/images/ojs_brand.png">
+			</a>
+		</div>
+	</div>
+</div><!-- pkp_structure_footer_wrapper -->
+
+</div><!-- pkp_structure_page -->
+
+<script src="https://jcbi.org/lib/pkp/lib/vendor/components/jquery/jquery.min.js?v=3.3.0.8" type="text/javascript"></script><script src="https://jcbi.org/lib/pkp/lib/vendor/components/jqueryui/jquery-ui.min.js?v=3.3.0.8" type="text/javascript"></script><script src="https://jcbi.org/plugins/themes/default/js/lib/popper/popper.js?v=3.3.0.8" type="text/javascript"></script><script src="https://jcbi.org/plugins/themes/default/js/lib/bootstrap/util.js?v=3.3.0.8" type="text/javascript"></script><script src="https://jcbi.org/plugins/themes/default/js/lib/bootstrap/dropdown.js?v=3.3.0.8" type="text/javascript"></script><script src="https://jcbi.org/plugins/themes/default/js/main.js?v=3.3.0.8" type="text/javascript"></script><script src="https://jcbi.org/plugins/generic/citationStyleLanguage/js/articleCitation.js?v=3.3.0.8" type="text/javascript"></script>
+
+
+</body>
+</html>

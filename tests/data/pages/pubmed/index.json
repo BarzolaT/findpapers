@@ -1,0 +1,102 @@
+[
+  {
+    "key": "10.1037/met0000518",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/36006759/",
+    "doi": "10.1037/met0000518",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/36006759/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 115089,
+    "error": null
+  },
+  {
+    "key": "10.1177/0739456x21995890",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/38799249/",
+    "doi": "10.1177/0739456x21995890",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/38799249/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 127973,
+    "error": null
+  },
+  {
+    "key": "10.3934/mbe.2024058",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/38303468/",
+    "doi": "10.3934/mbe.2024058",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/38303468/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 112013,
+    "error": null
+  },
+  {
+    "key": "10.3934/mbe.2024013",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/38303423/",
+    "doi": "10.3934/mbe.2024013",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/38303423/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 123212,
+    "error": null
+  },
+  {
+    "key": "10.3758/s13428-022-02028-7",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/36547757/",
+    "doi": "10.3758/s13428-022-02028-7",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/36547757/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 138133,
+    "error": null
+  },
+  {
+    "key": "10.1016/j.jos.2022.09.003",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/36163118/",
+    "doi": "10.1016/j.jos.2022.09.003",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/36163118/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 138150,
+    "error": null
+  },
+  {
+    "key": "10.12688/openreseurope.14507.2",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/38654755/",
+    "doi": "10.12688/openreseurope.14507.2",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/38654755/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 154238,
+    "error": null
+  },
+  {
+    "key": "10.1080/10803548.2022.2111847",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/35980110/",
+    "doi": "10.1080/10803548.2022.2111847",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/35980110/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 120679,
+    "error": null
+  },
+  {
+    "key": "10.1177/21925682211062831",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/35225694/",
+    "doi": "10.1177/21925682211062831",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/35225694/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 148899,
+    "error": null
+  },
+  {
+    "key": "10.1177/0018720820958588",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/32988239/",
+    "doi": "10.1177/0018720820958588",
+    "final_url": "https://pubmed.ncbi.nlm.nih.gov/32988239/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 115223,
+    "error": null
+  }
+]
