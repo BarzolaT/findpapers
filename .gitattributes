@@ -1,1 +1,6 @@
-tests/data/* linguist-vendored
+
+*.html linguist-generated
+
+*.json linguist-generated
+
+*.xml linguist-generated
