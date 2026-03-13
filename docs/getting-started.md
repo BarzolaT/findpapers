@@ -133,6 +133,6 @@ if paper:
 ## Next Steps
 
 - [Query Syntax](https://github.com/jonatasgrosman/findpapers/blob/main/docs/query-syntax.md) - learn how to write powerful search queries with boolean operators, wildcards, and field filters
-- [Search Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/search-databases.md) - details on each supported database
+- [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) - details on each supported database
 - [API Reference](https://github.com/jonatasgrosman/findpapers/blob/main/docs/api-reference.md) - complete reference for all classes and methods
 - [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) - environment variables and advanced settings

@@ -7,16 +7,19 @@
   <a href="https://pypi.org/project/findpapers"><img src="https://img.shields.io/pypi/v/findpapers" alt="PyPI"></a>
 </p>
 
-Findpapers is a Python library that helps researchers search for academic papers across multiple databases from a single query. It provides a unified interface for **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, and **Semantic Scholar**, with built-in support for paper enrichment, PDF downloading, citation graph building (snowballing), and export to multiple formats.
+Findpapers is a Python library that gives researchers unified access to **hundreds of millions of academic papers** from different databases - all through a single query. Instead of searching the databases one by one, each with its own interface and query language, Findpapers lets you write one boolean expression and run it everywhere at once, automatically merging and deduplicating the results.
+
+Findpapers connects **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, and **Semantic Scholar** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science. It also supports paper enrichment, PDF downloading, citation graph building (snowballing), and export to multiple formats.
 
 ## Key Features
 
-- **Multi-database search** - query six academic databases in parallel with a single boolean search expression
+- **Massive coverage** - access hundreds of millions of papers across six databases that together span every scientific discipline
+- **Multi-database search** - query all databases in parallel with one boolean search expression - no need to learn six different query syntaxes
 - **Smart deduplication** - automatically merges duplicate papers found across different databases
 - **Paper enrichment** - fetch additional metadata (abstracts, keywords, citations) via CrossRef and web scraping
-- **PDF downloading** - download PDFs with automatic URL resolution for major publishers (ACM, IEEE, Elsevier, Springer, and more)
+- **PDF downloading** - download PDFs with automatic URL resolution for major publishers
 - **Citation snowballing** - build citation graphs by traversing references and citations (forward and backward)
-- **Flexible export** - save results as JSON, BibTeX, or CSV; reload them later for further processing
+- **Flexible export** - save results as JSON, BibTeX, or CSV
 - **Filter codes** - restrict search terms to specific fields (title, abstract, keywords, author, source, affiliation)
 - **Parallel execution** - speed up searches and downloads using multiple worker threads
 
@@ -59,16 +62,35 @@ findpapers.export_papers_to_bibtex(result.papers, "references.bib")
 findpapers.export_to_json(graph, "citation_graph.json")
 ```
 
+## Supported Databases
+
+The table below summarizes each database - for full details on authentication, rate limits, and per-database quirks, see the [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) documentation.
+
+| Database | Size (papers) | API Key | Coverage |
+|----------|------------|---------|----------|
+| [arXiv](https://arxiv.org) | 3 M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Open-access preprints in physics, math, CS, biology, economics, and more |
+| [IEEE Xplore](https://ieeexplore.ieee.org) | 7 M+ [²](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Journals, conferences, and standards in electrical engineering and CS |
+| [OpenAlex](https://openalex.org) | 243 M+ [³](https://openalex.org/about) | Optional | The largest open catalog of scholarly works across all disciplines |
+| [PubMed](https://pubmed.ncbi.nlm.nih.gov) | 40 M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Biomedical and life sciences literature (MEDLINE, PMC, and more) |
+| [Scopus](https://www.scopus.com) | 100 M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Peer-reviewed literature in science, technology, medicine, social sciences, and humanities |
+| [Semantic Scholar](https://www.semanticscholar.org) | 214 M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | AI-powered academic graph covering all fields of science |
+
+In addition, [CrossRef](https://www.crossref.org) (180 M+ DOIs [⁷](https://www.crossref.org/about)) is used internally for DOI-based metadata enrichment and backward snowballing (no API key required).
+
+*Estimated paper counts were consulted in March 2026 from each database's official website. Click the superscript links for the original sources. These numbers grow continuously.*
+
+> **All API keys are free.** Every API key from the databases listed above can be obtained at no cost - just create an account on each provider’s website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). There is no reason to skip them. See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for more details on how to get these API keys, and [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
+
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
 | [Getting Started](https://github.com/jonatasgrosman/findpapers/blob/main/docs/getting-started.md) | Installation, configuration, and first search |
 | [Query Syntax](https://github.com/jonatasgrosman/findpapers/blob/main/docs/query-syntax.md) | How to write search queries, boolean operators, wildcards, and filter codes |
-| [Search Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/search-databases.md) | Supported databases, authentication, and per-database details |
-| [API Reference](https://github.com/jonatasgrosman/findpapers/blob/main/docs/api-reference.md) | Complete reference for the `Engine` class and data models |
+| [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) | Supported databases, authentication, and per-database details |
 | [Export Formats](https://github.com/jonatasgrosman/findpapers/blob/main/docs/export-formats.md) | JSON, BibTeX, and CSV export/import details |
 | [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) | Environment variables, proxy, SSL, and API keys |
+| [API Reference](https://github.com/jonatasgrosman/findpapers/blob/main/docs/api-reference.md) | Complete reference for the `Engine` class and data models |
 
 ## Want to help?
 

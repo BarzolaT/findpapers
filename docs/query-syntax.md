@@ -69,7 +69,7 @@ ti([neural network] OR abs[deep learning])
 
 In this example, `[neural network]` inherits the `ti` filter from the group, but `[deep learning]` uses its own explicit `abs` filter.
 
-> **Note:** Not all databases support every filter code. Findpapers validates the query against each database's capabilities and skips databases that cannot handle the query. See [Search Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/search-databases.md) for per-database support.
+> **Note:** Not all databases support every filter code. Findpapers validates the query against each database's capabilities and skips databases that cannot handle the query. See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for per-database support.
 
 ## Wildcards
 
