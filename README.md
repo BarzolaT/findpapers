@@ -93,6 +93,7 @@ The table below summarizes each supported database - for full details on authent
 | [Snowball](https://github.com/jonatasgrosman/findpapers/blob/main/docs/snowball.md) | Build citation graphs via forward and backward snowballing |
 | [Fetch by DOI](https://github.com/jonatasgrosman/findpapers/blob/main/docs/fetch-by-doi.md) | Look up a single paper by DOI |
 | [Save/Load](https://github.com/jonatasgrosman/findpapers/blob/main/docs/save-load.md) | JSON, BibTeX, and CSV persistence details |
+| [API Reference](https://github.com/jonatasgrosman/findpapers/blob/main/docs/api-reference.md) | Public classes, functions, enums, and exceptions |
 
 ## Want to help?
 
