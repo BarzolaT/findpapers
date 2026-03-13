@@ -78,7 +78,7 @@ class SearchResult:
         failed_databases : list[str] | None
             Database identifiers that failed during search (network error,
             connector error, etc.).  ``None`` means the information was not
-            recorded (e.g. loaded from an older export).
+            recorded (e.g. loaded from an older save).
         """
         self.query = query
         self.since = since
@@ -149,7 +149,7 @@ class SearchResult:
         """Reconstruct a SearchResult from a dictionary.
 
         Accepts the format produced by :meth:`to_dict` (and by
-        :func:`~findpapers.utils.export.export_to_json`).
+        :func:`~findpapers.utils.persistence.save_to_json`).
 
         Parameters
         ----------

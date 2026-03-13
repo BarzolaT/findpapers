@@ -1,4 +1,4 @@
-"""Unit tests for export utilities."""
+"""Unit tests for save utilities."""
 
 from __future__ import annotations
 
@@ -14,8 +14,8 @@ from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source, SourceType
-from findpapers.exceptions import ExportError
-from findpapers.utils.export import (
+from findpapers.exceptions import PersistenceError
+from findpapers.utils.persistence import (
     _escape_bibtex,
     _extract_papers,
     _sanitize_csv_value,
@@ -25,13 +25,13 @@ from findpapers.utils.export import (
     bibtex_how_published,
     bibtex_note,
     citation_key_for,
-    export_papers_to_bibtex,
-    export_papers_to_csv,
-    export_to_json,
+    load_from_bibtex,
+    load_from_csv,
     load_from_json,
-    load_papers_from_bibtex,
-    load_papers_from_csv,
     paper_to_bibtex,
+    save_to_bibtex,
+    save_to_csv,
+    save_to_json,
 )
 
 # ---------------------------------------------------------------------------
@@ -151,8 +151,8 @@ class TestExtractPapers:
         assert len(papers) == 2
 
     def test_raises_for_unsupported_type(self) -> None:
-        """Raises ExportError for unsupported input."""
-        with pytest.raises(ExportError, match="Expected"):
+        """Raises PersistenceError for unsupported input."""
+        with pytest.raises(PersistenceError, match="Expected"):
             _extract_papers("not a valid input")  # type: ignore[arg-type]
 
 
@@ -183,8 +183,8 @@ class TestSerializeToDict:
         assert len(result["papers"]) == 1
 
     def test_raises_for_unsupported_type(self) -> None:
-        """Raises ExportError for unsupported input."""
-        with pytest.raises(ExportError, match="Expected"):
+        """Raises PersistenceError for unsupported input."""
+        with pytest.raises(PersistenceError, match="Expected"):
             _serialize_to_dict("not valid")  # type: ignore[arg-type]
 
 
@@ -839,49 +839,49 @@ class TestPaperToBibtex:
 
 
 # ---------------------------------------------------------------------------
-# export_to_json
+# save_to_json
 # ---------------------------------------------------------------------------
 
 
-class TestExportToJson:
-    """Tests for export_to_json()."""
+class TestSaveToJson:
+    """Tests for save_to_json()."""
 
     def test_creates_file_from_search(self, sample_search: SearchResult) -> None:
         """File is created from a SearchResult."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.json")
-            export_to_json(sample_search, path)
+            save_to_json(sample_search, path)
             assert Path(path).exists()
 
     def test_creates_file_from_graph(self, sample_graph: CitationGraph) -> None:
         """File is created from a CitationGraph."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.json")
-            export_to_json(sample_graph, path)
+            save_to_json(sample_graph, path)
             assert Path(path).exists()
 
     def test_creates_file_from_paper_list(self, full_paper: Paper) -> None:
         """File is created from a list of papers."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.json")
-            export_to_json([full_paper], path)
+            save_to_json([full_paper], path)
             assert Path(path).exists()
 
     def test_search_result_valid_json(self, sample_search: SearchResult) -> None:
-        """SearchResult export creates valid JSON with type discriminator."""
+        """SearchResult save creates valid JSON with type discriminator."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.json")
-            export_to_json(sample_search, path)
+            save_to_json(sample_search, path)
             with open(path, encoding="utf-8") as fh:
                 data = json.load(fh)
             assert data["type"] == "search_result"
             assert len(data["papers"]) == 2
 
     def test_paper_list_valid_json(self, full_paper: Paper, minimal_paper: Paper) -> None:
-        """Paper list export creates valid JSON with type discriminator."""
+        """Paper list save creates valid JSON with type discriminator."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.json")
-            export_to_json([full_paper, minimal_paper], path)
+            save_to_json([full_paper, minimal_paper], path)
             with open(path, encoding="utf-8") as fh:
                 data = json.load(fh)
             assert data["type"] == "paper_list"
@@ -889,18 +889,18 @@ class TestExportToJson:
 
 
 # ---------------------------------------------------------------------------
-# export_papers_to_bibtex
+# save_to_bibtex
 # ---------------------------------------------------------------------------
 
 
-class TestExportPapersToBibtex:
-    """Tests for export_papers_to_bibtex()."""
+class TestSaveToBibtex:
+    """Tests for save_to_bibtex()."""
 
     def test_creates_file_from_paper_list(self, full_paper: Paper) -> None:
         """File is created from a list of papers."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_papers_to_bibtex([full_paper], path)
+            save_to_bibtex([full_paper], path)
             content = Path(path).read_text(encoding="utf-8")
             assert "@" in content
 
@@ -908,7 +908,7 @@ class TestExportPapersToBibtex:
         """Number of '@' entry markers equals the number of papers."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_papers_to_bibtex(sample_search.papers, path)
+            save_to_bibtex(sample_search.papers, path)
             content = Path(path).read_text(encoding="utf-8")
             entries = [line for line in content.splitlines() if line.startswith("@")]
             assert len(entries) == len(sample_search.papers)
@@ -917,25 +917,25 @@ class TestExportPapersToBibtex:
         """Empty paper list produces an empty file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_papers_to_bibtex([], path)
+            save_to_bibtex([], path)
             content = Path(path).read_text(encoding="utf-8")
             assert content == ""
 
 
 # ---------------------------------------------------------------------------
-# load_papers_from_bibtex
+# load_from_bibtex
 # ---------------------------------------------------------------------------
 
 
-class TestLoadPapersFromBibtex:
-    """Tests for load_papers_from_bibtex()."""
+class TestLoadFromBibtex:
+    """Tests for load_from_bibtex()."""
 
     def test_round_trip(self, full_paper: Paper) -> None:
-        """Papers survive export -> load round-trip."""
+        """Papers survive save -> load round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_papers_to_bibtex([full_paper], path)
-            loaded = load_papers_from_bibtex(path)
+            save_to_bibtex([full_paper], path)
+            loaded = load_from_bibtex(path)
             assert len(loaded) == 1
             assert loaded[0].title == full_paper.title
 
@@ -943,8 +943,8 @@ class TestLoadPapersFromBibtex:
         """Author names are preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_papers_to_bibtex([full_paper], path)
-            loaded = load_papers_from_bibtex(path)
+            save_to_bibtex([full_paper], path)
+            loaded = load_from_bibtex(path)
             original_names = [a.name for a in full_paper.authors]
             loaded_names = [a.name for a in loaded[0].authors]
             assert loaded_names == original_names
@@ -953,16 +953,16 @@ class TestLoadPapersFromBibtex:
         """DOI is preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_papers_to_bibtex([full_paper], path)
-            loaded = load_papers_from_bibtex(path)
+            save_to_bibtex([full_paper], path)
+            loaded = load_from_bibtex(path)
             assert loaded[0].doi == full_paper.doi
 
     def test_preserves_year(self, full_paper: Paper) -> None:
         """Publication year is preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_papers_to_bibtex([full_paper], path)
-            loaded = load_papers_from_bibtex(path)
+            save_to_bibtex([full_paper], path)
+            loaded = load_from_bibtex(path)
             assert loaded[0].publication_date is not None
             assert full_paper.publication_date is not None
             assert loaded[0].publication_date.year == full_paper.publication_date.year
@@ -979,8 +979,8 @@ class TestLoadPapersFromBibtex:
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.bib")
-            export_papers_to_bibtex([paper], path)
-            loaded = load_papers_from_bibtex(path)
+            save_to_bibtex([paper], path)
+            loaded = load_from_bibtex(path)
             assert loaded[0].paper_type == PaperType.ARTICLE
 
     def test_empty_file(self) -> None:
@@ -988,7 +988,7 @@ class TestLoadPapersFromBibtex:
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "empty.bib")
             Path(path).write_text("", encoding="utf-8")
-            loaded = load_papers_from_bibtex(path)
+            loaded = load_from_bibtex(path)
             assert loaded == []
 
     def test_unescape_special_characters(self) -> None:
@@ -1003,7 +1003,7 @@ class TestLoadPapersFromBibtex:
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "special.bib")
             Path(path).write_text(bib_content, encoding="utf-8")
-            loaded = load_papers_from_bibtex(path)
+            loaded = load_from_bibtex(path)
             assert len(loaded) == 1
             assert loaded[0].title == "Deep Learning & Neural Networks"
 
@@ -1016,7 +1016,7 @@ class TestLoadPapersFromBibtex:
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "multi.bib")
             Path(path).write_text(bib_content, encoding="utf-8")
-            loaded = load_papers_from_bibtex(path)
+            loaded = load_from_bibtex(path)
             assert len(loaded) == 2
             assert loaded[0].title == "Paper One"
             assert loaded[1].title == "Paper Two"
@@ -1027,13 +1027,13 @@ class TestLoadPapersFromBibtex:
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "notitle.bib")
             Path(path).write_text(bib_content, encoding="utf-8")
-            loaded = load_papers_from_bibtex(path)
+            loaded = load_from_bibtex(path)
             assert loaded == []
 
     def test_file_not_found(self) -> None:
         """FileNotFoundError is raised for non-existent paths."""
         with pytest.raises(FileNotFoundError):
-            load_papers_from_bibtex("/tmp/nonexistent_bibtex_file.bib")
+            load_from_bibtex("/tmp/nonexistent_bibtex_file.bib")
 
 
 # ---------------------------------------------------------------------------
@@ -1079,10 +1079,10 @@ class TestLoadFromJson:
     """Tests for load_from_json()."""
 
     def test_round_trip_search_result(self, sample_search: SearchResult) -> None:
-        """SearchResult survives export -> load round-trip."""
+        """SearchResult survives save -> load round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "search.json")
-            export_to_json(sample_search, path)
+            save_to_json(sample_search, path)
             loaded = load_from_json(path)
 
         assert isinstance(loaded, SearchResult)
@@ -1090,10 +1090,10 @@ class TestLoadFromJson:
         assert loaded.query == "[deep learning]"
 
     def test_round_trip_citation_graph(self, sample_graph: CitationGraph) -> None:
-        """CitationGraph survives export -> load round-trip."""
+        """CitationGraph survives save -> load round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "graph.json")
-            export_to_json(sample_graph, path)
+            save_to_json(sample_graph, path)
             loaded = load_from_json(path)
 
         assert isinstance(loaded, CitationGraph)
@@ -1101,11 +1101,11 @@ class TestLoadFromJson:
         assert loaded.edge_count == 1
 
     def test_round_trip_paper_list(self, full_paper: Paper, minimal_paper: Paper) -> None:
-        """Paper list survives export -> load round-trip."""
+        """Paper list survives save -> load round-trip."""
         papers = [full_paper, minimal_paper]
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "papers.json")
-            export_to_json(papers, path)
+            save_to_json(papers, path)
             loaded = load_from_json(path)
 
         assert isinstance(loaded, list)
@@ -1139,29 +1139,29 @@ class TestLoadFromJson:
         assert isinstance(loaded, CitationGraph)
 
     def test_unrecognised_format_raises(self) -> None:
-        """Files with unrecognised structure cause ExportError."""
+        """Files with unrecognised structure cause PersistenceError."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "bad.json")
             with open(path, "w", encoding="utf-8") as fh:
                 json.dump({"foo": "bar"}, fh)
 
-            with pytest.raises(ExportError, match="Unrecognised"):
+            with pytest.raises(PersistenceError, match="Unrecognised"):
                 load_from_json(path)
 
 
 # ---------------------------------------------------------------------------
-# export_papers_to_csv
+# save_to_csv
 # ---------------------------------------------------------------------------
 
 
-class TestExportPapersToCsv:
-    """Tests for export_papers_to_csv()."""
+class TestSaveToCsv:
+    """Tests for save_to_csv()."""
 
     def test_creates_file(self, full_paper: Paper) -> None:
         """CSV file is created from a list of papers."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
+            save_to_csv([full_paper], path)
             assert Path(path).exists()
             content = Path(path).read_text(encoding="utf-8")
             assert "title" in content
@@ -1171,7 +1171,7 @@ class TestExportPapersToCsv:
         """Number of data rows equals the number of papers."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv(sample_search.papers, path)
+            save_to_csv(sample_search.papers, path)
             lines = Path(path).read_text(encoding="utf-8").strip().splitlines()
             # header + one row per paper
             assert len(lines) == len(sample_search.papers) + 1
@@ -1180,7 +1180,7 @@ class TestExportPapersToCsv:
         """Empty paper list produces a CSV with only the header."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([], path)
+            save_to_csv([], path)
             lines = Path(path).read_text(encoding="utf-8").strip().splitlines()
             assert len(lines) == 1  # header only
 
@@ -1188,7 +1188,7 @@ class TestExportPapersToCsv:
         """Multiple authors are joined with '; '."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
+            save_to_csv([full_paper], path)
             content = Path(path).read_text(encoding="utf-8")
             assert "LeCun, Y.; Bengio, Y.; Hinton, G." in content
 
@@ -1196,25 +1196,25 @@ class TestExportPapersToCsv:
         """Keywords are joined with '; ' and sorted."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
+            save_to_csv([full_paper], path)
             content = Path(path).read_text(encoding="utf-8")
             assert "AI; deep learning; neural networks" in content
 
 
 # ---------------------------------------------------------------------------
-# load_papers_from_csv
+# load_from_csv
 # ---------------------------------------------------------------------------
 
 
-class TestLoadPapersFromCsv:
-    """Tests for load_papers_from_csv()."""
+class TestLoadFromCsv:
+    """Tests for load_from_csv()."""
 
     def test_round_trip(self, full_paper: Paper) -> None:
-        """Papers survive export -> load round-trip."""
+        """Papers survive save -> load round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([full_paper], path)
+            loaded = load_from_csv(path)
             assert len(loaded) == 1
             assert loaded[0].title == full_paper.title
 
@@ -1222,8 +1222,8 @@ class TestLoadPapersFromCsv:
         """Author names are preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([full_paper], path)
+            loaded = load_from_csv(path)
             original_names = [a.name for a in full_paper.authors]
             loaded_names = [a.name for a in loaded[0].authors]
             assert loaded_names == original_names
@@ -1232,16 +1232,16 @@ class TestLoadPapersFromCsv:
         """DOI is preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([full_paper], path)
+            loaded = load_from_csv(path)
             assert loaded[0].doi == full_paper.doi
 
     def test_preserves_publication_date(self, full_paper: Paper) -> None:
         """Publication date is preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([full_paper], path)
+            loaded = load_from_csv(path)
             assert loaded[0].publication_date == full_paper.publication_date
 
     def test_preserves_paper_type(self) -> None:
@@ -1256,32 +1256,32 @@ class TestLoadPapersFromCsv:
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([paper], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([paper], path)
+            loaded = load_from_csv(path)
             assert loaded[0].paper_type == PaperType.ARTICLE
 
     def test_preserves_keywords(self, full_paper: Paper) -> None:
         """Keywords are preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([full_paper], path)
+            loaded = load_from_csv(path)
             assert loaded[0].keywords == full_paper.keywords
 
     def test_preserves_citations(self, full_paper: Paper) -> None:
         """Citations count is preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([full_paper], path)
+            loaded = load_from_csv(path)
             assert loaded[0].citations == full_paper.citations
 
     def test_preserves_source(self, full_paper: Paper) -> None:
         """Source title and publisher are preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([full_paper], path)
+            loaded = load_from_csv(path)
             assert loaded[0].source is not None
             assert full_paper.source is not None
             assert loaded[0].source.title == full_paper.source.title
@@ -1291,24 +1291,24 @@ class TestLoadPapersFromCsv:
         """Databases are preserved across the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([full_paper], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([full_paper], path)
+            loaded = load_from_csv(path)
             assert loaded[0].databases == full_paper.databases
 
     def test_multiple_papers(self, sample_search: SearchResult) -> None:
         """Multiple papers survive the round-trip."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv(sample_search.papers, path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv(sample_search.papers, path)
+            loaded = load_from_csv(path)
             assert len(loaded) == len(sample_search.papers)
 
     def test_empty_file_returns_empty_list(self) -> None:
         """A CSV with only a header produces an empty list."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "empty.csv")
-            export_papers_to_csv([], path)
-            loaded = load_papers_from_csv(path)
+            save_to_csv([], path)
+            loaded = load_from_csv(path)
             assert loaded == []
 
     def test_skips_rows_without_title(self) -> None:
@@ -1317,13 +1317,13 @@ class TestLoadPapersFromCsv:
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "notitle.csv")
             Path(path).write_text(csv_content, encoding="utf-8")
-            loaded = load_papers_from_csv(path)
+            loaded = load_from_csv(path)
             assert loaded == []
 
     def test_file_not_found(self) -> None:
         """FileNotFoundError is raised for non-existent paths."""
         with pytest.raises(FileNotFoundError):
-            load_papers_from_csv("/tmp/nonexistent_csv_file.csv")
+            load_from_csv("/tmp/nonexistent_csv_file.csv")
 
 
 # ---------------------------------------------------------------------------
@@ -1380,7 +1380,7 @@ class TestCsvFormulaInjectionRoundTrip:
     """End-to-end CSV round-trip with formula-trigger values."""
 
     def test_dangerous_title_survives_round_trip(self):
-        """A title starting with '=' survives export→import without formula injection."""
+        """A title starting with '=' survives save→load without formula injection."""
         paper = Paper(
             title="=SUM(A1:A10)",
             abstract="+abstract with plus",
@@ -1391,7 +1391,7 @@ class TestCsvFormulaInjectionRoundTrip:
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             path = str(Path(tmpdir) / "out.csv")
-            export_papers_to_csv([paper], path)
+            save_to_csv([paper], path)
 
             # Verify the raw CSV does not contain unsanitized formula triggers
             raw = Path(path).read_text(encoding="utf-8")
@@ -1400,7 +1400,7 @@ class TestCsvFormulaInjectionRoundTrip:
             data_line = lines[1]
             assert not data_line.startswith("=")
 
-            loaded = load_papers_from_csv(path)
+            loaded = load_from_csv(path)
             assert len(loaded) == 1
             assert loaded[0].title == paper.title
             assert loaded[0].abstract == paper.abstract

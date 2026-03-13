@@ -56,10 +56,10 @@ engine.download(result.papers, "./pdfs")
 # Build a citation graph from the top results
 graph = engine.snowball(result.papers[:5], max_depth=1, direction="both")
 
-# Export results
-findpapers.export_to_json(result, "results.json")
-findpapers.export_papers_to_bibtex(result.papers, "references.bib")
-findpapers.export_to_json(graph, "citation_graph.json")
+# Save results
+findpapers.save_to_json(result, "results.json")
+findpapers.save_to_bibtex(result.papers, "references.bib")
+findpapers.save_to_json(graph, "citation_graph.json")
 ```
 
 ## Supported Databases
@@ -88,7 +88,7 @@ In addition, [CrossRef](https://www.crossref.org) (180M+ DOIs [⁷](https://www.
 | [Getting Started](https://github.com/jonatasgrosman/findpapers/blob/main/docs/getting-started.md) | Installation, configuration, and first search |
 | [Query Syntax](https://github.com/jonatasgrosman/findpapers/blob/main/docs/query-syntax.md) | How to write search queries, boolean operators, wildcards, and filter codes |
 | [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) | Supported databases, authentication, and per-database details |
-| [Export Formats](https://github.com/jonatasgrosman/findpapers/blob/main/docs/export-formats.md) | JSON, BibTeX, and CSV export/import details |
+| [Persistence Formats](https://github.com/jonatasgrosman/findpapers/blob/main/docs/persistence-formats.md) | JSON, BibTeX, and CSV persistence details |
 | [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) | Environment variables, proxy, SSL, and API keys |
 | [API Reference](https://github.com/jonatasgrosman/findpapers/blob/main/docs/api-reference.md) | Complete reference for the `Engine` class and data models |
 

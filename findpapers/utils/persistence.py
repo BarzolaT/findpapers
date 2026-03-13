@@ -13,15 +13,15 @@ from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source
-from findpapers.exceptions import ExportError
+from findpapers.exceptions import PersistenceError
 from findpapers.utils.version import package_version
 
-#: Union of all exportable types.
-Exportable: TypeAlias = "SearchResult | CitationGraph | list[Paper]"
+#: Union of all persistable types.
+Persistable: TypeAlias = "SearchResult | CitationGraph | list[Paper]"
 
 
-def _extract_papers(data: Exportable) -> list[Paper]:
-    """Extract a flat list of papers from any exportable input.
+def _extract_papers(data: Persistable) -> list[Paper]:
+    """Extract a flat list of papers from any persistable input.
 
     Parameters
     ----------
@@ -35,7 +35,7 @@ def _extract_papers(data: Exportable) -> list[Paper]:
 
     Raises
     ------
-    ExportError
+    PersistenceError
         If *data* is not a supported type.
     """
     if isinstance(data, list):
@@ -44,13 +44,13 @@ def _extract_papers(data: Exportable) -> list[Paper]:
         return data.papers
     if isinstance(data, CitationGraph):
         return data.papers
-    raise ExportError(
+    raise PersistenceError(
         f"Expected SearchResult, CitationGraph, or list[Paper], got {type(data).__name__}"
     )
 
 
-def _serialize_to_dict(data: Exportable) -> dict:
-    """Serialize any exportable input to a dictionary.
+def _serialize_to_dict(data: Persistable) -> dict:
+    """Serialize any persistable input to a dictionary.
 
     The output always contains a top-level ``"type"`` key so that
     :func:`load_from_json` can reconstruct the original object.
@@ -67,7 +67,7 @@ def _serialize_to_dict(data: Exportable) -> dict:
 
     Raises
     ------
-    ExportError
+    PersistenceError
         If *data* is not a supported type.
     """
     if isinstance(data, SearchResult):
@@ -87,12 +87,12 @@ def _serialize_to_dict(data: Exportable) -> dict:
             },
             "papers": [p.to_dict() for p in data],
         }
-    raise ExportError(
+    raise PersistenceError(
         f"Expected SearchResult, CitationGraph, or list[Paper], got {type(data).__name__}"
     )
 
 
-def export_to_json(data: Exportable, path: str) -> None:
+def save_to_json(data: Persistable, path: str) -> None:
     """Write data to a JSON file.
 
     Accepts a :class:`~findpapers.core.search_result.SearchResult`,
@@ -102,7 +102,7 @@ def export_to_json(data: Exportable, path: str) -> None:
     Parameters
     ----------
     data : SearchResult | CitationGraph | list[Paper]
-        Data to export.
+        Data to save.
     path : str
         Output file path.
 
@@ -115,13 +115,13 @@ def export_to_json(data: Exportable, path: str) -> None:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
 
 
-def export_papers_to_bibtex(papers: list[Paper], path: str) -> None:
+def save_to_bibtex(papers: list[Paper], path: str) -> None:
     """Write a list of papers to a BibTeX file.
 
     Parameters
     ----------
     papers : list[Paper]
-        Papers to export.
+        Papers to save.
     path : str
         Output file path.
 
@@ -137,7 +137,7 @@ def export_papers_to_bibtex(papers: list[Paper], path: str) -> None:
 def load_from_json(
     path: str,
 ) -> SearchResult | CitationGraph | list[Paper]:
-    """Load data previously exported with :func:`export_to_json`.
+    """Load data previously saved with :func:`save_to_json`.
 
     The ``"type"`` key in the JSON payload is used to reconstruct the
     correct Python object:
@@ -146,7 +146,7 @@ def load_from_json(
     * ``"citation_graph"`` → :class:`~findpapers.core.citation_graph.CitationGraph`
     * ``"paper_list"`` → ``list[Paper]``
 
-    Files exported **before** the ``"type"`` key was introduced are
+    Files saved **before** the ``"type"`` key was introduced are
     auto-detected as either a ``SearchResult`` (when the payload
     contains a ``"papers"`` key) or a ``CitationGraph`` (when it
     contains ``"nodes"`` and ``"edges"`` keys).
@@ -154,7 +154,7 @@ def load_from_json(
     Parameters
     ----------
     path : str
-        Path to a JSON file created by :func:`export_to_json`.
+        Path to a JSON file created by :func:`save_to_json`.
 
     Returns
     -------
@@ -163,7 +163,7 @@ def load_from_json(
 
     Raises
     ------
-    ExportError
+    PersistenceError
         If the file format cannot be identified.
     """
     with Path(path).open("r", encoding="utf-8") as handle:
@@ -185,7 +185,7 @@ def load_from_json(
     if "papers" in payload:
         return SearchResult.from_dict(payload)
 
-    raise ExportError(
+    raise PersistenceError(
         "Unrecognised JSON format: expected a 'type' key or a recognisable "
         "SearchResult / CitationGraph structure."
     )
@@ -462,7 +462,7 @@ def _parse_bibtex_entries(raw: str) -> list[dict[str, str]]:
     return entries
 
 
-def load_papers_from_bibtex(path: str) -> list[Paper]:
+def load_from_bibtex(path: str) -> list[Paper]:
     """Load papers from a BibTeX file.
 
     Parses the BibTeX entries and reconstructs
@@ -552,12 +552,12 @@ def load_papers_from_bibtex(path: str) -> list[Paper]:
 
 
 # ---------------------------------------------------------------------------
-# CSV export / import
+# CSV save / import
 # ---------------------------------------------------------------------------
 
 # Characters that trigger formula interpretation in spreadsheet applications
 # (Excel, LibreOffice Calc, Google Sheets).  Values starting with any of
-# these are prefixed with a single quote on export and stripped on import
+# these are prefixed with a single quote on save and stripped on import
 # so that round-trips are transparent while preventing formula injection.
 # The single quote is the OWASP-recommended prefix (CWE-1236) and is
 # natively recognised by Excel as a text-indicator — it hides the quote
@@ -582,7 +582,7 @@ def _sanitize_csv_value(value: str) -> str:
     Returns
     -------
     str
-        Sanitized value safe for CSV export.
+        Sanitized value safe for CSV save.
     """
     if value and value[0] in _CSV_FORMULA_CHARS:
         return "'" + value
@@ -610,7 +610,7 @@ def _unsanitize_csv_value(value: str) -> str:
     return value
 
 
-#: Columns written by :func:`export_papers_to_csv`.
+#: Columns written by :func:`save_to_csv`.
 _CSV_COLUMNS: list[str] = [
     "title",
     "authors",
@@ -632,7 +632,7 @@ _CSV_COLUMNS: list[str] = [
 ]
 
 
-def export_papers_to_csv(papers: list[Paper], path: str) -> None:
+def save_to_csv(papers: list[Paper], path: str) -> None:
     """Write a list of papers to a CSV file.
 
     Each row represents one paper.  Multi-valued fields (authors,
@@ -641,7 +641,7 @@ def export_papers_to_csv(papers: list[Paper], path: str) -> None:
     Parameters
     ----------
     papers : list[Paper]
-        Papers to export.
+        Papers to save.
     path : str
         Output file path.
 
@@ -693,11 +693,11 @@ def _paper_to_csv_row(paper: Paper) -> dict[str, str]:
     }
 
 
-def load_papers_from_csv(path: str) -> list[Paper]:
+def load_from_csv(path: str) -> list[Paper]:
     """Load papers from a CSV file.
 
     Expects a header row with column names matching those produced by
-    :func:`export_papers_to_csv`.  Unknown columns are silently ignored.
+    :func:`save_to_csv`.  Unknown columns are silently ignored.
 
     Parameters
     ----------

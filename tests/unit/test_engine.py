@@ -529,14 +529,14 @@ class TestSnowballImport:
         assert findpapers.SnowballRunner is SnowballRunner
 
 
-class TestExportFunctionsImport:
-    """Verify export/import functions are accessible from findpapers namespace."""
+class TestSaveFunctionsImport:
+    """Verify persistence functions are accessible from findpapers namespace."""
 
-    def test_export_to_json_importable(self):
-        """findpapers.export_to_json is accessible."""
+    def test_save_to_json_importable(self):
+        """findpapers.save_to_json is accessible."""
         import findpapers
 
-        assert callable(findpapers.export_to_json)
+        assert callable(findpapers.save_to_json)
 
     def test_load_from_json_importable(self):
         """findpapers.load_from_json is accessible."""
@@ -544,80 +544,80 @@ class TestExportFunctionsImport:
 
         assert callable(findpapers.load_from_json)
 
-    def test_export_papers_to_bibtex_importable(self):
-        """findpapers.export_papers_to_bibtex is accessible."""
+    def test_save_to_bibtex_importable(self):
+        """findpapers.save_to_bibtex is accessible."""
         import findpapers
 
-        assert callable(findpapers.export_papers_to_bibtex)
+        assert callable(findpapers.save_to_bibtex)
 
-    def test_load_papers_from_bibtex_importable(self):
-        """findpapers.load_papers_from_bibtex is accessible."""
+    def test_load_from_bibtex_importable(self):
+        """findpapers.load_from_bibtex is accessible."""
         import findpapers
 
-        assert callable(findpapers.load_papers_from_bibtex)
+        assert callable(findpapers.load_from_bibtex)
 
-    def test_export_papers_to_csv_importable(self):
-        """findpapers.export_papers_to_csv is accessible."""
+    def test_save_to_csv_importable(self):
+        """findpapers.save_to_csv is accessible."""
         import findpapers
 
-        assert callable(findpapers.export_papers_to_csv)
+        assert callable(findpapers.save_to_csv)
 
-    def test_load_papers_from_csv_importable(self):
-        """findpapers.load_papers_from_csv is accessible."""
+    def test_load_from_csv_importable(self):
+        """findpapers.load_from_csv is accessible."""
         import findpapers
 
-        assert callable(findpapers.load_papers_from_csv)
+        assert callable(findpapers.load_from_csv)
 
 
 # ---------------------------------------------------------------------------
-# Export / Load (top-level functions)
+# Save / Load (top-level functions)
 # ---------------------------------------------------------------------------
 
 
-class TestExportToJson:
-    """Tests for findpapers.export_to_json top-level function."""
+class TestSaveToJson:
+    """Tests for findpapers.save_to_json top-level function."""
 
-    def test_export_search_result(self, make_paper, tmp_path):
-        """SearchResult is exported to a JSON file."""
+    def test_save_search_result(self, make_paper, tmp_path):
+        """SearchResult is saved to a JSON file."""
         import findpapers
 
         search = SearchResult(query="[test]", databases=["arxiv"])
         search.add_paper(make_paper(doi="10.1/a"))
         path = str(tmp_path / "search.json")
-        findpapers.export_to_json(search, path)
+        findpapers.save_to_json(search, path)
         assert os.path.exists(path)
 
-    def test_export_paper_list(self, make_paper, tmp_path):
-        """A plain list of papers is exported to a JSON file."""
+    def test_save_paper_list(self, make_paper, tmp_path):
+        """A plain list of papers is saved to a JSON file."""
         import findpapers
 
         papers = [make_paper(doi="10.1/a"), make_paper(title="Paper B", doi="10.1/b")]
         path = str(tmp_path / "papers.json")
-        findpapers.export_to_json(papers, path)
+        findpapers.save_to_json(papers, path)
         assert os.path.exists(path)
 
-    def test_export_citation_graph(self, make_paper, tmp_path):
-        """A CitationGraph is exported to a JSON file."""
+    def test_save_citation_graph(self, make_paper, tmp_path):
+        """A CitationGraph is saved to a JSON file."""
         import findpapers
         from findpapers.core.citation_graph import CitationGraph
 
         seed = make_paper(doi="10.1/seed")
         graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
         path = str(tmp_path / "graph.json")
-        findpapers.export_to_json(graph, path)
+        findpapers.save_to_json(graph, path)
         assert os.path.exists(path)
 
 
-class TestExportPapersToBibtex:
-    """Tests for findpapers.export_papers_to_bibtex top-level function."""
+class TestSaveToBibtex:
+    """Tests for findpapers.save_to_bibtex top-level function."""
 
-    def test_export_paper_list(self, make_paper, tmp_path):
-        """A plain list of papers is exported to a BibTeX file."""
+    def test_save_paper_list(self, make_paper, tmp_path):
+        """A plain list of papers is saved to a BibTeX file."""
         import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "refs.bib")
-        findpapers.export_papers_to_bibtex(papers, path)
+        findpapers.save_to_bibtex(papers, path)
         with open(path, encoding="utf-8") as file_handle:
             content = file_handle.read()
         assert "@" in content
@@ -627,23 +627,23 @@ class TestExportPapersToBibtex:
         import findpapers
 
         path = str(tmp_path / "empty.bib")
-        findpapers.export_papers_to_bibtex([], path)
+        findpapers.save_to_bibtex([], path)
         with open(path, encoding="utf-8") as file_handle:
             content = file_handle.read()
         assert content == ""
 
 
-class TestLoadPapersFromBibtex:
-    """Tests for findpapers.load_papers_from_bibtex top-level function."""
+class TestLoadFromBibtex:
+    """Tests for findpapers.load_from_bibtex top-level function."""
 
     def test_round_trip(self, make_paper, tmp_path):
-        """Papers survive export -> load round-trip."""
+        """Papers survive save -> load round-trip."""
         import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "refs.bib")
-        findpapers.export_papers_to_bibtex(papers, path)
-        loaded = findpapers.load_papers_from_bibtex(path)
+        findpapers.save_to_bibtex(papers, path)
+        loaded = findpapers.load_from_bibtex(path)
         assert len(loaded) == 1
         assert loaded[0].title == papers[0].title
 
@@ -652,25 +652,25 @@ class TestLoadFromJson:
     """Tests for findpapers.load_from_json top-level function."""
 
     def test_round_trip_search_result(self, make_paper, tmp_path):
-        """SearchResult survives export -> load round-trip."""
+        """SearchResult survives save -> load round-trip."""
         import findpapers
 
         search = SearchResult(query="[test]", databases=["arxiv"])
         search.add_paper(make_paper(doi="10.1/a"))
         path = str(tmp_path / "search.json")
-        findpapers.export_to_json(search, path)
+        findpapers.save_to_json(search, path)
 
         loaded = findpapers.load_from_json(path)
         assert isinstance(loaded, SearchResult)
         assert len(loaded.papers) == 1
 
     def test_round_trip_paper_list(self, make_paper, tmp_path):
-        """Paper list survives export -> load round-trip."""
+        """Paper list survives save -> load round-trip."""
         import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.json")
-        findpapers.export_to_json(papers, path)
+        findpapers.save_to_json(papers, path)
 
         loaded = findpapers.load_from_json(path)
         assert isinstance(loaded, list)
@@ -678,30 +678,30 @@ class TestLoadFromJson:
         assert loaded[0].title == "Test Paper"
 
     def test_round_trip_citation_graph(self, make_paper, tmp_path):
-        """CitationGraph survives export -> load round-trip."""
+        """CitationGraph survives save -> load round-trip."""
         import findpapers
         from findpapers.core.citation_graph import CitationGraph
 
         seed = make_paper(doi="10.1/seed")
         graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
         path = str(tmp_path / "graph.json")
-        findpapers.export_to_json(graph, path)
+        findpapers.save_to_json(graph, path)
 
         loaded = findpapers.load_from_json(path)
         assert isinstance(loaded, CitationGraph)
         assert loaded.paper_count == 1
 
 
-class TestExportPapersToCsv:
-    """Tests for findpapers.export_papers_to_csv top-level function."""
+class TestSaveToCsv:
+    """Tests for findpapers.save_to_csv top-level function."""
 
-    def test_export_paper_list(self, make_paper, tmp_path):
-        """A plain list of papers is exported to a CSV file."""
+    def test_save_paper_list(self, make_paper, tmp_path):
+        """A plain list of papers is saved to a CSV file."""
         import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.csv")
-        findpapers.export_papers_to_csv(papers, path)
+        findpapers.save_to_csv(papers, path)
         with open(path, encoding="utf-8") as fh:
             content = fh.read()
         assert "title" in content
@@ -712,22 +712,22 @@ class TestExportPapersToCsv:
         import findpapers
 
         path = str(tmp_path / "empty.csv")
-        findpapers.export_papers_to_csv([], path)
+        findpapers.save_to_csv([], path)
         with open(path, encoding="utf-8") as fh:
             lines = fh.read().strip().splitlines()
         assert len(lines) == 1
 
 
-class TestLoadPapersFromCsv:
-    """Tests for findpapers.load_papers_from_csv top-level function."""
+class TestLoadFromCsv:
+    """Tests for findpapers.load_from_csv top-level function."""
 
     def test_round_trip(self, make_paper, tmp_path):
-        """Papers survive export -> load round-trip."""
+        """Papers survive save -> load round-trip."""
         import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.csv")
-        findpapers.export_papers_to_csv(papers, path)
-        loaded = findpapers.load_papers_from_csv(path)
+        findpapers.save_to_csv(papers, path)
+        loaded = findpapers.load_from_csv(path)
         assert len(loaded) == 1
         assert loaded[0].title == papers[0].title

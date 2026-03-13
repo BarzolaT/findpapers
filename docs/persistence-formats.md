@@ -1,24 +1,24 @@
-# Export Formats
+# Persistence Formats
 
-Findpapers supports three export formats: **JSON**, **BibTeX**, and **CSV**. All export/import functions are available as top-level functions in the `findpapers` package.
+Findpapers supports three persistence formats: **JSON**, **BibTeX**, and **CSV**. All persistence functions are available as top-level functions in the `findpapers` package.
 
 ## JSON
 
-JSON is the recommended format for preserving all metadata. It supports exporting and reimporting `SearchResult`, `CitationGraph`, and plain `list[Paper]` objects.
+JSON is the recommended format for preserving all metadata. It supports saving and reloading `SearchResult`, `CitationGraph`, and plain `list[Paper]` objects.
 
-### Export
+### Save
 
 ```python
 import findpapers
 
-# Export a SearchResult (includes query, dates, database info, and all papers)
-findpapers.export_to_json(result, "search_result.json")
+# Save a SearchResult (includes query, dates, database info, and all papers)
+findpapers.save_to_json(result, "search_result.json")
 
-# Export a CitationGraph (includes seed papers, edges, and all discovered papers)
-findpapers.export_to_json(graph, "citation_graph.json")
+# Save a CitationGraph (includes seed papers, edges, and all discovered papers)
+findpapers.save_to_json(graph, "citation_graph.json")
 
-# Export a plain list of papers
-findpapers.export_to_json(papers, "papers.json")
+# Save a plain list of papers
+findpapers.save_to_json(papers, "papers.json")
 ```
 
 ### Import
@@ -43,18 +43,18 @@ Each paper is serialized with all its attributes, including nested `Author` and 
 
 ## BibTeX
 
-BibTeX export generates standard `.bib` files compatible with LaTeX.
+BibTeX save generates standard `.bib` files compatible with LaTeX.
 
-### Export
+### Save
 
 ```python
-findpapers.export_papers_to_bibtex(papers, "references.bib")
+findpapers.save_to_bibtex(papers, "references.bib")
 ```
 
 ### Import
 
 ```python
-papers = findpapers.load_papers_from_bibtex("references.bib")
+papers = findpapers.load_from_bibtex("references.bib")
 ```
 
 ### Format Details
@@ -66,24 +66,24 @@ papers = findpapers.load_papers_from_bibtex("references.bib")
 
 ### Limitations
 
-- Some metadata is lost during BibTeX export (e.g., `citation count`, `databases`, `pdf_url`, `fields_of_study`, `subjects`). Use JSON for lossless round-trips.
+- Some metadata is lost during BibTeX save (e.g., `citation count`, `databases`, `pdf_url`, `fields_of_study`, `subjects`). Use JSON for lossless round-trips.
 
 ---
 
 ## CSV
 
-CSV export creates spreadsheet-compatible files with one paper per row.
+CSV save creates spreadsheet-compatible files with one paper per row.
 
-### Export
+### Save
 
 ```python
-findpapers.export_papers_to_csv(papers, "papers.csv")
+findpapers.save_to_csv(papers, "papers.csv")
 ```
 
 ### Import
 
 ```python
-papers = findpapers.load_papers_from_csv("papers.csv")
+papers = findpapers.load_from_csv("papers.csv")
 ```
 
 ### Columns
@@ -116,8 +116,8 @@ papers = findpapers.load_papers_from_csv("papers.csv")
 
 ### Limitations
 
-- Nested objects like `Source` are flattened (only `source` title and `publisher` are exported)
-- Author affiliations are not included in CSV export
+- Nested objects like `Source` are flattened (only `source` title and `publisher` are saved)
+- Author affiliations are not included in CSV save
 - Use JSON for lossless round-trips
 
 ---

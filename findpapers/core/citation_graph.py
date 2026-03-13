@@ -370,7 +370,7 @@ class CitationGraph:
         """Reconstruct a CitationGraph from a dictionary.
 
         Accepts the format produced by :meth:`to_dict` (and by
-        :func:`~findpapers.utils.export.export_to_json`).
+        :func:`~findpapers.utils.persistence.save_to_json`).
 
         Parameters
         ----------

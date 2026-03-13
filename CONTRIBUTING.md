@@ -169,9 +169,9 @@ docs: update changelog to 0.2
 ```
 
 ```
-fix: error when exporting to CSV with empty paper list
+fix: error when saving to CSV with empty paper list
 
-When the paper list was empty, exporting to CSV raised an unhandled exception.
+When the paper list was empty, saving to CSV raised an unhandled exception.
 
 ```
 
@@ -195,7 +195,7 @@ We use a concise set of commit types. Use one of the following in the commit hea
 Scope is optional and should be a short lowercase identifier (no spaces). The scope could be
 the name of the module, package being changed or a broader category that the change falls under.
 There is no strict list of scopes, but here are some examples to guide you: `runners`,
-`utils`, `search`, `export`...
+`utils`, `search`, `persistence`...
 
 ### Subject
 

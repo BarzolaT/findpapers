@@ -9,8 +9,8 @@ from findpapers.core.source import Source, SourceType
 from findpapers.engine import Engine
 from findpapers.exceptions import (
     ConnectorError,
-    ExportError,
     FindpapersError,
+    PersistenceError,
     QueryValidationError,
     UnsupportedQueryError,
 )
@@ -19,13 +19,13 @@ from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
 from findpapers.runners.search_runner import SearchRunner
 from findpapers.runners.snowball_runner import SnowballRunner
-from findpapers.utils.export import (
-    export_papers_to_bibtex,
-    export_papers_to_csv,
-    export_to_json,
+from findpapers.utils.persistence import (
+    load_from_bibtex,
+    load_from_csv,
     load_from_json,
-    load_papers_from_bibtex,
-    load_papers_from_csv,
+    save_to_bibtex,
+    save_to_csv,
+    save_to_json,
 )
 
 __all__ = [
@@ -37,11 +37,11 @@ __all__ = [
     "DownloadRunner",
     "Engine",
     "EnrichmentRunner",
-    "ExportError",
     "FilterCode",
     "FindpapersError",
     "Paper",
     "PaperType",
+    "PersistenceError",
     "QueryValidationError",
     "SearchResult",
     "SearchRunner",
@@ -49,10 +49,10 @@ __all__ = [
     "Source",
     "SourceType",
     "UnsupportedQueryError",
-    "export_papers_to_bibtex",
-    "export_papers_to_csv",
-    "export_to_json",
+    "load_from_bibtex",
+    "load_from_csv",
     "load_from_json",
-    "load_papers_from_bibtex",
-    "load_papers_from_csv",
+    "save_to_bibtex",
+    "save_to_csv",
+    "save_to_json",
 ]

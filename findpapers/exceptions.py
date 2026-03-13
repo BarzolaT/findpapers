@@ -20,8 +20,8 @@ class ConnectorError(FindpapersError):
     """Raised when an external API connector encounters an unrecoverable error."""
 
 
-class ExportError(FindpapersError):
-    """Raised when export/import encounters an unsupported data type or format."""
+class PersistenceError(FindpapersError):
+    """Raised when persistence encounters an unsupported data type or format."""
 
 
 class QueryValidationError(FindpapersError, ValueError):

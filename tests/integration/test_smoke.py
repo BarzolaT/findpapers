@@ -31,7 +31,7 @@ from pathlib import Path
 
 import pytest
 
-from findpapers import Engine, export_papers_to_bibtex, export_to_json, load_from_json
+from findpapers import Engine, load_from_json, save_to_bibtex, save_to_json
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import SearchResult
 
@@ -170,11 +170,11 @@ class TestSnowball:
         assert graph.paper_count >= 1, "Citation graph has no papers"
 
 
-class TestExport:
-    """Verify that export/import round-trips work correctly."""
+class TestSave:
+    """Verify that save/load round-trips work correctly."""
 
     def test_json_round_trip(self) -> None:
-        """Export a SearchResult to JSON and re-import it."""
+        """Save a SearchResult to JSON and re-import it."""
         engine = _build_engine()
         result = engine.search(
             _SEARCH_QUERY,
@@ -188,7 +188,7 @@ class TestExport:
         with tempfile.TemporaryDirectory() as tmpdir:
             json_path = os.path.join(tmpdir, "results.json")
 
-            export_to_json(result, json_path)
+            save_to_json(result, json_path)
             assert os.path.isfile(json_path), "JSON file was not created"
 
             # Validate the file is valid JSON.
@@ -201,8 +201,8 @@ class TestExport:
             assert isinstance(loaded, SearchResult)
             assert len(loaded.papers) == len(result.papers)
 
-    def test_bibtex_export(self) -> None:
-        """Export papers to BibTeX and verify the file is non-empty."""
+    def test_bibtex_save(self) -> None:
+        """Save papers to BibTeX and verify the file is non-empty."""
         engine = _build_engine()
         result = engine.search(
             _SEARCH_QUERY,
@@ -215,7 +215,7 @@ class TestExport:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             bib_path = os.path.join(tmpdir, "results.bib")
-            export_papers_to_bibtex(result.papers, bib_path)
+            save_to_bibtex(result.papers, bib_path)
 
             assert os.path.isfile(bib_path), "BibTeX file was not created"
             content = Path(bib_path).read_text(encoding="utf-8")

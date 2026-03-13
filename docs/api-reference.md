@@ -1,6 +1,6 @@
 # API Reference
 
-This page documents the main public classes and methods exported by Findpapers.
+This page documents the main public classes and methods provided by Findpapers.
 
 ## Engine
 
@@ -108,22 +108,22 @@ graph = engine.snowball(
 
 **Returns:** `CitationGraph`
 
-### Export/Import Functions
+### Persistence Functions
 
-Export and import functions are available as top-level functions in the `findpapers` package:
+Save and load functions are available as top-level functions in the `findpapers` package:
 
 ```python
 import findpapers
 
-# Export
-findpapers.export_to_json(data, path)              # data: SearchResult | CitationGraph | list[Paper]
-findpapers.export_papers_to_bibtex(papers, path)   # papers: list[Paper]
-findpapers.export_papers_to_csv(papers, path)      # papers: list[Paper]
+# Save
+findpapers.save_to_json(data, path)       # data: SearchResult | CitationGraph | list[Paper]
+findpapers.save_to_bibtex(papers, path)   # papers: list[Paper]
+findpapers.save_to_csv(papers, path)      # papers: list[Paper]
 
-# Import
-data = findpapers.load_from_json(path)             # Returns SearchResult | CitationGraph | list[Paper]
-papers = findpapers.load_papers_from_bibtex(path)  # Returns list[Paper]
-papers = findpapers.load_papers_from_csv(path)     # Returns list[Paper]
+# Load
+data = findpapers.load_from_json(path)      # Returns SearchResult | CitationGraph | list[Paper]
+papers = findpapers.load_from_bibtex(path)  # Returns list[Paper]
+papers = findpapers.load_from_csv(path)     # Returns list[Paper]
 ```
 
 ---
@@ -311,7 +311,7 @@ All Findpapers exceptions inherit from `FindpapersError`.
 | `QueryValidationError` | `FindpapersError`, `ValueError` | Invalid query syntax |
 | `UnsupportedQueryError` | `FindpapersError`, `ValueError` | Database doesn't support the query |
 | `ConnectorError` | `FindpapersError` | Unrecoverable API error |
-| `ExportError` | `FindpapersError` | Export format or data error |
+| `PersistenceError` | `FindpapersError` | Persistence format or data error |
 
 ---
 

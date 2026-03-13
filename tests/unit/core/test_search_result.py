@@ -239,6 +239,6 @@ class TestFailedDatabases:
         assert restored.failed_databases == []
 
     def test_from_dict_missing_key(self) -> None:
-        """Older exports without the key produce an empty list."""
+        """Older saves without the key produce an empty list."""
         sr = SearchResult.from_dict({"metadata": {}, "papers": []})
         assert sr.failed_databases == []

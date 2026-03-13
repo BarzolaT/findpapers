@@ -75,20 +75,20 @@ print(f"Enriched {metrics['enriched_papers']} papers")
 
 Enrichment can fill in missing abstracts, keywords, citation counts, PDF URLs, and source details. Papers are modified in place.
 
-## Exporting Results
+## Saving Results
 
 ```python
 # JSON (preserves all metadata, can be reloaded later)
-findpapers.export_to_json(result, "results.json")
+findpapers.save_to_json(result, "results.json")
 
 # BibTeX (for LaTeX references)
-findpapers.export_papers_to_bibtex(result.papers, "references.bib")
+findpapers.save_to_bibtex(result.papers, "references.bib")
 
 # CSV (for spreadsheets)
-findpapers.export_papers_to_csv(result.papers, "papers.csv")
+findpapers.save_to_csv(result.papers, "papers.csv")
 ```
 
-See [Export Formats](https://github.com/jonatasgrosman/findpapers/blob/main/docs/export-formats.md) for details on each format.
+See [Persistence Formats](https://github.com/jonatasgrosman/findpapers/blob/main/docs/persistence-formats.md) for details on each format.
 
 ## Reloading Results
 
@@ -97,8 +97,8 @@ See [Export Formats](https://github.com/jonatasgrosman/findpapers/blob/main/docs
 result = findpapers.load_from_json("results.json")
 
 # Reload papers from BibTeX or CSV
-papers = findpapers.load_papers_from_bibtex("references.bib")
-papers = findpapers.load_papers_from_csv("papers.csv")
+papers = findpapers.load_from_bibtex("references.bib")
+papers = findpapers.load_from_csv("papers.csv")
 ```
 
 ## Citation Snowballing
@@ -114,8 +114,8 @@ graph = engine.snowball(
 
 print(f"Graph has {len(graph.papers)} papers and {len(graph.edges)} citation edges")
 
-# Export the citation graph
-findpapers.export_to_json(graph, "citation_graph.json")
+# Save the citation graph
+findpapers.save_to_json(graph, "citation_graph.json")
 ```
 
 Snowballing uses OpenAlex, Semantic Scholar, and CrossRef to traverse citations. Papers must have a DOI to be included.

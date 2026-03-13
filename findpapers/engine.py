@@ -224,9 +224,9 @@ class Engine:
         SearchResult
             A :class:`~findpapers.core.search_result.SearchResult` object
             whose ``papers`` attribute contains the collected
-            :class:`~findpapers.core.paper.Paper` instances.  Export via
-            :func:`findpapers.export_to_json` or
-            :func:`findpapers.export_papers_to_bibtex`.
+            :class:`~findpapers.core.paper.Paper` instances.  Save via
+            :func:`findpapers.save_to_json` or
+            :func:`findpapers.save_to_bibtex`.
 
         Raises
         ------
@@ -261,11 +261,11 @@ class Engine:
         ...     max_papers_per_database=50,
         ... )
 
-        Export results to a file:
+        Save results to a file:
 
         >>> import findpapers
-        >>> findpapers.export_to_json(result, "my_search.json")
-        >>> findpapers.export_papers_to_bibtex(result.papers, "my_search.bib")
+        >>> findpapers.save_to_json(result, "my_search.json")
+        >>> findpapers.save_to_bibtex(result.papers, "my_search.bib")
         """
         runner = SearchRunner(
             query=query,
@@ -433,13 +433,13 @@ class Engine:
         >>> print(f"{metrics['enriched_papers']}/{metrics['total_papers']} enriched")
         8/10 enriched
 
-        Chain search, enrichment, and export:
+        Chain search, enrichment, and save:
 
         >>> engine = Engine()
         >>> result = engine.search("[transformers]")
         >>> engine.enrich(result.papers)
         >>> import findpapers
-        >>> findpapers.export_to_json(result, "enriched_results.json")
+        >>> findpapers.save_to_json(result, "enriched_results.json")
         """
         runner = EnrichmentRunner(
             papers=papers,
@@ -570,7 +570,7 @@ class Engine:
         -------
         CitationGraph
             A directed citation graph with all discovered papers as nodes
-            and citation relationships as edges.  The graph can be exported
+            and citation relationships as edges.  The graph can be saved
             via ``graph.to_json(path)`` or serialized via ``graph.to_dict()``.
 
         See Also
@@ -590,10 +590,10 @@ class Engine:
         >>> print(f"{graph.paper_count} papers, {graph.edge_count} edges")
         42 papers, 65 edges
 
-        Export the graph to JSON:
+        Save the graph to JSON:
 
         >>> import findpapers
-        >>> findpapers.export_to_json(graph, "citation_graph.json")
+        >>> findpapers.save_to_json(graph, "citation_graph.json")
 
         Snowball from search results with only backward direction:
 
