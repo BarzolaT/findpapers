@@ -75,7 +75,7 @@ Not all databases support every filter code. When a query uses a filter code tha
 
 | Filter Code | Field | arXiv | IEEE | OpenAlex | PubMed | Scopus | Semantic Scholar |
 |-------------|-------|-------|------|----------|--------|--------|------------------|
-| `ti` | Title | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `ti` | Title | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
 | `abs` | Abstract | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 | `key` | Keywords | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
 | `au` | Author | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
@@ -248,5 +248,6 @@ If a query is valid but not supported by a specific database (e.g., uses a filte
 ## Database-Specific Notes
 
 - **arXiv** uses server-side stemming - e.g., `[transformer]` also matches "transformations" and "transformed".
-- **OpenAlex** decomposes queries containing `OR` or `AND NOT` into multiple independent sub-queries internally.
-- **Semantic Scholar** is the most restrictive - it only supports `tiabs` filtering and has no per-field search.
+- **arXiv** and **Semantic Scholar** automatically replace hyphens with spaces in terms before sending the query (e.g., `[self-attention]` becomes `[self attention]`). All other databases receive terms exactly as typed - hyphens are preserved.
+- **PubMed** phrase index is limited to approximately 3-word phrases. Longer exact phrases silently return zero results. Use short terms and combine with `AND` instead.
+- **PubMed** author names must follow the "LastName Initials" format (e.g., `au[Doudna JA]` for 'Jennifer Anne Doudna'). Full first names do not match.

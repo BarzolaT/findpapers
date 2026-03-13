@@ -17,17 +17,16 @@ def _make_term_query(term: str, filter_code: FilterCode | None = None) -> Query:
     return Query(raw_query=f"[{term}]", root=root)
 
 
-def test_ieee_single_term_field_payload(parse_and_propagate: Callable[[str], Query]) -> None:
-    """IEEE returns dedicated field parameter for simple queries."""
+def test_ieee_rejects_title_filter(parse_and_propagate: Callable[[str], Query]) -> None:
+    """IEEE rejects ti[] because 'Article Title' is broken in querytext mode."""
     query = parse_and_propagate("ti[graph neural networks]")
-    converted = IEEEQueryBuilder().convert_query(query)
-    assert converted == {"article_title": "graph neural networks"}
+    result = IEEEQueryBuilder().validate_query(query)
+    assert result.is_valid is False
 
 
 @pytest.mark.parametrize(
     ("query_string", "expected_payload"),
     [
-        ("ti[quantum]", {"article_title": "quantum"}),
         ("abs[quantum]", {"abstract": "quantum"}),
         ("key[quantum]", {"index_terms": "quantum"}),
         ("au[quantum]", {"author": "quantum"}),
@@ -49,24 +48,23 @@ def test_ieee_supports_direct_field_filters(
 
 
 def test_ieee_supports_tiabs_filter(parse_and_propagate: Callable[[str], Query]) -> None:
-    """IEEE tiabs filter maps to title-or-abstract expression."""
+    """IEEE tiabs filter maps to Abstract only (Article Title is broken)."""
     query = parse_and_propagate("tiabs[quantum]")
     result = IEEEQueryBuilder().validate_query(query)
     assert result.is_valid is True
     converted = IEEEQueryBuilder().convert_query(query)
-    assert "querytext" in converted
-    assert '"Article Title":"quantum"' in converted["querytext"]
-    assert '"Abstract":"quantum"' in converted["querytext"]
+    # Single-term tiabs uses dedicated abstract param (no Article Title)
+    assert converted == {"abstract": "quantum"}
 
 
 def test_ieee_supports_tiabskey_filter(parse_and_propagate: Callable[[str], Query]) -> None:
-    """IEEE tiabskey filter maps to title-or-abstract-or-key expression."""
+    """IEEE tiabskey filter maps to Abstract + Index Terms (no Article Title)."""
     query = parse_and_propagate("tiabskey[quantum]")
     result = IEEEQueryBuilder().validate_query(query)
     assert result.is_valid is True
     converted = IEEEQueryBuilder().convert_query(query)
     assert "querytext" in converted
-    assert '"Article Title":"quantum"' in converted["querytext"]
+    assert '"Article Title"' not in converted["querytext"]
     assert '"Abstract":"quantum"' in converted["querytext"]
     assert '"Index Terms":"quantum"' in converted["querytext"]
 
@@ -106,7 +104,7 @@ def test_ieee_accepts_long_enough_star_wildcard(
         ("au[a] AND au[b]", '"Authors"'),
         ("src[a] AND src[b]", '"Publication Title"'),
         ("aff[a] AND aff[b]", '"Affiliation"'),
-        ("tiabs[a] AND tiabs[b]", '"Article Title"'),
+        ("tiabs[a] AND tiabs[b]", '"Abstract"'),
     ],
 )
 def test_ieee_multi_term_convert_query_field_mapping(
@@ -124,12 +122,12 @@ def test_ieee_multi_term_convert_query_field_mapping(
 def test_ieee_multi_term_tiabskey_includes_all_fields(
     parse_and_propagate: Callable[[str], Query],
 ) -> None:
-    """IEEE multi-term tiabskey maps to title, abstract, and index-terms expression."""
+    """IEEE multi-term tiabskey maps to Abstract + Index Terms (no Article Title)."""
     query = parse_and_propagate("tiabskey[a] AND tiabskey[b]")
     converted = IEEEQueryBuilder().convert_query(query)
     assert "querytext" in converted
     expr = converted["querytext"]
-    assert '"Article Title"' in expr
+    assert '"Article Title"' not in expr
     assert '"Abstract"' in expr
     assert '"Index Terms"' in expr
 
@@ -145,24 +143,21 @@ def test_ieee_expand_query_returns_single_query(
 
 
 def test_ieee_single_term_tiabs_payload(parse_and_propagate: Callable[[str], Query]) -> None:
-    """_single_term_payload for tiabs returns querytext with title-or-abstract expression."""
+    """Single-term tiabs returns abstract param (Article Title is broken)."""
     query = parse_and_propagate("tiabs[quantum]")
     converted = IEEEQueryBuilder().convert_query(query)
-    assert "querytext" in converted
-    assert '"Article Title"' in converted["querytext"]
-    assert '"Abstract"' in converted["querytext"]
-    # Should NOT contain Index Terms for tiabs
-    assert '"Index Terms"' not in converted["querytext"]
+    # Single-term tiabs falls back to abstract-only dedicated param
+    assert converted == {"abstract": "quantum"}
 
 
 def test_ieee_group_filter_optimization(
     parse_and_propagate: Callable[[str], Query],
 ) -> None:
     """IEEE wraps group at field level when all children share a single-field filter."""
-    query = parse_and_propagate("ti([neural] OR [networks])")
+    query = parse_and_propagate("abs([neural] OR [networks])")
     converted = IEEEQueryBuilder().convert_query(query)
     assert "querytext" in converted
-    assert converted["querytext"] == '"Article Title":("neural" OR "networks")'
+    assert converted["querytext"] == '"Abstract":("neural" OR "networks")'
 
 
 def test_ieee_group_filter_no_optimization_on_compound(
@@ -172,8 +167,8 @@ def test_ieee_group_filter_no_optimization_on_compound(
     query = parse_and_propagate("tiabs([a] OR [b])")
     converted = IEEEQueryBuilder().convert_query(query)
     assert "querytext" in converted
-    # Compound filter: per-term expansion, not group-level
-    assert '"Article Title"' in converted["querytext"]
+    # Compound filter: per-term expansion, not group-level (no Article Title)
+    assert '"Article Title"' not in converted["querytext"]
     assert '"Abstract"' in converted["querytext"]
 
 
@@ -181,19 +176,19 @@ def test_ieee_group_filter_no_optimization_on_mixed(
     parse_and_propagate: Callable[[str], Query],
 ) -> None:
     """IEEE falls back to per-term when children use different filters."""
-    query = parse_and_propagate("ti([a] OR abs[b])")
+    query = parse_and_propagate("abs([a] OR key[b])")
     converted = IEEEQueryBuilder().convert_query(query)
     assert "querytext" in converted
-    assert '"Article Title":"a"' in converted["querytext"]
-    assert '"Abstract":"b"' in converted["querytext"]
+    assert '"Abstract":"a"' in converted["querytext"]
+    assert '"Index Terms":"b"' in converted["querytext"]
 
 
 def test_ieee_nested_group_optimization(
     parse_and_propagate: Callable[[str], Query],
 ) -> None:
     """IEEE optimises nested groups independently."""
-    query = parse_and_propagate("ti([a] AND abs([b] OR [c]))")
+    query = parse_and_propagate("key([a] AND abs([b] OR [c]))")
     converted = IEEEQueryBuilder().convert_query(query)
     assert "querytext" in converted
-    assert '"Article Title":"a"' in converted["querytext"]
+    assert '"Index Terms":"a"' in converted["querytext"]
     assert '"Abstract":("b" OR "c")' in converted["querytext"]

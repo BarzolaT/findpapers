@@ -64,6 +64,8 @@ arXiv is one of the most important open-access repositories in science. Founded 
 - No citation count data
 - No keywords
 - Wildcards are not supported
+- **Stemming:** arXiv uses Lucene-based stemming, so `ti[transformer]` also matches "transformers" and "transforming". Keep this in mind when looking for exact terms
+- **Hyphens:** Hyphens are treated as spaces (`ti[self-attention]` is equivalent to `ti[self attention]`). Findpapers normalizes hyphens automatically
 
 ---
 
@@ -88,6 +90,7 @@ IEEE Xplore is the digital library of the Institute of Electrical and Electronic
 
 - Publication date has year-level granularity only
 - Only `*` wildcard supported (not `?`)
+- **Title-only filter disabled:** The `ti[]` filter is disabled for IEEE because the API's `"Article Title"` field silently returns zero results in `querytext` mode (used for boolean expressions).
 
 ---
 
@@ -135,6 +138,8 @@ PubMed is the world's most important database for biomedical and life sciences r
 #### Limitations
 
 - Only `*` wildcard supported (not `?`)
+- **Author name format:** PubMed indexes authors as "LastName Initials" (e.g., `Doudna JA`). When using the `au` filter, provide the name in this format for reliable results: `au[Doudna JA]`. Full first names (e.g., `au[Jennifer Doudna]`) may return no results
+- **Phrase length limit:** PubMed's phrase index only supports exact-match phrases up to approximately 3 words. Queries like `ti[deep learning]` (2 words) work, but `ti[deep learning for image recognition]` (5 words) returns zero results. Keep `ti[]`, `abs[]`, and `tiabs[]` terms short (1–3 words) for best results. To search for longer concepts, combine shorter phrases with AND: `ti[deep learning] AND ti[image recognition]`
 
 ---
 
@@ -185,6 +190,7 @@ Semantic Scholar is a free, AI-powered academic search engine developed by the A
 
 - No keywords
 - When exact publication date is unavailable, falls back to year only (January 1)
+- Only `tiabs` (title + abstract) filter is supported
 
 ---
 

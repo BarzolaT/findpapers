@@ -16,7 +16,16 @@ class IEEEQueryBuilder(QueryBuilder):
 
     _SUPPORTED_FILTERS = frozenset(
         {
-            FilterCode.TITLE,
+            # NOTE: FilterCode.TITLE is intentionally excluded.
+            # The IEEE Xplore API "Article Title" field is broken in querytext
+            # mode — it silently returns zero results regardless of the search
+            # term.  The dedicated `article_title` parameter (used for simple
+            # single-term queries) works, but querytext is the only option for
+            # boolean expressions.  Because we cannot guarantee correct
+            # behaviour for all query shapes, title-only searches are disabled.
+            # Compound filters (TITLE_ABSTRACT, TITLE_ABSTRACT_KEYWORDS) remain
+            # supported and search via Abstract / Index Terms instead.
+            # Last verified: 2026-03-13 against IEEE Xplore API v1.
             FilterCode.ABSTRACT,
             FilterCode.KEYWORDS,
             FilterCode.AUTHOR,
@@ -104,13 +113,13 @@ class IEEEQueryBuilder(QueryBuilder):
             if filter_code == FilterCode.AFFILIATION:
                 return f'"Affiliation":{self._quote(term)}'
             if filter_code == FilterCode.TITLE_ABSTRACT:
-                title_expr = f'"Article Title":{self._quote(term)}'
-                abs_expr = f'"Abstract":{self._quote(term)}'
-                return f"({title_expr} OR {abs_expr})"
-            title_expr = f'"Article Title":{self._quote(term)}'
+                # "Article Title" is broken in querytext mode (returns 0
+                # results), so TITLE_ABSTRACT falls back to Abstract only.
+                return f'"Abstract":{self._quote(term)}'
+            # TITLE_ABSTRACT_KEYWORDS → Abstract + Index Terms (no Article Title)
             abs_expr = f'"Abstract":{self._quote(term)}'
             key_expr = f'"Index Terms":{self._quote(term)}'
-            return f"({title_expr} OR {abs_expr} OR {key_expr})"
+            return f"({abs_expr} OR {key_expr})"
 
         def plain_term(term_node: QueryNode) -> str:
             """Convert term without filter prefix."""
@@ -124,7 +133,8 @@ class IEEEQueryBuilder(QueryBuilder):
             """
             filter_code = get_effective_filter(group_node)
             field_map: dict[FilterCode, str] = {
-                FilterCode.TITLE: '"Article Title"',
+                # NOTE: FilterCode.TITLE / "Article Title" excluded — broken
+                # in querytext mode (returns 0 results).
                 FilterCode.ABSTRACT: '"Abstract"',
                 FilterCode.KEYWORDS: '"Index Terms"',
                 FilterCode.AUTHOR: '"Authors"',
@@ -180,7 +190,12 @@ class IEEEQueryBuilder(QueryBuilder):
         term = term_node.value or ""
         filter_code = get_effective_filter(term_node)
         mapping = {
-            FilterCode.TITLE: "article_title",
+            # NOTE: FilterCode.TITLE / "article_title" param actually works
+            # for simple single-term queries, but we exclude ti[] from
+            # _SUPPORTED_FILTERS because the querytext mode (used for boolean
+            # expressions) silently returns 0 results for "Article Title".
+            # Keeping it out of the mapping avoids inconsistent behaviour
+            # between simple and compound queries.
             FilterCode.ABSTRACT: "abstract",
             FilterCode.KEYWORDS: "index_terms",
             FilterCode.AUTHOR: "author",
@@ -190,17 +205,12 @@ class IEEEQueryBuilder(QueryBuilder):
         if filter_code in mapping:
             return {mapping[filter_code]: term}
         if filter_code == FilterCode.TITLE_ABSTRACT:
-            return {
-                "querytext": (
-                    f'("Article Title":{self._quote(term)} OR "Abstract":{self._quote(term)})'
-                )
-            }
+            # "Article Title" is broken in querytext mode, so TITLE_ABSTRACT
+            # falls back to Abstract only.
+            return {"abstract": term}
+        # TITLE_ABSTRACT_KEYWORDS → Abstract + Index Terms (no Article Title)
         return {
-            "querytext": (
-                f'("Article Title":{self._quote(term)} OR '
-                f'"Abstract":{self._quote(term)} OR '
-                f'"Index Terms":{self._quote(term)})'
-            )
+            "querytext": (f'("Abstract":{self._quote(term)} OR "Index Terms":{self._quote(term)})')
         }
 
     def _quote(self, term: str) -> str:
