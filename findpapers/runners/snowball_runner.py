@@ -20,6 +20,7 @@ from findpapers.connectors import CITATION_REGISTRY, CitationSource
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
+from findpapers.exceptions import InvalidParameterError
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.progress import make_progress_bar
 
@@ -74,11 +75,11 @@ class SnowballRunner:
 
         Raises
         ------
-        ValueError
+        InvalidParameterError
             If *max_depth* is less than 1.
         """
         if max_depth < 1:
-            raise ValueError(f"max_depth must be >= 1, got {max_depth}")
+            raise InvalidParameterError(f"max_depth must be >= 1, got {max_depth}")
 
         if isinstance(seed_papers, Paper):
             seed_papers = [seed_papers]

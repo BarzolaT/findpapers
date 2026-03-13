@@ -4,6 +4,7 @@ import pytest
 
 from findpapers.core.citation_graph import CitationEdge, CitationGraph
 from findpapers.core.paper import Paper
+from findpapers.exceptions import InvalidParameterError
 
 # ---------------------------------------------------------------------------
 # CitationEdge tests
@@ -56,13 +57,13 @@ class TestCitationGraph:
     """Tests for the CitationGraph class."""
 
     def test_max_depth_zero_raises(self) -> None:
-        """max_depth of zero raises ValueError."""
-        with pytest.raises(ValueError, match="max_depth must be >= 1"):
+        """max_depth of zero raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="max_depth must be >= 1"):
             CitationGraph(seed_papers=[], max_depth=0, direction="both")
 
     def test_max_depth_negative_raises(self) -> None:
-        """Negative max_depth raises ValueError."""
-        with pytest.raises(ValueError, match="max_depth must be >= 1"):
+        """Negative max_depth raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="max_depth must be >= 1"):
             CitationGraph(seed_papers=[], max_depth=-5, direction="both")
 
     def test_creation_with_seed_papers(self, make_paper) -> None:
@@ -78,11 +79,13 @@ class TestCitationGraph:
         assert graph.get_paper_depth(seed) == 0
 
     def test_add_paper_discovered_from_not_in_graph_raises(self, make_paper) -> None:
-        """add_paper raises ValueError if discovered_from is not in the graph."""
+        """add_paper raises InvalidParameterError if discovered_from is not in the graph."""
         graph = CitationGraph(seed_papers=[], max_depth=1, direction="both")
         paper = make_paper("Paper", doi="10.1000/p")
         unknown = make_paper("Unknown", doi="10.1000/unknown")
-        with pytest.raises(ValueError, match="discovered_from paper is not in the graph"):
+        with pytest.raises(
+            InvalidParameterError, match="discovered_from paper is not in the graph"
+        ):
             graph.add_paper(paper, discovered_from=unknown)
 
     def test_creation_empty_seeds(self) -> None:

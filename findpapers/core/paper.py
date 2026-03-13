@@ -8,6 +8,8 @@ import logging
 from enum import StrEnum
 from typing import Any
 
+from findpapers.exceptions import ModelValidationError
+
 from ..utils.merge import merge_authors, merge_value
 from .author import Author
 from .source import Source
@@ -194,11 +196,11 @@ class Paper:
 
         Raises
         ------
-        ValueError
+        ModelValidationError
             If title is missing.
         """
         if not title:
-            raise ValueError("Paper's title cannot be null")
+            raise ModelValidationError("Paper's title cannot be null")
 
         self.title = title
         self.abstract = abstract
@@ -457,12 +459,12 @@ class Paper:
 
         Raises
         ------
-        ValueError
+        ModelValidationError
             If the title is missing.
         """
         title = paper_dict.get("title")
         if not isinstance(title, str) or not title:
-            raise ValueError("Paper's title cannot be null")
+            raise ModelValidationError("Paper's title cannot be null")
 
         abstract = paper_dict.get("abstract") or ""
         if not isinstance(abstract, str):

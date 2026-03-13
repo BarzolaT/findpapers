@@ -68,7 +68,7 @@ Returns a `SearchResult` object containing:
 | Exception | When |
 |-----------|------|
 | `QueryValidationError` | The query has syntax errors (unbalanced brackets, invalid filter codes, etc.) |
-| `ValueError` | An unknown database name is passed in `databases` |
+| `InvalidParameterError` | An unknown database name is passed in `databases`, or `databases` is an empty list |
 
 ## Selecting Databases
 

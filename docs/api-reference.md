@@ -72,7 +72,7 @@ engine.search(
 
 **Returns:** `SearchResult` with deduplicated papers.
 
-**Raises:** `QueryValidationError` if the query string is invalid. `ValueError` for invalid parameter values.
+**Raises:** `QueryValidationError` if the query string is invalid. `InvalidParameterError` for invalid parameter values (e.g. unknown database names, empty databases list).
 
 ### `download()`
 
@@ -147,7 +147,7 @@ engine.fetch_paper_by_doi(
 
 **Returns:** `Paper` with CrossRef metadata, or `None` if not found.
 
-**Raises:** `ValueError` if DOI is empty after sanitization.
+**Raises:** `InvalidParameterError` if DOI is empty after sanitization.
 
 ### `snowball()`
 
@@ -590,7 +590,7 @@ DOILookupRunner(
 |---|---|---|
 | `run(verbose=False)` | `Paper \| None` | Fetch the paper by DOI, or return `None` if not found. |
 
-**Raises:** `ValueError` if DOI is empty or blank.
+**Raises:** `InvalidParameterError` if DOI is empty or blank.
 
 ### SnowballRunner
 
@@ -679,13 +679,15 @@ Load papers from a CSV file. Expects the header row format produced by `save_to_
 
 ## Exceptions
 
-All exceptions inherit from `FindpapersError`.
+All exceptions inherit from `FindpapersError`. They also inherit from the corresponding built-in type (`ValueError`) so that existing `except ValueError` handlers continue to work.
 
 ```python
 from findpapers import (
     FindpapersError,
     QueryValidationError,
     UnsupportedQueryError,
+    ModelValidationError,
+    InvalidParameterError,
     ConnectorError,
     PersistenceError,
 )
@@ -696,5 +698,7 @@ from findpapers import (
 | `FindpapersError` | `Exception` | Base exception for all findpapers errors. |
 | `QueryValidationError` | `FindpapersError`, `ValueError` | Raised when a query string is syntactically or semantically invalid. |
 | `UnsupportedQueryError` | `FindpapersError`, `ValueError` | Raised when a query uses features not supported by a specific database. |
+| `ModelValidationError` | `FindpapersError`, `ValueError` | Raised when a model object (Paper, Author, Source) has invalid data (e.g. missing title). |
+| `InvalidParameterError` | `FindpapersError`, `ValueError` | Raised when a function or runner receives an invalid argument (e.g. empty DOI, unknown database). |
 | `ConnectorError` | `FindpapersError` | Raised when an external database API encounters an unrecoverable error. |
 | `PersistenceError` | `FindpapersError` | Raised when save/load encounters an unsupported data type or format. |

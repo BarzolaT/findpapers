@@ -10,6 +10,8 @@ from findpapers.engine import Engine
 from findpapers.exceptions import (
     ConnectorError,
     FindpapersError,
+    InvalidParameterError,
+    ModelValidationError,
     PersistenceError,
     QueryValidationError,
     UnsupportedQueryError,
@@ -39,6 +41,8 @@ __all__ = [
     "EnrichmentRunner",
     "FilterCode",
     "FindpapersError",
+    "InvalidParameterError",
+    "ModelValidationError",
     "Paper",
     "PaperType",
     "PersistenceError",

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from findpapers.exceptions import ModelValidationError
+
 
 class Author:
     """Represents a paper author with name and optional affiliation.
@@ -17,13 +19,13 @@ class Author:
 
     Raises
     ------
-    ValueError
+    ModelValidationError
         If name is empty or ``None``.
     """
 
     def __init__(self, name: str, affiliation: str | None = None) -> None:
         if not name or not name.strip():
-            raise ValueError("Author name cannot be empty")
+            raise ModelValidationError("Author name cannot be empty")
         self.name: str = name.strip()
         self.affiliation: str | None = affiliation.strip() if affiliation else None
 

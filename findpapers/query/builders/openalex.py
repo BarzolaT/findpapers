@@ -5,6 +5,7 @@ from __future__ import annotations
 import itertools
 
 from findpapers.core.query import ConnectorType, FilterCode, NodeType, Query, QueryNode
+from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
 from findpapers.query.builders.common import (
     get_effective_filter,
@@ -126,7 +127,7 @@ class OpenAlexQueryBuilder(QueryBuilder):
             return f"raw_affiliation_strings.search:{encoded_term}"
         if filter_code == FilterCode.TITLE_ABSTRACT:
             return f"title_and_abstract.search:{encoded_term}"
-        raise ValueError(f"Unsupported filter code for OpenAlex: {filter_code}")
+        raise UnsupportedQueryError(f"Unsupported filter code for OpenAlex: {filter_code}")
 
     def _to_openalex_boolean_search(self, node: QueryNode) -> str:
         """Convert query node to OpenAlex boolean search expression.

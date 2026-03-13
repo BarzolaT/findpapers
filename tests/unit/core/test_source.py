@@ -3,6 +3,7 @@
 import pytest
 
 from findpapers.core.source import Source, SourceType
+from findpapers.exceptions import ModelValidationError
 
 
 def test_source_merge():
@@ -98,13 +99,13 @@ class TestSourceInit:
     """Tests for Source.__init__ ValueError."""
 
     def test_none_title_raises(self) -> None:
-        """Passing None as title raises ValueError."""
-        with pytest.raises(ValueError, match="title"):
+        """Passing None as title raises ModelValidationError."""
+        with pytest.raises(ModelValidationError, match="title"):
             Source(title=None)  # type: ignore[arg-type]
 
     def test_empty_title_raises(self) -> None:
-        """Passing empty string as title raises ValueError."""
-        with pytest.raises(ValueError, match="title"):
+        """Passing empty string as title raises ModelValidationError."""
+        with pytest.raises(ModelValidationError, match="title"):
             Source(title="")
 
     def test_valid_title_stores_attributes(self) -> None:
@@ -132,18 +133,18 @@ class TestSourceFromDict:
     """Tests for Source.from_dict edge cases."""
 
     def test_missing_title_raises(self) -> None:
-        """from_dict without title key raises ValueError."""
-        with pytest.raises(ValueError, match="title"):
+        """from_dict without title key raises ModelValidationError."""
+        with pytest.raises(ModelValidationError, match="title"):
             Source.from_dict({})
 
     def test_none_title_raises(self) -> None:
-        """from_dict with None title raises ValueError."""
-        with pytest.raises(ValueError, match="title"):
+        """from_dict with None title raises ModelValidationError."""
+        with pytest.raises(ModelValidationError, match="title"):
             Source.from_dict({"title": None})
 
     def test_non_string_title_raises(self) -> None:
-        """from_dict with non-string title raises ValueError."""
-        with pytest.raises(ValueError, match="title"):
+        """from_dict with non-string title raises ModelValidationError."""
+        with pytest.raises(ModelValidationError, match="title"):
             Source.from_dict({"title": 123})
 
     def test_valid_source_type_parsed(self) -> None:

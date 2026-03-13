@@ -10,6 +10,7 @@ import pytest
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.source import Source
+from findpapers.exceptions import InvalidParameterError
 from findpapers.runners.doi_lookup_runner import DOILookupRunner
 
 
@@ -74,18 +75,18 @@ class TestDOISanitization:
         assert runner._doi == "10.1234/test"
 
     def test_empty_doi_raises(self):
-        """An empty DOI raises ValueError."""
-        with pytest.raises(ValueError, match="must not be empty"):
+        """An empty DOI raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="must not be empty"):
             DOILookupRunner(doi="")
 
     def test_blank_doi_raises(self):
-        """A whitespace-only DOI raises ValueError."""
-        with pytest.raises(ValueError, match="must not be empty"):
+        """A whitespace-only DOI raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="must not be empty"):
             DOILookupRunner(doi="   ")
 
     def test_prefix_only_raises(self):
-        """A DOI that is only the URL prefix raises ValueError."""
-        with pytest.raises(ValueError, match="must not be empty"):
+        """A DOI that is only the URL prefix raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="must not be empty"):
             DOILookupRunner(doi="https://doi.org/")
 
 

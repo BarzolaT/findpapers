@@ -1,6 +1,9 @@
 """Unit tests for the Author model."""
 
+import pytest
+
 from findpapers.core.author import Author
+from findpapers.exceptions import ModelValidationError
 
 
 class TestAuthorInit:
@@ -17,6 +20,16 @@ class TestAuthorInit:
         author = Author(name="Alice Smith", affiliation="MIT")
         assert author.name == "Alice Smith"
         assert author.affiliation == "MIT"
+
+    def test_empty_name_raises(self):
+        """An empty name raises ModelValidationError."""
+        with pytest.raises(ModelValidationError, match="Author name cannot be empty"):
+            Author(name="")
+
+    def test_whitespace_name_raises(self):
+        """A whitespace-only name raises ModelValidationError."""
+        with pytest.raises(ModelValidationError, match="Author name cannot be empty"):
+            Author(name="   ")
 
 
 class TestAuthorStr:

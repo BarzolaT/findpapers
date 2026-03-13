@@ -8,6 +8,7 @@ import pytest
 
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.paper import Paper
+from findpapers.exceptions import InvalidParameterError
 from findpapers.runners.snowball_runner import SnowballRunner
 
 
@@ -131,15 +132,15 @@ class TestSnowballRunnerInit:
         assert runner._num_workers == 1
 
     def test_max_depth_zero_raises(self, make_paper) -> None:
-        """max_depth of zero raises ValueError."""
+        """max_depth of zero raises InvalidParameterError."""
         seed = make_paper("Seed", doi="10.1000/seed")
-        with pytest.raises(ValueError, match="max_depth must be >= 1"):
+        with pytest.raises(InvalidParameterError, match="max_depth must be >= 1"):
             SnowballRunner(seed_papers=[seed], max_depth=0)
 
     def test_max_depth_negative_raises(self, make_paper) -> None:
-        """Negative max_depth raises ValueError."""
+        """Negative max_depth raises InvalidParameterError."""
         seed = make_paper("Seed", doi="10.1000/seed")
-        with pytest.raises(ValueError, match="max_depth must be >= 1"):
+        with pytest.raises(InvalidParameterError, match="max_depth must be >= 1"):
             SnowballRunner(seed_papers=[seed], max_depth=-1)
 
 

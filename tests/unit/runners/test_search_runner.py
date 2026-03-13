@@ -11,7 +11,7 @@ from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import Database
 from findpapers.core.source import Source
-from findpapers.exceptions import UnsupportedQueryError
+from findpapers.exceptions import InvalidParameterError, UnsupportedQueryError
 from findpapers.runners.search_runner import SearchRunner, _are_years_compatible
 
 
@@ -26,8 +26,8 @@ class TestSearchRunnerInit:
             SearchRunner(query="((bad query")
 
     def test_unknown_database_raises_on_run(self):
-        """Providing an unknown database name raises ValueError."""
-        with pytest.raises(ValueError, match="Unknown database"):
+        """Providing an unknown database name raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="Unknown database"):
             SearchRunner(query="[machine learning]", databases=["nonexistent_db"])
 
     def test_valid_init(self):
@@ -99,8 +99,8 @@ class TestSearchRunnerInit:
         assert runner._skipped_databases == []
 
     def test_empty_databases_list_raises(self):
-        """Passing an empty list for databases raises ValueError."""
-        with pytest.raises(ValueError, match="databases must not be an empty list"):
+        """Passing an empty list for databases raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="databases must not be an empty list"):
             SearchRunner(query="[ml]", databases=[])
 
 

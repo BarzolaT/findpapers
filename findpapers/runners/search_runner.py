@@ -11,7 +11,7 @@ from findpapers.connectors import SEARCH_REGISTRY
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.paper import Paper, _is_preprint_doi
 from findpapers.core.search_result import Database, SearchResult
-from findpapers.exceptions import UnsupportedQueryError
+from findpapers.exceptions import InvalidParameterError, UnsupportedQueryError
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
 from findpapers.query.validator import QueryValidator
@@ -256,7 +256,7 @@ class SearchRunner:
 
         Raises
         ------
-        ValueError
+        InvalidParameterError
             When an unknown database identifier is provided.
         """
         # Per-database constructor credentials.  Databases with no entry
@@ -276,14 +276,14 @@ class SearchRunner:
         # Treat an explicit empty list as an error – the caller likely
         # intended to pass ``None`` (select all) instead of ``[]``.
         if databases is not None and len(databases) == 0:
-            raise ValueError(
+            raise InvalidParameterError(
                 "databases must not be an empty list. Pass None to select all available databases."
             )
 
         raw = [db.strip().lower() for db in (databases or [db.value for db in SEARCH_REGISTRY])]
         unknown = [db for db in raw if db not in valid_values]
         if unknown:
-            raise ValueError(
+            raise InvalidParameterError(
                 f"Unknown database(s): {', '.join(unknown)}. "
                 f"Accepted values: {', '.join(sorted(valid_values))}"
             )

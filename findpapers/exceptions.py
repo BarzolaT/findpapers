@@ -26,3 +26,11 @@ class PersistenceError(FindpapersError):
 
 class QueryValidationError(FindpapersError, ValueError):
     """Raised when a query string is invalid."""
+
+
+class ModelValidationError(FindpapersError, ValueError):
+    """Raised when a model object (Paper, Author, Source) has invalid data."""
+
+
+class InvalidParameterError(FindpapersError, ValueError):
+    """Raised when a function or runner receives an invalid argument."""

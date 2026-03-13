@@ -7,11 +7,12 @@ import pytest
 from findpapers.core.author import Author
 from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, PaperType, _is_preprint_doi, _merge_doi
 from findpapers.core.source import Source
+from findpapers.exceptions import ModelValidationError
 
 
 def test_paper_requires_title():
     """Test that paper requires a title."""
-    with pytest.raises(ValueError, match="cannot be null"):
+    with pytest.raises(ModelValidationError, match="cannot be null"):
         Paper(
             title="",
             abstract="",
@@ -817,8 +818,8 @@ class TestPaperFromDictEdgeCases:
     """Tests for from_dict coercion and edge-case handling."""
 
     def test_missing_title_raises(self) -> None:
-        """from_dict raises ValueError when title is missing."""
-        with pytest.raises(ValueError, match="title"):
+        """from_dict raises ModelValidationError when title is missing."""
+        with pytest.raises(ModelValidationError, match="title"):
             Paper.from_dict({})
 
     def test_non_string_abstract_coerced(self) -> None:

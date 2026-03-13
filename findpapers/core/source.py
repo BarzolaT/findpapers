@@ -6,6 +6,8 @@ import contextlib
 from enum import StrEnum
 from typing import Any
 
+from findpapers.exceptions import ModelValidationError
+
 from ..utils.merge import merge_value
 
 
@@ -69,11 +71,11 @@ class Source:
 
         Raises
         ------
-        ValueError
+        ModelValidationError
             If title is empty.
         """
         if not title:
-            raise ValueError("Source's title cannot be null")
+            raise ModelValidationError("Source's title cannot be null")
 
         self.title = title
         self.isbn = isbn
@@ -169,12 +171,12 @@ class Source:
 
         Raises
         ------
-        ValueError
+        ModelValidationError
             If the title is missing.
         """
         title = source_dict.get("title")
         if not isinstance(title, str) or not title:
-            raise ValueError("Source's title cannot be null")
+            raise ModelValidationError("Source's title cannot be null")
         raw_source_type = source_dict.get("source_type")
         source_type: SourceType | None = None
         if raw_source_type is not None:

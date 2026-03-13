@@ -7,6 +7,7 @@ from time import perf_counter
 
 from findpapers.connectors.crossref import CrossRefConnector
 from findpapers.core.paper import Paper
+from findpapers.exceptions import InvalidParameterError
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.metadata_parser import DOI_URL_PREFIXES
 
@@ -138,7 +139,7 @@ class DOILookupRunner:
 
         Raises
         ------
-        ValueError
+        InvalidParameterError
             If the result is empty after sanitization.
         """
         cleaned = doi.strip()
@@ -148,5 +149,5 @@ class DOILookupRunner:
                 break
         cleaned = cleaned.strip()
         if not cleaned:
-            raise ValueError("DOI must not be empty.")
+            raise InvalidParameterError("DOI must not be empty.")
         return cleaned

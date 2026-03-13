@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from findpapers.core.paper import Paper
+from findpapers.exceptions import InvalidParameterError
 from findpapers.utils.version import package_version
 
 
@@ -91,11 +92,11 @@ class CitationGraph:
 
         Raises
         ------
-        ValueError
+        InvalidParameterError
             If *max_depth* is less than 1.
         """
         if max_depth < 1:
-            raise ValueError(f"max_depth must be >= 1, got {max_depth}")
+            raise InvalidParameterError(f"max_depth must be >= 1, got {max_depth}")
         self.seed_papers: list[Paper] = list(seed_papers)
         self.max_depth = max_depth
         self.direction = direction
@@ -212,12 +213,12 @@ class CitationGraph:
 
         Raises
         ------
-        ValueError
+        InvalidParameterError
             If *discovered_from* is not in the graph.
         """
         parent_depth = self.get_paper_depth(discovered_from)
         if parent_depth is None:
-            raise ValueError(
+            raise InvalidParameterError(
                 "discovered_from paper is not in the graph; add it first or pass it as a seed."
             )
         depth = parent_depth + 1

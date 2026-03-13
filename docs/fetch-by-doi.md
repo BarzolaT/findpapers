@@ -41,7 +41,7 @@ Returns a `Paper` object with CrossRef metadata, or `None` when the DOI is not f
 
 | Exception | When |
 |-----------|------|
-| `ValueError` | The DOI is empty or blank after stripping whitespace and URL prefixes |
+| `InvalidParameterError` | The DOI is empty or blank after stripping whitespace and URL prefixes |
 
 ## DOI Formats
 
