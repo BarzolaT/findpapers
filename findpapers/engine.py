@@ -162,7 +162,7 @@ class Engine:
         Query syntax
         ~~~~~~~~~~~~
         Wrap each search term in square brackets and combine them with
-        ``AND``, ``OR``, or ``NOT`` operators.  Optionally prefix a term or
+        ``AND``, ``OR``, or ``AND NOT`` operators.  Optionally prefix a term or
         group with a **filter code** to restrict where it is matched:
 
         * ``ti`` — title
@@ -405,15 +405,9 @@ class Engine:
 
             * ``total_papers`` — number of papers processed.
             * ``enriched_papers`` — number of papers that gained new metadata.
-            * ``doi_enriched_papers`` — subset enriched via CrossRef (DOI
-              lookup).
-            * ``fetch_error_papers`` — papers where metadata fetch failed.
-            * ``no_metadata_papers`` — papers where fetched pages had no
-              usable data.
-            * ``no_change_papers`` — papers already up-to-date (no new data
+            * ``unchanged_papers`` — papers already up-to-date (no new data
               found).
-            * ``no_urls_papers`` — papers skipped because they had no known
-              URLs.
+            * ``failed_papers`` — papers where metadata fetch failed.
             * ``runtime_in_seconds`` — wall-clock time of the enrichment
               process.
 
@@ -570,8 +564,9 @@ class Engine:
         -------
         CitationGraph
             A directed citation graph with all discovered papers as nodes
-            and citation relationships as edges.  The graph can be saved
-            via ``graph.to_json(path)`` or serialized via ``graph.to_dict()``.
+            and citation relationships as edges.  Save via
+            ``findpapers.save_to_json(graph, path)`` or serialize via
+            ``graph.to_dict()``.
 
         See Also
         --------

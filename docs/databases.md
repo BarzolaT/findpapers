@@ -2,9 +2,11 @@
 
 One of the biggest advantages of Findpapers is that it connects you to **hundreds of millions of academic papers** from six major databases through a single query. Instead of visiting each portal separately and learning its query syntax, you write one search expression and Findpapers handles the rest - translating your query, running parallel searches, and merging all results with automatic deduplication.
 
-Together, these databases cover virtually every peer-reviewed paper, preprint, and conference proceeding across all fields of science. The table below shows a quick comparison; the sections that follow describe each database in detail.
+Findpapers searches for papers through **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, and **Semantic Scholar** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science. In addition, **CrossRef** is used internally for DOI-based metadata enrichment and backward snowballing.
 
 ## Overview
+
+The table below shows a quick databases comparison.
 
 | Database | Size (papers) | API Key | Search | Snowballing | Rate Limit |
 |----------|------------|---------|--------|-------------|------------|
@@ -16,13 +18,13 @@ Together, these databases cover virtually every peer-reviewed paper, preprint, a
 | Semantic Scholar | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | Yes | Yes (both) | ~1 req/s with key |
 | CrossRef | 180M+ [⁷](https://www.crossref.org/about) | Not required | No | Backward only | ~10 req/s |
 
-> **All API keys are free.** Every API key from the databases listed above can be obtained at no cost - just create an account on each provider’s website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). There is no reason to skip them. See [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
+> **Every API key from the databases listed above can be obtained at no cost** - just create an account on each provider’s website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). See the **Databases** section for more details on how to get these API keys, and [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
 
 ---
 
-## Selecting Databases
+## Selecting Databases to Search
 
-By default, `Engine.search()` queries all databases for which valid credentials are available. To restrict to specific databases:
+By default, `Engine.search()` queries all databases. To restrict to specific databases:
 
 ```python
 result = engine.search(
@@ -33,16 +35,11 @@ result = engine.search(
 
 Valid database identifiers: `arxiv`, `ieee`, `openalex`, `pubmed`, `scopus`, `semantic_scholar`.
 
-## Deduplication
+## Rate Limiting
 
-Papers found in multiple databases are automatically deduplicated:
+Findpapers automatically respects each database's rate limits. When a rate limit is hit, it waits for the required cooldown period before retrying. Responses with status codes 429 (Too Many Requests) and 5xx are retried with exponential backoff.
 
-1. **By DOI** - papers sharing the same DOI (case-insensitive) are merged
-2. **By title and year** - papers with matching normalized titles and publication year are merged
-
-When merging, metadata from all sources is combined: the longer abstract is kept, keywords are unioned, affiliations are back-filled, and the higher citation count is retained.
-
-## Databases
+## Supported Databases
 
 ### arXiv
 

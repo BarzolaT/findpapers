@@ -244,16 +244,6 @@ cd findpapers
 git remote add upstream https://github.com/jonatasgrosman/findpapers.git
 ```
 
-## Initial config
-
-Clone the environment variables file sample
-
-```shell
-cp .env.sample .env
-```
-
-After cloning this file, you should set the values of its variables properly
-
 ## Installing dependencies
 
 ```shell

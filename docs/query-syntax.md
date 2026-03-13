@@ -22,7 +22,9 @@ Three connectors are available (case-insensitive):
 | `OR` | At least one term must be present |
 | `AND NOT` | First term present, second excluded |
 
-Connectors must have at least one whitespace before and after them. `OR NOT` is **not** a valid connector - use `AND NOT` instead.
+Connectors must have at least one whitespace before and after them.
+
+All six databases support all three boolean connectors.
 
 ## Grouping
 
@@ -40,10 +42,10 @@ Groups can be nested:
 
 ## Filter Codes
 
-Filter codes restrict where a term is searched. Add them before the opening bracket:
+Filter codes restrict where a term is searched. Add them before the opening bracket or before a group:
 
 ```
-ti[neural network] AND abs[image segmentation]
+ti[neural network] AND abs([image segmentation] OR [object detection])
 ```
 
 | Code | Field | Description |
@@ -52,7 +54,7 @@ ti[neural network] AND abs[image segmentation]
 | `abs` | Abstract | Search in abstract only |
 | `key` | Keywords | Search in keywords only |
 | `au` | Author | Search by author name |
-| `src` | Source | Search by publication source (journal, conference) |
+| `src` | Source | Search by publication source name (journal, conference) |
 | `aff` | Affiliation | Search by author affiliation |
 | `tiabs` | Title + Abstract | Search in title and abstract (default) |
 | `tiabskey` | Title + Abstract + Keywords | Search in title, abstract, and keywords |
@@ -69,7 +71,18 @@ ti([neural network] OR abs[deep learning])
 
 In this example, `[neural network]` inherits the `ti` filter from the group, but `[deep learning]` uses its own explicit `abs` filter.
 
-> **Note:** Not all databases support every filter code. Findpapers validates the query against each database's capabilities and skips databases that cannot handle the query. See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for per-database support.
+Not all databases support every filter code. When a query uses a filter code that a database doesn't handle, that database is automatically skipped.
+
+| Filter Code | Field | arXiv | IEEE | OpenAlex | PubMed | Scopus | Semantic Scholar |
+|-------------|-------|-------|------|----------|--------|--------|------------------|
+| `ti` | Title | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `abs` | Abstract | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `key` | Keywords | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| `au` | Author | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `src` | Source | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| `aff` | Affiliation | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `tiabs` | Title + Abstract | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `tiabskey` | Title + Abstract + Keywords | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
 
 ## Wildcards
 
@@ -83,35 +96,137 @@ Two wildcards are available:
 ### Wildcard Rules
 
 - Cannot be placed at the **start** of a term
-- `*` requires at least **3 characters** before it
+- `*` requires at least **3 characters** before it (4 for PubMed)
 - `*` can only be placed at the **end** of a term
 - Only **one** wildcard per term
 - Can only be used in **single-word** terms
 
-> **Database support:** IEEE and PubMed support only `*`. Scopus supports both `?` and `*`. arXiv does **not** support wildcards. OpenAlex and Semantic Scholar have limited wildcard support.
+Not all databases support wildcards. When a query uses a wildcard that a database doesn't handle, that database is automatically skipped.
+
+| Feature | arXiv | IEEE | OpenAlex | PubMed | Scopus | Semantic Scholar |
+|---------|-------|------|----------|--------|--------|------------------|
+| `?` (single char) | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `*` (zero or more) | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ |
+| Min chars before `*` | - | 3 | - | 4 | 3 | 3 |
+
 
 ## Examples
 
-| Query | Valid? |
-|-------|--------|
-| `[term a]` | Yes |
-| `([term a] OR [term b])` | Yes |
-| `[term a] AND [term b]` | Yes |
-| `[term a] AND NOT ([term b] OR [term c])` | Yes |
-| `[term a] OR ([term b] AND ([term*] OR [t?rm]))` | Yes |
-| `ti[neural nets] AND abs[vision]` | Yes |
-| `[term a]OR[term b]` | **No** - missing whitespace around connector |
-| `([term a] OR [term b]` | **No** - unbalanced parentheses |
-| `term a OR [term b]` | **No** - missing square brackets |
-| `[term a] [term b]` | **No** - missing connector |
-| `[term a] XOR [term b]` | **No** - invalid connector |
-| `[] AND [term b]` | **No** - empty term |
-| `["term a"]` | **No** - double quotes not allowed |
-| `[?erm]` | **No** - wildcard at start |
-| `[te*]` | **No** - fewer than 3 chars before `*` |
-| `[ter*s]` | **No** - `*` not at end |
-| `[t?rm?]` | **No** - multiple wildcards |
-| `[some term*]` | **No** - wildcard in multi-word term |
+### Realistic Queries
+
+**Simple topic search** - find papers about a single topic:
+
+```
+[machine learning]
+```
+
+**Two topics combined** - find papers that cover both topics:
+
+```
+[machine learning] AND [healthcare]
+```
+
+**Alternative terms** - find papers that mention at least one of the synonyms:
+
+```
+[deep learning] OR [neural network] OR [artificial intelligence]
+```
+
+**Excluding a subtopic** - find reinforcement learning papers that are not about games:
+
+```
+[reinforcement learning] AND NOT [game]
+```
+
+**Complex boolean with grouping** - find papers about transformers applied to either vision or speech:
+
+```
+[transformer] AND ([computer vision] OR [speech recognition])
+```
+
+**Nested groups** - combine broader topics with specific sub-areas:
+
+```
+([natural language processing] OR [computational linguistics]) AND ([sentiment analysis] OR [text classification]) AND NOT [social media]
+```
+
+**Filter by title** - find papers with "attention" in the title:
+
+```
+ti[attention mechanism] AND [transformer]
+```
+
+**Multiple filter codes** - title and abstract targeting different terms:
+
+```
+ti[BERT] AND abs[fine-tuning] AND key[transfer learning]
+```
+
+**Filter code on a group** - apply a filter to an entire group of alternatives:
+
+```
+ti([convolutional neural network] OR [CNN]) AND abs[medical imaging]
+```
+
+**Author search** - find papers by a specific author on a topic:
+
+```
+au[Yoshua Bengio] AND [deep learning]
+```
+
+**Source filter** - search within a specific journal:
+
+```
+src[Nature] AND [gene editing] AND [CRISPR]
+```
+
+**Affiliation filter** - papers from a specific institution:
+
+```
+aff[Stanford University] AND [artificial intelligence]
+```
+
+**Wildcard with `*`** - match word variations (e.g., "neural", "neurological", "neuroscience"):
+
+```
+[neur*] AND [imaging]
+```
+
+**Wildcard with `?`** - match a single character variation:
+
+```
+[optimi?ation]
+```
+
+**Combining several features** - a realistic literature review query:
+
+```
+ti([deep learning] OR [neural network]) AND abs([medical imaging] OR [radiology]) AND NOT [survey]
+```
+
+### Valid vs. Invalid Syntax
+
+| Query | Valid? | Why |
+|-------|--------|-----|
+| `[machine learning]` | ✅ | Single term |
+| `[deep learning] AND [NLP]` | ✅ | Two terms with connector |
+| `([term a] OR [term b])` | ✅ | Grouped alternatives |
+| `[term a] AND NOT ([term b] OR [term c])` | ✅ | Exclusion with grouping |
+| `ti[neural nets] AND abs[vision]` | ✅ | Filter codes on individual terms |
+| `ti([CNN] OR [ResNet]) AND abs[classification]` | ✅ | Filter code on a group |
+| `[term a] OR ([term b] AND ([term*] OR [t?rm]))` | ✅ | Wildcards inside nested groups |
+| `[term a]OR[term b]` | ❌ | Missing whitespace around connector |
+| `([term a] OR [term b]` | ❌ | Unbalanced parentheses |
+| `term a OR [term b]` | ❌ | Missing square brackets around `term a` |
+| `[term a] [term b]` | ❌ | Missing connector between terms |
+| `[term a] XOR [term b]` | ❌ | Invalid connector (`XOR` is not supported) |
+| `[] AND [term b]` | ❌ | Empty term |
+| `["term a"]` | ❌ | Double quotes not allowed inside brackets |
+| `[?erm]` | ❌ | Wildcard at start of term |
+| `[te*]` | ❌ | Fewer than 3 characters before `*` |
+| `[ter*s]` | ❌ | `*` not at end of term |
+| `[t?rm?]` | ❌ | Multiple wildcards in one term |
+| `[some term*]` | ❌ | Wildcard in multi-word term |
 
 ## Error Handling
 
@@ -129,3 +244,9 @@ except QueryValidationError as e:
 ```
 
 If a query is valid but not supported by a specific database (e.g., uses a filter code the database doesn't handle), that database is silently skipped and the search proceeds with the remaining databases.
+
+## Database-Specific Notes
+
+- **arXiv** uses server-side stemming - e.g., `[transformer]` also matches "transformations" and "transformed".
+- **OpenAlex** decomposes queries containing `OR` or `AND NOT` into multiple independent sub-queries internally.
+- **Semantic Scholar** is the most restrictive - it only supports `tiabs` filtering and has no per-field search.

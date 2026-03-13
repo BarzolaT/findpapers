@@ -1,4 +1,4 @@
-# Persistence Formats
+# Save/Load
 
 Findpapers supports three persistence formats: **JSON**, **BibTeX**, and **CSV**. All persistence functions are available as top-level functions in the `findpapers` package.
 
@@ -21,7 +21,7 @@ findpapers.save_to_json(graph, "citation_graph.json")
 findpapers.save_to_json(papers, "papers.json")
 ```
 
-### Import
+### Load
 
 ```python
 # Automatically detects the type and returns the correct object
@@ -51,7 +51,7 @@ BibTeX save generates standard `.bib` files compatible with LaTeX.
 findpapers.save_to_bibtex(papers, "references.bib")
 ```
 
-### Import
+### Load
 
 ```python
 papers = findpapers.load_from_bibtex("references.bib")
@@ -80,7 +80,7 @@ CSV save creates spreadsheet-compatible files with one paper per row.
 findpapers.save_to_csv(papers, "papers.csv")
 ```
 
-### Import
+### Load
 
 ```python
 papers = findpapers.load_from_csv("papers.csv")
@@ -126,12 +126,12 @@ papers = findpapers.load_from_csv("papers.csv")
 
 | Feature | JSON | BibTeX | CSV |
 |---------|------|--------|-----|
-| Lossless round-trip | Yes | No | No |
-| Supports SearchResult | Yes | No | No |
-| Supports CitationGraph | Yes | No | No |
-| LaTeX-compatible | No | Yes | No |
-| Spreadsheet-compatible | No | No | Yes |
-| Author affiliations | Yes | No | No |
-| Citation count | Yes | No | Yes |
-| Database provenance | Yes | No | Yes |
-| Fields of study | Yes | No | Yes |
+| Lossless round-trip | ✅ | ❌ | ❌ |
+| Supports SearchResult | ✅ | ❌ | ❌ |
+| Supports CitationGraph | ✅ | ❌ | ❌ |
+| LaTeX-compatible | ❌ | ✅ | ❌ |
+| Spreadsheet-compatible | ❌ | ❌ | ✅ |
+| Author affiliations | ✅ | ❌ | ❌ |
+| Citation count | ✅ | ❌ | ✅ |
+| Database provenance | ✅ | ❌ | ✅ |
+| Fields of study | ✅ | ❌ | ✅ |
