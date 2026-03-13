@@ -18,6 +18,7 @@ from findpapers.exceptions import PersistenceError
 from findpapers.utils.persistence import (
     _escape_bibtex,
     _extract_papers,
+    _normalize_whitespace,
     _sanitize_csv_value,
     _serialize_to_dict,
     _unescape_bibtex,
@@ -390,6 +391,55 @@ class TestEscapeBibtex:
     def test_empty_string(self) -> None:
         """Empty string returns empty string."""
         assert _escape_bibtex("") == ""
+
+    def test_newlines_collapsed_to_spaces(self) -> None:
+        """Newlines within text are collapsed to single spaces."""
+        assert _escape_bibtex("line one\nline two") == "line one line two"
+
+    def test_multiple_newlines_collapsed(self) -> None:
+        """Multiple consecutive newlines are collapsed to a single space."""
+        assert _escape_bibtex("a\n\n\nb") == "a b"
+
+    def test_newlines_with_surrounding_whitespace(self) -> None:
+        """Whitespace around newlines is also collapsed."""
+        assert _escape_bibtex("a  \n  b") == "a b"
+
+
+# ---------------------------------------------------------------------------
+# _normalize_whitespace
+# ---------------------------------------------------------------------------
+
+
+class TestNormalizeWhitespace:
+    """Tests for _normalize_whitespace()."""
+
+    def test_no_newlines(self) -> None:
+        """Text without newlines passes through unchanged."""
+        assert _normalize_whitespace("hello world") == "hello world"
+
+    def test_single_newline(self) -> None:
+        """A single newline is replaced with a space."""
+        assert _normalize_whitespace("hello\nworld") == "hello world"
+
+    def test_crlf_newline(self) -> None:
+        """Windows-style CRLF is also collapsed."""
+        assert _normalize_whitespace("hello\r\nworld") == "hello world"
+
+    def test_multiple_newlines(self) -> None:
+        """Multiple consecutive newlines collapse to one space."""
+        assert _normalize_whitespace("a\n\n\nb") == "a b"
+
+    def test_surrounding_whitespace_collapsed(self) -> None:
+        """Whitespace around newlines is included in the collapse."""
+        assert _normalize_whitespace("a  \n  b") == "a b"
+
+    def test_leading_trailing_stripped(self) -> None:
+        """Leading and trailing newlines are stripped."""
+        assert _normalize_whitespace("\nhello\n") == "hello"
+
+    def test_empty_string(self) -> None:
+        """Empty string returns empty string."""
+        assert _normalize_whitespace("") == ""
 
 
 # ---------------------------------------------------------------------------
@@ -921,6 +971,24 @@ class TestSaveToBibtex:
             content = Path(path).read_text(encoding="utf-8")
             assert content == ""
 
+    def test_abstract_newlines_collapsed(self) -> None:
+        """Newlines in abstract are collapsed to spaces in BibTeX output."""
+        paper = Paper(
+            title="Test",
+            abstract="BACKGROUND\nSome text.\n\nMETHODS\nMore text.",
+            authors=[Author(name="A, B.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.bib")
+            save_to_bibtex([paper], path)
+            content = Path(path).read_text(encoding="utf-8")
+            # No literal newlines inside the abstract field value
+            for line in content.splitlines():
+                if "abstract" in line.lower():
+                    assert "\n" not in line.split("{", 1)[1]
+
 
 # ---------------------------------------------------------------------------
 # load_from_bibtex
@@ -1351,6 +1419,52 @@ class TestSanitizeCsvValue:
     def test_leaves_numeric_string_unchanged(self):
         """Numeric strings that don't start with formula chars are untouched."""
         assert _sanitize_csv_value("10.1038/nature12373") == "10.1038/nature12373"
+
+    def test_newlines_collapsed_to_spaces(self):
+        """Newlines within a value are collapsed to single spaces."""
+        assert _sanitize_csv_value("line one\nline two") == "line one line two"
+
+    def test_newlines_before_formula_prefix(self):
+        """Newlines are collapsed before formula-prefix check."""
+        # A leading newline followed by '=' should result in the text
+        # being stripped, then the '=' prefix triggers the quote.
+        assert _sanitize_csv_value("\n=cmd") == "'=cmd"
+
+
+class TestCsvNewlineNormalization:
+    """Newlines in CSV cell values are collapsed to spaces."""
+
+    def test_abstract_newlines_collapsed_in_csv(self) -> None:
+        """Newlines in abstract are collapsed in CSV output."""
+        paper = Paper(
+            title="Test",
+            abstract="BACKGROUND\nSome text.\n\nMETHODS\nMore text.",
+            authors=[Author(name="A, B.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            save_to_csv([paper], path)
+            raw = Path(path).read_text(encoding="utf-8")
+            # Header + exactly one data line (no extra lines from newlines)
+            lines = raw.strip().splitlines()
+            assert len(lines) == 2
+
+    def test_round_trip_preserves_content(self) -> None:
+        """Abstract with newlines survives save→load with content intact."""
+        paper = Paper(
+            title="Test",
+            abstract="Line one\nLine two",
+            authors=[Author(name="A, B.")],
+            source=None,
+            publication_date=datetime.date(2021, 1, 1),
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            save_to_csv([paper], path)
+            loaded = load_from_csv(path)
+            assert loaded[0].abstract == "Line one Line two"
 
 
 class TestUnsanitizeCsvValue:

@@ -205,6 +205,27 @@ _BIBTEX_ESCAPE_MAP: list[tuple[str, str]] = [
 ]
 
 
+def _normalize_whitespace(text: str) -> str:
+    """Collapse newlines and surrounding whitespace into single spaces.
+
+    Prevents literal line breaks from appearing inside BibTeX field values
+    and CSV cells, which can confuse external parsers.
+
+    Parameters
+    ----------
+    text : str
+        Raw text that may contain newlines.
+
+    Returns
+    -------
+    str
+        Text with newlines collapsed into single spaces.
+    """
+    # Replace each run of whitespace that contains at least one newline
+    # with a single space, preserving intentional spaces within lines.
+    return re.sub(r"\s*\n\s*", " ", text).strip()
+
+
 def _escape_bibtex(text: str) -> str:
     r"""Escape LaTeX special characters in a BibTeX field value.
 
@@ -221,6 +242,7 @@ def _escape_bibtex(text: str) -> str:
     str
         LaTeX-safe text suitable for inclusion in a BibTeX field.
     """
+    text = _normalize_whitespace(text)
     for char, replacement in _BIBTEX_ESCAPE_MAP:
         text = text.replace(char, replacement)
     return text
@@ -584,6 +606,7 @@ def _sanitize_csv_value(value: str) -> str:
     str
         Sanitized value safe for CSV save.
     """
+    value = _normalize_whitespace(value)
     if value and value[0] in _CSV_FORMULA_CHARS:
         return "'" + value
     return value
