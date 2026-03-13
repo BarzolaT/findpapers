@@ -68,12 +68,12 @@ The table below summarizes each database - for full details on authentication, r
 
 | Database | Size (papers) | API Key | Coverage |
 |----------|------------|---------|----------|
-| [arXiv](https://arxiv.org) | 3 M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Open-access preprints in physics, math, CS, biology, economics, and more |
-| [IEEE Xplore](https://ieeexplore.ieee.org) | 7 M+ [²](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Journals, conferences, and standards in electrical engineering and CS |
-| [OpenAlex](https://openalex.org) | 243 M+ [³](https://openalex.org/about) | Optional | The largest open catalog of scholarly works across all disciplines |
-| [PubMed](https://pubmed.ncbi.nlm.nih.gov) | 40 M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Biomedical and life sciences literature (MEDLINE, PMC, and more) |
-| [Scopus](https://www.scopus.com) | 100 M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Peer-reviewed literature in science, technology, medicine, social sciences, and humanities |
-| [Semantic Scholar](https://www.semanticscholar.org) | 214 M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | AI-powered academic graph covering all fields of science |
+| [arXiv](https://arxiv.org) | 3M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Open-access preprints in physics, math, CS, biology, economics, and more |
+| [IEEE Xplore](https://ieeexplore.ieee.org) | 7M+ [²](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Journals, conferences, and standards in electrical engineering and CS |
+| [OpenAlex](https://openalex.org) | 243M+ [³](https://openalex.org/about) | Optional | The largest open catalog of scholarly works across all disciplines |
+| [PubMed](https://pubmed.ncbi.nlm.nih.gov) | 40M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Biomedical and life sciences literature (MEDLINE, PMC, and more) |
+| [Scopus](https://www.scopus.com) | 100M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Peer-reviewed literature in science, technology, medicine, social sciences, and humanities |
+| [Semantic Scholar](https://www.semanticscholar.org) | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | AI-powered academic graph covering all fields of science |
 
 In addition, [CrossRef](https://www.crossref.org) (180 M+ DOIs [⁷](https://www.crossref.org/about)) is used internally for DOI-based metadata enrichment and backward snowballing (no API key required).
 

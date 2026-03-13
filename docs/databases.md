@@ -8,13 +8,13 @@ Together, these databases cover virtually every peer-reviewed paper, preprint, a
 
 | Database | Size (papers) | API Key | Search | Snowballing | Rate Limit |
 |----------|------------|---------|--------|-------------|------------|
-| arXiv | 3 M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Yes | No | ~3 s between requests |
-| IEEE Xplore | 7 M+ [²](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Yes | No | ~200 req/day |
-| OpenAlex | 243 M+ [³](https://openalex.org/about) | Optional | Yes | Yes (both) | ~10 req/s with email |
-| PubMed | 40 M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Yes | No | 3 req/s (10 with key) |
-| Scopus | 100 M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Yes | No | 20k req/week |
-| Semantic Scholar | 214 M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | Yes | Yes (both) | ~1 req/s with key |
-| CrossRef | 180 M+ [⁷](https://www.crossref.org/about) | Not required | No | Backward only | ~10 req/s |
+| arXiv | 3M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Yes | No | ~3 s between requests |
+| IEEE Xplore | 7M+ [²](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Yes | No | ~200 req/day |
+| OpenAlex | 243M+ [³](https://openalex.org/about) | Optional | Yes | Yes (both) | ~10 req/s with email |
+| PubMed | 40M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Yes | No | 3 req/s (10 with key) |
+| Scopus | 100M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Yes | No | 20k req/week |
+| Semantic Scholar | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | Yes | Yes (both) | ~1 req/s with key |
+| CrossRef | 180M+ [⁷](https://www.crossref.org/about) | Not required | No | Backward only | ~10 req/s |
 
 > **All API keys are free.** Every API key from the databases listed above can be obtained at no cost - just create an account on each provider’s website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). There is no reason to skip them. See [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
 
