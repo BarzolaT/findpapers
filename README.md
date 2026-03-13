@@ -75,7 +75,7 @@ The table below summarizes each database - for full details on authentication, r
 | [Scopus](https://www.scopus.com) | 100M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Peer-reviewed literature in science, technology, medicine, social sciences, and humanities |
 | [Semantic Scholar](https://www.semanticscholar.org) | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | AI-powered academic graph covering all fields of science |
 
-In addition, [CrossRef](https://www.crossref.org) (180 M+ DOIs [⁷](https://www.crossref.org/about)) is used internally for DOI-based metadata enrichment and backward snowballing (no API key required).
+In addition, [CrossRef](https://www.crossref.org) (180M+ DOIs [⁷](https://www.crossref.org/about)) is used internally for DOI-based metadata enrichment and backward snowballing (no API key required).
 
 *Estimated paper counts were consulted in March 2026 from each database's official website. Click the superscript links for the original sources. These numbers grow continuously.*
 
