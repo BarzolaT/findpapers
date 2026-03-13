@@ -179,6 +179,32 @@ class TestDownloadRunnerRun:
         assert "[OK] Success Paper" in content
         assert "[FAILED] Failure Paper" in content
 
+    def test_log_urls_are_indented(self, make_paper, tmp_path):
+        """URLs in the log are indented with '  -> ' prefix."""
+        paper = make_paper(title="Indented URL Paper")
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_download_paper", return_value=(True, ["http://indented-url"])):
+            runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "  -> http://indented-url" in content
+
+    def test_log_session_header_contains_separator(self, tmp_path):
+        """Log header uses '=' separator lines."""
+        runner = DownloadRunner(papers=[], output_directory=str(tmp_path))
+        runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "=" * 80 in content
+        assert "Download session started:" in content
+
+    def test_log_failure_no_urls_uses_placeholder(self, make_paper, tmp_path):
+        """Failure with no URLs logs a '(no URLs available)' placeholder."""
+        runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
+        # Raising an exception triggers the error path which calls _log_download_error([]).
+        with patch.object(runner, "_download_paper", side_effect=RuntimeError("boom")):
+            runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "(no URLs available)" in content
+
 
 class TestDownloadRunnerVerbose:
     """Tests for the verbose=True logging path."""

@@ -118,10 +118,9 @@ class DownloadRunner:
         log_path = os.path.join(self._output_directory, "download_log.txt")
         with open(log_path, "a", encoding="utf-8") as fp:
             now = datetime.datetime.now(UTC)
-            fp.write(
-                "------- A new download process started at: "
-                f"{datetime.datetime.strftime(now, '%Y-%m-%d %H:%M:%S')} \n"
-            )
+            ts = datetime.datetime.strftime(now, "%Y-%m-%d %H:%M:%S")
+            separator = "=" * 80
+            fp.write(f"\n{separator}\nDownload session started: {ts}\n{separator}\n")
 
         num_workers = self._num_workers
         timeout = self._timeout
@@ -256,9 +255,9 @@ class DownloadRunner:
         None
         """
         with open(log_path, "a", encoding="utf-8") as fp:
-            fp.write(f"[OK] {title}\n")
+            fp.write(f"\n[OK] {title}\n")
             for url in attempted_urls:
-                fp.write(f"{url}\n")
+                fp.write(f"  -> {url}\n")
 
     def _log_download_error(
         self,
@@ -282,12 +281,12 @@ class DownloadRunner:
         None
         """
         with open(log_path, "a", encoding="utf-8") as fp:
-            fp.write(f"[FAILED] {title}\n")
+            fp.write(f"\n[FAILED] {title}\n")
             if not attempted_urls:
-                fp.write("Empty URL list\n")
+                fp.write("  -> (no URLs available)\n")
             else:
                 for url in attempted_urls:
-                    fp.write(f"{url}\n")
+                    fp.write(f"  -> {url}\n")
 
     def _download_paper(
         self,
