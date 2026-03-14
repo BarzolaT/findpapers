@@ -382,10 +382,11 @@ class TestConnectorBaseRetry:
         assert connector._http_session.get.call_count == 1
 
     def test_429_retried_then_succeeds(self) -> None:
-        """A 429 response triggers retries until a 200 is received."""
+        """A 429 response triggers rate-limit retries until a 200 is received."""
         connector = _StubConnector()
         connector._max_retries = 3
         connector._retry_base_delay = 0.0
+        connector._rate_limit_base_delay = 0.0
 
         resp_429 = self._make_response(429, "Too Many Requests")
         # Override raise_for_status: 429 should NOT raise during retry loop
@@ -421,12 +422,13 @@ class TestConnectorBaseRetry:
         assert connector._http_session.get.call_count == 2
 
     def test_retries_exhausted_raises_http_error(self) -> None:
-        """When all retries are exhausted, HTTPError is raised."""
+        """When all rate-limit retries are exhausted, HTTPError is raised."""
         import requests as req_lib
 
         connector = _StubConnector()
-        connector._max_retries = 2
+        connector._max_rate_limit_retries = 2
         connector._retry_base_delay = 0.0
+        connector._rate_limit_base_delay = 0.0
 
         resp_429 = self._make_response(429, "Too Many Requests")
         # After retries are exhausted, raise_for_status is called on the last response.
@@ -436,7 +438,7 @@ class TestConnectorBaseRetry:
         with pytest.raises(req_lib.HTTPError):
             connector._get("https://api.example.com/test")
 
-        # 1 initial + 2 retries = 3 requests total
+        # 1 initial + 2 rate-limit retries = 3 requests total
         assert connector._http_session.get.call_count == 3
 
     def test_non_retryable_status_raises_immediately(self) -> None:
@@ -564,6 +566,7 @@ class TestConnectorBaseRetry:
         connector = _StubConnector()
         connector._max_retries = 1
         connector._retry_base_delay = 0.0
+        connector._rate_limit_base_delay = 0.0
 
         resp_429 = self._make_response(429, "Too Many Requests")
         resp_429.raise_for_status = MagicMock()
@@ -594,6 +597,59 @@ class TestConnectorBaseRetry:
 
         assert result is resp_200
         assert connector._http_session.post.call_count == 2
+
+    def test_timeouts_and_429_use_separate_retry_budgets(self) -> None:
+        """Timeouts do not consume the HTTP 429 retry budget.
+
+        This is the regression test for the scenario where connection errors
+        (timeouts) on early attempts used to exhaust ``_max_retries`` so that
+        a subsequent 429 was never retried.
+        """
+        import requests as req_lib
+
+        connector = _StubConnector()
+        connector._max_retries = 2  # budget for connection errors
+        connector._max_rate_limit_retries = 2  # separate budget for 429
+        connector._retry_base_delay = 0.0
+        connector._rate_limit_base_delay = 0.0
+
+        resp_429 = self._make_response(429, "Too Many Requests")
+        resp_429.raise_for_status = MagicMock()
+        resp_200 = self._make_response(200)
+
+        # Two timeouts (consuming both general retries) then two 429s
+        # (consuming both rate-limit retries) then success — all should
+        # succeed because the budgets are independent.
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = [
+            req_lib.Timeout("timed out"),  # general retry 1
+            req_lib.Timeout("timed out"),  # general retry 2
+            resp_429,  # rate-limit retry 1
+            resp_429,  # rate-limit retry 2
+            resp_200,  # success
+        ]
+
+        result = connector._get("https://api.example.com/test")
+
+        assert result is resp_200
+        assert connector._http_session.get.call_count == 5
+
+    def test_429_rate_limit_base_delay_used_for_429_retries(self) -> None:
+        """_rate_limit_base_delay is used when delaying 429 retries."""
+        connector = _StubConnector()
+        connector._retry_base_delay = 1.0
+        connector._rate_limit_base_delay = 10.0
+        connector._retry_max_delay = 120.0
+
+        # Without base_delay override: uses _retry_base_delay.
+        delay_normal = connector._retry_delay(0)
+        assert delay_normal >= 1.0
+        assert delay_normal < 2.0
+
+        # With base_delay=_rate_limit_base_delay: uses the larger base.
+        delay_rl = connector._retry_delay(0, base_delay=10.0)
+        assert delay_rl >= 10.0
+        assert delay_rl < 12.5 + 0.01  # 10 * 1.25 upper bound + tolerance
 
 
 class TestConnectorBaseThreadSafety:

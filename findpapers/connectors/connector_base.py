@@ -81,11 +81,21 @@ class ConnectorBase(ABC):
     # HTTP status codes that trigger an automatic retry.
     _retryable_status_codes: frozenset[int] = frozenset({429, 502, 503, 504})
 
-    # Maximum number of retry attempts (excluding the initial request).
+    # Maximum number of retry attempts for connection errors / non-429 retryable
+    # status codes (excluding the initial request).
     _max_retries: int = 3
+
+    # Maximum number of retry attempts exclusively for HTTP 429 responses.
+    # This budget is independent of _max_retries so that transient timeouts
+    # do not consume the rate-limit retry allowance.
+    _max_rate_limit_retries: int = 3
 
     # Base delay in seconds for exponential backoff (delay = base * 2^attempt).
     _retry_base_delay: float = 1.0
+
+    # Base delay used when retrying HTTP 429 (rate-limited) responses.
+    # Rate-limit back-off needs longer waits than generic transient errors.
+    _rate_limit_base_delay: float = 5.0
 
     # Maximum delay cap in seconds to prevent excessively long waits.
     _retry_max_delay: float = 60.0
@@ -208,7 +218,13 @@ class ConnectorBase(ABC):
             if elapsed < self.min_request_interval:
                 time.sleep(self.min_request_interval - elapsed)
 
-    def _retry_delay(self, attempt: int, response: requests.Response | None = None) -> float:
+    def _retry_delay(
+        self,
+        attempt: int,
+        response: requests.Response | None = None,
+        *,
+        base_delay: float | None = None,
+    ) -> float:
         """Compute the delay before the next retry attempt.
 
         Uses exponential backoff with jitter.  If the response contains a
@@ -221,14 +237,18 @@ class ConnectorBase(ABC):
             Zero-based retry attempt number (0 = first retry).
         response : requests.Response | None
             The HTTP response that triggered the retry, if available.
+        base_delay : float | None
+            Override the exponential-backoff base delay.  When ``None`` the
+            instance attribute :attr:`_retry_base_delay` is used.
 
         Returns
         -------
         float
             Delay in seconds before the next retry.
         """
+        effective_base = base_delay if base_delay is not None else self._retry_base_delay
         # Exponential backoff: base * 2^attempt, capped at max_delay.
-        backoff: float = min(self._retry_base_delay * (2**attempt), self._retry_max_delay)
+        backoff: float = min(effective_base * (2**attempt), self._retry_max_delay)
 
         # Honour Retry-After header when present (429 responses).
         if response is not None:
@@ -257,6 +277,12 @@ class ConnectorBase(ABC):
         :class:`requests.Timeout` exceptions.  Uses exponential backoff with
         jitter between attempts.
 
+        HTTP 429 (rate-limited) responses use a **separate** retry counter
+        (:attr:`_max_rate_limit_retries`) so that transient timeouts or
+        connection errors do not consume the rate-limit retry allowance.
+        The back-off base for 429 retries is :attr:`_rate_limit_base_delay`
+        (typically larger than :attr:`_retry_base_delay`).
+
         Parameters
         ----------
         method : str
@@ -284,10 +310,14 @@ class ConnectorBase(ABC):
         requests.Timeout
             On persistent timeout failures.
         """
-        last_response: requests.Response | None = None
-        last_exception: Exception | None = None
+        # general_attempt counts retries for connection errors, timeouts, and
+        # non-429 retryable status codes.
+        # rate_limit_attempt counts retries exclusively for HTTP 429 so that
+        # transient failures do not consume the rate-limit retry allowance.
+        general_attempt: int = 0
+        rate_limit_attempt: int = 0
 
-        for attempt in range(1 + self._max_retries):
+        while True:
             try:
                 self._rate_limit()
                 self._log_request(url, params or None, method=method, headers=headers)
@@ -312,54 +342,66 @@ class ConnectorBase(ABC):
                     self._last_request_time = time.monotonic()
                 self._log_response(response)
 
-                # Check for retryable status codes.
-                if (
+                if response.status_code == 429:
+                    # 429 uses its own retry budget so general retries (e.g.
+                    # timeouts on earlier attempts) do not exhaust it.
+                    if rate_limit_attempt < self._max_rate_limit_retries:
+                        delay = self._retry_delay(
+                            rate_limit_attempt,
+                            response,
+                            base_delay=self._rate_limit_base_delay,
+                        )
+                        logger.warning(
+                            "[%s] HTTP 429 from %s — retrying in %.1fs (attempt %d/%d).",
+                            self.name,
+                            url,
+                            delay,
+                            rate_limit_attempt + 1,
+                            self._max_rate_limit_retries,
+                        )
+                        time.sleep(delay)
+                        rate_limit_attempt += 1
+                        continue
+                    # Rate-limit retries exhausted — fall through to raise.
+
+                elif (
                     response.status_code in self._retryable_status_codes
-                    and attempt < self._max_retries
+                    and general_attempt < self._max_retries
                 ):
-                    delay = self._retry_delay(attempt, response)
+                    delay = self._retry_delay(general_attempt, response)
                     logger.warning(
                         "[%s] HTTP %d from %s — retrying in %.1fs (attempt %d/%d).",
                         self.name,
                         response.status_code,
                         url,
                         delay,
-                        attempt + 1,
+                        general_attempt + 1,
                         self._max_retries,
                     )
                     time.sleep(delay)
-                    last_response = response
+                    general_attempt += 1
                     continue
+                    # General retries exhausted — fall through to raise.
 
                 response.raise_for_status()
                 return response
 
             except (requests.ConnectionError, requests.Timeout) as exc:
-                last_exception = exc
-                if attempt < self._max_retries:
-                    delay = self._retry_delay(attempt)
+                if general_attempt < self._max_retries:
+                    delay = self._retry_delay(general_attempt)
                     logger.warning(
                         "[%s] %s for %s — retrying in %.1fs (attempt %d/%d).",
                         self.name,
                         type(exc).__name__,
                         url,
                         delay,
-                        attempt + 1,
+                        general_attempt + 1,
                         self._max_retries,
                     )
                     time.sleep(delay)
+                    general_attempt += 1
                     continue
                 raise
-
-        # All retries exhausted with a retryable status code.
-        if last_response is not None:
-            last_response.raise_for_status()
-        if last_exception is not None:  # pragma: no cover
-            raise last_exception
-
-        raise RuntimeError(
-            "Unreachable: retry loop exited without response or exception."
-        )  # pragma: no cover
 
     def _prepare_params(self, params: dict) -> dict:
         """Augment query parameters before the request is sent.
