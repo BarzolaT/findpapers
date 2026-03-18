@@ -447,3 +447,49 @@ class TestScopusConnectorSearch:
         assert len(get_calls) >= 1
         params = get_calls[0]
         assert params["date"] == "2020"
+
+
+class TestScopusConnectorIsOpenAccess:
+    """Tests for is_open_access extraction from Scopus results."""
+
+    def test_openaccess_flag_true(self):
+        """openaccessFlag=True yields is_open_access=True."""
+        entry = {"dc:title": "P", "openaccessFlag": True}
+        paper = ScopusConnector()._parse_paper(entry)
+        assert paper is not None
+        assert paper.is_open_access is True
+
+    def test_openaccess_flag_false(self):
+        """openaccessFlag=False yields is_open_access=False."""
+        entry = {"dc:title": "P", "openaccessFlag": False}
+        paper = ScopusConnector()._parse_paper(entry)
+        assert paper is not None
+        assert paper.is_open_access is False
+
+    def test_openaccess_int_one(self):
+        """openaccess='1' (string) yields is_open_access=True."""
+        entry = {"dc:title": "P", "openaccess": "1"}
+        paper = ScopusConnector()._parse_paper(entry)
+        assert paper is not None
+        assert paper.is_open_access is True
+
+    def test_openaccess_int_zero(self):
+        """openaccess=0 yields is_open_access=False."""
+        entry = {"dc:title": "P", "openaccess": 0}
+        paper = ScopusConnector()._parse_paper(entry)
+        assert paper is not None
+        assert paper.is_open_access is False
+
+    def test_flag_takes_priority_over_int_field(self):
+        """openaccessFlag takes priority over openaccess integer field."""
+        entry = {"dc:title": "P", "openaccessFlag": True, "openaccess": "0"}
+        paper = ScopusConnector()._parse_paper(entry)
+        assert paper is not None
+        assert paper.is_open_access is True
+
+    def test_both_absent_sets_none(self):
+        """Neither field present yields is_open_access=None."""
+        entry = {"dc:title": "P"}
+        paper = ScopusConnector()._parse_paper(entry)
+        assert paper is not None
+        assert paper.is_open_access is None

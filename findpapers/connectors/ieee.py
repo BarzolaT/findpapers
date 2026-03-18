@@ -253,6 +253,14 @@ class IEEEConnector(SearchConnectorBase):
         elif start_page:
             pages = str(start_page)
 
+        # Open access — "OPEN_ACCESS" → True, "LOCKED" → False, else None.
+        raw_access_type = (item.get("access_type") or "").strip().upper()
+        is_open_access: bool | None = None
+        if raw_access_type == "OPEN_ACCESS":
+            is_open_access = True
+        elif raw_access_type == "LOCKED":
+            is_open_access = False
+
         try:
             paper = Paper(
                 title=title,
@@ -269,6 +277,7 @@ class IEEEConnector(SearchConnectorBase):
                 page_range=pages,
                 databases={self.name},
                 paper_type=paper_type,
+                is_open_access=is_open_access,
             )
         except ValueError:
             return None

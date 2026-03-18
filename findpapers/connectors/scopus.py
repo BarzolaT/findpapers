@@ -255,6 +255,18 @@ class ScopusConnector(SearchConnectorBase):
         # Pages
         pages: str | None = (entry.get("prism:pageRange") or "").strip() or None
 
+        # Open access — prefer the boolean openaccessFlag when present;
+        # fall back to the integer openaccess field (1 = OA, 0 = not OA).
+        is_open_access: bool | None = None
+        raw_oa_flag = entry.get("openaccessFlag")
+        if isinstance(raw_oa_flag, bool):
+            is_open_access = raw_oa_flag
+        else:
+            raw_oa_int = entry.get("openaccess")
+            if raw_oa_int is not None:
+                with contextlib.suppress(ValueError, TypeError):
+                    is_open_access = bool(int(raw_oa_int))
+
         try:
             paper = Paper(
                 title=title,
@@ -268,6 +280,7 @@ class ScopusConnector(SearchConnectorBase):
                 page_range=pages,
                 databases={self.name},
                 paper_type=paper_type,
+                is_open_access=is_open_access,
             )
         except ValueError:
             return None

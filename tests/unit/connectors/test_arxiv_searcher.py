@@ -600,3 +600,31 @@ class TestArxivConnectorFieldsOfStudyAndSubjects:
         valid_papers = [p for p in papers if p is not None]
         papers_with_fos = [p for p in valid_papers if p.fields_of_study]
         assert len(papers_with_fos) > 0
+
+    def test_is_open_access_always_true(self):
+        """All arXiv papers are marked as open access."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <entry xmlns="http://www.w3.org/2005/Atom"
+               xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <title>A Paper</title>
+            <summary>Abstract.</summary>
+        </entry>
+        """
+        entry = ET.fromstring(xml_str)
+        paper = ArxivConnector()._parse_paper(entry)
+        assert paper is not None
+        assert paper.is_open_access is True
+
+    def test_sample_xml_all_open_access(self, arxiv_sample_xml):
+        """Every paper parsed from sample XML has is_open_access=True."""
+        from xml.etree import ElementTree as ET
+
+        from findpapers.connectors.arxiv import _NS
+
+        tree = ET.fromstring(arxiv_sample_xml)
+        entries = tree.findall("atom:entry", _NS)
+        papers = [ArxivConnector()._parse_paper(e) for e in entries]
+        valid_papers = [p for p in papers if p is not None]
+        assert all(p.is_open_access is True for p in valid_papers)

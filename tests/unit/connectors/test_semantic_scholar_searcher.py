@@ -657,3 +657,28 @@ class TestSemanticScholarFieldsOfStudyAndSubjects:
         assert paper is not None
         assert paper.fields_of_study == set()
         assert paper.subjects == set()
+
+
+class TestSemanticScholarConnectorIsOpenAccess:
+    """Tests for is_open_access extraction from Semantic Scholar results."""
+
+    def test_is_open_access_true(self):
+        """isOpenAccess=True yields is_open_access=True."""
+        item = {"title": "P", "isOpenAccess": True}
+        paper = SemanticScholarConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.is_open_access is True
+
+    def test_is_open_access_false(self):
+        """isOpenAccess=False yields is_open_access=False."""
+        item = {"title": "P", "isOpenAccess": False}
+        paper = SemanticScholarConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.is_open_access is False
+
+    def test_is_open_access_absent_sets_none(self):
+        """Missing isOpenAccess key yields is_open_access=None."""
+        item = {"title": "P"}
+        paper = SemanticScholarConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.is_open_access is None

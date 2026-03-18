@@ -564,6 +564,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 fields_of_study=fields_of_study if fields_of_study else None,
                 subjects=subjects if subjects else None,
                 language=normalize_language(work.get("language")),
+                is_open_access=open_access.get("is_oa") if isinstance(open_access, dict) else None,
             )
         except ValueError:
             return None

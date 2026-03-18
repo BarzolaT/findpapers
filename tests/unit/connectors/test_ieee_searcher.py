@@ -387,3 +387,42 @@ class TestIEEEConnectorSearch:
         params = call_args.kwargs.get("params") or call_args[1].get("params", {})
         assert params.get("start_year") == "2021"
         assert "end_year" not in params
+
+
+class TestIEEEConnectorIsOpenAccess:
+    """Tests for is_open_access extraction from IEEE results."""
+
+    def test_open_access_type_sets_true(self):
+        """access_type='OPEN_ACCESS' yields is_open_access=True."""
+        item = {"title": "P", "access_type": "OPEN_ACCESS"}
+        paper = IEEEConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.is_open_access is True
+
+    def test_locked_access_type_sets_false(self):
+        """access_type='LOCKED' yields is_open_access=False."""
+        item = {"title": "P", "access_type": "LOCKED"}
+        paper = IEEEConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.is_open_access is False
+
+    def test_ephemera_access_type_sets_none(self):
+        """access_type='EPHEMERA' yields is_open_access=None (unknown)."""
+        item = {"title": "P", "access_type": "EPHEMERA"}
+        paper = IEEEConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.is_open_access is None
+
+    def test_missing_access_type_sets_none(self):
+        """Missing access_type yields is_open_access=None."""
+        item = {"title": "P"}
+        paper = IEEEConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.is_open_access is None
+
+    def test_case_insensitive_access_type(self):
+        """access_type matching is case-insensitive."""
+        item = {"title": "P", "access_type": "open_access"}
+        paper = IEEEConnector()._parse_paper(item)
+        assert paper is not None
+        assert paper.is_open_access is True

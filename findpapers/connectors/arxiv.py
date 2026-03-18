@@ -235,6 +235,8 @@ class ArxivConnector(SearchConnectorBase):
                 paper_type=paper_type,
                 fields_of_study=fields_of_study if fields_of_study else None,
                 subjects=subjects if subjects else None,
+                # All arXiv papers are open access by design.
+                is_open_access=True,
             )
         except ValueError:
             return None

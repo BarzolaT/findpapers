@@ -83,7 +83,7 @@ IEEE Xplore is the digital library of the Institute of Electrical and Electronic
 
 #### Features
 
-- Extracts title, abstract, authors (with affiliations), DOI, URLs, keywords (IEEE terms, author terms, MeSH terms), citation count, source, paper type, and page range
+- Extracts title, abstract, authors (with affiliations), DOI, URLs, keywords (IEEE terms, author terms, MeSH terms), citation count, source, paper type, page range, and open access status
 - Supports boolean queries with `*` wildcard
 
 #### Limitations
@@ -108,7 +108,7 @@ OpenAlex is the largest fully open index of scholarly works in the world. It was
 
 #### Features
 
-- Extracts title, abstract, authors (with institutional affiliations), publication date, DOI, URLs, PDF URLs, citation count, keywords, source, paper type, page range, and language (ISO 639-1 code)
+- Extracts title, abstract, authors (with institutional affiliations), publication date, DOI, URLs, PDF URLs, citation count, keywords, source, paper type, page range, language (ISO 639-1 code), and open access status
 - **Citation-capable:** supports both forward (cited-by) and backward (references) snowballing
 - Best source selection (prefers journals/conferences over repositories)
 
@@ -157,7 +157,7 @@ Scopus is Elsevier's flagship abstract and citation database, and one of the two
 
 #### Features
 
-- Extracts title, publication date, DOI, URL, citation count, source (with ISSN, eISSN, ISBN, publisher), paper type, and page range
+- Extracts title, publication date, DOI, URL, citation count, source (with ISSN, eISSN, ISBN, publisher), paper type, page range, and open access status
 - Supports boolean queries with wildcards
 
 #### Limitations
@@ -183,7 +183,7 @@ Semantic Scholar is a free, AI-powered academic search engine developed by the A
 
 #### Features
 
-- Extracts title, abstract, authors (with affiliations), publication date, DOI, URLs, PDF URL, citation count, fields of study, source (journal or venue), paper type, and page range
+- Extracts title, abstract, authors (with affiliations), publication date, DOI, URLs, PDF URL, citation count, fields of study, source (journal or venue), paper type, page range, and open access status
 - Supports both forward (cited-by) and backward (references) snowballing
 
 #### Limitations

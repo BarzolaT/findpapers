@@ -38,7 +38,7 @@ _MIN_REQUEST_INTERVAL_WITH_KEY = 1.1  # respects 1 RPS introductory limit
 _PAPER_FIELDS = (
     "paperId,externalIds,title,abstract,authors,year,publicationDate,"
     "journal,venue,citationCount,openAccessPdf,url,fieldsOfStudy,"
-    "s2FieldsOfStudy,publicationTypes,publicationVenue"
+    "s2FieldsOfStudy,publicationTypes,publicationVenue,isOpenAccess"
 )
 
 # Mapping from Semantic Scholar publicationVenue.type to SourceType.
@@ -513,6 +513,10 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
                 paper_type = _SS_PAPER_TYPE_MAP[pt]
                 break
 
+        # Open access flag from Semantic Scholar.
+        raw_is_oa = item.get("isOpenAccess")
+        is_open_access: bool | None = bool(raw_is_oa) if raw_is_oa is not None else None
+
         try:
             paper = Paper(
                 title=title,
@@ -530,6 +534,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
                 paper_type=paper_type,
                 fields_of_study=fields_of_study if fields_of_study else None,
                 subjects=subjects if subjects else None,
+                is_open_access=is_open_access,
             )
         except ValueError:  # pragma: no cover — title already validated above
             return None

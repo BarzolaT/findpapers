@@ -603,6 +603,164 @@ class TestPaperLanguage:
         assert base.language == "en"
 
 
+class TestPaperIsOpenAccess:
+    """Tests for the is_open_access attribute on Paper."""
+
+    def test_is_open_access_defaults_to_none(self) -> None:
+        """Paper without explicit is_open_access has None."""
+        paper = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        assert paper.is_open_access is None
+
+    def test_is_open_access_set_true_at_construction(self) -> None:
+        """Paper can be constructed with is_open_access=True."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_open_access=True,
+        )
+        assert paper.is_open_access is True
+
+    def test_is_open_access_set_false_at_construction(self) -> None:
+        """Paper can be constructed with is_open_access=False."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_open_access=False,
+        )
+        assert paper.is_open_access is False
+
+    def test_is_open_access_serialized_true_in_to_dict(self) -> None:
+        """to_dict includes is_open_access=True when set."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_open_access=True,
+        )
+        assert paper.to_dict()["is_open_access"] is True
+
+    def test_is_open_access_serialized_false_in_to_dict(self) -> None:
+        """to_dict includes is_open_access=False when set."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_open_access=False,
+        )
+        assert paper.to_dict()["is_open_access"] is False
+
+    def test_is_open_access_none_serialized_as_none(self) -> None:
+        """to_dict serializes missing is_open_access as None."""
+        paper = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        assert paper.to_dict()["is_open_access"] is None
+
+    def test_is_open_access_deserialized_from_dict_true(self) -> None:
+        """from_dict restores is_open_access=True."""
+        paper = Paper.from_dict({"title": "T", "is_open_access": True})
+        assert paper.is_open_access is True
+
+    def test_is_open_access_deserialized_from_dict_false(self) -> None:
+        """from_dict restores is_open_access=False."""
+        paper = Paper.from_dict({"title": "T", "is_open_access": False})
+        assert paper.is_open_access is False
+
+    def test_is_open_access_none_in_dict(self) -> None:
+        """from_dict handles is_open_access being None."""
+        paper = Paper.from_dict({"title": "T", "is_open_access": None})
+        assert paper.is_open_access is None
+
+    def test_is_open_access_missing_from_dict(self) -> None:
+        """from_dict handles is_open_access key missing."""
+        paper = Paper.from_dict({"title": "T"})
+        assert paper.is_open_access is None
+
+    def test_is_open_access_round_trip(self) -> None:
+        """to_dict → from_dict preserves is_open_access."""
+        for value in (True, False, None):
+            paper = Paper(
+                title="T",
+                abstract="",
+                authors=[],
+                source=None,
+                publication_date=None,
+                is_open_access=value,
+            )
+            assert Paper.from_dict(paper.to_dict()).is_open_access is value
+
+    def test_is_open_access_merge_fills_none_with_true(self) -> None:
+        """merge() fills is_open_access when base has None and incoming has True."""
+        base = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_open_access=True,
+        )
+        base.merge(incoming)
+        assert base.is_open_access is True
+
+    def test_is_open_access_merge_fills_none_with_false(self) -> None:
+        """merge() fills is_open_access when base has None and incoming has False."""
+        base = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_open_access=False,
+        )
+        base.merge(incoming)
+        assert base.is_open_access is False
+
+    def test_is_open_access_merge_true_wins_over_false(self) -> None:
+        """merge() honours merge_value semantics: True beats False (bool is int subtype)."""
+        base = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_open_access=False,
+        )
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_open_access=True,
+        )
+        base.merge(incoming)
+        assert base.is_open_access is True
+
+    def test_is_open_access_merge_keeps_existing_true(self) -> None:
+        """merge() keeps is_open_access=True when incoming has None."""
+        base = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_open_access=True,
+        )
+        incoming = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        base.merge(incoming)
+        assert base.is_open_access is True
+
+
 class TestInferPageCount:
     """Tests for Paper._infer_page_count and its integration."""
 

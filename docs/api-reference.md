@@ -210,6 +210,7 @@ Paper(
     fields_of_study: set[str] | None = None,
     subjects: set[str] | None = None,
     language: str | None = None,
+    is_open_access: bool | None = None,
 )
 ```
 
@@ -235,6 +236,7 @@ Paper(
 | `fields_of_study` | `set[str]` | Broad knowledge areas. |
 | `subjects` | `set[str]` | Disciplinary classifications. |
 | `language` | `str \| None` | ISO 639-1 two-letter language code (e.g. `"en"`, `"pt"`). |
+| `is_open_access` | `bool \| None` | `True` when the paper is freely available online, `False` when behind a paywall, `None` when unknown. |
 
 #### Methods
 

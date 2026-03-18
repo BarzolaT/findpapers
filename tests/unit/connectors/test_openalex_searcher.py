@@ -671,3 +671,43 @@ class TestOpenAlexFieldsOfStudyAndSubjects:
         valid = [p for p in papers if p is not None]
         papers_with_fos = [p for p in valid if p.fields_of_study]
         assert len(papers_with_fos) > 0
+
+
+class TestOpenAlexConnectorIsOpenAccess:
+    """Tests for is_open_access extraction from OpenAlex results."""
+
+    def test_is_oa_true(self):
+        """open_access.is_oa=True yields is_open_access=True."""
+        work = {"title": "P", "open_access": {"is_oa": True, "oa_url": None}}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.is_open_access is True
+
+    def test_is_oa_false(self):
+        """open_access.is_oa=False yields is_open_access=False."""
+        work = {"title": "P", "open_access": {"is_oa": False}}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.is_open_access is False
+
+    def test_open_access_absent_sets_none(self):
+        """Missing open_access object yields is_open_access=None."""
+        work: dict[str, Any] = {"title": "P"}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.is_open_access is None
+
+    def test_is_oa_key_absent_in_open_access_sets_none(self):
+        """open_access dict without is_oa key yields is_open_access=None."""
+        work = {"title": "P", "open_access": {"oa_url": "https://example.com"}}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.is_open_access is None
+
+    def test_is_open_access_from_sample_json(self, openalex_sample_json):
+        """Sample JSON works have is_open_access parsed as a bool or None."""
+        results = openalex_sample_json.get("results", [])
+        papers = [OpenAlexConnector()._parse_paper(r) for r in results]
+        valid = [p for p in papers if p is not None]
+        for paper in valid:
+            assert paper.is_open_access is None or isinstance(paper.is_open_access, bool)
