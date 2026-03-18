@@ -388,6 +388,230 @@ def normalize_doi(raw: str) -> str | None:
     return value if value.startswith("10.") else None
 
 
+# ---------------------------------------------------------------------------
+# Language normalisation
+# ---------------------------------------------------------------------------
+
+# Mapping from ISO 639-2 terminological (T) and bibliographic (B) 3-letter codes
+# to their ISO 639-1 2-letter equivalents.  We include the pairs where T ≠ B
+# (B variant listed with a comment) to ensure full coverage.
+_ISO_639_2_TO_1: dict[str, str] = {
+    "eng": "en",
+    "fra": "fr",
+    "fre": "fr",  # bibliographic variant
+    "deu": "de",
+    "ger": "de",  # bibliographic variant
+    "spa": "es",
+    "por": "pt",
+    "ita": "it",
+    "nld": "nl",
+    "dut": "nl",  # bibliographic variant
+    "rus": "ru",
+    "zho": "zh",
+    "chi": "zh",  # bibliographic variant
+    "jpn": "ja",
+    "kor": "ko",
+    "ara": "ar",
+    "tur": "tr",
+    "pol": "pl",
+    "ces": "cs",
+    "cze": "cs",  # bibliographic variant
+    "slk": "sk",
+    "slo": "sk",  # bibliographic variant
+    "hun": "hu",
+    "ron": "ro",
+    "rum": "ro",  # bibliographic variant
+    "bul": "bg",
+    "hrv": "hr",
+    "swe": "sv",
+    "nor": "no",
+    "nob": "no",
+    "nno": "nn",
+    "dan": "da",
+    "fin": "fi",
+    "heb": "he",
+    "ind": "id",
+    "msa": "ms",
+    "may": "ms",  # bibliographic variant
+    "vie": "vi",
+    "tha": "th",
+    "fas": "fa",
+    "per": "fa",  # bibliographic variant
+    "ukr": "uk",
+    "cat": "ca",
+    "slv": "sl",
+    "srp": "sr",
+    "ell": "el",
+    "gre": "el",  # bibliographic variant
+    "lat": "la",
+    "ben": "bn",
+    "hin": "hi",
+    "tam": "ta",
+    "tel": "te",
+    "mar": "mr",
+    "urd": "ur",
+    "swa": "sw",
+    "mlt": "mt",
+    "lit": "lt",
+    "lav": "lv",
+    "est": "et",
+    "isl": "is",
+    "ice": "is",  # bibliographic variant
+    "gle": "ga",
+    "bos": "bs",
+    "mkd": "mk",
+    "mac": "mk",  # bibliographic variant
+    "alb": "sq",
+    "sqi": "sq",
+    "bel": "be",
+    "glg": "gl",
+    "eus": "eu",
+    "afr": "af",
+    "amh": "am",
+    "hau": "ha",
+    "yor": "yo",
+    "ibo": "ig",
+    "zul": "zu",
+    "xho": "xh",
+    "sna": "sn",
+    "som": "so",
+    "kin": "rw",
+    "nep": "ne",
+    "sin": "si",
+    "khm": "km",
+    "lao": "lo",
+    "mya": "my",
+    "bur": "my",  # bibliographic variant
+    "mon": "mn",
+    "kaz": "kk",
+    "uzb": "uz",
+    "aze": "az",
+    "geo": "ka",
+    "kat": "ka",
+    "hye": "hy",
+    "arm": "hy",  # bibliographic variant
+    "mri": "mi",
+    "mao": "mi",  # bibliographic variant
+    "tgl": "tl",
+    "jav": "jv",
+    "sun": "su",
+}
+
+# Mapping from lowercase full language name to ISO 639-1 2-letter code.
+_LANGUAGE_NAME_TO_1: dict[str, str] = {
+    "english": "en",
+    "french": "fr",
+    "german": "de",
+    "spanish": "es",
+    "portuguese": "pt",
+    "italian": "it",
+    "dutch": "nl",
+    "russian": "ru",
+    "chinese": "zh",
+    "japanese": "ja",
+    "korean": "ko",
+    "arabic": "ar",
+    "turkish": "tr",
+    "polish": "pl",
+    "czech": "cs",
+    "slovak": "sk",
+    "hungarian": "hu",
+    "romanian": "ro",
+    "bulgarian": "bg",
+    "croatian": "hr",
+    "swedish": "sv",
+    "norwegian": "no",
+    "danish": "da",
+    "finnish": "fi",
+    "hebrew": "he",
+    "indonesian": "id",
+    "malay": "ms",
+    "vietnamese": "vi",
+    "thai": "th",
+    "persian": "fa",
+    "farsi": "fa",
+    "ukrainian": "uk",
+    "catalan": "ca",
+    "slovenian": "sl",
+    "serbian": "sr",
+    "greek": "el",
+    "latin": "la",
+    "bengali": "bn",
+    "hindi": "hi",
+    "tamil": "ta",
+    "telugu": "te",
+    "marathi": "mr",
+    "urdu": "ur",
+    "swahili": "sw",
+    "maltese": "mt",
+    "lithuanian": "lt",
+    "latvian": "lv",
+    "estonian": "et",
+    "icelandic": "is",
+    "irish": "ga",
+    "bosnian": "bs",
+    "macedonian": "mk",
+    "albanian": "sq",
+    "belarusian": "be",
+    "galician": "gl",
+    "basque": "eu",
+    "afrikaans": "af",
+}
+
+# Valid ISO 639-1 2-letter codes used as a passthrough guard.
+_VALID_ISO_639_1: frozenset[str] = frozenset(_ISO_639_2_TO_1.values())
+
+
+def normalize_language(value: str | None) -> str | None:
+    """Normalise a language identifier to an ISO 639-1 2-letter code.
+
+    Accepts ISO 639-1 2-letter codes (``"en"``), ISO 639-2 3-letter codes
+    (terminological and bibliographic, e.g. ``"eng"``, ``"fre"``), and common
+    full English language names (``"English"``, ``"french"``).
+
+    Parameters
+    ----------
+    value : str | None
+        Raw language value coming from an upstream API.
+
+    Returns
+    -------
+    str | None
+        Lower-cased ISO 639-1 2-letter code, or ``None`` when the input is
+        empty or cannot be recognised.
+
+    Examples
+    --------
+    >>> normalize_language("eng")
+    'en'
+    >>> normalize_language("EN")
+    'en'
+    >>> normalize_language("English")
+    'en'
+    >>> normalize_language("unknown_lang")
+    None
+    """
+    if not value:
+        return None
+    lowered = value.strip().lower()
+    if not lowered:
+        return None
+
+    # Already a known 2-letter ISO 639-1 code.
+    if lowered in _VALID_ISO_639_1:
+        return lowered
+
+    # ISO 639-2 3-letter code (terminological or bibliographic).
+    if len(lowered) == 3 and lowered in _ISO_639_2_TO_1:
+        return _ISO_639_2_TO_1[lowered]
+
+    # Full language name.
+    if lowered in _LANGUAGE_NAME_TO_1:
+        return _LANGUAGE_NAME_TO_1[lowered]
+
+    return None
+
+
 def parse_keywords(value: str | list | None) -> set[str]:
     """Parse keyword metadata into a set of strings.
 

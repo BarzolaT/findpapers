@@ -209,6 +209,7 @@ Paper(
     paper_type: PaperType | None = None,
     fields_of_study: set[str] | None = None,
     subjects: set[str] | None = None,
+    language: str | None = None,
 )
 ```
 
@@ -233,6 +234,7 @@ Paper(
 | `paper_type` | `PaperType \| None` | BibTeX-aligned classification. |
 | `fields_of_study` | `set[str]` | Broad knowledge areas. |
 | `subjects` | `set[str]` | Disciplinary classifications. |
+| `language` | `str \| None` | ISO 639-1 two-letter language code (e.g. `"en"`, `"pt"`). |
 
 #### Methods
 

@@ -19,6 +19,7 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
+from findpapers.utils.metadata_parser import normalize_language
 
 logger = logging.getLogger(__name__)
 
@@ -349,6 +350,12 @@ class PubmedConnector(SearchConnectorBase):
                 paper_type = rule_type
                 break
 
+        # Language — first <Language> element inside the Article
+        language: str | None = None
+        lang_el = article.find(".//Language")
+        if lang_el is not None and lang_el.text:
+            language = normalize_language(lang_el.text.strip())
+
         try:
             paper = Paper(
                 title=title,
@@ -363,6 +370,7 @@ class PubmedConnector(SearchConnectorBase):
                 databases={self.name},
                 paper_type=paper_type,
                 subjects=subjects if subjects else None,
+                language=language,
             )
         except ValueError:
             return None

@@ -894,3 +894,80 @@ class TestPubmedSubjectsExtraction:
         # But all descriptors should still be in keywords
         assert "Machine Learning" in paper.keywords
         assert "Humans" in paper.keywords
+
+
+class TestPubmedLanguageExtraction:
+    """Tests for language extraction from <Language> elements."""
+
+    def test_language_eng_maps_to_en(self):
+        """<Language>eng</Language> is normalised to 'en'."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>1</PMID>
+                <Article>
+                    <ArticleTitle>Sample</ArticleTitle>
+                    <Language>eng</Language>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.language == "en"
+
+    def test_language_por_maps_to_pt(self):
+        """<Language>por</Language> is normalised to 'pt'."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>2</PMID>
+                <Article>
+                    <ArticleTitle>Amostra</ArticleTitle>
+                    <Language>por</Language>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.language == "pt"
+
+    def test_language_absent_is_none(self):
+        """Papers without <Language> element have language=None."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>3</PMID>
+                <Article>
+                    <ArticleTitle>No Language</ArticleTitle>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.language is None
+
+    def test_language_from_sample_xml(self, pubmed_efetch_xml):
+        """Sample XML records (all 'eng') are normalised to 'en'."""
+        from xml.etree import ElementTree as ET
+
+        tree = ET.fromstring(pubmed_efetch_xml)
+        articles = tree.findall(".//PubmedArticle")
+        for article_el in articles:
+            paper = PubmedConnector()._parse_paper(article_el)
+            if paper is not None:
+                # All sample records use 'eng'
+                assert paper.language == "en", (
+                    f"Expected 'en', got {paper.language!r} for {paper.title!r}"
+                )

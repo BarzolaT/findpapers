@@ -153,6 +153,7 @@ class Paper:
         paper_type: PaperType | None = None,
         fields_of_study: set[str] | None = None,
         subjects: set[str] | None = None,
+        language: str | None = None,
     ) -> None:
         """Create a Paper instance.
 
@@ -193,6 +194,8 @@ class Paper:
         subjects : set[str] | None
             More specific disciplinary classifications
             (e.g. "Artificial Intelligence", "Optimization and Control").
+        language : str | None
+            ISO 639-1 2-letter language code (e.g. ``"en"``, ``"pt"``).
 
         Raises
         ------
@@ -221,6 +224,7 @@ class Paper:
         self.paper_type = paper_type
         self.fields_of_study = fields_of_study if fields_of_study is not None else set()
         self.subjects = subjects if subjects is not None else set()
+        self.language = language
 
     def __eq__(self, other: object) -> bool:
         """Check equality by DOI (case-insensitive) or title.
@@ -433,6 +437,7 @@ class Paper:
         self.keywords = merge_value(self.keywords, paper.keywords)
         self.fields_of_study |= paper.fields_of_study
         self.subjects |= paper.subjects
+        self.language = merge_value(self.language, paper.language)
 
         # Always accumulate databases for traceability.
         self.databases |= paper.databases
@@ -529,6 +534,10 @@ class Paper:
         else:
             subjects = {str(raw_subjects)} if raw_subjects else set()
 
+        language = paper_dict.get("language")
+        if language is not None and not isinstance(language, str):
+            language = str(language)
+
         return cls(
             title=title,
             abstract=abstract,
@@ -547,6 +556,7 @@ class Paper:
             paper_type=paper_type,
             fields_of_study=fields_of_study,
             subjects=subjects,
+            language=language,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -577,4 +587,5 @@ class Paper:
             "paper_type": self.paper_type.value if self.paper_type else None,
             "fields_of_study": sorted(self.fields_of_study),
             "subjects": sorted(self.subjects),
+            "language": self.language,
         }

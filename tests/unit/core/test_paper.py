@@ -503,6 +503,106 @@ class TestPaperType:
         assert restored.paper_type is PaperType.TECHREPORT
 
 
+class TestPaperLanguage:
+    """Tests for the language attribute on Paper."""
+
+    def test_language_defaults_to_none(self) -> None:
+        """Paper without explicit language has None."""
+        paper = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        assert paper.language is None
+
+    def test_language_set_at_construction(self) -> None:
+        """Paper can be constructed with a language."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            language="en",
+        )
+        assert paper.language == "en"
+
+    def test_language_serialized_in_to_dict(self) -> None:
+        """to_dict includes language when set."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            language="pt",
+        )
+        assert paper.to_dict()["language"] == "pt"
+
+    def test_language_none_serialized_as_none(self) -> None:
+        """to_dict serializes missing language as None."""
+        paper = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        assert paper.to_dict()["language"] is None
+
+    def test_language_deserialized_from_dict(self) -> None:
+        """from_dict restores language from string value."""
+        paper = Paper.from_dict({"title": "T", "language": "fr"})
+        assert paper.language == "fr"
+
+    def test_language_none_in_dict(self) -> None:
+        """from_dict handles language being None."""
+        paper = Paper.from_dict({"title": "T", "language": None})
+        assert paper.language is None
+
+    def test_language_missing_from_dict(self) -> None:
+        """from_dict handles language key missing."""
+        paper = Paper.from_dict({"title": "T"})
+        assert paper.language is None
+
+    def test_language_round_trip(self) -> None:
+        """to_dict → from_dict preserves language."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            language="de",
+        )
+        assert Paper.from_dict(paper.to_dict()).language == "de"
+
+    def test_language_merge_fills_none(self) -> None:
+        """merge() fills language when base has None."""
+        base = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            language="en",
+        )
+        base.merge(incoming)
+        assert base.language == "en"
+
+    def test_language_merge_keeps_existing(self) -> None:
+        """merge() preserves existing language value."""
+        base = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            language="en",
+        )
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            language="fr",
+        )
+        base.merge(incoming)
+        assert base.language == "en"
+
+
 class TestInferPageCount:
     """Tests for Paper._infer_page_count and its integration."""
 

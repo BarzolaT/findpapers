@@ -19,7 +19,7 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
-from findpapers.utils.metadata_parser import normalize_doi
+from findpapers.utils.metadata_parser import normalize_doi, normalize_language
 
 logger = logging.getLogger(__name__)
 
@@ -226,7 +226,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 "select": (
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
-                    "primary_location,concepts,keywords,type,biblio,primary_topic"
+                    "primary_location,concepts,keywords,type,biblio,primary_topic,language"
                 ),
             }
             try:
@@ -270,7 +270,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             "select": (
                 "id,doi,title,display_name,publication_date,authorships,"
                 "abstract_inverted_index,cited_by_count,open_access,locations,"
-                "primary_location,concepts,keywords,type,biblio,primary_topic"
+                "primary_location,concepts,keywords,type,biblio,primary_topic,language"
             ),
         }
         try:
@@ -563,6 +563,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 paper_type=paper_type,
                 fields_of_study=fields_of_study if fields_of_study else None,
                 subjects=subjects if subjects else None,
+                language=normalize_language(work.get("language")),
             )
         except ValueError:
             return None
@@ -618,7 +619,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 "select": (
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
-                    "primary_location,concepts,keywords,type,biblio,primary_topic"
+                    "primary_location,concepts,keywords,type,biblio,primary_topic,language"
                 ),
             }
 

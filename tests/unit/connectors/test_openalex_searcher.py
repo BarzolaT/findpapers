@@ -382,6 +382,30 @@ class TestOpenAlexConnectorParsePaper:
         assert paper is not None
         assert paper.paper_type is None
 
+    def test_language_extracted(self):
+        """Language field from the work dict is normalised and stored."""
+        work = {"title": "P", "language": "en"}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.language == "en"
+
+    def test_language_absent_is_none(self):
+        """Paper language is None when 'language' key is absent."""
+        work = {"title": "P"}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.language is None
+
+    def test_language_from_sample_json(self, openalex_sample_json):
+        """Sample JSON works have their language field parsed correctly."""
+        results = openalex_sample_json.get("results", [])
+        papers = [OpenAlexConnector()._parse_paper(r) for r in results]
+        valid = [p for p in papers if p is not None]
+        # Every paper in the sample has a language field; they should all be 2-letter codes.
+        for paper in valid:
+            if paper.language is not None:
+                assert len(paper.language) == 2, f"Unexpected language code: {paper.language!r}"
+
 
 class TestOpenAlexConnectorReconstructAbstract:
     """Tests for _reconstruct_abstract helper."""
