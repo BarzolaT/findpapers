@@ -211,6 +211,7 @@ Paper(
     subjects: set[str] | None = None,
     language: str | None = None,
     is_open_access: bool | None = None,
+    is_retracted: bool | None = None,
 )
 ```
 
@@ -237,6 +238,7 @@ Paper(
 | `subjects` | `set[str]` | Disciplinary classifications. |
 | `language` | `str \| None` | ISO 639-1 two-letter language code (e.g. `"en"`, `"pt"`). |
 | `is_open_access` | `bool \| None` | `True` when the paper is freely available online, `False` when behind a paywall, `None` when unknown. |
+| `is_retracted` | `bool \| None` | `True` when the paper was retracted, `False` when known not to be retracted, `None` when unknown. |
 
 #### Methods
 

@@ -155,6 +155,7 @@ class Paper:
         subjects: set[str] | None = None,
         language: str | None = None,
         is_open_access: bool | None = None,
+        is_retracted: bool | None = None,
     ) -> None:
         """Create a Paper instance.
 
@@ -200,6 +201,9 @@ class Paper:
         is_open_access : bool | None
             ``True`` when the paper is freely available online, ``False``
             when it is known to be behind a paywall, ``None`` when unknown.
+        is_retracted : bool | None
+            ``True`` when the paper was retracted, ``False`` when it is
+            known not to be retracted, ``None`` when unknown.
 
         Raises
         ------
@@ -230,6 +234,7 @@ class Paper:
         self.subjects = subjects if subjects is not None else set()
         self.language = language
         self.is_open_access = is_open_access
+        self.is_retracted = is_retracted
 
     def __eq__(self, other: object) -> bool:
         """Check equality by DOI (case-insensitive) or title.
@@ -444,6 +449,7 @@ class Paper:
         self.subjects |= paper.subjects
         self.language = merge_value(self.language, paper.language)
         self.is_open_access = merge_value(self.is_open_access, paper.is_open_access)
+        self.is_retracted = merge_value(self.is_retracted, paper.is_retracted)
 
         # Always accumulate databases for traceability.
         self.databases |= paper.databases
@@ -551,6 +557,13 @@ class Paper:
         elif raw_is_open_access is not None:
             is_open_access = bool(raw_is_open_access)
 
+        raw_is_retracted = paper_dict.get("is_retracted")
+        is_retracted: bool | None = None
+        if isinstance(raw_is_retracted, bool):
+            is_retracted = raw_is_retracted
+        elif raw_is_retracted is not None:
+            is_retracted = bool(raw_is_retracted)
+
         return cls(
             title=title,
             abstract=abstract,
@@ -571,6 +584,7 @@ class Paper:
             subjects=subjects,
             language=language,
             is_open_access=is_open_access,
+            is_retracted=is_retracted,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -603,4 +617,5 @@ class Paper:
             "subjects": sorted(self.subjects),
             "language": self.language,
             "is_open_access": self.is_open_access,
+            "is_retracted": self.is_retracted,
         }

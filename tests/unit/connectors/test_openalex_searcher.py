@@ -711,3 +711,36 @@ class TestOpenAlexConnectorIsOpenAccess:
         valid = [p for p in papers if p is not None]
         for paper in valid:
             assert paper.is_open_access is None or isinstance(paper.is_open_access, bool)
+
+
+class TestOpenAlexConnectorIsRetracted:
+    """Tests for is_retracted extraction from OpenAlex results."""
+
+    def test_is_retracted_true(self):
+        """is_retracted=True in the work yields Paper.is_retracted=True."""
+        work = {"title": "P", "is_retracted": True}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.is_retracted is True
+
+    def test_is_retracted_false(self):
+        """is_retracted=False in the work yields Paper.is_retracted=False."""
+        work = {"title": "P", "is_retracted": False}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.is_retracted is False
+
+    def test_is_retracted_absent_sets_none(self):
+        """Missing is_retracted field yields Paper.is_retracted=None."""
+        work: dict[str, Any] = {"title": "P"}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.is_retracted is None
+
+    def test_is_retracted_from_sample_json(self, openalex_sample_json):
+        """Sample JSON works have is_retracted parsed as a bool or None."""
+        results = openalex_sample_json.get("results", [])
+        papers = [OpenAlexConnector()._parse_paper(r) for r in results]
+        valid = [p for p in papers if p is not None]
+        for paper in valid:
+            assert paper.is_retracted is None or isinstance(paper.is_retracted, bool)

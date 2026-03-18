@@ -350,6 +350,10 @@ class PubmedConnector(SearchConnectorBase):
                 paper_type = rule_type
                 break
 
+        # is_retracted — "Retracted Publication" means this paper was retracted.
+        # ("Retraction of Publication" means the paper IS the retraction notice — not what we want.)
+        is_retracted = "retracted publication" in pub_type_texts
+
         # Language — first <Language> element inside the Article
         language: str | None = None
         lang_el = article.find(".//Language")
@@ -371,6 +375,7 @@ class PubmedConnector(SearchConnectorBase):
                 paper_type=paper_type,
                 subjects=subjects if subjects else None,
                 language=language,
+                is_retracted=is_retracted,
             )
         except ValueError:
             return None

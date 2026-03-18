@@ -761,6 +761,164 @@ class TestPaperIsOpenAccess:
         assert base.is_open_access is True
 
 
+class TestPaperIsRetracted:
+    """Tests for the is_retracted attribute on Paper."""
+
+    def test_is_retracted_defaults_to_none(self) -> None:
+        """Paper without explicit is_retracted has None."""
+        paper = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        assert paper.is_retracted is None
+
+    def test_is_retracted_set_true_at_construction(self) -> None:
+        """Paper can be constructed with is_retracted=True."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_retracted=True,
+        )
+        assert paper.is_retracted is True
+
+    def test_is_retracted_set_false_at_construction(self) -> None:
+        """Paper can be constructed with is_retracted=False."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_retracted=False,
+        )
+        assert paper.is_retracted is False
+
+    def test_is_retracted_serialized_true_in_to_dict(self) -> None:
+        """to_dict includes is_retracted=True when set."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_retracted=True,
+        )
+        assert paper.to_dict()["is_retracted"] is True
+
+    def test_is_retracted_serialized_false_in_to_dict(self) -> None:
+        """to_dict includes is_retracted=False when set."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_retracted=False,
+        )
+        assert paper.to_dict()["is_retracted"] is False
+
+    def test_is_retracted_none_serialized_as_none(self) -> None:
+        """to_dict serializes missing is_retracted as None."""
+        paper = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        assert paper.to_dict()["is_retracted"] is None
+
+    def test_is_retracted_deserialized_from_dict_true(self) -> None:
+        """from_dict restores is_retracted=True."""
+        paper = Paper.from_dict({"title": "T", "is_retracted": True})
+        assert paper.is_retracted is True
+
+    def test_is_retracted_deserialized_from_dict_false(self) -> None:
+        """from_dict restores is_retracted=False."""
+        paper = Paper.from_dict({"title": "T", "is_retracted": False})
+        assert paper.is_retracted is False
+
+    def test_is_retracted_none_in_dict(self) -> None:
+        """from_dict handles is_retracted being None."""
+        paper = Paper.from_dict({"title": "T", "is_retracted": None})
+        assert paper.is_retracted is None
+
+    def test_is_retracted_missing_from_dict(self) -> None:
+        """from_dict handles is_retracted key missing."""
+        paper = Paper.from_dict({"title": "T"})
+        assert paper.is_retracted is None
+
+    def test_is_retracted_round_trip(self) -> None:
+        """to_dict → from_dict preserves is_retracted."""
+        for value in (True, False, None):
+            paper = Paper(
+                title="T",
+                abstract="",
+                authors=[],
+                source=None,
+                publication_date=None,
+                is_retracted=value,
+            )
+            assert Paper.from_dict(paper.to_dict()).is_retracted is value
+
+    def test_is_retracted_merge_fills_none_with_true(self) -> None:
+        """merge() fills is_retracted when base has None and incoming has True."""
+        base = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_retracted=True,
+        )
+        base.merge(incoming)
+        assert base.is_retracted is True
+
+    def test_is_retracted_merge_fills_none_with_false(self) -> None:
+        """merge() fills is_retracted when base has None and incoming has False."""
+        base = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_retracted=False,
+        )
+        base.merge(incoming)
+        assert base.is_retracted is False
+
+    def test_is_retracted_merge_true_wins_over_false(self) -> None:
+        """merge() honours merge_value semantics: True beats False (bool is int subtype)."""
+        base = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_retracted=False,
+        )
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_retracted=True,
+        )
+        base.merge(incoming)
+        assert base.is_retracted is True
+
+    def test_is_retracted_merge_keeps_existing_true(self) -> None:
+        """merge() keeps is_retracted=True when incoming has None."""
+        base = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            is_retracted=True,
+        )
+        incoming = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        base.merge(incoming)
+        assert base.is_retracted is True
+
+
 class TestInferPageCount:
     """Tests for Paper._infer_page_count and its integration."""
 

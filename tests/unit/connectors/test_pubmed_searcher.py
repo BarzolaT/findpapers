@@ -971,3 +971,77 @@ class TestPubmedLanguageExtraction:
                 assert paper.language == "en", (
                     f"Expected 'en', got {paper.language!r} for {paper.title!r}"
                 )
+
+
+class TestPubmedIsRetractedExtraction:
+    """Tests for is_retracted extraction from PubMed PublicationTypeList."""
+
+    def _make_xml(self, pub_types: list[str], title: str = "Sample") -> str:
+        """Build a minimal PubmedArticle XML string with the given PublicationTypes."""
+        type_elements = "".join(
+            f'<PublicationType UI="">{pt}</PublicationType>' for pt in pub_types
+        )
+        return f"""
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>99</PMID>
+                <Article>
+                    <ArticleTitle>{title}</ArticleTitle>
+                    <PublicationTypeList>{type_elements}</PublicationTypeList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+
+    def test_retracted_publication_sets_is_retracted_true(self):
+        """'Retracted Publication' pub type yields is_retracted=True."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = self._make_xml(["Journal Article", "Retracted Publication"])
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.is_retracted is True
+
+    def test_retraction_of_publication_does_not_set_is_retracted(self):
+        """'Retraction of Publication' (the notice itself) does NOT yield is_retracted=True."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = self._make_xml(["Retraction of Publication"])
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.is_retracted is False
+
+    def test_no_retraction_type_sets_is_retracted_false(self):
+        """Normal paper without any retraction pub type yields is_retracted=False."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = self._make_xml(["Journal Article", "Research Support, Non-U.S. Gov't"])
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.is_retracted is False
+
+    def test_empty_publication_type_list_sets_is_retracted_false(self):
+        """Paper with an empty PublicationTypeList yields is_retracted=False."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = self._make_xml([])
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.is_retracted is False
+
+    def test_is_retracted_from_sample_xml(self, pubmed_efetch_xml):
+        """Sample XML records yield is_retracted as a bool (not None)."""
+        from xml.etree import ElementTree as ET
+
+        tree = ET.fromstring(pubmed_efetch_xml)
+        articles = tree.findall(".//PubmedArticle")
+        for article_el in articles:
+            paper = PubmedConnector()._parse_paper(article_el)
+            if paper is not None:
+                assert isinstance(paper.is_retracted, bool), (
+                    f"Expected bool, got {paper.is_retracted!r} for {paper.title!r}"
+                )

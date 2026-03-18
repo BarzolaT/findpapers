@@ -226,7 +226,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 "select": (
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
-                    "primary_location,concepts,keywords,type,biblio,primary_topic,language"
+                    "primary_location,concepts,keywords,type,biblio,primary_topic,language,"
+                    "is_retracted"
                 ),
             }
             try:
@@ -270,7 +271,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
             "select": (
                 "id,doi,title,display_name,publication_date,authorships,"
                 "abstract_inverted_index,cited_by_count,open_access,locations,"
-                "primary_location,concepts,keywords,type,biblio,primary_topic,language"
+                "primary_location,concepts,keywords,type,biblio,primary_topic,language,"
+                "is_retracted"
             ),
         }
         try:
@@ -565,6 +567,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 subjects=subjects if subjects else None,
                 language=normalize_language(work.get("language")),
                 is_open_access=open_access.get("is_oa") if isinstance(open_access, dict) else None,
+                is_retracted=work.get("is_retracted"),
             )
         except ValueError:
             return None
@@ -620,7 +623,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
                 "select": (
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
-                    "primary_location,concepts,keywords,type,biblio,primary_topic,language"
+                    "primary_location,concepts,keywords,type,biblio,primary_topic,language,"
+                    "is_retracted"
                 ),
             }
 
