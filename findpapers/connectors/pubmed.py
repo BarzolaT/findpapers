@@ -403,6 +403,13 @@ class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase):
         if lang_el is not None and lang_el.text:
             language = normalize_language(lang_el.text.strip())
 
+        # Funders — Agency names from GrantList/Grant elements
+        funders: set[str] = set()
+        for grant_el in article_el.findall(".//GrantList/Grant"):
+            agency = (grant_el.findtext("Agency") or "").strip()
+            if agency:
+                funders.add(agency)
+
         try:
             paper = Paper(
                 title=title,
@@ -419,6 +426,7 @@ class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase):
                 subjects=subjects if subjects else None,
                 language=language,
                 is_retracted=is_retracted,
+                funders=funders if funders else None,
             )
         except ValueError:
             return None

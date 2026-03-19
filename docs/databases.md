@@ -108,7 +108,7 @@ OpenAlex is the largest fully open index of scholarly works in the world. It was
 
 #### Features
 
-- Extracts title, abstract, authors (with institutional affiliations), publication date, DOI, URLs, PDF URLs, citation count, keywords, source, paper type, page range, language (ISO 639-1 code), open access status, and retraction status
+- Extracts title, abstract, authors (with institutional affiliations), publication date, DOI, URLs, PDF URLs, citation count, keywords, source, paper type, page range, language (ISO 639-1 code), open access status, retraction status, and funders
 - **Citation-capable:** supports both forward (cited-by) and backward (references) snowballing
 - Best source selection (prefers journals/conferences over repositories)
 
@@ -132,7 +132,7 @@ PubMed is the world's most important database for biomedical and life sciences r
 
 #### Features
 
-- Extracts title, abstract, authors (with affiliations), publication date, DOI, URL, keywords (MeSH terms and author keywords), page range, source (journal with ISSN), paper type, language (ISO 639-1 code), and retraction status
+- Extracts title, abstract, authors (with affiliations), publication date, DOI, URL, keywords (MeSH terms and author keywords), page range, source (journal with ISSN), paper type, language (ISO 639-1 code), retraction status, and funders
 - Supports `*` wildcard
 
 #### Limitations

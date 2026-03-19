@@ -90,6 +90,7 @@ def full_paper(journal_publication: Source) -> Paper:
         page_count=42,
         page_range="1-42",
         databases={"arxiv", "semantic_scholar"},
+        funders={"NIH", "NSF"},
     )
 
 
@@ -1392,6 +1393,14 @@ class TestLoadFromCsv:
         """FileNotFoundError is raised for non-existent paths."""
         with pytest.raises(FileNotFoundError):
             load_from_csv("/tmp/nonexistent_csv_file.csv")
+
+    def test_preserves_funders(self, full_paper: Paper) -> None:
+        """Funders are preserved across the CSV save->load round-trip."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            save_to_csv([full_paper], path)
+            loaded = load_from_csv(path)
+            assert loaded[0].funders == full_paper.funders
 
 
 # ---------------------------------------------------------------------------

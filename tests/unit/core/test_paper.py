@@ -1264,3 +1264,129 @@ class TestPaperFromDictEdgeCases:
         d = {"title": "T", "subjects": "Artificial Intelligence"}
         paper = Paper.from_dict(d)
         assert paper.subjects == {"Artificial Intelligence"}
+
+
+# ------------------------------------------------------------------
+# Paper.funders
+# ------------------------------------------------------------------
+
+
+class TestPaperFunders:
+    """Tests for the funders attribute on Paper."""
+
+    def test_funders_defaults_to_empty_set(self) -> None:
+        """Paper without explicit funders has an empty set."""
+        paper = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        assert paper.funders == set()
+
+    def test_funders_set_at_construction(self) -> None:
+        """funders can be populated at construction time."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            funders={"NSF", "NIH"},
+        )
+        assert paper.funders == {"NSF", "NIH"}
+
+    def test_funders_serialized_in_to_dict(self) -> None:
+        """to_dict includes funders as a sorted list."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            funders={"Wellcome Trust", "FAPESP"},
+        )
+        d = paper.to_dict()
+        assert d["funders"] == ["FAPESP", "Wellcome Trust"]
+
+    def test_funders_empty_serialized_as_empty_list(self) -> None:
+        """to_dict serializes an empty funders set as an empty list."""
+        paper = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        assert paper.to_dict()["funders"] == []
+
+    def test_funders_deserialized_from_dict_list(self) -> None:
+        """from_dict restores funders from a list."""
+        paper = Paper.from_dict({"title": "T", "funders": ["NSF", "NIH"]})
+        assert paper.funders == {"NSF", "NIH"}
+
+    def test_funders_missing_from_dict_defaults_empty(self) -> None:
+        """from_dict defaults funders to empty set when key is absent."""
+        paper = Paper.from_dict({"title": "T"})
+        assert paper.funders == set()
+
+    def test_funders_none_in_dict_defaults_empty(self) -> None:
+        """from_dict treats None funders as an empty set."""
+        paper = Paper.from_dict({"title": "T", "funders": None})
+        assert paper.funders == set()
+
+    def test_funders_round_trip(self) -> None:
+        """to_dict → from_dict preserves funders."""
+        paper = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            funders={"European Commission", "CAPES"},
+        )
+        restored = Paper.from_dict(paper.to_dict())
+        assert restored.funders == {"European Commission", "CAPES"}
+
+    def test_funders_merge_unions_both_sets(self) -> None:
+        """merge() unions funders from both papers."""
+        base = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            funders={"NSF"},
+        )
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            funders={"NIH"},
+        )
+        base.merge(incoming)
+        assert base.funders == {"NSF", "NIH"}
+
+    def test_funders_merge_empty_base_with_populated_incoming(self) -> None:
+        """merge() fills funders when base has none."""
+        base = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        incoming = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            funders={"Wellcome Trust"},
+        )
+        base.merge(incoming)
+        assert base.funders == {"Wellcome Trust"}
+
+    def test_funders_merge_keeps_existing_when_incoming_empty(self) -> None:
+        """merge() keeps existing funders when incoming has none."""
+        base = Paper(
+            title="T",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            funders={"CNPQ"},
+        )
+        incoming = Paper(title="T", abstract="", authors=[], source=None, publication_date=None)
+        base.merge(incoming)
+        assert base.funders == {"CNPQ"}
+
+    def test_scalar_funder_wrapped_in_set(self) -> None:
+        """A single scalar funder string is wrapped into a set by from_dict."""
+        paper = Paper.from_dict({"title": "T", "funders": "NSF"})
+        assert paper.funders == {"NSF"}

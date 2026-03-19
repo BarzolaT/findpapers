@@ -1045,3 +1045,90 @@ class TestPubmedIsRetractedExtraction:
                 assert isinstance(paper.is_retracted, bool), (
                     f"Expected bool, got {paper.is_retracted!r} for {paper.title!r}"
                 )
+
+
+class TestPubmedFundersExtraction:
+    """Tests for funders extraction from PubMed GrantList elements."""
+
+    @staticmethod
+    def _make_grant_xml(agencies: list[str], title: str = "Sample") -> str:
+        """Build a minimal PubmedArticle XML string with the given grant agencies."""
+        grant_elements = "".join(f"<Grant><Agency>{a}</Agency></Grant>" for a in agencies)
+        grant_list = f"<GrantList>{grant_elements}</GrantList>" if agencies else ""
+        return f"""
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>99</PMID>
+                <Article>
+                    <ArticleTitle>{title}</ArticleTitle>
+                    {grant_list}
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+
+    def test_funders_extracted_from_grant_agencies(self):
+        """Agency names inside GrantList/Grant are collected into funders."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = self._make_grant_xml(["National Cancer Institute", "FAPESP"])
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.funders == {"National Cancer Institute", "FAPESP"}
+
+    def test_funders_empty_when_no_grant_list(self):
+        """Paper without GrantList has an empty funders set."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = self._make_grant_xml([])
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.funders == set()
+
+    def test_funders_skips_blank_agency(self):
+        """Grant entries with blank Agency text are skipped."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>99</PMID>
+                <Article>
+                    <ArticleTitle>Sample</ArticleTitle>
+                    <GrantList>
+                        <Grant><Agency>   </Agency></Grant>
+                        <Grant><Agency>NIH</Agency></Grant>
+                    </GrantList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.funders == {"NIH"}
+
+    def test_funders_skips_grant_without_agency_element(self):
+        """Grant entries without an Agency element are skipped."""
+        from xml.etree import ElementTree as ET
+
+        xml_str = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>99</PMID>
+                <Article>
+                    <ArticleTitle>Sample</ArticleTitle>
+                    <GrantList>
+                        <Grant><GrantID>R01AA000</GrantID></Grant>
+                        <Grant><Agency>Wellcome Trust</Agency></Grant>
+                    </GrantList>
+                </Article>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        article = ET.fromstring(xml_str)
+        paper = PubmedConnector()._parse_paper(article)
+        assert paper is not None
+        assert paper.funders == {"Wellcome Trust"}

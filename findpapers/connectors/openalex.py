@@ -191,7 +191,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
                 "id,doi,title,display_name,publication_date,authorships,"
                 "abstract_inverted_index,cited_by_count,open_access,locations,"
                 "primary_location,concepts,keywords,type,biblio,primary_topic,language,"
-                "is_retracted"
+                "is_retracted,funders"
             ),
         }
         params = self._prepare_params(params)
@@ -274,7 +274,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
                     "primary_location,concepts,keywords,type,biblio,primary_topic,language,"
-                    "is_retracted"
+                    "is_retracted,funders"
                 ),
             }
             try:
@@ -319,7 +319,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
                 "id,doi,title,display_name,publication_date,authorships,"
                 "abstract_inverted_index,cited_by_count,open_access,locations,"
                 "primary_location,concepts,keywords,type,biblio,primary_topic,language,"
-                "is_retracted"
+                "is_retracted,funders"
             ),
         }
         try:
@@ -595,6 +595,14 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
             if topic_name:
                 subjects.add(topic_name)
 
+        # Funders — extracted from the funders list
+        funders: set[str] = set()
+        for funder in work.get("funders") or []:
+            if isinstance(funder, dict):
+                funder_name = (funder.get("display_name") or "").strip()
+                if funder_name:
+                    funders.add(funder_name)
+
         try:
             paper = Paper(
                 title=title,
@@ -615,6 +623,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
                 language=normalize_language(work.get("language")),
                 is_open_access=open_access.get("is_oa") if isinstance(open_access, dict) else None,
                 is_retracted=work.get("is_retracted"),
+                funders=funders if funders else None,
             )
         except ValueError:
             return None
@@ -671,7 +680,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
                     "id,doi,title,display_name,publication_date,authorships,"
                     "abstract_inverted_index,cited_by_count,open_access,locations,"
                     "primary_location,concepts,keywords,type,biblio,primary_topic,language,"
-                    "is_retracted"
+                    "is_retracted,funders"
                 ),
             }
 

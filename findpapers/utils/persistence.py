@@ -651,6 +651,7 @@ _CSV_COLUMNS: list[str] = [
     "databases",
     "fields_of_study",
     "subjects",
+    "funders",
     "comments",
 ]
 
@@ -712,6 +713,7 @@ def _paper_to_csv_row(paper: Paper) -> dict[str, str]:
             s("; ".join(sorted(paper.fields_of_study))) if paper.fields_of_study else ""
         ),
         "subjects": s("; ".join(sorted(paper.subjects)) if paper.subjects else ""),
+        "funders": s("; ".join(sorted(paper.funders)) if paper.funders else ""),
         "comments": s(paper.comments or ""),
     }
 
@@ -808,6 +810,9 @@ def _csv_row_to_paper(row: dict[str, str]) -> Paper | None:
     raw_subjects = u(row.get("subjects", ""))
     subjects = {s.strip() for s in raw_subjects.split(";") if s.strip()} or None
 
+    raw_funders = u(row.get("funders", ""))
+    funders = {f.strip() for f in raw_funders.split(";") if f.strip()} or None
+
     comments = u(row.get("comments", "")).strip() or None
 
     return Paper(
@@ -827,4 +832,5 @@ def _csv_row_to_paper(row: dict[str, str]) -> Paper | None:
         paper_type=paper_type,
         fields_of_study=fields_of_study,
         subjects=subjects,
+        funders=funders,
     )

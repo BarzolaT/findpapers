@@ -744,3 +744,61 @@ class TestOpenAlexConnectorIsRetracted:
         valid = [p for p in papers if p is not None]
         for paper in valid:
             assert paper.is_retracted is None or isinstance(paper.is_retracted, bool)
+
+
+class TestOpenAlexConnectorFunders:
+    """Tests for funders extraction from OpenAlex funders field."""
+
+    def test_funders_extracted_from_funders_list(self):
+        """display_name values in funders are collected into paper.funders."""
+        work = {
+            "title": "P",
+            "funders": [
+                {"display_name": "National Science Foundation", "id": "https://openalex.org/F1"},
+                {"display_name": "National Institutes of Health", "id": "https://openalex.org/F2"},
+            ],
+        }
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.funders == {"National Science Foundation", "National Institutes of Health"}
+
+    def test_funders_empty_when_funders_absent(self):
+        """Paper without funders field has an empty funders set."""
+        work: dict[str, Any] = {"title": "P"}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.funders == set()
+
+    def test_funders_empty_when_funders_is_empty_list(self):
+        """Paper with empty funders list has an empty funders set."""
+        work = {"title": "P", "funders": []}
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.funders == set()
+
+    def test_funders_skips_blank_display_name(self):
+        """Funder entries with blank display_name are skipped."""
+        work = {
+            "title": "P",
+            "funders": [
+                {"display_name": ""},
+                {"display_name": "   "},
+                {"display_name": "European Commission"},
+            ],
+        }
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.funders == {"European Commission"}
+
+    def test_funders_skips_missing_display_name_key(self):
+        """Funder entries without display_name key are skipped."""
+        work = {
+            "title": "P",
+            "funders": [
+                {"id": "https://openalex.org/F1"},
+                {"display_name": "Wellcome Trust"},
+            ],
+        }
+        paper = OpenAlexConnector()._parse_paper(work)
+        assert paper is not None
+        assert paper.funders == {"Wellcome Trust"}

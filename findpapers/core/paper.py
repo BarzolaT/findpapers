@@ -90,6 +90,7 @@ class Paper:
         language: str | None = None,
         is_open_access: bool | None = None,
         is_retracted: bool | None = None,
+        funders: set[str] | None = None,
     ) -> None:
         """Create a Paper instance.
 
@@ -138,6 +139,10 @@ class Paper:
         is_retracted : bool | None
             ``True`` when the paper was retracted, ``False`` when it is
             known not to be retracted, ``None`` when unknown.
+        funders : set[str] | None
+            Names of funding agencies or organisations that supported this
+            work (e.g. ``{"National Science Foundation", "NIH"}``).  When no
+            funding information is available, defaults to an empty set.
 
         Raises
         ------
@@ -169,6 +174,7 @@ class Paper:
         self.language = language
         self.is_open_access = is_open_access
         self.is_retracted = is_retracted
+        self.funders = funders if funders is not None else set()
 
     def __eq__(self, other: object) -> bool:
         """Check equality by DOI (case-insensitive) or title.
@@ -385,6 +391,7 @@ class Paper:
         self.language = merge_value(self.language, paper.language)
         self.is_open_access = merge_value(self.is_open_access, paper.is_open_access)
         self.is_retracted = merge_value(self.is_retracted, paper.is_retracted)
+        self.funders |= paper.funders
 
         # Always accumulate databases for traceability.
         self.databases |= paper.databases
@@ -499,6 +506,12 @@ class Paper:
         elif raw_is_retracted is not None:
             is_retracted = bool(raw_is_retracted)
 
+        raw_funders = paper_dict.get("funders") or []
+        if isinstance(raw_funders, (list, set, tuple)):
+            funders = {str(f) for f in raw_funders}
+        else:
+            funders = {str(raw_funders)} if raw_funders else set()
+
         return cls(
             title=title,
             abstract=abstract,
@@ -520,6 +533,7 @@ class Paper:
             language=language,
             is_open_access=is_open_access,
             is_retracted=is_retracted,
+            funders=funders,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -553,4 +567,5 @@ class Paper:
             "language": self.language,
             "is_open_access": self.is_open_access,
             "is_retracted": self.is_retracted,
+            "funders": sorted(self.funders),
         }
