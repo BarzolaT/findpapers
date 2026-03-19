@@ -319,6 +319,12 @@ def paper_to_bibtex(paper: Paper) -> str:
     if paper.url is not None:
         lines.append(f"{default_tab}url = {{{paper.url}}},")
 
+    # BibTeX @unpublished requires a note field (contains URL, date, and comments).
+    if paper.paper_type == PaperType.UNPUBLISHED:
+        note = bibtex_note(paper)
+        if note:
+            lines.append(f"{default_tab}note = {{{_escape_bibtex(note)}}},")
+
     entry = "\n".join(lines)
     entry = entry.rstrip(",") + "\n" if entry.endswith(",") else entry
     return f"{entry}\n}}\n\n"
@@ -651,6 +657,9 @@ _CSV_COLUMNS: list[str] = [
     "databases",
     "fields_of_study",
     "subjects",
+    "language",
+    "is_open_access",
+    "is_retracted",
     "funders",
     "comments",
 ]
@@ -713,6 +722,13 @@ def _paper_to_csv_row(paper: Paper) -> dict[str, str]:
             s("; ".join(sorted(paper.fields_of_study))) if paper.fields_of_study else ""
         ),
         "subjects": s("; ".join(sorted(paper.subjects)) if paper.subjects else ""),
+        "language": paper.language or "",
+        "is_open_access": (
+            "" if paper.is_open_access is None else ("true" if paper.is_open_access else "false")
+        ),
+        "is_retracted": (
+            "" if paper.is_retracted is None else ("true" if paper.is_retracted else "false")
+        ),
         "funders": s("; ".join(sorted(paper.funders)) if paper.funders else ""),
         "comments": s(paper.comments or ""),
     }
@@ -813,6 +829,18 @@ def _csv_row_to_paper(row: dict[str, str]) -> Paper | None:
     raw_funders = u(row.get("funders", ""))
     funders = {f.strip() for f in raw_funders.split(";") if f.strip()} or None
 
+    language = row.get("language", "").strip() or None
+
+    raw_is_open_access = row.get("is_open_access", "").strip().lower()
+    is_open_access: bool | None = (
+        True if raw_is_open_access == "true" else False if raw_is_open_access == "false" else None
+    )
+
+    raw_is_retracted = row.get("is_retracted", "").strip().lower()
+    is_retracted: bool | None = (
+        True if raw_is_retracted == "true" else False if raw_is_retracted == "false" else None
+    )
+
     comments = u(row.get("comments", "")).strip() or None
 
     return Paper(
@@ -832,5 +860,8 @@ def _csv_row_to_paper(row: dict[str, str]) -> Paper | None:
         paper_type=paper_type,
         fields_of_study=fields_of_study,
         subjects=subjects,
+        language=language,
+        is_open_access=is_open_access,
+        is_retracted=is_retracted,
         funders=funders,
     )

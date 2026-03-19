@@ -585,6 +585,24 @@ class TestPaperToBibtex:
         entry = paper_to_bibtex(paper)
         assert entry.startswith("@unpublished{")
 
+    def test_unpublished_includes_note_field(self) -> None:
+        """@unpublished entry includes a note field built from URL, date, and comments."""
+        paper = Paper(
+            title="Preprint",
+            abstract="",
+            authors=[Author(name="Smith, J.")],
+            source=None,
+            publication_date=datetime.date(2024, 3, 1),
+            url="https://arxiv.org/abs/2401.00001",
+            comments="Submitted to ICML",
+            paper_type=PaperType.UNPUBLISHED,
+        )
+        entry = paper_to_bibtex(paper)
+        assert "note = {" in entry
+        assert "arxiv.org" in entry
+        assert "2024" in entry
+        assert "Submitted to ICML" in entry
+
     def test_paper_type_none_falls_back_to_misc(self) -> None:
         """Without paper_type, BibTeX type defaults to @misc."""
         pub = Source(title="NeurIPS", source_type=SourceType.CONFERENCE)
@@ -1401,6 +1419,56 @@ class TestLoadFromCsv:
             save_to_csv([full_paper], path)
             loaded = load_from_csv(path)
             assert loaded[0].funders == full_paper.funders
+
+    def test_preserves_language(self) -> None:
+        """Language is preserved across the CSV save->load round-trip."""
+        paper = Paper(
+            title="Test",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            language="pt",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = str(Path(tmpdir) / "out.csv")
+            save_to_csv([paper], path)
+            loaded = load_from_csv(path)
+            assert loaded[0].language == "pt"
+
+    def test_preserves_is_open_access(self) -> None:
+        """is_open_access is preserved across the CSV save->load round-trip."""
+        for value in (True, False, None):
+            paper = Paper(
+                title="Test",
+                abstract="",
+                authors=[],
+                source=None,
+                publication_date=None,
+                is_open_access=value,
+            )
+            with tempfile.TemporaryDirectory() as tmpdir:
+                path = str(Path(tmpdir) / "out.csv")
+                save_to_csv([paper], path)
+                loaded = load_from_csv(path)
+                assert loaded[0].is_open_access == value
+
+    def test_preserves_is_retracted(self) -> None:
+        """is_retracted is preserved across the CSV save->load round-trip."""
+        for value in (True, False, None):
+            paper = Paper(
+                title="Test",
+                abstract="",
+                authors=[],
+                source=None,
+                publication_date=None,
+                is_retracted=value,
+            )
+            with tempfile.TemporaryDirectory() as tmpdir:
+                path = str(Path(tmpdir) / "out.csv")
+                save_to_csv([paper], path)
+                loaded = load_from_csv(path)
+                assert loaded[0].is_retracted == value
 
 
 # ---------------------------------------------------------------------------

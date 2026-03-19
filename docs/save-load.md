@@ -60,13 +60,13 @@ papers = findpapers.load_from_bibtex("references.bib")
 ### Format Details
 
 - Each paper becomes a BibTeX entry with a type matching its `PaperType` (`@article`, `@inproceedings`, `@book`, etc.). Papers without a type default to `@misc`.
-- **Citation keys** are auto-generated from the first author's last name and the publication year (e.g., `smith2023`). Duplicates are made unique with a suffix.
+- **Citation keys** are auto-generated from the first author's name, the publication year, and the first word of the title (e.g., `smith2023attention`).
 - LaTeX special characters (`&`, `%`, `$`, `#`, `_`, `{`, `}`, `~`, `^`) are escaped automatically.
-- Fields included: `title`, `author`, `abstract`, `year`, `month`, `doi`, `url`, `keywords`, `journal`/`booktitle`, `publisher`, `issn`, `isbn`, `pages`, `note`.
+- Fields included: `title`, `author`, `abstract`, `year`, `doi`, `url`, `keywords`, `journal` (for `@article`), `booktitle` (for `@inproceedings`/`@incollection`), `institution` (for `@techreport`/`@phdthesis`/`@mastersthesis`), `publisher`, `pages`, `howpublished` (for `@misc`/`@unpublished` with a URL), `note` (for `@unpublished`).
 
 ### Limitations
 
-- Some metadata is lost during BibTeX save (e.g., `citation count`, `databases`, `pdf_url`, `fields_of_study`, `subjects`, `funders`). Use JSON for lossless round-trips.
+- Some metadata is lost during BibTeX save (e.g., `citation count`, `databases`, `pdf_url`, `fields_of_study`, `subjects`, `language`, `is_open_access`, `is_retracted`, `funders`). Use JSON for lossless round-trips.
 
 ---
 
@@ -106,6 +106,9 @@ papers = findpapers.load_from_csv("papers.csv")
 | `databases` | Database names, separated by `"; "` |
 | `fields_of_study` | Fields of study, separated by `"; "` |
 | `subjects` | Subjects, separated by `"; "` |
+| `language` | ISO 639-1 two-letter language code (e.g. `"en"`) |
+| `is_open_access` | `"true"`, `"false"`, or empty when unknown |
+| `is_retracted` | `"true"`, `"false"`, or empty when unknown |
 | `funders` | Funding organisations, separated by `"; "` |
 | `comments` | Free-text comments |
 
