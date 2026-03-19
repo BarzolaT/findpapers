@@ -21,6 +21,7 @@ from urllib.parse import quote as _url_quote
 import requests
 
 from findpapers.connectors.citation_base import CitationConnectorBase
+from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
 from findpapers.core.source import Source, SourceType
@@ -57,7 +58,7 @@ _CROSSREF_TYPE_MAP: dict[str, SourceType] = {
 _TAG_RE = re.compile(r"<[^>]+>")
 
 
-class CrossRefConnector(CitationConnectorBase):
+class CrossRefConnector(CitationConnectorBase, DOILookupConnectorBase):
     """Connector for the CrossRef REST API (DOI-based metadata lookup).
 
     Unlike search connectors this class does **not** support free-text
@@ -117,6 +118,28 @@ class CrossRefConnector(CitationConnectorBase):
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
+
+    def fetch_paper_by_doi(self, doi: str) -> Paper | None:
+        """Fetch a paper by DOI using the CrossRef ``/works/{doi}`` endpoint.
+
+        Convenience wrapper that calls :meth:`fetch_work` then
+        :meth:`build_paper`.
+
+        Parameters
+        ----------
+        doi : str
+            Bare DOI (without ``https://doi.org/`` prefix).
+
+        Returns
+        -------
+        Paper | None
+            Populated paper, or ``None`` when the DOI is not found or the
+            record is missing required fields.
+        """
+        work = self.fetch_work(doi)
+        if work is None:
+            return None
+        return self.build_paper(work)
 
     def fetch_work(self, doi: str) -> dict[str, Any] | None:
         """Fetch the CrossRef ``/works/{doi}`` record.

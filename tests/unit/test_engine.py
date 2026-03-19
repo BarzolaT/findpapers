@@ -377,11 +377,10 @@ class TestEngineFetchPaperByDoi:
 
             result = engine.fetch_paper_by_doi("10.1234/test", timeout=30.0, verbose=True)
 
-        mock_cls.assert_called_once_with(
-            doi="10.1234/test",
-            email=None,
-            timeout=30.0,
-        )
+        # Verify the DOI and timeout are forwarded correctly.
+        _, call_kwargs = mock_cls.call_args
+        assert call_kwargs["doi"] == "10.1234/test"
+        assert call_kwargs["timeout"] == 30.0
         mock_runner.run.assert_called_once_with(verbose=True)
         assert result is fake_paper
 

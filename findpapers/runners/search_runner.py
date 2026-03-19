@@ -9,9 +9,9 @@ from time import perf_counter
 
 from findpapers.connectors import SEARCH_REGISTRY
 from findpapers.connectors.search_base import SearchConnectorBase
-from findpapers.core.paper import Paper, _is_preprint_doi
+from findpapers.core.paper import Paper
 from findpapers.core.search_result import Database, SearchResult
-from findpapers.exceptions import InvalidParameterError, UnsupportedQueryError
+from findpapers.exceptions import InvalidParameterError, MissingApiKeyError, UnsupportedQueryError
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
 from findpapers.query.validator import QueryValidator
@@ -20,6 +20,33 @@ from findpapers.utils.parallel import execute_tasks
 from findpapers.utils.progress import make_progress_bar
 
 logger = logging.getLogger(__name__)
+
+_PREPRINT_DOI_PREFIXES: frozenset[str] = frozenset(
+    {
+        "10.48550/arxiv.",  # arXiv
+        "10.1101/",  # bioRxiv / medRxiv
+        "10.2139/ssrn.",  # SSRN
+        "10.5281/zenodo.",  # Zenodo
+        "10.20944/preprints",  # Preprints.org
+    }
+)
+
+
+def _is_preprint_doi(doi: str) -> bool:
+    """Return ``True`` when *doi* belongs to a preprint server.
+
+    Parameters
+    ----------
+    doi : str
+        DOI string (without ``https://doi.org/`` prefix).
+
+    Returns
+    -------
+    bool
+        ``True`` for known preprint-server DOI prefixes.
+    """
+    lowered = doi.strip().lower()
+    return any(lowered.startswith(prefix) for prefix in _PREPRINT_DOI_PREFIXES)
 
 
 class SearchRunner:
@@ -288,21 +315,19 @@ class SearchRunner:
                 f"Accepted values: {', '.join(sorted(valid_values))}"
             )
 
-        searchers = [
-            SEARCH_REGISTRY[Database(db)](**_credentials.get(Database(db), {})) for db in raw
-        ]
-        available = []
+        searchers: list = []
         skipped: list[str] = []
-        for searcher in searchers:
-            if searcher.is_available:
-                available.append(searcher)
-            else:
-                skipped.append(searcher.name)
+        for db in raw:
+            try:
+                searcher = SEARCH_REGISTRY[Database(db)](**_credentials.get(Database(db), {}))
+                searchers.append(searcher)
+            except MissingApiKeyError:
+                skipped.append(Database(db).value)
                 logger.warning(
                     "Skipping '%s': a required API key was not provided.",
-                    searcher.name,
+                    Database(db).value,
                 )
-        return available, skipped
+        return searchers, skipped
 
     def _fetch_papers(
         self,

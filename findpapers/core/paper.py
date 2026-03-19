@@ -64,72 +64,6 @@ class PaperType(StrEnum):
 # from upstream APIs and silently replaced with ``None``.
 _MAX_FUTURE_DAYS: int = 365
 
-# DOI prefixes that belong to preprint servers and should be deprioritised
-# in favour of a publisher-assigned DOI when merging two copies of the same work.
-_PREPRINT_DOI_PREFIXES: frozenset[str] = frozenset(
-    {
-        "10.48550/arxiv.",  # arXiv
-        "10.1101/",  # bioRxiv / medRxiv
-        "10.2139/ssrn.",  # SSRN
-        "10.5281/zenodo.",  # Zenodo
-        "10.20944/preprints",  # Preprints.org
-    }
-)
-
-
-def _is_preprint_doi(doi: str) -> bool:
-    """Return ``True`` when *doi* belongs to a preprint server.
-
-    Parameters
-    ----------
-    doi : str
-        DOI string (without ``https://doi.org/`` prefix).
-
-    Returns
-    -------
-    bool
-        ``True`` for known preprint-server DOI prefixes.
-    """
-    lowered = doi.strip().lower()
-    return any(lowered.startswith(prefix) for prefix in _PREPRINT_DOI_PREFIXES)
-
-
-def _merge_doi(base: str | None, incoming: str | None) -> str | None:
-    """Merge two DOI values, preferring the non-preprint one.
-
-    When both DOIs are present and exactly one of them belongs to a known
-    preprint server, the publisher DOI is kept.  In all other cases the
-    :func:`~findpapers.utils.merge.merge_value` default is used.
-
-    Parameters
-    ----------
-    base : str | None
-        The DOI already stored on the paper.
-    incoming : str | None
-        The DOI coming from the paper being merged in.
-
-    Returns
-    -------
-    str | None
-        The winning DOI.
-    """
-    if base is None:
-        return incoming
-    if incoming is None:
-        return base
-
-    base_is_preprint = _is_preprint_doi(base)
-    incoming_is_preprint = _is_preprint_doi(incoming)
-
-    if base_is_preprint and not incoming_is_preprint:
-        return incoming
-    if incoming_is_preprint and not base_is_preprint:
-        return base
-
-    # Both preprint, both publisher, or indistinguishable: fall back to default.
-    result: str | None = merge_value(base, incoming)
-    return result
-
 
 class Paper:
     """Represents a paper instance."""
@@ -426,7 +360,8 @@ class Paper:
 
         # Merge scalar fields using shared rules.
         self.title = merge_value(self.title, paper.title)
-        self.doi = _merge_doi(self.doi, paper.doi)
+        # DOI is never overwritten: the first source wins.
+        self.doi = self.doi or paper.doi
         self.abstract = merge_value(self.abstract, paper.abstract)
         self.citations = merge_value(self.citations, paper.citations)
         self.comments = merge_value(self.comments, paper.comments)

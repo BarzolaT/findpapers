@@ -11,6 +11,7 @@ from typing import Any
 import requests
 
 from findpapers.connectors.citation_base import CitationConnectorBase
+from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
@@ -76,7 +77,7 @@ _SS_PAPER_TYPE_MAP: dict[str, PaperType] = {
 }
 
 
-class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
+class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase, DOILookupConnectorBase):
     """Connector for the Semantic Scholar research corpus.
 
     Uses the Bulk Search endpoint:
@@ -172,6 +173,44 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase):
         if self._api_key:
             updated["x-api-key"] = self._api_key
         return updated
+
+    # ------------------------------------------------------------------
+    # DOI lookup
+    # ------------------------------------------------------------------
+
+    def fetch_paper_by_doi(self, doi: str) -> Paper | None:
+        """Fetch a single paper by its DOI from Semantic Scholar.
+
+        Queries ``GET /graph/v1/paper/DOI:{doi}?fields=...`` and converts
+        the response into a :class:`~findpapers.core.paper.Paper`.
+
+        Parameters
+        ----------
+        doi : str
+            Bare DOI identifier (e.g. ``"10.1038/nature12373"``).
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when the DOI is not found or the response cannot be parsed.
+        """
+        url = f"{_PAPER_URL}/DOI:{doi}"
+        params = {"fields": _PAPER_FIELDS}
+        try:
+            response = self._get(url, params=params)
+            data = response.json()
+        except requests.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                logger.debug("Semantic Scholar: DOI %s not found (404).", doi)
+                return None
+            logger.warning("Semantic Scholar: HTTP error fetching DOI %s: %s", doi, exc)
+            return None
+        except (requests.RequestException, ValueError):
+            logger.warning("Semantic Scholar: failed to fetch DOI %s.", doi)
+            return None
+
+        return self._parse_paper(data)
 
     # ------------------------------------------------------------------
     # Citation methods (CitationConnectorBase)

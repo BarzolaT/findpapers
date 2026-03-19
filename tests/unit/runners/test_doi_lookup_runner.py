@@ -28,10 +28,10 @@ def _fake_crossref_work() -> dict:
     }
 
 
-def _fake_paper() -> Paper:
+def _fake_paper(title: str = "Fake Paper Title") -> Paper:
     """Return a paper as it would be built from the fake CrossRef work."""
     return Paper(
-        title="Fake Paper Title",
+        title=title,
         abstract="An abstract.",
         authors=[Author(name="Alice Smith")],
         source=Source(title="Fake Journal"),
@@ -39,6 +39,23 @@ def _fake_paper() -> Paper:
         doi="10.1234/test",
         citations=42,
     )
+
+
+def _patch_all_extra_connectors_as_none():
+    """Return a context-manager stack that makes all non-CrossRef connectors return None.
+
+    This avoids live network calls in unit tests that only care about
+    CrossRef behaviour.
+    """
+    return patch.multiple(
+        "findpapers.runners.doi_lookup_runner",
+        **{},  # no-op placeholder; real patches added below
+    )
+
+
+def _noop_fetch(*_args, **_kwargs) -> None:
+    """Stub for fetch_paper_by_doi that always returns None."""
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -108,20 +125,42 @@ class TestDOILookupRunnerInit:
         runner = DOILookupRunner(doi="10.1234/test", timeout=30.0)
         assert runner._timeout == 30.0
 
-    def test_timeout_propagated_to_connector(self):
-        """Custom timeout is forwarded to the underlying CrossRefConnector."""
+    def test_timeout_propagated_to_crossref_connector(self):
+        """Custom timeout is forwarded to the CrossRefConnector."""
         runner = DOILookupRunner(doi="10.1234/test", timeout=42.0)
-        assert runner._connector._timeout == 42.0
+        assert runner._crossref._timeout == 42.0
 
-    def test_default_timeout_propagated_to_connector(self):
-        """Default timeout (10.0) is forwarded to the underlying CrossRefConnector."""
+    def test_timeout_propagated_to_all_connectors(self):
+        """Custom timeout is forwarded to every connector."""
+        runner = DOILookupRunner(doi="10.1234/test", timeout=25.0)
+        for connector in runner._all_connectors:
+            assert connector._timeout == 25.0
+
+    def test_default_timeout_propagated_to_crossref(self):
+        """Default timeout (10.0) is forwarded to CrossRefConnector."""
         runner = DOILookupRunner(doi="10.1234/test")
-        assert runner._connector._timeout == 10.0
+        assert runner._crossref._timeout == 10.0
 
 
 # ---------------------------------------------------------------------------
 # run()
 # ---------------------------------------------------------------------------
+
+
+def _make_runner_with_mocked_connectors(doi: str = "10.1234/test") -> DOILookupRunner:
+    """Create a runner whose extra connectors are pre-stubbed to return None.
+
+    Only the CrossRef connector is left un-mocked; callers patch it separately.
+    IEEE and Scopus are None when no key is provided, so they are skipped.
+    """
+    runner = DOILookupRunner(doi=doi)
+    for attr in ("_openalex", "_semantic_scholar", "_pubmed", "_arxiv", "_ieee", "_scopus"):
+        conn = getattr(runner, attr)
+        if conn is None:
+            continue
+        conn.fetch_paper_by_doi = _noop_fetch
+        conn.close = lambda: None
+    return runner
 
 
 class TestDOILookupRunnerRun:
@@ -141,24 +180,32 @@ class TestDOILookupRunnerRun:
                 return_value=fake_paper,
             ),
         ):
-            runner = DOILookupRunner(doi="10.1234/test")
+            runner = _make_runner_with_mocked_connectors()
             result = runner.run()
 
         assert result is fake_paper
 
-    def test_run_returns_none_when_doi_not_found(self):
-        """run() returns None when CrossRef returns 404."""
+    def test_run_returns_none_when_no_database_finds_doi(self):
+        """run() returns None when every database returns nothing."""
+        runner = _make_runner_with_mocked_connectors(doi="10.9999/nonexistent")
+        runner._crossref.fetch_work = lambda doi: None  # type: ignore[method-assign]
+        runner._crossref.close = lambda: None  # type: ignore[method-assign]
+        result = runner.run()
+        assert result is None
+
+    def test_run_returns_none_when_crossref_not_found_and_others_return_none(self):
+        """run() returns None when CrossRef returns 404 and no fallback finds it."""
         with patch(
             "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             return_value=None,
         ):
-            runner = DOILookupRunner(doi="10.9999/nonexistent")
+            runner = _make_runner_with_mocked_connectors()
             result = runner.run()
 
         assert result is None
 
     def test_run_returns_none_when_paper_cannot_be_built(self):
-        """run() returns None when build_paper returns None."""
+        """run() returns None when CrossRef work exists but build_paper returns None."""
         with (
             patch(
                 "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
@@ -169,7 +216,7 @@ class TestDOILookupRunnerRun:
                 return_value=None,
             ),
         ):
-            runner = DOILookupRunner(doi="10.1234/bad")
+            runner = _make_runner_with_mocked_connectors()
             result = runner.run()
 
         assert result is None
@@ -180,7 +227,7 @@ class TestDOILookupRunnerRun:
             "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             return_value=None,
         ) as mock_fetch:
-            runner = DOILookupRunner(doi="10.1234/test", timeout=25.0)
+            runner = _make_runner_with_mocked_connectors()
             runner.run()
 
         mock_fetch.assert_called_once_with("10.1234/test")
@@ -191,10 +238,58 @@ class TestDOILookupRunnerRun:
             "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             return_value=None,
         ):
-            runner = DOILookupRunner(doi="10.1234/test")
+            runner = _make_runner_with_mocked_connectors()
             result = runner.run(verbose=True)
 
         assert result is None
+
+    def test_run_merges_extra_connector_data_into_base(self):
+        """Extra connectors' results are merged into the CrossRef base paper."""
+        base_paper = _fake_paper()  # no keywords
+        extra_paper = Paper(
+            title="Fake Paper Title",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            doi="10.1234/test",
+            keywords={"ML", "AI"},
+            databases={"semantic_scholar"},
+        )
+
+        with (
+            patch(
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
+                return_value=_fake_crossref_work(),
+            ),
+            patch(
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
+                return_value=base_paper,
+            ),
+        ):
+            runner = _make_runner_with_mocked_connectors()
+            # Override one extra connector to return extra_paper.
+            runner._semantic_scholar.fetch_paper_by_doi = lambda doi: extra_paper  # type: ignore[method-assign]
+            result = runner.run()
+
+        # The keywords from semantic scholar should have been merged in.
+        assert result is base_paper
+        assert result.keywords is not None
+        assert "ML" in result.keywords
+
+    def test_run_uses_fallback_when_crossref_returns_none(self):
+        """When CrossRef returns None another connector can still provide a result."""
+        fallback_paper = _fake_paper()
+
+        with patch(
+            "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
+            return_value=None,
+        ):
+            runner = _make_runner_with_mocked_connectors()
+            runner._openalex.fetch_paper_by_doi = lambda doi: fallback_paper  # type: ignore[method-assign]
+            result = runner.run()
+
+        assert result is fallback_paper
 
     def test_run_can_be_called_multiple_times(self):
         """Calling run() twice updates the result."""
@@ -202,7 +297,7 @@ class TestDOILookupRunnerRun:
             "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             return_value=None,
         ):
-            runner = DOILookupRunner(doi="10.1234/test")
+            runner = _make_runner_with_mocked_connectors()
             first = runner.run()
 
         fake_paper = _fake_paper()

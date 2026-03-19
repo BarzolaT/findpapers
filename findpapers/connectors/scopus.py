@@ -10,12 +10,14 @@ from typing import Any
 
 import requests
 
+from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
+from findpapers.exceptions import MissingApiKeyError
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 
@@ -54,7 +56,7 @@ _SCOPUS_PAPER_TYPE_MAP: dict[str, PaperType] = {
 }
 
 
-class ScopusConnector(SearchConnectorBase):
+class ScopusConnector(SearchConnectorBase, DOILookupConnectorBase):
     """Connector for the Elsevier Scopus database.
 
     Requires a Scopus API key:
@@ -88,6 +90,10 @@ class ScopusConnector(SearchConnectorBase):
         """
         super().__init__()
         self._query_builder: ScopusQueryBuilder = query_builder or ScopusQueryBuilder()
+        if not api_key or not api_key.strip():
+            raise MissingApiKeyError(
+                "ScopusConnector requires an api_key. Obtain one at https://dev.elsevier.com/"
+            )
         self._api_key = api_key
 
     @property
@@ -100,20 +106,6 @@ class ScopusConnector(SearchConnectorBase):
             Database name.
         """
         return Database.SCOPUS.value
-
-    @property
-    def is_available(self) -> bool:
-        """Return ``True`` only when an API key has been provided.
-
-        Scopus requires an API key for production use.  Without one the
-        searcher is considered unavailable and will be skipped by the runner.
-
-        Returns
-        -------
-        bool
-            ``True`` if a non-blank API key is set, ``False`` otherwise.
-        """
-        return bool(self._api_key and self._api_key.strip())
 
     @property
     def query_builder(self) -> QueryBuilder:
@@ -156,6 +148,52 @@ class ScopusConnector(SearchConnectorBase):
         if self._api_key:
             updated["X-ELS-APIKey"] = self._api_key
         return updated
+
+    # ------------------------------------------------------------------
+    # DOI lookup
+    # ------------------------------------------------------------------
+
+    def fetch_paper_by_doi(self, doi: str) -> Paper | None:
+        """Fetch a single paper by its DOI from Scopus.
+
+        Uses the Scopus Search API with the ``doi({doi})`` query term, which
+        returns the same JSON structure as a regular search.  The
+        *Abstract Retrieval* endpoint (``/content/abstract/doi/{doi}``) is
+        not used here because the ``FULL`` view requires institutional
+        entitlements beyond a basic API key.
+
+        Parameters
+        ----------
+        doi : str
+            Bare DOI identifier (e.g. ``"10.1038/nature12373"``).
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when no API key is configured, the DOI is not found in Scopus,
+            or the response cannot be parsed.
+        """
+        params = {"query": f"doi({doi})", "count": 1}
+        try:
+            response = self._get(_BASE_URL, params=params)
+            data = response.json()
+        except (requests.RequestException, ValueError):
+            logger.warning("Scopus: failed to fetch DOI %s.", doi)
+            return None
+
+        entries = (data.get("search-results") or {}).get("entry") or []
+        if not entries:
+            logger.debug("Scopus: DOI %s not found.", doi)
+            return None
+
+        # A Scopus result with an error key means no results were found.
+        first = entries[0]
+        if first.get("error"):
+            logger.debug("Scopus: DOI %s returned error: %s", doi, first["error"])
+            return None
+
+        return self._parse_paper(first)
 
     def _parse_paper(self, entry: dict[str, Any]) -> Paper | None:
         """Parse a single Scopus search result entry.

@@ -182,21 +182,6 @@ class ConnectorBase(ABC):
             Interval in seconds.
         """
 
-    @property
-    def is_available(self) -> bool:
-        """Return ``True`` if the connector is properly configured and ready to use.
-
-        Connectors that require an API key override this property to return
-        ``False`` when no key has been provided, so callers can skip them
-        gracefully instead of failing at request time.
-
-        Returns
-        -------
-        bool
-            ``True`` by default; ``False`` when a required credential is absent.
-        """
-        return True
-
     def _get_lock(self) -> threading.Lock:
         """Return the per-instance threading lock.
 

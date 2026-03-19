@@ -34,3 +34,7 @@ class ModelValidationError(FindpapersError, ValueError):
 
 class InvalidParameterError(FindpapersError, ValueError):
     """Raised when a function or runner receives an invalid argument."""
+
+
+class MissingApiKeyError(InvalidParameterError):
+    """Raised when a connector that requires an API key is created without one."""

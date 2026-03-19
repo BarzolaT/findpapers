@@ -10,12 +10,14 @@ from typing import Any
 
 import requests
 
+from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
 from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
+from findpapers.exceptions import MissingApiKeyError
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.ieee import IEEEQueryBuilder
 
@@ -51,7 +53,7 @@ _IEEE_PAPER_TYPE_MAP: dict[str, PaperType] = {
 }
 
 
-class IEEEConnector(SearchConnectorBase):
+class IEEEConnector(SearchConnectorBase, DOILookupConnectorBase):
     """Connector for the IEEE Xplore database.
 
     Requires an IEEE API key:
@@ -77,6 +79,10 @@ class IEEEConnector(SearchConnectorBase):
         """
         super().__init__()
         self._query_builder: IEEEQueryBuilder = query_builder or IEEEQueryBuilder()
+        if not api_key or not api_key.strip():
+            raise MissingApiKeyError(
+                "IEEEConnector requires an api_key. Obtain one at https://developer.ieee.org/"
+            )
         self._api_key = api_key
 
     @property
@@ -89,20 +95,6 @@ class IEEEConnector(SearchConnectorBase):
             Database name.
         """
         return Database.IEEE.value
-
-    @property
-    def is_available(self) -> bool:
-        """Return ``True`` only when an API key has been provided.
-
-        IEEE Xplore requires an API key for production use.  Without one the
-        searcher is considered unavailable and will be skipped by the runner.
-
-        Returns
-        -------
-        bool
-            ``True`` if a non-blank API key is set, ``False`` otherwise.
-        """
-        return bool(self._api_key and self._api_key.strip())
 
     @property
     def query_builder(self) -> QueryBuilder:
@@ -160,6 +152,46 @@ class IEEEConnector(SearchConnectorBase):
         if self._api_key:
             updated["X-API-Key"] = self._api_key
         return updated
+
+    # ------------------------------------------------------------------
+    # DOI lookup
+    # ------------------------------------------------------------------
+
+    def fetch_paper_by_doi(self, doi: str) -> Paper | None:
+        """Fetch a single paper by its DOI from IEEE Xplore.
+
+        Queries ``GET /api/v1/search/articles?doi={doi}&apikey={key}`` and
+        converts the first result into a :class:`~findpapers.core.paper.Paper`.
+
+        Parameters
+        ----------
+        doi : str
+            Bare DOI identifier (e.g. ``"10.1109/5.771073"``).
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when no API key is configured, the DOI is not found in IEEE, or
+            the response cannot be parsed.
+        """
+        # Note: max_records=1 is intentionally omitted - the IEEE Xplore API
+        # returns total_records=1 but an empty articles list when max_records=1
+        # is passed alongside a doi filter (probably an API bug).
+        params = self._prepare_params({"doi": doi})
+        try:
+            response = self._get(_BASE_URL, params=params)
+            data = response.json()
+        except (requests.RequestException, ValueError):
+            logger.warning("IEEE: failed to fetch DOI %s.", doi)
+            return None
+
+        articles = data.get("articles") or []
+        if not articles:
+            logger.debug("IEEE: DOI %s not found.", doi)
+            return None
+
+        return self._parse_paper(articles[0])
 
     def _parse_paper(self, item: dict[str, Any]) -> Paper | None:
         """Parse a single IEEE API result item.

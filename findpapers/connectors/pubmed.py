@@ -11,6 +11,7 @@ from xml.etree import ElementTree as ET
 
 import requests
 
+from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
@@ -31,7 +32,7 @@ _MIN_REQUEST_INTERVAL_DEFAULT = 0.34  # ~3 req/s
 _MIN_REQUEST_INTERVAL_WITH_KEY = 0.11  # ~10 req/s
 
 
-class PubmedConnector(SearchConnectorBase):
+class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase):
     """Connector for the PubMed / NCBI database.
 
     Uses NCBI E-utilities (esearch + efetch):
@@ -135,6 +136,48 @@ class PubmedConnector(SearchConnectorBase):
         if self._api_key:
             return {**params, "api_key": self._api_key}
         return params
+
+    # ------------------------------------------------------------------
+    # DOI lookup
+    # ------------------------------------------------------------------
+
+    def fetch_paper_by_doi(self, doi: str) -> Paper | None:
+        """Fetch a single paper by its DOI from PubMed.
+
+        Uses the NCBI E-Search ``{doi}[doi]`` term to locate the PMID,
+        then fetches full metadata via E-Fetch.
+
+        Parameters
+        ----------
+        doi : str
+            Bare DOI identifier (e.g. ``"10.1038/nature12373"``).
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when the DOI is not found or the response cannot be parsed.
+        """
+        try:
+            ids, _ = self._search_ids(f"{doi}[doi]", retstart=0, retmax=1)
+        except (requests.RequestException, ValueError):
+            logger.warning("PubMed: esearch failed for DOI %s.", doi)
+            return None
+
+        if not ids:
+            logger.debug("PubMed: DOI %s not found.", doi)
+            return None
+
+        try:
+            articles = self._fetch_details(ids[:1])
+        except (requests.RequestException, ET.ParseError):
+            logger.warning("PubMed: efetch failed for DOI %s (pmid=%s).", doi, ids[0])
+            return None
+
+        if not articles:
+            return None
+
+        return self._parse_paper(articles[0])
 
     def _search_ids(
         self,

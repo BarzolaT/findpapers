@@ -11,6 +11,7 @@ from xml.etree import ElementTree as ET
 
 import requests
 
+from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
@@ -34,6 +35,10 @@ _NS = {"atom": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas
 # Example: http://arxiv.org/abs/1706.03762v5 → 1706.03762
 _ARXIV_ID_RE = re.compile(r"arxiv\.org/abs/([\d.]+)", re.IGNORECASE)
 
+# Regex to extract arXiv paper ID from an arXiv-assigned DOI.
+# arXiv assigns DOIs under the 10.48550 prefix: 10.48550/arXiv.1706.03762
+_ARXIV_DOI_RE = re.compile(r"^10\.48550/arxiv\.([\d.]+)$", re.IGNORECASE)
+
 # Mapping from SourceType to PaperType for arXiv entries.
 _ARXIV_PAPER_TYPE_MAP: dict[SourceType, PaperType] = {
     SourceType.JOURNAL: PaperType.ARTICLE,
@@ -43,7 +48,7 @@ _ARXIV_PAPER_TYPE_MAP: dict[SourceType, PaperType] = {
 }
 
 
-class ArxivConnector(SearchConnectorBase):
+class ArxivConnector(SearchConnectorBase, DOILookupConnectorBase):
     """Connector for the arXiv preprint database.
 
     Uses the arXiv Atom Feed API:
@@ -96,6 +101,50 @@ class ArxivConnector(SearchConnectorBase):
             Interval in seconds.
         """
         return _MIN_REQUEST_INTERVAL
+
+    # ------------------------------------------------------------------
+    # DOI lookup
+    # ------------------------------------------------------------------
+
+    def fetch_paper_by_doi(self, doi: str) -> Paper | None:
+        """Fetch a single paper by its DOI from arXiv.
+
+        Only arXiv-assigned DOIs (``10.48550/arXiv.<id>``) are supported.
+        For papers whose publisher DOI happens to appear on arXiv the arXiv
+        API does not provide a DOI-based search, so ``None`` is returned.
+
+        Parameters
+        ----------
+        doi : str
+            Bare DOI identifier.
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when the DOI is not an arXiv-native DOI, the paper is not found,
+            or the response cannot be parsed.
+        """
+        m = _ARXIV_DOI_RE.match(doi.strip())
+        if not m:
+            # Not an arXiv-native DOI — cannot resolve via arXiv API.
+            logger.debug("arXiv: DOI %s is not an arXiv-native DOI — skipping.", doi)
+            return None
+
+        arxiv_id = m.group(1)
+        try:
+            response = self._get(_BASE_URL, params={"id_list": arxiv_id, "max_results": 1})
+            tree = ET.fromstring(response.text)
+        except (requests.RequestException, ET.ParseError):
+            logger.warning("arXiv: failed to fetch arXiv ID %s for DOI %s.", arxiv_id, doi)
+            return None
+
+        entries = tree.findall("atom:entry", _NS)
+        if not entries:
+            logger.debug("arXiv: no entry found for ID %s.", arxiv_id)
+            return None
+
+        return self._parse_paper(entries[0])
 
     def _parse_paper(self, entry: ET.Element) -> Paper | None:
         """Parse a single Atom entry element into a :class:`Paper`.

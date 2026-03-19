@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 from unittest.mock import MagicMock, patch
 
+import pytest
 import requests
 
 from findpapers.connectors.scopus import ScopusConnector
@@ -12,6 +13,7 @@ from findpapers.core.author import Author
 from findpapers.core.paper import PaperType
 from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
+from findpapers.exceptions import MissingApiKeyError
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 
 
@@ -20,7 +22,7 @@ class TestScopusConnectorInit:
 
     def test_default_builder_created(self):
         """Connector creates ScopusQueryBuilder when none provided."""
-        searcher = ScopusConnector()
+        searcher = ScopusConnector(api_key="dummy")
         assert isinstance(searcher.query_builder, ScopusQueryBuilder)
 
     def test_api_key_stored(self):
@@ -30,20 +32,19 @@ class TestScopusConnectorInit:
 
     def test_name(self):
         """Connector name is 'Scopus'."""
-        assert ScopusConnector().name == Database.SCOPUS
+        assert ScopusConnector(api_key="dummy").name == Database.SCOPUS
 
-    def test_is_available_without_api_key(self):
-        """is_available is False when no API key is provided."""
-        assert ScopusConnector().is_available is False
+    def test_missing_api_key_raises(self):
+        """Constructing without an API key raises MissingApiKeyError."""
+        with pytest.raises(MissingApiKeyError, match="api_key"):
+            ScopusConnector()
 
-    def test_is_available_with_api_key(self):
-        """is_available is True when an API key is provided."""
-        assert ScopusConnector(api_key="key").is_available is True
-
-    def test_is_available_with_empty_api_key(self):
-        """is_available is False when an empty/blank API key is provided."""
-        assert ScopusConnector(api_key="").is_available is False
-        assert ScopusConnector(api_key="   ").is_available is False
+    def test_missing_empty_api_key_raises(self):
+        """Constructing with a blank API key raises MissingApiKeyError."""
+        with pytest.raises(MissingApiKeyError, match="api_key"):
+            ScopusConnector(api_key="")
+        with pytest.raises(MissingApiKeyError, match="api_key"):
+            ScopusConnector(api_key="   ")
 
 
 class TestScopusConnectorParsePaper:
@@ -54,20 +55,20 @@ class TestScopusConnectorParsePaper:
         entries = scopus_sample_json.get("search-results", {}).get("entry", [])
         assert len(entries) > 0
 
-        papers = [ScopusConnector()._parse_paper(e) for e in entries]
+        papers = [ScopusConnector(api_key="dummy")._parse_paper(e) for e in entries]
         valid = [p for p in papers if p is not None]
         assert len(valid) > 0
 
     def test_paper_has_database_tag(self, scopus_sample_json):
         """Parsed paper has 'Scopus' in databases set."""
         entry = scopus_sample_json["search-results"]["entry"][0]
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert Database.SCOPUS in paper.databases
 
     def test_missing_title_returns_none(self):
         """Entry with empty title returns None."""
-        paper = ScopusConnector()._parse_paper({"dc:title": ""})
+        paper = ScopusConnector(api_key="dummy")._parse_paper({"dc:title": ""})
         assert paper is None
 
     def test_authors_as_list(self):
@@ -76,7 +77,7 @@ class TestScopusConnectorParsePaper:
             "dc:title": "A Paper",
             "dc:creator": ["Author One", "Author Two"],
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert len(paper.authors) == 2
         assert Author(name="Author One") in paper.authors
@@ -87,7 +88,7 @@ class TestScopusConnectorParsePaper:
             "dc:title": "A Paper",
             "prism:teaser": "Teaser text here.",
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.abstract == "Teaser text here."
 
@@ -98,7 +99,7 @@ class TestScopusConnectorParsePaper:
             "prism:publicationName": "Some Book",
             "prism:isbn": [{"$": "978-3-16-148410-0"}, {"$": "978-0-00-000000-0"}],
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.isbn == "978-3-16-148410-0"
@@ -106,14 +107,14 @@ class TestScopusConnectorParsePaper:
     def test_pages_extracted(self):
         """Entry with prism:pageRange populates page_range field."""
         entry = {"dc:title": "A Paper", "prism:pageRange": "100-110"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.page_range == "100-110"
 
     def test_citation_count_parsed(self):
         """citedby-count is parsed as integer."""
         entry = {"dc:title": "A Paper", "citedby-count": "42"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.citations == 42
 
@@ -131,7 +132,7 @@ class TestScopusConnectorParsePaper:
                 }
             ],
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert len(paper.authors) == 1
         assert paper.authors[0].name == "Smith, J."
@@ -151,7 +152,7 @@ class TestScopusConnectorParsePaper:
                 }
             ],
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert len(paper.authors) == 2
         assert paper.authors[0].affiliation is None
@@ -164,14 +165,14 @@ class TestScopusConnectorParsePaper:
             "dc:creator": "Solo Author",
             "affiliation": [],
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.authors[0].affiliation is None
 
     def test_affiliation_from_sample_response(self, scopus_sample_json):
         """First entry in sample response has affiliation extracted."""
         entry = scopus_sample_json["search-results"]["entry"][0]
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert len(paper.authors) == 1
         assert paper.authors[0].name == "Sumithra M.G."
@@ -184,7 +185,7 @@ class TestScopusConnectorParsePaper:
             "prism:publicationName": "Nature",
             "prism:aggregationType": "Journal",
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.JOURNAL
@@ -196,7 +197,7 @@ class TestScopusConnectorParsePaper:
             "prism:publicationName": "ICML 2021",
             "prism:aggregationType": "Conference Proceeding",
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.CONFERENCE
@@ -208,7 +209,7 @@ class TestScopusConnectorParsePaper:
             "prism:publicationName": "Advances in AI",
             "prism:aggregationType": "Book",
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.BOOK
@@ -219,7 +220,7 @@ class TestScopusConnectorParsePaper:
             "dc:title": "A Paper",
             "prism:publicationName": "Something",
         }
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type is None
@@ -227,56 +228,56 @@ class TestScopusConnectorParsePaper:
     def test_paper_type_article_from_subtype(self):
         """subtypeDescription 'Article' maps to PaperType.ARTICLE."""
         entry = {"dc:title": "P", "subtypeDescription": "Article"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.ARTICLE
 
     def test_paper_type_inproceedings_from_conference_paper(self):
         """subtypeDescription 'Conference Paper' maps to PaperType.INPROCEEDINGS."""
         entry = {"dc:title": "P", "subtypeDescription": "Conference Paper"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.INPROCEEDINGS
 
     def test_paper_type_book_from_subtype(self):
         """subtypeDescription 'Book' maps to PaperType.BOOK."""
         entry = {"dc:title": "P", "subtypeDescription": "Book"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.BOOK
 
     def test_paper_type_inbook_from_book_chapter(self):
         """subtypeDescription 'Book Chapter' maps to PaperType.INBOOK."""
         entry = {"dc:title": "P", "subtypeDescription": "Book Chapter"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.INBOOK
 
     def test_paper_type_techreport_from_report(self):
         """subtypeDescription 'Report' maps to PaperType.TECHREPORT."""
         entry = {"dc:title": "P", "subtypeDescription": "Report"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.TECHREPORT
 
     def test_paper_type_misc_from_data_paper(self):
         """subtypeDescription 'Data Paper' maps to PaperType.MISC."""
         entry = {"dc:title": "P", "subtypeDescription": "Data Paper"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.MISC
 
     def test_paper_type_article_from_business_article(self):
         """subtypeDescription 'Business Article' maps to PaperType.ARTICLE."""
         entry = {"dc:title": "P", "subtypeDescription": "Business Article"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is PaperType.ARTICLE
 
     def test_paper_type_none_when_missing(self):
         """Missing subtypeDescription results in paper_type being None."""
         entry = {"dc:title": "P"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.paper_type is None
 
@@ -293,7 +294,7 @@ class TestScopusConnectorSearch:
 
     def test_search_returns_papers(self, simple_query, scopus_sample_json, mock_response):
         """search() returns papers from Scopus JSON response."""
-        searcher = ScopusConnector()
+        searcher = ScopusConnector(api_key="dummy")
         response_with_data = mock_response(json_data=scopus_sample_json)
         response_with_data.raise_for_status = MagicMock()
         response_empty_page = self._empty_page_response(mock_response)
@@ -314,7 +315,7 @@ class TestScopusConnectorSearch:
 
     def test_max_papers_respected(self, simple_query, scopus_sample_json, mock_response):
         """search() returns no more than max_papers papers."""
-        searcher = ScopusConnector()
+        searcher = ScopusConnector(api_key="dummy")
         response_with_data = mock_response(json_data=scopus_sample_json)
         response_with_data.raise_for_status = MagicMock()
 
@@ -328,7 +329,7 @@ class TestScopusConnectorSearch:
 
     def test_http_error_breaks_loop(self, simple_query):
         """Exception in _get breaks the pagination loop and returns empty list."""
-        searcher = ScopusConnector()
+        searcher = ScopusConnector(api_key="dummy")
 
         with (
             patch.object(searcher, "_get", side_effect=requests.RequestException("network error")),
@@ -340,7 +341,7 @@ class TestScopusConnectorSearch:
 
     def test_progress_callback_called(self, simple_query, scopus_sample_json, mock_response):
         """Progress callback is invoked after processing each page."""
-        searcher = ScopusConnector()
+        searcher = ScopusConnector(api_key="dummy")
         response_with_data = mock_response(json_data=scopus_sample_json)
         response_with_data.raise_for_status = MagicMock()
         response_empty_page = self._empty_page_response(mock_response)
@@ -372,7 +373,7 @@ class TestScopusConnectorSearch:
                 ],
             }
         }
-        searcher = ScopusConnector()
+        searcher = ScopusConnector(api_key="dummy")
         response = mock_response(json_data=single_entry_data)
         response.raise_for_status = MagicMock()
 
@@ -389,7 +390,7 @@ class TestScopusConnectorSearch:
         """Network error in _fetch_papers is caught and returns an empty list."""
         import requests as req_lib
 
-        searcher = ScopusConnector()
+        searcher = ScopusConnector(api_key="dummy")
 
         with patch.object(
             searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
@@ -400,7 +401,7 @@ class TestScopusConnectorSearch:
 
     def test_since_until_adds_date_param(self, simple_query, scopus_sample_json, mock_response):
         """search() adds date=YYYY-YYYY when since/until are given."""
-        searcher = ScopusConnector()
+        searcher = ScopusConnector(api_key="dummy")
         response = mock_response(json_data=scopus_sample_json)
         response.raise_for_status = MagicMock()
         get_calls: list = []
@@ -426,7 +427,7 @@ class TestScopusConnectorSearch:
         self, simple_query, scopus_sample_json, mock_response
     ):
         """When since and until are in the same year, date=YYYY is used instead of YYYY-YYYY."""
-        searcher = ScopusConnector()
+        searcher = ScopusConnector(api_key="dummy")
         response = mock_response(json_data=scopus_sample_json)
         response.raise_for_status = MagicMock()
         get_calls: list = []
@@ -455,41 +456,41 @@ class TestScopusConnectorIsOpenAccess:
     def test_openaccess_flag_true(self):
         """openaccessFlag=True yields is_open_access=True."""
         entry = {"dc:title": "P", "openaccessFlag": True}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.is_open_access is True
 
     def test_openaccess_flag_false(self):
         """openaccessFlag=False yields is_open_access=False."""
         entry = {"dc:title": "P", "openaccessFlag": False}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.is_open_access is False
 
     def test_openaccess_int_one(self):
         """openaccess='1' (string) yields is_open_access=True."""
         entry = {"dc:title": "P", "openaccess": "1"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.is_open_access is True
 
     def test_openaccess_int_zero(self):
         """openaccess=0 yields is_open_access=False."""
         entry = {"dc:title": "P", "openaccess": 0}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.is_open_access is False
 
     def test_flag_takes_priority_over_int_field(self):
         """openaccessFlag takes priority over openaccess integer field."""
         entry = {"dc:title": "P", "openaccessFlag": True, "openaccess": "0"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.is_open_access is True
 
     def test_both_absent_sets_none(self):
         """Neither field present yields is_open_access=None."""
         entry = {"dc:title": "P"}
-        paper = ScopusConnector()._parse_paper(entry)
+        paper = ScopusConnector(api_key="dummy")._parse_paper(entry)
         assert paper is not None
         assert paper.is_open_access is None

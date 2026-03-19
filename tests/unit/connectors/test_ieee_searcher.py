@@ -12,7 +12,7 @@ from findpapers.connectors.ieee import IEEEConnector
 from findpapers.core.paper import PaperType
 from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
-from findpapers.exceptions import UnsupportedQueryError
+from findpapers.exceptions import MissingApiKeyError, UnsupportedQueryError
 from findpapers.query.builders.ieee import IEEEQueryBuilder
 
 
@@ -21,7 +21,7 @@ class TestIEEEConnectorInit:
 
     def test_default_builder_created(self):
         """Connector creates IEEEQueryBuilder when none provided."""
-        searcher = IEEEConnector()
+        searcher = IEEEConnector(api_key="dummy")
         assert isinstance(searcher.query_builder, IEEEQueryBuilder)
 
     def test_api_key_stored(self):
@@ -31,20 +31,19 @@ class TestIEEEConnectorInit:
 
     def test_name(self):
         """Connector name is 'IEEE'."""
-        assert IEEEConnector().name == Database.IEEE
+        assert IEEEConnector(api_key="dummy").name == Database.IEEE
 
-    def test_is_available_without_api_key(self):
-        """is_available is False when no API key is provided."""
-        assert IEEEConnector().is_available is False
+    def test_missing_api_key_raises(self):
+        """Constructing without an API key raises MissingApiKeyError."""
+        with pytest.raises(MissingApiKeyError, match="api_key"):
+            IEEEConnector()
 
-    def test_is_available_with_api_key(self):
-        """is_available is True when an API key is provided."""
-        assert IEEEConnector(api_key="key").is_available is True
-
-    def test_is_available_with_empty_api_key(self):
-        """is_available is False when an empty/blank API key is provided."""
-        assert IEEEConnector(api_key="").is_available is False
-        assert IEEEConnector(api_key="   ").is_available is False
+    def test_missing_empty_api_key_raises(self):
+        """Constructing with a blank API key raises MissingApiKeyError."""
+        with pytest.raises(MissingApiKeyError, match="api_key"):
+            IEEEConnector(api_key="")
+        with pytest.raises(MissingApiKeyError, match="api_key"):
+            IEEEConnector(api_key="   ")
 
 
 class TestIEEEConnectorParsePaper:
@@ -55,20 +54,22 @@ class TestIEEEConnectorParsePaper:
         articles = ieee_sample_json.get("articles", [])
         assert len(articles) > 0
 
-        papers = [IEEEConnector()._parse_paper(item) for item in articles]
+        papers = [IEEEConnector(api_key="dummy")._parse_paper(item) for item in articles]
         valid = [p for p in papers if p is not None]
         assert len(valid) > 0
 
     def test_paper_has_database_tag(self, ieee_sample_json):
         """Parsed paper has 'IEEE' in databases set."""
         item = ieee_sample_json["articles"][0]
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert Database.IEEE in paper.databases
 
     def test_missing_title_returns_none(self):
         """Item with empty title returns None."""
-        paper = IEEEConnector()._parse_paper({"title": "  ", "abstract": "some text"})
+        paper = IEEEConnector(api_key="dummy")._parse_paper(
+            {"title": "  ", "abstract": "some text"}
+        )
         assert paper is None
 
     def test_parse_with_all_keyword_groups(self):
@@ -81,7 +82,7 @@ class TestIEEEConnectorParsePaper:
                 "mesh_terms": {"terms": ["term3"]},
             },
         }
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.subjects == {"term1"}
         assert paper.keywords == {"term2", "term3"}
@@ -89,7 +90,7 @@ class TestIEEEConnectorParsePaper:
     def test_index_terms_explicit_none_does_not_crash(self):
         """When index_terms is explicitly None (not just absent), parsing should not crash."""
         item = {"title": "A Paper", "index_terms": None}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         # No keywords should be extracted, but no AttributeError either.
         assert not paper.keywords
@@ -104,7 +105,7 @@ class TestIEEEConnectorParsePaper:
                 "author_terms": {"terms": ["my keyword"]},
             },
         }
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.subjects == {"Signal processing", "Frequency estimation"}
         assert paper.keywords == {"my keyword"}
@@ -112,35 +113,35 @@ class TestIEEEConnectorParsePaper:
     def test_no_index_terms_gives_empty_subjects(self):
         """When no index_terms are present, subjects is empty."""
         item = {"title": "A Paper"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.subjects == set()
 
     def test_pages_start_end(self):
         """start_page and end_page are combined into page_range field."""
         item = {"title": "A Paper", "start_page": "10", "end_page": "20"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.page_range == "10-20"
 
     def test_pages_start_only(self):
         """Only start_page populates page_range field."""
         item = {"title": "A Paper", "start_page": "5"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.page_range == "5"
 
     def test_citation_count_parsed(self):
         """citing_paper_count is parsed as an integer."""
         item = {"title": "A Paper", "citing_paper_count": "42"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.citations == 42
 
     def test_invalid_citation_count_ignored(self):
         """Non-numeric citing_paper_count is gracefully ignored."""
         item = {"title": "A Paper", "citing_paper_count": "N/A"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.citations is None
 
@@ -153,7 +154,7 @@ class TestIEEEConnectorParsePaper:
             "isbn": "978-0-xxx",
             "publisher": "IEEE",
         }
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.title == "IEEE Trans."
@@ -162,7 +163,7 @@ class TestIEEEConnectorParsePaper:
         """Author terms go to keywords; IEEE terms go to subjects."""
         articles = ieee_sample_json["articles"]
         # articles[2] is the first entry with index_terms (ieee_terms + author_terms)
-        paper = IEEEConnector()._parse_paper(articles[2])
+        paper = IEEEConnector(api_key="dummy")._parse_paper(articles[2])
         assert paper is not None
         # ieee_terms → subjects
         assert "Natural language processing" in paper.subjects
@@ -173,7 +174,7 @@ class TestIEEEConnectorParsePaper:
     def test_source_type_journal(self):
         """content_type 'Journals' maps to SourceType.JOURNAL."""
         item = {"title": "A Paper", "publication_title": "IEEE Trans.", "content_type": "Journals"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.JOURNAL
@@ -185,7 +186,7 @@ class TestIEEEConnectorParsePaper:
             "publication_title": "Proc. ICML",
             "content_type": "Conferences",
         }
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.CONFERENCE
@@ -193,7 +194,7 @@ class TestIEEEConnectorParsePaper:
     def test_source_type_book(self):
         """content_type 'Books' maps to SourceType.BOOK."""
         item = {"title": "A Paper", "publication_title": "A Book Title", "content_type": "Books"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.BOOK
@@ -205,7 +206,7 @@ class TestIEEEConnectorParsePaper:
             "publication_title": "IEEE Spectrum",
             "content_type": "Magazines",
         }
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.JOURNAL
@@ -217,7 +218,7 @@ class TestIEEEConnectorParsePaper:
             "publication_title": "Something",
             "content_type": "UnknownType",
         }
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type is None
@@ -229,7 +230,7 @@ class TestIEEEConnectorParsePaper:
             "publication_title": "IEEE Standard",
             "content_type": "Standards",
         }
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.source is not None
         assert paper.source.source_type == SourceType.OTHER
@@ -237,35 +238,35 @@ class TestIEEEConnectorParsePaper:
     def test_paper_type_article_from_journals(self):
         """content_type 'Journals' maps to PaperType.ARTICLE."""
         item = {"title": "P", "content_type": "Journals"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.paper_type is PaperType.ARTICLE
 
     def test_paper_type_inproceedings_from_conferences(self):
         """content_type 'Conferences' maps to PaperType.INPROCEEDINGS."""
         item = {"title": "P", "content_type": "Conferences"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.paper_type is PaperType.INPROCEEDINGS
 
     def test_paper_type_inbook_from_books(self):
         """content_type 'Books' maps to PaperType.INBOOK."""
         item = {"title": "P", "content_type": "Books"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.paper_type is PaperType.INBOOK
 
     def test_paper_type_techreport_from_standards(self):
         """content_type 'Standards' maps to PaperType.TECHREPORT."""
         item = {"title": "P", "content_type": "Standards"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.paper_type is PaperType.TECHREPORT
 
     def test_paper_type_none_when_unknown(self):
         """Unknown content_type results in paper_type being None."""
         item = {"title": "P", "content_type": "UnknownType"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.paper_type is None
 
@@ -281,13 +282,13 @@ class TestIEEEConnectorSearch:
         parser = QueryParser()
         propagator = FilterPropagator()
         q = propagator.propagate(parser.parse("[mach?]"))
-        searcher = IEEEConnector()
+        searcher = IEEEConnector(api_key="dummy")
         with pytest.raises(UnsupportedQueryError):
             searcher.search(q)
 
     def test_search_returns_papers(self, simple_query, ieee_sample_json, mock_response):
         """search() returns papers from IEEE JSON response."""
-        searcher = IEEEConnector()
+        searcher = IEEEConnector(api_key="dummy")
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
         searcher._http_session = MagicMock()
@@ -301,7 +302,7 @@ class TestIEEEConnectorSearch:
 
     def test_max_papers_respected(self, simple_query, ieee_sample_json, mock_response):
         """search() returns no more than max_papers papers."""
-        searcher = IEEEConnector()
+        searcher = IEEEConnector(api_key="dummy")
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
         searcher._http_session = MagicMock()
@@ -314,7 +315,7 @@ class TestIEEEConnectorSearch:
 
     def test_http_error_breaks_loop(self, simple_query, mock_response):
         """HTTP error in _get breaks the pagination loop and returns partial results."""
-        searcher = IEEEConnector()
+        searcher = IEEEConnector(api_key="dummy")
 
         with (
             patch.object(searcher, "_get", side_effect=requests.RequestException("network error")),
@@ -326,7 +327,7 @@ class TestIEEEConnectorSearch:
 
     def test_progress_callback_called(self, simple_query, ieee_sample_json, mock_response):
         """Progress callback is called during search."""
-        searcher = IEEEConnector()
+        searcher = IEEEConnector(api_key="dummy")
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
         callback = MagicMock()
@@ -342,7 +343,7 @@ class TestIEEEConnectorSearch:
         """Network error in _fetch_papers is caught and returns an empty list."""
         import requests as req_lib
 
-        searcher = IEEEConnector()
+        searcher = IEEEConnector(api_key="dummy")
 
         with patch.object(
             searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
@@ -353,7 +354,7 @@ class TestIEEEConnectorSearch:
 
     def test_since_until_adds_year_params(self, simple_query, ieee_sample_json, mock_response):
         """search() adds start_year/end_year when since/until are given."""
-        searcher = IEEEConnector()
+        searcher = IEEEConnector(api_key="dummy")
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
         searcher._http_session = MagicMock()
@@ -372,7 +373,7 @@ class TestIEEEConnectorSearch:
 
     def test_since_only_adds_start_year(self, simple_query, ieee_sample_json, mock_response):
         """search() adds only start_year when only `since` is given."""
-        searcher = IEEEConnector()
+        searcher = IEEEConnector(api_key="dummy")
         response = mock_response(json_data=ieee_sample_json)
         response.raise_for_status = MagicMock()
         searcher._http_session = MagicMock()
@@ -395,34 +396,34 @@ class TestIEEEConnectorIsOpenAccess:
     def test_open_access_type_sets_true(self):
         """access_type='OPEN_ACCESS' yields is_open_access=True."""
         item = {"title": "P", "access_type": "OPEN_ACCESS"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.is_open_access is True
 
     def test_locked_access_type_sets_false(self):
         """access_type='LOCKED' yields is_open_access=False."""
         item = {"title": "P", "access_type": "LOCKED"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.is_open_access is False
 
     def test_ephemera_access_type_sets_none(self):
         """access_type='EPHEMERA' yields is_open_access=None (unknown)."""
         item = {"title": "P", "access_type": "EPHEMERA"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.is_open_access is None
 
     def test_missing_access_type_sets_none(self):
         """Missing access_type yields is_open_access=None."""
         item = {"title": "P"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.is_open_access is None
 
     def test_case_insensitive_access_type(self):
         """access_type matching is case-insensitive."""
         item = {"title": "P", "access_type": "open_access"}
-        paper = IEEEConnector()._parse_paper(item)
+        paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.is_open_access is True

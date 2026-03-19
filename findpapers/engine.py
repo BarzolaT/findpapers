@@ -452,11 +452,16 @@ class Engine:
         timeout: float | None = 10.0,
         verbose: bool = False,
     ) -> Paper | None:
-        """Fetch a single paper by its DOI from CrossRef.
+        """Fetch a single paper by its DOI from multiple databases.
 
-        Queries the CrossRef API for the given DOI and returns a
-        :class:`~findpapers.core.paper.Paper` populated with the available
-        metadata (title, authors, abstract, source, publication date, etc.).
+        Queries each database and merges the results into a single
+        :class:`~findpapers.core.paper.Paper` enriched with metadata
+        from every source that found the paper.
+
+        CrossRef is the canonical DOI authority and is always tried first.
+        IEEE and Scopus are only queried when their API keys have been
+        provided to this :class:`Engine`.  arXiv is only able to resolve
+        arXiv-native DOIs (``10.48550/arXiv.<id>``).
 
         The DOI can be provided as a bare identifier (e.g.
         ``"10.1038/nature12373"``) or as a full URL (e.g.
@@ -477,9 +482,9 @@ class Engine:
         Returns
         -------
         Paper | None
-            A :class:`~findpapers.core.paper.Paper` with CrossRef metadata,
-            or ``None`` when the DOI is not found or the response cannot be
-            parsed into a valid paper.
+            A :class:`~findpapers.core.paper.Paper` with metadata merged
+            from all queried databases, or ``None`` when no database found
+            the DOI.
 
         Raises
         ------
@@ -501,7 +506,6 @@ class Engine:
         >>> engine = Engine()
         >>> paper = engine.fetch_paper_by_doi("10.1038/nature12373")
         >>> print(paper.title)
-        Experimental ...
 
         Using a full DOI URL:
 
@@ -510,6 +514,11 @@ class Engine:
         runner = DOILookupRunner(
             doi=doi,
             email=self._email,
+            ieee_api_key=self._ieee_api_key,
+            scopus_api_key=self._scopus_api_key,
+            pubmed_api_key=self._pubmed_api_key,
+            openalex_api_key=self._openalex_api_key,
+            semantic_scholar_api_key=self._semantic_scholar_api_key,
             timeout=timeout,
         )
         return runner.run(verbose=verbose)

@@ -5,7 +5,7 @@ import datetime
 import pytest
 
 from findpapers.core.author import Author
-from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, PaperType, _is_preprint_doi, _merge_doi
+from findpapers.core.paper import _MAX_FUTURE_DAYS, Paper, PaperType
 from findpapers.core.source import Source
 from findpapers.exceptions import ModelValidationError
 
@@ -254,67 +254,8 @@ def test_paper_merge_keeps_larger_author_list():
     ]
 
 
-class TestIsPreprintDoi:
-    """Unit tests for the _is_preprint_doi helper."""
-
-    def test_arxiv_doi_recognised_as_preprint(self):
-        assert _is_preprint_doi("10.48550/arxiv.1706.03762") is True
-
-    def test_biorxiv_doi_recognised_as_preprint(self):
-        assert _is_preprint_doi("10.1101/2021.05.01.442244") is True
-
-    def test_ssrn_doi_recognised_as_preprint(self):
-        assert _is_preprint_doi("10.2139/ssrn.3844763") is True
-
-    def test_zenodo_doi_recognised_as_preprint(self):
-        assert _is_preprint_doi("10.5281/zenodo.18056028") is True
-
-    def test_publisher_doi_not_preprint(self):
-        assert _is_preprint_doi("10.5555/3295222.3295349") is False
-
-    def test_nature_doi_not_preprint(self):
-        assert _is_preprint_doi("10.1038/s41586-021-03819-2") is False
-
-    def test_case_insensitive(self):
-        assert _is_preprint_doi("10.48550/ARXIV.1706.03762") is True
-
-
-class TestMergeDoi:
-    """Unit tests for the _merge_doi helper."""
-
-    def test_preprint_base_publisher_incoming_returns_publisher(self):
-        result = _merge_doi("10.48550/arxiv.1706.03762", "10.5555/3295222.3295349")
-        assert result == "10.5555/3295222.3295349"
-
-    def test_publisher_base_preprint_incoming_returns_base(self):
-        result = _merge_doi("10.5555/3295222.3295349", "10.48550/arxiv.1706.03762")
-        assert result == "10.5555/3295222.3295349"
-
-    def test_both_preprint_returns_longer(self):
-        a = "10.48550/arxiv.1706.03762"
-        b = "10.1101/2021.05.01.442244"
-        result = _merge_doi(a, b)
-        # falls back to merge_value → the longer string
-        assert result == max(a, b, key=len)
-
-    def test_both_publisher_returns_longer(self):
-        a = "10.1038/s41586-021-03819-2"
-        b = "10.5555/3295222.3295349"
-        result = _merge_doi(a, b)
-        assert result == max(a, b, key=len)
-
-    def test_base_none_returns_incoming(self):
-        assert _merge_doi(None, "10.5555/x") == "10.5555/x"
-
-    def test_incoming_none_returns_base(self):
-        assert _merge_doi("10.5555/x", None) == "10.5555/x"
-
-    def test_both_none_returns_none(self):
-        assert _merge_doi(None, None) is None
-
-
-def test_paper_merge_prefers_publisher_doi_over_preprint_doi():
-    """Paper.merge keeps the publisher DOI when one copy has an arXiv DOI."""
+def test_paper_merge_doi_first_wins():
+    """Paper.merge never overwrites an existing DOI — the first source wins."""
     base = Paper(
         title="Attention is All You Need",
         abstract="",
@@ -332,26 +273,27 @@ def test_paper_merge_prefers_publisher_doi_over_preprint_doi():
         doi="10.5555/3295222.3295349",
     )
     base.merge(incoming)
-    assert base.doi == "10.5555/3295222.3295349"
+    # Base DOI must be preserved regardless of which one is a preprint.
+    assert base.doi == "10.48550/arxiv.1706.03762"
 
 
-def test_paper_merge_prefers_publisher_doi_when_preprint_is_incoming():
-    """Publisher DOI on base is preserved even when the incoming has a preprint DOI."""
+def test_paper_merge_doi_filled_from_incoming_when_base_has_none():
+    """Paper.merge fills a missing DOI from the incoming paper."""
     base = Paper(
-        title="Attention is All You Need",
-        abstract="The dominant sequence...",
-        authors=[Author(name="Vaswani")],
+        title="Paper",
+        abstract="",
+        authors=[],
         source=None,
-        publication_date=datetime.date(2017, 6, 12),
-        doi="10.5555/3295222.3295349",
+        publication_date=None,
+        doi=None,
     )
     incoming = Paper(
-        title="Attention is All You Need",
+        title="Paper",
         abstract="",
-        authors=[Author(name="Vaswani")],
+        authors=[],
         source=None,
-        publication_date=datetime.date(2017, 6, 12),
-        doi="10.48550/arxiv.1706.03762",
+        publication_date=None,
+        doi="10.5555/3295222.3295349",
     )
     base.merge(incoming)
     assert base.doi == "10.5555/3295222.3295349"

@@ -11,6 +11,7 @@ from typing import Any
 import requests
 
 from findpapers.connectors.citation_base import CitationConnectorBase
+from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
@@ -69,7 +70,7 @@ _OPENALEX_PAPER_TYPE_MAP: dict[str, PaperType] = {
 }
 
 
-class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
+class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupConnectorBase):
     """Connector for the OpenAlex open catalog of academic works.
 
     https://docs.openalex.org/how-to-use-the-api
@@ -162,6 +163,52 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase):
         if self._api_key:
             return {**params, "api_key": self._api_key}
         return params
+
+    # ------------------------------------------------------------------
+    # DOI lookup
+    # ------------------------------------------------------------------
+
+    def fetch_paper_by_doi(self, doi: str) -> Paper | None:
+        """Fetch a single paper by its DOI from OpenAlex.
+
+        Queries ``GET /works/doi:{doi}`` and converts the response into a
+        :class:`~findpapers.core.paper.Paper`.
+
+        Parameters
+        ----------
+        doi : str
+            Bare DOI identifier (e.g. ``"10.1038/nature12373"``).
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when the DOI is not found or the response cannot be parsed.
+        """
+        url = f"{_BASE_URL}/doi:{doi}"
+        params: dict[str, Any] = {
+            "select": (
+                "id,doi,title,display_name,publication_date,authorships,"
+                "abstract_inverted_index,cited_by_count,open_access,locations,"
+                "primary_location,concepts,keywords,type,biblio,primary_topic,language,"
+                "is_retracted"
+            ),
+        }
+        params = self._prepare_params(params)
+        try:
+            response = self._get(url, params=params)
+            data = response.json()
+        except requests.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                logger.debug("OpenAlex: DOI %s not found (404).", doi)
+                return None
+            logger.warning("OpenAlex: HTTP error fetching DOI %s: %s", doi, exc)
+            return None
+        except (requests.RequestException, ValueError):
+            logger.warning("OpenAlex: failed to fetch DOI %s.", doi)
+            return None
+
+        return self._parse_paper(data)
 
     # ------------------------------------------------------------------
     # Citation methods (CitationConnectorBase)

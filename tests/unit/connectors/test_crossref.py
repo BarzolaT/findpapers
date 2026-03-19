@@ -387,10 +387,6 @@ class TestCrossRefConnector:
         """Minimum request interval is a positive float."""
         assert self.connector.min_request_interval > 0
 
-    def test_is_available(self) -> None:
-        """CrossRef connector is always available (no API key required)."""
-        assert self.connector.is_available is True
-
     def test_successful_fetch(self) -> None:
         """Successful API call returns the message dict."""
         mock_response = MagicMock()
