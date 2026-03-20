@@ -7,6 +7,8 @@
   <a href="https://pypi.org/project/findpapers"><img src="https://img.shields.io/pypi/v/findpapers" alt="PyPI"></a>
 </p>
 
+> **WARNING:** A new release is currently being prepared. The `main` branch may change frequently until then. If something stops working, update the tool and check the latest version of the [documentation](https://github.com/jonatasgrosman/findpapers/tree/main/docs). If you find a bug, please [open an issue](https://github.com/jonatasgrosman/findpapers/issues).
+
 Findpapers is a Python library that gives researchers unified access to **hundreds of millions of academic papers** from different databases - all through a single query. Instead of searching the databases one by one, each with its own interface and query language, Findpapers lets you write one boolean expression and run it everywhere at once, automatically merging and deduplicating the results.
 
 Findpapers searches for papers through **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, and **Semantic Scholar** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science. It also supports paper enrichment, PDF downloading, citation graph building (snowballing), and export to multiple formats.
