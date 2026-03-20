@@ -497,8 +497,17 @@ class CrossRefConnector(CitationConnectorBase, DOILookupConnectorBase):
         # PDF URL
         pdf_url = CrossRefConnector._parse_pdf_url(work)
 
-        # URL — use the DOI URL as landing page.
-        url: str | None = (work.get("URL") or "").strip() or None
+        # URL — prefer the canonical publisher landing page from
+        # ``resource.primary.URL`` (the final redirect target), falling back
+        # to ``URL`` which is typically the doi.org resolver URL.
+        resource = work.get("resource")
+        url: str | None = None
+        if isinstance(resource, dict):
+            primary = resource.get("primary")
+            if isinstance(primary, dict):
+                url = (primary.get("URL") or "").strip() or None
+        if not url:
+            url = (work.get("URL") or "").strip() or None
 
         # Source (journal, conference, book, etc.)
         source: Source | None = None
