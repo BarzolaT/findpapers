@@ -187,6 +187,12 @@ class DOILookupRunner:
         try:
             base_paper = self._run_connector(self._crossref, "CrossRef", None, verbose=verbose)
 
+            # Preserve the CrossRef URL before merging with other sources so it
+            # can be restored as the canonical URL afterwards.  merge_value
+            # picks the *longer* string, which would otherwise let a lengthier
+            # URL from another source overwrite the authoritative CrossRef one.
+            crossref_url: str | None = base_paper.url if base_paper is not None else None
+
             base_paper = self._run_connector(self._arxiv, "arXiv", base_paper, verbose=verbose)
             base_paper = self._run_connector(self._ieee, "IEEE", base_paper, verbose=verbose)
             base_paper = self._run_connector(self._pubmed, "PubMed", base_paper, verbose=verbose)
@@ -197,6 +203,10 @@ class DOILookupRunner:
             base_paper = self._run_connector(
                 self._openalex, "OpenAlex", base_paper, verbose=verbose
             )
+
+            # Restore CrossRef URL as the final canonical URL when available.
+            if base_paper is not None and crossref_url is not None:
+                base_paper.url = crossref_url
 
         finally:
             for connector in self._all_connectors:

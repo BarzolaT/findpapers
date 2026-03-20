@@ -315,3 +315,71 @@ class TestDOILookupRunnerRun:
 
         assert first is None
         assert second is fake_paper
+
+    def test_crossref_url_has_priority_over_other_sources(self):
+        """CrossRef URL is preserved as the final URL even when another source has a longer one."""
+        base_paper = _fake_paper()
+        base_paper.url = "https://doi.org/10.1234/test"  # short CrossRef URL
+
+        extra_paper = Paper(
+            title="Fake Paper Title",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            doi="10.1234/test",
+            url="https://www.some-publisher.com/journal/articles/very-long-url-from-openalex/10.1234/test",
+            databases={"openalex"},
+        )
+
+        with (
+            patch(
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
+                return_value=_fake_crossref_work(),
+            ),
+            patch(
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
+                return_value=base_paper,
+            ),
+        ):
+            runner = _make_runner_with_mocked_connectors()
+            runner._openalex.fetch_paper_by_doi = lambda doi: extra_paper  # type: ignore[method-assign]
+            result = runner.run()
+
+        # Despite the longer URL from OpenAlex, the CrossRef URL must be kept.
+        assert result is not None
+        assert result.url == "https://doi.org/10.1234/test"
+
+    def test_crossref_url_priority_not_applied_when_crossref_url_is_none(self):
+        """When CrossRef returns no URL, another source's URL is kept."""
+        base_paper = _fake_paper()
+        base_paper.url = None  # CrossRef provided no URL
+
+        extra_paper = Paper(
+            title="Fake Paper Title",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            doi="10.1234/test",
+            url="https://www.openalex.org/works/W123",
+            databases={"openalex"},
+        )
+
+        with (
+            patch(
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
+                return_value=_fake_crossref_work(),
+            ),
+            patch(
+                "findpapers.connectors.crossref.CrossRefConnector.build_paper",
+                return_value=base_paper,
+            ),
+        ):
+            runner = _make_runner_with_mocked_connectors()
+            runner._openalex.fetch_paper_by_doi = lambda doi: extra_paper  # type: ignore[method-assign]
+            result = runner.run()
+
+        # CrossRef URL was None, so the fallback URL from OpenAlex must be used.
+        assert result is not None
+        assert result.url == "https://www.openalex.org/works/W123"
