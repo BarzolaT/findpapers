@@ -4,7 +4,13 @@ from __future__ import annotations
 
 import random
 
-from findpapers.utils.http_headers import _USER_AGENTS, get_browser_headers
+from findpapers.utils.http_headers import (
+    _CHROME_CLIENT_HINTS,
+    _SEC_FETCH_HEADERS,
+    _USER_AGENTS,
+    _client_hints_for_ua,
+    get_browser_headers,
+)
 
 
 class TestGetBrowserHeaders:
@@ -33,10 +39,38 @@ class TestGetBrowserHeaders:
             assert ua.startswith("Mozilla/"), f"Bad UA: {ua}"
 
     def test_required_headers_present(self) -> None:
-        """Accept, Accept-Language, Accept-Encoding, Connection keys must be present."""
+        """Accept, Accept-Language, Connection keys must be present.
+
+        Accept-Encoding is intentionally omitted from the dict so that httpx
+        can add it and handle decompression automatically (passing it explicitly
+        disables httpx auto-decompression, causing Brotli responses to be
+        returned as raw binary).
+        """
         headers = get_browser_headers()
-        for key in ("Accept", "Accept-Language", "Accept-Encoding", "Connection"):
+        for key in ("Accept", "Accept-Language", "Connection"):
             assert key in headers, f"Missing header: {key}"
+        assert "Accept-Encoding" not in headers, (
+            "Accept-Encoding must NOT be set manually — httpx manages it"
+        )
+
+    def test_sec_fetch_headers_present(self) -> None:
+        """Sec-Fetch-* and Cache-Control headers must always be included."""
+        headers = get_browser_headers()
+        for key in _SEC_FETCH_HEADERS:
+            assert key in headers, f"Missing Sec-Fetch header: {key}"
+            assert headers[key] == _SEC_FETCH_HEADERS[key]
+
+    def test_sec_fetch_dest_is_document(self) -> None:
+        """Sec-Fetch-Dest must be 'document' to simulate page navigation."""
+        assert get_browser_headers()["Sec-Fetch-Dest"] == "document"
+
+    def test_sec_fetch_mode_is_navigate(self) -> None:
+        """Sec-Fetch-Mode must be 'navigate'."""
+        assert get_browser_headers()["Sec-Fetch-Mode"] == "navigate"
+
+    def test_sec_fetch_site_is_none(self) -> None:
+        """Sec-Fetch-Site must be 'none' (direct navigation — no referring site)."""
+        assert get_browser_headers()["Sec-Fetch-Site"] == "none"
 
     def test_rotation_uses_multiple_agents(self) -> None:
         """Over many calls, more than one distinct User-Agent should be returned."""
@@ -72,3 +106,60 @@ class TestGetBrowserHeaders:
         headers1["User-Agent"] = "tampered"
         headers2 = get_browser_headers()
         assert headers2["User-Agent"] != "tampered"
+
+    def test_chrome_ua_includes_client_hints(self) -> None:
+        """Chrome User-Agent strings must trigger sec-ch-ua Client Hints."""
+        chrome_ua = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/122.0.0.0 Safari/537.36"
+        )
+        hints = _client_hints_for_ua(chrome_ua)
+        assert "sec-ch-ua" in hints
+        assert "sec-ch-ua-mobile" in hints
+        assert "sec-ch-ua-platform" in hints
+        assert "Google Chrome" in hints["sec-ch-ua"]
+
+    def test_edge_ua_includes_client_hints(self) -> None:
+        """Edge User-Agent strings must trigger sec-ch-ua Client Hints."""
+        edge_ua = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0"
+        )
+        hints = _client_hints_for_ua(edge_ua)
+        assert "sec-ch-ua" in hints
+        assert "Microsoft Edge" in hints["sec-ch-ua"]
+
+    def test_firefox_ua_has_no_client_hints(self) -> None:
+        """Firefox does not send sec-ch-ua — no hints expected for Firefox UAs."""
+        firefox_ua = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0"
+        )
+        hints = _client_hints_for_ua(firefox_ua)
+        assert hints == {}
+
+    def test_safari_ua_has_no_client_hints(self) -> None:
+        """Safari does not send sec-ch-ua — no hints expected for Safari UAs."""
+        safari_ua = (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_3) "
+            "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/17.2 Safari/605.1.15"
+        )
+        hints = _client_hints_for_ua(safari_ua)
+        assert hints == {}
+
+    def test_chrome_headers_include_client_hints(self) -> None:
+        """get_browser_headers() includes sec-ch-ua when a Chrome UA is selected."""
+        # Verify that at least one Chrome UA is in the pool, then call the
+        # helper directly instead of monkey-patching the RNG.
+        chrome_uas = [
+            ua for ua in _USER_AGENTS if "Chrome/" in ua and "Edg/" not in ua and "Chrome/12" in ua
+        ]
+        assert chrome_uas, "No Chrome UA in pool to test"
+        hints = _client_hints_for_ua(chrome_uas[0])
+        assert "sec-ch-ua" in hints
+
+    def test_chrome_client_hints_pool_is_populated(self) -> None:
+        """_CHROME_CLIENT_HINTS must define hints for at least 2 Chrome versions."""
+        assert len(_CHROME_CLIENT_HINTS) >= 2

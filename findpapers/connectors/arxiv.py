@@ -21,7 +21,7 @@ from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.arxiv import ArxivQueryBuilder
 from findpapers.utils.arxiv_taxonomy import arxiv_category_to_field, arxiv_category_to_subject
-from findpapers.utils.metadata_parser import parse_date
+from findpapers.utils.normalization import parse_date
 
 logger = logging.getLogger(__name__)
 

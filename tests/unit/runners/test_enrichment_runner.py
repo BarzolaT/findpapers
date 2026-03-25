@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import requests
 
 from findpapers.runners.enrichment_runner import EnrichmentRunner
 
-# Minimal metadata dict that makes _fetch_url_metadata look successful (HTML with a title).
-_FAKE_METADATA: dict = {"citation_title": "Test Paper"}
+_WEBPAGE_PATCH = "findpapers.connectors.web_scraping.WebScrapingConnector.fetch_paper_from_url"
 
 
 class TestEnrichmentRunnerInit:
@@ -37,10 +36,7 @@ class TestEnrichmentRunnerRun:
         """Metrics contain all expected keys after run()."""
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
         ):
             metrics = runner.run()
@@ -61,14 +57,7 @@ class TestEnrichmentRunnerRun:
         enriched_paper = make_paper(title="Enriched")
         enriched_paper.doi = "10.1234/test"
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=_FAKE_METADATA,
-            ),
-            patch(
-                "findpapers.runners.enrichment_runner.build_paper_from_metadata",
-                return_value=enriched_paper,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=enriched_paper),
             patch(
                 "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=None,
@@ -86,14 +75,7 @@ class TestEnrichmentRunnerRun:
         """
         same_paper = make_paper()
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=_FAKE_METADATA,
-            ),
-            patch(
-                "findpapers.runners.enrichment_runner.build_paper_from_metadata",
-                return_value=same_paper,  # identical data — no improvement
-            ),
+            patch(_WEBPAGE_PATCH, return_value=same_paper),  # identical data — no improvement
             patch(
                 "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=None,
@@ -109,9 +91,7 @@ class TestEnrichmentRunnerRun:
         paper.doi = None  # ensure no DOI fallback URL either
         runner = EnrichmentRunner(papers=[paper])
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata"
-            ) as mock_fetch,
+            patch(_WEBPAGE_PATCH) as mock_fetch,
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work") as mock_crossref,
         ):
             metrics = runner.run()
@@ -124,10 +104,7 @@ class TestEnrichmentRunnerRun:
         """run() can be called multiple times; metrics are fresh each time."""
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
         ):
             runner.run()
@@ -139,10 +116,7 @@ class TestEnrichmentRunnerRun:
         papers = [make_paper(f"Paper {i}") for i in range(5)]
         runner = EnrichmentRunner(papers=papers, num_workers=3)
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
         ):
             metrics = runner.run()
@@ -153,23 +127,17 @@ class TestEnrichmentRunnerRun:
         paper = make_paper()
         paper.doi = None  # no DOI so CrossRef is skipped
         runner = EnrichmentRunner(papers=[paper])
-        with patch(
-            "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-            side_effect=RuntimeError("network error"),
-        ):
+        with patch(_WEBPAGE_PATCH, side_effect=requests.RequestException("network error")):
             metrics = runner.run()
         assert metrics["failed_papers"] == 1
         assert metrics["enriched_papers"] == 0
 
-    def test_no_metadata_counted_when_fetch_returns_none(self, make_paper):
-        """failed_papers counts papers whose URL returned non-HTML content."""
+    def test_no_paper_counted_when_fetch_returns_none(self, make_paper):
+        """failed_papers counts papers whose URL returned no parseable paper."""
         paper = make_paper()
         paper.doi = None  # no DOI so CrossRef is skipped
         runner = EnrichmentRunner(papers=[paper])
-        with patch(
-            "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-            return_value=None,
-        ):
+        with patch(_WEBPAGE_PATCH, return_value=None):
             metrics = runner.run()
         assert metrics["failed_papers"] == 1
         assert metrics["enriched_papers"] == 0
@@ -178,14 +146,7 @@ class TestEnrichmentRunnerRun:
         """unchanged_papers counts papers where HTML was fetched but added no new data."""
         same_paper = make_paper()
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=_FAKE_METADATA,
-            ),
-            patch(
-                "findpapers.runners.enrichment_runner.build_paper_from_metadata",
-                return_value=same_paper,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=same_paper),
             patch(
                 "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=None,
@@ -204,13 +165,10 @@ class TestEnrichmentRunnerRun:
 
         def _record_fetch(url: str, timeout: object = None) -> None:
             fetched_urls.append(url)
-            return None  # simulate non-HTML / no-metadata response
+            return None  # simulate no parseable paper
 
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                side_effect=_record_fetch,
-            ),
+            patch(_WEBPAGE_PATCH, side_effect=_record_fetch),
             patch(
                 "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 return_value=None,
@@ -236,10 +194,7 @@ class TestEnrichmentRunnerVerbose:
 
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
             caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"),
         ):
@@ -252,10 +207,7 @@ class TestEnrichmentRunnerVerbose:
 
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
             caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"),
         ):
@@ -269,10 +221,7 @@ class TestEnrichmentRunnerVerbose:
         paper = make_paper()
         paper.doi = None  # no DOI so CrossRef is skipped
         runner = EnrichmentRunner(papers=[paper])
-        with patch(
-            "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-            side_effect=RuntimeError("network error"),
-        ):
+        with patch(_WEBPAGE_PATCH, side_effect=requests.RequestException("network error")):
             metrics = runner.run(verbose=True)
         assert metrics["failed_papers"] == 1
 
@@ -282,10 +231,7 @@ class TestEnrichmentRunnerVerbose:
 
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
             caplog.at_level(logging.INFO, logger="findpapers.runners.enrichment_runner"),
         ):
@@ -296,10 +242,7 @@ class TestEnrichmentRunnerVerbose:
         """show_progress=False suppresses the tqdm progress bar."""
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
             patch("findpapers.connectors.crossref.CrossRefConnector.fetch_work", return_value=None),
             patch("findpapers.utils.parallel.make_progress_bar") as mock_pbar,
         ):
@@ -339,10 +282,7 @@ class TestEnrichmentRunnerCrossRef:
                 "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=crossref_paper,
             ),
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
         ):
             runner = EnrichmentRunner(papers=[paper])
             metrics = runner.run()
@@ -360,10 +300,7 @@ class TestEnrichmentRunnerCrossRef:
             patch(
                 "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
             ) as mock_crossref,
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
         ):
             runner = EnrichmentRunner(papers=[paper])
             runner.run()
@@ -384,14 +321,7 @@ class TestEnrichmentRunnerCrossRef:
                 "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
                 side_effect=requests.RequestException("CrossRef timeout"),
             ),
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=_FAKE_METADATA,
-            ),
-            patch(
-                "findpapers.runners.enrichment_runner.build_paper_from_metadata",
-                return_value=enriched_paper,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=enriched_paper),
         ):
             runner = EnrichmentRunner(papers=[paper])
             metrics = runner.run()
@@ -426,14 +356,7 @@ class TestEnrichmentRunnerCrossRef:
                 "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=crossref_paper,
             ),
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=_FAKE_METADATA,
-            ),
-            patch(
-                "findpapers.runners.enrichment_runner.build_paper_from_metadata",
-                return_value=scraped_paper,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=scraped_paper),
         ):
             runner = EnrichmentRunner(papers=[paper])
             metrics = runner.run()
@@ -460,115 +383,10 @@ class TestEnrichmentRunnerCrossRef:
                 "findpapers.connectors.crossref.CrossRefConnector.build_paper",
                 return_value=crossref_paper,
             ),
-            patch(
-                "findpapers.runners.enrichment_runner.EnrichmentRunner._fetch_url_metadata",
-                return_value=None,
-            ),
+            patch(_WEBPAGE_PATCH, return_value=None),
         ):
             runner = EnrichmentRunner(papers=[paper])
             metrics = runner.run()
 
         assert metrics["enriched_papers"] == 1
         assert metrics["failed_papers"] == 0
-
-
-class TestFetchUrlMetadata:
-    """Tests for the _fetch_url_metadata HTTP boundary method."""
-
-    def test_returns_none_for_non_html_content_type(self, make_paper) -> None:
-        """_fetch_url_metadata returns None when content-type is not text/html."""
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "application/pdf"}
-        mock_resp.text = ""
-        mock_resp.content = b""
-        mock_resp.raise_for_status = MagicMock()
-
-        runner = EnrichmentRunner(papers=[make_paper()])
-        with patch("findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp):
-            result = runner._fetch_url_metadata("https://example.com/paper.pdf")
-        assert result is None
-
-    def test_returns_dict_for_html_content_type(self, make_paper) -> None:
-        """_fetch_url_metadata returns a metadata dict for HTML responses."""
-        html = '<html><head><meta name="citation_title" content="Test"></head></html>'
-        mock_resp = MagicMock()
-        mock_resp.status_code = 200
-        mock_resp.headers = {"content-type": "text/html; charset=utf-8"}
-        mock_resp.text = html
-        mock_resp.content = html.encode()
-        mock_resp.raise_for_status = MagicMock()
-
-        runner = EnrichmentRunner(papers=[make_paper()])
-        with patch("findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp):
-            result = runner._fetch_url_metadata("https://example.com/paper")
-        assert isinstance(result, dict)
-        assert result.get("citation_title") == "Test"
-
-    def test_proxy_forwarded_to_requests(self, make_paper) -> None:
-        """When proxy is configured, requests.get receives the proxies dict."""
-        mock_resp = MagicMock()
-        mock_resp.headers = {"content-type": "text/html"}
-        mock_resp.text = "<html><head></head></html>"
-        mock_resp.content = b""
-        mock_resp.raise_for_status = MagicMock()
-
-        runner = EnrichmentRunner(papers=[make_paper()], proxy="http://proxy:8080")
-        with patch(
-            "findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp
-        ) as mock_get:
-            runner._fetch_url_metadata("https://example.com")
-
-        _, kwargs = mock_get.call_args
-        assert kwargs["proxies"] == {"http": "http://proxy:8080", "https": "http://proxy:8080"}
-
-    def test_ssl_verify_forwarded_to_requests(self, make_paper) -> None:
-        """When ssl_verify=False, requests.get receives verify=False."""
-        mock_resp = MagicMock()
-        mock_resp.headers = {"content-type": "text/html"}
-        mock_resp.text = "<html><head></head></html>"
-        mock_resp.content = b""
-        mock_resp.raise_for_status = MagicMock()
-
-        runner = EnrichmentRunner(papers=[make_paper()], ssl_verify=False)
-        with patch(
-            "findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp
-        ) as mock_get:
-            runner._fetch_url_metadata("https://example.com")
-
-        _, kwargs = mock_get.call_args
-        assert kwargs["verify"] is False
-
-    def test_ssl_verify_defaults_to_true(self, make_paper) -> None:
-        """By default, requests.get receives verify=True."""
-        mock_resp = MagicMock()
-        mock_resp.headers = {"content-type": "text/html"}
-        mock_resp.text = "<html><head></head></html>"
-        mock_resp.content = b""
-        mock_resp.raise_for_status = MagicMock()
-
-        runner = EnrichmentRunner(papers=[make_paper()])
-        with patch(
-            "findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp
-        ) as mock_get:
-            runner._fetch_url_metadata("https://example.com")
-
-        _, kwargs = mock_get.call_args
-        assert kwargs["verify"] is True
-
-    def test_no_proxy_sends_none(self, make_paper) -> None:
-        """When no proxy is configured, proxies=None is passed."""
-        mock_resp = MagicMock()
-        mock_resp.headers = {"content-type": "text/html"}
-        mock_resp.text = "<html><head></head></html>"
-        mock_resp.content = b""
-        mock_resp.raise_for_status = MagicMock()
-
-        runner = EnrichmentRunner(papers=[make_paper()])
-        with patch(
-            "findpapers.runners.enrichment_runner.requests.get", return_value=mock_resp
-        ) as mock_get:
-            runner._fetch_url_metadata("https://example.com")
-
-        _, kwargs = mock_get.call_args
-        assert kwargs["proxies"] is None

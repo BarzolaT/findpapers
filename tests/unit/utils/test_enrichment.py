@@ -12,15 +12,15 @@ from pathlib import Path
 
 import pytest
 
+from findpapers.connectors.web_scraping import WebScrapingConnector
 from findpapers.core.author import Author
 from findpapers.core.source import SourceType
-from findpapers.runners.enrichment_runner import build_paper_from_metadata
-from findpapers.utils.metadata_parser import (
-    extract_metadata_from_html,
-    parse_affiliations,
-    parse_authors,
-    parse_keywords,
-)
+
+build_paper_from_metadata = WebScrapingConnector.build_paper_from_metadata
+extract_metadata_from_html = WebScrapingConnector._extract_metadata_from_html
+parse_affiliations = WebScrapingConnector._parse_affiliations
+parse_authors = WebScrapingConnector._parse_authors
+parse_keywords = WebScrapingConnector._parse_keywords
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -643,13 +643,13 @@ class TestBuildPaperFromMetadata:
     # Real-page integration tests
     # ------------------------------------------------------------------
 
-    def test_arxiv_paper_has_no_doi_no_source(self) -> None:
-        """arXiv abs/* pages have no DOI and no formal source attached."""
+    def test_arxiv_paper_doi_derived_from_url(self) -> None:
+        """arXiv abs/* pages have no DOI in meta tags but DOI is derived from the URL."""
         _skip_if_missing(ARXIV_HTML)
         meta = extract_metadata_from_html(ARXIV_HTML)  # type: ignore[arg-type]
         paper = build_paper_from_metadata(meta, "https://arxiv.org/abs/2301.00306v4")
         assert paper is not None
-        assert paper.doi is None
+        assert paper.doi == "10.48550/arXiv.2301.00306"
         assert paper.source is None  # preprint — no journal
 
     def test_arxiv_paper_has_pdf_url(self) -> None:

@@ -17,7 +17,7 @@ from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.core.paper import Paper
 from findpapers.exceptions import InvalidParameterError
 from findpapers.utils.logging_config import configure_verbose_logging
-from findpapers.utils.metadata_parser import DOI_URL_PREFIXES
+from findpapers.utils.normalization import DOI_URL_PREFIXES
 
 logger = logging.getLogger(__name__)
 

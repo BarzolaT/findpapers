@@ -2,43 +2,16 @@
 
 from __future__ import annotations
 
-import contextlib
 import logging
 from enum import Enum
 from time import perf_counter
-from typing import Any
 
 import requests
 
 from findpapers.connectors.crossref import CrossRefConnector
-from findpapers.core.author import Author
+from findpapers.connectors.web_scraping import WebScrapingConnector
 from findpapers.core.paper import Paper
-from findpapers.core.source import Source, SourceType
-from findpapers.utils.http_headers import get_browser_headers
 from findpapers.utils.logging_config import configure_verbose_logging
-from findpapers.utils.metadata_parser import (
-    ABSTRACT_META_KEYS,
-    DATE_META_KEYS,
-    DOI_META_KEYS,
-    FIRSTPAGE_KEY,
-    KEYWORDS_META_KEYS,
-    LASTPAGE_KEY,
-    NUM_PAGES_KEY,
-    PDF_URL_KEYS,
-    PREPRINT_SERVERS,
-    SOURCE_ISBN_KEYS,
-    SOURCE_ISSN_KEYS,
-    SOURCE_KEY_TYPE_MAP,
-    SOURCE_PUBLISHER_KEYS,
-    SOURCE_TITLE_KEYS,
-    TITLE_META_KEYS,
-    build_authors_from_metadata,
-    extract_metadata_from_html,
-    normalize_doi,
-    parse_date,
-    parse_keywords,
-    pick_metadata_value,
-)
 from findpapers.utils.parallel import execute_tasks
 
 logger = logging.getLogger(__name__)
@@ -98,105 +71,6 @@ def _enrichment_snapshot(paper: Paper) -> tuple:
     )
 
 
-def build_paper_from_metadata(metadata: dict[str, Any], page_url: str) -> Paper | None:
-    """Build a :class:`~findpapers.core.paper.Paper` from extracted metadata.
-
-    Parameters
-    ----------
-    metadata : dict[str, Any]
-        Metadata extracted from the page.
-    page_url : str
-        Final landing-page URL (used as a source URL and fallback).
-
-    Returns
-    -------
-    Paper | None
-        Populated paper instance, or ``None`` when required fields are absent.
-    """
-    title = pick_metadata_value(metadata, TITLE_META_KEYS)
-    if not title:
-        return None
-
-    abstract = pick_metadata_value(metadata, ABSTRACT_META_KEYS)
-
-    # DOI — try each candidate key in priority order; normalise URL prefixes.
-    doi: str | None = None
-    for doi_key in DOI_META_KEYS:
-        raw = metadata.get(doi_key)
-        if isinstance(raw, list):
-            raw = max((str(v).strip() for v in raw if v), key=len, default=None)
-        if raw:
-            doi = normalize_doi(str(raw))
-            if doi:
-                break
-
-    # Authors — build Author objects with affiliations when available.
-    authors: list[Author] = build_authors_from_metadata(metadata)
-
-    # Keywords — accumulate from all matching keys.
-    keywords: set[str] = set()
-    for kw_key in KEYWORDS_META_KEYS:
-        val = metadata.get(kw_key)
-        if val:
-            keywords |= parse_keywords(val)
-
-    publication_date = parse_date(pick_metadata_value(metadata, DATE_META_KEYS))
-
-    # Page range — combine first/last page into a single string when available.
-    first_page = (str(metadata.get(FIRSTPAGE_KEY) or "")).strip()
-    last_page = (str(metadata.get(LASTPAGE_KEY) or "")).strip()
-    if first_page and last_page:
-        pages: str | None = f"{first_page}\u2013{last_page}"  # en-dash
-    elif first_page:
-        pages = first_page
-    else:
-        pages = None
-
-    # Number of pages — parse as int when the key is present.
-    page_count: int | None = None
-    num_pages_raw = metadata.get(NUM_PAGES_KEY)
-    if num_pages_raw:
-        with contextlib.suppress(ValueError):
-            page_count = int(str(num_pages_raw).strip())
-
-    source_title = pick_metadata_value(metadata, SOURCE_TITLE_KEYS)
-    source = None
-    source_type: SourceType | None = None
-    if source_title and source_title.lower() not in PREPRINT_SERVERS:
-        # Determine source_type based on which meta key matched.
-        for key in SOURCE_TITLE_KEYS:
-            raw = metadata.get(key)
-            if raw:
-                val = raw[0].strip() if isinstance(raw, list) else str(raw).strip()
-                if val:
-                    type_str = SOURCE_KEY_TYPE_MAP.get(key)
-                    source_type = SourceType(type_str) if type_str else None
-                    break
-        source = Source(
-            title=source_title,
-            issn=pick_metadata_value(metadata, SOURCE_ISSN_KEYS),
-            isbn=pick_metadata_value(metadata, SOURCE_ISBN_KEYS),
-            publisher=pick_metadata_value(metadata, SOURCE_PUBLISHER_KEYS),
-            source_type=source_type,
-        )
-
-    pdf_url_val = pick_metadata_value(metadata, PDF_URL_KEYS)
-
-    return Paper(
-        title=title,
-        abstract=abstract or "",
-        authors=authors,
-        source=source,
-        publication_date=publication_date,
-        url=page_url,
-        pdf_url=pdf_url_val,
-        doi=doi,
-        keywords=keywords or None,
-        page_range=pages,
-        page_count=page_count,
-    )
-
-
 class EnrichmentRunner:
     """Runner that enriches a provided list of papers using web scraping.
 
@@ -244,9 +118,8 @@ class EnrichmentRunner:
         self._metrics: dict[str, int | float] = {}
         self._num_workers = num_workers
         self._timeout = timeout
-        self._proxy = proxy
-        self._ssl_verify = ssl_verify
         self._crossref = CrossRefConnector(email=email)
+        self._webpage = WebScrapingConnector(proxy=proxy, ssl_verify=ssl_verify)
 
     # ------------------------------------------------------------------
     # Public interface
@@ -277,8 +150,8 @@ class EnrichmentRunner:
             logger.info("Total papers: %d", len(self._results))
             logger.info("Num workers: %d", self._num_workers)
             logger.info("Timeout: %s", self._timeout or "default")
-            logger.info("Proxy: %s", self._proxy or "none")
-            logger.info("SSL verify: %s", self._ssl_verify)
+            logger.info("Proxy: %s", self._webpage._proxy or "none")
+            logger.info("SSL verify: %s", self._webpage._ssl_verify)
             logger.info("======================================")
 
         start = perf_counter()
@@ -294,6 +167,7 @@ class EnrichmentRunner:
             self._enrich_results(metrics, verbose, show_progress=show_progress)
         finally:
             self._crossref.close()
+            self._webpage.close()
 
         metrics["runtime_in_seconds"] = perf_counter() - start
         self._metrics = metrics
@@ -373,68 +247,6 @@ class EnrichmentRunner:
         metrics["unchanged_papers"] = unchanged
         metrics["failed_papers"] = failed
 
-    def _build_proxies(self) -> dict[str, str] | None:
-        """Build a proxies dict for *requests* if a proxy is configured.
-
-        Returns
-        -------
-        dict[str, str] | None
-            Proxies mapping, or ``None``.
-        """
-        if self._proxy:
-            return {"http": self._proxy, "https": self._proxy}
-        return None
-
-    def _fetch_url_metadata(
-        self,
-        url: str,
-        timeout: float | None = None,
-    ) -> dict[str, Any] | None:
-        """Fetch an HTML page and extract ``<meta>`` tag metadata.
-
-        This is the HTTP boundary for enrichment URL scraping.  The actual
-        parsing is delegated to
-        :func:`~findpapers.utils.metadata_parser.extract_metadata_from_html`.
-
-        Parameters
-        ----------
-        url : str
-            URL to fetch.
-        timeout : float | None
-            Request timeout in seconds.
-
-        Returns
-        -------
-        dict[str, Any] | None
-            Parsed metadata dict, or ``None`` when the response is not HTML.
-
-        Raises
-        ------
-        requests.RequestException
-            If the HTTP request fails.
-        """
-        logger.debug("GET %s", url)
-        response = requests.get(
-            url,
-            headers=get_browser_headers(),
-            timeout=timeout,
-            allow_redirects=True,
-            proxies=self._build_proxies(),
-            verify=self._ssl_verify,
-        )
-        content_type = response.headers.get("content-type", "")
-        logger.debug(
-            "<- %s %s | content-type: %s | %d bytes",
-            response.status_code,
-            response.reason,
-            content_type.split(";")[0].strip() or "unknown",
-            len(response.content),
-        )
-        response.raise_for_status()
-        if "text/html" not in content_type.lower():
-            return None
-        return extract_metadata_from_html(response.text)
-
     def _enrich_paper(self, paper: Paper, timeout: float | None = None) -> EnrichmentOutcome:
         """Attempt to enrich a single paper using the CrossRef API and URL scraping.
 
@@ -492,13 +304,10 @@ class EnrichmentRunner:
         had_url_metadata = False
         for url in deduped:
             try:
-                metadata = self._fetch_url_metadata(url, timeout=timeout)
+                enriched_paper = self._webpage.fetch_paper_from_url(url, timeout=timeout)
             except requests.RequestException:
                 logger.warning("Fetch error for enrichment URL: %s", url)
                 continue
-            if not metadata:
-                continue
-            enriched_paper = build_paper_from_metadata(metadata, url)
             if enriched_paper is None:
                 continue
             had_url_metadata = True

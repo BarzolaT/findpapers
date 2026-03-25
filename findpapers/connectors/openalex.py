@@ -20,7 +20,7 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.query.builder import QueryBuilder
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
-from findpapers.utils.metadata_parser import normalize_doi, normalize_language
+from findpapers.utils.normalization import normalize_doi, normalize_language
 
 logger = logging.getLogger(__name__)
 
