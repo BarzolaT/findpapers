@@ -376,7 +376,7 @@ class SnowballRunner:
         if self._direction in ("both", "backward"):
             try:
                 with make_progress_bar(
-                    desc=f"  {connector.name} refs",
+                    desc=f"  {connector.name} backward",
                     total=ref_count,
                     unit="paper",
                     disable=not show_progress,
@@ -396,7 +396,7 @@ class SnowballRunner:
         if self._direction in ("both", "forward"):
             try:
                 with make_progress_bar(
-                    desc=f"  {connector.name} cites",
+                    desc=f"  {connector.name} forward",
                     total=cit_count,
                     unit="paper",
                     disable=not show_progress,

@@ -201,6 +201,41 @@ class CrossRefConnector(CitationConnectorBase, DOILookupConnectorBase):
     # Citation interface (CitationConnectorBase)
     # ------------------------------------------------------------------
 
+    def get_expected_counts(self, paper: Paper) -> tuple[int | None, int | None]:
+        """Return expected citation and reference counts for *paper*.
+
+        CrossRef does not expose forward citation counts, so
+        ``citation_count`` is always ``None``.  The reference count is
+        derived from the ``reference`` array in the work record.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper whose counts are requested.
+
+        Returns
+        -------
+        tuple[int | None, int | None]
+            ``(None, reference_count)``.
+        """
+        if not paper.doi:
+            return None, None
+
+        ref_count: int | None = None
+        try:
+            work = self.fetch_work(paper.doi)
+            if work:
+                raw_refs = work.get("reference") or []
+                ref_count = sum(
+                    1
+                    for entry in raw_refs
+                    if isinstance(entry, dict) and (entry.get("DOI") or "").strip()
+                )
+        except requests.RequestException:
+            pass
+
+        return None, ref_count
+
     def fetch_references(
         self,
         paper: Paper,
@@ -253,11 +288,13 @@ class CrossRefConnector(CitationConnectorBase, DOILookupConnectorBase):
                 ref_work = self.fetch_work(ref_doi)
             except requests.RequestException:
                 logger.debug("CrossRef: could not fetch reference DOI %s", ref_doi)
-                continue
-            if ref_work:
-                ref_paper = self.build_paper(ref_work)
-                if ref_paper:
-                    papers.append(ref_paper)
+            else:
+                if ref_work:
+                    ref_paper = self.build_paper(ref_work)
+                    if ref_paper:
+                        papers.append(ref_paper)
+            if progress_callback is not None:
+                progress_callback(1)
 
         return papers
 

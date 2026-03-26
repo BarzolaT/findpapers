@@ -214,6 +214,41 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
     # Citation methods (CitationConnectorBase)
     # ------------------------------------------------------------------
 
+    def get_expected_counts(self, paper: Paper) -> tuple[int | None, int | None]:
+        """Return expected citation and reference counts for *paper*.
+
+        Uses ``paper.citations`` for the citation count (already populated
+        during search) and fetches the ``referenced_works`` list from
+        OpenAlex to obtain the reference count.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper whose counts are requested.
+
+        Returns
+        -------
+        tuple[int | None, int | None]
+            ``(citation_count, reference_count)``.  Either may be ``None``
+            when the information is unavailable.
+        """
+        if not paper.doi:
+            return None, None
+
+        cit_count: int | None = paper.citations
+
+        ref_count: int | None = None
+        url = f"{_BASE_URL}/doi:{paper.doi}"
+        try:
+            response = self._get(url, params={"select": "referenced_works"})
+            data = response.json()
+            referenced = data.get("referenced_works") or []
+            ref_count = len(referenced)
+        except (requests.RequestException, ValueError):
+            pass
+
+        return cit_count, ref_count
+
     def _resolve_openalex_id(self, paper: Paper) -> str | None:
         """Resolve a paper's OpenAlex ID via the DOI.
 
@@ -243,7 +278,11 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
             logger.debug("Failed to resolve OpenAlex ID for DOI %s.", paper.doi)
             return None
 
-    def _fetch_works_by_ids(self, openalex_ids: list[str]) -> list[Paper]:
+    def _fetch_works_by_ids(
+        self,
+        openalex_ids: list[str],
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Paper]:
         """Fetch full work records for a list of OpenAlex IDs.
 
         Uses the pipe-separated ID filter (``openalex:{id1}|{id2}|...``) to
@@ -254,6 +293,9 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
         openalex_ids : list[str]
             OpenAlex work IDs (full URLs like
             ``https://openalex.org/W123``).
+        progress_callback : Callable[[int], None] | None
+            Optional callback invoked after each batch with the number of
+            papers fetched in that batch.
 
         Returns
         -------
@@ -280,10 +322,14 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
             try:
                 response = self._get(_BASE_URL, params)
                 data = response.json()
+                batch_papers: list[Paper] = []
                 for work in data.get("results") or []:
                     paper = self._parse_paper(work)
                     if paper is not None:
-                        papers.append(paper)
+                        batch_papers.append(paper)
+                papers.extend(batch_papers)
+                if progress_callback is not None and batch_papers:
+                    progress_callback(len(batch_papers))
             except (requests.RequestException, ValueError, KeyError, TypeError):
                 logger.warning(
                     "Failed to fetch OpenAlex works batch (offset=%d, count=%d).",
@@ -391,7 +437,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
             len(referenced_ids),
             paper.doi,
         )
-        return self._fetch_works_by_ids(referenced_ids)
+        return self._fetch_works_by_ids(referenced_ids, progress_callback=progress_callback)
 
     def fetch_cited_by(
         self,
@@ -430,6 +476,8 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
         while cursor is not None:
             page_papers, cursor = self._fetch_cited_by_page(openalex_id, cursor)
             all_papers.extend(page_papers)
+            if progress_callback is not None and page_papers:
+                progress_callback(len(page_papers))
 
         return all_papers
 
