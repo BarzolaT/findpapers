@@ -159,6 +159,7 @@ engine.snowball(
     *,
     max_depth: int = 1,
     direction: Literal["both", "backward", "forward"] = "both",
+    top_n_per_level: int | None = None,
     num_workers: int = 1,
     verbose: bool = False,
     show_progress: bool = True,
@@ -170,6 +171,7 @@ engine.snowball(
 | `papers` | `list[Paper] \| Paper` | Seed paper(s) to start snowballing from. |
 | `max_depth` | `int` | Maximum traversal depth. Defaults to `1`. |
 | `direction` | `Literal["both", "backward", "forward"]` | Snowball direction. Defaults to `"both"`. |
+| `top_n_per_level` | `int \| None` | Keep only the N most-cited papers per level; papers outside the top N are discarded entirely. Seed papers are always expanded. Defaults to `None` (no limit). |
 | `num_workers` | `int` | Number of parallel workers. Defaults to `1`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bars. Defaults to `True`. |
@@ -612,6 +614,7 @@ SnowballRunner(
     *,
     max_depth: int = 1,
     direction: Literal["both", "backward", "forward"] = "both",
+    top_n_per_level: int | None = None,
     openalex_api_key: str | None = None,
     email: str | None = None,
     semantic_scholar_api_key: str | None = None,

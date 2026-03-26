@@ -144,6 +144,30 @@ class TestSnowballRunnerInit:
         with pytest.raises(InvalidParameterError, match="max_depth must be >= 1"):
             SnowballRunner(seed_papers=[seed], max_depth=-1)
 
+    def test_top_n_per_level_zero_raises(self, make_paper) -> None:
+        """top_n_per_level of zero raises InvalidParameterError."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        with pytest.raises(InvalidParameterError, match="top_n_per_level must be >= 1"):
+            SnowballRunner(seed_papers=[seed], top_n_per_level=0)
+
+    def test_top_n_per_level_negative_raises(self, make_paper) -> None:
+        """Negative top_n_per_level raises InvalidParameterError."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        with pytest.raises(InvalidParameterError, match="top_n_per_level must be >= 1"):
+            SnowballRunner(seed_papers=[seed], top_n_per_level=-5)
+
+    def test_top_n_per_level_none_is_valid(self, make_paper) -> None:
+        """top_n_per_level=None (default) does not raise."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        runner = SnowballRunner(seed_papers=[seed])
+        assert runner._top_n_per_level is None
+
+    def test_top_n_per_level_positive_is_stored(self, make_paper) -> None:
+        """A positive top_n_per_level value is stored on the runner."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        runner = SnowballRunner(seed_papers=[seed], top_n_per_level=10)
+        assert runner._top_n_per_level == 10
+
 
 class TestSnowballRunnerRun:
     """Tests for the snowball execution logic."""
@@ -438,6 +462,116 @@ class TestSnowballRunnerRun:
         assert graph.paper_count == 3  # seed + rc1 + rc2
         assert graph.edge_count == 2
 
+    def test_top_n_per_level_limits_next_frontier(self, make_paper) -> None:
+        """top_n_per_level keeps only the N most-cited papers in the graph per level."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        # Three papers at level 1 with distinct citation counts.
+        high = make_paper("High", doi="10.1000/high", citations=100)
+        mid = make_paper("Mid", doi="10.1000/mid", citations=50)
+        low = make_paper("Low", doi="10.1000/low", citations=5)
+
+        connector = FakeCitationConnector(
+            references={"10.1000/seed": [high, mid, low]},
+        )
+        runner = SnowballRunner(
+            seed_papers=[seed],
+            max_depth=2,
+            direction="backward",
+            top_n_per_level=2,
+        )
+        runner._connectors = [connector]
+
+        graph = runner.run()
+
+        # Only the top 2 (high, mid) are added to the graph; "low" is discarded.
+        assert graph.contains(high)
+        assert graph.contains(mid)
+        assert not graph.contains(low)
+
+    def test_top_n_per_level_selects_by_citation_count(self, make_paper) -> None:
+        """Papers are ranked by citations descending; lower-cited ones are not added to the graph."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        high = make_paper("High", doi="10.1000/high", citations=200)
+        low = make_paper("Low", doi="10.1000/low", citations=1)
+        # Level 2 papers reachable only via "low" — should NOT appear.
+        deep = make_paper("Deep", doi="10.1000/deep", citations=999)
+
+        connector = FakeCitationConnector(
+            references={
+                "10.1000/seed": [high, low],
+                "10.1000/low": [deep],
+            },
+        )
+        runner = SnowballRunner(
+            seed_papers=[seed],
+            max_depth=2,
+            direction="backward",
+            top_n_per_level=1,
+        )
+        runner._connectors = [connector]
+
+        graph = runner.run()
+
+        # Only "high" (top 1) is added; "low" is discarded and "deep" is never discovered.
+        assert graph.contains(high)
+        assert not graph.contains(low)
+        assert not graph.contains(deep)
+
+    def test_top_n_per_level_none_expands_all(self, make_paper) -> None:
+        """Without top_n_per_level all discovered papers are expanded."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        p1 = make_paper("P1", doi="10.1000/p1", citations=10)
+        p2 = make_paper("P2", doi="10.1000/p2", citations=1)
+        deep = make_paper("Deep", doi="10.1000/deep")
+
+        connector = FakeCitationConnector(
+            references={
+                "10.1000/seed": [p1, p2],
+                "10.1000/p2": [deep],
+            },
+        )
+        runner = SnowballRunner(
+            seed_papers=[seed],
+            max_depth=2,
+            direction="backward",
+            # top_n_per_level not set (default None)
+        )
+        runner._connectors = [connector]
+
+        graph = runner.run()
+
+        # p2 is expanded so deep should be discovered.
+        assert graph.contains(deep)
+
+    def test_top_n_per_level_none_citations_treated_as_zero(self, make_paper) -> None:
+        """Papers with citations=None are ranked below papers with known counts."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        cited = make_paper("Cited", doi="10.1000/cited", citations=10)
+        unknown = make_paper("Unknown", doi="10.1000/unknown", citations=None)
+        deep_via_unknown = make_paper("DeepUnknown", doi="10.1000/deepunknown")
+
+        connector = FakeCitationConnector(
+            references={
+                "10.1000/seed": [cited, unknown],
+                "10.1000/unknown": [deep_via_unknown],
+            },
+        )
+        runner = SnowballRunner(
+            seed_papers=[seed],
+            max_depth=2,
+            direction="backward",
+            top_n_per_level=1,
+        )
+        runner._connectors = [connector]
+
+        graph = runner.run()
+
+        # Only "cited" (top 1 by citation count) is added; "unknown" is discarded
+        # and "deep_via_unknown" is never discovered.
+        assert graph.contains(cited)
+        assert not graph.contains(unknown)
+        assert not graph.contains(deep_via_unknown)
+
 
 class TestSnowballRunnerMetrics:
     """Tests for metrics after execution."""
@@ -476,6 +610,59 @@ class TestSnowballRunnerMetrics:
             assert mock_pbar.called
             for call in mock_pbar.call_args_list:
                 assert call.kwargs.get("disable") is True
+
+
+class TestCollectCandidates:
+    """Tests for the _collect_candidates helper method."""
+
+    def test_returns_reference_tuples_with_is_ref_true(self, make_paper) -> None:
+        """Backward citations are returned with is_reference=True."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.1000/ref")
+        connector = FakeCitationConnector(references={"10.1000/seed": [ref]})
+        runner = SnowballRunner(seed_papers=[seed], max_depth=1, direction="backward")
+        runner._connectors = [connector]
+
+        candidates = runner._collect_candidates(seed)
+
+        assert len(candidates) == 1
+        candidate, source, is_ref = candidates[0]
+        assert candidate.doi == "10.1000/ref"
+        assert source is seed
+        assert is_ref is True
+
+    def test_returns_citing_tuples_with_is_ref_false(self, make_paper) -> None:
+        """Forward citations are returned with is_reference=False."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        citing = make_paper("Citing", doi="10.1000/citing")
+        connector = FakeCitationConnector(cited_by={"10.1000/seed": [citing]})
+        runner = SnowballRunner(seed_papers=[seed], max_depth=1, direction="forward")
+        runner._connectors = [connector]
+
+        candidates = runner._collect_candidates(seed)
+
+        assert len(candidates) == 1
+        candidate, source, is_ref = candidates[0]
+        assert candidate.doi == "10.1000/citing"
+        assert source is seed
+        assert is_ref is False
+
+    def test_does_not_modify_graph(self, make_paper) -> None:
+        """_collect_candidates must not add any paper to the graph."""
+        from findpapers.core.citation_graph import CitationGraph
+
+        seed = make_paper("Seed", doi="10.1000/seed")
+        ref = make_paper("Ref", doi="10.1000/ref")
+        connector = FakeCitationConnector(references={"10.1000/seed": [ref]})
+        runner = SnowballRunner(seed_papers=[seed], max_depth=1, direction="backward")
+        runner._connectors = [connector]
+
+        graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
+        paper_count_before = graph.paper_count
+
+        runner._collect_candidates(seed)
+
+        assert graph.paper_count == paper_count_before
 
 
 class TestSnowballRunnerVerbose:

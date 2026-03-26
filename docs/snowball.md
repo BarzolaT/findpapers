@@ -24,6 +24,7 @@ graph = engine.snowball(
     papers,                         # list[Paper] | Paper - seed papers
     max_depth=1,                    # int - maximum traversal depth
     direction="both",               # "both" | "backward" | "forward"
+    top_n_per_level=None,           # int | None - keep only top N papers per level
     num_workers=1,                  # int - number of parallel workers
     verbose=False,                  # bool - enable detailed logging
     show_progress=True,             # bool - show progress bars
@@ -35,6 +36,7 @@ graph = engine.snowball(
 | `papers` | `list[Paper] \| Paper` | *(required)* | One or more seed papers from which the snowball starts |
 | `max_depth` | `int` | `1` | Maximum number of snowball iterations |
 | `direction` | `"both" \| "backward" \| "forward"` | `"both"` | Direction of citation traversal |
+| `top_n_per_level` | `int \| None` | `None` | Keep only the N most-cited papers per level in the graph; the rest are discarded. Seed papers are always expanded. `None` means no limit |
 | `num_workers` | `int` | `1` | Number of parallel workers used to query connectors |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
 | `show_progress` | `bool` | `True` | Display tqdm progress bars while papers are being expanded |
@@ -89,6 +91,26 @@ graph = engine.snowball(papers, max_depth=2)
 ```
 
 > **Note:** Higher depths can result in very large graphs. Start with `max_depth=1` and increase gradually.
+
+## Controlling Cost with `top_n_per_level`
+
+At each snowball level the number of discovered papers can grow explosively, making deep snowballs (e.g. `max_depth=3`) very expensive in terms of API calls. The `top_n_per_level` parameter addresses this by only adding the **N most-cited** papers found at each level to the graph. Papers that do not make the cut are discarded entirely — they are not added to the graph and are never expanded.
+
+Seed papers passed to `engine.snowball()` are always fully expanded regardless of this limit.
+
+```python
+# Deep snowball but limit to the 10 most-cited papers at each level
+graph = engine.snowball(
+    seed_papers,
+    max_depth=3,
+    direction="forward",
+    top_n_per_level=10,
+)
+```
+
+When `top_n_per_level` is `None` (the default) all discovered papers are added to the graph and expanded.
+
+> **Tip:** Papers with an unknown citation count (`citations=None`) are ranked below papers with a known count, so well-indexed papers are always preferred.
 
 ## Data Sources
 

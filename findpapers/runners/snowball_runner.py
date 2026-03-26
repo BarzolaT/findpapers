@@ -48,6 +48,14 @@ class SnowballRunner:
         ``"backward"`` fetches references (papers cited *by* the seed),
         ``"forward"`` fetches citing papers (papers that *cite* the seed),
         ``"both"`` fetches in both directions.
+    top_n_per_level : int | None
+        When set, only the *top N* most-cited papers discovered at each
+        snowball level are kept as candidates for expansion in the next
+        level.  Seed papers are always expanded regardless of this limit.
+        This is useful for controlling cost when running deep snowballs:
+        setting a small value (e.g. ``20``) avoids the combinatorial
+        explosion that occurs without a cut-off.  When ``None`` (default)
+        all discovered papers are expanded.
     openalex_api_key : str | None
         OpenAlex API key.
     email : str | None
@@ -66,6 +74,7 @@ class SnowballRunner:
         *,
         max_depth: int = 1,
         direction: Literal["both", "backward", "forward"] = "both",
+        top_n_per_level: int | None = None,
         openalex_api_key: str | None = None,
         email: str | None = None,
         semantic_scholar_api_key: str | None = None,
@@ -76,10 +85,14 @@ class SnowballRunner:
         Raises
         ------
         InvalidParameterError
-            If *max_depth* is less than 1.
+            If *max_depth* is less than 1 or *top_n_per_level* is less than 1.
         """
         if max_depth < 1:
             raise InvalidParameterError(f"max_depth must be >= 1, got {max_depth}")
+        if top_n_per_level is not None and top_n_per_level < 1:
+            raise InvalidParameterError(
+                f"top_n_per_level must be >= 1 when set, got {top_n_per_level}"
+            )
 
         if isinstance(seed_papers, Paper):
             seed_papers = [seed_papers]
@@ -88,6 +101,7 @@ class SnowballRunner:
         self._skipped_seeds = len(seed_papers) - len(self._seed_papers)
         self._max_depth = max_depth
         self._direction = direction
+        self._top_n_per_level = top_n_per_level
         self._num_workers = max(num_workers, 1)
         self._graph: CitationGraph | None = None
         self._metrics: dict[str, int | float] = {}
@@ -132,6 +146,10 @@ class SnowballRunner:
             )
             logger.info("Max depth: %d", self._max_depth)
             logger.info("Direction: %s", self._direction)
+            logger.info(
+                "Top N per level: %s",
+                str(self._top_n_per_level) if self._top_n_per_level else "unlimited",
+            )
             logger.info("Connectors: %s", [c.name for c in self._connectors])
             logger.info("Num workers: %d", self._num_workers)
             logger.info("=====================================")
@@ -178,24 +196,73 @@ class SnowballRunner:
                     unit="paper",
                     disable=not show_progress,
                 ) as pbar:
-                    for paper in frontier:
-                        discovered = self._expand_paper(
-                            paper,
-                            graph,
-                            pool,
-                            show_progress=show_progress,
-                        )
-                        next_frontier.extend(discovered)
-                        pbar.update(1)
+                    if self._top_n_per_level is None:
+                        # No limit: add every discovered paper to the graph.
+                        for paper in frontier:
+                            discovered = self._expand_paper(
+                                paper, graph, pool, show_progress=show_progress
+                            )
+                            next_frontier.extend(discovered)
+                            pbar.update(1)
+                    else:
+                        # Collect all candidates from the whole frontier
+                        # WITHOUT adding them to the graph so we can rank
+                        # and filter before committing anything.
+                        all_raw: list[tuple[Paper, Paper, bool]] = []
+                        for paper in frontier:
+                            all_raw.extend(
+                                self._collect_candidates(paper, pool, show_progress=show_progress)
+                            )
+                            pbar.update(1)
+
+                        # Group novel candidates by graph key.
+                        # For duplicates, keep the representation with the
+                        # highest known citation count (for ranking) and
+                        # accumulate all (source, is_ref) edge tuples.
+                        best: dict[str, Paper] = {}
+                        edge_map: dict[str, list[tuple[Paper, bool]]] = {}
+                        for candidate, source, is_ref in all_raw:
+                            key = CitationGraph._paper_key(candidate)
+                            if key is None or graph.contains(candidate):
+                                continue
+                            if key not in best:
+                                best[key] = candidate
+                                edge_map[key] = []
+                            elif candidate.citations is not None and (
+                                best[key].citations is None
+                                or candidate.citations > (best[key].citations or 0)
+                            ):
+                                best[key] = candidate
+                            edge_map[key].append((source, is_ref))
+
+                        # Rank by citation count descending and take top N.
+                        top_keys = sorted(
+                            best,
+                            key=lambda k: best[k].citations or 0,
+                            reverse=True,
+                        )[: self._top_n_per_level]
+
+                        # Add only the top-N papers to the graph.
+                        for key in top_keys:
+                            paper_repr = best[key]
+                            first_source = edge_map[key][0][0]
+                            canonical = graph.add_paper(paper_repr, discovered_from=first_source)
+                            for source, is_ref in edge_map[key]:
+                                if is_ref:
+                                    graph.add_edge(source, canonical)
+                                else:
+                                    graph.add_edge(canonical, source)
+                            next_frontier.append(canonical)
 
                 frontier = next_frontier
 
                 if verbose:
                     logger.info(
-                        "Level %d/%d complete: %d new papers discovered.",
+                        "Level %d/%d complete: %d new papers discovered%s.",
                         level,
                         self._max_depth,
                         len(next_frontier),
+                        f" (top {self._top_n_per_level} kept)" if self._top_n_per_level else "",
                     )
         finally:
             if pool is not None:
@@ -298,34 +365,58 @@ class SnowballRunner:
         """
         new_papers: list[Paper] = []
 
-        # Collect results from each connector — either sequentially or in
-        # parallel depending on num_workers.
-        connector_results = self._query_connectors(
-            paper,
-            pool,
-            show_progress=show_progress,
-        )
-
-        for _connector_name, references, citing in connector_results:
-            # Backward: paper cites these references
-            if references is not None:
-                for ref_paper in references:
-                    is_new = not graph.contains(ref_paper)
-                    canonical = graph.add_paper(ref_paper, discovered_from=paper)
-                    graph.add_edge(paper, canonical)
-                    if is_new:
-                        new_papers.append(canonical)
-
-            # Forward: these papers cite the paper
-            if citing is not None:
-                for citing_paper in citing:
-                    is_new = not graph.contains(citing_paper)
-                    canonical = graph.add_paper(citing_paper, discovered_from=paper)
-                    graph.add_edge(canonical, paper)
-                    if is_new:
-                        new_papers.append(canonical)
+        for candidate, source, is_ref in self._collect_candidates(
+            paper, pool, show_progress=show_progress
+        ):
+            is_new = not graph.contains(candidate)
+            canonical = graph.add_paper(candidate, discovered_from=source)
+            if is_ref:
+                graph.add_edge(source, canonical)
+            else:
+                graph.add_edge(canonical, source)
+            if is_new:
+                new_papers.append(canonical)
 
         return new_papers
+
+    def _collect_candidates(
+        self,
+        paper: Paper,
+        pool: ThreadPoolExecutor | None = None,
+        *,
+        show_progress: bool = True,
+    ) -> list[tuple[Paper, Paper, bool]]:
+        """Query connectors for *paper* and return raw candidates without modifying the graph.
+
+        Parameters
+        ----------
+        paper : Paper
+            The paper to query.
+        pool : ThreadPoolExecutor | None
+            Optional shared thread pool for parallel connector queries.
+        show_progress : bool
+            Display per-connector progress bars.
+
+        Returns
+        -------
+        list[tuple[Paper, Paper, bool]]
+            Each entry is ``(candidate, source, is_reference)``.  *is_reference*
+            is ``True`` for backward citations (source cites candidate) and
+            ``False`` for forward citations (candidate cites source).
+        """
+        candidates: list[tuple[Paper, Paper, bool]] = []
+
+        for _name, references, citing in self._query_connectors(
+            paper, pool, show_progress=show_progress
+        ):
+            if references is not None:
+                for ref_paper in references:
+                    candidates.append((ref_paper, paper, True))
+            if citing is not None:
+                for citing_paper in citing:
+                    candidates.append((citing_paper, paper, False))
+
+        return candidates
 
     def _query_single_connector(
         self,

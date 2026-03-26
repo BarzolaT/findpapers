@@ -529,6 +529,7 @@ class Engine:
         *,
         max_depth: int = 1,
         direction: Literal["both", "backward", "forward"] = "both",
+        top_n_per_level: int | None = None,
         num_workers: int = 1,
         verbose: bool = False,
         show_progress: bool = True,
@@ -558,6 +559,12 @@ class Engine:
         direction : Literal["both", "backward", "forward"]
             ``"backward"`` fetches references (papers cited *by* the seed),
             ``"forward"`` fetches citing papers, ``"both"`` does both.
+        top_n_per_level : int | None
+            When set, only the *top N* most-cited papers discovered at each
+            snowball level are kept as candidates for expansion in the next
+            level.  Seed papers are always expanded regardless of this limit.
+            Useful for controlling cost in deep snowballs.  ``None`` (default)
+            means no limit.
         num_workers : int
             Maximum number of connectors to query in parallel for each
             paper.  Defaults to ``1`` (sequential).  The effective
@@ -612,6 +619,7 @@ class Engine:
             seed_papers=papers,
             max_depth=max_depth,
             direction=direction,
+            top_n_per_level=top_n_per_level,
             openalex_api_key=self._openalex_api_key,
             email=self._email,
             semantic_scholar_api_key=self._semantic_scholar_api_key,
