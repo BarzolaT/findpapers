@@ -120,7 +120,7 @@ Download, enrichment, and DOI lookup operations accept a `timeout` parameter (in
 ```python
 engine.download(result.papers, "./pdfs", timeout=30.0)
 engine.enrich(result.papers, timeout=15.0)
-paper = engine.fetch_paper_by_doi("10.1038/nature12373", timeout=15.0)
+paper = engine.get("10.1038/nature12373", timeout=15.0)
 ```
 
 Set to `None` to disable timeouts (not recommended).

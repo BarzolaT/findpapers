@@ -125,7 +125,7 @@ Snowballing uses OpenAlex, Semantic Scholar, and CrossRef to traverse citations.
 Fetch a single paper by its DOI:
 
 ```python
-paper = engine.fetch_paper_by_doi("10.1038/s41586-021-03819-2")
+paper = engine.get("10.1038/s41586-021-03819-2")
 if paper:
     print(paper)
 ```

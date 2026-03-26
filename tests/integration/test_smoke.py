@@ -118,12 +118,12 @@ class TestSearch:
 
 
 class TestDOILookup:
-    """Verify that ``Engine.fetch_paper_by_doi`` works against CrossRef."""
+    """Verify that ``Engine.get`` works against CrossRef."""
 
     def test_fetch_known_doi(self) -> None:
         """Fetch a well-known DOI and check basic fields."""
         engine = _build_engine()
-        paper = engine.fetch_paper_by_doi(_KNOWN_DOI)
+        paper = engine.get(_KNOWN_DOI)
 
         assert paper is not None, f"DOI lookup returned None for {_KNOWN_DOI}"
         assert isinstance(paper, Paper)
@@ -159,7 +159,7 @@ class TestSnowball:
     def test_snowball_from_doi(self) -> None:
         """Snowball from a single seed paper found by DOI."""
         engine = _build_engine()
-        seed = engine.fetch_paper_by_doi(_KNOWN_DOI)
+        seed = engine.get(_KNOWN_DOI)
 
         assert seed is not None, "Seed paper not found; cannot test snowball"
 

@@ -445,7 +445,7 @@ class Engine:
         )
         return runner.run(verbose=verbose, show_progress=show_progress)
 
-    def fetch_paper_by_doi(
+    def get(
         self,
         doi: str,
         *,
@@ -504,12 +504,12 @@ class Engine:
 
         >>> from findpapers import Engine
         >>> engine = Engine()
-        >>> paper = engine.fetch_paper_by_doi("10.1038/nature12373")
+        >>> paper = engine.get("10.1038/nature12373")
         >>> print(paper.title)
 
         Using a full DOI URL:
 
-        >>> paper = engine.fetch_paper_by_doi("https://doi.org/10.1038/nature12373")
+        >>> paper = engine.get("https://doi.org/10.1038/nature12373")
         """
         runner = DOILookupRunner(
             doi=doi,
@@ -550,7 +550,7 @@ class Engine:
         papers : list[Paper] | Paper
             One or more seed papers from which the snowball starts.
             Typically obtained from ``engine.search(...).papers`` or
-            ``engine.fetch_paper_by_doi(...)``.
+            ``engine.get(...)``.
         max_depth : int
             Maximum number of snowball iterations.  ``1`` (default)
             retrieves only the immediate neighbours.  ``2`` also expands
@@ -589,7 +589,7 @@ class Engine:
 
         >>> from findpapers import Engine
         >>> engine = Engine()
-        >>> seed = engine.fetch_paper_by_doi("10.1038/nature12373")
+        >>> seed = engine.get("10.1038/nature12373")
         >>> graph = engine.snowball(seed, max_depth=1)
         >>> print(f"{graph.paper_count} papers, {graph.edge_count} edges")
         42 papers, 65 edges

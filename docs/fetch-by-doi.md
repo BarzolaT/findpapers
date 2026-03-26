@@ -1,6 +1,6 @@
 # Fetch by DOI
 
-The `engine.fetch_paper_by_doi()` method looks up a single paper from CrossRef using its DOI. This is useful when you already know the DOI of a paper and want to retrieve its metadata without running a full search.
+The `engine.get()` method looks up a single paper from CrossRef using its DOI. This is useful when you already know the DOI of a paper and want to retrieve its metadata without running a full search.
 
 ## Basic Usage
 
@@ -9,7 +9,7 @@ import findpapers
 
 engine = findpapers.Engine()
 
-paper = engine.fetch_paper_by_doi("10.1038/nature12373")
+paper = engine.get("10.1038/nature12373")
 
 if paper:
     print(paper.title)
@@ -20,7 +20,7 @@ if paper:
 ## Parameters
 
 ```python
-paper = engine.fetch_paper_by_doi(
+paper = engine.get(
     doi,                            # str - the DOI to look up
     timeout=10.0,                   # float | None - request timeout in seconds
     verbose=False,                  # bool - enable detailed logging
@@ -49,10 +49,10 @@ The DOI can be provided as a bare identifier or as a full URL - the URL prefix i
 
 ```python
 # Bare DOI
-paper = engine.fetch_paper_by_doi("10.1038/nature12373")
+paper = engine.get("10.1038/nature12373")
 
 # Full DOI URL
-paper = engine.fetch_paper_by_doi("https://doi.org/10.1038/nature12373")
+paper = engine.get("https://doi.org/10.1038/nature12373")
 ```
 
 ## Using as a Snowball Seed
@@ -65,7 +65,7 @@ import findpapers
 engine = findpapers.Engine()
 
 # Fetch the seed paper
-seed = engine.fetch_paper_by_doi("10.1038/nature12373")
+seed = engine.get("10.1038/nature12373")
 
 if seed:
     # Build a citation graph around it
@@ -77,7 +77,7 @@ if seed:
 
 ## Fetching Multiple Papers by DOI
 
-To look up multiple DOIs, call `fetch_paper_by_doi()` in a loop:
+To look up multiple DOIs, call `get()` in a loop:
 
 ```python
 dois = [
@@ -88,7 +88,7 @@ dois = [
 
 papers = []
 for doi in dois:
-    paper = engine.fetch_paper_by_doi(doi)
+    paper = engine.get(doi)
     if paper:
         papers.append(paper)
 

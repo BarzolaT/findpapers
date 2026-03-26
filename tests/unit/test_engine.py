@@ -362,15 +362,15 @@ class TestEngineEnrich:
 
 
 # ---------------------------------------------------------------------------
-# fetch_paper_by_doi()
+# get()
 # ---------------------------------------------------------------------------
 
 
-class TestEngineFetchPaperByDoi:
-    """Tests for Engine.fetch_paper_by_doi()."""
+class TestEngineGet:
+    """Tests for Engine.get()."""
 
     def test_fetch_forwards_timeout(self):
-        """fetch_paper_by_doi() forwards per-call timeout to DOILookupRunner."""
+        """get() forwards per-call timeout to DOILookupRunner."""
         engine = Engine()
         fake_paper = MagicMock(spec=Paper)
         with patch("findpapers.engine.DOILookupRunner") as mock_cls:
@@ -378,7 +378,7 @@ class TestEngineFetchPaperByDoi:
             mock_runner.run.return_value = fake_paper
             mock_cls.return_value = mock_runner
 
-            result = engine.fetch_paper_by_doi("10.1234/test", timeout=30.0, verbose=True)
+            result = engine.get("10.1234/test", timeout=30.0, verbose=True)
 
         # Verify the DOI and timeout are forwarded correctly.
         _, call_kwargs = mock_cls.call_args
@@ -388,26 +388,26 @@ class TestEngineFetchPaperByDoi:
         assert result is fake_paper
 
     def test_fetch_returns_none_when_not_found(self):
-        """fetch_paper_by_doi() returns None when DOI is not found."""
+        """get() returns None when DOI is not found."""
         engine = Engine()
         with patch("findpapers.engine.DOILookupRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = None
             mock_cls.return_value = mock_runner
 
-            result = engine.fetch_paper_by_doi("10.9999/nonexistent")
+            result = engine.get("10.9999/nonexistent")
 
         assert result is None
 
     def test_fetch_default_per_call_params(self):
-        """verbose defaults to False, timeout to 10.0."""
+        """get() verbose defaults to False, timeout to 10.0."""
         engine = Engine()
         with patch("findpapers.engine.DOILookupRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = None
             mock_cls.return_value = mock_runner
 
-            engine.fetch_paper_by_doi("10.1234/test")
+            engine.get("10.1234/test")
 
         _, kwargs = mock_cls.call_args
         assert kwargs["timeout"] == 10.0

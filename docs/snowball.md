@@ -10,7 +10,7 @@ import findpapers
 engine = findpapers.Engine()
 
 # Start from a paper found by DOI
-seed = engine.fetch_paper_by_doi("10.1038/nature12373")
+seed = engine.get("10.1038/nature12373")
 
 graph = engine.snowball(seed, max_depth=1, direction="both")
 
@@ -126,7 +126,7 @@ findpapers.save_to_json(graph, "citation_graph.json")
 You can pass a single `Paper` object directly:
 
 ```python
-seed = engine.fetch_paper_by_doi("10.1038/nature12373")
+seed = engine.get("10.1038/nature12373")
 graph = engine.snowball(seed)
 ```
 

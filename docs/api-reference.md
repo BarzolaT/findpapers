@@ -126,12 +126,12 @@ engine.enrich(
 
 **Returns:** Metrics dictionary with keys: `total_papers`, `enriched_papers`, `unchanged_papers`, `failed_papers`, `runtime_in_seconds`.
 
-### `fetch_paper_by_doi()`
+### `get()`
 
 Fetch a single paper by its DOI from CrossRef.
 
 ```python
-engine.fetch_paper_by_doi(
+engine.get(
     doi: str,
     *,
     timeout: float | None = 10.0,

@@ -55,8 +55,11 @@ engine.enrich(result.papers)
 # Download PDFs
 engine.download(result.papers, "./pdfs")
 
+# You can also look up a single paper directly by DOI
+paper = engine.get("10.1038/s41586-021-03819-2")
+
 # Build a citation graph from the top results
-graph = engine.snowball(result.papers[:5], max_depth=1, direction="both")
+graph = engine.snowball([paper], max_depth=1, direction="forward")
 
 # Save results
 findpapers.save_to_json(result, "results.json")
