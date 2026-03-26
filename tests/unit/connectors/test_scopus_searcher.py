@@ -388,12 +388,10 @@ class TestScopusConnectorSearch:
 
     def test_search_network_error_returns_empty_list(self, simple_query):
         """Network error in _fetch_papers is caught and returns an empty list."""
-        import requests as req_lib
-
         searcher = ScopusConnector(api_key="dummy")
 
         with patch.object(
-            searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
+            searcher, "_fetch_papers", side_effect=requests.ConnectionError("network down")
         ):
             papers = searcher.search(simple_query)
 

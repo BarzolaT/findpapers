@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import httpx
 import pytest
 import requests
+from curl_cffi.requests.errors import RequestsError as _CurlError
 
 from findpapers.connectors.web_scraping import WebScrapingConnector
 from findpapers.core.paper import PaperType
@@ -142,86 +142,74 @@ class TestWebScrapingConnectorFetchPaperFromUrl:
         assert paper is not None
         assert paper.url == final_url
 
-    def test_raises_on_http_error(self) -> None:
-        """Propagates requests.RequestException on network-level httpx errors."""
+    def test_raises_on_network_error(self) -> None:
+        """Propagates requests.RequestException on network-level curl_cffi errors."""
         connector = WebScrapingConnector()
         with (
-            patch.object(
-                connector, "_make_html_request", side_effect=httpx.ConnectError("refused")
-            ),
+            patch.object(connector, "_make_html_request", side_effect=_CurlError("refused")),
             pytest.raises(requests.RequestException),
         ):
             connector.fetch_paper_from_url("https://example.com/paper")
 
-    def _httpx_client_ctx(self, response: MagicMock) -> tuple[MagicMock, MagicMock]:
-        """Return (MockClient, ctx_mock) with ctx.get pre-configured to return *response*."""
+    def _curl_session_ctx(self, response: MagicMock) -> tuple[MagicMock, MagicMock]:
+        """Return (MockSession, session_ctx) with ctx.get pre-configured to return *response*."""
         ctx = MagicMock()
         ctx.get.return_value = response
-        mock_client = MagicMock()
-        mock_client.__enter__ = MagicMock(return_value=ctx)
-        mock_client.__exit__ = MagicMock(return_value=False)
-        return mock_client, ctx
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
+        return mock_session, ctx
 
     def test_proxy_forwarded_to_session_get(self) -> None:
-        """proxy setting is forwarded as proxy= to httpx.Client."""
+        """proxy setting is forwarded as proxies= to _CurlSession.get()."""
         connector = WebScrapingConnector(proxy="http://proxy:8080")
-        mock_client, _ = self._httpx_client_ctx(_mock_html_response(_TITLED_HTML))
-        with patch(
-            "findpapers.connectors.web_scraping.httpx.Client", return_value=mock_client
-        ) as MockClient:
+        mock_session, ctx = self._curl_session_ctx(_mock_html_response(_TITLED_HTML))
+        with patch("findpapers.connectors.web_scraping._CurlSession", return_value=mock_session):
             connector.fetch_paper_from_url("https://example.com/paper")
-        _, ctor_kwargs = MockClient.call_args
-        assert ctor_kwargs["proxy"] == "http://proxy:8080"
+        _, get_kwargs = ctx.get.call_args
+        assert get_kwargs["proxies"] == {"http": "http://proxy:8080", "https": "http://proxy:8080"}
 
     def test_ssl_verify_false_forwarded_to_session_get(self) -> None:
-        """ssl_verify=False is forwarded as verify=False to httpx.Client."""
+        """ssl_verify=False is forwarded as verify=False to _CurlSession.get()."""
         connector = WebScrapingConnector(ssl_verify=False)
-        mock_client, _ = self._httpx_client_ctx(_mock_html_response(_TITLED_HTML))
-        with patch(
-            "findpapers.connectors.web_scraping.httpx.Client", return_value=mock_client
-        ) as MockClient:
+        mock_session, ctx = self._curl_session_ctx(_mock_html_response(_TITLED_HTML))
+        with patch("findpapers.connectors.web_scraping._CurlSession", return_value=mock_session):
             connector.fetch_paper_from_url("https://example.com/paper")
-        _, ctor_kwargs = MockClient.call_args
-        assert ctor_kwargs["verify"] is False
+        _, get_kwargs = ctx.get.call_args
+        assert get_kwargs["verify"] is False
 
     def test_ssl_verify_defaults_to_true_in_request(self) -> None:
-        """verify=True is passed to httpx.Client by default."""
+        """verify=True is passed to _CurlSession.get() by default."""
         connector = WebScrapingConnector()
-        mock_client, _ = self._httpx_client_ctx(_mock_html_response(_TITLED_HTML))
-        with patch(
-            "findpapers.connectors.web_scraping.httpx.Client", return_value=mock_client
-        ) as MockClient:
+        mock_session, ctx = self._curl_session_ctx(_mock_html_response(_TITLED_HTML))
+        with patch("findpapers.connectors.web_scraping._CurlSession", return_value=mock_session):
             connector.fetch_paper_from_url("https://example.com/paper")
-        _, ctor_kwargs = MockClient.call_args
-        assert ctor_kwargs["verify"] is True
+        _, get_kwargs = ctx.get.call_args
+        assert get_kwargs["verify"] is True
 
     def test_no_proxy_sends_none_to_session_get(self) -> None:
-        """proxy=None is passed to httpx.Client when no proxy is configured."""
+        """proxies=None is passed to _CurlSession.get() when no proxy is configured."""
         connector = WebScrapingConnector()
-        mock_client, _ = self._httpx_client_ctx(_mock_html_response(_TITLED_HTML))
-        with patch(
-            "findpapers.connectors.web_scraping.httpx.Client", return_value=mock_client
-        ) as MockClient:
+        mock_session, ctx = self._curl_session_ctx(_mock_html_response(_TITLED_HTML))
+        with patch("findpapers.connectors.web_scraping._CurlSession", return_value=mock_session):
             connector.fetch_paper_from_url("https://example.com/paper")
-        _, ctor_kwargs = MockClient.call_args
-        assert ctor_kwargs["proxy"] is None
+        _, get_kwargs = ctx.get.call_args
+        assert get_kwargs["proxies"] is None
 
     def test_allow_redirects_is_true(self) -> None:
-        """follow_redirects=True is always passed to httpx.Client."""
+        """allow_redirects=True is always passed to _CurlSession.get()."""
         connector = WebScrapingConnector()
-        mock_client, _ = self._httpx_client_ctx(_mock_html_response(_TITLED_HTML))
-        with patch(
-            "findpapers.connectors.web_scraping.httpx.Client", return_value=mock_client
-        ) as MockClient:
+        mock_session, ctx = self._curl_session_ctx(_mock_html_response(_TITLED_HTML))
+        with patch("findpapers.connectors.web_scraping._CurlSession", return_value=mock_session):
             connector.fetch_paper_from_url("https://example.com/paper")
-        _, ctor_kwargs = MockClient.call_args
-        assert ctor_kwargs["follow_redirects"] is True
+        _, get_kwargs = ctx.get.call_args
+        assert get_kwargs["allow_redirects"] is True
 
     def test_timeout_forwarded_to_session_get(self) -> None:
-        """Custom timeout is forwarded to client.get()."""
+        """Custom timeout is forwarded to _CurlSession.get()."""
         connector = WebScrapingConnector()
-        mock_client, ctx = self._httpx_client_ctx(_mock_html_response(_TITLED_HTML))
-        with patch("findpapers.connectors.web_scraping.httpx.Client", return_value=mock_client):
+        mock_session, ctx = self._curl_session_ctx(_mock_html_response(_TITLED_HTML))
+        with patch("findpapers.connectors.web_scraping._CurlSession", return_value=mock_session):
             connector.fetch_paper_from_url("https://example.com/paper", timeout=30.0)
         _, get_kwargs = ctx.get.call_args
         assert get_kwargs["timeout"] == 30.0
@@ -282,10 +270,8 @@ def _mock_blocking_html_response(
     resp.url = url
     # fetch_paper_from_url only calls raise_for_status() for non-fallback codes
     # (403/406/418 take the early-return path).  For 4xx that reach raise_for_status
-    # the connector expects httpx.HTTPStatusError (which it re-raises as requests.HTTPError).
-    resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-        f"HTTP {status_code}", request=MagicMock(), response=resp
-    )
+    # the connector expects _CurlError (which it re-raises as requests.HTTPError).
+    resp.raise_for_status.side_effect = _CurlError(f"HTTP {status_code}")
     return resp
 
 
@@ -318,7 +304,7 @@ class TestFetchPaperFromUrlApiFallback:
             ),
             patch.object(connector, "_try_api_fallback", return_value=None) as spy,
         ):
-            connector.fetch_paper_from_url("https://elifesciences.org/articles/12345")
+            connector.fetch_paper_from_url("https://academic.oup.com/article/12345")
         spy.assert_called_once()
 
     def test_418_triggers_fallback(self) -> None:
@@ -411,14 +397,6 @@ class TestTryApiFallbackRouting:
         spy.assert_called_once_with(
             "10.1101/2020.05.01.20087619", medrxiv_url, 10.0, server="medrxiv"
         )
-
-    def test_elife_url_routes_to_elife(self) -> None:
-        """An elifesciences.org/articles/... URL calls _fetch_from_elife_api."""
-        connector = WebScrapingConnector()
-        elife_url = "https://elifesciences.org/articles/85609"
-        with patch.object(WebScrapingConnector, "_fetch_from_elife_api", return_value=None) as spy:
-            connector._try_api_fallback(elife_url, elife_url, 10.0)
-        spy.assert_called_once_with("85609", elife_url, 10.0)
 
     def test_unknown_url_returns_none(self) -> None:
         """An unrecognised URL returns None without calling any fallback."""
@@ -805,122 +783,231 @@ class TestFetchFromBiorxivApi:
 
 
 # ---------------------------------------------------------------------------
-# Tests for _fetch_from_elife_api
+# Tests for _merge_ieee_metadata — publicationYear fallback + isOpenAccess
 # ---------------------------------------------------------------------------
 
-_ELIFE_API_RESPONSE: dict = {
-    "status": "vor",
-    "id": "85609",
-    "doi": "10.7554/eLife.85609",
-    "title": "Regulation of AMPA receptor transport by 4.1N and SAP97",
-    "published": "2023-04-20T00:00:00Z",
-    "authors": [
-        {
-            "name": {"given": "Caroline", "surname": "Bonnet"},
-            "affiliations": [{"name": ["CNRS", "University of Bordeaux"]}],
-        },
-        {
-            "name": {"given": "Justine", "surname": "Charpentier"},
-            "affiliations": [],
-        },
-    ],
-    "keywords": ["AMPA receptor", "synaptic plasticity"],
-}
+
+def _ieee_html(*fields_kv: tuple[str, object]) -> str:
+    """Return minimal HTML containing an IEEE JS metadata blob with the given fields."""
+    import json
+
+    blob = json.dumps(dict(fields_kv))
+    return f"<html><script>xplGlobal.document.metadata = {blob};</script></html>"
 
 
-class TestFetchFromElifeApi:
-    """Tests for _fetch_from_elife_api."""
+class TestMergeIeeeMetadataPublicationYear:
+    """Tests for publicationYear fallback and isOpenAccess in _merge_ieee_metadata."""
 
-    def test_returns_paper_on_success(self) -> None:
-        """Returns a Paper with correct title, DOI, authors, keywords."""
-        with patch(
-            "findpapers.connectors.web_scraping.requests.get",
-            return_value=_mock_api_response(_ELIFE_API_RESPONSE),
-        ):
-            paper = WebScrapingConnector._fetch_from_elife_api(
-                "85609", "https://elifesciences.org/articles/85609", 10.0
-            )
+    def test_publication_year_used_when_date_absent(self) -> None:
+        """publicationYear is stored when publicationDate is missing."""
+        content = _ieee_html(("publicationYear", "2022"))
+        meta = WebScrapingConnector._extract_metadata_from_html(content)
+        assert meta.get("citation_publication_date") == "2022"
+
+    def test_publication_date_takes_priority_over_year(self) -> None:
+        """publicationDate wins over publicationYear when both are present."""
+        content = _ieee_html(("publicationDate", "2022-03"), ("publicationYear", "2022"))
+        meta = WebScrapingConnector._extract_metadata_from_html(content)
+        assert meta.get("citation_publication_date") == "2022-03"
+
+    def test_is_open_access_true_extracted(self) -> None:
+        """isOpenAccess=True from the IEEE blob is stored as _is_open_access."""
+        content = _ieee_html(("isOpenAccess", True))
+        meta = WebScrapingConnector._extract_metadata_from_html(content)
+        assert meta.get("_is_open_access") is True
+
+    def test_is_open_access_false_extracted(self) -> None:
+        """isOpenAccess=False from the IEEE blob is stored as _is_open_access."""
+        content = _ieee_html(("isOpenAccess", False))
+        meta = WebScrapingConnector._extract_metadata_from_html(content)
+        assert meta.get("_is_open_access") is False
+
+    def test_is_open_access_propagated_to_paper(self) -> None:
+        """_is_open_access=True in the metadata dict is propagated to Paper.is_open_access."""
+        meta = {
+            "citation_title": "Test Paper",
+            "citation_author": "Doe, J.",
+            "_is_open_access": True,
+        }
+        paper = WebScrapingConnector.build_paper_from_metadata(meta, "https://example.com")
         assert paper is not None
-        assert paper.title == "Regulation of AMPA receptor transport by 4.1N and SAP97"
-        assert paper.doi == "10.7554/eLife.85609"
-        assert len(paper.authors) == 2
-        assert paper.authors[0].name == "Caroline Bonnet"
-        assert paper.keywords == {"AMPA receptor", "synaptic plasticity"}
+        assert paper.is_open_access is True
 
-    def test_author_affiliations_extracted(self) -> None:
-        """Author affiliations from the eLife API are stored correctly."""
-        with patch(
-            "findpapers.connectors.web_scraping.requests.get",
-            return_value=_mock_api_response(_ELIFE_API_RESPONSE),
-        ):
-            paper = WebScrapingConnector._fetch_from_elife_api(
-                "85609", "https://elifesciences.org/articles/85609", 10.0
-            )
+    def test_is_open_access_false_propagated_to_paper(self) -> None:
+        """_is_open_access=False in the metadata dict is propagated to Paper.is_open_access."""
+        meta = {
+            "citation_title": "Test Paper",
+            "citation_author": "Doe, J.",
+            "_is_open_access": False,
+        }
+        paper = WebScrapingConnector.build_paper_from_metadata(meta, "https://example.com")
         assert paper is not None
-        assert paper.authors[0].affiliation is not None
-        assert "CNRS" in paper.authors[0].affiliation
-        assert "University of Bordeaux" in paper.authors[0].affiliation
+        assert paper.is_open_access is False
 
-    def test_source_is_elife_journal(self) -> None:
-        """Source is always set to the eLife journal."""
-        with patch(
-            "findpapers.connectors.web_scraping.requests.get",
-            return_value=_mock_api_response(_ELIFE_API_RESPONSE),
-        ):
-            paper = WebScrapingConnector._fetch_from_elife_api(
-                "85609", "https://elifesciences.org/articles/85609", 10.0
-            )
+    def test_is_open_access_none_when_absent(self) -> None:
+        """Paper.is_open_access is None when _is_open_access is not in the metadata."""
+        meta = {"citation_title": "Test Paper", "citation_author": "Doe, J."}
+        paper = WebScrapingConnector.build_paper_from_metadata(meta, "https://example.com")
         assert paper is not None
-        assert paper.source is not None
-        assert paper.source.title == "eLife"
-        assert paper.source.issn == "2050-084X"
+        assert paper.is_open_access is None
 
-    def test_doi_fallback_when_not_in_response(self) -> None:
-        """DOI is derived from the article_id when absent in the API response."""
-        data = {**_ELIFE_API_RESPONSE}
-        del data["doi"]
-        with patch(
-            "findpapers.connectors.web_scraping.requests.get",
-            return_value=_mock_api_response(data),
-        ):
-            paper = WebScrapingConnector._fetch_from_elife_api(
-                "85609", "https://elifesciences.org/articles/85609", 10.0
-            )
-        assert paper is not None
-        assert paper.doi is not None
-        assert "85609" in paper.doi
 
-    def test_returns_none_when_title_missing(self) -> None:
-        """Returns None when the API response has no title."""
-        data = {**_ELIFE_API_RESPONSE, "title": ""}
-        with patch(
-            "findpapers.connectors.web_scraping.requests.get",
-            return_value=_mock_api_response(data),
-        ):
-            result = WebScrapingConnector._fetch_from_elife_api(
-                "85609", "https://elifesciences.org/articles/85609", 10.0
-            )
-        assert result is None
+# ---------------------------------------------------------------------------
+# Tests for _merge_jsonld_metadata — @id DOI, editor fallback, isAccessibleForFree
+# ---------------------------------------------------------------------------
 
-    def test_returns_none_on_api_error(self) -> None:
-        """Returns None when the API call raises an exception."""
-        with patch(
-            "findpapers.connectors.web_scraping.requests.get",
-            side_effect=requests.ConnectionError("unreachable"),
-        ):
-            result = WebScrapingConnector._fetch_from_elife_api(
-                "85609", "https://elifesciences.org/articles/85609", 5.0
-            )
-        assert result is None
 
-    def test_returns_none_on_404(self) -> None:
-        """Returns None when the API returns 404 (article not found)."""
-        resp = _mock_api_response({"title": "not found"}, status_code=404)
-        with patch(
-            "findpapers.connectors.web_scraping.requests.get",
-            return_value=resp,
-        ):
-            result = WebScrapingConnector._fetch_from_elife_api(
-                "00000", "https://elifesciences.org/articles/00000", 5.0
-            )
-        assert result is None
+def _jsonld_html(data: dict) -> str:
+    """Return minimal HTML with a JSON-LD script block of the given data."""
+    import json
+
+    payload = {"@type": "ScholarlyArticle", **data}
+    script = json.dumps(payload)
+    return f'<html><head><script type="application/ld+json">{script}</script></head></html>'
+
+
+class TestMergeJsonldMetadata:
+    """Tests for DOI from @id, editor fallback, and isAccessibleForFree in _merge_jsonld_metadata."""
+
+    def test_doi_extracted_from_degruyter_at_id(self) -> None:
+        """DOI is extracted from a De Gruyter-style @id URL."""
+        html = _jsonld_html(
+            {
+                "@id": "https://www.degruyterbrill.com/document/doi/10.1515/9783110750584/html",
+                "name": "Test Book",
+            }
+        )
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_doi") == "10.1515/9783110750584"
+
+    def test_doi_extracted_from_doi_org_at_id(self) -> None:
+        """DOI is extracted from a doi.org @id URL."""
+        html = _jsonld_html(
+            {
+                "@id": "https://doi.org/10.1234/test.456",
+                "name": "Test",
+            }
+        )
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_doi") == "10.1234/test.456"
+
+    def test_at_id_doi_does_not_overwrite_explicit_doi(self) -> None:
+        """An explicit doi/identifier field takes priority over the @id URL."""
+        html = _jsonld_html(
+            {
+                "@id": "https://doi.org/10.9999/wrong",
+                "doi": "10.1234/correct",
+                "name": "Test",
+            }
+        )
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_doi") == "10.1234/correct"
+
+    def test_editor_used_when_author_empty(self) -> None:
+        """Editor list is used for citation_author when author is empty."""
+        html = _jsonld_html(
+            {
+                "name": "Edited Book",
+                "author": [],
+                "editor": [{"@type": "Person", "name": "Jane Editor"}],
+            }
+        )
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_author") == "Jane Editor"
+
+    def test_author_takes_priority_over_editor(self) -> None:
+        """When author is present, editor is ignored."""
+        html = _jsonld_html(
+            {
+                "name": "Authored Book",
+                "author": [{"@type": "Person", "name": "John Author"}],
+                "editor": [{"@type": "Person", "name": "Jane Editor"}],
+            }
+        )
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_author") == "John Author"
+
+    def test_is_accessible_for_free_true(self) -> None:
+        """isAccessibleForFree=True sets _is_open_access to True."""
+        html = _jsonld_html({"name": "Open Article", "isAccessibleForFree": True})
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("_is_open_access") is True
+
+    def test_is_accessible_for_free_false(self) -> None:
+        """isAccessibleForFree=False sets _is_open_access to False."""
+        html = _jsonld_html({"name": "Paywalled Article", "isAccessibleForFree": False})
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("_is_open_access") is False
+
+
+# ---------------------------------------------------------------------------
+# Tests for _merge_arxiv_subjects
+# ---------------------------------------------------------------------------
+
+
+class TestMergeArxivSubjects:
+    """Tests for the ArXiv subjects-as-keywords extraction."""
+
+    def test_subjects_extracted_as_keywords(self) -> None:
+        """Subjects cell contents become citation_keywords."""
+        html = (
+            "<html><body><table><tr>"
+            '<td class="tablecell subjects">Computer Vision (cs.CV); Machine Learning (cs.LG)</td>'
+            "</tr></table></body></html>"
+        )
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert "citation_keywords" in meta
+        assert "cs.CV" in meta["citation_keywords"]
+
+    def test_subjects_not_overwritten_when_keywords_already_present(self) -> None:
+        """Subjects are skipped when citation_keywords already exists in the page."""
+        html = (
+            '<html><head><meta name="citation_keywords" content="existing keyword"></head>'
+            "<body><table><tr>"
+            '<td class="tablecell subjects">cs.CV</td>'
+            "</tr></table></body></html>"
+        )
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_keywords") == "existing keyword"
+
+    def test_no_subjects_element_is_noop(self) -> None:
+        """No citation_keywords is set when there is no subjects cell."""
+        html = "<html><body><p>No subjects here</p></body></html>"
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert "citation_keywords" not in meta
+
+
+# ---------------------------------------------------------------------------
+# Tests for DOI extraction from visible "DOI: ..." text in HTML
+# ---------------------------------------------------------------------------
+
+
+class TestDoiFromTextPattern:
+    """Tests for the last-resort DOI extraction from plain-text 'DOI: ...' labels."""
+
+    def test_doi_extracted_from_doi_label(self) -> None:
+        """DOI is extracted when preceded by 'DOI:' in the page text."""
+        html = "<html><body><span>DOI: 10.3837/tiis.2022.12.005</span></body></html>"
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_doi") == "10.3837/tiis.2022.12.005"
+
+    def test_doi_trailing_punctuation_stripped(self) -> None:
+        """Trailing commas and similar punctuation are stripped from the extracted DOI."""
+        html = "<html><body><p>DOI: 10.3837/tiis.2022.12.005,</p></body></html>"
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_doi") == "10.3837/tiis.2022.12.005"
+
+    def test_doi_case_insensitive(self) -> None:
+        """The 'DOI:' label is matched case-insensitively."""
+        html = "<html><body><p>doi: 10.1234/test</p></body></html>"
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_doi") == "10.1234/test"
+
+    def test_meta_tag_doi_takes_priority(self) -> None:
+        """A citation_doi meta tag is preferred over the plain-text fallback."""
+        html = (
+            '<html><head><meta name="citation_doi" content="10.1234/correct"></head>'
+            "<body><p>DOI: 10.9999/wrong</p></body></html>"
+        )
+        meta = WebScrapingConnector._extract_metadata_from_html(html)
+        assert meta.get("citation_doi") == "10.1234/correct"

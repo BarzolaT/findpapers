@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import time
+from concurrent.futures import Future
+from concurrent.futures import TimeoutError as FuturesTimeoutError
+from unittest.mock import MagicMock, patch
 
 from findpapers.utils.parallel import execute_tasks
 
@@ -101,7 +104,6 @@ class TestExecuteTasksParallel:
 
     def test_parallel_timeout_yields_remaining_as_timeout_errors(self):
         """When global timeout fires in parallel mode, remaining items yield TimeoutError."""
-        import time
 
         def _slow(x):
             time.sleep(0.5)
@@ -119,10 +121,6 @@ class TestExecuteTasksParallel:
 
     def test_parallel_timeout_done_future_yields_result(self):
         """Done futures not yet yielded are resolved when global timeout fires."""
-        from concurrent.futures import Future
-        from concurrent.futures import TimeoutError as FuturesTimeoutError
-        from unittest.mock import MagicMock, patch
-
         # Build two futures: one already done (result=99), one not done
         done_future: Future = Future()
         done_future.set_result(99)
@@ -150,10 +148,6 @@ class TestExecuteTasksParallel:
 
     def test_parallel_timeout_done_future_with_exception(self):
         """Done futures that raise exceptions are surfaced correctly after timeout."""
-        from concurrent.futures import Future
-        from concurrent.futures import TimeoutError as FuturesTimeoutError
-        from unittest.mock import MagicMock, patch
-
         boom_future: Future = Future()
         boom_future.set_exception(ValueError("boom"))
 

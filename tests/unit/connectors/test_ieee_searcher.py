@@ -14,6 +14,8 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
 from findpapers.exceptions import MissingApiKeyError, UnsupportedQueryError
 from findpapers.query.builders.ieee import IEEEQueryBuilder
+from findpapers.query.parser import QueryParser
+from findpapers.query.propagator import FilterPropagator
 
 
 class TestIEEEConnectorInit:
@@ -276,9 +278,6 @@ class TestIEEEConnectorSearch:
 
     def test_search_raises_on_invalid_query(self, wildcard_query):
         """Search raises UnsupportedQueryError for '?' wildcard (not supported by IEEE)."""
-        from findpapers.query.parser import QueryParser
-        from findpapers.query.propagator import FilterPropagator
-
         parser = QueryParser()
         propagator = FilterPropagator()
         q = propagator.propagate(parser.parse("[mach?]"))
@@ -341,12 +340,10 @@ class TestIEEEConnectorSearch:
 
     def test_search_network_error_returns_empty_list(self, simple_query):
         """Network error in _fetch_papers is caught and returns an empty list."""
-        import requests as req_lib
-
         searcher = IEEEConnector(api_key="dummy")
 
         with patch.object(
-            searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
+            searcher, "_fetch_papers", side_effect=requests.ConnectionError("network down")
         ):
             papers = searcher.search(simple_query)
 

@@ -2,7 +2,7 @@
 
 import pytest
 
-from findpapers.core.query import NodeType
+from findpapers.core.query import NodeType, Query
 from findpapers.query.parser import QueryParser
 from findpapers.query.validator import QueryValidator
 
@@ -141,8 +141,6 @@ class TestQueryParser:
         """Test query serialization and deserialization."""
         original = self.parse_validated("[term a] AND [term b]", parser, validator)
         data = original.to_dict()
-
-        from findpapers.core.query import Query
 
         restored = Query.from_dict(data)
         assert restored.raw_query == original.raw_query

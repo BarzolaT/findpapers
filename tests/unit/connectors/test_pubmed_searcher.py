@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from unittest.mock import MagicMock, patch
 from xml.etree import ElementTree as ET
 
@@ -10,6 +11,8 @@ import pytest
 import requests
 
 from findpapers.connectors.pubmed import (
+    _MIN_REQUEST_INTERVAL_DEFAULT,
+    _MIN_REQUEST_INTERVAL_WITH_KEY,
     PubmedConnector,
     _normalize_month,
     _parse_date_element,
@@ -20,6 +23,8 @@ from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
+from findpapers.query.parser import QueryParser
+from findpapers.query.propagator import FilterPropagator
 
 
 class TestNormalizeMonth:
@@ -102,16 +107,12 @@ class TestPubmedConnectorInit:
 
     def test_warning_when_no_api_key(self, caplog):
         """A warning is logged when no API key is provided."""
-        import logging
-
         with caplog.at_level(logging.WARNING, logger="findpapers.connectors.pubmed"):
             PubmedConnector()
         assert any("No API key provided for PubMed" in msg for msg in caplog.messages)
 
     def test_no_warning_when_api_key_provided(self, caplog):
         """No warning is logged when an API key is provided."""
-        import logging
-
         with caplog.at_level(logging.WARNING, logger="findpapers.connectors.pubmed"):
             PubmedConnector(api_key="key")
         assert not any("No API key provided" in msg for msg in caplog.messages)
@@ -122,18 +123,11 @@ class TestPubmedConnectorInit:
 
     def test_rate_interval_without_key(self):
         """Default rate interval is used when no API key provided."""
-        from findpapers.connectors.pubmed import _MIN_REQUEST_INTERVAL_DEFAULT
-
         searcher = PubmedConnector()
         assert searcher._request_interval == _MIN_REQUEST_INTERVAL_DEFAULT
 
     def test_rate_interval_with_key(self):
         """Faster rate interval used when API key is provided."""
-        from findpapers.connectors.pubmed import (
-            _MIN_REQUEST_INTERVAL_DEFAULT,
-            _MIN_REQUEST_INTERVAL_WITH_KEY,
-        )
-
         searcher = PubmedConnector(api_key="key")
         assert searcher._request_interval == _MIN_REQUEST_INTERVAL_WITH_KEY
         assert searcher._request_interval < _MIN_REQUEST_INTERVAL_DEFAULT
@@ -639,9 +633,6 @@ class TestPubmedConnectorSearch:
         """Search raises UnsupportedQueryError for '?' wildcard (not supported by PubMed)."""
         # The wildcard_query uses 'machine*' which is valid (>= 4 chars).
         # Override with '?' test via a custom query.
-        from findpapers.query.parser import QueryParser
-        from findpapers.query.propagator import FilterPropagator
-
         parser = QueryParser()
         propagator = FilterPropagator()
         q = propagator.propagate(parser.parse("[mac?]"))
@@ -747,12 +738,10 @@ class TestPubmedConnectorSearch:
 
     def test_search_network_error_returns_empty_list(self, simple_query):
         """Network error in _fetch_papers is caught and returns an empty list."""
-        import requests as req_lib
-
         searcher = PubmedConnector()
 
         with patch.object(
-            searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
+            searcher, "_fetch_papers", side_effect=requests.ConnectionError("network down")
         ):
             papers = searcher.search(simple_query)
 
@@ -842,8 +831,6 @@ class TestPubmedSubjectsExtraction:
 
     def test_major_mesh_topics_as_subjects(self, pubmed_efetch_xml):
         """MeSH descriptors with MajorTopicYN='Y' are extracted as subjects."""
-        from xml.etree import ElementTree as ET
-
         tree = ET.fromstring(pubmed_efetch_xml)
         articles = tree.findall(".//PubmedArticle")
         assert len(articles) > 0
@@ -855,8 +842,6 @@ class TestPubmedSubjectsExtraction:
 
     def test_mesh_major_topic_inline_xml(self):
         """Inline XML with MeSH MajorTopicYN='Y' populates subjects."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <PubmedArticle>
             <MedlineCitation>
@@ -901,8 +886,6 @@ class TestPubmedLanguageExtraction:
 
     def test_language_eng_maps_to_en(self):
         """<Language>eng</Language> is normalised to 'en'."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <PubmedArticle>
             <MedlineCitation>
@@ -921,8 +904,6 @@ class TestPubmedLanguageExtraction:
 
     def test_language_por_maps_to_pt(self):
         """<Language>por</Language> is normalised to 'pt'."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <PubmedArticle>
             <MedlineCitation>
@@ -941,8 +922,6 @@ class TestPubmedLanguageExtraction:
 
     def test_language_absent_is_none(self):
         """Papers without <Language> element have language=None."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <PubmedArticle>
             <MedlineCitation>
@@ -960,8 +939,6 @@ class TestPubmedLanguageExtraction:
 
     def test_language_from_sample_xml(self, pubmed_efetch_xml):
         """Sample XML records (all 'eng') are normalised to 'en'."""
-        from xml.etree import ElementTree as ET
-
         tree = ET.fromstring(pubmed_efetch_xml)
         articles = tree.findall(".//PubmedArticle")
         for article_el in articles:
@@ -995,8 +972,6 @@ class TestPubmedIsRetractedExtraction:
 
     def test_retracted_publication_sets_is_retracted_true(self):
         """'Retracted Publication' pub type yields is_retracted=True."""
-        from xml.etree import ElementTree as ET
-
         xml_str = self._make_xml(["Journal Article", "Retracted Publication"])
         article = ET.fromstring(xml_str)
         paper = PubmedConnector()._parse_paper(article)
@@ -1005,8 +980,6 @@ class TestPubmedIsRetractedExtraction:
 
     def test_retraction_of_publication_does_not_set_is_retracted(self):
         """'Retraction of Publication' (the notice itself) does NOT yield is_retracted=True."""
-        from xml.etree import ElementTree as ET
-
         xml_str = self._make_xml(["Retraction of Publication"])
         article = ET.fromstring(xml_str)
         paper = PubmedConnector()._parse_paper(article)
@@ -1015,8 +988,6 @@ class TestPubmedIsRetractedExtraction:
 
     def test_no_retraction_type_sets_is_retracted_false(self):
         """Normal paper without any retraction pub type yields is_retracted=False."""
-        from xml.etree import ElementTree as ET
-
         xml_str = self._make_xml(["Journal Article", "Research Support, Non-U.S. Gov't"])
         article = ET.fromstring(xml_str)
         paper = PubmedConnector()._parse_paper(article)
@@ -1025,8 +996,6 @@ class TestPubmedIsRetractedExtraction:
 
     def test_empty_publication_type_list_sets_is_retracted_false(self):
         """Paper with an empty PublicationTypeList yields is_retracted=False."""
-        from xml.etree import ElementTree as ET
-
         xml_str = self._make_xml([])
         article = ET.fromstring(xml_str)
         paper = PubmedConnector()._parse_paper(article)
@@ -1035,8 +1004,6 @@ class TestPubmedIsRetractedExtraction:
 
     def test_is_retracted_from_sample_xml(self, pubmed_efetch_xml):
         """Sample XML records yield is_retracted as a bool (not None)."""
-        from xml.etree import ElementTree as ET
-
         tree = ET.fromstring(pubmed_efetch_xml)
         articles = tree.findall(".//PubmedArticle")
         for article_el in articles:
@@ -1069,8 +1036,6 @@ class TestPubmedFundersExtraction:
 
     def test_funders_extracted_from_grant_agencies(self):
         """Agency names inside GrantList/Grant are collected into funders."""
-        from xml.etree import ElementTree as ET
-
         xml_str = self._make_grant_xml(["National Cancer Institute", "FAPESP"])
         article = ET.fromstring(xml_str)
         paper = PubmedConnector()._parse_paper(article)
@@ -1079,8 +1044,6 @@ class TestPubmedFundersExtraction:
 
     def test_funders_empty_when_no_grant_list(self):
         """Paper without GrantList has an empty funders set."""
-        from xml.etree import ElementTree as ET
-
         xml_str = self._make_grant_xml([])
         article = ET.fromstring(xml_str)
         paper = PubmedConnector()._parse_paper(article)
@@ -1089,8 +1052,6 @@ class TestPubmedFundersExtraction:
 
     def test_funders_skips_blank_agency(self):
         """Grant entries with blank Agency text are skipped."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <PubmedArticle>
             <MedlineCitation>
@@ -1112,8 +1073,6 @@ class TestPubmedFundersExtraction:
 
     def test_funders_skips_grant_without_agency_element(self):
         """Grant entries without an Agency element are skipped."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <PubmedArticle>
             <MedlineCitation>

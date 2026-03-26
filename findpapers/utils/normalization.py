@@ -100,6 +100,12 @@ def parse_date(value: str | None) -> date | None:
             return datetime.strptime(value[:10], fmt).date()
         except ValueError:
             continue
+    # US-style numeric format MM/DD/YYYY (used by PubMed's citation_date).
+    for fmt in ("%m/%d/%Y",):
+        try:
+            return datetime.strptime(value[:10], fmt).date()
+        except ValueError:
+            continue
     # Written month-name formats: must match the full string.
     # Includes both "Month YYYY" and "YYYY Month" variants (e.g. PubMed's
     # citation_date uses "2023 Dec" — year first followed by abbreviated month).

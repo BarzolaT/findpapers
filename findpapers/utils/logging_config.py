@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 
 # Third-party loggers that produce excessive output at DEBUG level.
-_NOISY_LOGGERS = ("urllib3", "requests", "httpx", "charset_normalizer")
+_NOISY_LOGGERS = ("urllib3", "requests", "curl_cffi", "charset_normalizer")
 
 
 def configure_verbose_logging() -> None:

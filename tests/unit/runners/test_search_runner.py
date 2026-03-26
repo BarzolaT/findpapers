@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import date
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+import findpapers.runners.search_runner as sr_mod
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
-from findpapers.core.search_result import Database
+from findpapers.core.search_result import Database, SearchResult
 from findpapers.core.source import Source
-from findpapers.exceptions import InvalidParameterError, UnsupportedQueryError
+from findpapers.exceptions import InvalidParameterError, QueryValidationError, UnsupportedQueryError
 from findpapers.runners.search_runner import SearchRunner, _are_years_compatible, _is_preprint_doi
 
 
@@ -20,8 +22,6 @@ class TestSearchRunnerInit:
 
     def test_invalid_query_raises(self):
         """Malformed query raises QueryValidationError at construction time."""
-        from findpapers.exceptions import QueryValidationError
-
         with pytest.raises(QueryValidationError):
             SearchRunner(query="((bad query")
 
@@ -118,8 +118,6 @@ class TestSearchRunnerPipeline:
 
     def test_run_returns_search_object(self, make_paper):
         """run() returns a SearchResult instance."""
-        from findpapers.core.search_result import SearchResult
-
         runner = self._make_runner_with_mock_papers([make_paper()])
         result = runner.run()
         assert isinstance(result, SearchResult)
@@ -430,10 +428,6 @@ class TestSearchRunnerPipeline:
 
     def test_unsupported_query_error_emits_warning(self, caplog):
         """UnsupportedQueryError from a searcher emits a warning regardless of verbose."""
-        import logging
-
-        from findpapers.exceptions import UnsupportedQueryError
-
         runner = SearchRunner(query="[ml]", databases=["arxiv"])
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
@@ -451,8 +445,6 @@ class TestSearchRunnerPipeline:
 
     def test_regular_error_warning_requires_verbose(self, caplog):
         """A generic searcher error only emits a warning when verbose=True."""
-        import logging
-
         runner = SearchRunner(query="[ml]", databases=["arxiv"])
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
@@ -482,8 +474,6 @@ class TestSearchRunnerVerbose:
 
     def test_verbose_run_does_not_raise(self, make_paper, caplog):
         """run(verbose=True) completes without raising."""
-        import logging
-
         runner = self._make_runner_with_mock_papers([make_paper()])
         with caplog.at_level(logging.INFO):
             result = runner.run(verbose=True)
@@ -492,8 +482,6 @@ class TestSearchRunnerVerbose:
 
     def test_verbose_true_emits_configuration_header(self, make_paper, caplog):
         """verbose=True logs the configuration header."""
-        import logging
-
         runner = self._make_runner_with_mock_papers([make_paper()])
         with caplog.at_level(logging.INFO, logger="findpapers.runners.search_runner"):
             runner.run(verbose=True)
@@ -502,8 +490,6 @@ class TestSearchRunnerVerbose:
 
     def test_verbose_true_emits_results_summary(self, make_paper, caplog):
         """verbose=True logs the results summary."""
-        import logging
-
         runner = self._make_runner_with_mock_papers([make_paper()])
         with caplog.at_level(logging.INFO, logger="findpapers.runners.search_runner"):
             runner.run(verbose=True)
@@ -513,8 +499,6 @@ class TestSearchRunnerVerbose:
 
     def test_verbose_false_emits_no_configuration_log(self, make_paper, caplog):
         """verbose=False (default) does not log the configuration header."""
-        import logging
-
         runner = self._make_runner_with_mock_papers([make_paper()])
         with caplog.at_level(logging.INFO, logger="findpapers.runners.search_runner"):
             runner.run(verbose=False)
@@ -522,8 +506,6 @@ class TestSearchRunnerVerbose:
 
     def test_show_progress_false_disables_progress_bars(self, make_paper):
         """show_progress=False suppresses tqdm progress bars."""
-        from unittest.mock import patch
-
         runner = self._make_runner_with_mock_papers([make_paper()])
         with patch("findpapers.runners.search_runner.make_progress_bar") as mock_pbar:
             mock_ctx = MagicMock()
@@ -538,8 +520,6 @@ class TestSearchRunnerVerbose:
 
     def test_show_progress_true_enables_progress_bars(self, make_paper):
         """show_progress=True (default) enables tqdm progress bars."""
-        from unittest.mock import patch
-
         runner = self._make_runner_with_mock_papers([make_paper()])
         with patch("findpapers.runners.search_runner.make_progress_bar") as mock_pbar:
             mock_ctx = MagicMock()
@@ -589,8 +569,6 @@ class TestSearchRunnerParallel:
         def _capture_execute(tasks, fn, *, num_workers, **kwargs):
             captured.append(num_workers)
             return original_execute(tasks, fn, num_workers=num_workers, **kwargs)
-
-        import findpapers.runners.search_runner as sr_mod
 
         original = sr_mod.execute_tasks
         sr_mod.execute_tasks = _capture_execute  # type: ignore[assignment]

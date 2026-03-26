@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import datetime
+import logging
+import threading
+import time
 from collections.abc import Callable
 from unittest.mock import MagicMock, patch
 
@@ -12,7 +15,8 @@ import requests
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.paper import Paper
 from findpapers.core.query import Query
-from findpapers.query.builder import QueryBuilder
+from findpapers.exceptions import ConnectorError, UnsupportedQueryError
+from findpapers.query.builder import QueryBuilder, QueryValidationResult
 
 # ---------------------------------------------------------------------------
 # Minimal concrete subclass for testing
@@ -70,8 +74,6 @@ class TestSearchConnectorBaseGetLogging:
 
     def test_request_logged_at_debug(self, caplog) -> None:
         """_get logs the outgoing GET URL at DEBUG level."""
-        import logging
-
         searcher = _StubConnector()
         resp = _make_response()
         searcher._http_session = MagicMock()
@@ -84,8 +86,6 @@ class TestSearchConnectorBaseGetLogging:
 
     def test_sensitive_params_redacted_in_request_log(self, caplog) -> None:
         """API key values are replaced with *** in the request log."""
-        import logging
-
         searcher = _StubConnector()
         resp = _make_response()
         searcher._http_session = MagicMock()
@@ -104,8 +104,6 @@ class TestSearchConnectorBaseGetLogging:
 
     def test_sensitive_headers_redacted_in_request_log(self, caplog) -> None:
         """API key values in headers are replaced with *** in the request log."""
-        import logging
-
         searcher = _StubConnector()
         resp = _make_response()
         searcher._http_session = MagicMock()
@@ -125,8 +123,6 @@ class TestSearchConnectorBaseGetLogging:
 
     def test_response_logged_at_debug(self, caplog) -> None:
         """_get logs the response status, content-type, and size at DEBUG level."""
-        import logging
-
         searcher = _StubConnector()
         resp = _make_response(status=200, content=b"hello")
         searcher._http_session = MagicMock()
@@ -145,19 +141,15 @@ class TestSearchConnectorBaseGetLogging:
         This verifies the ordering: _log_response must be called BEFORE
         raise_for_status() so that non-2xx responses still appear in logs.
         """
-        import logging
-
-        import requests as req_lib
-
         searcher = _StubConnector()
         resp = _make_response(status=404, reason="Not Found", content=b"not found")
-        resp.raise_for_status.side_effect = req_lib.HTTPError("404")
+        resp.raise_for_status.side_effect = requests.HTTPError("404")
         searcher._http_session = MagicMock()
         searcher._http_session.get.return_value = resp
 
         with (
             caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"),
-            pytest.raises(req_lib.HTTPError),
+            pytest.raises(requests.HTTPError),
         ):
             searcher._get("https://api.example.com/missing")
 
@@ -196,8 +188,6 @@ class TestSearchConnectorBaseSearch:
 
     def _make_searcher_with_validation(self, is_valid: bool, error_message: str | None = None):
         """Build a _StubConnector whose query_builder returns the given validation result."""
-        from findpapers.query.builder import QueryValidationResult
-
         mock_builder = MagicMock()
         mock_builder.validate_query.return_value = QueryValidationResult(
             is_valid=is_valid,
@@ -207,10 +197,6 @@ class TestSearchConnectorBaseSearch:
 
     def test_raises_unsupported_query_error_when_query_invalid(self) -> None:
         """search() raises UnsupportedQueryError when query fails validation."""
-        import pytest
-
-        from findpapers.exceptions import UnsupportedQueryError
-
         searcher = self._make_searcher_with_validation(
             is_valid=False, error_message="Filter 'key' is not supported."
         )
@@ -220,10 +206,6 @@ class TestSearchConnectorBaseSearch:
 
     def test_error_message_included_in_exception(self) -> None:
         """UnsupportedQueryError message contains the searcher name and detail."""
-        import pytest
-
-        from findpapers.exceptions import UnsupportedQueryError
-
         searcher = self._make_searcher_with_validation(
             is_valid=False, error_message="Wildcard '?' not supported."
         )
@@ -233,12 +215,10 @@ class TestSearchConnectorBaseSearch:
 
     def test_request_exception_returns_empty_list(self) -> None:
         """requests.RequestException in _fetch_papers is caught and returns empty list."""
-        import requests as req_lib
-
         searcher = self._make_searcher_with_validation(is_valid=True)
         mock_query = MagicMock()
         with patch.object(
-            searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
+            searcher, "_fetch_papers", side_effect=requests.ConnectionError("network down")
         ):
             papers = searcher.search(mock_query)
 
@@ -246,19 +226,15 @@ class TestSearchConnectorBaseSearch:
 
     def test_http_error_returns_empty_list(self) -> None:
         """requests.HTTPError (e.g. 401) in _fetch_papers is caught and returns empty list."""
-        import requests as req_lib
-
         searcher = self._make_searcher_with_validation(is_valid=True)
         mock_query = MagicMock()
-        with patch.object(searcher, "_fetch_papers", side_effect=req_lib.HTTPError("401")):
+        with patch.object(searcher, "_fetch_papers", side_effect=requests.HTTPError("401")):
             papers = searcher.search(mock_query)
 
         assert papers == []
 
     def test_connector_error_returns_empty_list(self) -> None:
         """ConnectorError in _fetch_papers is caught and returns empty list."""
-        from findpapers.exceptions import ConnectorError
-
         searcher = self._make_searcher_with_validation(is_valid=True)
         mock_query = MagicMock()
         with patch.object(searcher, "_fetch_papers", side_effect=ConnectorError("API key invalid")):
@@ -278,15 +254,11 @@ class TestSearchConnectorBaseSearch:
 
     def test_caught_exceptions_are_logged(self, caplog) -> None:
         """Caught network errors are logged at ERROR level with traceback."""
-        import logging
-
-        import requests as req_lib
-
         searcher = self._make_searcher_with_validation(is_valid=True)
         mock_query = MagicMock()
         with (
             caplog.at_level(logging.ERROR, logger="findpapers.connectors.search_base"),
-            patch.object(searcher, "_fetch_papers", side_effect=req_lib.Timeout("timed out")),
+            patch.object(searcher, "_fetch_papers", side_effect=requests.Timeout("timed out")),
         ):
             searcher.search(mock_query)
 
@@ -423,8 +395,6 @@ class TestConnectorBaseRetry:
 
     def test_retries_exhausted_raises_http_error(self) -> None:
         """When all rate-limit retries are exhausted, HTTPError is raised."""
-        import requests as req_lib
-
         connector = _StubConnector()
         connector._max_rate_limit_retries = 2
         connector._retry_base_delay = 0.0
@@ -435,7 +405,7 @@ class TestConnectorBaseRetry:
         connector._http_session = MagicMock()
         connector._http_session.get.return_value = resp_429
 
-        with pytest.raises(req_lib.HTTPError):
+        with pytest.raises(requests.HTTPError):
             connector._get("https://api.example.com/test")
 
         # 1 initial + 2 rate-limit retries = 3 requests total
@@ -443,8 +413,6 @@ class TestConnectorBaseRetry:
 
     def test_non_retryable_status_raises_immediately(self) -> None:
         """A 404 is not retryable and raises HTTPError immediately."""
-        import requests as req_lib
-
         connector = _StubConnector()
         connector._max_retries = 3
         connector._retry_base_delay = 0.0
@@ -453,7 +421,7 @@ class TestConnectorBaseRetry:
         connector._http_session = MagicMock()
         connector._http_session.get.return_value = resp_404
 
-        with pytest.raises(req_lib.HTTPError):
+        with pytest.raises(requests.HTTPError):
             connector._get("https://api.example.com/test")
 
         # Only 1 attempt — no retries for 404.
@@ -461,8 +429,6 @@ class TestConnectorBaseRetry:
 
     def test_connection_error_retried_then_succeeds(self) -> None:
         """A ConnectionError triggers retries until a request succeeds."""
-        import requests as req_lib
-
         connector = _StubConnector()
         connector._max_retries = 2
         connector._retry_base_delay = 0.0
@@ -470,7 +436,7 @@ class TestConnectorBaseRetry:
         resp_200 = self._make_response(200)
         connector._http_session = MagicMock()
         connector._http_session.get.side_effect = [
-            req_lib.ConnectionError("reset"),
+            requests.ConnectionError("reset"),
             resp_200,
         ]
 
@@ -481,8 +447,6 @@ class TestConnectorBaseRetry:
 
     def test_timeout_error_retried_then_succeeds(self) -> None:
         """A Timeout triggers retries until a request succeeds."""
-        import requests as req_lib
-
         connector = _StubConnector()
         connector._max_retries = 2
         connector._retry_base_delay = 0.0
@@ -490,7 +454,7 @@ class TestConnectorBaseRetry:
         resp_200 = self._make_response(200)
         connector._http_session = MagicMock()
         connector._http_session.get.side_effect = [
-            req_lib.Timeout("timed out"),
+            requests.Timeout("timed out"),
             resp_200,
         ]
 
@@ -501,16 +465,14 @@ class TestConnectorBaseRetry:
 
     def test_connection_error_retries_exhausted(self) -> None:
         """Persistent ConnectionError is raised after all retries are exhausted."""
-        import requests as req_lib
-
         connector = _StubConnector()
         connector._max_retries = 1
         connector._retry_base_delay = 0.0
 
         connector._http_session = MagicMock()
-        connector._http_session.get.side_effect = req_lib.ConnectionError("down")
+        connector._http_session.get.side_effect = requests.ConnectionError("down")
 
-        with pytest.raises(req_lib.ConnectionError):
+        with pytest.raises(requests.ConnectionError):
             connector._get("https://api.example.com/test")
 
         # 1 initial + 1 retry = 2 attempts.
@@ -561,8 +523,6 @@ class TestConnectorBaseRetry:
 
     def test_retry_logs_warnings(self, caplog) -> None:
         """Retried requests log warnings with attempt information."""
-        import logging
-
         connector = _StubConnector()
         connector._max_retries = 1
         connector._retry_base_delay = 0.0
@@ -605,8 +565,6 @@ class TestConnectorBaseRetry:
         (timeouts) on early attempts used to exhaust ``_max_retries`` so that
         a subsequent 429 was never retried.
         """
-        import requests as req_lib
-
         connector = _StubConnector()
         connector._max_retries = 2  # budget for connection errors
         connector._max_rate_limit_retries = 2  # separate budget for 429
@@ -622,8 +580,8 @@ class TestConnectorBaseRetry:
         # succeed because the budgets are independent.
         connector._http_session = MagicMock()
         connector._http_session.get.side_effect = [
-            req_lib.Timeout("timed out"),  # general retry 1
-            req_lib.Timeout("timed out"),  # general retry 2
+            requests.Timeout("timed out"),  # general retry 1
+            requests.Timeout("timed out"),  # general retry 2
             resp_429,  # rate-limit retry 1
             resp_429,  # rate-limit retry 2
             resp_200,  # success
@@ -670,15 +628,11 @@ class TestConnectorBaseThreadSafety:
 
     def test_concurrent_rate_limit_respects_interval(self) -> None:
         """Two threads sharing a connector both respect the minimum interval."""
-        import threading
-
         connector = _StubConnector()
         timestamps: list[float] = []
         lock = threading.Lock()
 
         def _call() -> None:
-            import time
-
             connector._rate_limit()
             with lock:
                 timestamps.append(time.monotonic())

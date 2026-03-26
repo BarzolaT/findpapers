@@ -3,11 +3,18 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from unittest.mock import MagicMock, patch
 
 import requests
 
-from findpapers.connectors.semantic_scholar import SemanticScholarConnector
+from findpapers.connectors.semantic_scholar import (
+    _MIN_REQUEST_INTERVAL_DEFAULT,
+    _MIN_REQUEST_INTERVAL_WITH_KEY,
+    _PAGE_SIZE,
+    SemanticScholarConnector,
+)
+from findpapers.core.author import Author
 from findpapers.core.paper import PaperType
 from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
@@ -29,16 +36,12 @@ class TestSemanticScholarConnectorInit:
 
     def test_warning_when_no_api_key(self, caplog):
         """A warning is logged when no API key is provided."""
-        import logging
-
         with caplog.at_level(logging.WARNING, logger="findpapers.connectors.semantic_scholar"):
             SemanticScholarConnector()
         assert any("No API key provided for Semantic Scholar" in msg for msg in caplog.messages)
 
     def test_no_warning_when_api_key_provided(self, caplog):
         """No warning is logged when an API key is provided."""
-        import logging
-
         with caplog.at_level(logging.WARNING, logger="findpapers.connectors.semantic_scholar"):
             SemanticScholarConnector(api_key="key")
         assert not any("No API key provided" in msg for msg in caplog.messages)
@@ -49,15 +52,11 @@ class TestSemanticScholarConnectorInit:
 
     def test_rate_interval_without_key(self):
         """Default rate interval used when no API key provided."""
-        from findpapers.connectors.semantic_scholar import _MIN_REQUEST_INTERVAL_DEFAULT
-
         searcher = SemanticScholarConnector()
         assert searcher._request_interval == _MIN_REQUEST_INTERVAL_DEFAULT
 
     def test_rate_interval_with_key(self):
         """Rate interval with key matches INTERVAL_WITH_KEY constant."""
-        from findpapers.connectors.semantic_scholar import _MIN_REQUEST_INTERVAL_WITH_KEY
-
         searcher = SemanticScholarConnector(api_key="key")
         assert searcher._request_interval == _MIN_REQUEST_INTERVAL_WITH_KEY
 
@@ -414,12 +413,10 @@ class TestSemanticScholarConnectorSearch:
 
     def test_search_network_error_returns_empty_list(self, simple_query):
         """Network error in _fetch_papers is caught and returns an empty list."""
-        import requests as req_lib
-
         searcher = SemanticScholarConnector()
 
         with patch.object(
-            searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
+            searcher, "_fetch_papers", side_effect=requests.ConnectionError("network down")
         ):
             papers = searcher.search(simple_query)
 
@@ -470,8 +467,6 @@ class TestSemanticScholarConnectorSearch:
 
     def test_min_request_interval_property(self):
         """min_request_interval property delegates to _request_interval."""
-        from findpapers.connectors.semantic_scholar import _MIN_REQUEST_INTERVAL_WITH_KEY
-
         searcher = SemanticScholarConnector(api_key="key")
         assert searcher.min_request_interval == _MIN_REQUEST_INTERVAL_WITH_KEY
 
@@ -489,8 +484,6 @@ class TestSemanticScholarConnectorSearch:
 
     def test_pagination_token_used_on_second_page(self, simple_query, mock_response):
         """Pagination token from page 1 is sent as param on page 2."""
-        from findpapers.connectors.semantic_scholar import _PAGE_SIZE
-
         # Build a first page with exactly _PAGE_SIZE items so size check passes.
         items = [{"title": f"Paper {i}"} for i in range(_PAGE_SIZE)]
         page1 = mock_response(json_data={"total": _PAGE_SIZE + 5, "token": "NEXT", "data": items})
@@ -532,8 +525,6 @@ class TestSemanticScholarAffiliationEnrichment:
 
     def test_affiliation_batch_request_error_continues(self):
         """RequestException during batch fetch is caught and processing continues."""
-        from findpapers.core.author import Author
-
         searcher = SemanticScholarConnector()
         author = Author(name="Test Author")
         id_map: dict[str, list] = {"auth1": [author]}
@@ -546,8 +537,6 @@ class TestSemanticScholarAffiliationEnrichment:
 
     def test_affiliation_non_dict_result_skipped(self):
         """Non-dict entries in the batch response are silently skipped."""
-        from findpapers.core.author import Author
-
         searcher = SemanticScholarConnector()
         author = Author(name="Test Author")
         id_map: dict[str, list] = {"auth1": [author]}
@@ -563,8 +552,6 @@ class TestSemanticScholarAffiliationEnrichment:
 
     def test_affiliation_empty_affiliations_skipped(self):
         """Authors with empty affiliations list are skipped."""
-        from findpapers.core.author import Author
-
         searcher = SemanticScholarConnector()
         author = Author(name="Test Author")
         id_map: dict[str, list] = {"auth1": [author]}
@@ -581,8 +568,6 @@ class TestSemanticScholarAffiliationEnrichment:
 
     def test_affiliation_set_on_matching_authors(self):
         """Affiliations are joined and set on matching authors."""
-        from findpapers.core.author import Author
-
         searcher = SemanticScholarConnector()
         author1 = Author(name="Author One")
         author2 = Author(name="Author One Dup")
@@ -601,8 +586,6 @@ class TestSemanticScholarAffiliationEnrichment:
 
     def test_affiliation_not_overwritten_if_already_set(self):
         """Authors with existing affiliation are not overwritten."""
-        from findpapers.core.author import Author
-
         searcher = SemanticScholarConnector()
         author = Author(name="Test Author")
         author.affiliation = "Existing"

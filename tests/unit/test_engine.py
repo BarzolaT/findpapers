@@ -7,9 +7,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+import findpapers
+from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import SearchResult
 from findpapers.engine import Engine
+from findpapers.runners.snowball_runner import SnowballRunner
 
 # ---------------------------------------------------------------------------
 # Construction
@@ -421,7 +424,6 @@ class TestEngineImport:
 
     def test_engine_importable(self):
         """findpapers.Engine is the Engine class."""
-        import findpapers
 
         assert findpapers.Engine is Engine
 
@@ -515,15 +517,11 @@ class TestSnowballImport:
 
     def test_citation_graph_importable(self):
         """findpapers.CitationGraph is accessible."""
-        import findpapers
-        from findpapers.core.citation_graph import CitationGraph
 
         assert findpapers.CitationGraph is CitationGraph
 
     def test_snowball_runner_importable(self):
         """findpapers.SnowballRunner is accessible."""
-        import findpapers
-        from findpapers.runners.snowball_runner import SnowballRunner
 
         assert findpapers.SnowballRunner is SnowballRunner
 
@@ -533,37 +531,31 @@ class TestSaveFunctionsImport:
 
     def test_save_to_json_importable(self):
         """findpapers.save_to_json is accessible."""
-        import findpapers
 
         assert callable(findpapers.save_to_json)
 
     def test_load_from_json_importable(self):
         """findpapers.load_from_json is accessible."""
-        import findpapers
 
         assert callable(findpapers.load_from_json)
 
     def test_save_to_bibtex_importable(self):
         """findpapers.save_to_bibtex is accessible."""
-        import findpapers
 
         assert callable(findpapers.save_to_bibtex)
 
     def test_load_from_bibtex_importable(self):
         """findpapers.load_from_bibtex is accessible."""
-        import findpapers
 
         assert callable(findpapers.load_from_bibtex)
 
     def test_save_to_csv_importable(self):
         """findpapers.save_to_csv is accessible."""
-        import findpapers
 
         assert callable(findpapers.save_to_csv)
 
     def test_load_from_csv_importable(self):
         """findpapers.load_from_csv is accessible."""
-        import findpapers
 
         assert callable(findpapers.load_from_csv)
 
@@ -578,7 +570,6 @@ class TestSaveToJson:
 
     def test_save_search_result(self, make_paper, tmp_path):
         """SearchResult is saved to a JSON file."""
-        import findpapers
 
         search = SearchResult(query="[test]", databases=["arxiv"])
         search.add_paper(make_paper(doi="10.1/a"))
@@ -588,7 +579,6 @@ class TestSaveToJson:
 
     def test_save_paper_list(self, make_paper, tmp_path):
         """A plain list of papers is saved to a JSON file."""
-        import findpapers
 
         papers = [make_paper(doi="10.1/a"), make_paper(title="Paper B", doi="10.1/b")]
         path = str(tmp_path / "papers.json")
@@ -597,8 +587,6 @@ class TestSaveToJson:
 
     def test_save_citation_graph(self, make_paper, tmp_path):
         """A CitationGraph is saved to a JSON file."""
-        import findpapers
-        from findpapers.core.citation_graph import CitationGraph
 
         seed = make_paper(doi="10.1/seed")
         graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
@@ -612,7 +600,6 @@ class TestSaveToBibtex:
 
     def test_save_paper_list(self, make_paper, tmp_path):
         """A plain list of papers is saved to a BibTeX file."""
-        import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "refs.bib")
@@ -623,7 +610,6 @@ class TestSaveToBibtex:
 
     def test_empty_list_produces_empty_file(self, tmp_path):
         """An empty paper list creates an empty file."""
-        import findpapers
 
         path = str(tmp_path / "empty.bib")
         findpapers.save_to_bibtex([], path)
@@ -637,7 +623,6 @@ class TestLoadFromBibtex:
 
     def test_round_trip(self, make_paper, tmp_path):
         """Papers survive save -> load round-trip."""
-        import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "refs.bib")
@@ -652,7 +637,6 @@ class TestLoadFromJson:
 
     def test_round_trip_search_result(self, make_paper, tmp_path):
         """SearchResult survives save -> load round-trip."""
-        import findpapers
 
         search = SearchResult(query="[test]", databases=["arxiv"])
         search.add_paper(make_paper(doi="10.1/a"))
@@ -665,7 +649,6 @@ class TestLoadFromJson:
 
     def test_round_trip_paper_list(self, make_paper, tmp_path):
         """Paper list survives save -> load round-trip."""
-        import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.json")
@@ -678,8 +661,6 @@ class TestLoadFromJson:
 
     def test_round_trip_citation_graph(self, make_paper, tmp_path):
         """CitationGraph survives save -> load round-trip."""
-        import findpapers
-        from findpapers.core.citation_graph import CitationGraph
 
         seed = make_paper(doi="10.1/seed")
         graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
@@ -696,7 +677,6 @@ class TestSaveToCsv:
 
     def test_save_paper_list(self, make_paper, tmp_path):
         """A plain list of papers is saved to a CSV file."""
-        import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.csv")
@@ -708,7 +688,6 @@ class TestSaveToCsv:
 
     def test_empty_list_produces_header_only(self, tmp_path):
         """An empty paper list creates a CSV with only the header."""
-        import findpapers
 
         path = str(tmp_path / "empty.csv")
         findpapers.save_to_csv([], path)
@@ -722,7 +701,6 @@ class TestLoadFromCsv:
 
     def test_round_trip(self, make_paper, tmp_path):
         """Papers survive save -> load round-trip."""
-        import findpapers
 
         papers = [make_paper(doi="10.1/a")]
         path = str(tmp_path / "papers.csv")

@@ -17,8 +17,10 @@ import logging
 import re
 from typing import Any
 
-import httpx
 import requests
+from curl_cffi.requests import Response as _CurlResponse
+from curl_cffi.requests import Session as _CurlSession
+from curl_cffi.requests.errors import RequestsError as _CurlError
 from lxml import html
 from lxml.html import HtmlElement
 
@@ -26,7 +28,6 @@ from findpapers.connectors.connector_base import ConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.source import Source, SourceType
-from findpapers.utils.http_headers import get_browser_headers
 from findpapers.utils.normalization import normalize_doi, parse_date
 
 logger = logging.getLogger(__name__)
@@ -156,13 +157,6 @@ _ZENODO_RECORD_RE: re.Pattern[str] = re.compile(
 #   https://www.medrxiv.org/content/10.1101/2020.05.01.20087619v1
 _BIORXIV_DOI_RE: re.Pattern[str] = re.compile(
     r"(biorxiv|medrxiv)\.org/content/(10\.\d{4,}/\d{4}\.\d{2}\.\d{2}\.\d+)",
-    re.IGNORECASE,
-)
-
-# Extracts the numeric article ID from an eLife landing-page URL.
-# Example: https://elifesciences.org/articles/85609
-_ELIFE_ID_RE: re.Pattern[str] = re.compile(
-    r"elifesciences\.org/articles/(\d+)",
     re.IGNORECASE,
 )
 
@@ -304,9 +298,7 @@ class WebScrapingConnector(ConnectorBase):
         logger.debug("GET %s", url)
         try:
             response = self._make_html_request(url, timeout)
-        except httpx.RequestError as exc:
-            # Map httpx network errors to requests.RequestException so that
-            # existing callers (e.g. enrichment_runner) continue to work.
+        except _CurlError as exc:
             raise requests.RequestException(str(exc)) from exc
         content_type = response.headers.get("content-type", "")
         logger.debug(
@@ -315,10 +307,6 @@ class WebScrapingConnector(ConnectorBase):
             content_type.split(";")[0].strip() or "unknown",
             len(response.content),
         )
-        # When a publisher WAF blocks the request (403 Forbidden, 406 Not
-        # Acceptable, 418 I'm a Teapot), fall back to open REST APIs
-        # (Crossref, Zenodo, bioRxiv, eLife) so scraping failures do not
-        # silently lose metadata that is otherwise freely available.
         if response.status_code in _FALLBACK_STATUS_CODES:
             logger.debug(
                 "HTTP %s blocked — trying API fallback for %s",
@@ -328,7 +316,7 @@ class WebScrapingConnector(ConnectorBase):
             return self._try_api_fallback(url, str(response.url), timeout)
         try:
             response.raise_for_status()
-        except httpx.HTTPStatusError as exc:
+        except _CurlError as exc:
             raise requests.HTTPError(str(exc)) from exc
         if "text/html" not in content_type.lower():
             return None
@@ -431,6 +419,11 @@ class WebScrapingConnector(ConnectorBase):
 
         pdf_url_val = cls._pick_metadata_value(metadata, _PDF_URL_KEYS)
 
+        # is_open_access — stored as a boolean under the private key
+        # ``_is_open_access`` by source-specific parsers (e.g. IEEE, JSON-LD).
+        raw_oa = metadata.get("_is_open_access")
+        is_open_access: bool | None = bool(raw_oa) if raw_oa is not None else None
+
         return Paper(
             title=title,
             abstract=abstract or "",
@@ -443,6 +436,7 @@ class WebScrapingConnector(ConnectorBase):
             keywords=keywords or None,
             page_range=pages,
             page_count=page_count,
+            is_open_access=is_open_access,
         )
 
     # ------------------------------------------------------------------
@@ -462,18 +456,18 @@ class WebScrapingConnector(ConnectorBase):
             return {"http": self._proxy, "https": self._proxy}
         return None
 
-    def _make_html_request(self, url: str, timeout: float | None) -> httpx.Response:
+    def _make_html_request(self, url: str, timeout: float | None) -> _CurlResponse:
         """Issue a single browser-like HTTP GET and return the raw response.
 
-        Uses :mod:`httpx` with HTTP/2 support for broader publisher
-        compatibility.  Publishers such as MDPI (Cloudflare-protected) block
-        the default :mod:`requests` / :mod:`urllib3` TLS fingerprint but
-        accept :mod:`httpx`'s TLS profile.  A fresh :class:`httpx.Client` is
-        created for every call so no cookies or TLS session state are shared
-        between fetches — publisher CDNs track persistent sessions to
-        bot-score sequential requests (e.g. IEEE Xplore sets JSESSIONID /
-        AWSALBAPP and returns 418 on subsequent requests carrying those
-        cookies), so isolation is critical.
+        Uses :mod:`curl_cffi` with Chrome TLS impersonation so that the JA3
+        fingerprint of every request matches a real Chrome browser.  Publishers
+        protected by Akamai (PubMed/NCBI), Cloudflare (MDPI), and similar WAFs
+        that gate access on the TLS fingerprint are bypassed transparently.
+        A fresh :class:`curl_cffi.requests.Session` is created for every call
+        so no cookies or TLS session state are shared between fetches —
+        publisher CDNs track persistent sessions to bot-score sequential
+        requests (e.g. IEEE Xplore sets JSESSIONID/AWSALBAPP and returns 418
+        on subsequent requests carrying those cookies), so isolation is critical.
 
         Parameters
         ----------
@@ -484,21 +478,22 @@ class WebScrapingConnector(ConnectorBase):
 
         Returns
         -------
-        httpx.Response
+        _CurlResponse
             Raw HTTP response (status not yet validated).
 
         Raises
         ------
-        httpx.RequestError
+        _CurlError
             On network-level failures (DNS, connection refused, timeout, …).
         """
-        with httpx.Client(
-            http2=True,
-            follow_redirects=True,
-            proxy=self._proxy,
-            verify=self._ssl_verify,
-        ) as client:
-            return client.get(url, headers=get_browser_headers(), timeout=timeout)
+        with _CurlSession(impersonate="chrome") as session:
+            return session.get(  # type: ignore[no-any-return]
+                url,
+                proxies=self._get_proxies(),
+                verify=self._ssl_verify,
+                allow_redirects=True,
+                timeout=timeout,
+            )
 
     def _try_api_fallback(
         self,
@@ -518,8 +513,6 @@ class WebScrapingConnector(ConnectorBase):
            covers zenodo.org whether accessed via doi.org or directly.
         2. **bioRxiv** — ``api.biorxiv.org/details/biorxiv/{doi}``:
            covers biorxiv.org/content/... URLs.
-        3. **eLife** — ``api.elifesciences.org/articles/{id}``:
-           covers elifesciences.org/articles/... URLs.
 
         Parameters
         ----------
@@ -551,13 +544,6 @@ class WebScrapingConnector(ConnectorBase):
             doi_match = m.group(2)
             logger.debug("Falling back to %s API for DOI %s", server, doi_match)
             result = self._fetch_from_biorxiv_api(doi_match, final_url, timeout, server=server)
-            if result is not None:
-                return result
-
-        # 3. eLife
-        if m := _ELIFE_ID_RE.search(final_url):
-            logger.debug("Falling back to eLife API for article %s", m.group(1))
-            result = self._fetch_from_elife_api(m.group(1), final_url, timeout)
             if result is not None:
                 return result
 
@@ -755,100 +741,6 @@ class WebScrapingConnector(ConnectorBase):
             funders=funders,
         )
 
-    @staticmethod
-    def _fetch_from_elife_api(
-        article_id: str,
-        page_url: str,
-        timeout: float | None,
-    ) -> Paper | None:
-        """Fetch paper metadata from the eLife REST API.
-
-        eLife publishes an unauthenticated JSON API at
-        ``https://api.elifesciences.org/articles/{id}`` that returns complete
-        article metadata even when the HTML landing page returns 406.
-
-        Parameters
-        ----------
-        article_id : str
-            The numeric article identifier, extracted from the landing URL.
-        page_url : str
-            Final landing-page URL (used as ``paper.url``).
-        timeout : float | None
-            Request timeout in seconds.
-
-        Returns
-        -------
-        Paper | None
-            Paper built from the eLife record, or ``None`` when the article
-            is not found or the API call fails.
-        """
-        api_url = f"https://api.elifesciences.org/articles/{article_id}"
-        try:
-            response = requests.get(
-                api_url,
-                headers={"Accept": "application/json"},
-                timeout=timeout,
-            )
-            response.raise_for_status()
-            data: dict[str, Any] = response.json()
-        except Exception:
-            logger.debug("eLife API call failed for article %s", article_id, exc_info=True)
-            return None
-
-        title = (data.get("title") or "").strip()
-        if not title:
-            return None
-
-        record_doi = normalize_doi(data.get("doi") or f"10.7554/eLife.{article_id}")
-
-        # Authors: the API returns either an "authorLine" summary string or a
-        # structured "authors" list.  Prefer the structured list when present.
-        authors: list[Author] = []
-        for author_entry in data.get("authors", []):
-            given = (author_entry.get("name", {}).get("given") or "").strip()
-            family = (author_entry.get("name", {}).get("surname") or "").strip()
-            full = f"{given} {family}".strip() if (given or family) else ""
-            if not full:
-                full = (author_entry.get("name", "") or "").strip()
-            if full:
-                affs: set[str] = set()
-                for aff_ref in author_entry.get("affiliations", []):
-                    inst = aff_ref.get("name") or []
-                    if isinstance(inst, list):
-                        affs.update(s for s in inst if s)
-                    elif inst:
-                        affs.add(str(inst))
-                authors.append(
-                    Author(name=full, affiliation="; ".join(sorted(affs)) if affs else None)
-                )
-
-        publication_date = parse_date(data.get("published"))
-
-        # Keywords: eLife stores them under "keywords".
-        keywords: set[str] = set()
-        for kw in data.get("keywords", []):
-            if kw and isinstance(kw, str):
-                keywords.add(kw.strip())
-
-        # Source — eLife is an open-access journal; issue/volume available.
-        source: Source | None = Source(
-            title="eLife",
-            issn="2050-084X",
-            publisher="eLife Sciences Publications",
-            source_type=SourceType.JOURNAL,
-        )
-
-        return Paper(
-            title=title,
-            abstract="",  # abstract requires a separate API call in eLife's model
-            authors=authors,
-            source=source,
-            publication_date=publication_date,
-            url=page_url,
-            doi=record_doi,
-            keywords=keywords or None,
-        )
-
     # ------------------------------------------------------------------
     # Private helpers — HTML extraction
     # ------------------------------------------------------------------
@@ -914,6 +806,21 @@ class WebScrapingConnector(ConnectorBase):
         # Supplement with JSON-LD Schema.org data as a last-resort fallback for
         # pages (e.g. Springer books) that carry metadata only in JSON-LD.
         cls._merge_jsonld_metadata(doc, metadata)
+        # Extract arXiv subject classifications as keywords when no keywords
+        # were found in meta tags (arXiv pages lack citation_keywords entirely).
+        cls._merge_arxiv_subjects(doc, metadata)
+        # Last-resort DOI extraction: some publishers (e.g. itiis.org) display
+        # the DOI as visible text with a "DOI:" prefix rather than embedding it
+        # in a meta tag.  Scan the raw HTML for this pattern when no DOI key
+        # has been populated by the meta-tag or source-specific parsers.
+        if not any(metadata.get(k) for k in _DOI_META_KEYS):
+            doi_text_match = re.search(
+                r"\bDOI[:\s]+\s*(10\.\d{4,}/[^\s<>\"']+)",
+                content,
+                re.IGNORECASE,
+            )
+            if doi_text_match:
+                metadata.setdefault("citation_doi", doi_text_match.group(1).rstrip(".,;)"))
         return metadata
 
     @classmethod
@@ -1002,6 +909,19 @@ class WebScrapingConnector(ConnectorBase):
         _set_if_absent("citation_firstpage", data.get("startPage"))
         _set_if_absent("citation_lastpage", data.get("endPage"))
         _set_if_absent("citation_publication_date", data.get("publicationDate"))
+        # IEEE books report only ``publicationYear`` (a 4-digit string such as
+        # "2022") instead of a full ``publicationDate``.  Use it as a fallback
+        # so the publication year is not lost for book entries.
+        _set_if_absent("citation_publication_date", data.get("publicationYear"))
+
+        # Open-access flag — IEEE embeds a boolean ``isOpenAccess`` in the JS
+        # blob; store it under a private key so ``build_paper_from_metadata``
+        # can pass it to ``Paper(is_open_access=...)``.
+        # Use direct assignment (not _set_if_absent) because False is a valid
+        # value that _set_if_absent would skip as falsy.
+        oa_val = data.get("isOpenAccess")
+        if oa_val is not None and "_is_open_access" not in metadata:
+            metadata["_is_open_access"] = bool(oa_val)
 
         # PDF URL — prepend domain for relative paths.
         pdf_path = data.get("pdfPath") or data.get("pdfUrl")
@@ -1125,8 +1045,25 @@ class WebScrapingConnector(ConnectorBase):
             if doi_raw:
                 _set_if_absent("citation_doi", str(doi_raw).strip())
 
+            # DOI fallback — many publishers (e.g. De Gruyter) set ``@id`` to
+            # a URL containing the DOI rather than exposing it in ``doi`` or
+            # ``identifier``.  Extract from patterns like
+            # ``https://host/document/doi/<DOI>/html``.
+            if "citation_doi" not in metadata:
+                at_id = str(data.get("@id") or "")
+                doi_in_id = re.search(
+                    r"(?:doi\.org/|/doi/)((10\.\d{4,}/[^/?&#\s]+))",
+                    at_id,
+                )
+                if doi_in_id:
+                    _set_if_absent("citation_doi", doi_in_id.group(1).rstrip("/"))
+
             # Authors — may be a list of objects with a "name" key.
+            # Fall back to ``editor`` when ``author`` is absent or empty
+            # (common for edited books such as De Gruyter volumes).
             authors_raw = data.get("author") or data.get("creator")
+            if not authors_raw:
+                authors_raw = data.get("editor")
             if isinstance(authors_raw, list):
                 names = [
                     str(a.get("name", "")).strip()
@@ -1189,6 +1126,13 @@ class WebScrapingConnector(ConnectorBase):
             if isbn_raw:
                 _set_if_absent("citation_isbn", str(isbn_raw).strip())
 
+            # Open-access flag — Schema.org uses ``isAccessibleForFree``.
+            # Use direct assignment (not _set_if_absent) because False is a
+            # valid value that _set_if_absent would skip as falsy.
+            oa_val = data.get("isAccessibleForFree")
+            if oa_val is not None and "_is_open_access" not in metadata:
+                metadata["_is_open_access"] = bool(oa_val)
+
             # Once the first usable JSON-LD block is processed, stop.
             break
 
@@ -1222,6 +1166,44 @@ class WebScrapingConnector(ConnectorBase):
             if selected:
                 return selected
         return None
+
+    @classmethod
+    def _merge_arxiv_subjects(cls, doc: HtmlElement, metadata: dict[str, Any]) -> None:
+        """Extract arXiv subject classifications and store them as keywords.
+
+        ArXiv abstract pages list the subject categories (e.g.
+        ``"Computer Vision and Pattern Recognition (cs.CV)"``) in a table cell
+        with class ``tablecell subjects`` rather than in any ``<meta>`` tag.
+        When no keywords have already been found this method uses those
+        classifications as a substitute.
+
+        The method is a no-op for non-arXiv pages because the XPath selector
+        will not match any element.
+
+        Only writes ``citation_keywords`` when it is not yet present in
+        *metadata* and at least one subject is found.
+
+        Parameters
+        ----------
+        doc : HtmlElement
+            Parsed lxml HTML document.
+        metadata : dict[str, Any]
+            Metadata dict to update in-place.
+
+        Returns
+        -------
+        None
+        """
+        if any(metadata.get(k) for k in _KEYWORDS_META_KEYS):
+            return  # keywords already present — nothing to do
+
+        subjects_cells = doc.xpath("//td[contains(@class, 'subjects')]")
+        if not isinstance(subjects_cells, list) or not subjects_cells:
+            return
+
+        subjects_text = (subjects_cells[0].text_content() or "").strip()
+        if subjects_text:
+            metadata.setdefault("citation_keywords", subjects_text)
 
     @staticmethod
     def _parse_authors(value: Any) -> list[str]:

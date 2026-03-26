@@ -210,6 +210,16 @@ class TestParseDate:
         """'2020 Jan' is parsed to Jan 1st of that year."""
         assert parse_date("2020 Jan") == date(2020, 1, 1)
 
+    # --- US-style numeric MM/DD/YYYY ---
+
+    def test_us_date_format(self) -> None:
+        """'10/27/2023' (PubMed citation_date US format) is parsed correctly."""
+        assert parse_date("10/27/2023") == date(2023, 10, 27)
+
+    def test_us_date_leading_zeros(self) -> None:
+        """US format with leading zeros is parsed correctly."""
+        assert parse_date("01/05/2019") == date(2019, 1, 5)
+
 
 class TestNormalizeDoi:
     """Tests for normalize_doi()."""

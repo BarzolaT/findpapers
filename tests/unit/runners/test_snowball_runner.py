@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from unittest.mock import patch
 
 import pytest
 
@@ -454,8 +455,6 @@ class TestSnowballRunnerMetrics:
 
     def test_show_progress_false_disables_progress_bar(self, make_paper) -> None:
         """show_progress=False suppresses the tqdm progress bar."""
-        from unittest.mock import patch
-
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.2000/ref")
         connector = FakeCitationConnector(references={"10.1000/seed": [ref]})
@@ -604,8 +603,6 @@ class TestSnowballRunnerParallelErrors:
 
     def test_parallel_future_exception_is_caught(self, make_paper) -> None:
         """When _query_single_connector itself raises, the future exception is caught."""
-        from unittest.mock import patch
-
         seed = make_paper("Seed", doi="10.1000/seed")
         ref = make_paper("Ref", doi="10.1000/ref")
         good = FakeCitationConnector(references={"10.1000/seed": [ref]})

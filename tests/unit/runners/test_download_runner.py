@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from datetime import date
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
+
+from curl_cffi.requests.errors import RequestsError as _CurlError
 
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper
@@ -286,7 +289,7 @@ class TestDownloadRunnerVerbose:
 
         runner = DownloadRunner(papers=[], output_directory=str(tmp_path))
         runner.run(verbose=True)
-        for lib in ("urllib3", "requests", "httpx", "charset_normalizer"):
+        for lib in ("urllib3", "requests", "curl_cffi", "charset_normalizer"):
             assert logging.getLogger(lib).level == logging.WARNING
 
     def test_verbose_true_masks_proxy_credentials(self, tmp_path, caplog):
@@ -307,9 +310,6 @@ class TestDownloadRunnerVerbose:
 
     def test_request_and_response_logged_at_debug(self, make_paper, tmp_path, caplog):
         """_request() logs GET url and response details at DEBUG level."""
-        import logging
-        from unittest.mock import MagicMock
-
         paper = make_paper(title="Debug Log Paper")
 
         mock_resp = MagicMock()
@@ -319,9 +319,15 @@ class TestDownloadRunnerVerbose:
         mock_resp.content = b"%PDF"
         mock_resp.url = "http://example.com/paper.pdf"
 
+        ctx = MagicMock()
+        ctx.get.return_value = mock_resp
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
+
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
         with (
-            patch("findpapers.runners.download_runner.requests.get", return_value=mock_resp),
+            patch("findpapers.runners.download_runner._CurlSession", return_value=mock_session),
             caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"),
         ):
             runner.run(verbose=True)
@@ -331,15 +337,16 @@ class TestDownloadRunnerVerbose:
         assert "200" in debug_messages
 
     def test_response_not_logged_when_connection_fails(self, make_paper, tmp_path, caplog):
-        """No response log is emitted when requests.get raises (no connection established)."""
-        import logging
+        """No response log is emitted when the curl_cffi request raises (no connection)."""
+        ctx = MagicMock()
+        ctx.get.side_effect = _CurlError("refused")
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
 
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with (
-            patch(
-                "findpapers.runners.download_runner.requests.get",
-                side_effect=ConnectionError("refused"),
-            ),
+            patch("findpapers.runners.download_runner._CurlSession", return_value=mock_session),
             caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"),
         ):
             runner.run(verbose=True)
@@ -349,10 +356,8 @@ class TestDownloadRunnerVerbose:
         assert "GET" in debug_messages
         assert "<-" not in debug_messages
 
-    def test_browser_headers_sent_in_request(self, make_paper, tmp_path):
-        """requests.get is called with browser-like headers to avoid bot detection."""
-        from unittest.mock import MagicMock
-
+    def test_chrome_impersonation_used_in_request(self, make_paper, tmp_path):
+        """_CurlSession is created with impersonate='chrome' for bot-detection bypass."""
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.reason = "OK"
@@ -361,24 +366,22 @@ class TestDownloadRunnerVerbose:
         mock_resp.url = "http://example.com/paper.pdf"
         mock_resp.ok = True
 
+        ctx = MagicMock()
+        ctx.get.return_value = mock_resp
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
+
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with patch(
-            "findpapers.runners.download_runner.requests.get", return_value=mock_resp
-        ) as mock_get:
+            "findpapers.runners.download_runner._CurlSession", return_value=mock_session
+        ) as MockSession:
             runner.run()
 
-        assert mock_get.called
-        _, kwargs = mock_get.call_args
-        headers = kwargs.get("headers", {})
-        assert "User-Agent" in headers
-        assert "python-requests" not in headers["User-Agent"].lower()
-        assert "Mozilla" in headers["User-Agent"]
+        MockSession.assert_called_once_with(impersonate="chrome")
 
     def test_418_response_emits_warning(self, make_paper, tmp_path, caplog):
         """A 418 response from bot-detection logs a WARNING with a clear message."""
-        import logging
-        from unittest.mock import MagicMock
-
         mock_resp = MagicMock()
         mock_resp.status_code = 418
         mock_resp.reason = "I'm a Teapot"
@@ -387,9 +390,15 @@ class TestDownloadRunnerVerbose:
         mock_resp.url = "http://example.com/paper"
         mock_resp.ok = False
 
+        ctx = MagicMock()
+        ctx.get.return_value = mock_resp
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
+
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with (
-            patch("findpapers.runners.download_runner.requests.get", return_value=mock_resp),
+            patch("findpapers.runners.download_runner._CurlSession", return_value=mock_session),
             caplog.at_level(logging.WARNING, logger="findpapers.runners.download_runner"),
         ):
             runner.run(verbose=True)
@@ -411,35 +420,34 @@ class TestDownloadRunnerSslVerify:
         runner = DownloadRunner(papers=[], output_directory="/tmp", ssl_verify=False)
         assert runner._ssl_verify is False
 
-    def test_ssl_verify_passed_to_requests_get(self, make_paper, tmp_path):
-        """ssl_verify value is forwarded to requests.get as verify=."""
-        from unittest.mock import MagicMock
-
+    def test_ssl_verify_passed_to_curl_session_get(self, make_paper, tmp_path):
+        """ssl_verify value is forwarded to _CurlSession.get() as verify=."""
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.reason = "OK"
         mock_resp.headers = {"content-type": "application/pdf"}
         mock_resp.content = b"%PDF"
         mock_resp.url = "http://example.com/paper.pdf"
+
+        ctx = MagicMock()
+        ctx.get.return_value = mock_resp
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
 
         runner = DownloadRunner(
             papers=[make_paper()],
             output_directory=str(tmp_path),
             ssl_verify=False,
         )
-        with patch(
-            "findpapers.runners.download_runner.requests.get", return_value=mock_resp
-        ) as mock_get:
+        with patch("findpapers.runners.download_runner._CurlSession", return_value=mock_session):
             runner.run()
 
-        assert mock_get.called
-        _, kwargs = mock_get.call_args
+        _, kwargs = ctx.get.call_args
         assert kwargs.get("verify") is False
 
-    def test_ssl_verify_true_passed_to_requests_get(self, make_paper, tmp_path):
-        """ssl_verify=True (default) forwards verify=True to requests.get."""
-        from unittest.mock import MagicMock
-
+    def test_ssl_verify_true_passed_to_curl_session_get(self, make_paper, tmp_path):
+        """ssl_verify=True (default) forwards verify=True to _CurlSession.get()."""
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.reason = "OK"
@@ -447,23 +455,24 @@ class TestDownloadRunnerSslVerify:
         mock_resp.content = b"%PDF"
         mock_resp.url = "http://example.com/paper.pdf"
 
+        ctx = MagicMock()
+        ctx.get.return_value = mock_resp
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
+
         runner = DownloadRunner(
             papers=[make_paper()],
             output_directory=str(tmp_path),
         )
-        with patch(
-            "findpapers.runners.download_runner.requests.get", return_value=mock_resp
-        ) as mock_get:
+        with patch("findpapers.runners.download_runner._CurlSession", return_value=mock_session):
             runner.run()
 
-        assert mock_get.called
-        _, kwargs = mock_get.call_args
+        _, kwargs = ctx.get.call_args
         assert kwargs.get("verify") is True
 
     def test_ssl_verify_logged_in_verbose_mode(self, tmp_path, caplog):
         """verbose=True includes ssl_verify value in the configuration log."""
-        import logging
-
         runner = DownloadRunner(
             papers=[],
             output_directory=str(tmp_path),
@@ -476,14 +485,18 @@ class TestDownloadRunnerSslVerify:
         assert "False" in messages
 
     def test_request_exception_logged_at_debug(self, make_paper, tmp_path, caplog):
-        """When requests.get raises, the exception is logged at DEBUG level."""
-        import logging
+        """When _CurlSession.get raises, the exception is logged at DEBUG level."""
+        ctx = MagicMock()
+        ctx.get.side_effect = _CurlError("SSL handshake failed")
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
 
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with (
             patch(
-                "findpapers.runners.download_runner.requests.get",
-                side_effect=ConnectionError("SSL handshake failed"),
+                "findpapers.runners.download_runner._CurlSession",
+                return_value=mock_session,
             ),
             caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"),
         ):
@@ -540,8 +553,6 @@ class TestDownloadRunnerUrlPriority:
     @staticmethod
     def _make_pdf_response():
         """Return a mock response that looks like a PDF."""
-        from unittest.mock import MagicMock
-
         resp = MagicMock()
         resp.headers = {"content-type": "application/pdf"}
         resp.content = b"%PDF-1.4 fake"
@@ -633,8 +644,6 @@ class TestDownloadRunnerEdgeCases:
     @staticmethod
     def _make_response(status_code=200, content_type="application/pdf", content=b"%PDF"):
         """Build a minimal mock response."""
-        from unittest.mock import MagicMock
-
         resp = MagicMock()
         resp.status_code = status_code
         resp.reason = "OK" if status_code == 200 else "Error"
@@ -653,11 +662,11 @@ class TestDownloadRunnerEdgeCases:
         filepath = tmp_path / filename
         filepath.write_bytes(b"%PDF-existing")
 
-        with patch("findpapers.runners.download_runner.requests.get") as mock_get:
+        with patch.object(runner, "_request") as mock_request:
             metrics = runner.run()
 
-        # The file already existed so requests.get() should not be called.
-        mock_get.assert_not_called()
+        # The file already existed so _request() should not be called.
+        mock_request.assert_not_called()
         assert metrics["downloaded_papers"] == 1
 
     def test_doi_url_used_as_candidate(self, make_paper, tmp_path):
@@ -667,12 +676,18 @@ class TestDownloadRunnerEdgeCases:
         paper.url = None
         paper.doi = "10.1234/test"
 
-        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
         resp = self._make_response()
-        with patch("findpapers.runners.download_runner.requests.get", return_value=resp) as mg:
+        ctx = MagicMock()
+        ctx.get.return_value = resp
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch("findpapers.runners.download_runner._CurlSession", return_value=mock_session):
             runner.run()
 
-        called_url = mg.call_args[0][0]
+        called_url = ctx.get.call_args[0][0]
         assert "doi.org/10.1234/test" in called_url
 
     def test_html_response_resolves_to_pdf(self, make_paper, tmp_path):
@@ -694,8 +709,14 @@ class TestDownloadRunnerEdgeCases:
                 return html_resp
             return pdf_resp
 
+        ctx = MagicMock()
+        ctx.get.side_effect = _fake_get
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
+
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
-        with patch("findpapers.runners.download_runner.requests.get", side_effect=_fake_get):
+        with patch("findpapers.runners.download_runner._CurlSession", return_value=mock_session):
             metrics = runner.run()
 
         assert metrics["downloaded_papers"] == 1
@@ -703,8 +724,6 @@ class TestDownloadRunnerEdgeCases:
 
     def test_non_ok_response_logged(self, make_paper, tmp_path, caplog):
         """Non-success status (non-418) logs at DEBUG level."""
-        import logging
-
         paper = make_paper(title="Server Error")
         paper.pdf_url = "http://example.com/broken"
         paper.url = None
@@ -713,9 +732,15 @@ class TestDownloadRunnerEdgeCases:
         resp = self._make_response(status_code=500, content_type="text/html", content=b"error")
         resp.ok = False
 
+        ctx = MagicMock()
+        ctx.get.return_value = resp
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=ctx)
+        mock_session.__exit__ = MagicMock(return_value=False)
+
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
         with (
-            patch("findpapers.runners.download_runner.requests.get", return_value=resp),
+            patch("findpapers.runners.download_runner._CurlSession", return_value=mock_session),
             caplog.at_level(logging.DEBUG, logger="findpapers.runners.download_runner"),
         ):
             runner.run()
@@ -732,10 +757,7 @@ class TestDownloadRunnerEdgeCases:
 
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
 
-        def _exploding_get(url, **kwargs):
-            raise RuntimeError("unexpected boom")
-
-        with patch("findpapers.runners.download_runner.requests.get", side_effect=_exploding_get):
+        with patch.object(runner, "_request", side_effect=RuntimeError("unexpected boom")):
             metrics = runner.run()
 
         assert metrics["downloaded_papers"] == 0
@@ -786,7 +808,7 @@ class TestDownloadRunnerEdgeCases:
         type(resp).content = property(lambda self: (_ for _ in ()).throw(OSError("disk full")))
 
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
-        with patch("findpapers.runners.download_runner.requests.get", return_value=resp):
+        with patch.object(runner, "_request", return_value=resp):
             metrics = runner.run()
 
         assert metrics["downloaded_papers"] == 0

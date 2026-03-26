@@ -8,6 +8,7 @@ live network requests.
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -470,8 +471,6 @@ class TestBuildPaperFromMetadata:
 
     def test_dc_date_issued_used_for_date(self) -> None:
         """dc.date.issued is used as publication date when other date keys are absent."""
-        from datetime import date
-
         meta = {"citation_title": "Paper", "dc.date.issued": "2021-03-15"}
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
@@ -479,8 +478,6 @@ class TestBuildPaperFromMetadata:
 
     def test_citation_online_date_used_as_fallback_date(self) -> None:
         """citation_online_date is used as last-resort date fallback."""
-        from datetime import date
-
         meta = {"citation_title": "Paper", "citation_online_date": "2024/02/12"}
         paper = build_paper_from_metadata(meta, "http://x.com")
         assert paper is not None
@@ -629,8 +626,6 @@ class TestBuildPaperFromMetadata:
 
     def test_date_parsed(self) -> None:
         """citation_date is parsed into a datetime.date."""
-        from datetime import date
-
         meta = {
             "citation_title": "T",
             "citation_date": "2023-06-15",

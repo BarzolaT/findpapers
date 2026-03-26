@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import datetime
 from unittest.mock import MagicMock, patch
+from xml.etree import ElementTree as ET
 
 import pytest
+import requests
 
-from findpapers.connectors.arxiv import ArxivConnector, _infer_source_type_from_journal_ref
+from findpapers.connectors.arxiv import _NS, ArxivConnector, _infer_source_type_from_journal_ref
 from findpapers.core.paper import PaperType
 from findpapers.core.search_result import Database
 from findpapers.core.source import SourceType
@@ -39,10 +41,6 @@ class TestArxivConnectorParseResponse:
 
     def test_parse_sample_xml(self, arxiv_sample_xml, simple_query):
         """Parsing sample XML returns non-empty list of papers."""
-        from xml.etree import ElementTree as ET
-
-        from findpapers.connectors.arxiv import _NS
-
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
         assert len(entries) > 0
@@ -53,10 +51,6 @@ class TestArxivConnectorParseResponse:
 
     def test_parsed_paper_has_database_tag(self, arxiv_sample_xml):
         """Papers parsed from arXiv have 'arXiv' in databases set."""
-        from xml.etree import ElementTree as ET
-
-        from findpapers.connectors.arxiv import _NS
-
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
         paper = ArxivConnector()._parse_paper(entries[0])
@@ -65,8 +59,6 @@ class TestArxivConnectorParseResponse:
 
     def test_missing_title_returns_none(self):
         """Entry without title returns None."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom">
             <title>  </title>
@@ -78,8 +70,6 @@ class TestArxivConnectorParseResponse:
 
     def test_comments_extracted_from_entry(self):
         """Comments field is populated when arxiv:comment element is present."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -95,8 +85,6 @@ class TestArxivConnectorParseResponse:
 
     def test_comments_none_when_absent(self):
         """Comments field is None when arxiv:comment element is missing."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -111,10 +99,6 @@ class TestArxivConnectorParseResponse:
 
     def test_sample_xml_has_papers_with_comments(self, arxiv_sample_xml):
         """Parsing the sample XML finds at least one paper with a non-None comment."""
-        from xml.etree import ElementTree as ET
-
-        from findpapers.connectors.arxiv import _NS
-
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
         papers = [ArxivConnector()._parse_paper(e) for e in entries]
@@ -124,8 +108,6 @@ class TestArxivConnectorParseResponse:
 
     def test_preprint_without_journal_ref_gets_repository_source(self):
         """Paper without journal_ref gets Source(title='arXiv', type=REPOSITORY)."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -142,8 +124,6 @@ class TestArxivConnectorParseResponse:
 
     def test_paper_with_journal_ref_infers_source_type(self):
         """Paper with journal_ref containing 'Physics' has source_type inferred."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -161,8 +141,6 @@ class TestArxivConnectorParseResponse:
 
     def test_journal_ref_conference_inferred(self):
         """journal_ref with 'Proceedings' is classified as CONFERENCE."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -179,8 +157,6 @@ class TestArxivConnectorParseResponse:
 
     def test_journal_ref_workshop_inferred(self):
         """journal_ref with 'Workshop' is classified as CONFERENCE."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -197,8 +173,6 @@ class TestArxivConnectorParseResponse:
 
     def test_journal_ref_book_inferred(self):
         """journal_ref with 'Lecture Notes' is classified as BOOK."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -215,8 +189,6 @@ class TestArxivConnectorParseResponse:
 
     def test_journal_ref_no_match_leaves_none(self):
         """journal_ref that doesn't match any heuristic leaves source_type None."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -234,8 +206,6 @@ class TestArxivConnectorParseResponse:
 
     def test_paper_type_unpublished_for_preprint(self):
         """arXiv preprint without journal_ref gets PaperType.UNPUBLISHED."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -250,8 +220,6 @@ class TestArxivConnectorParseResponse:
 
     def test_paper_type_article_for_journal_ref(self):
         """arXiv paper with journal source_type gets PaperType.ARTICLE."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -267,8 +235,6 @@ class TestArxivConnectorParseResponse:
 
     def test_paper_type_inproceedings_for_conference_ref(self):
         """arXiv paper with conference source_type gets PaperType.INPROCEEDINGS."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -284,8 +250,6 @@ class TestArxivConnectorParseResponse:
 
     def test_paper_type_inbook_for_book_ref(self):
         """arXiv paper with book source_type gets PaperType.INBOOK."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -301,8 +265,6 @@ class TestArxivConnectorParseResponse:
 
     def test_doi_derived_from_entry_id_when_absent(self):
         """When <arxiv:doi> is absent, DOI is derived from <id> as 10.48550/arXiv.<id>."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -318,8 +280,6 @@ class TestArxivConnectorParseResponse:
 
     def test_explicit_doi_takes_priority_over_derived(self):
         """When <arxiv:doi> is present, it is used instead of deriving from <id>."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -336,8 +296,6 @@ class TestArxivConnectorParseResponse:
 
     def test_doi_none_when_no_id_and_no_explicit_doi(self):
         """DOI is None when neither <arxiv:doi> nor a parseable <id> is present."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -476,10 +434,8 @@ class TestArxivConnectorSearch:
     def test_http_error_returns_empty(self, simple_query, mock_response):
         """search() returns empty list when HTTP request fails."""
         searcher = ArxivConnector()
-        import requests as req
-
         searcher._http_session = MagicMock()
-        searcher._http_session.get.side_effect = req.HTTPError("500")
+        searcher._http_session.get.side_effect = requests.HTTPError("500")
         with patch.object(searcher, "_rate_limit"):
             papers = searcher.search(simple_query)
 
@@ -549,8 +505,6 @@ class TestArxivConnectorFieldsOfStudyAndSubjects:
 
     def test_categories_extracted_as_fields_and_subjects(self):
         """arXiv categories populate fields_of_study and subjects."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -573,8 +527,6 @@ class TestArxivConnectorFieldsOfStudyAndSubjects:
 
     def test_no_categories_empty_sets(self):
         """Paper without categories has empty fields_of_study and subjects."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -590,10 +542,6 @@ class TestArxivConnectorFieldsOfStudyAndSubjects:
 
     def test_sample_xml_has_fields_of_study(self, arxiv_sample_xml):
         """Papers parsed from sample XML have non-empty fields_of_study."""
-        from xml.etree import ElementTree as ET
-
-        from findpapers.connectors.arxiv import _NS
-
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
         papers = [ArxivConnector()._parse_paper(e) for e in entries]
@@ -603,8 +551,6 @@ class TestArxivConnectorFieldsOfStudyAndSubjects:
 
     def test_is_open_access_always_true(self):
         """All arXiv papers are marked as open access."""
-        from xml.etree import ElementTree as ET
-
         xml_str = """
         <entry xmlns="http://www.w3.org/2005/Atom"
                xmlns:arxiv="http://arxiv.org/schemas/atom">
@@ -619,10 +565,6 @@ class TestArxivConnectorFieldsOfStudyAndSubjects:
 
     def test_sample_xml_all_open_access(self, arxiv_sample_xml):
         """Every paper parsed from sample XML has is_open_access=True."""
-        from xml.etree import ElementTree as ET
-
-        from findpapers.connectors.arxiv import _NS
-
         tree = ET.fromstring(arxiv_sample_xml)
         entries = tree.findall("atom:entry", _NS)
         papers = [ArxivConnector()._parse_paper(e) for e in entries]

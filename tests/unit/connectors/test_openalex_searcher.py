@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -42,16 +43,12 @@ class TestOpenAlexConnectorInit:
 
     def test_warning_when_no_api_key(self, caplog):
         """A warning is logged when no API key is provided."""
-        import logging
-
         with caplog.at_level(logging.WARNING, logger="findpapers.connectors.openalex"):
             OpenAlexConnector()
         assert any("No API key provided for OpenAlex" in msg for msg in caplog.messages)
 
     def test_no_warning_when_api_key_provided(self, caplog):
         """No warning is logged when an API key is provided."""
-        import logging
-
         with caplog.at_level(logging.WARNING, logger="findpapers.connectors.openalex"):
             OpenAlexConnector(api_key="mykey")
         assert not any("No API key provided" in msg for msg in caplog.messages)
@@ -496,12 +493,10 @@ class TestOpenAlexConnectorSearch:
 
     def test_search_network_error_returns_empty_list(self, simple_query):
         """Network error in _fetch_papers is caught and returns an empty list."""
-        import requests as req_lib
-
         searcher = OpenAlexConnector()
 
         with patch.object(
-            searcher, "_fetch_papers", side_effect=req_lib.ConnectionError("network down")
+            searcher, "_fetch_papers", side_effect=requests.ConnectionError("network down")
         ):
             papers = searcher.search(simple_query)
 

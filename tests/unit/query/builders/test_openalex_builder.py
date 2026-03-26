@@ -134,9 +134,6 @@ def test_openalex_boolean_search_with_group_node() -> None:
 
 def test_openalex_rejects_unsupported_filter() -> None:
     """OpenAlex rejects a term with an unsupported filter code via direct injection."""
-    from findpapers.core.query import FilterCode
-    from findpapers.query.builders.openalex import OpenAlexQueryBuilder
-
     unsupported = FilterCode.TITLE  # supported — confirm via double check
     assert OpenAlexQueryBuilder().supports_filter(unsupported) is True
 

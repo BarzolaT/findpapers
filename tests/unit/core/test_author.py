@@ -4,6 +4,7 @@ import pytest
 
 from findpapers.core.author import Author
 from findpapers.exceptions import ModelValidationError
+from findpapers.utils.merge import merge_authors
 
 
 class TestAuthorInit:
@@ -115,8 +116,6 @@ class TestMergeAuthorsAffiliation:
 
     def test_backfill_affiliation_from_loser(self):
         """Winner list gains affiliations from the loser via name matching."""
-        from findpapers.utils.merge import merge_authors
-
         base = [
             Author(name="Alice", affiliation="MIT"),
             Author(name="Bob"),
@@ -129,8 +128,6 @@ class TestMergeAuthorsAffiliation:
 
     def test_prefers_list_with_more_affiliations_on_tie(self):
         """On equal length, the list with more affiliations wins."""
-        from findpapers.utils.merge import merge_authors
-
         base = [Author(name="Alice"), Author(name="Bob")]
         incoming = [
             Author(name="Alice", affiliation="MIT"),

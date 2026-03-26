@@ -9,11 +9,12 @@ import urllib.parse
 from datetime import UTC
 from time import perf_counter
 
-import requests
+from curl_cffi.requests import Response as _CurlResponse
+from curl_cffi.requests import Session as _CurlSession
+from curl_cffi.requests.errors import RequestsError as _CurlError
 
 from findpapers.core.paper import Paper
 from findpapers.utils.download import build_filename, build_proxies, resolve_pdf_url
-from findpapers.utils.http_headers import get_browser_headers
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.parallel import execute_tasks
 
@@ -177,7 +178,7 @@ class DownloadRunner:
     # ------------------------------------------------------------------
 
     def _build_proxies(self) -> dict[str, str] | None:
-        """Build a proxies dict for *requests* if a proxy is configured.
+        """Build a proxies dict if a proxy is configured.
 
         Returns
         -------
@@ -186,7 +187,7 @@ class DownloadRunner:
         """
         return build_proxies(self._proxy)
 
-    def _log_response(self, response: requests.Response) -> None:
+    def _log_response(self, response: _CurlResponse) -> None:
         """Log a concise summary of an HTTP response at DEBUG level.
 
         This mirrors the behaviour in SearchConnectorBase._log_response but is
@@ -370,7 +371,7 @@ class DownloadRunner:
                     with open(output_filepath, "wb") as fp:
                         fp.write(response.content)
                     return True, attempted_urls
-            except (requests.RequestException, OSError):
+            except OSError:
                 logger.debug("Download attempt failed", exc_info=True)
 
         return False, attempted_urls
@@ -381,7 +382,7 @@ class DownloadRunner:
         timeout: float | None,
         proxies: dict[str, str] | None,
         ssl_verify: bool = True,
-    ) -> requests.Response | None:
+    ) -> _CurlResponse | None:
         """Perform a GET request, returning ``None`` on failure.
 
         Parameters
@@ -398,19 +399,20 @@ class DownloadRunner:
 
         Returns
         -------
-        requests.Response | None
+        _CurlResponse | None
             Response object, or ``None`` when the request fails.
         """
         try:
             logger.debug("GET %s", url)
-            response = requests.get(
-                url,
-                headers=get_browser_headers(),
-                timeout=timeout,
-                proxies=proxies,
-                verify=ssl_verify,
-            )
-        except requests.RequestException:
+            with _CurlSession(impersonate="chrome") as session:
+                response = session.get(
+                    url,
+                    proxies=proxies,
+                    verify=ssl_verify,
+                    allow_redirects=True,
+                    timeout=timeout,
+                )
+        except _CurlError:
             logger.debug("Request failed for %s", url, exc_info=True)
             return None
         content_type = response.headers.get("content-type", "unknown").split(";")[0].strip()
@@ -433,7 +435,7 @@ class DownloadRunner:
                 response.status_code,
                 url,
             )
-        return response
+        return response  # type: ignore[no-any-return]
 
     def _build_filename(self, paper: Paper) -> str:
         """Build a sanitised filename for the paper PDF.

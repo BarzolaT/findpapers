@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from unittest.mock import patch
 
 import requests
@@ -190,8 +191,6 @@ class TestEnrichmentRunnerVerbose:
 
     def test_verbose_true_emits_configuration_header(self, make_paper, caplog):
         """verbose=True logs the EnrichmentRunner configuration header."""
-        import logging
-
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
             patch(_WEBPAGE_PATCH, return_value=None),
@@ -203,8 +202,6 @@ class TestEnrichmentRunnerVerbose:
 
     def test_verbose_true_emits_enrichment_summary(self, make_paper, caplog):
         """verbose=True logs the enrichment summary after execution."""
-        import logging
-
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
             patch(_WEBPAGE_PATCH, return_value=None),
@@ -227,8 +224,6 @@ class TestEnrichmentRunnerVerbose:
 
     def test_verbose_false_emits_no_configuration_log(self, make_paper, caplog):
         """verbose=False (default) does not log the configuration header."""
-        import logging
-
         runner = EnrichmentRunner(papers=[make_paper()])
         with (
             patch(_WEBPAGE_PATCH, return_value=None),
@@ -253,11 +248,9 @@ class TestEnrichmentRunnerVerbose:
 
     def test_verbose_true_suppresses_third_party_loggers(self):
         """verbose=True sets noisy third-party loggers to WARNING to avoid credential leaks."""
-        import logging
-
         runner = EnrichmentRunner(papers=[])
         runner.run(verbose=True)
-        for lib in ("urllib3", "requests", "httpx", "charset_normalizer"):
+        for lib in ("urllib3", "requests", "curl_cffi", "charset_normalizer"):
             assert logging.getLogger(lib).level == logging.WARNING
 
 
