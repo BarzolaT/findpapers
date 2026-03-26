@@ -161,7 +161,7 @@ class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase):
         try:
             ids, _ = self._search_ids(f"{doi}[doi]", retstart=0, retmax=1)
         except (requests.RequestException, ValueError):
-            logger.warning("PubMed: esearch failed for DOI %s.", doi)
+            logger.debug("PubMed: esearch failed for DOI %s.", doi)
             return None
 
         if not ids:

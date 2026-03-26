@@ -535,7 +535,7 @@ class TestConnectorBaseRetry:
         connector._http_session = MagicMock()
         connector._http_session.get.side_effect = [resp_429, resp_200]
 
-        with caplog.at_level(logging.WARNING, logger="findpapers.connectors.connector_base"):
+        with caplog.at_level(logging.DEBUG, logger="findpapers.connectors.connector_base"):
             connector._get("https://api.example.com/test")
 
         assert any("429" in m and "retrying" in m for m in caplog.messages)

@@ -183,7 +183,7 @@ class IEEEConnector(SearchConnectorBase, DOILookupConnectorBase):
             response = self._get(_BASE_URL, params=params)
             data = response.json()
         except (requests.RequestException, ValueError):
-            logger.warning("IEEE: failed to fetch DOI %s.", doi)
+            logger.debug("IEEE: failed to fetch DOI %s.", doi)
             return None
 
         articles = data.get("articles") or []

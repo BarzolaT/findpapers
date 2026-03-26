@@ -268,7 +268,7 @@ class CrossRefConnector(CitationConnectorBase, DOILookupConnectorBase):
         try:
             work = self.fetch_work(paper.doi)
         except requests.RequestException:
-            logger.warning("CrossRef: failed to fetch work for DOI %s", paper.doi)
+            logger.debug("CrossRef: failed to fetch work for DOI %s", paper.doi)
             return []
 
         if not work:

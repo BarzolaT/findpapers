@@ -336,7 +336,7 @@ class ConnectorBase(ABC):
                             response,
                             base_delay=self._rate_limit_base_delay,
                         )
-                        logger.warning(
+                        logger.debug(
                             "[%s] HTTP 429 from %s — retrying in %.1fs (attempt %d/%d).",
                             self.name,
                             url,

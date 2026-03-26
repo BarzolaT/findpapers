@@ -204,10 +204,10 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase, DOILo
             if exc.response is not None and exc.response.status_code == 404:
                 logger.debug("Semantic Scholar: DOI %s not found (404).", doi)
                 return None
-            logger.warning("Semantic Scholar: HTTP error fetching DOI %s: %s", doi, exc)
+            logger.debug("Semantic Scholar: HTTP error fetching DOI %s: %s", doi, exc)
             return None
         except (requests.RequestException, ValueError):
-            logger.warning("Semantic Scholar: failed to fetch DOI %s.", doi)
+            logger.debug("Semantic Scholar: failed to fetch DOI %s.", doi)
             return None
 
         return self._parse_paper(data)
@@ -248,7 +248,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase, DOILo
         try:
             response = self._get(url, params)
         except requests.RequestException:
-            logger.warning(
+            logger.debug(
                 "Semantic Scholar: failed to fetch %s for DOI %s (offset=%d).",
                 endpoint,
                 doi,
@@ -611,7 +611,7 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase, DOILo
                     params={"fields": "affiliations"},
                 )
             except requests.RequestException:
-                logger.warning(
+                logger.debug(
                     "Failed to fetch author affiliations batch (offset=%d).",
                     start,
                 )

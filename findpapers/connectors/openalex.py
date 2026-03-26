@@ -202,10 +202,10 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
             if exc.response is not None and exc.response.status_code == 404:
                 logger.debug("OpenAlex: DOI %s not found (404).", doi)
                 return None
-            logger.warning("OpenAlex: HTTP error fetching DOI %s: %s", doi, exc)
+            logger.debug("OpenAlex: HTTP error fetching DOI %s: %s", doi, exc)
             return None
         except (requests.RequestException, ValueError):
-            logger.warning("OpenAlex: failed to fetch DOI %s.", doi)
+            logger.debug("OpenAlex: failed to fetch DOI %s.", doi)
             return None
 
         return self._parse_paper(data)
@@ -331,7 +331,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
                 if progress_callback is not None and batch_papers:
                     progress_callback(len(batch_papers))
             except (requests.RequestException, ValueError, KeyError, TypeError):
-                logger.warning(
+                logger.debug(
                     "Failed to fetch OpenAlex works batch (offset=%d, count=%d).",
                     start,
                     len(batch),
@@ -371,7 +371,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
         try:
             response = self._get(_BASE_URL, params)
         except requests.RequestException:
-            logger.warning(
+            logger.debug(
                 "Failed to fetch cited-by page for %s (cursor=%s).",
                 openalex_id,
                 cursor,
@@ -425,7 +425,7 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
             response = self._get(url, params={"select": "id,referenced_works"})
             data = response.json()
         except (requests.RequestException, ValueError):
-            logger.warning("Failed to fetch OpenAlex work for DOI %s.", paper.doi)
+            logger.debug("Failed to fetch OpenAlex work for DOI %s.", paper.doi)
             return []
 
         referenced_ids = data.get("referenced_works") or []

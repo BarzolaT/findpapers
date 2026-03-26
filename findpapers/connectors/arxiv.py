@@ -136,7 +136,7 @@ class ArxivConnector(SearchConnectorBase, DOILookupConnectorBase):
             response = self._get(_BASE_URL, params={"id_list": arxiv_id, "max_results": 1})
             tree = ET.fromstring(response.text)
         except (requests.RequestException, ET.ParseError):
-            logger.warning("arXiv: failed to fetch arXiv ID %s for DOI %s.", arxiv_id, doi)
+            logger.debug("arXiv: failed to fetch arXiv ID %s for DOI %s.", arxiv_id, doi)
             return None
 
         entries = tree.findall("atom:entry", _NS)
