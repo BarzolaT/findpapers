@@ -623,11 +623,12 @@ class TestSnowballRunnerParallelErrors:
             paper: Paper,
             *,
             show_progress: bool = True,
+            parallel: bool = False,
         ) -> tuple[str, list[Paper] | None, list[Paper] | None]:
             """Raise for the 'bad' connector, delegate otherwise."""
             if connector is bad:
                 raise RuntimeError("unexpected crash")
-            return original(connector, paper, show_progress=show_progress)
+            return original(connector, paper, show_progress=show_progress, parallel=parallel)
 
         with patch.object(runner, "_query_single_connector", side_effect=patched):
             graph = runner.run(show_progress=False)

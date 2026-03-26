@@ -333,6 +333,7 @@ class SnowballRunner:
         paper: Paper,
         *,
         show_progress: bool = True,
+        parallel: bool = False,
     ) -> tuple[str, list[Paper] | None, list[Paper] | None]:
         """Query a single connector for references and/or citing papers.
 
@@ -348,6 +349,10 @@ class SnowballRunner:
             The paper to look up.
         show_progress : bool
             Display per-connector progress bars for long pagination.
+        parallel : bool
+            When ``True``, the connector is being called from a thread pool.
+            Inner progress bars are disabled in this case to avoid
+            interleaved output across threads.
 
         Returns
         -------
@@ -366,10 +371,14 @@ class SnowballRunner:
 
             return _cb
 
+        # Inner bars are disabled when running in parallel (multiple threads
+        # would interleave writes and garble the terminal output).
+        inner_show = show_progress and not parallel
+
         # Fetch expected counts for determinate progress bars.
         cit_count: int | None = None
         ref_count: int | None = None
-        if show_progress:
+        if inner_show:
             with contextlib.suppress(Exception):
                 cit_count, ref_count = connector.get_expected_counts(paper)
 
@@ -379,7 +388,8 @@ class SnowballRunner:
                     desc=f"  {connector.name} backward",
                     total=ref_count,
                     unit="paper",
-                    disable=not show_progress,
+                    disable=not inner_show,
+                    leave=False,
                 ) as pbar:
                     references = connector.fetch_references(
                         paper,
@@ -399,7 +409,8 @@ class SnowballRunner:
                     desc=f"  {connector.name} forward",
                     total=cit_count,
                     unit="paper",
-                    disable=not show_progress,
+                    disable=not inner_show,
+                    leave=False,
                 ) as pbar:
                     citing = connector.fetch_cited_by(
                         paper,
@@ -460,6 +471,7 @@ class SnowballRunner:
                 connector,
                 paper,
                 show_progress=show_progress,
+                parallel=True,
             ): connector
             for connector in self._connectors
         }

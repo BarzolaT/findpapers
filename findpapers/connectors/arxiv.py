@@ -353,7 +353,7 @@ class ArxivConnector(SearchConnectorBase, DOILookupConnectorBase):
             try:
                 response = self._get(_BASE_URL, params)
             except requests.RequestException:
-                logger.exception("arXiv request failed (offset=%d).", offset)
+                logger.debug("arXiv request failed (offset=%d).", offset, exc_info=True)
                 break
 
             tree = ET.fromstring(response.text)

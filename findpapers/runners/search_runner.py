@@ -359,6 +359,8 @@ class SearchRunner:
 
         def _run_searcher(
             searcher: SearchConnectorBase,
+            *,
+            parallel: bool = False,
         ) -> tuple[list[Paper], float]:
             """Run a single searcher with a per-database tqdm bar.
 
@@ -366,14 +368,22 @@ class SearchRunner:
             ----------
             searcher : SearchConnectorBase
                 Connector to execute.
+            parallel : bool
+                When ``True``, the searcher is being called from a thread
+                pool.  The inner progress bar is disabled to avoid
+                interleaved output across threads.
 
             Returns
             -------
             tuple[list[Paper], float]
                 Retrieved papers and wall-clock runtime in seconds.
             """
+            inner_show = show_progress and not parallel
             with make_progress_bar(
-                desc=searcher.name, unit="paper", disable=not show_progress
+                desc=f"  {searcher.name}",
+                unit="paper",
+                disable=not inner_show,
+                leave=False,
             ) as pbar:
 
                 def _cb(current: int, total: int | None) -> None:
@@ -394,29 +404,42 @@ class SearchRunner:
 
         num_searchers = len(self._searchers)
         num_workers = min(self._num_workers, num_searchers)
+        parallel = num_workers > 1
+
+        # Wrap searchers so _run_searcher receives the parallel flag.
+        def _run_searcher_bound(searcher: SearchConnectorBase) -> tuple[list[Paper], float]:
+            return _run_searcher(searcher, parallel=parallel)
 
         failed: list[str] = []
         db_runtimes: dict[str, float] = {}
-        for searcher, result, error in execute_tasks(
-            self._searchers,
-            _run_searcher,
-            num_workers=num_workers,
-            timeout=None,
-            use_progress=False,
-        ):
-            if error is not None or result is None:
-                metrics[f"total_papers_from_{searcher.name}"] = 0
-                if isinstance(error, UnsupportedQueryError):
-                    logger.warning("Skipping '%s': %s", searcher.name, error)
+        with make_progress_bar(
+            desc="Search by database",
+            total=num_searchers,
+            unit="db",
+            leave=True,
+            disable=not show_progress,
+        ) as outer_pbar:
+            for searcher, result, error in execute_tasks(
+                self._searchers,
+                _run_searcher_bound,
+                num_workers=num_workers,
+                timeout=None,
+                use_progress=False,
+            ):
+                if error is not None or result is None:
+                    metrics[f"total_papers_from_{searcher.name}"] = 0
+                    if isinstance(error, UnsupportedQueryError):
+                        logger.warning("Skipping '%s': %s", searcher.name, error)
+                    else:
+                        failed.append(searcher.name)
+                        if verbose:
+                            logger.warning("Error fetching from %s: %s", searcher.name, error)
                 else:
-                    failed.append(searcher.name)
-                    if verbose:
-                        logger.warning("Error fetching from %s: %s", searcher.name, error)
-                continue
-            papers, elapsed = result
-            db_runtimes[searcher.name] = elapsed
-            metrics[f"total_papers_from_{searcher.name}"] = len(papers)
-            self._results.extend(papers)
+                    papers, elapsed = result
+                    db_runtimes[searcher.name] = elapsed
+                    metrics[f"total_papers_from_{searcher.name}"] = len(papers)
+                    self._results.extend(papers)
+                outer_pbar.update(1)
 
         return failed, db_runtimes
 

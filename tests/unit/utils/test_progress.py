@@ -16,10 +16,16 @@ class TestMakeProgressBar:
         assert isinstance(pbar, tqdm)
         pbar.close()
 
-    def test_leave_is_true(self):
-        """The returned bar always has leave=True."""
+    def test_leave_defaults_to_true(self):
+        """The returned bar has leave=True by default."""
         pbar = make_progress_bar()
         assert pbar.leave is True
+        pbar.close()
+
+    def test_leave_false_is_forwarded(self):
+        """Passing leave=False creates a transient bar."""
+        pbar = make_progress_bar(leave=False)
+        assert pbar.leave is False
         pbar.close()
 
     def test_desc_is_set(self):
