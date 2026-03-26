@@ -412,8 +412,9 @@ class SearchRunner:
 
         failed: list[str] = []
         db_runtimes: dict[str, float] = {}
+        db_count = 0
         with make_progress_bar(
-            desc="Search by database",
+            desc=f"Database 1/{num_searchers}",
             total=num_searchers,
             unit="db",
             leave=True,
@@ -426,6 +427,8 @@ class SearchRunner:
                 timeout=None,
                 use_progress=False,
             ):
+                db_count += 1
+                outer_pbar.set_description(f"Database {db_count}/{num_searchers}")
                 if error is not None or result is None:
                     metrics[f"total_papers_from_{searcher.name}"] = 0
                     if isinstance(error, UnsupportedQueryError):
