@@ -456,6 +456,58 @@ class TestEngineGet:
         assert kwargs["proxy"] == "http://proxy:8080"
         assert kwargs["ssl_verify"] is False
 
+    def test_get_forwards_databases_param(self):
+        """get() passes the databases list to GetRunner."""
+        engine = Engine()
+        with patch("findpapers.engine.GetRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = None
+            mock_cls.return_value = mock_runner
+
+            engine.get("10.1234/test", databases=["arxiv", "pubmed"])
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs["databases"] == ["arxiv", "pubmed"]
+
+    def test_get_databases_defaults_to_none(self):
+        """get() passes databases=None to GetRunner when not specified."""
+        engine = Engine()
+        with patch("findpapers.engine.GetRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = None
+            mock_cls.return_value = mock_runner
+
+            engine.get("10.1234/test")
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs["databases"] is None
+
+    def test_get_forwards_crossref_in_databases(self):
+        """get() forwards databases list including 'crossref' to GetRunner."""
+        engine = Engine()
+        with patch("findpapers.engine.GetRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = None
+            mock_cls.return_value = mock_runner
+
+            engine.get("10.1234/test", databases=["crossref"])
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs["databases"] == ["crossref"]
+
+    def test_get_forwards_web_scraping_in_databases(self):
+        """get() forwards databases list including 'web_scraping' to GetRunner."""
+        engine = Engine()
+        with patch("findpapers.engine.GetRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = None
+            mock_cls.return_value = mock_runner
+
+            engine.get("https://arxiv.org/abs/1706.03762", databases=["web_scraping"])
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs["databases"] == ["web_scraping"]
+
 
 # ---------------------------------------------------------------------------
 # Top-level import

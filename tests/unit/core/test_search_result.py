@@ -20,6 +20,7 @@ class TestDatabase:
     def test_members_match_string_values(self) -> None:
         """Each enum member is equal to its raw string value."""
         assert Database.ARXIV == "arxiv"
+        assert Database.CROSSREF == "crossref"
         assert Database.IEEE == "ieee"
         assert Database.OPENALEX == "openalex"
         assert Database.PUBMED == "pubmed"
@@ -27,8 +28,8 @@ class TestDatabase:
         assert Database.SEMANTIC_SCHOLAR == "semantic_scholar"
 
     def test_all_members_present(self) -> None:
-        """Six databases are defined."""
-        assert len(Database) == 6
+        """Seven databases are defined."""
+        assert len(Database) == 7
 
 
 # ---------------------------------------------------------------------------

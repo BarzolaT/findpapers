@@ -21,6 +21,9 @@ class Database(StrEnum):
     ARXIV = "arxiv"
     """arXiv preprint server."""
 
+    CROSSREF = "crossref"
+    """CrossRef DOI registration authority."""
+
     IEEE = "ieee"
     """IEEE Xplore digital library."""
 

@@ -63,8 +63,9 @@ def _make_runner(identifier: str = "10.1234/test") -> GetRunner:
     runner = GetRunner(identifier=identifier)
     for attr in ("_openalex", "_semantic_scholar", "_pubmed", "_arxiv"):
         conn = getattr(runner, attr)
-        conn.fetch_paper_by_doi = _noop_fetch_doi
-        conn.close = lambda: None
+        if conn is not None:
+            conn.fetch_paper_by_doi = _noop_fetch_doi
+            conn.close = lambda: None
     return runner
 
 
@@ -162,6 +163,7 @@ class TestGetRunnerInit:
     def test_timeout_propagated_to_crossref(self):
         """Custom timeout is forwarded to the CrossRef connector."""
         runner = GetRunner(identifier="10.1234/test", timeout=42.0)
+        assert runner._crossref is not None
         assert runner._crossref._timeout == 42.0
 
     def test_timeout_propagated_to_all_doi_connectors(self):
@@ -173,6 +175,7 @@ class TestGetRunnerInit:
     def test_timeout_propagated_to_scraper(self):
         """Custom timeout is also forwarded to the WebScrapingConnector."""
         runner = GetRunner(identifier="10.1234/test", timeout=15.0)
+        assert runner._scraper is not None
         assert runner._scraper._timeout == 15.0
 
     def test_ieee_connector_absent_without_key(self):
@@ -184,6 +187,104 @@ class TestGetRunnerInit:
         """Scopus connector is None when no API key is provided."""
         runner = GetRunner(identifier="10.1234/test")
         assert runner._scopus is None
+
+    def test_databases_none_creates_all_connectors(self):
+        """When databases=None, all non-key-gated connectors are created."""
+        runner = GetRunner(identifier="10.1234/test")
+        assert runner._arxiv is not None
+        assert runner._pubmed is not None
+        assert runner._openalex is not None
+        assert runner._semantic_scholar is not None
+
+    def test_databases_subset_skips_excluded_connectors(self):
+        """Only selected databases have their connectors initialised."""
+        runner = GetRunner(identifier="10.1234/test", databases=["arxiv", "pubmed"])
+        assert runner._arxiv is not None
+        assert runner._pubmed is not None
+        assert runner._openalex is None
+        assert runner._semantic_scholar is None
+
+    def test_databases_single_entry(self):
+        """A single-database list creates only that connector."""
+        runner = GetRunner(identifier="10.1234/test", databases=["openalex"])
+        assert runner._openalex is not None
+        assert runner._arxiv is None
+        assert runner._pubmed is None
+        assert runner._semantic_scholar is None
+
+    def test_databases_empty_list_raises(self):
+        """An empty databases list raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="must not be an empty list"):
+            GetRunner(identifier="10.1234/test", databases=[])
+
+    def test_databases_unknown_value_raises(self):
+        """An unrecognised database name raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="Unknown database"):
+            GetRunner(identifier="10.1234/test", databases=["unknown_db"])
+
+    def test_databases_case_insensitive(self):
+        """Database names are case-insensitive."""
+        runner = GetRunner(identifier="10.1234/test", databases=["ArXiv", "PUBMED"])
+        assert runner._arxiv is not None
+        assert runner._pubmed is not None
+        assert runner._openalex is None
+
+    def test_databases_ieee_with_key_and_filter(self):
+        """IEEE connector is created when both key and filter include it."""
+        runner = GetRunner(
+            identifier="10.1234/test",
+            databases=["ieee"],
+            ieee_api_key="fake-key",
+        )
+        assert runner._ieee is not None
+
+    def test_databases_ieee_excluded_by_filter_despite_key(self):
+        """IEEE connector is None when excluded by databases filter, even with API key."""
+        runner = GetRunner(
+            identifier="10.1234/test",
+            databases=["arxiv"],
+            ieee_api_key="fake-key",
+        )
+        assert runner._ieee is None
+
+    def test_crossref_always_present_regardless_of_filter(self):
+        """CrossRef connector is created when databases=None (all sources)."""
+        runner = GetRunner(identifier="10.1234/test")
+        assert runner._crossref is not None
+
+    def test_crossref_absent_when_excluded(self):
+        """CrossRef connector is None when 'crossref' is not in databases."""
+        runner = GetRunner(identifier="10.1234/test", databases=["arxiv", "pubmed"])
+        assert runner._crossref is None
+
+    def test_crossref_present_when_explicitly_included(self):
+        """CrossRef connector is created when 'crossref' is in databases."""
+        runner = GetRunner(identifier="10.1234/test", databases=["crossref"])
+        assert runner._crossref is not None
+
+    def test_web_scraping_enabled_by_default(self):
+        """Scraper is created when databases=None."""
+        runner = GetRunner(identifier="10.1234/test")
+        assert runner._scraper is not None
+
+    def test_web_scraping_disabled_when_excluded(self):
+        """Scraper is None when 'web_scraping' is not in databases."""
+        runner = GetRunner(identifier="10.1234/test", databases=["arxiv"])
+        assert runner._scraper is None
+
+    def test_web_scraping_enabled_when_included(self):
+        """Scraper is created when 'web_scraping' is explicitly included."""
+        runner = GetRunner(identifier="10.1234/test", databases=["web_scraping", "crossref"])
+        assert runner._scraper is not None
+
+    def test_databases_accepts_all_get_databases_values(self):
+        """Every value in GET_DATABASES is accepted without raising."""
+        from findpapers.runners.get_runner import GET_DATABASES
+
+        # IEEE and Scopus need keys; skip them here to avoid MissingApiKeyError.
+        values = GET_DATABASES - {"ieee", "scopus"}
+        runner = GetRunner(identifier="10.1234/test", databases=list(values))
+        assert runner is not None
 
 
 # ---------------------------------------------------------------------------
@@ -265,7 +366,7 @@ class TestGetRunnerDoiPath:
             ),
         ):
             runner = _make_runner()
-            runner._semantic_scholar.fetch_paper_by_doi = lambda doi: extra_paper  # type: ignore[method-assign]
+            runner._semantic_scholar.fetch_paper_by_doi = lambda doi: extra_paper  # type: ignore[union-attr, method-assign]
             result = runner.run()
 
         assert result is base_paper
@@ -296,7 +397,7 @@ class TestGetRunnerDoiPath:
             ),
         ):
             runner = _make_runner()
-            runner._openalex.fetch_paper_by_doi = lambda doi: extra_paper  # type: ignore[method-assign]
+            runner._openalex.fetch_paper_by_doi = lambda doi: extra_paper  # type: ignore[union-attr, method-assign]
             result = runner.run()
 
         assert result is not None
@@ -310,7 +411,7 @@ class TestGetRunnerDoiPath:
             return_value=None,
         ):
             runner = _make_runner()
-            runner._openalex.fetch_paper_by_doi = lambda doi: fallback_paper  # type: ignore[method-assign]
+            runner._openalex.fetch_paper_by_doi = lambda doi: fallback_paper  # type: ignore[union-attr, method-assign]
             result = runner.run()
 
         assert result is fallback_paper
@@ -436,3 +537,142 @@ class TestGetRunnerUrlPath:
 
         assert result is scraped_paper
         assert result.url == "https://doi.org/10.1234/test"
+
+
+# ---------------------------------------------------------------------------
+# run() — databases filter behaviour
+# ---------------------------------------------------------------------------
+
+
+class TestGetRunnerDatabasesFilter:
+    """Behavioural tests for run() when specific databases are enabled/disabled."""
+
+    def test_crossref_disabled_returns_none_for_bare_doi(self):
+        """When crossref is disabled and no other connector finds the DOI, returns None."""
+        runner = GetRunner(identifier="10.1234/test", databases=["arxiv", "pubmed"])
+        assert runner._crossref is None
+        # stub only the connectors that exist
+        if runner._arxiv is not None:
+            runner._arxiv.fetch_paper_by_doi = lambda doi: None  # type: ignore[method-assign]
+        if runner._pubmed is not None:
+            runner._pubmed.fetch_paper_by_doi = lambda doi: None  # type: ignore[method-assign]
+        result = runner.run()
+        assert result is None
+
+    def test_crossref_disabled_but_other_connector_finds_paper(self):
+        """Without crossref, another Stage-2 connector can still return a result."""
+        fake_paper = _fake_paper(databases={"arxiv"})
+        runner = GetRunner(identifier="10.1234/test", databases=["arxiv"])
+        assert runner._crossref is None
+        runner._arxiv.fetch_paper_by_doi = lambda doi: fake_paper  # type: ignore[union-attr, method-assign]
+        result = runner.run()
+        assert result is fake_paper
+
+    def test_web_scraping_disabled_skips_stage1_for_landing_url(self):
+        """When web_scraping is disabled, a landing-page URL returns None (no DOI)."""
+        runner = GetRunner(
+            identifier="https://example.com/paper",
+            databases=["crossref", "arxiv"],
+        )
+        assert runner._scraper is None
+        result = runner.run()
+        assert result is None
+
+    def test_web_scraping_only_returns_scraped_paper(self):
+        """When only web_scraping is enabled, Stage 2 is never reached."""
+        scraped_paper = _fake_paper(doi=None, databases={"web_scraping"})
+        with patch(
+            "findpapers.connectors.web_scraping.WebScrapingConnector.fetch_paper_from_url",
+            return_value=scraped_paper,
+        ):
+            runner = GetRunner(
+                identifier="https://example.com/paper",
+                databases=["web_scraping"],
+            )
+            result = runner.run()
+
+        assert result is scraped_paper
+        # CrossRef must not be instantiated.
+        assert runner._crossref is None
+
+    def test_web_scraping_disabled_stage1_not_called_even_for_url(self):
+        """WebScraping.fetch_paper_from_url is never called when web_scraping disabled."""
+        with patch(
+            "findpapers.connectors.web_scraping.WebScrapingConnector.fetch_paper_from_url"
+        ) as mock_scrape:
+            runner = GetRunner(
+                identifier="https://example.com/paper",
+                databases=["crossref"],
+            )
+            runner.run()
+
+        mock_scrape.assert_not_called()
+
+    def test_bare_doi_with_web_scraping_calls_scraper_with_doi_url(self):
+        """When identifier is a bare DOI and web_scraping is enabled, the scraper
+        is called with the https://doi.org/{doi} redirect URL."""
+        scraped_paper = _fake_paper(doi="10.1234/test", databases={"web_scraping"})
+        with (
+            patch(
+                "findpapers.connectors.web_scraping.WebScrapingConnector.fetch_paper_from_url",
+                return_value=scraped_paper,
+            ) as mock_scrape,
+            patch(
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
+                return_value=None,
+            ),
+        ):
+            runner = GetRunner(
+                identifier="10.1234/test",
+                databases=["web_scraping", "crossref"],
+            )
+            result = runner.run()
+
+        mock_scrape.assert_called_once()
+        call_url = mock_scrape.call_args[0][0]
+        assert call_url == "https://doi.org/10.1234/test"
+        assert result is scraped_paper
+
+    def test_bare_doi_with_web_scraping_disabled_does_not_call_scraper(self):
+        """When web_scraping is disabled, the scraper is never called for bare DOIs."""
+        with (
+            patch(
+                "findpapers.connectors.web_scraping.WebScrapingConnector.fetch_paper_from_url"
+            ) as mock_scrape,
+            patch(
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
+                return_value=None,
+            ),
+        ):
+            runner = GetRunner(
+                identifier="10.1234/test",
+                databases=["crossref"],
+            )
+            runner.run()
+
+        mock_scrape.assert_not_called()
+
+    def test_doi_org_url_with_web_scraping_calls_scraper(self):
+        """When identifier is a doi.org URL and web_scraping is enabled, the
+        scraper is called with the normalised https://doi.org/{doi} URL."""
+        scraped_paper = _fake_paper(doi="10.1234/test", databases={"web_scraping"})
+        with (
+            patch(
+                "findpapers.connectors.web_scraping.WebScrapingConnector.fetch_paper_from_url",
+                return_value=scraped_paper,
+            ) as mock_scrape,
+            patch(
+                "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
+                return_value=None,
+            ),
+        ):
+            runner = GetRunner(
+                identifier="https://doi.org/10.1234/test",
+                databases=["web_scraping", "crossref"],
+            )
+            result = runner.run()
+
+        mock_scrape.assert_called_once()
+        call_url = mock_scrape.call_args[0][0]
+        assert call_url == "https://doi.org/10.1234/test"
+        assert result is scraped_paper

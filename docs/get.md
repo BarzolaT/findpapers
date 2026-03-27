@@ -26,6 +26,7 @@ if paper:
 ```python
 paper = engine.get(
     identifier,                     # str - DOI, DOI URL, or landing-page URL
+    databases=None,                 # list[str] | None - sources to use (default: all)
     timeout=10.0,                   # float | None - request timeout in seconds
     verbose=False,                  # bool - enable detailed logging
 )
@@ -34,8 +35,37 @@ paper = engine.get(
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `identifier` | `str` | *(required)* | DOI, DOI URL, or paper landing-page URL |
+| `databases` | `list[str] \| None` | `None` | Sources to consult (see below). `None` uses all sources |
 | `timeout` | `float \| None` | `10.0` | HTTP request timeout in seconds. `None` disables the timeout |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
+
+### The `databases` parameter
+
+`get()` queries multiple sources and merges their results into a single paper.
+The `databases` parameter controls which sources to include.  When `None`
+(the default), all available sources are used.
+
+| Value | Description |
+|-------|-------------|
+| `"web_scraping"` | Fetch metadata directly from the paper's landing page using HTML scraping. When a bare DOI is the identifier, the doi.org redirect URL is followed to the actual page. |
+| `"crossref"` | CrossRef DOI registration authority — canonical URL and structured metadata. |
+| `"arxiv"` | arXiv preprint API. |
+| `"ieee"` | IEEE Xplore API (requires `ieee_api_key`). |
+| `"openalex"` | OpenAlex scholarly graph. |
+| `"pubmed"` | NCBI PubMed / E-utilities. |
+| `"scopus"` | Elsevier Scopus API (requires `scopus_api_key`). |
+| `"semantic_scholar"` | Semantic Scholar API. |
+
+```python
+# CrossRef only — fast, authoritative structured metadata
+paper = engine.get("10.1038/nature12373", databases=["crossref"])
+
+# Web scraping + OpenAlex — scrape the landing page and enrich via OpenAlex
+paper = engine.get("10.1038/nature12373", databases=["web_scraping", "crossref", "openalex"])
+
+# Web scraping only — fetch from URL without any API-based enrichment
+paper = engine.get("https://arxiv.org/abs/1706.03762", databases=["web_scraping"])
+```
 
 ## Return Value
 
@@ -46,6 +76,7 @@ Returns a `Paper` object, or `None` when the paper cannot be found or the page y
 | Exception | When |
 |-----------|------|
 | `ValueError` | The identifier is a bare DOI that is empty or blank after stripping whitespace |
+| `InvalidParameterError` | `databases` is an empty list or contains an unrecognised value |
 
 ## Accepted Identifier Formats
 

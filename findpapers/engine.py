@@ -449,6 +449,7 @@ class Engine:
         self,
         identifier: str,
         *,
+        databases: list[str] | None = None,
         timeout: float | None = 10.0,
         verbose: bool = False,
     ) -> Paper | None:
@@ -473,6 +474,12 @@ class Engine:
         ----------
         identifier : str
             DOI, DOI URL, or paper landing-page URL.
+        databases : list[str] | None
+            Sources to consult when looking up the paper.  When ``None``
+            all available sources are used.  Pass a list to enable only
+            the specified ones.  Accepted values: ``"arxiv"``,
+            ``"crossref"``, ``"ieee"``, ``"openalex"``, ``"pubmed"``,
+            ``"scopus"``, ``"semantic_scholar"``, ``"web_scraping"``.
         timeout : float | None
             HTTP request timeout in seconds.  ``None`` disables the
             timeout.  Defaults to ``10.0``.
@@ -491,6 +498,9 @@ class Engine:
         ValueError
             If *identifier* is a bare DOI that is empty or blank after
             stripping whitespace and URL prefixes.
+        InvalidParameterError
+            If *databases* is an empty list or contains unknown database
+            names.
 
         See Also
         --------
@@ -521,6 +531,7 @@ class Engine:
         runner = GetRunner(
             identifier=identifier,
             email=self._email,
+            databases=databases,
             ieee_api_key=self._ieee_api_key,
             scopus_api_key=self._scopus_api_key,
             pubmed_api_key=self._pubmed_api_key,

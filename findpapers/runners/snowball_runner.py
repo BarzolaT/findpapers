@@ -16,10 +16,11 @@ from typing import Literal
 
 from tqdm import tqdm
 
-from findpapers.connectors import CITATION_REGISTRY, CitationSource
+from findpapers.connectors import CITATION_REGISTRY
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
+from findpapers.core.search_result import Database
 from findpapers.exceptions import InvalidParameterError
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.progress import make_progress_bar
@@ -321,10 +322,10 @@ class SnowballRunner:
         # are constructed with no arguments.  The classes are looked up in
         # the central CITATION_REGISTRY so that this runner does not need
         # to import every concrete connector.
-        _credentials: dict[CitationSource, dict[str, str | None]] = {
-            CitationSource.OPENALEX: {"api_key": openalex_api_key, "email": email},
-            CitationSource.SEMANTIC_SCHOLAR: {"api_key": semantic_scholar_api_key},
-            CitationSource.CROSSREF: {"email": email},
+        _credentials: dict[Database, dict[str, str | None]] = {
+            Database.OPENALEX: {"api_key": openalex_api_key, "email": email},
+            Database.SEMANTIC_SCHOLAR: {"api_key": semantic_scholar_api_key},
+            Database.CROSSREF: {"email": email},
         }
 
         return [cls(**_credentials.get(name, {})) for name, cls in CITATION_REGISTRY.items()]
