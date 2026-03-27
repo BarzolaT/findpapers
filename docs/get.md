@@ -1,4 +1,4 @@
-# Fetch by DOI
+# Get
 
 The `engine.get()` method looks up a single paper from CrossRef using its DOI. This is useful when you already know the DOI of a paper and want to retrieve its metadata without running a full search.
 

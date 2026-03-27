@@ -96,7 +96,7 @@ The table below summarizes each supported database - for full details on authent
 | [Enrich](https://github.com/jonatasgrosman/findpapers/blob/main/docs/enrich.md) | Enrich papers with additional metadata from CrossRef and web scraping |
 | [Download](https://github.com/jonatasgrosman/findpapers/blob/main/docs/download.md) | Download PDFs for papers |
 | [Snowball](https://github.com/jonatasgrosman/findpapers/blob/main/docs/snowball.md) | Build citation graphs via forward and backward snowballing |
-| [Fetch by DOI](https://github.com/jonatasgrosman/findpapers/blob/main/docs/fetch-by-doi.md) | Look up a single paper by DOI |
+| [Get](https://github.com/jonatasgrosman/findpapers/blob/main/docs/get.md) | Look up a single paper |
 | [Save/Load](https://github.com/jonatasgrosman/findpapers/blob/main/docs/save-load.md) | JSON, BibTeX, and CSV persistence details |
 | [API Reference](https://github.com/jonatasgrosman/findpapers/blob/main/docs/api-reference.md) | Public classes, functions, enums, and exceptions |
 
