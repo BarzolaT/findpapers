@@ -59,7 +59,7 @@ engine.download(result.papers, "./pdfs")
 paper = engine.get("10.1038/nature11804")
 
 # Build a citation graph from seed papers
-graph = engine.snowball([paper], max_depth=1, direction="forward")
+graph = engine.snowball(paper, max_depth=1, direction="forward")
 
 # Save results
 findpapers.save_to_json(result, "results.json")
