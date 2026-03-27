@@ -13,6 +13,7 @@ import requests
 
 from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
+from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -39,6 +40,17 @@ _ARXIV_ID_RE = re.compile(r"arxiv\.org/abs/([\d.]+)", re.IGNORECASE)
 # arXiv assigns DOIs under the 10.48550 prefix: 10.48550/arXiv.1706.03762
 _ARXIV_DOI_RE = re.compile(r"^10\.48550/arxiv\.([\d.]+)$", re.IGNORECASE)
 
+# Regex that matches arXiv abstract or PDF landing-page URLs and captures the
+# paper ID (without version suffix).  Used by URLLookupConnectorBase.
+# Examples:
+#   https://arxiv.org/abs/1706.03762
+#   https://arxiv.org/abs/1706.03762v3
+#   https://arxiv.org/pdf/1706.03762v5
+_ARXIV_URL_RE = re.compile(
+    r"arxiv\.org/(?:abs|pdf)/(\d{4}\.\d{4,5})(?:v\d+)?",
+    re.IGNORECASE,
+)
+
 # Mapping from SourceType to PaperType for arXiv entries.
 _ARXIV_PAPER_TYPE_MAP: dict[SourceType, PaperType] = {
     SourceType.JOURNAL: PaperType.ARTICLE,
@@ -48,7 +60,7 @@ _ARXIV_PAPER_TYPE_MAP: dict[SourceType, PaperType] = {
 }
 
 
-class ArxivConnector(SearchConnectorBase, DOILookupConnectorBase):
+class ArxivConnector(SearchConnectorBase, DOILookupConnectorBase, URLLookupConnectorBase):
     """Connector for the arXiv preprint database.
 
     Uses the arXiv Atom Feed API:
@@ -103,6 +115,49 @@ class ArxivConnector(SearchConnectorBase, DOILookupConnectorBase):
         return _MIN_REQUEST_INTERVAL
 
     # ------------------------------------------------------------------
+    # URL lookup
+    # ------------------------------------------------------------------
+
+    @property
+    def url_pattern(self) -> re.Pattern[str]:
+        """Return the regex matching arXiv abstract and PDF URLs.
+
+        Returns
+        -------
+        re.Pattern[str]
+            Compiled regex whose first capture group is the arXiv paper ID.
+        """
+        return _ARXIV_URL_RE
+
+    def fetch_paper_by_id(self, paper_id: str) -> Paper | None:
+        """Fetch a single arXiv paper by its native ID.
+
+        Parameters
+        ----------
+        paper_id : str
+            arXiv paper ID (e.g. ``"1706.03762"``), without version suffix.
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when the paper is not found or the response cannot be parsed.
+        """
+        try:
+            response = self._get(_BASE_URL, params={"id_list": paper_id, "max_results": 1})
+            tree = ET.fromstring(response.text)
+        except (requests.RequestException, ET.ParseError):
+            logger.debug("arXiv: failed to fetch arXiv ID %s.", paper_id)
+            return None
+
+        entries = tree.findall("atom:entry", _NS)
+        if not entries:
+            logger.debug("arXiv: no entry found for ID %s.", paper_id)
+            return None
+
+        return self._parse_paper(entries[0])
+
+    # ------------------------------------------------------------------
     # DOI lookup
     # ------------------------------------------------------------------
 
@@ -131,20 +186,7 @@ class ArxivConnector(SearchConnectorBase, DOILookupConnectorBase):
             logger.debug("arXiv: DOI %s is not an arXiv-native DOI — skipping.", doi)
             return None
 
-        arxiv_id = m.group(1)
-        try:
-            response = self._get(_BASE_URL, params={"id_list": arxiv_id, "max_results": 1})
-            tree = ET.fromstring(response.text)
-        except (requests.RequestException, ET.ParseError):
-            logger.debug("arXiv: failed to fetch arXiv ID %s for DOI %s.", arxiv_id, doi)
-            return None
-
-        entries = tree.findall("atom:entry", _NS)
-        if not entries:
-            logger.debug("arXiv: no entry found for ID %s.", arxiv_id)
-            return None
-
-        return self._parse_paper(entries[0])
+        return self.fetch_paper_by_id(m.group(1))
 
     def _parse_paper(self, entry: ET.Element) -> Paper | None:
         """Parse a single Atom entry element into a :class:`Paper`.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import datetime
 import logging
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -12,6 +13,7 @@ import requests
 
 from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
+from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -27,6 +29,15 @@ _BASE_URL = "https://ieeexploreapi.ieee.org/api/v1/search/articles"
 _PAGE_SIZE = 200  # IEEE max per request
 # 200 calls/day limit — use conservative interval
 _MIN_REQUEST_INTERVAL = 0.5
+
+# Regex that matches IEEE Xplore landing-page URLs and captures the article number.
+# Handles:
+#   https://ieeexplore.ieee.org/document/9413133
+#   https://ieeexplore.ieee.org/abstract/document/9413133
+_IEEE_URL_RE = re.compile(
+    r"ieeexplore\.ieee\.org/(?:abstract/)?document/(\d+)",
+    re.IGNORECASE,
+)
 
 # Mapping from IEEE content_type values to SourceType.
 _IEEE_CONTENT_TYPE_MAP: dict[str, SourceType] = {
@@ -53,7 +64,7 @@ _IEEE_PAPER_TYPE_MAP: dict[str, PaperType] = {
 }
 
 
-class IEEEConnector(SearchConnectorBase, DOILookupConnectorBase):
+class IEEEConnector(SearchConnectorBase, DOILookupConnectorBase, URLLookupConnectorBase):
     """Connector for the IEEE Xplore database.
 
     Requires an IEEE API key:
@@ -152,6 +163,50 @@ class IEEEConnector(SearchConnectorBase, DOILookupConnectorBase):
         if self._api_key:
             updated["X-API-Key"] = self._api_key
         return updated
+
+    # ------------------------------------------------------------------
+    # URL lookup
+    # ------------------------------------------------------------------
+
+    @property
+    def url_pattern(self) -> re.Pattern[str]:
+        """Return the regex matching IEEE Xplore landing-page URLs.
+
+        Returns
+        -------
+        re.Pattern[str]
+            Compiled regex whose first capture group is the article number.
+        """
+        return _IEEE_URL_RE
+
+    def fetch_paper_by_id(self, paper_id: str) -> Paper | None:
+        """Fetch a single IEEE paper by its article number.
+
+        Parameters
+        ----------
+        paper_id : str
+            IEEE Xplore article number (e.g. ``"9413133"``).
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when the article is not found or the response cannot be parsed.
+        """
+        params = self._prepare_params({"article_number": paper_id})
+        try:
+            response = self._get(_BASE_URL, params=params)
+            data = response.json()
+        except (requests.RequestException, ValueError):
+            logger.debug("IEEE: failed to fetch article number %s.", paper_id)
+            return None
+
+        articles = data.get("articles") or []
+        if not articles:
+            logger.debug("IEEE: article number %s not found.", paper_id)
+            return None
+
+        return self._parse_paper(articles[0])
 
     # ------------------------------------------------------------------
     # DOI lookup

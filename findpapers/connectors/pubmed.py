@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import datetime
 import logging
+import re
 from collections.abc import Callable
 from typing import ClassVar
 from xml.etree import ElementTree as ET
@@ -13,6 +14,7 @@ import requests
 
 from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
+from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -31,8 +33,18 @@ _PAGE_SIZE = 100
 _MIN_REQUEST_INTERVAL_DEFAULT = 0.34  # ~3 req/s
 _MIN_REQUEST_INTERVAL_WITH_KEY = 0.11  # ~10 req/s
 
+# Regex that matches PubMed landing-page URLs and captures the PMID.
+# Handles:
+#   https://pubmed.ncbi.nlm.nih.gov/12345678
+#   https://pubmed.ncbi.nlm.nih.gov/12345678/
+#   https://www.ncbi.nlm.nih.gov/pubmed/12345678
+_PUBMED_URL_RE = re.compile(
+    r"(?:pubmed\.ncbi\.nlm\.nih\.gov|ncbi\.nlm\.nih\.gov/pubmed)/(\d+)",
+    re.IGNORECASE,
+)
 
-class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase):
+
+class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase, URLLookupConnectorBase):
     """Connector for the PubMed / NCBI database.
 
     Uses NCBI E-utilities (esearch + efetch):
@@ -138,6 +150,47 @@ class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase):
         return params
 
     # ------------------------------------------------------------------
+    # URL lookup
+    # ------------------------------------------------------------------
+
+    @property
+    def url_pattern(self) -> re.Pattern[str]:
+        """Return the regex matching PubMed landing-page URLs.
+
+        Returns
+        -------
+        re.Pattern[str]
+            Compiled regex whose first capture group is the PMID.
+        """
+        return _PUBMED_URL_RE
+
+    def fetch_paper_by_id(self, paper_id: str) -> Paper | None:
+        """Fetch a single PubMed paper by its PMID.
+
+        Parameters
+        ----------
+        paper_id : str
+            PubMed ID (PMID), e.g. ``"12345678"``.
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when the paper is not found or the response cannot be parsed.
+        """
+        try:
+            articles = self._fetch_details([paper_id])
+        except (requests.RequestException, ET.ParseError):
+            logger.debug("PubMed: efetch failed for PMID %s.", paper_id)
+            return None
+
+        if not articles:
+            logger.debug("PubMed: PMID %s not found.", paper_id)
+            return None
+
+        return self._parse_paper(articles[0])
+
+    # ------------------------------------------------------------------
     # DOI lookup
     # ------------------------------------------------------------------
 
@@ -168,16 +221,7 @@ class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase):
             logger.debug("PubMed: DOI %s not found.", doi)
             return None
 
-        try:
-            articles = self._fetch_details(ids[:1])
-        except (requests.RequestException, ET.ParseError):
-            logger.warning("PubMed: efetch failed for DOI %s (pmid=%s).", doi, ids[0])
-            return None
-
-        if not articles:
-            return None
-
-        return self._parse_paper(articles[0])
+        return self.fetch_paper_by_id(ids[0])
 
     def _search_ids(
         self,

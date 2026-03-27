@@ -570,3 +570,96 @@ class TestArxivConnectorFieldsOfStudyAndSubjects:
         papers = [ArxivConnector()._parse_paper(e) for e in entries]
         valid_papers = [p for p in papers if p is not None]
         assert all(p.is_open_access is True for p in valid_papers)
+
+
+class TestArxivConnectorFetchPaperById:
+    """Tests for fetch_paper_by_id."""
+
+    def test_fetch_paper_by_id_returns_paper(self, arxiv_sample_xml, mock_response):
+        """fetch_paper_by_id returns a Paper when the API responds with a valid entry."""
+        connector = ArxivConnector()
+        response = mock_response(text=arxiv_sample_xml)
+        response.raise_for_status = MagicMock()
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = response
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_id("1706.03762")
+
+        assert paper is not None
+
+    def test_fetch_paper_by_id_returns_none_on_empty_response(self, mock_response):
+        """fetch_paper_by_id returns None when the API returns no entries."""
+        empty_xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <feed xmlns="http://www.w3.org/2005/Atom">
+        </feed>"""
+        connector = ArxivConnector()
+        response = mock_response(text=empty_xml)
+        response.raise_for_status = MagicMock()
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = response
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("9999.99999")
+
+        assert result is None
+
+    def test_fetch_paper_by_id_returns_none_on_request_error(self):
+        """fetch_paper_by_id returns None when the HTTP request fails."""
+        connector = ArxivConnector()
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = requests.RequestException("timeout")
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("1706.03762")
+
+        assert result is None
+
+
+class TestArxivConnectorURLPattern:
+    """Tests for url_pattern and fetch_paper_by_url."""
+
+    @pytest.mark.parametrize(
+        ("url", "expected_id"),
+        [
+            ("https://arxiv.org/abs/1706.03762", "1706.03762"),
+            ("https://arxiv.org/abs/1706.03762v5", "1706.03762"),
+            ("https://arxiv.org/pdf/2301.12345", "2301.12345"),
+            ("http://arxiv.org/abs/2301.12345v1", "2301.12345"),
+        ],
+    )
+    def test_url_pattern_matches_arxiv_urls(self, url: str, expected_id: str) -> None:
+        """url_pattern matches arXiv abstract and PDF URLs."""
+        connector = ArxivConnector()
+        match = connector.url_pattern.search(url)
+        assert match is not None
+        assert match.group(1) == expected_id
+
+    def test_url_pattern_does_not_match_non_arxiv_url(self) -> None:
+        """url_pattern returns None for non-arXiv URLs."""
+        connector = ArxivConnector()
+        assert connector.url_pattern.search("https://pubmed.ncbi.nlm.nih.gov/12345") is None
+
+    def test_fetch_paper_by_url_delegates_to_fetch_paper_by_id(
+        self, arxiv_sample_xml, mock_response
+    ) -> None:
+        """fetch_paper_by_url extracts the arXiv ID and delegates to fetch_paper_by_id."""
+        connector = ArxivConnector()
+        response = mock_response(text=arxiv_sample_xml)
+        response.raise_for_status = MagicMock()
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = response
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_url("https://arxiv.org/abs/1706.03762")
+
+        assert paper is not None
+        # Verify the correct API parameter was sent (id_list should match the extracted ID).
+        call_kwargs = connector._http_session.get.call_args
+        assert "1706.03762" in str(call_kwargs)
+
+    def test_fetch_paper_by_url_returns_none_for_unrecognised_url(self) -> None:
+        """fetch_paper_by_url returns None when the URL is not an arXiv URL."""
+        connector = ArxivConnector()
+        result = connector.fetch_paper_by_url("https://ieeexplore.ieee.org/document/9413133")
+        assert result is None

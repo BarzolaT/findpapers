@@ -1091,3 +1091,86 @@ class TestPubmedFundersExtraction:
         paper = PubmedConnector()._parse_paper(article)
         assert paper is not None
         assert paper.funders == {"Wellcome Trust"}
+
+
+class TestPubmedConnectorFetchPaperById:
+    """Tests for fetch_paper_by_id."""
+
+    def test_fetch_paper_by_id_returns_paper(self, pubmed_efetch_xml, mock_response):
+        """fetch_paper_by_id returns a Paper when efetch responds with a valid record."""
+        connector = PubmedConnector()
+        efetch_mock = mock_response(text=pubmed_efetch_xml)
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = efetch_mock
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_id("12345678")
+
+        assert paper is not None
+
+    def test_fetch_paper_by_id_returns_none_on_empty_response(self, mock_response):
+        """fetch_paper_by_id returns None when efetch returns no articles."""
+        empty_xml = "<PubmedArticleSet></PubmedArticleSet>"
+        connector = PubmedConnector()
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = mock_response(text=empty_xml)
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("99999999")
+
+        assert result is None
+
+    def test_fetch_paper_by_id_returns_none_on_request_error(self):
+        """fetch_paper_by_id returns None when the HTTP request fails."""
+        connector = PubmedConnector()
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = requests.RequestException("timeout")
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("12345678")
+
+        assert result is None
+
+
+class TestPubmedConnectorURLPattern:
+    """Tests for url_pattern and fetch_paper_by_url."""
+
+    @pytest.mark.parametrize(
+        ("url", "expected_id"),
+        [
+            ("https://pubmed.ncbi.nlm.nih.gov/12345678", "12345678"),
+            ("https://pubmed.ncbi.nlm.nih.gov/12345678/", "12345678"),
+            ("https://www.ncbi.nlm.nih.gov/pubmed/99887766", "99887766"),
+        ],
+    )
+    def test_url_pattern_matches_pubmed_urls(self, url: str, expected_id: str) -> None:
+        """url_pattern matches PubMed landing-page URLs."""
+        connector = PubmedConnector()
+        match = connector.url_pattern.search(url)
+        assert match is not None
+        assert match.group(1) == expected_id
+
+    def test_url_pattern_does_not_match_non_pubmed_url(self) -> None:
+        """url_pattern returns None for non-PubMed URLs."""
+        connector = PubmedConnector()
+        assert connector.url_pattern.search("https://arxiv.org/abs/1706.03762") is None
+
+    def test_fetch_paper_by_url_delegates_to_fetch_paper_by_id(
+        self, pubmed_efetch_xml, mock_response
+    ) -> None:
+        """fetch_paper_by_url extracts the PMID and delegates to fetch_paper_by_id."""
+        connector = PubmedConnector()
+        efetch_mock = mock_response(text=pubmed_efetch_xml)
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = efetch_mock
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_url("https://pubmed.ncbi.nlm.nih.gov/12345678")
+
+        assert paper is not None
+
+    def test_fetch_paper_by_url_returns_none_for_unrecognised_url(self) -> None:
+        """fetch_paper_by_url returns None when the URL is not a PubMed URL."""
+        connector = PubmedConnector()
+        result = connector.fetch_paper_by_url("https://arxiv.org/abs/1706.03762")
+        assert result is None

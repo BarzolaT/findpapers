@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import datetime
 import logging
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -13,6 +14,7 @@ import requests
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
+from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -28,6 +30,15 @@ _BASE_URL = "https://api.openalex.org/works"
 _PAGE_SIZE = 200  # OpenAlex max per_page
 # Polite pool: ~10 req/s with email in User-Agent → use 0.1s interval
 _MIN_REQUEST_INTERVAL = 0.15
+
+# Regex that matches OpenAlex work landing-page URLs and captures the work ID.
+# Handles:
+#   https://openalex.org/W2741809807
+#   https://openalex.org/works/W2741809807
+_OPENALEX_URL_RE = re.compile(
+    r"openalex\.org/(?:works/)?(W\d+)",
+    re.IGNORECASE,
+)
 
 # Mapping from OpenAlex source.type values to SourceType.
 _OPENALEX_SOURCE_TYPE_MAP: dict[str, SourceType] = {
@@ -70,7 +81,9 @@ _OPENALEX_PAPER_TYPE_MAP: dict[str, PaperType] = {
 }
 
 
-class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupConnectorBase):
+class OpenAlexConnector(
+    SearchConnectorBase, CitationConnectorBase, DOILookupConnectorBase, URLLookupConnectorBase
+):
     """Connector for the OpenAlex open catalog of academic works.
 
     https://docs.openalex.org/how-to-use-the-api
@@ -163,6 +176,60 @@ class OpenAlexConnector(SearchConnectorBase, CitationConnectorBase, DOILookupCon
         if self._api_key:
             return {**params, "api_key": self._api_key}
         return params
+
+    # ------------------------------------------------------------------
+    # URL lookup
+    # ------------------------------------------------------------------
+
+    @property
+    def url_pattern(self) -> re.Pattern[str]:
+        """Return the regex matching OpenAlex work landing-page URLs.
+
+        Returns
+        -------
+        re.Pattern[str]
+            Compiled regex whose first capture group is the OpenAlex work ID.
+        """
+        return _OPENALEX_URL_RE
+
+    def fetch_paper_by_id(self, paper_id: str) -> Paper | None:
+        """Fetch a single paper by its OpenAlex work ID.
+
+        Parameters
+        ----------
+        paper_id : str
+            OpenAlex work ID (e.g. ``"W2741809807"``).
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when the work is not found or the response cannot be parsed.
+        """
+        url = f"{_BASE_URL}/{paper_id}"
+        params: dict[str, Any] = {
+            "select": (
+                "id,doi,title,display_name,publication_date,authorships,"
+                "abstract_inverted_index,cited_by_count,open_access,locations,"
+                "primary_location,concepts,keywords,type,biblio,primary_topic,language,"
+                "is_retracted,funders"
+            ),
+        }
+        params = self._prepare_params(params)
+        try:
+            response = self._get(url, params=params)
+            data = response.json()
+        except requests.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                logger.debug("OpenAlex: work ID %s not found (404).", paper_id)
+                return None
+            logger.debug("OpenAlex: HTTP error fetching work ID %s: %s", paper_id, exc)
+            return None
+        except (requests.RequestException, ValueError):
+            logger.debug("OpenAlex: failed to fetch work ID %s.", paper_id)
+            return None
+
+        return self._parse_paper(data)
 
     # ------------------------------------------------------------------
     # DOI lookup

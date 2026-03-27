@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import datetime
 import logging
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -13,6 +14,7 @@ import requests
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
+from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.query import Query
@@ -50,6 +52,16 @@ _SS_VENUE_TYPE_MAP: dict[str, SourceType] = {
     "repository": SourceType.REPOSITORY,
 }
 
+# Regex that matches Semantic Scholar paper landing-page URLs and captures the
+# 40-character hexadecimal paper ID.
+# Handles:
+#   https://www.semanticscholar.org/paper/Attention-is-All-you-Need/204e3073870fae3d05bcbc2f6a8e263d9b72e776
+#   https://www.semanticscholar.org/paper/204e3073870fae3d05bcbc2f6a8e263d9b72e776
+_SS_URL_RE = re.compile(
+    r"semanticscholar\.org/paper/(?:[^/]+/)?([0-9a-f]{40})",
+    re.IGNORECASE,
+)
+
 # Mapping from publicationTypes list entries to SourceType (fallback).
 _SS_PUB_TYPE_MAP: dict[str, SourceType] = {
     "JournalArticle": SourceType.JOURNAL,
@@ -77,7 +89,12 @@ _SS_PAPER_TYPE_MAP: dict[str, PaperType] = {
 }
 
 
-class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase, DOILookupConnectorBase):
+class SemanticScholarConnector(
+    SearchConnectorBase,
+    CitationConnectorBase,
+    DOILookupConnectorBase,
+    URLLookupConnectorBase,
+):
     """Connector for the Semantic Scholar research corpus.
 
     Uses the Bulk Search endpoint:
@@ -173,6 +190,52 @@ class SemanticScholarConnector(SearchConnectorBase, CitationConnectorBase, DOILo
         if self._api_key:
             updated["x-api-key"] = self._api_key
         return updated
+
+    # ------------------------------------------------------------------
+    # URL lookup
+    # ------------------------------------------------------------------
+
+    @property
+    def url_pattern(self) -> re.Pattern[str]:
+        """Return the regex matching Semantic Scholar paper landing-page URLs.
+
+        Returns
+        -------
+        re.Pattern[str]
+            Compiled regex whose first capture group is the 40-char paper ID.
+        """
+        return _SS_URL_RE
+
+    def fetch_paper_by_id(self, paper_id: str) -> Paper | None:
+        """Fetch a single paper by its Semantic Scholar paper ID.
+
+        Parameters
+        ----------
+        paper_id : str
+            40-character hexadecimal Semantic Scholar paper ID.
+
+        Returns
+        -------
+        Paper | None
+            A populated :class:`~findpapers.core.paper.Paper`, or ``None``
+            when the paper is not found or the response cannot be parsed.
+        """
+        url = f"{_PAPER_URL}/{paper_id}"
+        params = {"fields": _PAPER_FIELDS}
+        try:
+            response = self._get(url, params=params)
+            data = response.json()
+        except requests.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                logger.debug("Semantic Scholar: paper ID %s not found (404).", paper_id)
+                return None
+            logger.debug("Semantic Scholar: HTTP error fetching paper ID %s: %s", paper_id, exc)
+            return None
+        except (requests.RequestException, ValueError):
+            logger.debug("Semantic Scholar: failed to fetch paper ID %s.", paper_id)
+            return None
+
+        return self._parse_paper(data)
 
     # ------------------------------------------------------------------
     # DOI lookup

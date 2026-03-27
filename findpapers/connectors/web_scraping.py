@@ -25,6 +25,7 @@ from lxml import html
 from lxml.html import HtmlElement
 
 from findpapers.connectors.connector_base import ConnectorBase
+from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
 from findpapers.core.author import Author
 from findpapers.core.paper import Paper, PaperType
 from findpapers.core.source import Source, SourceType
@@ -221,11 +222,30 @@ class WebScrapingConnector(ConnectorBase):
         self,
         proxy: str | None = None,
         ssl_verify: bool = True,
+        url_lookup_connectors: list[URLLookupConnectorBase] | None = None,
     ) -> None:
-        """Initialise the connector with optional proxy and SSL settings."""
+        """Initialise the connector with optional proxy, SSL settings, and URL-lookup connectors.
+
+        Parameters
+        ----------
+        proxy : str | None
+            Optional HTTP/HTTPS proxy URL.  When supplied all requests are
+            routed through this proxy.
+        ssl_verify : bool
+            Whether to verify SSL certificates.  Set to ``False`` only when
+            working behind institutional proxies that perform SSL inspection.
+            Defaults to ``True``.
+        url_lookup_connectors : list[URLLookupConnectorBase] | None
+            Optional list of connectors that support URL-based lookup.  When
+            a URL passed to :meth:`fetch_paper_from_url` matches one of these
+            connectors' URL patterns, the fetch is delegated to that connector
+            instead of performing HTML scraping.  Connectors are checked in
+            list order; the first match wins.
+        """
         super().__init__()
         self._proxy = proxy
         self._ssl_verify = ssl_verify
+        self._url_lookup_connectors: list[URLLookupConnectorBase] = url_lookup_connectors or []
 
     # ------------------------------------------------------------------
     # ConnectorBase abstract interface
@@ -296,6 +316,18 @@ class WebScrapingConnector(ConnectorBase):
             (i.e. status codes other than 403, 406, and 418).
         """
         logger.debug("GET %s", url)
+        # Before making an HTTP request, try to delegate to a structured
+        # API connector that recognises this URL.
+        for connector in self._url_lookup_connectors:
+            if connector.supports_url(url):
+                paper = connector.fetch_paper_by_url(url)
+                if paper is not None:
+                    logger.debug(
+                        "URL %s handled by connector '%s' — skipping HTML scraping.",
+                        url,
+                        connector.name,
+                    )
+                    return paper
         try:
             response = self._make_html_request(url, timeout)
         except _CurlError as exc:

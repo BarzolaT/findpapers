@@ -1011,3 +1011,72 @@ class TestDoiFromTextPattern:
         )
         meta = WebScrapingConnector._extract_metadata_from_html(html)
         assert meta.get("citation_doi") == "10.1234/correct"
+
+
+class TestWebScrapingConnectorURLLookupDelegation:
+    """Tests for URL-lookup connector delegation in fetch_paper_from_url."""
+
+    def _make_url_lookup_connector(self, url_pattern_str: str, paper: object) -> MagicMock:
+        """Build a mock URLLookupConnectorBase that returns *paper* for matching URLs."""
+        import re
+
+        pattern = re.compile(url_pattern_str)
+        connector = MagicMock()
+        connector.url_pattern = pattern
+        connector.name = "mock_connector"
+        connector.supports_url.side_effect = lambda url: bool(pattern.search(url))
+        connector.fetch_paper_by_url.return_value = paper
+        return connector
+
+    def test_matching_connector_is_used_instead_of_scraping(self) -> None:
+        """When a URL-lookup connector matches, fetch_paper_from_url delegates to it."""
+        expected_paper = MagicMock()
+        url_connector = self._make_url_lookup_connector(r"arxiv\.org/abs/(\d+)", expected_paper)
+
+        scraper = WebScrapingConnector(url_lookup_connectors=[url_connector])
+        result = scraper.fetch_paper_from_url("https://arxiv.org/abs/1706.03762")
+
+        url_connector.fetch_paper_by_url.assert_called_once_with("https://arxiv.org/abs/1706.03762")
+        assert result is expected_paper
+
+    def test_non_matching_connector_falls_through_to_scraping(self) -> None:
+        """When no URL-lookup connector matches, scraping proceeds normally."""
+        url_connector = self._make_url_lookup_connector(r"arxiv\.org/abs/(\d+)", None)
+        url_connector.fetch_paper_by_url.return_value = None
+
+        scraper = WebScrapingConnector(url_lookup_connectors=[url_connector])
+        html = '<html><head><meta name="citation_title" content="Test Paper"></head></html>'
+        with patch.object(
+            scraper,
+            "_make_html_request",
+            return_value=_mock_html_response(html, url="https://example.com/paper"),
+        ):
+            result = scraper.fetch_paper_from_url("https://example.com/paper")
+
+        # Scraping was performed and returned a paper.
+        assert result is not None
+        assert result.title == "Test Paper"
+
+    def test_first_matching_connector_wins(self) -> None:
+        """When multiple connectors match, the first one's result is used."""
+        paper_a = MagicMock()
+        paper_b = MagicMock()
+        connector_a = self._make_url_lookup_connector(r"example\.com/paper/(\w+)", paper_a)
+        connector_b = self._make_url_lookup_connector(r"example\.com/paper/(\w+)", paper_b)
+
+        scraper = WebScrapingConnector(url_lookup_connectors=[connector_a, connector_b])
+        result = scraper.fetch_paper_from_url("https://example.com/paper/123")
+
+        assert result is paper_a
+        connector_b.fetch_paper_by_url.assert_not_called()
+
+    def test_no_url_lookup_connectors_by_default(self) -> None:
+        """WebScrapingConnector has an empty url_lookup_connectors list by default."""
+        scraper = WebScrapingConnector()
+        assert scraper._url_lookup_connectors == []
+
+    def test_url_lookup_connectors_stored(self) -> None:
+        """url_lookup_connectors passed at construction are stored on the instance."""
+        mock_connector = MagicMock()
+        scraper = WebScrapingConnector(url_lookup_connectors=[mock_connector])
+        assert scraper._url_lookup_connectors == [mock_connector]

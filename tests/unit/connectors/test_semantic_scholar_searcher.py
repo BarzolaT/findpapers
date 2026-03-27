@@ -6,6 +6,7 @@ import datetime
 import logging
 from unittest.mock import MagicMock, patch
 
+import pytest
 import requests
 
 from findpapers.connectors.semantic_scholar import (
@@ -665,3 +666,94 @@ class TestSemanticScholarConnectorIsOpenAccess:
         paper = SemanticScholarConnector()._parse_paper(item)
         assert paper is not None
         assert paper.is_open_access is None
+
+
+class TestSemanticScholarConnectorFetchPaperById:
+    """Tests for fetch_paper_by_id."""
+
+    def test_fetch_paper_by_id_returns_paper(self, semantic_scholar_sample_json, mock_response):
+        """fetch_paper_by_id returns a Paper when the API responds with a valid record."""
+        single_paper = semantic_scholar_sample_json["data"][0]
+        connector = SemanticScholarConnector()
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = mock_response(json_data=single_paper)
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_id("204e3073870fae3d05bcbc2f6a8e263d9b72e776")
+
+        assert paper is not None
+
+    def test_fetch_paper_by_id_returns_none_on_404(self, mock_response):
+        """fetch_paper_by_id returns None when the API responds with 404."""
+        connector = SemanticScholarConnector()
+        error_response = mock_response(status_code=404)
+        error_response.status_code = 404
+        http_error = requests.HTTPError(response=error_response)
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = http_error
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("a" * 40)
+
+        assert result is None
+
+    def test_fetch_paper_by_id_returns_none_on_request_error(self):
+        """fetch_paper_by_id returns None when the HTTP request fails."""
+        connector = SemanticScholarConnector()
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = requests.RequestException("timeout")
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("204e3073870fae3d05bcbc2f6a8e263d9b72e776")
+
+        assert result is None
+
+
+class TestSemanticScholarConnectorURLPattern:
+    """Tests for url_pattern and fetch_paper_by_url."""
+
+    @pytest.mark.parametrize(
+        ("url", "expected_id"),
+        [
+            (
+                "https://www.semanticscholar.org/paper/Attention-is-All-you-Need/204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+                "204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+            ),
+            (
+                "https://www.semanticscholar.org/paper/204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+                "204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+            ),
+        ],
+    )
+    def test_url_pattern_matches_semantic_scholar_urls(self, url: str, expected_id: str) -> None:
+        """url_pattern matches Semantic Scholar paper landing-page URLs."""
+        connector = SemanticScholarConnector()
+        match = connector.url_pattern.search(url)
+        assert match is not None
+        assert match.group(1) == expected_id
+
+    def test_url_pattern_does_not_match_non_ss_url(self) -> None:
+        """url_pattern returns None for non-Semantic Scholar URLs."""
+        connector = SemanticScholarConnector()
+        assert connector.url_pattern.search("https://arxiv.org/abs/1706.03762") is None
+
+    def test_fetch_paper_by_url_delegates_to_fetch_paper_by_id(
+        self, semantic_scholar_sample_json, mock_response
+    ) -> None:
+        """fetch_paper_by_url extracts the SS ID and delegates to fetch_paper_by_id."""
+        single_paper = semantic_scholar_sample_json["data"][0]
+        connector = SemanticScholarConnector()
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = mock_response(json_data=single_paper)
+        ss_url = "https://www.semanticscholar.org/paper/Attention/204e3073870fae3d05bcbc2f6a8e263d9b72e776"
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_url(ss_url)
+
+        assert paper is not None
+
+    def test_fetch_paper_by_url_returns_none_for_unrecognised_url(self) -> None:
+        """fetch_paper_by_url returns None when the URL is not a Semantic Scholar URL."""
+        connector = SemanticScholarConnector()
+        result = connector.fetch_paper_by_url("https://arxiv.org/abs/1706.03762")
+        assert result is None

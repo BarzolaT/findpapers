@@ -424,3 +424,85 @@ class TestIEEEConnectorIsOpenAccess:
         paper = IEEEConnector(api_key="dummy")._parse_paper(item)
         assert paper is not None
         assert paper.is_open_access is True
+
+
+class TestIEEEConnectorFetchPaperById:
+    """Tests for fetch_paper_by_id."""
+
+    def test_fetch_paper_by_id_returns_paper(self, ieee_sample_json, mock_response):
+        """fetch_paper_by_id returns a Paper when the API responds with a valid article."""
+        connector = IEEEConnector(api_key="dummy")
+        response = mock_response(json_data=ieee_sample_json)
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = response
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_id("9413133")
+
+        assert paper is not None
+
+    def test_fetch_paper_by_id_returns_none_when_articles_empty(self, mock_response):
+        """fetch_paper_by_id returns None when the API returns no articles."""
+        connector = IEEEConnector(api_key="dummy")
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = mock_response(json_data={"articles": []})
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("0000000")
+
+        assert result is None
+
+    def test_fetch_paper_by_id_returns_none_on_request_error(self):
+        """fetch_paper_by_id returns None when the HTTP request fails."""
+        connector = IEEEConnector(api_key="dummy")
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = requests.RequestException("timeout")
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("9413133")
+
+        assert result is None
+
+
+class TestIEEEConnectorURLPattern:
+    """Tests for url_pattern and fetch_paper_by_url."""
+
+    @pytest.mark.parametrize(
+        ("url", "expected_id"),
+        [
+            ("https://ieeexplore.ieee.org/document/9413133", "9413133"),
+            ("https://ieeexplore.ieee.org/abstract/document/9413133", "9413133"),
+            ("https://ieeexplore.ieee.org/document/9413133/", "9413133"),
+        ],
+    )
+    def test_url_pattern_matches_ieee_urls(self, url: str, expected_id: str) -> None:
+        """url_pattern matches IEEE Xplore landing-page URLs."""
+        connector = IEEEConnector(api_key="dummy")
+        match = connector.url_pattern.search(url)
+        assert match is not None
+        assert match.group(1) == expected_id
+
+    def test_url_pattern_does_not_match_non_ieee_url(self) -> None:
+        """url_pattern returns None for non-IEEE URLs."""
+        connector = IEEEConnector(api_key="dummy")
+        assert connector.url_pattern.search("https://arxiv.org/abs/1706.03762") is None
+
+    def test_fetch_paper_by_url_delegates_to_fetch_paper_by_id(
+        self, ieee_sample_json, mock_response
+    ) -> None:
+        """fetch_paper_by_url extracts the article number and delegates to fetch_paper_by_id."""
+        connector = IEEEConnector(api_key="dummy")
+        response = mock_response(json_data=ieee_sample_json)
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = response
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_url("https://ieeexplore.ieee.org/document/9413133")
+
+        assert paper is not None
+
+    def test_fetch_paper_by_url_returns_none_for_unrecognised_url(self) -> None:
+        """fetch_paper_by_url returns None when the URL is not an IEEE Xplore URL."""
+        connector = IEEEConnector(api_key="dummy")
+        result = connector.fetch_paper_by_url("https://arxiv.org/abs/1706.03762")
+        assert result is None

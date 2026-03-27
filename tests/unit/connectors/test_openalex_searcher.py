@@ -7,6 +7,7 @@ import logging
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import pytest
 import requests
 
 from findpapers.connectors.openalex import (
@@ -797,3 +798,90 @@ class TestOpenAlexConnectorFunders:
         paper = OpenAlexConnector()._parse_paper(work)
         assert paper is not None
         assert paper.funders == {"Wellcome Trust"}
+
+
+class TestOpenAlexConnectorFetchPaperById:
+    """Tests for fetch_paper_by_id."""
+
+    def test_fetch_paper_by_id_returns_paper(self, openalex_sample_json, mock_response):
+        """fetch_paper_by_id returns a Paper when the API responds with a valid work."""
+        # Pick the first result from the sample as a single-work response.
+        single_work = openalex_sample_json["results"][0]
+        connector = OpenAlexConnector()
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = mock_response(json_data=single_work)
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_id("W2741809807")
+
+        assert paper is not None
+
+    def test_fetch_paper_by_id_returns_none_on_404(self, mock_response):
+        """fetch_paper_by_id returns None when the API responds with 404."""
+        import requests as _requests
+
+        connector = OpenAlexConnector()
+        error_response = mock_response(status_code=404)
+        error_response.status_code = 404
+        http_error = _requests.HTTPError(response=error_response)
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = http_error
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("W9999999999")
+
+        assert result is None
+
+    def test_fetch_paper_by_id_returns_none_on_request_error(self):
+        """fetch_paper_by_id returns None when the HTTP request fails."""
+        connector = OpenAlexConnector()
+        connector._http_session = MagicMock()
+        connector._http_session.get.side_effect = requests.RequestException("timeout")
+
+        with patch.object(connector, "_rate_limit"):
+            result = connector.fetch_paper_by_id("W2741809807")
+
+        assert result is None
+
+
+class TestOpenAlexConnectorURLPattern:
+    """Tests for url_pattern and fetch_paper_by_url."""
+
+    @pytest.mark.parametrize(
+        ("url", "expected_id"),
+        [
+            ("https://openalex.org/W2741809807", "W2741809807"),
+            ("https://openalex.org/works/W2741809807", "W2741809807"),
+        ],
+    )
+    def test_url_pattern_matches_openalex_urls(self, url: str, expected_id: str) -> None:
+        """url_pattern matches OpenAlex work landing-page URLs."""
+        connector = OpenAlexConnector()
+        match = connector.url_pattern.search(url)
+        assert match is not None
+        assert match.group(1) == expected_id
+
+    def test_url_pattern_does_not_match_non_openalex_url(self) -> None:
+        """url_pattern returns None for non-OpenAlex URLs."""
+        connector = OpenAlexConnector()
+        assert connector.url_pattern.search("https://arxiv.org/abs/1706.03762") is None
+
+    def test_fetch_paper_by_url_delegates_to_fetch_paper_by_id(
+        self, openalex_sample_json, mock_response
+    ) -> None:
+        """fetch_paper_by_url extracts the OpenAlex ID and delegates to fetch_paper_by_id."""
+        single_work = openalex_sample_json["results"][0]
+        connector = OpenAlexConnector()
+        connector._http_session = MagicMock()
+        connector._http_session.get.return_value = mock_response(json_data=single_work)
+
+        with patch.object(connector, "_rate_limit"):
+            paper = connector.fetch_paper_by_url("https://openalex.org/W2741809807")
+
+        assert paper is not None
+
+    def test_fetch_paper_by_url_returns_none_for_unrecognised_url(self) -> None:
+        """fetch_paper_by_url returns None when the URL is not an OpenAlex URL."""
+        connector = OpenAlexConnector()
+        result = connector.fetch_paper_by_url("https://arxiv.org/abs/1706.03762")
+        assert result is None
