@@ -246,7 +246,7 @@ class SnowballRunner:
                         for key in top_keys:
                             paper_repr = best[key]
                             first_source = edge_map[key][0][0]
-                            canonical = graph.add_paper(paper_repr, discovered_from=first_source)
+                            canonical = graph.add_node(paper_repr, discovered_from=first_source)
                             for source, is_ref in edge_map[key]:
                                 if is_ref:
                                     graph.add_edge(source, canonical)
@@ -275,7 +275,7 @@ class SnowballRunner:
             "seed_papers": len(self._seed_papers),
             "skipped_seeds_without_doi": self._skipped_seeds,
             "max_depth": self._max_depth,
-            "total_papers": graph.paper_count,
+            "total_nodes": graph.node_count,
             "total_edges": graph.edge_count,
             "runtime_in_seconds": elapsed,
         }
@@ -283,7 +283,7 @@ class SnowballRunner:
 
         if verbose:
             logger.info("=== Snowball Results ===")
-            logger.info("Total papers: %d", graph.paper_count)
+            logger.info("Total nodes: %d", graph.node_count)
             logger.info("Total edges: %d", graph.edge_count)
             logger.info("Runtime: %.2f s", elapsed)
             logger.info("========================")
@@ -369,7 +369,7 @@ class SnowballRunner:
             paper, pool, show_progress=show_progress
         ):
             is_new = not graph.contains(candidate)
-            canonical = graph.add_paper(candidate, discovered_from=source)
+            canonical = graph.add_node(candidate, discovered_from=source)
             if is_ref:
                 graph.add_edge(source, canonical)
             else:

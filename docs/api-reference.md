@@ -452,21 +452,21 @@ CitationGraph(
 
 | Property | Type | Description |
 |---|---|---|
-| `papers` | `list[Paper]` | All paper nodes in the graph. |
+| `nodes` | `list[Paper]` | All paper nodes in the graph. |
 | `edges` | `list[CitationEdge]` | All directed citation edges. Each edge has a `source` (citing paper) and `target` (cited paper). |
-| `paper_count` | `int` | Number of unique papers. |
+| `node_count` | `int` | Number of unique nodes. |
 | `edge_count` | `int` | Number of citation edges. |
 
 #### Methods
 
 | Method | Returns | Description |
 |---|---|---|
-| `contains(paper: Paper)` | `bool` | Check if a paper exists in the graph. |
-| `add_paper(paper: Paper, discovered_from: Paper)` | `Paper` | Add a paper (or merge if it already exists). |
+| `contains(paper: Paper)` | `bool` | Check if a node exists in the graph. |
+| `add_node(paper: Paper, discovered_from: Paper)` | `Paper` | Add a node (or merge if it already exists). |
 | `add_edge(source: Paper, target: Paper)` | `None` | Record a citation edge (source cites target). |
 | `get_references(paper: Paper)` | `list[Paper]` | Get papers cited by the given paper. |
 | `get_cited_by(paper: Paper)` | `list[Paper]` | Get papers that cite the given paper. |
-| `get_paper_depth(paper: Paper)` | `int \| None` | Get the traversal depth where a paper was discovered. |
+| `get_node_depth(paper: Paper)` | `int \| None` | Get the traversal depth where a node was discovered. |
 | `to_dict()` | `dict[str, Any]` | Serialize to dictionary (includes metadata, nodes, and edges). |
 | `from_dict(data: dict)` | `CitationGraph` | *Class method.* Create a `CitationGraph` from a dictionary. |
 

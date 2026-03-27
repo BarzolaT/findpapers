@@ -43,7 +43,7 @@ def _extract_papers(data: Persistable) -> list[Paper]:
     if isinstance(data, SearchResult):
         return data.papers
     if isinstance(data, CitationGraph):
-        return data.papers
+        return data.nodes
     raise PersistenceError(
         f"Expected SearchResult, CitationGraph, or list[Paper], got {type(data).__name__}"
     )

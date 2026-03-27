@@ -184,7 +184,7 @@ class TestSnowballRunnerRun:
 
         graph = runner.run()
 
-        assert graph.paper_count == 2
+        assert graph.node_count == 2
         assert graph.edge_count == 1
 
     def test_backward_snowball_depth_1(self, make_paper) -> None:
@@ -205,7 +205,7 @@ class TestSnowballRunnerRun:
 
         graph = runner.run()
 
-        assert graph.paper_count == 3  # seed + 2 refs
+        assert graph.node_count == 3  # seed + 2 refs
         assert graph.edge_count == 2  # seed -> ref1, seed -> ref2
         refs = graph.get_references(seed)
         assert len(refs) == 2
@@ -228,7 +228,7 @@ class TestSnowballRunnerRun:
 
         graph = runner.run()
 
-        assert graph.paper_count == 3  # seed + 2 citing
+        assert graph.node_count == 3  # seed + 2 citing
         assert graph.edge_count == 2
         cited_by = graph.get_cited_by(seed)
         assert len(cited_by) == 2
@@ -252,7 +252,7 @@ class TestSnowballRunnerRun:
 
         graph = runner.run()
 
-        assert graph.paper_count == 3
+        assert graph.node_count == 3
         assert graph.edge_count == 2
 
     def test_depth_2_expands_second_level(self, make_paper) -> None:
@@ -276,11 +276,11 @@ class TestSnowballRunnerRun:
 
         graph = runner.run()
 
-        assert graph.paper_count == 3  # seed + l1 + l2
+        assert graph.node_count == 3  # seed + l1 + l2
         assert graph.edge_count == 2  # seed->l1, l1->l2
-        assert graph.get_paper_depth(seed) == 0
-        assert graph.get_paper_depth(level1) == 1
-        assert graph.get_paper_depth(level2) == 2
+        assert graph.get_node_depth(seed) == 0
+        assert graph.get_node_depth(level1) == 1
+        assert graph.get_node_depth(level2) == 2
 
     def test_deduplication_across_connectors(self, make_paper) -> None:
         """Same paper found by different connectors is not duplicated."""
@@ -300,7 +300,7 @@ class TestSnowballRunnerRun:
 
         graph = runner.run()
 
-        assert graph.paper_count == 2  # seed + ref (deduplicated)
+        assert graph.node_count == 2  # seed + ref (deduplicated)
         assert graph.edge_count == 1  # one edge seed -> ref
 
     def test_cycle_detection(self, make_paper) -> None:
@@ -325,7 +325,7 @@ class TestSnowballRunnerRun:
         graph = runner.run()
 
         # Only 2 papers; the seed is not re-added.
-        assert graph.paper_count == 2
+        assert graph.node_count == 2
         # seed -> ref AND ref -> seed (but ref -> seed is only added
         # at depth 2 when ref is expanded).
         assert graph.edge_count == 2
@@ -411,7 +411,7 @@ class TestSnowballRunnerRun:
         # Should not raise.
         graph = runner.run()
 
-        assert graph.paper_count == 1  # only the seed
+        assert graph.node_count == 1  # only the seed
         assert graph.edge_count == 0
 
     def test_multiple_seeds(self, make_paper) -> None:
@@ -436,7 +436,7 @@ class TestSnowballRunnerRun:
 
         graph = runner.run()
 
-        assert graph.paper_count == 4
+        assert graph.node_count == 4
         assert graph.edge_count == 2
 
     def test_parallel_connectors(self, make_paper) -> None:
@@ -459,7 +459,7 @@ class TestSnowballRunnerRun:
         graph = runner.run()
 
         # Both connectors should have been queried.
-        assert graph.paper_count == 3  # seed + rc1 + rc2
+        assert graph.node_count == 3  # seed + rc1 + rc2
         assert graph.edge_count == 2
 
     def test_top_n_per_level_limits_next_frontier(self, make_paper) -> None:
@@ -584,7 +584,7 @@ class TestSnowballRunnerMetrics:
 
         graph = runner.run()
 
-        assert graph.paper_count == 1
+        assert graph.node_count == 1
         assert graph.edge_count == 0
 
     def test_show_progress_false_disables_progress_bar(self, make_paper) -> None:
@@ -658,11 +658,11 @@ class TestCollectCandidates:
         runner._connectors = [connector]
 
         graph = CitationGraph(seed_papers=[seed], max_depth=1, direction="backward")
-        paper_count_before = graph.paper_count
+        node_count_before = graph.node_count
 
         runner._collect_candidates(seed)
 
-        assert graph.paper_count == paper_count_before
+        assert graph.node_count == node_count_before
 
 
 class TestSnowballRunnerVerbose:
@@ -678,7 +678,7 @@ class TestSnowballRunnerVerbose:
 
         graph = runner.run(verbose=True, show_progress=False)
 
-        assert graph.paper_count == 2
+        assert graph.node_count == 2
 
     def test_verbose_multi_level(self, make_paper) -> None:
         """verbose=True logs at each depth level."""
@@ -693,7 +693,7 @@ class TestSnowballRunnerVerbose:
 
         graph = runner.run(verbose=True, show_progress=False)
 
-        assert graph.paper_count == 3
+        assert graph.node_count == 3
 
 
 class TestSnowballRunnerParallelErrors:
@@ -785,7 +785,7 @@ class TestSnowballRunnerParallelErrors:
         graph = runner.run(show_progress=False)
 
         # The good connector's result should still be present.
-        assert graph.paper_count == 2  # seed + ref
+        assert graph.node_count == 2  # seed + ref
         assert graph.edge_count == 1
 
     def test_parallel_future_exception_is_caught(self, make_paper) -> None:
@@ -821,7 +821,7 @@ class TestSnowballRunnerParallelErrors:
             graph = runner.run(show_progress=False)
 
         # The good connector result survives; the bad one is logged & skipped.
-        assert graph.paper_count == 2  # seed + ref
+        assert graph.node_count == 2  # seed + ref
         assert graph.edge_count == 1
 
 
@@ -842,5 +842,5 @@ class TestSnowballRunnerEmptyFrontier:
 
         graph = runner.run(show_progress=False)
 
-        assert graph.paper_count == 1  # only the seed
+        assert graph.node_count == 1  # only the seed
         assert graph.edge_count == 0

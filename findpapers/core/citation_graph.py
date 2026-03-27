@@ -100,9 +100,9 @@ class CitationGraph:
         self.seed_papers: list[Paper] = list(seed_papers)
         self.max_depth = max_depth
         self.direction = direction
-        # All papers in the graph, keyed by a unique identifier (DOI preferred,
+        # All nodes in the graph, keyed by a unique identifier (DOI preferred,
         # falling back to title).
-        self._papers: dict[str, Paper] = {}
+        self._nodes: dict[str, Paper] = {}
         self._edges: list[CitationEdge] = []
         # Set of (source_key, target_key) tuples for O(1) duplicate edge detection.
         self._edge_keys: set[tuple[str, str]] = set()
@@ -111,30 +111,30 @@ class CitationGraph:
         # _backward_adj: target_key → list of source Papers (cited-by)
         self._forward_adj: dict[str, list[Paper]] = {}
         self._backward_adj: dict[str, list[Paper]] = {}
-        # Track the depth at which each paper was first discovered.
-        self._paper_depths: dict[str, int] = {}
+        # Track the depth at which each node was first discovered.
+        self._node_depths: dict[str, int] = {}
 
-        # Register seed papers at depth 0.
+        # Register seed nodes at depth 0.
         for paper in self.seed_papers:
             key = self._paper_key(paper)
             if key:
-                self._papers[key] = paper
-                self._paper_depths[key] = 0
+                self._nodes[key] = paper
+                self._node_depths[key] = 0
 
     # ------------------------------------------------------------------
     # Public properties
     # ------------------------------------------------------------------
 
     @property
-    def papers(self) -> list[Paper]:
-        """Return all papers in the graph.
+    def nodes(self) -> list[Paper]:
+        """Return all nodes in the graph.
 
         Returns
         -------
         list[Paper]
             All paper nodes.
         """
-        return list(self._papers.values())
+        return list(self._nodes.values())
 
     @property
     def edges(self) -> list[CitationEdge]:
@@ -187,36 +187,36 @@ class CitationGraph:
             ``True`` if the paper (by DOI or title) is already in the graph.
         """
         key = self._paper_key(paper)
-        return key is not None and key in self._papers
+        return key is not None and key in self._nodes
 
-    def add_paper(self, paper: Paper, discovered_from: Paper) -> Paper:
-        """Add a paper to the graph (or merge with an existing entry).
+    def add_node(self, paper: Paper, discovered_from: Paper) -> Paper:
+        """Add a node to the graph (or merge with an existing entry).
 
-        The paper's depth is automatically computed as
-        ``get_paper_depth(discovered_from) + 1``.
+        The node's depth is automatically computed as
+        ``get_node_depth(discovered_from) + 1``.
 
-        If the paper already exists it is merged and the existing instance
-        is returned.  Otherwise the new paper is stored and returned.
+        If the node already exists it is merged and the existing instance
+        is returned.  Otherwise the new node is stored and returned.
 
         Parameters
         ----------
         paper : Paper
-            Paper to add.
+            Paper to add as a node.
         discovered_from : Paper
-            The parent paper from which *paper* was discovered.  Must
+            The parent node from which *paper* was discovered.  Must
             already be in the graph so that its depth can be resolved.
 
         Returns
         -------
         Paper
-            The canonical paper instance in the graph.
+            The canonical node instance in the graph.
 
         Raises
         ------
         InvalidParameterError
             If *discovered_from* is not in the graph.
         """
-        parent_depth = self.get_paper_depth(discovered_from)
+        parent_depth = self.get_node_depth(discovered_from)
         if parent_depth is None:
             raise InvalidParameterError(
                 "discovered_from paper is not in the graph; add it first or pass it as a seed."
@@ -227,22 +227,22 @@ class CitationGraph:
         if key is None:
             return paper
 
-        if key in self._papers:
-            self._papers[key].merge(paper)
+        if key in self._nodes:
+            self._nodes[key].merge(paper)
             # Keep the shallowest depth.
-            if depth < self._paper_depths.get(key, depth + 1):
-                self._paper_depths[key] = depth
-            return self._papers[key]
+            if depth < self._node_depths.get(key, depth + 1):
+                self._node_depths[key] = depth
+            return self._nodes[key]
 
-        self._papers[key] = paper
-        self._paper_depths[key] = depth
+        self._nodes[key] = paper
+        self._node_depths[key] = depth
         return paper
 
     def add_edge(self, source: Paper, target: Paper) -> None:
         """Record a citation edge (``source`` cites ``target``).
 
         Both papers must already be present in the graph (via
-        :meth:`add_paper`).  Duplicate edges are silently ignored.
+        :meth:`add_node`).  Duplicate edges are silently ignored.
 
         Parameters
         ----------
@@ -257,8 +257,8 @@ class CitationGraph:
         if source_key is None or target_key is None:
             return
 
-        canonical_source = self._papers.get(source_key, source)
-        canonical_target = self._papers.get(target_key, target)
+        canonical_source = self._nodes.get(source_key, source)
+        canonical_target = self._nodes.get(target_key, target)
 
         # Prevent duplicate edges (O(1) lookup).
         edge_key = (source_key, target_key)
@@ -312,10 +312,10 @@ class CitationGraph:
             return []
         return list(self._backward_adj.get(key, []))
 
-    def get_paper_depth(self, paper: Paper) -> int | None:
-        """Return the traversal depth at which a paper was first discovered.
+    def get_node_depth(self, paper: Paper) -> int | None:
+        """Return the traversal depth at which a node was first discovered.
 
-        Seed papers have depth 0.
+        Seed nodes have depth 0.
 
         Parameters
         ----------
@@ -325,12 +325,12 @@ class CitationGraph:
         Returns
         -------
         int | None
-            Depth, or ``None`` if the paper is not in the graph.
+            Depth, or ``None`` if the node is not in the graph.
         """
         key = self._paper_key(paper)
         if key is None:
             return None
-        return self._paper_depths.get(key)
+        return self._node_depths.get(key)
 
     # ------------------------------------------------------------------
     # Serialization
@@ -349,19 +349,19 @@ class CitationGraph:
                 "seed_papers": [{"doi": p.doi, "title": p.title} for p in self.seed_papers],
                 "max_depth": self.max_depth,
                 "direction": self.direction,
-                "total_papers": len(self._papers),
+                "total_nodes": len(self._nodes),
                 "total_edges": len(self._edges),
                 "version": package_version(),
             },
             "nodes": [
                 {
                     **paper.to_dict(),
-                    "snowball_depth": self._paper_depths.get(
+                    "snowball_depth": self._node_depths.get(
                         self._paper_key(paper),  # type: ignore[arg-type]
                         -1,
                     ),
                 }
-                for paper in self._papers.values()
+                for paper in self._nodes.values()
             ],
             "edges": [edge.to_dict() for edge in self._edges],
         }
@@ -388,23 +388,23 @@ class CitationGraph:
         direction = metadata.get("direction", "both")
         max_depth = metadata.get("max_depth", metadata.get("depth", 1))
 
-        # Rebuild papers keyed by DOI / title.
-        papers: dict[str, Paper] = {}
-        paper_depths: dict[str, int] = {}
+        # Rebuild nodes keyed by DOI / title.
+        nodes: dict[str, Paper] = {}
+        node_depths: dict[str, int] = {}
         for node in data.get("nodes", []):
             paper = Paper.from_dict(node)
             key = (paper.doi or "").strip().lower() or (paper.title or "").strip().lower()
             if not key:
                 continue
-            papers[key] = paper
-            paper_depths[key] = node.get("snowball_depth", -1)
+            nodes[key] = paper
+            node_depths[key] = node.get("snowball_depth", -1)
 
         # Identify seeds (depth == 0).
-        seed_papers = [p for k, p in papers.items() if paper_depths.get(k) == 0]
+        seed_papers = [p for k, p in nodes.items() if node_depths.get(k) == 0]
 
         graph = cls(seed_papers=[], max_depth=max_depth, direction=direction)
-        graph._papers = papers
-        graph._paper_depths = paper_depths
+        graph._nodes = nodes
+        graph._node_depths = node_depths
         graph.seed_papers = seed_papers
 
         # Rebuild edges.
@@ -416,25 +416,25 @@ class CitationGraph:
 
             src_key = src_doi or src_title
             tgt_key = tgt_doi or tgt_title
-            if src_key in papers and tgt_key in papers:
-                graph._edges.append(CitationEdge(source=papers[src_key], target=papers[tgt_key]))
+            if src_key in nodes and tgt_key in nodes:
+                graph._edges.append(CitationEdge(source=nodes[src_key], target=nodes[tgt_key]))
                 graph._edge_keys.add((src_key, tgt_key))
                 # Rebuild adjacency dicts.
-                graph._forward_adj.setdefault(src_key, []).append(papers[tgt_key])
-                graph._backward_adj.setdefault(tgt_key, []).append(papers[src_key])
+                graph._forward_adj.setdefault(src_key, []).append(nodes[tgt_key])
+                graph._backward_adj.setdefault(tgt_key, []).append(nodes[src_key])
 
         return graph
 
     @property
-    def paper_count(self) -> int:
-        """Return the number of unique papers in the graph.
+    def node_count(self) -> int:
+        """Return the number of unique nodes in the graph.
 
         Returns
         -------
         int
             Number of paper nodes.
         """
-        return len(self._papers)
+        return len(self._nodes)
 
     @property
     def edge_count(self) -> int:

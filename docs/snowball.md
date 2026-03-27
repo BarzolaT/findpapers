@@ -14,7 +14,7 @@ seed = engine.get("10.1038/nature12373")
 
 graph = engine.snowball(seed, max_depth=1, direction="both")
 
-print(f"{len(graph.papers)} papers, {len(graph.edges)} edges")
+print(f"{len(graph.nodes)} nodes, {len(graph.edges)} edges")
 ```
 
 ## Parameters
@@ -50,7 +50,7 @@ Returns a `CitationGraph` object containing:
 | `seed_papers` | `list[Paper]` | Starting papers |
 | `max_depth` | `int` | Maximum traversal depth used |
 | `direction` | `str` | Direction used (`"both"`, `"backward"`, or `"forward"`) |
-| `papers` | `list[Paper]` | All papers in the graph (property) |
+| `nodes` | `list[Paper]` | All paper nodes in the graph (property) |
 | `edges` | `list[CitationEdge]` | Directed edges where each edge means "source cites target" (property) |
 
 Each `CitationEdge` has a `source` (the citing paper) and a `target` (the cited paper).
@@ -137,7 +137,7 @@ result = engine.search("[attention mechanism] AND [transformer]")
 # Snowball from the top 5 results
 graph = engine.snowball(result.papers[:5], max_depth=1, direction="both")
 
-print(f"Found {len(graph.papers)} papers in the citation network")
+print(f"Found {len(graph.nodes)} papers in the citation network")
 
 # Save the graph
 findpapers.save_to_json(graph, "citation_graph.json")

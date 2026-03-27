@@ -752,7 +752,7 @@ class TestLoadFromJson:
 
         loaded = findpapers.load_from_json(path)
         assert isinstance(loaded, CitationGraph)
-        assert loaded.paper_count == 1
+        assert loaded.node_count == 1
 
 
 class TestSaveToCsv:

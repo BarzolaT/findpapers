@@ -112,7 +112,7 @@ graph = engine.snowball(
     direction="both",
 )
 
-print(f"Graph has {len(graph.papers)} papers and {len(graph.edges)} citation edges")
+print(f"Graph has {len(graph.nodes)} papers and {len(graph.edges)} citation edges")
 
 # Save the citation graph
 findpapers.save_to_json(graph, "citation_graph.json")

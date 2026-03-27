@@ -124,7 +124,7 @@ def sample_graph(full_paper: Paper, minimal_paper: Paper) -> CitationGraph:
     full_paper.doi = "10.1000/full"
     minimal_paper.doi = "10.1000/minimal"
     graph = CitationGraph(seed_papers=[full_paper], max_depth=1, direction="backward")
-    graph.add_paper(minimal_paper, discovered_from=full_paper)
+    graph.add_node(minimal_paper, discovered_from=full_paper)
     graph.add_edge(full_paper, minimal_paper)
     return graph
 
@@ -1184,7 +1184,7 @@ class TestLoadFromJson:
             loaded = load_from_json(path)
 
         assert isinstance(loaded, CitationGraph)
-        assert loaded.paper_count == 2
+        assert loaded.node_count == 2
         assert loaded.edge_count == 1
 
     def test_round_trip_paper_list(self, full_paper: Paper, minimal_paper: Paper) -> None:

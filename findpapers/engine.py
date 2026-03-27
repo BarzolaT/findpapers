@@ -657,8 +657,8 @@ class Engine:
         >>> engine = Engine()
         >>> seed = engine.get("10.1038/nature12373")
         >>> graph = engine.snowball(seed, max_depth=1)
-        >>> print(f"{graph.paper_count} papers, {graph.edge_count} edges")
-        42 papers, 65 edges
+        >>> print(f"{graph.node_count} nodes, {graph.edge_count} edges")
+        42 nodes, 65 edges
 
         Save the graph to JSON:
 
