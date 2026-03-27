@@ -146,9 +146,9 @@ engine.get(
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 
 **Routing:**
-- `doi.org` / `dx.doi.org` URLs and bare DOIs → multi-database API lookup via `DOILookupRunner`.
-- Landing-page URLs from arXiv, PubMed, IEEE, OpenAlex, or Semantic Scholar → fetched directly via that database's API.
-- Any other `http(s)://` URL → HTML metadata extraction via `WebScrapingConnector`.
+- All identifier types (bare DOI, `doi.org` URL, landing-page URL) are handled by `GetRunner`.
+- Landing-page URLs run web scraping first (delegating to the matching database API when recognised), then enrich via DOI-based connectors if a DOI is found.
+- Bare DOIs and `doi.org` URLs go directly to the multi-database DOI lookup pipeline.
 
 **Returns:** `Paper`, or `None` if the paper cannot be found or the page yields no metadata.
 
@@ -587,25 +587,27 @@ EnrichmentRunner(
 |---|---|---|
 | `run(verbose=False, show_progress=True)` | `dict[str, int \| float]` | Execute enrichment and return metrics. |
 
-### DOILookupRunner
+### GetRunner
 
 ```python
-from findpapers import DOILookupRunner
+from findpapers import GetRunner
 ```
 
 ```python
-DOILookupRunner(
-    doi: str,
+GetRunner(
+    identifier: str,
     email: str | None = None,
     timeout: float | None = 10.0,
+    proxy: str | None = None,
+    ssl_verify: bool = True,
 )
 ```
 
 | Method | Returns | Description |
 |---|---|---|
-| `run(verbose=False)` | `Paper \| None` | Fetch the paper by DOI, or return `None` if not found. |
+| `run(verbose=False)` | `Paper \| None` | Fetch the paper by identifier (DOI or URL), or return `None` if not found. |
 
-**Raises:** `InvalidParameterError` if DOI is empty or blank.
+**Raises:** `InvalidParameterError` if the identifier is a bare DOI that is empty or blank.
 
 ### SnowballRunner
 

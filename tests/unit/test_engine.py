@@ -370,27 +370,26 @@ class TestEngineGet:
     """Tests for Engine.get()."""
 
     def test_fetch_forwards_timeout(self):
-        """get() forwards per-call timeout to DOILookupRunner."""
+        """get() forwards per-call timeout to GetRunner."""
         engine = Engine()
         fake_paper = MagicMock(spec=Paper)
-        with patch("findpapers.engine.DOILookupRunner") as mock_cls:
+        with patch("findpapers.engine.GetRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = fake_paper
             mock_cls.return_value = mock_runner
 
             result = engine.get("10.1234/test", timeout=30.0, verbose=True)
 
-        # Verify the DOI and timeout are forwarded correctly.
         _, call_kwargs = mock_cls.call_args
-        assert call_kwargs["doi"] == "10.1234/test"
+        assert call_kwargs["identifier"] == "10.1234/test"
         assert call_kwargs["timeout"] == 30.0
         mock_runner.run.assert_called_once_with(verbose=True)
         assert result is fake_paper
 
     def test_fetch_returns_none_when_not_found(self):
-        """get() returns None when DOI is not found."""
+        """get() returns None when the identifier cannot be resolved."""
         engine = Engine()
-        with patch("findpapers.engine.DOILookupRunner") as mock_cls:
+        with patch("findpapers.engine.GetRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = None
             mock_cls.return_value = mock_runner
@@ -402,7 +401,7 @@ class TestEngineGet:
     def test_fetch_default_per_call_params(self):
         """get() verbose defaults to False, timeout to 10.0."""
         engine = Engine()
-        with patch("findpapers.engine.DOILookupRunner") as mock_cls:
+        with patch("findpapers.engine.GetRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = None
             mock_cls.return_value = mock_runner
@@ -413,14 +412,11 @@ class TestEngineGet:
         assert kwargs["timeout"] == 10.0
         mock_runner.run.assert_called_once_with(verbose=False)
 
-    def test_get_doi_org_url_uses_doi_lookup_runner(self):
-        """get() routes doi.org URLs to DOILookupRunner (not WebScrapingConnector)."""
+    def test_get_forwards_doi_org_url(self):
+        """get() passes doi.org URLs to GetRunner as the identifier."""
         engine = Engine()
         fake_paper = MagicMock(spec=Paper)
-        with (
-            patch("findpapers.engine.DOILookupRunner") as mock_cls,
-            patch("findpapers.engine.WebScrapingConnector") as mock_scraper_cls,
-        ):
+        with patch("findpapers.engine.GetRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = fake_paper
             mock_cls.return_value = mock_runner
@@ -428,71 +424,35 @@ class TestEngineGet:
             result = engine.get("https://doi.org/10.1038/nature12373")
 
         _, kwargs = mock_cls.call_args
-        assert kwargs["doi"] == "https://doi.org/10.1038/nature12373"
-        mock_scraper_cls.assert_not_called()
+        assert kwargs["identifier"] == "https://doi.org/10.1038/nature12373"
         assert result is fake_paper
 
-    def test_get_dx_doi_org_url_uses_doi_lookup_runner(self):
-        """get() routes dx.doi.org URLs to DOILookupRunner."""
+    def test_get_forwards_landing_page_url(self):
+        """get() passes landing-page URLs to GetRunner as the identifier."""
         engine = Engine()
-        with (
-            patch("findpapers.engine.DOILookupRunner") as mock_cls,
-            patch("findpapers.engine.WebScrapingConnector") as mock_scraper_cls,
-        ):
+        fake_paper = MagicMock(spec=Paper)
+        with patch("findpapers.engine.GetRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = fake_paper
+            mock_cls.return_value = mock_runner
+
+            result = engine.get("https://arxiv.org/abs/1706.03762")
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs["identifier"] == "https://arxiv.org/abs/1706.03762"
+        assert result is fake_paper
+
+    def test_get_forwards_proxy_and_ssl(self):
+        """get() passes proxy and ssl_verify from the Engine to GetRunner."""
+        engine = Engine(proxy="http://proxy:8080", ssl_verify=False)
+        with patch("findpapers.engine.GetRunner") as mock_cls:
             mock_runner = MagicMock()
             mock_runner.run.return_value = None
             mock_cls.return_value = mock_runner
 
-            engine.get("http://dx.doi.org/10.1038/nature12373")
-
-        mock_cls.assert_called_once()
-        mock_scraper_cls.assert_not_called()
-
-    def test_get_landing_page_url_uses_web_scraping_connector(self):
-        """get() routes non-DOI URLs to WebScrapingConnector."""
-        engine = Engine()
-        fake_paper = MagicMock(spec=Paper)
-        with (
-            patch("findpapers.engine.WebScrapingConnector") as mock_scraper_cls,
-            patch("findpapers.engine.DOILookupRunner") as mock_doi_cls,
-        ):
-            mock_scraper = MagicMock()
-            mock_scraper.fetch_paper_from_url.return_value = fake_paper
-            mock_scraper_cls.return_value = mock_scraper
-
-            result = engine.get("https://arxiv.org/abs/1706.03762")
-
-        mock_scraper.fetch_paper_from_url.assert_called_once_with(
-            "https://arxiv.org/abs/1706.03762"
-        )
-        mock_doi_cls.assert_not_called()
-        assert result is fake_paper
-
-    def test_get_landing_page_url_passes_url_lookup_connectors(self):
-        """get() passes url_lookup_connectors to WebScrapingConnector for landing-page URLs."""
-        engine = Engine()
-        with patch("findpapers.engine.WebScrapingConnector") as mock_scraper_cls:
-            mock_scraper = MagicMock()
-            mock_scraper.fetch_paper_from_url.return_value = None
-            mock_scraper_cls.return_value = mock_scraper
-
             engine.get("https://arxiv.org/abs/1706.03762")
 
-        _, kwargs = mock_scraper_cls.call_args
-        assert "url_lookup_connectors" in kwargs
-        assert len(kwargs["url_lookup_connectors"]) >= 4  # at least arxiv, pubmed, openalex, s2
-
-    def test_get_landing_page_url_forwards_proxy_and_ssl(self):
-        """get() passes proxy and ssl_verify to WebScrapingConnector."""
-        engine = Engine(proxy="http://proxy:8080", ssl_verify=False)
-        with patch("findpapers.engine.WebScrapingConnector") as mock_scraper_cls:
-            mock_scraper = MagicMock()
-            mock_scraper.fetch_paper_from_url.return_value = None
-            mock_scraper_cls.return_value = mock_scraper
-
-            engine.get("https://arxiv.org/abs/1706.03762")
-
-        _, kwargs = mock_scraper_cls.call_args
+        _, kwargs = mock_cls.call_args
         assert kwargs["proxy"] == "http://proxy:8080"
         assert kwargs["ssl_verify"] is False
 

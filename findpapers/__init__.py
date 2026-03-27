@@ -17,9 +17,9 @@ from findpapers.exceptions import (
     QueryValidationError,
     UnsupportedQueryError,
 )
-from findpapers.runners.doi_lookup_runner import DOILookupRunner
 from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
+from findpapers.runners.get_runner import GetRunner
 from findpapers.runners.search_runner import SearchRunner
 from findpapers.runners.snowball_runner import SnowballRunner
 from findpapers.utils.persistence import (
@@ -36,12 +36,12 @@ __all__ = [
     "CitationGraph",
     "ConnectorError",
     "ConnectorType",
-    "DOILookupRunner",
     "DownloadRunner",
     "Engine",
     "EnrichmentRunner",
     "FilterCode",
     "FindpapersError",
+    "GetRunner",
     "InvalidParameterError",
     "MissingApiKeyError",
     "ModelValidationError",

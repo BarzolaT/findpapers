@@ -19,7 +19,7 @@ class DOILookupConnectorBase(ConnectorBase):
     """Abstract base class for connectors that can resolve a DOI to a Paper.
 
     Any connector that implements :meth:`fetch_paper_by_doi` should inherit
-    from this class so that :class:`~findpapers.runners.doi_lookup_runner.DOILookupRunner`
+    from this class so that :class:`~findpapers.runners.get_runner.GetRunner`
     can accept it via a well-typed interface.
     """
 

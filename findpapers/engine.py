@@ -22,28 +22,16 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import os
-import re
 from typing import Literal
 
-from findpapers.connectors.arxiv import ArxivConnector
-from findpapers.connectors.ieee import IEEEConnector
-from findpapers.connectors.openalex import OpenAlexConnector
-from findpapers.connectors.pubmed import PubmedConnector
-from findpapers.connectors.semantic_scholar import SemanticScholarConnector
-from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
-from findpapers.connectors.web_scraping import WebScrapingConnector
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import SearchResult
-from findpapers.runners.doi_lookup_runner import DOILookupRunner
 from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.enrichment_runner import EnrichmentRunner
+from findpapers.runners.get_runner import GetRunner
 from findpapers.runners.search_runner import SearchRunner
 from findpapers.runners.snowball_runner import SnowballRunner
-
-# Matches doi.org and dx.doi.org URLs so they can be routed to DOILookupRunner
-# rather than WebScrapingConnector.
-_DOI_ORG_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/", re.IGNORECASE)
 
 
 class Engine:
@@ -506,10 +494,9 @@ class Engine:
 
         See Also
         --------
-        findpapers.runners.doi_lookup_runner.DOILookupRunner :
-            Lower-level class for DOI-based lookups.
-        findpapers.connectors.web_scraping.WebScrapingConnector :
-            Lower-level class for URL-based lookups.
+        findpapers.runners.get_runner.GetRunner :
+            Lower-level class that combines URL scraping and DOI-based
+            lookups into a single unified pipeline.
 
         Examples
         --------
@@ -531,25 +518,8 @@ class Engine:
 
         >>> paper = engine.get("https://www.nature.com/articles/s41586-021-03819-2")
         """
-        # Landing-page URLs (anything that starts with http(s):// and is NOT
-        # a doi.org redirect) are handled by WebScrapingConnector, which will
-        # prefer a structured API connector when the URL belongs to a known
-        # database, and fall back to HTML scraping otherwise.
-        is_landing_page_url = identifier.startswith(
-            ("http://", "https://")
-        ) and not _DOI_ORG_URL_RE.match(identifier)
-
-        if is_landing_page_url:
-            scraper = WebScrapingConnector(
-                proxy=self._proxy,
-                ssl_verify=self._ssl_verify,
-                url_lookup_connectors=self._build_url_lookup_connectors(),
-            )
-            return scraper.fetch_paper_from_url(identifier)
-
-        # Bare DOI or doi.org URL — DOILookupRunner handles prefix stripping.
-        runner = DOILookupRunner(
-            doi=identifier,
+        runner = GetRunner(
+            identifier=identifier,
             email=self._email,
             ieee_api_key=self._ieee_api_key,
             scopus_api_key=self._scopus_api_key,
@@ -557,30 +527,10 @@ class Engine:
             openalex_api_key=self._openalex_api_key,
             semantic_scholar_api_key=self._semantic_scholar_api_key,
             timeout=timeout,
+            proxy=self._proxy,
+            ssl_verify=self._ssl_verify,
         )
         return runner.run(verbose=verbose)
-
-    def _build_url_lookup_connectors(self) -> list[URLLookupConnectorBase]:
-        """Build URL-lookup connectors from the engine's stored API keys.
-
-        Returns
-        -------
-        list[URLLookupConnectorBase]
-            Connectors that can resolve a landing-page URL to a Paper via
-            the database's own API, avoiding HTML scraping.
-        """
-        connectors: list[URLLookupConnectorBase] = [
-            ArxivConnector(),
-            PubmedConnector(api_key=self._pubmed_api_key),
-            OpenAlexConnector(
-                api_key=self._openalex_api_key,
-                email=self._email,
-            ),
-            SemanticScholarConnector(api_key=self._semantic_scholar_api_key),
-        ]
-        if self._ieee_api_key:
-            connectors.append(IEEEConnector(api_key=self._ieee_api_key))
-        return connectors
 
     def snowball(
         self,
