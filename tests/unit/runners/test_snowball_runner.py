@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import datetime
 from collections.abc import Callable
 from unittest.mock import patch
 
 import pytest
 
 from findpapers.connectors.citation_base import CitationConnectorBase
-from findpapers.core.paper import Paper
+from findpapers.core.citation_graph import CitationGraph
+from findpapers.core.paper import Paper, PaperType
 from findpapers.exceptions import InvalidParameterError
 from findpapers.runners.snowball_runner import SnowballRunner
 
@@ -844,3 +846,187 @@ class TestSnowballRunnerEmptyFrontier:
 
         assert graph.node_count == 1  # only the seed
         assert graph.edge_count == 0
+
+
+class TestSnowballRunnerFilters:
+    """Tests for the since, until, and paper_types filters in SnowballRunner."""
+
+    def _run_with_refs(
+        self,
+        make_paper,
+        seed_doi: str,
+        refs: list[Paper],
+        **runner_kwargs,
+    ) -> CitationGraph:
+        """Helper: run SnowballRunner with a single seed and given references."""
+        seed = make_paper("Seed", doi=seed_doi)
+        connector = FakeCitationConnector(references={seed_doi: refs})
+        runner = SnowballRunner(
+            seed_papers=[seed], max_depth=1, direction="backward", **runner_kwargs
+        )
+        runner._connectors = [connector]
+        return runner.run(show_progress=False)
+
+    # ------------------------------------------------------------------
+    # paper_types filter
+    # ------------------------------------------------------------------
+
+    def test_no_paper_types_filter_returns_all(self, make_paper) -> None:
+        """Without a paper_types filter all discovered papers are added."""
+        ref1 = make_paper("Ref1", doi="10.1/r1", paper_type=PaperType.ARTICLE)
+        ref2 = make_paper("Ref2", doi="10.1/r2", paper_type=PaperType.INPROCEEDINGS)
+        graph = self._run_with_refs(make_paper, "10.1/seed", [ref1, ref2])
+        assert graph.node_count == 3  # seed + 2 refs
+
+    def test_paper_types_filter_keeps_matching(self, make_paper) -> None:
+        """Only papers matching the given paper_type strings are added."""
+        article = make_paper("Article", doi="10.1/a", paper_type=PaperType.ARTICLE)
+        inproc = make_paper("Proc", doi="10.1/p", paper_type=PaperType.INPROCEEDINGS)
+        graph = self._run_with_refs(
+            make_paper, "10.1/seed", [article, inproc], paper_types=["article"]
+        )
+        titles = {n.title for n in graph.nodes}
+        assert "Article" in titles
+        assert "Proc" not in titles
+
+    def test_paper_types_filter_excludes_none_type(self, make_paper) -> None:
+        """Papers with paper_type=None are excluded when a filter is active."""
+        typed = make_paper("Typed", doi="10.1/t", paper_type=PaperType.BOOK)
+        untyped = make_paper("Untyped", doi="10.1/u", paper_type=None)
+        graph = self._run_with_refs(make_paper, "10.1/seed", [typed, untyped], paper_types=["book"])
+        titles = {n.title for n in graph.nodes}
+        assert "Typed" in titles
+        assert "Untyped" not in titles
+
+    def test_paper_types_filter_multiple_types(self, make_paper) -> None:
+        """Multiple types in the list are all accepted."""
+        a = make_paper("A", doi="10.1/a", paper_type=PaperType.ARTICLE)
+        b = make_paper("B", doi="10.1/b", paper_type=PaperType.BOOK)
+        c = make_paper("C", doi="10.1/c", paper_type=PaperType.TECHREPORT)
+        graph = self._run_with_refs(
+            make_paper, "10.1/seed", [a, b, c], paper_types=["article", "book"]
+        )
+        titles = {n.title for n in graph.nodes}
+        assert "A" in titles
+        assert "B" in titles
+        assert "C" not in titles
+
+    def test_invalid_paper_type_raises(self, make_paper) -> None:
+        """An unrecognised paper_type string raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="Unknown paper_type"):
+            SnowballRunner(
+                seed_papers=[make_paper("S", doi="10.1/s")],
+                paper_types=["not_a_type"],
+            )
+
+    def test_paper_types_stored_as_enum(self, make_paper) -> None:
+        """Internally the runner stores parsed PaperType enums."""
+        runner = SnowballRunner(
+            seed_papers=[make_paper("S", doi="10.1/s")],
+            paper_types=["article", "book"],
+        )
+        assert runner._paper_types == [PaperType.ARTICLE, PaperType.BOOK]
+
+    def test_paper_types_none_stored_as_none(self, make_paper) -> None:
+        """When paper_types is None, the runner stores None (no filter)."""
+        runner = SnowballRunner(
+            seed_papers=[make_paper("S", doi="10.1/s")],
+            paper_types=None,
+        )
+        assert runner._paper_types is None
+
+    # ------------------------------------------------------------------
+    # since / until date filters
+    # ------------------------------------------------------------------
+
+    def test_since_filter_excludes_older_papers(self, make_paper) -> None:
+        """Papers published before `since` are not added to the graph."""
+        old = make_paper("Old", doi="10.1/old", publication_date=datetime.date(2020, 1, 1))
+        new = make_paper("New", doi="10.1/new", publication_date=datetime.date(2023, 6, 1))
+        graph = self._run_with_refs(
+            make_paper,
+            "10.1/seed",
+            [old, new],
+            since=datetime.date(2022, 1, 1),
+        )
+        titles = {n.title for n in graph.nodes}
+        assert "New" in titles
+        assert "Old" not in titles
+
+    def test_until_filter_excludes_newer_papers(self, make_paper) -> None:
+        """Papers published after `until` are not added to the graph."""
+        old = make_paper("Old", doi="10.1/old", publication_date=datetime.date(2019, 3, 1))
+        new = make_paper("New", doi="10.1/new", publication_date=datetime.date(2024, 1, 1))
+        graph = self._run_with_refs(
+            make_paper,
+            "10.1/seed",
+            [old, new],
+            until=datetime.date(2020, 12, 31),
+        )
+        titles = {n.title for n in graph.nodes}
+        assert "Old" in titles
+        assert "New" not in titles
+
+    def test_since_filter_excludes_papers_with_no_date(self, make_paper) -> None:
+        """Papers without a publication date are excluded when since is set."""
+        no_date = Paper(
+            title="NoDate",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            doi="10.1/nd",
+        )
+        graph = self._run_with_refs(
+            make_paper,
+            "10.1/seed",
+            [no_date],
+            since=datetime.date(2020, 1, 1),
+        )
+        titles = {n.title for n in graph.nodes}
+        assert "NoDate" not in titles
+
+    def test_until_filter_excludes_papers_with_no_date(self, make_paper) -> None:
+        """Papers without a publication date are excluded when until is set."""
+        no_date = Paper(
+            title="NoDate",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+            doi="10.1/nd",
+        )
+        graph = self._run_with_refs(
+            make_paper,
+            "10.1/seed",
+            [no_date],
+            until=datetime.date(2025, 1, 1),
+        )
+        titles = {n.title for n in graph.nodes}
+        assert "NoDate" not in titles
+
+    def test_since_and_until_combined(self, make_paper) -> None:
+        """Only papers within the [since, until] range are accepted."""
+        in_range = make_paper("InRange", doi="10.1/ir", publication_date=datetime.date(2021, 6, 1))
+        too_old = make_paper("TooOld", doi="10.1/to", publication_date=datetime.date(2019, 1, 1))
+        too_new = make_paper("TooNew", doi="10.1/tn", publication_date=datetime.date(2024, 1, 1))
+        graph = self._run_with_refs(
+            make_paper,
+            "10.1/seed",
+            [in_range, too_old, too_new],
+            since=datetime.date(2020, 1, 1),
+            until=datetime.date(2023, 12, 31),
+        )
+        titles = {n.title for n in graph.nodes}
+        assert "InRange" in titles
+        assert "TooOld" not in titles
+        assert "TooNew" not in titles
+
+    def test_no_filters_adds_all_papers(self, make_paper) -> None:
+        """Without any filters, papers with or without dates are all added."""
+        dated = make_paper("Dated", doi="10.1/d", publication_date=datetime.date(2021, 1, 1))
+        no_date = make_paper("NoDate", doi="10.1/nd", publication_date=None)
+        graph = self._run_with_refs(make_paper, "10.1/seed", [dated, no_date])
+        titles = {n.title for n in graph.nodes}
+        assert "Dated" in titles
+        assert "NoDate" in titles

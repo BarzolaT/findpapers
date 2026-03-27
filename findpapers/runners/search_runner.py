@@ -15,6 +15,7 @@ from findpapers.exceptions import InvalidParameterError, MissingApiKeyError, Uns
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
 from findpapers.query.validator import QueryValidator
+from findpapers.runners.base_runner import BaseRunner
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.parallel import execute_tasks
 from findpapers.utils.progress import make_progress_bar
@@ -49,18 +50,18 @@ def _is_preprint_doi(doi: str) -> bool:
     return any(lowered.startswith(prefix) for prefix in _PREPRINT_DOI_PREFIXES)
 
 
-class SearchRunner:
+class SearchRunner(BaseRunner):
     """Public API entry point for running academic paper searches.
 
     The runner orchestrates the full pipeline:
 
     1. Parse and validate the query string.
     2. Fetch papers from each configured database searcher.
-    3. Filter by publication type (when specified).
-    4. Deduplicate and merge results using a two-pass strategy: first by
+    3. Deduplicate and merge results using a two-pass strategy: first by
        DOI when available, then a second pass by normalised title+year to
        catch cross-database cases where the same paper carries different DOIs
        (e.g. arXiv preprint DOI vs. publisher DOI).
+    4. Filter by ``paper_types`` when specified.
 
     Parameters
     ----------
@@ -89,6 +90,17 @@ class SearchRunner:
         Number of parallel workers for running database searchers
         concurrently.  Defaults to ``1``, which runs all searchers
         sequentially.  Values greater than ``1`` enable parallel execution.
+    since : dt.date | None
+        Only return papers published on or after this date.
+    until : dt.date | None
+        Only return papers published on or before this date.
+    paper_types : list[str] | None
+        When set, only papers whose type is in this list are returned.
+        Allowed values: ``"article"``, ``"inproceedings"``, ``"inbook"``,
+        ``"incollection"``, ``"book"``, ``"phdthesis"``,
+        ``"mastersthesis"``, ``"techreport"``, ``"unpublished"``,
+        ``"misc"``.  Papers with an unknown type are excluded when this
+        filter is active.  ``None`` (default) disables the filter.
 
     Raises
     ------
@@ -120,17 +132,18 @@ class SearchRunner:
         num_workers: int = 1,
         since: dt.date | None = None,
         until: dt.date | None = None,
+        paper_types: list[str] | None = None,
     ) -> None:
         """Initialise search configuration without executing it."""
         self._results: list[Paper] = []
         self._metrics: dict[str, int | float] = {}
         self._search: SearchResult | None = None
 
+        super().__init__(since=since, until=until, paper_types=paper_types)
+
         self._query_string = query
         self._max_papers_per_database = max_papers_per_database
         self._num_workers = num_workers
-        self._since = since
-        self._until = until
 
         # Parse and validate the query upfront so errors surface early.
         validator = QueryValidator()
@@ -215,6 +228,20 @@ class SearchRunner:
                 len(self._results),
                 merged,
             )
+
+        # Apply post-fetch filters (paper type + exact date range).  Connectors
+        # that only support year-level date filtering may return papers outside
+        # the requested range; _matches_filters enforces precise boundaries.
+        if self._paper_types is not None or self._since is not None or self._until is not None:
+            before_filter = len(self._results)
+            self._results = [p for p in self._results if self._matches_filters(p)]
+            if verbose:
+                logger.info(
+                    "Post-fetch filter: %d -> %d papers (%d removed)",
+                    before_filter,
+                    len(self._results),
+                    before_filter - len(self._results),
+                )
 
         metrics["total_papers"] = len(self._results)
         metrics["runtime_in_seconds"] = perf_counter() - start

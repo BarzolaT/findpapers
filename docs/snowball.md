@@ -25,6 +25,9 @@ graph = engine.snowball(
     max_depth=1,                    # int - maximum traversal depth
     direction="both",               # "both" | "backward" | "forward"
     top_n_per_level=None,           # int | None - keep only top N papers per level
+    since=None,                     # datetime.date | None - exclude papers before this date
+    until=None,                     # datetime.date | None - exclude papers after this date
+    paper_types=None,               # list[str] | None - restrict to specific paper types
     num_workers=1,                  # int - number of parallel workers
     verbose=False,                  # bool - enable detailed logging
     show_progress=True,             # bool - show progress bars
@@ -37,6 +40,9 @@ graph = engine.snowball(
 | `max_depth` | `int` | `1` | Maximum number of snowball iterations |
 | `direction` | `"both" \| "backward" \| "forward"` | `"both"` | Direction of citation traversal |
 | `top_n_per_level` | `int \| None` | `None` | Keep only the N most-cited papers per level in the graph; the rest are discarded. Seed papers are always expanded. `None` means no limit |
+| `since` | `datetime.date \| None` | `None` | Only add discovered papers published on or after this date. Seed papers are never filtered |
+| `until` | `datetime.date \| None` | `None` | Only add discovered papers published on or before this date. Seed papers are never filtered |
+| `paper_types` | `list[str] \| None` | `None` | Only add discovered papers whose type is in this list. Accepted values: `"article"`, `"inproceedings"`, `"inbook"`, `"incollection"`, `"book"`, `"phdthesis"`, `"mastersthesis"`, `"techreport"`, `"unpublished"`, `"misc"`. Seed papers are never filtered. `None` disables the filter |
 | `num_workers` | `int` | `1` | Number of parallel workers used to query connectors |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
 | `show_progress` | `bool` | `True` | Display tqdm progress bars while papers are being expanded |
@@ -111,6 +117,56 @@ graph = engine.snowball(
 When `top_n_per_level` is `None` (the default) all discovered papers are added to the graph and expanded.
 
 > **Tip:** Papers with an unknown citation count (`citations=None`) are ranked below papers with a known count, so well-indexed papers are always preferred.
+
+## Date and Type Filtering
+
+Use `since`, `until`, and `paper_types` to narrow which *discovered* papers are added to the graph. Seed papers are **never** filtered.
+
+### Date range
+
+```python
+import datetime
+
+# Only papers published between 2018 and 2023
+graph = engine.snowball(
+    seed,
+    max_depth=2,
+    since=datetime.date(2018, 1, 1),
+    until=datetime.date(2023, 12, 31),
+)
+```
+
+Papers with an unknown publication date are excluded when either `since` or `until` is active.
+
+### Paper type
+
+```python
+# Only journal articles and conference papers
+graph = engine.snowball(
+    seed,
+    max_depth=2,
+    paper_types=["article", "inproceedings"],
+)
+```
+
+Accepted values: `"article"`, `"inproceedings"`, `"inbook"`, `"incollection"`, `"book"`, `"phdthesis"`, `"mastersthesis"`, `"techreport"`, `"unpublished"`, `"misc"`.
+
+Papers with an unknown type (`paper_type=None`) are excluded when this filter is active. An `InvalidParameterError` is raised if an unrecognised type string is provided.
+
+### Combining filters
+
+```python
+import datetime
+
+# Focused snowball: recent journal articles only
+graph = engine.snowball(
+    seed,
+    max_depth=2,
+    direction="backward",
+    since=datetime.date(2020, 1, 1),
+    paper_types=["article"],
+)
+```
 
 ## Data Sources
 

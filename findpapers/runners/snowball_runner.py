@@ -8,6 +8,7 @@ depth, producing a :class:`~findpapers.core.citation_graph.CitationGraph`.
 from __future__ import annotations
 
 import contextlib
+import datetime
 import logging
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,13 +22,14 @@ from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Database, Paper
 from findpapers.exceptions import InvalidParameterError
+from findpapers.runners.base_runner import BaseRunner
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.progress import make_progress_bar
 
 logger = logging.getLogger(__name__)
 
 
-class SnowballRunner:
+class SnowballRunner(BaseRunner):
     """Build a citation graph around seed papers via iterative snowballing.
 
     The runner traverses the citation network in a BFS fashion: at each
@@ -66,6 +68,23 @@ class SnowballRunner:
         Maximum number of connectors to query in parallel for each paper.
         Defaults to ``1`` (sequential).  The effective parallelism is
         capped at the number of available connectors.
+    since : datetime.date | None
+        Only include discovered papers published on or after this date.
+        Seed papers are never filtered.  ``None`` (default) disables
+        the lower-bound date filter.
+    until : datetime.date | None
+        Only include discovered papers published on or before this date.
+        Seed papers are never filtered.  ``None`` (default) disables
+        the upper-bound date filter.
+    paper_types : list[str] | None
+        When set, only discovered papers whose type is in this list are
+        added to the graph.  Allowed values: ``"article"``,
+        ``"inproceedings"``, ``"inbook"``, ``"incollection"``,
+        ``"book"``, ``"phdthesis"``, ``"mastersthesis"``,
+        ``"techreport"``, ``"unpublished"``, ``"misc"``.  Papers with
+        an unknown type are excluded when this filter is active.
+        Seed papers are never filtered.  ``None`` (default) disables
+        the filter.
     """
 
     def __init__(
@@ -79,6 +98,9 @@ class SnowballRunner:
         email: str | None = None,
         semantic_scholar_api_key: str | None = None,
         num_workers: int = 1,
+        since: datetime.date | None = None,
+        until: datetime.date | None = None,
+        paper_types: list[str] | None = None,
     ) -> None:
         """Initialise snowball configuration without executing it.
 
@@ -93,6 +115,8 @@ class SnowballRunner:
             raise InvalidParameterError(
                 f"top_n_per_level must be >= 1 when set, got {top_n_per_level}"
             )
+
+        super().__init__(since=since, until=until, paper_types=paper_types)
 
         if isinstance(seed_papers, Paper):
             seed_papers = [seed_papers]
@@ -224,6 +248,8 @@ class SnowballRunner:
                         for candidate, source, is_ref in all_raw:
                             key = CitationGraph._paper_key(candidate)
                             if key is None or graph.contains(candidate):
+                                continue
+                            if not self._matches_filters(candidate):
                                 continue
                             if key not in best:
                                 best[key] = candidate
@@ -368,6 +394,8 @@ class SnowballRunner:
         for candidate, source, is_ref in self._collect_candidates(
             paper, pool, show_progress=show_progress
         ):
+            if not self._matches_filters(candidate):
+                continue
             is_new = not graph.contains(candidate)
             canonical = graph.add_node(candidate, discovered_from=source)
             if is_ref:

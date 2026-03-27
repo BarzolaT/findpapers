@@ -30,6 +30,7 @@ result = engine.search(
     max_papers_per_database=None,   # int | None - limit results per database
     since=None,                     # datetime.date | None - start date filter
     until=None,                     # datetime.date | None - end date filter
+    paper_types=None,               # list[str] | None - restrict to specific paper types
     num_workers=1,                  # int - number of parallel workers
     verbose=False,                  # bool - enable detailed logging
     show_progress=True,             # bool - show progress bars
@@ -43,6 +44,7 @@ result = engine.search(
 | `max_papers_per_database` | `int \| None` | `None` | Cap on the number of papers retrieved from each database. `None` means no limit |
 | `since` | `datetime.date \| None` | `None` | Only return papers published on or after this date |
 | `until` | `datetime.date \| None` | `None` | Only return papers published on or before this date |
+| `paper_types` | `list[str] \| None` | `None` | Only return papers whose type is in this list. Accepted values: `"article"`, `"inproceedings"`, `"inbook"`, `"incollection"`, `"book"`, `"phdthesis"`, `"mastersthesis"`, `"techreport"`, `"unpublished"`, `"misc"`. `None` disables the filter |
 | `num_workers` | `int` | `1` | Number of parallel workers used to query databases concurrently |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
 | `show_progress` | `bool` | `True` | Display tqdm progress bars while papers are being fetched |
@@ -68,7 +70,7 @@ Returns a `SearchResult` object containing:
 | Exception | When |
 |-----------|------|
 | `QueryValidationError` | The query has syntax errors (unbalanced brackets, invalid filter codes, etc.) |
-| `InvalidParameterError` | An unknown database name is passed in `databases`, or `databases` is an empty list |
+| `InvalidParameterError` | An unknown database name is passed in `databases`, or `databases` is an empty list, or an unrecognised paper type string is passed in `paper_types` |
 
 ## Selecting Databases
 
@@ -112,6 +114,34 @@ result = engine.search(
 ```
 
 Both parameters are optional - you can use either one alone or combine them.
+
+## Paper Type Filtering
+
+Use `paper_types` to restrict results to specific BibTeX-aligned publication types:
+
+```python
+import datetime
+
+# Only journal articles
+result = engine.search("[deep learning]", paper_types=["article"])
+
+# Articles and conference papers
+result = engine.search(
+    "[transformer] AND [natural language processing]",
+    paper_types=["article", "inproceedings"],
+)
+
+# Combine with date range
+result = engine.search(
+    "[covid-19] AND [vaccine]",
+    since=datetime.date(2020, 1, 1),
+    paper_types=["article"],
+)
+```
+
+Accepted values: `"article"`, `"inproceedings"`, `"inbook"`, `"incollection"`, `"book"`, `"phdthesis"`, `"mastersthesis"`, `"techreport"`, `"unpublished"`, `"misc"`.
+
+Papers with an unknown type (`paper_type=None`) are excluded when this filter is active. An `InvalidParameterError` is raised if an unrecognised type string is provided.
 
 ## Parallel Execution
 
