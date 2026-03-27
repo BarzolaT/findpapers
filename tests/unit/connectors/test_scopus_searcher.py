@@ -10,8 +10,7 @@ import requests
 
 from findpapers.connectors.scopus import ScopusConnector
 from findpapers.core.author import Author
-from findpapers.core.paper import PaperType
-from findpapers.core.search_result import Database
+from findpapers.core.paper import Database, PaperType
 from findpapers.core.source import SourceType
 from findpapers.exceptions import MissingApiKeyError
 from findpapers.query.builders.scopus import ScopusQueryBuilder

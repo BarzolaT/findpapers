@@ -11,8 +11,7 @@ from findpapers.connectors.connector_base import ConnectorBase
 from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
 from findpapers.connectors.web_scraping import WebScrapingConnector
-from findpapers.core.paper import Paper
-from findpapers.core.search_result import Database
+from findpapers.core.paper import Database, Paper
 from findpapers.exceptions import InvalidParameterError
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.normalization import DOI_URL_PREFIXES

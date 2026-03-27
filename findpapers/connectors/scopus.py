@@ -13,9 +13,8 @@ import requests
 from findpapers.connectors.doi_lookup_base import DOILookupConnectorBase
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Database, Paper, PaperType
 from findpapers.core.query import Query
-from findpapers.core.search_result import Database
 from findpapers.core.source import Source, SourceType
 from findpapers.exceptions import MissingApiKeyError
 from findpapers.query.builder import QueryBuilder

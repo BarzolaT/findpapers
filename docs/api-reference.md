@@ -240,7 +240,7 @@ Paper(
 | `comments` | `str \| None` | Additional comments. |
 | `page_count` | `int \| None` | Total number of pages. |
 | `page_range` | `str \| None` | Page range (e.g., `"223-230"`). |
-| `databases` | `set[str]` | Databases where this paper was found. |
+| `databases` | `set[str]` | Databases where this paper was found. Values are `Database` enum strings (e.g. `"arxiv"`, `"pubmed"`). Populated by `search()`, `get()`, and `snowball()`. |
 | `paper_type` | `PaperType \| None` | BibTeX-aligned classification. |
 | `fields_of_study` | `set[str]` | Broad knowledge areas. |
 | `subjects` | `set[str]` | Disciplinary classifications. |
@@ -282,6 +282,28 @@ from findpapers import PaperType
 | `TECHREPORT` | `"techreport"` | Technical report. |
 | `UNPUBLISHED` | `"unpublished"` | Preprints and unpublished work. |
 | `MISC` | `"misc"` | Miscellaneous. |
+
+---
+
+### Database
+
+Enum of supported academic database identifiers. Values are the canonical string identifiers used in `Paper.databases`, `SearchResult.databases`, and the `databases` parameter of `search()` and `get()`.
+
+```python
+from findpapers import Database
+```
+
+| Member | Value | Description |
+|---|---|---|
+| `ARXIV` | `"arxiv"` | arXiv preprint server. |
+| `CROSSREF` | `"crossref"` | CrossRef DOI registration authority. |
+| `IEEE` | `"ieee"` | IEEE Xplore digital library. |
+| `OPENALEX` | `"openalex"` | OpenAlex open scholarly graph. |
+| `PUBMED` | `"pubmed"` | PubMed biomedical literature database. |
+| `SCOPUS` | `"scopus"` | Elsevier Scopus abstract and citation database. |
+| `SEMANTIC_SCHOLAR` | `"semantic_scholar"` | Semantic Scholar AI-powered research database. |
+
+`Database` is a `StrEnum`, so `Database.ARXIV == "arxiv"` is `True`. `"web_scraping"` is intentionally absent — web scraping is a retrieval mechanism, not a database, and is never stored in `Paper.databases`.
 
 ---
 

@@ -10,8 +10,7 @@ import pytest
 import requests
 
 from findpapers.connectors.arxiv import _NS, ArxivConnector, _infer_source_type_from_journal_ref
-from findpapers.core.paper import PaperType
-from findpapers.core.search_result import Database
+from findpapers.core.paper import Database, PaperType
 from findpapers.core.source import SourceType
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builders.arxiv import ArxivQueryBuilder

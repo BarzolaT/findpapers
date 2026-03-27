@@ -4,40 +4,10 @@ from __future__ import annotations
 
 import contextlib
 import datetime
-from enum import StrEnum
 from typing import Any
 
 from ..utils.version import package_version
 from .paper import Paper
-
-
-class Database(StrEnum):
-    """Supported academic database identifiers.
-
-    As a :class:`StrEnum`, each member compares equal to its string value,
-    so code such as ``database == "arxiv"`` works without modification.
-    """
-
-    ARXIV = "arxiv"
-    """arXiv preprint server."""
-
-    CROSSREF = "crossref"
-    """CrossRef DOI registration authority."""
-
-    IEEE = "ieee"
-    """IEEE Xplore digital library."""
-
-    OPENALEX = "openalex"
-    """OpenAlex open scholarly graph."""
-
-    PUBMED = "pubmed"
-    """PubMed biomedical literature database."""
-
-    SCOPUS = "scopus"
-    """Elsevier Scopus abstract and citation database."""
-
-    SEMANTIC_SCHOLAR = "semantic_scholar"
-    """Semantic Scholar AI-powered research database."""
 
 
 class SearchResult:

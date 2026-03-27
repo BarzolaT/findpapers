@@ -2,7 +2,7 @@
 
 from findpapers.core.author import Author
 from findpapers.core.citation_graph import CitationGraph
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Database, Paper, PaperType
 from findpapers.core.query import ConnectorType, FilterCode
 from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source, SourceType
@@ -36,6 +36,7 @@ __all__ = [
     "CitationGraph",
     "ConnectorError",
     "ConnectorType",
+    "Database",
     "DownloadRunner",
     "Engine",
     "EnrichmentRunner",

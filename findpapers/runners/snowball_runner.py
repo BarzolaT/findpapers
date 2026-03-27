@@ -19,8 +19,7 @@ from tqdm import tqdm
 from findpapers.connectors import CITATION_REGISTRY
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.citation_graph import CitationGraph
-from findpapers.core.paper import Paper
-from findpapers.core.search_result import Database
+from findpapers.core.paper import Database, Paper
 from findpapers.exceptions import InvalidParameterError
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.progress import make_progress_bar

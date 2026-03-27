@@ -9,8 +9,8 @@ from time import perf_counter
 
 from findpapers.connectors import SEARCH_REGISTRY
 from findpapers.connectors.search_base import SearchConnectorBase
-from findpapers.core.paper import Paper
-from findpapers.core.search_result import Database, SearchResult
+from findpapers.core.paper import Database, Paper
+from findpapers.core.search_result import SearchResult
 from findpapers.exceptions import InvalidParameterError, MissingApiKeyError, UnsupportedQueryError
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator

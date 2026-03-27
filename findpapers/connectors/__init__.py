@@ -8,28 +8,28 @@ To register a **new search connector**:
     1. Create the connector class inheriting from
        :class:`~findpapers.connectors.search_base.SearchConnectorBase`.
     2. Add a corresponding member to
-       :class:`~findpapers.core.search_result.Database`.
+       :class:`~findpapers.core.paper.Database`.
     3. Add an entry to :data:`SEARCH_REGISTRY` below.
 
 To register a **new DOI-lookup connector**:
     1. Create the connector class inheriting from
        :class:`~findpapers.connectors.doi_lookup_base.DOILookupConnectorBase`.
     2. Add a corresponding member to
-       :class:`~findpapers.core.search_result.Database`.
+       :class:`~findpapers.core.paper.Database`.
     3. Add an entry to :data:`DOI_LOOKUP_REGISTRY` below.
 
 To register a **new URL-lookup connector**:
     1. Create the connector class inheriting from
        :class:`~findpapers.connectors.url_lookup_base.URLLookupConnectorBase`.
     2. Add a corresponding member to
-       :class:`~findpapers.core.search_result.Database`.
+       :class:`~findpapers.core.paper.Database`.
     3. Add an entry to :data:`URL_LOOKUP_REGISTRY` below.
 
 To register a **new citation connector**:
     1. Create the connector class inheriting from
        :class:`~findpapers.connectors.citation_base.CitationConnectorBase`.
     2. Add a corresponding member to
-       :class:`~findpapers.core.search_result.Database`.
+       :class:`~findpapers.core.paper.Database`.
     3. Add an entry to :data:`CITATION_REGISTRY` below.
 """
 
@@ -46,7 +46,7 @@ from findpapers.connectors.scopus import ScopusConnector
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
-from findpapers.core.search_result import Database
+from findpapers.core.paper import Database
 
 # Central mapping of Database identifiers to their search connector classes.
 SEARCH_REGISTRY: dict[Database, type[SearchConnectorBase]] = {

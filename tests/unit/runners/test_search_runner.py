@@ -10,8 +10,8 @@ import pytest
 
 import findpapers.runners.search_runner as sr_mod
 from findpapers.core.author import Author
-from findpapers.core.paper import Paper
-from findpapers.core.search_result import Database, SearchResult
+from findpapers.core.paper import Database, Paper
+from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source
 from findpapers.exceptions import InvalidParameterError, QueryValidationError, UnsupportedQueryError
 from findpapers.runners.search_runner import SearchRunner, _are_years_compatible, _is_preprint_doi

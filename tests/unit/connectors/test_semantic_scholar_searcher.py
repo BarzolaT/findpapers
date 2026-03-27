@@ -16,8 +16,7 @@ from findpapers.connectors.semantic_scholar import (
     SemanticScholarConnector,
 )
 from findpapers.core.author import Author
-from findpapers.core.paper import PaperType
-from findpapers.core.search_result import Database
+from findpapers.core.paper import Database, PaperType
 from findpapers.core.source import SourceType
 from findpapers.query.builders.semantic_scholar import SemanticScholarQueryBuilder
 

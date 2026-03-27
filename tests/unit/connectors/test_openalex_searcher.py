@@ -14,8 +14,7 @@ from findpapers.connectors.openalex import (
     OpenAlexConnector,
     _reconstruct_abstract,
 )
-from findpapers.core.paper import PaperType
-from findpapers.core.search_result import Database
+from findpapers.core.paper import Database, PaperType
 from findpapers.core.source import SourceType
 from findpapers.query.builders.openalex import OpenAlexQueryBuilder
 

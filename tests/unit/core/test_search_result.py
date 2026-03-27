@@ -6,7 +6,8 @@ import datetime
 
 import pytest
 
-from findpapers.core.search_result import Database, SearchResult
+from findpapers.core.paper import Database
+from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source
 
 # ---------------------------------------------------------------------------

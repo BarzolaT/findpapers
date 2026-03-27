@@ -9,8 +9,7 @@ import pytest
 import requests
 
 from findpapers.connectors.ieee import IEEEConnector
-from findpapers.core.paper import PaperType
-from findpapers.core.search_result import Database
+from findpapers.core.paper import Database, PaperType
 from findpapers.core.source import SourceType
 from findpapers.exceptions import MissingApiKeyError, UnsupportedQueryError
 from findpapers.query.builders.ieee import IEEEQueryBuilder

@@ -59,6 +59,39 @@ class PaperType(StrEnum):
     MISC = "misc"
 
 
+class Database(StrEnum):
+    """Supported academic database identifiers.
+
+    As a :class:`StrEnum`, each member compares equal to its string value,
+    so code such as ``database == "arxiv"`` works without modification.
+
+    ``"web_scraping"`` is intentionally absent: web scraping is a retrieval
+    mechanism, not an academic database, and must never be added to a
+    :attr:`Paper.databases` set.
+    """
+
+    ARXIV = "arxiv"
+    """arXiv preprint server."""
+
+    CROSSREF = "crossref"
+    """CrossRef DOI registration authority."""
+
+    IEEE = "ieee"
+    """IEEE Xplore digital library."""
+
+    OPENALEX = "openalex"
+    """OpenAlex open scholarly graph."""
+
+    PUBMED = "pubmed"
+    """PubMed biomedical literature database."""
+
+    SCOPUS = "scopus"
+    """Elsevier Scopus abstract and citation database."""
+
+    SEMANTIC_SCHOLAR = "semantic_scholar"
+    """Semantic Scholar AI-powered research database."""
+
+
 # Maximum number of days into the future that a publication date is considered
 # plausible.  Dates beyond this threshold are treated as data-quality errors
 # from upstream APIs and silently replaced with ``None``.
