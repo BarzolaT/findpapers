@@ -1,6 +1,6 @@
 # Get
 
-The `engine.get()` method looks up a single paper from CrossRef using its DOI. This is useful when you already know the DOI of a paper and want to retrieve its metadata without running a full search.
+The `engine.get()` method fetches a single paper by its **DOI** or **landing-page URL**. This is useful when you already have a specific identifier and want to retrieve metadata without running a full search.
 
 ## Basic Usage
 
@@ -9,7 +9,11 @@ import findpapers
 
 engine = findpapers.Engine()
 
+# By bare DOI
 paper = engine.get("10.1038/nature12373")
+
+# By landing-page URL
+paper = engine.get("https://arxiv.org/abs/1706.03762")
 
 if paper:
     print(paper.title)
@@ -21,7 +25,7 @@ if paper:
 
 ```python
 paper = engine.get(
-    doi,                            # str - the DOI to look up
+    identifier,                     # str - DOI, DOI URL, or landing-page URL
     timeout=10.0,                   # float | None - request timeout in seconds
     verbose=False,                  # bool - enable detailed logging
 )
@@ -29,68 +33,100 @@ paper = engine.get(
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `doi` | `str` | *(required)* | DOI identifier or DOI URL of the paper to look up |
+| `identifier` | `str` | *(required)* | DOI, DOI URL, or paper landing-page URL |
 | `timeout` | `float \| None` | `10.0` | HTTP request timeout in seconds. `None` disables the timeout |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
 
 ## Return Value
 
-Returns a `Paper` object with CrossRef metadata, or `None` when the DOI is not found or the response cannot be parsed into a valid paper.
+Returns a `Paper` object, or `None` when the paper cannot be found or the page yields no metadata.
 
 ## Exceptions
 
 | Exception | When |
 |-----------|------|
-| `InvalidParameterError` | The DOI is empty or blank after stripping whitespace and URL prefixes |
+| `ValueError` | The identifier is a bare DOI that is empty or blank after stripping whitespace |
 
-## DOI Formats
+## Accepted Identifier Formats
 
-The DOI can be provided as a bare identifier or as a full URL - the URL prefix is stripped automatically:
+`get()` accepts three forms of identifier and routes each to the most appropriate backend:
+
+### Bare DOI
+
+Queries each configured database (CrossRef, arXiv, PubMed, IEEE, Scopus, OpenAlex, Semantic Scholar) via their APIs and merges the results.
 
 ```python
-# Bare DOI
 paper = engine.get("10.1038/nature12373")
+```
 
-# Full DOI URL
+### DOI URL
+
+The `doi.org` prefix is stripped automatically and the paper is resolved through the same multi-database path as a bare DOI.
+
+```python
 paper = engine.get("https://doi.org/10.1038/nature12373")
+paper = engine.get("http://dx.doi.org/10.1038/nature12373")
+```
+
+### Landing-page URL
+
+For URLs belonging to a supported database (arXiv, PubMed, IEEE Xplore, OpenAlex, Semantic Scholar), the paper is fetched directly via that database's API — no HTML scraping involved. For all other URLs the page is downloaded and metadata is extracted from HTML `<meta>` tags.
+
+```python
+# arXiv — fetched via arXiv API
+paper = engine.get("https://arxiv.org/abs/1706.03762")
+
+# PubMed — fetched via NCBI E-utilities
+paper = engine.get("https://pubmed.ncbi.nlm.nih.gov/34265844/")
+
+# IEEE Xplore — fetched via IEEE API (requires ieee_api_key)
+paper = engine.get("https://ieeexplore.ieee.org/document/726791")
+
+# OpenAlex — fetched via OpenAlex API
+paper = engine.get("https://openalex.org/W2626778328")
+
+# Semantic Scholar — fetched via S2 API
+paper = engine.get("https://www.semanticscholar.org/paper/204e3073870fae3d05bcbc2f6a8e263d9b72e776")
+
+# Any other publisher page — HTML scraping fallback
+paper = engine.get("https://www.nature.com/articles/s41586-021-03819-2")
 ```
 
 ## Using as a Snowball Seed
 
-A common use case is to fetch a paper by DOI and then use it as a seed for citation snowballing:
+A common use case is to fetch a paper and then use it as a seed for citation snowballing:
 
 ```python
 import findpapers
 
 engine = findpapers.Engine()
 
-# Fetch the seed paper
+# Fetch the seed paper — works with DOI or URL
 seed = engine.get("10.1038/nature12373")
 
 if seed:
-    # Build a citation graph around it
     graph = engine.snowball(seed, max_depth=1, direction="both")
     print(f"{len(graph.papers)} papers in the citation network")
 
     findpapers.save_to_json(graph, "citation_graph.json")
 ```
 
-## Fetching Multiple Papers by DOI
+## Fetching Multiple Papers
 
-To look up multiple DOIs, call `get()` in a loop:
+To look up multiple identifiers (mix of DOIs and URLs), call `get()` in a loop:
 
 ```python
-dois = [
+identifiers = [
     "10.1038/nature12373",
-    "10.1145/3292500.3330919",
-    "10.1109/CVPR.2016.90",
+    "https://arxiv.org/abs/1706.03762",
+    "https://pubmed.ncbi.nlm.nih.gov/34265844/",
 ]
 
 papers = []
-for doi in dois:
-    paper = engine.get(doi)
+for identifier in identifiers:
+    paper = engine.get(identifier)
     if paper:
         papers.append(paper)
 
-print(f"Fetched {len(papers)} of {len(dois)} papers")
+print(f"Fetched {len(papers)} of {len(identifiers)} papers")
 ```
