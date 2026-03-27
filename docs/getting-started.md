@@ -120,12 +120,20 @@ findpapers.save_to_json(graph, "citation_graph.json")
 
 Snowballing uses OpenAlex, Semantic Scholar, and CrossRef to traverse citations. Papers must have a DOI to be included.
 
-## Lookup by DOI
+## Lookup by DOI or URL
 
-Fetch a single paper by its DOI:
+Fetch a single paper by its DOI, DOI URL, or landing-page URL:
 
 ```python
+# Bare DOI
 paper = engine.get("10.1038/s41586-021-03819-2")
+
+# DOI URL
+paper = engine.get("https://doi.org/10.1038/s41586-021-03819-2")
+
+# Landing-page URL (uses the database API when available, otherwise scrapes HTML)
+paper = engine.get("https://arxiv.org/abs/1706.03762")
+
 if paper:
     print(paper)
 ```

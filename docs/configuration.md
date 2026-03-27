@@ -115,12 +115,13 @@ result = engine.search("[machine learning]", show_progress=False)
 
 ## Timeouts
 
-Download, enrichment, and DOI lookup operations accept a `timeout` parameter (in seconds) for individual HTTP requests:
+Download, enrichment, and paper-lookup operations accept a `timeout` parameter (in seconds) for individual HTTP requests:
 
 ```python
 engine.download(result.papers, "./pdfs", timeout=30.0)
 engine.enrich(result.papers, timeout=15.0)
 paper = engine.get("10.1038/nature12373", timeout=15.0)
+paper = engine.get("https://arxiv.org/abs/1706.03762", timeout=15.0)
 ```
 
 Set to `None` to disable timeouts (not recommended).

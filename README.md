@@ -55,7 +55,7 @@ engine.enrich(result.papers)
 # Download PDFs
 engine.download(result.papers, "./pdfs")
 
-# Look up a single paper directly by DOI
+# Look up a single paper by DOI or landing-page URL
 paper = engine.get("10.1038/nature11804")
 
 # Build a citation graph from seed papers

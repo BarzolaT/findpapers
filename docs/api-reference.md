@@ -128,11 +128,11 @@ engine.enrich(
 
 ### `get()`
 
-Fetch a single paper by its DOI from CrossRef.
+Fetch a single paper by its DOI or landing-page URL.
 
 ```python
 engine.get(
-    doi: str,
+    identifier: str,
     *,
     timeout: float | None = 10.0,
     verbose: bool = False,
@@ -141,13 +141,18 @@ engine.get(
 
 | Parameter | Type | Description |
 |---|---|---|
-| `doi` | `str` | Bare DOI (e.g., `"10.1038/nature12373"`) or full URL. |
+| `identifier` | `str` | Bare DOI, DOI URL (`doi.org`/`dx.doi.org`), or paper landing-page URL. |
 | `timeout` | `float \| None` | HTTP timeout in seconds. Defaults to `10.0`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 
-**Returns:** `Paper` with CrossRef metadata, or `None` if not found.
+**Routing:**
+- `doi.org` / `dx.doi.org` URLs and bare DOIs → multi-database API lookup via `DOILookupRunner`.
+- Landing-page URLs from arXiv, PubMed, IEEE, OpenAlex, or Semantic Scholar → fetched directly via that database's API.
+- Any other `http(s)://` URL → HTML metadata extraction via `WebScrapingConnector`.
 
-**Raises:** `InvalidParameterError` if DOI is empty after sanitization.
+**Returns:** `Paper`, or `None` if the paper cannot be found or the page yields no metadata.
+
+**Raises:** `ValueError` if identifier is a bare DOI that is empty or blank after sanitization.
 
 ### `snowball()`
 
