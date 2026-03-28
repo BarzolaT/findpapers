@@ -149,7 +149,6 @@ class Engine:
         max_papers_per_database: int | None = None,
         since: dt.date | None = None,
         until: dt.date | None = None,
-        paper_types: list[str] | None = None,
         num_workers: int = 1,
         verbose: bool = False,
         show_progress: bool = True,
@@ -208,14 +207,6 @@ class Engine:
             Only return papers published on or before this date.  Passed to
             each database connector's API when supported.  ``None`` means
             no upper-bound filter.
-        paper_types : list[str] | None
-            When set, only papers whose type is in this list are returned.
-            Allowed values: ``"article"``, ``"inproceedings"``,
-            ``"inbook"``, ``"incollection"``, ``"book"``,
-            ``"phdthesis"``, ``"mastersthesis"``, ``"techreport"``,
-            ``"unpublished"``, ``"misc"``.  Papers with an unknown type
-            are excluded when this filter is active.
-            ``None`` (default) disables the filter.
         num_workers : int
             Number of parallel workers used to query databases concurrently.
             Defaults to ``1`` (sequential).
@@ -244,7 +235,6 @@ class Engine:
             codes, etc.).
         ValueError
             If an unknown database name is passed in *databases*.
-
         See Also
         --------
         findpapers.runners.search_runner.SearchRunner :
@@ -289,7 +279,6 @@ class Engine:
             num_workers=num_workers,
             since=since,
             until=until,
-            paper_types=paper_types,
         )
         return runner.run(verbose=verbose, show_progress=show_progress)
 
@@ -562,7 +551,6 @@ class Engine:
         top_n_per_level: int | None = None,
         since: dt.date | None = None,
         until: dt.date | None = None,
-        paper_types: list[str] | None = None,
         num_workers: int = 1,
         verbose: bool = False,
         show_progress: bool = True,
@@ -606,15 +594,6 @@ class Engine:
             Only include discovered papers published on or before this date.
             Seed papers are never filtered.  ``None`` (default) means no
             upper-bound filter.
-        paper_types : list[str] | None
-            When set, only discovered papers whose type is in this list
-            are added to the graph.  Allowed values: ``"article"``,
-            ``"inproceedings"``, ``"inbook"``, ``"incollection"``,
-            ``"book"``, ``"phdthesis"``, ``"mastersthesis"``,
-            ``"techreport"``, ``"unpublished"``, ``"misc"``.  Papers
-            with an unknown type are excluded when this filter is active.
-            Seed papers are never filtered.  ``None`` (default) disables
-            the filter.
         num_workers : int
             Maximum number of connectors to query in parallel for each
             paper.  Defaults to ``1`` (sequential).  The effective
@@ -676,6 +655,5 @@ class Engine:
             num_workers=num_workers,
             since=since,
             until=until,
-            paper_types=paper_types,
         )
         return runner.run(verbose=verbose, show_progress=show_progress)

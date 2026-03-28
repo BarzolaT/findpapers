@@ -10,7 +10,7 @@ import pytest
 
 import findpapers.runners.search_runner as sr_mod
 from findpapers.core.author import Author
-from findpapers.core.paper import Database, Paper, PaperType
+from findpapers.core.paper import Database, Paper
 from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source
 from findpapers.exceptions import InvalidParameterError, QueryValidationError, UnsupportedQueryError
@@ -693,90 +693,6 @@ class TestIsPreprintDoi:
 
     def test_case_insensitive(self):
         assert _is_preprint_doi("10.48550/ARXIV.1706.03762") is True
-
-
-# ---------------------------------------------------------------------------
-# paper_types filter
-# ---------------------------------------------------------------------------
-
-
-class TestSearchRunnerPaperTypesFilter:
-    """Tests for the paper_types post-fetch filter in SearchRunner."""
-
-    def _make_runner_with_papers(
-        self,
-        papers: list[Paper],
-        paper_types: list[str] | None = None,
-    ) -> SearchRunner:
-        """Create a runner whose searcher returns *papers*, filtered by *paper_types*."""
-        runner = SearchRunner(query="[ml]", databases=["arxiv"], paper_types=paper_types)
-        mock_searcher = MagicMock()
-        mock_searcher.name = Database.ARXIV
-        mock_searcher.search.return_value = papers
-        runner._searchers = [mock_searcher]
-        return runner
-
-    def test_no_filter_returns_all_papers(self, make_paper):
-        """With paper_types=None all papers are returned regardless of type."""
-        papers = [
-            make_paper(title="A", paper_type=PaperType.ARTICLE),
-            make_paper(title="B", paper_type=PaperType.INPROCEEDINGS),
-            make_paper(title="C", paper_type=None),
-        ]
-        runner = self._make_runner_with_papers(papers, paper_types=None)
-        result = runner.run(show_progress=False)
-        assert len(result.papers) == 3
-
-    def test_filter_keeps_matching_types(self, make_paper):
-        """Only papers whose paper_type is in the filter list are returned."""
-        article = make_paper(title="Art", paper_type=PaperType.ARTICLE)
-        conf = make_paper(title="Conf", paper_type=PaperType.INPROCEEDINGS)
-        runner = self._make_runner_with_papers([article, conf], paper_types=["article"])
-        result = runner.run(show_progress=False)
-        assert len(result.papers) == 1
-        assert result.papers[0].title == "Art"
-
-    def test_filter_excludes_none_paper_type(self, make_paper):
-        """Papers with paper_type=None are excluded when any filter is active."""
-        typed = make_paper(title="Typed", paper_type=PaperType.ARTICLE)
-        untyped = make_paper(title="Untyped", paper_type=None)
-        runner = self._make_runner_with_papers([typed, untyped], paper_types=["article"])
-        result = runner.run(show_progress=False)
-        assert len(result.papers) == 1
-        assert result.papers[0].title == "Typed"
-
-    def test_filter_multiple_types(self, make_paper):
-        """Multiple paper_types can be specified and all matching papers are kept."""
-        a = make_paper(title="A", paper_type=PaperType.ARTICLE)
-        b = make_paper(title="B", paper_type=PaperType.INPROCEEDINGS)
-        c = make_paper(title="C", paper_type=PaperType.BOOK)
-        runner = self._make_runner_with_papers([a, b, c], paper_types=["article", "inproceedings"])
-        result = runner.run(show_progress=False)
-        assert len(result.papers) == 2
-        titles = {p.title for p in result.papers}
-        assert titles == {"A", "B"}
-
-    def test_filter_empty_result_when_no_match(self, make_paper):
-        """Empty list is returned when no paper matches the requested types."""
-        conf = make_paper(title="Conf", paper_type=PaperType.INPROCEEDINGS)
-        runner = self._make_runner_with_papers([conf], paper_types=["book"])
-        result = runner.run(show_progress=False)
-        assert result.papers == []
-
-    def test_invalid_paper_type_raises(self):
-        """An unrecognised paper_type string raises InvalidParameterError."""
-        with pytest.raises(InvalidParameterError, match="Unknown paper_type"):
-            SearchRunner(query="[ml]", databases=["arxiv"], paper_types=["not_a_type"])
-
-    def test_paper_types_stored_as_enum_on_runner(self):
-        """paper_types strings are converted to PaperType instances internally."""
-        runner = SearchRunner(query="[ml]", databases=["arxiv"], paper_types=["article"])
-        assert runner._paper_types == [PaperType.ARTICLE]
-
-    def test_paper_types_none_stored_on_runner(self):
-        """paper_types defaults to None when not specified."""
-        runner = SearchRunner(query="[ml]", databases=["arxiv"])
-        assert runner._paper_types is None
 
 
 # ---------------------------------------------------------------------------

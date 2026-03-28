@@ -61,8 +61,6 @@ class SearchRunner(BaseRunner):
        DOI when available, then a second pass by normalised title+year to
        catch cross-database cases where the same paper carries different DOIs
        (e.g. arXiv preprint DOI vs. publisher DOI).
-    4. Filter by ``paper_types`` when specified.
-
     Parameters
     ----------
     query : str
@@ -94,13 +92,6 @@ class SearchRunner(BaseRunner):
         Only return papers published on or after this date.
     until : dt.date | None
         Only return papers published on or before this date.
-    paper_types : list[str] | None
-        When set, only papers whose type is in this list are returned.
-        Allowed values: ``"article"``, ``"inproceedings"``, ``"inbook"``,
-        ``"incollection"``, ``"book"``, ``"phdthesis"``,
-        ``"mastersthesis"``, ``"techreport"``, ``"unpublished"``,
-        ``"misc"``.  Papers with an unknown type are excluded when this
-        filter is active.  ``None`` (default) disables the filter.
 
     Raises
     ------
@@ -132,14 +123,13 @@ class SearchRunner(BaseRunner):
         num_workers: int = 1,
         since: dt.date | None = None,
         until: dt.date | None = None,
-        paper_types: list[str] | None = None,
     ) -> None:
         """Initialise search configuration without executing it."""
         self._results: list[Paper] = []
         self._metrics: dict[str, int | float] = {}
         self._search: SearchResult | None = None
 
-        super().__init__(since=since, until=until, paper_types=paper_types)
+        super().__init__(since=since, until=until)
 
         self._query_string = query
         self._max_papers_per_database = max_papers_per_database
@@ -229,10 +219,10 @@ class SearchRunner(BaseRunner):
                 merged,
             )
 
-        # Apply post-fetch filters (paper type + exact date range).  Connectors
-        # that only support year-level date filtering may return papers outside
-        # the requested range; _matches_filters enforces precise boundaries.
-        if self._paper_types is not None or self._since is not None or self._until is not None:
+        # Apply post-fetch date filters.  Connectors that only support
+        # year-level date filtering may return papers outside the requested
+        # range; _matches_filters enforces precise boundaries.
+        if self._since is not None or self._until is not None:
             before_filter = len(self._results)
             self._results = [p for p in self._results if self._matches_filters(p)]
             if verbose:

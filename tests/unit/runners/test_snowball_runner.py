@@ -10,7 +10,7 @@ import pytest
 
 from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.citation_graph import CitationGraph
-from findpapers.core.paper import Paper, PaperType
+from findpapers.core.paper import Paper
 from findpapers.exceptions import InvalidParameterError
 from findpapers.runners.snowball_runner import SnowballRunner
 
@@ -849,7 +849,7 @@ class TestSnowballRunnerEmptyFrontier:
 
 
 class TestSnowballRunnerFilters:
-    """Tests for the since, until, and paper_types filters in SnowballRunner."""
+    """Tests for the since and until date filters in SnowballRunner."""
 
     def _run_with_refs(
         self,
@@ -866,74 +866,6 @@ class TestSnowballRunnerFilters:
         )
         runner._connectors = [connector]
         return runner.run(show_progress=False)
-
-    # ------------------------------------------------------------------
-    # paper_types filter
-    # ------------------------------------------------------------------
-
-    def test_no_paper_types_filter_returns_all(self, make_paper) -> None:
-        """Without a paper_types filter all discovered papers are added."""
-        ref1 = make_paper("Ref1", doi="10.1/r1", paper_type=PaperType.ARTICLE)
-        ref2 = make_paper("Ref2", doi="10.1/r2", paper_type=PaperType.INPROCEEDINGS)
-        graph = self._run_with_refs(make_paper, "10.1/seed", [ref1, ref2])
-        assert graph.node_count == 3  # seed + 2 refs
-
-    def test_paper_types_filter_keeps_matching(self, make_paper) -> None:
-        """Only papers matching the given paper_type strings are added."""
-        article = make_paper("Article", doi="10.1/a", paper_type=PaperType.ARTICLE)
-        inproc = make_paper("Proc", doi="10.1/p", paper_type=PaperType.INPROCEEDINGS)
-        graph = self._run_with_refs(
-            make_paper, "10.1/seed", [article, inproc], paper_types=["article"]
-        )
-        titles = {n.title for n in graph.nodes}
-        assert "Article" in titles
-        assert "Proc" not in titles
-
-    def test_paper_types_filter_excludes_none_type(self, make_paper) -> None:
-        """Papers with paper_type=None are excluded when a filter is active."""
-        typed = make_paper("Typed", doi="10.1/t", paper_type=PaperType.BOOK)
-        untyped = make_paper("Untyped", doi="10.1/u", paper_type=None)
-        graph = self._run_with_refs(make_paper, "10.1/seed", [typed, untyped], paper_types=["book"])
-        titles = {n.title for n in graph.nodes}
-        assert "Typed" in titles
-        assert "Untyped" not in titles
-
-    def test_paper_types_filter_multiple_types(self, make_paper) -> None:
-        """Multiple types in the list are all accepted."""
-        a = make_paper("A", doi="10.1/a", paper_type=PaperType.ARTICLE)
-        b = make_paper("B", doi="10.1/b", paper_type=PaperType.BOOK)
-        c = make_paper("C", doi="10.1/c", paper_type=PaperType.TECHREPORT)
-        graph = self._run_with_refs(
-            make_paper, "10.1/seed", [a, b, c], paper_types=["article", "book"]
-        )
-        titles = {n.title for n in graph.nodes}
-        assert "A" in titles
-        assert "B" in titles
-        assert "C" not in titles
-
-    def test_invalid_paper_type_raises(self, make_paper) -> None:
-        """An unrecognised paper_type string raises InvalidParameterError."""
-        with pytest.raises(InvalidParameterError, match="Unknown paper_type"):
-            SnowballRunner(
-                seed_papers=[make_paper("S", doi="10.1/s")],
-                paper_types=["not_a_type"],
-            )
-
-    def test_paper_types_stored_as_enum(self, make_paper) -> None:
-        """Internally the runner stores parsed PaperType enums."""
-        runner = SnowballRunner(
-            seed_papers=[make_paper("S", doi="10.1/s")],
-            paper_types=["article", "book"],
-        )
-        assert runner._paper_types == [PaperType.ARTICLE, PaperType.BOOK]
-
-    def test_paper_types_none_stored_as_none(self, make_paper) -> None:
-        """When paper_types is None, the runner stores None (no filter)."""
-        runner = SnowballRunner(
-            seed_papers=[make_paper("S", doi="10.1/s")],
-            paper_types=None,
-        )
-        assert runner._paper_types is None
 
     # ------------------------------------------------------------------
     # since / until date filters

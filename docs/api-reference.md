@@ -53,7 +53,6 @@ engine.search(
     max_papers_per_database: int | None = None,
     since: datetime.date | None = None,
     until: datetime.date | None = None,
-    paper_types: list[str] | None = None,
     num_workers: int = 1,
     verbose: bool = False,
     show_progress: bool = True,
@@ -67,14 +66,13 @@ engine.search(
 | `max_papers_per_database` | `int \| None` | Maximum number of papers to retrieve per database. |
 | `since` | `datetime.date \| None` | Only include papers published on or after this date. |
 | `until` | `datetime.date \| None` | Only include papers published on or before this date. |
-| `paper_types` | `list[str] \| None` | Only return papers whose type is in this list. Accepted values: `"article"`, `"inproceedings"`, `"inbook"`, `"incollection"`, `"book"`, `"phdthesis"`, `"mastersthesis"`, `"techreport"`, `"unpublished"`, `"misc"`. Papers with an unknown type are excluded when this filter is active. `None` disables the filter. |
 | `num_workers` | `int` | Number of parallel database workers. Defaults to `1`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bars. Defaults to `True`. |
 
 **Returns:** `SearchResult` with deduplicated papers.
 
-**Raises:** `QueryValidationError` if the query string is invalid. `InvalidParameterError` for invalid parameter values (e.g. unknown database names, empty databases list, unrecognised paper type strings).
+**Raises:** `QueryValidationError` if the query string is invalid. `InvalidParameterError` for invalid parameter values (e.g. unknown database names, empty databases list).
 
 ### `download()`
 
@@ -169,7 +167,6 @@ engine.snowball(
     top_n_per_level: int | None = None,
     since: datetime.date | None = None,
     until: datetime.date | None = None,
-    paper_types: list[str] | None = None,
     num_workers: int = 1,
     verbose: bool = False,
     show_progress: bool = True,
@@ -184,7 +181,6 @@ engine.snowball(
 | `top_n_per_level` | `int \| None` | Keep only the N most-cited papers per level; papers outside the top N are discarded entirely. Seed papers are always expanded. Defaults to `None` (no limit). |
 | `since` | `datetime.date \| None` | Only add discovered papers published on or after this date. Seed papers are never filtered. `None` disables the filter. |
 | `until` | `datetime.date \| None` | Only add discovered papers published on or before this date. Seed papers are never filtered. `None` disables the filter. |
-| `paper_types` | `list[str] \| None` | Only add discovered papers whose type is in this list. Accepted values: `"article"`, `"inproceedings"`, `"inbook"`, `"incollection"`, `"book"`, `"phdthesis"`, `"mastersthesis"`, `"techreport"`, `"unpublished"`, `"misc"`. Seed papers are never filtered. `None` disables the filter. |
 | `num_workers` | `int` | Number of parallel workers. Defaults to `1`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bars. Defaults to `True`. |
@@ -568,7 +564,6 @@ SearchRunner(
     num_workers: int = 1,
     since: datetime.date | None = None,
     until: datetime.date | None = None,
-    paper_types: list[str] | None = None,
 )
 ```
 
@@ -659,7 +654,6 @@ SnowballRunner(
     num_workers: int = 1,
     since: datetime.date | None = None,
     until: datetime.date | None = None,
-    paper_types: list[str] | None = None,
 )
 ```
 

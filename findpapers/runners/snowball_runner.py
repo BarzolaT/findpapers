@@ -76,15 +76,6 @@ class SnowballRunner(BaseRunner):
         Only include discovered papers published on or before this date.
         Seed papers are never filtered.  ``None`` (default) disables
         the upper-bound date filter.
-    paper_types : list[str] | None
-        When set, only discovered papers whose type is in this list are
-        added to the graph.  Allowed values: ``"article"``,
-        ``"inproceedings"``, ``"inbook"``, ``"incollection"``,
-        ``"book"``, ``"phdthesis"``, ``"mastersthesis"``,
-        ``"techreport"``, ``"unpublished"``, ``"misc"``.  Papers with
-        an unknown type are excluded when this filter is active.
-        Seed papers are never filtered.  ``None`` (default) disables
-        the filter.
     """
 
     def __init__(
@@ -100,7 +91,6 @@ class SnowballRunner(BaseRunner):
         num_workers: int = 1,
         since: datetime.date | None = None,
         until: datetime.date | None = None,
-        paper_types: list[str] | None = None,
     ) -> None:
         """Initialise snowball configuration without executing it.
 
@@ -116,7 +106,7 @@ class SnowballRunner(BaseRunner):
                 f"top_n_per_level must be >= 1 when set, got {top_n_per_level}"
             )
 
-        super().__init__(since=since, until=until, paper_types=paper_types)
+        super().__init__(since=since, until=until)
 
         if isinstance(seed_papers, Paper):
             seed_papers = [seed_papers]

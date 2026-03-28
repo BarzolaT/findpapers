@@ -198,36 +198,9 @@ class TestEngineSearch:
             num_workers=3,
             since=None,
             until=None,
-            paper_types=None,
         )
         mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
         assert result is fake_search
-
-    def test_search_paper_types_forwarded(self):
-        """search() forwards paper_types to SearchRunner."""
-        engine = Engine()
-        with patch("findpapers.engine.SearchRunner") as mock_cls:
-            mock_runner = MagicMock()
-            mock_runner.run.return_value = MagicMock(spec=SearchResult)
-            mock_cls.return_value = mock_runner
-
-            engine.search("[ml]", paper_types=["article", "book"])
-
-        _, kwargs = mock_cls.call_args
-        assert kwargs["paper_types"] == ["article", "book"]
-
-    def test_search_paper_types_none_by_default(self):
-        """search() passes paper_types=None to SearchRunner when not provided."""
-        engine = Engine()
-        with patch("findpapers.engine.SearchRunner") as mock_cls:
-            mock_runner = MagicMock()
-            mock_runner.run.return_value = MagicMock(spec=SearchResult)
-            mock_cls.return_value = mock_runner
-
-            engine.search("[ml]")
-
-        _, kwargs = mock_cls.call_args
-        assert kwargs["paper_types"] is None
 
     def test_search_default_per_call_params(self):
         """num_workers defaults to 1, verbose to False."""
@@ -621,23 +594,8 @@ class TestEngineSnowball:
         assert kwargs["since"] is since
         assert kwargs["until"] is until
 
-    def test_snowball_paper_types_forwarded(self, make_paper):
-        """snowball() forwards paper_types to SnowballRunner."""
-        engine = Engine()
-        seed = make_paper("Seed", doi="10.1000/seed")
-
-        with patch("findpapers.engine.SnowballRunner") as mock_cls:
-            mock_runner = MagicMock()
-            mock_runner.run.return_value = MagicMock()
-            mock_cls.return_value = mock_runner
-
-            engine.snowball(seed, paper_types=["article", "inproceedings"])
-
-        _, kwargs = mock_cls.call_args
-        assert kwargs["paper_types"] == ["article", "inproceedings"]
-
-    def test_snowball_since_until_paper_types_none_by_default(self, make_paper):
-        """snowball() passes None for since, until, paper_types when not provided."""
+    def test_snowball_since_until_none_by_default(self, make_paper):
+        """snowball() passes None for since and until when not provided."""
         engine = Engine()
         seed = make_paper("Seed", doi="10.1000/seed")
 
@@ -651,7 +609,6 @@ class TestEngineSnowball:
         _, kwargs = mock_cls.call_args
         assert kwargs["since"] is None
         assert kwargs["until"] is None
-        assert kwargs["paper_types"] is None
 
     def test_snowball_accepts_list_of_papers(self, make_paper):
         """snowball() accepts a list of papers."""
