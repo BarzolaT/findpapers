@@ -56,6 +56,7 @@ arXiv is one of the most important open-access repositories in science. Founded 
 #### Features
 
 - Full boolean query support
+- Supports `*` and `?` wildcards (not in first character position)
 - Extracts title, abstract, authors (with affiliations), publication date, DOI, URLs, comments, and source/journal info
 - Papers are typed as repository source
 
@@ -63,7 +64,6 @@ arXiv is one of the most important open-access repositories in science. Founded 
 
 - No citation count data
 - No keywords
-- Wildcards are not supported
 - **Stemming:** arXiv uses Lucene-based stemming, so `ti[transformer]` also matches "transformers" and "transforming". Keep this in mind when looking for exact terms
 - **Hyphens:** Hyphens are treated as spaces (`ti[self-attention]` is equivalent to `ti[self attention]`). Findpapers normalizes hyphens automatically
 

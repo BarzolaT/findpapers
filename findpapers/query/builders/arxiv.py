@@ -8,7 +8,6 @@ from findpapers.query.builders.common import (
     clone_query,
     convert_expression,
     get_effective_filter,
-    has_wildcard,
     iter_term_nodes,
     quote_term,
 )
@@ -45,11 +44,6 @@ class ArxivQueryBuilder(QueryBuilder):
                 return QueryValidationResult(
                     is_valid=False,
                     error_message=f"Filter '{filter_code}' is not supported by arXiv.",
-                )
-            if term.value and has_wildcard(term.value):
-                return QueryValidationResult(
-                    is_valid=False,
-                    error_message="Wildcards are not supported by arXiv.",
                 )
         return QueryValidationResult(is_valid=True)
 

@@ -96,18 +96,18 @@ Two wildcards are available:
 ### Wildcard Rules
 
 - Cannot be placed at the **start** of a term
-- `*` requires at least **3 characters** before it (4 for PubMed)
 - `*` can only be placed at the **end** of a term
 - Only **one** wildcard per term
 - Can only be used in **single-word** terms
+- Minimum characters before `*` varies by database (see table below)
 
 Not all databases support wildcards. When a query uses a wildcard that a database doesn't handle, that database is automatically skipped.
 
 | Feature | arXiv | IEEE | OpenAlex | PubMed | Scopus | Semantic Scholar |
 |---------|-------|------|----------|--------|--------|------------------|
-| `?` (single char) | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `*` (zero or more) | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ |
-| Min chars before `*` | - | 3 | - | 4 | 3 | 3 |
+| `?` (single char) | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `*` (zero or more) | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
+| Min chars before `*` | 1 | 3 | - | 4 | 3 | 1 |
 
 
 ## Examples

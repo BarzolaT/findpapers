@@ -83,12 +83,14 @@ class TestQueryValidator:
         ):
             validator.validate("[m*c?]")
 
-    def test_asterisk_requires_3_chars_before(self, validator):
-        """Test that asterisk requires 3 characters before."""
-        with pytest.raises(
-            QueryValidationError, match="A minimum of 3 characters preceding the asterisk wildcard"
-        ):
-            validator.validate("[ma*]")
+    def test_asterisk_valid_with_one_char_before(self, validator):
+        """Test that asterisk is valid with as few as one character before it.
+
+        The 3-character minimum was a global constraint that was removed; each
+        database builder enforces its own minimum (IEEE/Scopus: 3, PubMed: 4).
+        """
+        validator.validate("[m*]")  # 1 char before * — globally valid
+        validator.validate("[ma*]")  # 2 chars before * — also valid
 
     def test_asterisk_only_at_end(self, validator):
         """Test that asterisk can only be at the end."""

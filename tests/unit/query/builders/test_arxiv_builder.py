@@ -87,20 +87,29 @@ def test_arxiv_compound_query_no_percent_encoding(
     assert "abs:healthcare" in converted
 
 
-def test_arxiv_rejects_wildcard_query(
+def test_arxiv_accepts_trailing_star_wildcard(
     parse_and_propagate: Callable[[str], Query],
 ) -> None:
-    """arXiv validation rejects queries with wildcard characters."""
+    """arXiv supports '*' wildcard when not in the first character position.
+
+    The global QueryValidator already rejects leading wildcards, so they never
+    reach this builder.  Here we confirm the builder itself does not block
+    valid trailing wildcards.
+    """
     query = parse_and_propagate("[machine*]")
     result = ArxivQueryBuilder().validate_query(query)
-    assert result.is_valid is False
-    assert "wildcard" in (result.error_message or "").lower()
+    assert result.is_valid is True
 
 
-def test_arxiv_rejects_question_mark_wildcard(
+def test_arxiv_accepts_mid_question_mark_wildcard(
     parse_and_propagate: Callable[[str], Query],
 ) -> None:
-    """arXiv validation rejects queries with '?' wildcard."""
+    """arXiv supports '?' wildcard when not in the first character position.
+
+    The global QueryValidator already rejects leading wildcards, so they never
+    reach this builder.  Here we confirm the builder itself does not block
+    valid mid-word '?' wildcards.
+    """
     query = parse_and_propagate("[col?r]")
     result = ArxivQueryBuilder().validate_query(query)
-    assert result.is_valid is False
+    assert result.is_valid is True

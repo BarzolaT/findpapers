@@ -204,12 +204,6 @@ class QueryValidator:
                     f"The asterisk wildcard can only be used at the end of a search term: [{term}]"
                 )
 
-            # Minimum 3 characters before asterisk
-            if asterisk_pos < 3:
-                raise QueryValidationError(
-                    f"A minimum of 3 characters preceding the asterisk wildcard is required: [{term}]"
-                )
-
     def _check_consecutive_terms(self, query: str) -> None:
         """Check for consecutive terms without operators.
 
