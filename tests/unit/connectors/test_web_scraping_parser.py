@@ -1,4 +1,5 @@
-"""Unit tests for findpapers.utils.metadata_parser and enrichment pipeline.
+"""Unit tests for the HTML metadata parsing and paper-building pipeline in
+:class:`findpapers.connectors.web_scraping.WebScrapingConnector`.
 
 Tests use real HTML pages collected from arXiv, PubMed, OpenAlex,
 IEEE, Scopus, and SemanticScholar that are stored in tests/data/pages/.  This
