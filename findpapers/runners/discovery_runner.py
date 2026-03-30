@@ -10,6 +10,15 @@ from findpapers.exceptions import InvalidParameterError
 from findpapers.runners.get_runner import GET_DATABASES, GetRunner
 from findpapers.utils.parallel import execute_tasks
 
+# Databases used for enrichment when the caller does not specify any.
+# Kept small on purpose: CrossRef is the canonical DOI authority and covers
+# the vast majority of metadata gaps; web-scraping fills the rest without
+# requiring an API key.  Databases with tight daily quotas (IEEE, Scopus)
+# and those that duplicate CrossRef for most papers (OpenAlex, PubMed,
+# Semantic Scholar, arXiv) are intentionally excluded from this default to
+# avoid unnecessary quota consumption.
+DEFAULT_ENRICHMENT_DATABASES: list[str] = ["crossref", "web_scraping"]
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,8 +51,8 @@ class DiscoveryRunner:
     ssl_verify : bool
         Whether to verify SSL certificates during enrichment.
     enrichment_databases : list[str] | None
-        Databases for post-discovery enrichment.  ``None`` uses all available
-        sources; ``[]`` disables enrichment entirely.
+        Databases for post-discovery enrichment.  ``None`` (default) uses
+        ``crossref`` and ``web_scraping``; ``[]`` disables enrichment entirely.
 
     Raises
     ------
@@ -154,7 +163,7 @@ class DiscoveryRunner:
         all_dbs: frozenset[str] = (
             frozenset(self._enrichment_databases)
             if self._enrichment_databases is not None
-            else GET_DATABASES
+            else frozenset(DEFAULT_ENRICHMENT_DATABASES)
         )
 
         enrich_queue: list[tuple[Paper, str, list[str]]] = []

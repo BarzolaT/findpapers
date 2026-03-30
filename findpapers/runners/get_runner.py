@@ -16,6 +16,35 @@ from findpapers.exceptions import InvalidParameterError
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.normalization import DOI_URL_PREFIXES
 
+# ---------------------------------------------------------------------------
+# Source-skipping heuristics
+#
+# These tables let GetRunner skip DOI-lookup connectors when the identifier
+# (URL or DOI) strongly implies the paper is from a source that a given
+# database does not index.  This reduces wasteful API usage against services
+# with tight daily quotas (e.g. IEEE Xplore: ~200 requests/day).
+# ---------------------------------------------------------------------------
+
+# DOI prefix → databases to skip.
+# The prefix comparison is case-insensitive.
+_DOI_PREFIX_SKIP: tuple[tuple[str, frozenset[str]], ...] = (
+    # arXiv assigns the 10.48550 prefix to all its preprints.  IEEE Xplore and
+    # Scopus do not index arXiv preprints.
+    ("10.48550/", frozenset({Database.IEEE, Database.SCOPUS})),
+    # bioRxiv and medRxiv share the 10.1101 prefix.  IEEE Xplore does not
+    # index biomedical preprints.
+    ("10.1101/", frozenset({Database.IEEE})),
+)
+
+# URL substring (case-insensitive) → databases to skip.
+_URL_SUBSTRING_SKIP: tuple[tuple[str, frozenset[str]], ...] = (
+    # arXiv landing pages — not indexed by IEEE or Scopus.
+    ("arxiv.org", frozenset({Database.IEEE, Database.SCOPUS})),
+    # bioRxiv / medRxiv landing pages — not indexed by IEEE.
+    ("biorxiv.org", frozenset({Database.IEEE})),
+    ("medrxiv.org", frozenset({Database.IEEE})),
+)
+
 logger = logging.getLogger(__name__)
 
 # Matches doi.org and dx.doi.org redirect URLs.  These bypass HTML scraping
@@ -386,14 +415,18 @@ class GetRunner:
                     base_paper.merge(crossref_paper)
 
             # Iterate through the remaining connectors in priority order.
-            for connector, name in (
-                (self._arxiv, "arXiv"),
-                (self._ieee, "IEEE"),
-                (self._pubmed, "PubMed"),
-                (self._scopus, "Scopus"),
-                (self._semantic_scholar, "Semantic Scholar"),
-                (self._openalex, "OpenAlex"),
+            for connector, name, database in (
+                (self._arxiv, "arXiv", Database.ARXIV),
+                (self._ieee, "IEEE", Database.IEEE),
+                (self._pubmed, "PubMed", Database.PUBMED),
+                (self._scopus, "Scopus", Database.SCOPUS),
+                (self._semantic_scholar, "Semantic Scholar", Database.SEMANTIC_SCHOLAR),
+                (self._openalex, "OpenAlex", Database.OPENALEX),
             ):
+                if self._should_skip_connector(database, doi, self._identifier):
+                    if verbose:
+                        logger.info("  %s: skipped (source heuristic)", name)
+                    continue
                 base_paper = self._run_and_merge(connector, name, doi, base_paper, verbose=verbose)
 
             # Restore CrossRef URL as the final canonical URL when available.
@@ -511,6 +544,47 @@ class GetRunner:
             return paper
         base_paper.merge(paper)
         return base_paper
+
+    @staticmethod
+    def _should_skip_connector(
+        database: str,
+        doi: str | None,
+        identifier: str,
+    ) -> bool:
+        """Return ``True`` when heuristics indicate a connector is unlikely to hold the paper.
+
+        Skipping a connector avoids wasting a quota-limited API request against
+        a database that does not index papers from the detected source.  The
+        check is intentionally conservative: it only skips when the DOI prefix
+        or identifier URL *definitively* points to a preprint server or domain
+        incompatible with the given database.
+
+        Parameters
+        ----------
+        database : str
+            The :class:`~findpapers.core.paper.Database` value of the connector
+            being evaluated (e.g. ``"ieee"``).
+        doi : str | None
+            Bare DOI resolved for the paper so far, or ``None`` when unknown.
+        identifier : str
+            The original identifier supplied by the caller (bare DOI, doi.org
+            URL, or landing-page URL).
+
+        Returns
+        -------
+        bool
+            ``True`` when the connector should be skipped for this paper.
+        """
+        if doi is not None:
+            doi_lower = doi.lower()
+            for prefix, skip_set in _DOI_PREFIX_SKIP:
+                if doi_lower.startswith(prefix) and database in skip_set:
+                    return True
+        identifier_lower = identifier.lower()
+        for substring, skip_set in _URL_SUBSTRING_SKIP:
+            if substring in identifier_lower and database in skip_set:
+                return True
+        return False
 
     @staticmethod
     def _is_landing_page_url(identifier: str) -> bool:

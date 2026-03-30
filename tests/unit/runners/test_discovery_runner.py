@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 from datetime import date
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from findpapers.core.paper import Paper
-from findpapers.runners.discovery_runner import DiscoveryRunner
+from findpapers.exceptions import InvalidParameterError
+from findpapers.runners.discovery_runner import DEFAULT_ENRICHMENT_DATABASES, DiscoveryRunner
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -113,3 +117,104 @@ class TestMatchesFilters:
         assert not runner._matches_filters(_make_paper(date(2019, 12, 31)))
         # Too new.
         assert not runner._matches_filters(_make_paper(date(2024, 1, 1)))
+
+
+# ---------------------------------------------------------------------------
+# Enrichment databases default
+# ---------------------------------------------------------------------------
+
+
+class TestEnrichmentDatabasesDefault:
+    """Tests for the enrichment_databases default behaviour."""
+
+    def test_default_enrichment_databases_constant(self):
+        """DEFAULT_ENRICHMENT_DATABASES contains only crossref and web_scraping."""
+        assert set(DEFAULT_ENRICHMENT_DATABASES) == {"crossref", "web_scraping"}
+
+    def test_none_stores_none_internally(self):
+        """enrichment_databases=None is stored as None (resolved lazily in _enrich_papers)."""
+        runner = DiscoveryRunner()
+        assert runner._enrichment_databases is None
+
+    def test_explicit_list_stored_normalised(self):
+        """An explicit list is lower-cased and stored."""
+        runner = DiscoveryRunner(enrichment_databases=["CrossRef", "OPENALEX"])
+        assert runner._enrichment_databases == ["crossref", "openalex"]
+
+    def test_empty_list_stored_as_empty(self):
+        """enrichment_databases=[] is stored as-is (signals 'no enrichment')."""
+        runner = DiscoveryRunner(enrichment_databases=[])
+        assert runner._enrichment_databases == []
+
+    def test_unknown_database_raises(self):
+        """An unrecognised database name raises InvalidParameterError."""
+        with pytest.raises(InvalidParameterError, match="Unknown enrichment database"):
+            DiscoveryRunner(enrichment_databases=["not_a_db"])
+
+    def test_enrich_papers_uses_default_when_none(self):
+        """When enrichment_databases is None, _enrich_papers uses only crossref and web_scraping."""
+        runner = DiscoveryRunner()
+
+        import datetime
+
+        from findpapers.core.author import Author
+        from findpapers.core.source import Source
+
+        paper = Paper(
+            title="Test Paper",
+            abstract="",
+            authors=[Author(name="A. Author")],
+            source=Source(title="Fake Journal"),
+            publication_date=datetime.date(2023, 1, 1),
+            doi="10.1234/test",
+            databases={"arxiv"},
+        )
+
+        captured_databases: list[list[str]] = []
+
+        def _fake_get_runner(**kwargs):
+            captured_databases.append(sorted(kwargs.get("databases", [])))
+            mock = MagicMock()
+            mock.run.return_value = None
+            mock.close = MagicMock()
+            return mock
+
+        with patch("findpapers.runners.discovery_runner.GetRunner", side_effect=_fake_get_runner):
+            runner._enrich_papers([paper], verbose=False, show_progress=False)
+
+        assert len(captured_databases) == 1
+        assert set(captured_databases[0]) == {"crossref", "web_scraping"}
+
+    def test_enrich_papers_uses_explicit_databases(self):
+        """When enrichment_databases is explicit, _enrich_papers uses exactly those."""
+        runner = DiscoveryRunner(enrichment_databases=["openalex"])
+
+        import datetime
+
+        from findpapers.core.author import Author
+        from findpapers.core.source import Source
+
+        paper = Paper(
+            title="Test Paper",
+            abstract="",
+            authors=[Author(name="A. Author")],
+            source=Source(title="Fake Journal"),
+            publication_date=datetime.date(2023, 1, 1),
+            doi="10.1234/test",
+            databases=set(),
+        )
+
+        captured_databases: list[list[str]] = []
+
+        def _fake_get_runner(**kwargs):
+            captured_databases.append(sorted(kwargs.get("databases", [])))
+            mock = MagicMock()
+            mock.run.return_value = None
+            mock.close = MagicMock()
+            return mock
+
+        with patch("findpapers.runners.discovery_runner.GetRunner", side_effect=_fake_get_runner):
+            runner._enrich_papers([paper], verbose=False, show_progress=False)
+
+        assert len(captured_databases) == 1
+        assert captured_databases[0] == ["openalex"]

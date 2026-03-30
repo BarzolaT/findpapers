@@ -219,11 +219,13 @@ class Engine:
             keep log output clean).
         enrichment_databases : list[str] | None
             Databases used to enrich papers after search and filtering.
-            ``None`` (default) runs enrichment against all available
-            sources (``"crossref"``, ``"arxiv"``, ``"ieee"``,
+            ``None`` (default) runs enrichment against ``"crossref"`` and
+            ``"web_scraping"``, which cover the majority of metadata gaps
+            without consuming quota from rate-limited databases.  Pass an
+            explicit list to enable additional (or different) sources.
+            Accepted values: ``"arxiv"``, ``"crossref"``, ``"ieee"``,
             ``"openalex"``, ``"pubmed"``, ``"scopus"``,
-            ``"semantic_scholar"``, ``"web_scraping"``), skipping any
-            database that already returned the paper during the search.
+            ``"semantic_scholar"``, ``"web_scraping"``.
             Pass ``[]`` to disable enrichment entirely.
 
         Returns
@@ -530,11 +532,11 @@ class Engine:
             progress output.
         enrichment_databases : list[str] | None
             Databases used to enrich graph nodes after snowballing.
-            ``None`` (default) runs enrichment against all available
-            sources (``"arxiv"``, ``"crossref"``, ``"ieee"``,
-            ``"openalex"``, ``"pubmed"``, ``"scopus"``,
-            ``"semantic_scholar"``, ``"web_scraping"``), skipping
-            databases that already provided the paper.
+            ``None`` (default) runs enrichment against ``"crossref"`` and
+            ``"web_scraping"``.  Pass an explicit list to enable additional
+            (or different) sources.  Accepted values: ``"arxiv"``,
+            ``"crossref"``, ``"ieee"``, ``"openalex"``, ``"pubmed"``,
+            ``"scopus"``, ``"semantic_scholar"``, ``"web_scraping"``.
             Pass ``[]`` to disable enrichment entirely.
 
         Returns

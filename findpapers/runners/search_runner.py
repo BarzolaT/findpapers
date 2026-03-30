@@ -94,11 +94,12 @@ class SearchRunner(DiscoveryRunner):
         Only return papers published on or before this date.
     enrichment_databases : list[str] | None
         Databases used to enrich papers after search and filtering.
-        ``None`` (default) runs enrichment against every available source
-        (``"arxiv"``, ``"crossref"``, ``"ieee"``, ``"openalex"``,
-        ``"pubmed"``, ``"scopus"``, ``"semantic_scholar"``,
-        ``"web_scraping"``), skipping any database that already returned
-        the paper.  Pass ``[]`` to disable enrichment entirely.
+        ``None`` (default) runs enrichment against ``crossref`` and
+        ``web_scraping``, which covers the majority of metadata gaps without
+        consuming quota from rate-limited databases.  Pass a list to enable
+        additional sources (``"arxiv"``, ``"ieee"``, ``"openalex"``,
+        ``"pubmed"``, ``"scopus"``, ``"semantic_scholar"``).
+        Pass ``[]`` to disable enrichment entirely.
     proxy : str | None
         Optional HTTP/HTTPS proxy URL forwarded to the enrichment
         :class:`~findpapers.runners.get_runner.GetRunner`.
@@ -171,8 +172,9 @@ class SearchRunner(DiscoveryRunner):
         until : dt.date | None
             Upper-bound publication date filter.
         enrichment_databases : list[str] | None
-            Databases for post-search enrichment.  ``None`` uses all
-            available sources; ``[]`` disables enrichment entirely.
+            Databases for post-search enrichment.  ``None`` uses
+            ``crossref`` and ``web_scraping`` (default); ``[]`` disables
+            enrichment entirely.
         proxy : str | None
             Optional HTTP/HTTPS proxy URL for enrichment requests.
         ssl_verify : bool

@@ -69,7 +69,7 @@ engine.search(
 | `num_workers` | `int` | Number of parallel database workers. Defaults to `1`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bars. Defaults to `True`. |
-| `enrichment_databases` | `list[str] \| None` | Databases for post-search enrichment. `None` (default) uses all available sources. `[]` disables enrichment. |
+| `enrichment_databases` | `list[str] \| None` | Databases for post-search enrichment. `None` (default) uses `"crossref"` and `"web_scraping"`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`. `[]` disables enrichment. |
 
 **Returns:** `SearchResult` with deduplicated papers.
 
@@ -161,7 +161,7 @@ engine.snowball(
 | `num_workers` | `int` | Number of parallel workers. Defaults to `1`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bars. Defaults to `True`. |
-| `enrichment_databases` | `list[str] \| None` | Databases for post-snowball enrichment. `None` (default) uses all available sources. `[]` disables enrichment. |
+| `enrichment_databases` | `list[str] \| None` | Databases for post-snowball enrichment. `None` (default) uses `"crossref"` and `"web_scraping"`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`. `[]` disables enrichment. |
 
 **Returns:** `CitationGraph` with all discovered papers and citation edges.
 

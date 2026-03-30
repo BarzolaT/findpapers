@@ -81,6 +81,160 @@ def _make_runner(identifier: str = "10.1234/test") -> GetRunner:
 
 
 # ---------------------------------------------------------------------------
+# Source-skipping heuristics
+# ---------------------------------------------------------------------------
+
+
+class TestShouldSkipConnector:
+    """Tests for GetRunner._should_skip_connector."""
+
+    # --- arXiv DOI prefix (10.48550/) ---
+
+    def test_arxiv_doi_skips_ieee(self):
+        """arXiv DOI prefix causes IEEE to be skipped."""
+        assert (
+            GetRunner._should_skip_connector(
+                "ieee", "10.48550/arxiv.1706.03762", "10.48550/arxiv.1706.03762"
+            )
+            is True
+        )
+
+    def test_arxiv_doi_skips_scopus(self):
+        """arXiv DOI prefix causes Scopus to be skipped."""
+        assert (
+            GetRunner._should_skip_connector(
+                "scopus", "10.48550/arxiv.1706.03762", "10.48550/arxiv.1706.03762"
+            )
+            is True
+        )
+
+    def test_arxiv_doi_does_not_skip_arxiv(self):
+        """arXiv DOI prefix does not skip arXiv itself."""
+        assert (
+            GetRunner._should_skip_connector(
+                "arxiv", "10.48550/arxiv.1706.03762", "10.48550/arxiv.1706.03762"
+            )
+            is False
+        )
+
+    def test_arxiv_doi_does_not_skip_crossref(self):
+        """arXiv DOI prefix does not skip CrossRef."""
+        assert (
+            GetRunner._should_skip_connector(
+                "crossref", "10.48550/arxiv.1706.03762", "10.48550/arxiv.1706.03762"
+            )
+            is False
+        )
+
+    def test_arxiv_doi_case_insensitive(self):
+        """DOI comparison is case-insensitive."""
+        assert (
+            GetRunner._should_skip_connector(
+                "ieee", "10.48550/arXiv.1706.03762", "10.48550/arXiv.1706.03762"
+            )
+            is True
+        )
+
+    # --- bioRxiv / medRxiv DOI prefix (10.1101/) ---
+
+    def test_biorxiv_doi_skips_ieee(self):
+        """bioRxiv/medRxiv DOI prefix causes IEEE to be skipped."""
+        assert (
+            GetRunner._should_skip_connector(
+                "ieee", "10.1101/2021.01.01.123456", "10.1101/2021.01.01.123456"
+            )
+            is True
+        )
+
+    def test_biorxiv_doi_does_not_skip_pubmed(self):
+        """bioRxiv/medRxiv DOI prefix does not skip PubMed."""
+        assert (
+            GetRunner._should_skip_connector(
+                "pubmed", "10.1101/2021.01.01.123456", "10.1101/2021.01.01.123456"
+            )
+            is False
+        )
+
+    # --- arXiv URL in identifier ---
+
+    def test_arxiv_url_skips_ieee(self):
+        """arXiv landing-page URL causes IEEE to be skipped."""
+        assert (
+            GetRunner._should_skip_connector("ieee", None, "https://arxiv.org/abs/1706.03762")
+            is True
+        )
+
+    def test_arxiv_url_skips_scopus(self):
+        """arXiv landing-page URL causes Scopus to be skipped."""
+        assert (
+            GetRunner._should_skip_connector("scopus", None, "https://arxiv.org/abs/1706.03762")
+            is True
+        )
+
+    def test_arxiv_url_does_not_skip_semantic_scholar(self):
+        """arXiv URL does not skip Semantic Scholar."""
+        assert (
+            GetRunner._should_skip_connector(
+                "semantic_scholar", None, "https://arxiv.org/abs/1706.03762"
+            )
+            is False
+        )
+
+    # --- bioRxiv / medRxiv URL in identifier ---
+
+    def test_biorxiv_url_skips_ieee(self):
+        """bioRxiv URL causes IEEE to be skipped."""
+        assert (
+            GetRunner._should_skip_connector(
+                "ieee", None, "https://www.biorxiv.org/content/10.1101/123"
+            )
+            is True
+        )
+
+    def test_medrxiv_url_skips_ieee(self):
+        """medRxiv URL causes IEEE to be skipped."""
+        assert (
+            GetRunner._should_skip_connector(
+                "ieee", None, "https://www.medrxiv.org/content/10.1101/456"
+            )
+            is True
+        )
+
+    def test_biorxiv_url_does_not_skip_pubmed(self):
+        """bioRxiv URL does not skip PubMed."""
+        assert (
+            GetRunner._should_skip_connector(
+                "pubmed", None, "https://www.biorxiv.org/content/10.1101/123"
+            )
+            is False
+        )
+
+    # --- generic / other DOIs and URLs ---
+
+    def test_regular_doi_does_not_skip_ieee(self):
+        """A generic publisher DOI does not skip IEEE."""
+        assert (
+            GetRunner._should_skip_connector(
+                "ieee", "10.1109/tpami.2021.123456", "10.1109/tpami.2021.123456"
+            )
+            is False
+        )
+
+    def test_no_doi_and_generic_url_does_not_skip(self):
+        """No signal means no connector is skipped."""
+        assert (
+            GetRunner._should_skip_connector("ieee", None, "https://dl.acm.org/doi/10.1145/123")
+            is False
+        )
+
+    def test_doi_none_arxiv_url_still_skips(self):
+        """When doi=None, URL signal alone is sufficient to trigger skip."""
+        assert (
+            GetRunner._should_skip_connector("ieee", None, "https://arxiv.org/abs/2301.00001")
+            is True
+        )
+
+
 # Identifier classification
 # ---------------------------------------------------------------------------
 

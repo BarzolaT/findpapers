@@ -84,9 +84,8 @@ class SnowballRunner(DiscoveryRunner):
         NCBI PubMed API key used during the enrichment phase.
     enrichment_databases : list[str] | None
         Databases used to enrich graph nodes after snowballing completes.
-        ``None`` (default) runs enrichment against every available source,
-        skipping any database that already returned the paper.  Pass ``[]``
-        to disable enrichment entirely.
+        ``None`` (default) uses ``crossref`` and ``web_scraping``; pass
+        ``[]`` to disable enrichment entirely.
     proxy : str | None
         Optional HTTP/HTTPS proxy URL forwarded to the enrichment
         :class:`~findpapers.runners.get_runner.GetRunner`.
@@ -146,8 +145,9 @@ class SnowballRunner(DiscoveryRunner):
         pubmed_api_key : str | None
             PubMed API key for enrichment.
         enrichment_databases : list[str] | None
-            Databases for post-snowball enrichment.  ``None`` uses all;
-            ``[]`` disables enrichment.
+            Databases for post-snowball enrichment.  ``None`` uses
+            ``crossref`` and ``web_scraping`` (default); ``[]`` disables
+            enrichment.
         proxy : str | None
             Optional proxy URL for enrichment requests.
         ssl_verify : bool
