@@ -13,6 +13,17 @@ from findpapers.core.source import Source
 from findpapers.exceptions import InvalidParameterError
 from findpapers.runners.get_runner import GetRunner
 
+
+@pytest.fixture(autouse=True)
+def _no_web_scraping():
+    """Patch WebScrapingConnector so unit tests do not make real HTTP requests."""
+    with patch(
+        "findpapers.connectors.web_scraping.WebScrapingConnector.fetch_paper_from_url",
+        return_value=None,
+    ):
+        yield
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

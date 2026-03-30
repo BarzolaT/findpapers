@@ -15,6 +15,16 @@ from findpapers.exceptions import InvalidParameterError
 from findpapers.runners.snowball_runner import SnowballRunner
 
 
+@pytest.fixture(autouse=True)
+def _no_enrichment():
+    """Patch out enrichment so unit tests do not make real HTTP requests."""
+    with patch(
+        "findpapers.runners.discovery_runner.DiscoveryRunner._enrich_papers",
+        return_value=None,
+    ):
+        yield
+
+
 class FakeCitationConnector(CitationConnectorBase):
     """A fake connector that returns pre-configured references and citations."""
 

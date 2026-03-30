@@ -64,17 +64,6 @@ print(f"Downloaded {metrics['downloaded_papers']} of {metrics['total_papers']} p
 
 PDFs are saved as `YEAR-title.pdf`. A `download_log.txt` file is created in the output directory with the status of each download.
 
-## Enriching Papers
-
-Enrich papers with additional metadata from CrossRef and web scraping:
-
-```python
-metrics = engine.enrich(result.papers)
-print(f"Enriched {metrics['enriched_papers']} papers")
-```
-
-Enrichment can fill in missing abstracts, keywords, citation counts, PDF URLs, and source details. Papers are modified in place.
-
 ## Saving Results
 
 ```python

@@ -366,6 +366,12 @@ class TestBuildPaperFromCrossref:
         assert paper is not None
         assert paper.source is None
 
+    def test_databases_set_to_crossref(self) -> None:
+        """Built paper always has databases={'crossref'}."""
+        paper = CrossRefConnector._build_paper(_FULL_WORK)
+        assert paper is not None
+        assert paper.databases == {"crossref"}
+
 
 # ---------------------------------------------------------------------------
 # fetch_crossref_work

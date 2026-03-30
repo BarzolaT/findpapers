@@ -17,6 +17,16 @@ from findpapers.exceptions import InvalidParameterError, QueryValidationError, U
 from findpapers.runners.search_runner import SearchRunner, _are_years_compatible, _is_preprint_doi
 
 
+@pytest.fixture(autouse=True)
+def _no_enrichment():
+    """Patch out enrichment so unit tests do not make real HTTP requests."""
+    with patch(
+        "findpapers.runners.discovery_runner.DiscoveryRunner._enrich_papers",
+        return_value=None,
+    ):
+        yield
+
+
 class TestSearchRunnerInit:
     """Tests for SearchRunner initialisation."""
 
@@ -558,7 +568,14 @@ class TestSearchRunnerParallel:
         mock_s2.search.return_value = [make_paper(title="B")]
 
         # num_workers=10 but only 2 searchers — effective workers must be capped to 2.
-        runner = SearchRunner(query="[ml]", databases=["arxiv", "pubmed"], num_workers=10)
+        # enrichment_databases=[] disables the enrichment phase so only the
+        # fetch call to execute_tasks is captured.
+        runner = SearchRunner(
+            query="[ml]",
+            databases=["arxiv", "pubmed"],
+            num_workers=10,
+            enrichment_databases=[],
+        )
         runner._searchers = [mock_s1, mock_s2]
 
         captured: list[int | None] = []

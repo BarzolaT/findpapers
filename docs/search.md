@@ -33,6 +33,7 @@ result = engine.search(
     num_workers=1,                  # int - number of parallel workers
     verbose=False,                  # bool - enable detailed logging
     show_progress=True,             # bool - show progress bars
+    enrichment_databases=None,      # list[str] | None - databases for post-search enrichment
 )
 ```
 
@@ -47,6 +48,7 @@ result = engine.search(
 | `num_workers` | `int` | `1` | Number of parallel workers used to query databases concurrently |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
 | `show_progress` | `bool` | `True` | Display tqdm progress bars while papers are being fetched |
+| `enrichment_databases` | `list[str] \| None` | `None` | Databases used to enrich papers after search and filtering. `None` uses all available sources (`"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`). Pass `[]` to disable enrichment. |
 
 ## Return Value
 
@@ -122,6 +124,25 @@ Findpapers automatically deduplicates papers found across multiple databases. Tw
 - The same normalized title
 
 When duplicates are found, their metadata is merged - keeping the richest information from each source.
+
+## Enrichment
+
+After collecting and deduplicating papers, `search()` can automatically enrich them with additional metadata (abstracts, keywords, citation counts, PDF URLs) from multiple databases. Use the `enrichment_databases` parameter to control this:
+
+```python
+# Enrich with all available databases (default)
+result = engine.search("[transformers]", enrichment_databases=None)
+
+# Enrich only via CrossRef and Semantic Scholar
+result = engine.search("[transformers]", enrichment_databases=["crossref", "semantic_scholar"])
+
+# Skip enrichment entirely
+result = engine.search("[transformers]", enrichment_databases=[])
+```
+
+Databases that already returned a given paper during the search phase are always excluded from its enrichment to avoid redundant requests.
+
+Available identifiers for `enrichment_databases`: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`.
 
 ## Working with Results
 

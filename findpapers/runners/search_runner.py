@@ -15,7 +15,7 @@ from findpapers.exceptions import InvalidParameterError, MissingApiKeyError, Uns
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
 from findpapers.query.validator import QueryValidator
-from findpapers.runners.base_runner import BaseRunner
+from findpapers.runners.discovery_runner import DiscoveryRunner
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.parallel import execute_tasks
 from findpapers.utils.progress import make_progress_bar
@@ -50,7 +50,7 @@ def _is_preprint_doi(doi: str) -> bool:
     return any(lowered.startswith(prefix) for prefix in _PREPRINT_DOI_PREFIXES)
 
 
-class SearchRunner(BaseRunner):
+class SearchRunner(DiscoveryRunner):
     """Public API entry point for running academic paper searches.
 
     The runner orchestrates the full pipeline:
@@ -92,11 +92,26 @@ class SearchRunner(BaseRunner):
         Only return papers published on or after this date.
     until : dt.date | None
         Only return papers published on or before this date.
+    enrichment_databases : list[str] | None
+        Databases used to enrich papers after search and filtering.
+        ``None`` (default) runs enrichment against every available source
+        (``"arxiv"``, ``"crossref"``, ``"ieee"``, ``"openalex"``,
+        ``"pubmed"``, ``"scopus"``, ``"semantic_scholar"``,
+        ``"web_scraping"``), skipping any database that already returned
+        the paper.  Pass ``[]`` to disable enrichment entirely.
+    proxy : str | None
+        Optional HTTP/HTTPS proxy URL forwarded to the enrichment
+        :class:`~findpapers.runners.get_runner.GetRunner`.
+    ssl_verify : bool
+        Whether to verify SSL certificates during enrichment.
+        Defaults to ``True``.
 
     Raises
     ------
     findpapers.exceptions.QueryValidationError
         If the query string fails validation.
+    findpapers.exceptions.InvalidParameterError
+        If *enrichment_databases* contains unknown database names.
 
     Examples
     --------
@@ -123,19 +138,73 @@ class SearchRunner(BaseRunner):
         num_workers: int = 1,
         since: dt.date | None = None,
         until: dt.date | None = None,
+        enrichment_databases: list[str] | None = None,
+        proxy: str | None = None,
+        ssl_verify: bool = True,
     ) -> None:
-        """Initialise search configuration without executing it."""
+        """Initialise search configuration without executing it.
+
+        Parameters
+        ----------
+        query : str
+            Raw query string.
+        databases : list[str] | None
+            Database identifiers to query.  ``None`` selects all available.
+        max_papers_per_database : int | None
+            Maximum papers per database.  ``None`` means no limit.
+        ieee_api_key : str | None
+            IEEE Xplore API key.
+        scopus_api_key : str | None
+            Elsevier / Scopus API key.
+        pubmed_api_key : str | None
+            NCBI PubMed API key.
+        openalex_api_key : str | None
+            OpenAlex API key.
+        email : str | None
+            Contact email for polite-pool access (CrossRef, OpenAlex).
+        semantic_scholar_api_key : str | None
+            Semantic Scholar API key.
+        num_workers : int
+            Number of parallel workers.  Defaults to ``1``.
+        since : dt.date | None
+            Lower-bound publication date filter.
+        until : dt.date | None
+            Upper-bound publication date filter.
+        enrichment_databases : list[str] | None
+            Databases for post-search enrichment.  ``None`` uses all
+            available sources; ``[]`` disables enrichment entirely.
+        proxy : str | None
+            Optional HTTP/HTTPS proxy URL for enrichment requests.
+        ssl_verify : bool
+            Whether to verify SSL certificates during enrichment.
+
+        Raises
+        ------
+        InvalidParameterError
+            If *enrichment_databases* contains unknown database names.
+        """
         self._results: list[Paper] = []
         self._metrics: dict[str, int | float] = {}
         self._search: SearchResult | None = None
 
-        super().__init__(since=since, until=until)
+        super().__init__(
+            since=since,
+            until=until,
+            ieee_api_key=ieee_api_key,
+            scopus_api_key=scopus_api_key,
+            pubmed_api_key=pubmed_api_key,
+            openalex_api_key=openalex_api_key,
+            email=email,
+            semantic_scholar_api_key=semantic_scholar_api_key,
+            proxy=proxy,
+            ssl_verify=ssl_verify,
+            enrichment_databases=enrichment_databases,
+        )
 
         self._query_string = query
         self._max_papers_per_database = max_papers_per_database
         self._num_workers = num_workers
 
-        # Parse and validate the query upfront so errors surface early.
         validator = QueryValidator()
         validator.validate(query)
         parser = QueryParser()
@@ -232,6 +301,19 @@ class SearchRunner(BaseRunner):
                     len(self._results),
                     before_filter - len(self._results),
                 )
+
+        # Enrich the filtered papers via per-paper get() lookups.
+        # enrichment_databases=None  → enrich with all available databases.
+        # enrichment_databases=[]    → skip enrichment entirely.
+        if not (
+            isinstance(self._enrichment_databases, list) and len(self._enrichment_databases) == 0
+        ):
+            super()._enrich_papers(
+                self._results,
+                verbose,
+                show_progress=show_progress,
+                num_workers=self._num_workers,
+            )
 
         metrics["total_papers"] = len(self._results)
         metrics["runtime_in_seconds"] = perf_counter() - start

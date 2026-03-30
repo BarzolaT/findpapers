@@ -13,7 +13,6 @@ Example
 ...     proxy="http://proxy:8080",
 ... )
 >>> result = engine.search("[machine learning]", databases=["arxiv", "ieee"])
->>> engine.enrich(result.papers, num_workers=4)
 >>> engine.download(result.papers, "./pdfs")
 """
 
@@ -28,7 +27,6 @@ from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import SearchResult
 from findpapers.runners.download_runner import DownloadRunner
-from findpapers.runners.enrichment_runner import EnrichmentRunner
 from findpapers.runners.get_runner import GetRunner
 from findpapers.runners.search_runner import SearchRunner
 from findpapers.runners.snowball_runner import SnowballRunner
@@ -152,6 +150,7 @@ class Engine:
         num_workers: int = 1,
         verbose: bool = False,
         show_progress: bool = True,
+        enrichment_databases: list[str] | None = None,
     ) -> SearchResult:
         """Search for academic papers across multiple databases.
 
@@ -218,6 +217,14 @@ class Engine:
             papers are being fetched.  Set to ``False`` to suppress
             progress output (e.g. in non-interactive environments or to
             keep log output clean).
+        enrichment_databases : list[str] | None
+            Databases used to enrich papers after search and filtering.
+            ``None`` (default) runs enrichment against all available
+            sources (``"crossref"``, ``"arxiv"``, ``"ieee"``,
+            ``"openalex"``, ``"pubmed"``, ``"scopus"``,
+            ``"semantic_scholar"``, ``"web_scraping"``), skipping any
+            database that already returned the paper during the search.
+            Pass ``[]`` to disable enrichment entirely.
 
         Returns
         -------
@@ -279,6 +286,9 @@ class Engine:
             num_workers=num_workers,
             since=since,
             until=until,
+            enrichment_databases=enrichment_databases,
+            proxy=self._proxy,
+            ssl_verify=self._ssl_verify,
         )
         return runner.run(verbose=verbose, show_progress=show_progress)
 
@@ -350,93 +360,6 @@ class Engine:
         runner = DownloadRunner(
             papers=papers,
             output_directory=output_directory,
-            num_workers=num_workers,
-            timeout=timeout,
-            proxy=self._proxy,
-            ssl_verify=self._ssl_verify,
-        )
-        return runner.run(verbose=verbose, show_progress=show_progress)
-
-    def enrich(
-        self,
-        papers: list[Paper],
-        *,
-        num_workers: int = 1,
-        timeout: float | None = 10.0,
-        verbose: bool = False,
-        show_progress: bool = True,
-    ) -> dict[str, int | float]:
-        """Enrich papers with additional metadata from web sources.
-
-        For each paper, metadata is fetched from the CrossRef API (when a DOI
-        is available) and by scraping the paper's known URLs.  Found data —
-        such as abstracts, keywords, PDF links, citation counts, and source
-        details — is merged into the existing paper objects.
-
-        .. note::
-
-           Papers are modified **in-place**.  After calling ``enrich()`` the
-           same paper objects passed in will contain the updated metadata.
-
-        Parameters
-        ----------
-        papers : list[Paper]
-            Papers to enrich — typically obtained from
-            ``engine.search(...).papers``.
-        num_workers : int
-            Number of parallel workers.  Defaults to ``1`` (sequential).
-            Increase to speed up enrichment of large paper sets.
-        timeout : float | None
-            Per-request HTTP timeout in seconds.  ``None`` disables the
-            timeout.  Defaults to ``10.0``.
-        verbose : bool
-            When ``True``, emit detailed log messages at DEBUG level.
-            Defaults to ``False``.
-        show_progress : bool
-            When ``True`` (default), display a tqdm progress bar while
-            papers are being enriched.  Set to ``False`` to suppress
-            progress output.
-
-        Returns
-        -------
-        dict[str, int | float]
-            Metrics dictionary with at least the following keys:
-
-            * ``total_papers`` — number of papers processed.
-            * ``enriched_papers`` — number of papers that gained new metadata.
-            * ``unchanged_papers`` — papers already up-to-date (no new data
-              found).
-            * ``failed_papers`` — papers where metadata fetch failed.
-            * ``runtime_in_seconds`` — wall-clock time of the enrichment
-              process.
-
-        See Also
-        --------
-        findpapers.runners.enrichment_runner.EnrichmentRunner :
-            Lower-level class for finer control over the enrichment pipeline.
-
-        Examples
-        --------
-        Enrich papers right after a search:
-
-        >>> from findpapers import Engine
-        >>> engine = Engine()
-        >>> result = engine.search("[deep learning]", databases=["arxiv"])
-        >>> metrics = engine.enrich(result.papers, num_workers=4)
-        >>> print(f"{metrics['enriched_papers']}/{metrics['total_papers']} enriched")
-        8/10 enriched
-
-        Chain search, enrichment, and save:
-
-        >>> engine = Engine()
-        >>> result = engine.search("[transformers]")
-        >>> engine.enrich(result.papers)
-        >>> import findpapers
-        >>> findpapers.save_to_json(result, "enriched_results.json")
-        """
-        runner = EnrichmentRunner(
-            papers=papers,
-            email=self._email,
             num_workers=num_workers,
             timeout=timeout,
             proxy=self._proxy,
@@ -554,6 +477,7 @@ class Engine:
         num_workers: int = 1,
         verbose: bool = False,
         show_progress: bool = True,
+        enrichment_databases: list[str] | None = None,
     ) -> CitationGraph:
         """Build a citation graph around seed papers via snowballing.
 
@@ -604,6 +528,14 @@ class Engine:
             When ``True`` (default), display tqdm progress bars while
             papers are being expanded.  Set to ``False`` to suppress
             progress output.
+        enrichment_databases : list[str] | None
+            Databases used to enrich graph nodes after snowballing.
+            ``None`` (default) runs enrichment against all available
+            sources (``"arxiv"``, ``"crossref"``, ``"ieee"``,
+            ``"openalex"``, ``"pubmed"``, ``"scopus"``,
+            ``"semantic_scholar"``, ``"web_scraping"``), skipping
+            databases that already provided the paper.
+            Pass ``[]`` to disable enrichment entirely.
 
         Returns
         -------
@@ -652,8 +584,14 @@ class Engine:
             openalex_api_key=self._openalex_api_key,
             email=self._email,
             semantic_scholar_api_key=self._semantic_scholar_api_key,
+            ieee_api_key=self._ieee_api_key,
+            scopus_api_key=self._scopus_api_key,
+            pubmed_api_key=self._pubmed_api_key,
             num_workers=num_workers,
             since=since,
             until=until,
+            enrichment_databases=enrichment_databases,
+            proxy=self._proxy,
+            ssl_verify=self._ssl_verify,
         )
         return runner.run(verbose=verbose, show_progress=show_progress)

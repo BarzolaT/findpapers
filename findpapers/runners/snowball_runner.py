@@ -22,14 +22,14 @@ from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Database, Paper
 from findpapers.exceptions import InvalidParameterError
-from findpapers.runners.base_runner import BaseRunner
+from findpapers.runners.discovery_runner import DiscoveryRunner
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.progress import make_progress_bar
 
 logger = logging.getLogger(__name__)
 
 
-class SnowballRunner(BaseRunner):
+class SnowballRunner(DiscoveryRunner):
     """Build a citation graph around seed papers via iterative snowballing.
 
     The runner traverses the citation network in a BFS fashion: at each
@@ -76,6 +76,23 @@ class SnowballRunner(BaseRunner):
         Only include discovered papers published on or before this date.
         Seed papers are never filtered.  ``None`` (default) disables
         the upper-bound date filter.
+    ieee_api_key : str | None
+        IEEE Xplore API key used during the enrichment phase.
+    scopus_api_key : str | None
+        Elsevier / Scopus API key used during the enrichment phase.
+    pubmed_api_key : str | None
+        NCBI PubMed API key used during the enrichment phase.
+    enrichment_databases : list[str] | None
+        Databases used to enrich graph nodes after snowballing completes.
+        ``None`` (default) runs enrichment against every available source,
+        skipping any database that already returned the paper.  Pass ``[]``
+        to disable enrichment entirely.
+    proxy : str | None
+        Optional HTTP/HTTPS proxy URL forwarded to the enrichment
+        :class:`~findpapers.runners.get_runner.GetRunner`.
+    ssl_verify : bool
+        Whether to verify SSL certificates during enrichment.
+        Defaults to ``True``.
     """
 
     def __init__(
@@ -91,13 +108,56 @@ class SnowballRunner(BaseRunner):
         num_workers: int = 1,
         since: datetime.date | None = None,
         until: datetime.date | None = None,
+        ieee_api_key: str | None = None,
+        scopus_api_key: str | None = None,
+        pubmed_api_key: str | None = None,
+        enrichment_databases: list[str] | None = None,
+        proxy: str | None = None,
+        ssl_verify: bool = True,
     ) -> None:
         """Initialise snowball configuration without executing it.
+
+        Parameters
+        ----------
+        seed_papers : list[Paper] | Paper
+            One or more seed papers.
+        max_depth : int
+            Maximum BFS depth.  Must be >= 1.
+        direction : Literal["both", "backward", "forward"]
+            Snowball direction(s).
+        top_n_per_level : int | None
+            When set, keep only the top-N most-cited papers per level.
+        openalex_api_key : str | None
+            OpenAlex API key.
+        email : str | None
+            Contact email for polite-pool access.
+        semantic_scholar_api_key : str | None
+            Semantic Scholar API key.
+        num_workers : int
+            Maximum parallel workers per paper expansion.
+        since : datetime.date | None
+            Lower-bound publication date filter for discovered papers.
+        until : datetime.date | None
+            Upper-bound publication date filter for discovered papers.
+        ieee_api_key : str | None
+            IEEE Xplore API key for enrichment.
+        scopus_api_key : str | None
+            Scopus API key for enrichment.
+        pubmed_api_key : str | None
+            PubMed API key for enrichment.
+        enrichment_databases : list[str] | None
+            Databases for post-snowball enrichment.  ``None`` uses all;
+            ``[]`` disables enrichment.
+        proxy : str | None
+            Optional proxy URL for enrichment requests.
+        ssl_verify : bool
+            Whether to verify SSL certificates during enrichment.
 
         Raises
         ------
         InvalidParameterError
-            If *max_depth* is less than 1 or *top_n_per_level* is less than 1.
+            If *max_depth* is less than 1, *top_n_per_level* is less than 1,
+            or *enrichment_databases* contains unknown database names.
         """
         if max_depth < 1:
             raise InvalidParameterError(f"max_depth must be >= 1, got {max_depth}")
@@ -106,7 +166,19 @@ class SnowballRunner(BaseRunner):
                 f"top_n_per_level must be >= 1 when set, got {top_n_per_level}"
             )
 
-        super().__init__(since=since, until=until)
+        super().__init__(
+            since=since,
+            until=until,
+            ieee_api_key=ieee_api_key,
+            scopus_api_key=scopus_api_key,
+            pubmed_api_key=pubmed_api_key,
+            openalex_api_key=openalex_api_key,
+            email=email,
+            semantic_scholar_api_key=semantic_scholar_api_key,
+            proxy=proxy,
+            ssl_verify=ssl_verify,
+            enrichment_databases=enrichment_databases,
+        )
 
         if isinstance(seed_papers, Paper):
             seed_papers = [seed_papers]
@@ -296,6 +368,19 @@ class SnowballRunner(BaseRunner):
             "runtime_in_seconds": elapsed,
         }
         self._graph = graph
+
+        # Enrich graph nodes via per-paper get() lookups.
+        # enrichment_databases=None  → enrich with all available databases.
+        # enrichment_databases=[]    → skip enrichment entirely.
+        if not (
+            isinstance(self._enrichment_databases, list) and len(self._enrichment_databases) == 0
+        ):
+            super()._enrich_papers(
+                graph.nodes,
+                verbose,
+                show_progress=show_progress,
+                num_workers=self._num_workers,
+            )
 
         if verbose:
             logger.info("=== Snowball Results ===")

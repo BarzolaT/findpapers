@@ -14,6 +14,25 @@ from findpapers.core.search_result import SearchResult
 from findpapers.engine import Engine
 from findpapers.runners.snowball_runner import SnowballRunner
 
+_FINDPAPERS_ENV_VARS = {
+    "FINDPAPERS_IEEE_API_TOKEN": "",
+    "FINDPAPERS_SCOPUS_API_TOKEN": "",
+    "FINDPAPERS_PUBMED_API_TOKEN": "",
+    "FINDPAPERS_OPENALEX_API_TOKEN": "",
+    "FINDPAPERS_EMAIL": "",
+    "FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN": "",
+    "FINDPAPERS_PROXY": "",
+    "FINDPAPERS_SSL_VERIFY": "",
+}
+
+
+@pytest.fixture(autouse=True)
+def _clear_findpapers_env():
+    """Clear FINDPAPERS_* environment variables for every test in this module."""
+    with patch.dict(os.environ, _FINDPAPERS_ENV_VARS, clear=False):
+        yield
+
+
 # ---------------------------------------------------------------------------
 # Construction
 # ---------------------------------------------------------------------------
@@ -198,6 +217,9 @@ class TestEngineSearch:
             num_workers=3,
             since=None,
             until=None,
+            enrichment_databases=None,
+            proxy=None,
+            ssl_verify=True,
         )
         mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
         assert result is fake_search
@@ -298,67 +320,51 @@ class TestEngineDownload:
 
 
 # ---------------------------------------------------------------------------
-# enrich()
+# search() enrichment_databases forwarding
 # ---------------------------------------------------------------------------
 
 
-class TestEngineEnrich:
-    """Tests for Engine.enrich()."""
+class TestEngineSearchEnrichmentDatabases:
+    """Tests that Engine.search() forwards enrichment_databases to SearchRunner."""
 
-    def test_enrich_forwards_timeout(self, make_paper):
-        """enrich() forwards per-call timeout to EnrichmentRunner."""
-        with patch.dict(os.environ, {"FINDPAPERS_PROXY": "", "FINDPAPERS_SSL_VERIFY": ""}):
-            engine = Engine()
-        fake_metrics = {"total_papers": 2, "enriched_papers": 1}
-        with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
+    def test_enrichment_databases_forwarded(self):
+        """enrichment_databases is passed through to SearchRunner."""
+        engine = Engine()
+        with patch("findpapers.engine.SearchRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.run.return_value = fake_metrics
+            mock_runner.run.return_value = MagicMock(spec=SearchResult)
             mock_cls.return_value = mock_runner
 
-            papers = [make_paper(), make_paper(title="P2")]
-            result = engine.enrich(papers, num_workers=4, timeout=25.0, verbose=True)
-
-        mock_cls.assert_called_once_with(
-            papers=papers,
-            email=None,
-            num_workers=4,
-            timeout=25.0,
-            proxy=None,
-            ssl_verify=True,
-        )
-        mock_runner.run.assert_called_once_with(verbose=True, show_progress=True)
-        assert result == fake_metrics
-
-    def test_enrich_default_per_call_params(self):
-        """num_workers defaults to 1, verbose to False, timeout to 10.0."""
-        with patch.dict(os.environ, {"FINDPAPERS_PROXY": "", "FINDPAPERS_SSL_VERIFY": ""}):
-            engine = Engine()
-        with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
-            mock_runner = MagicMock()
-            mock_runner.run.return_value = {}
-            mock_cls.return_value = mock_runner
-
-            engine.enrich([])
+            engine.search("[ml]", enrichment_databases=["arxiv", "pubmed"])
 
         _, kwargs = mock_cls.call_args
-        assert kwargs["num_workers"] == 1
-        assert kwargs["timeout"] == 10.0
-        assert kwargs["proxy"] is None
-        assert kwargs["ssl_verify"] is True
-        mock_runner.run.assert_called_once_with(verbose=False, show_progress=True)
+        assert kwargs["enrichment_databases"] == ["arxiv", "pubmed"]
 
-    def test_enrich_show_progress_false(self):
-        """show_progress=False is forwarded to EnrichmentRunner.run()."""
-        with patch.dict(os.environ, {"FINDPAPERS_PROXY": "", "FINDPAPERS_SSL_VERIFY": ""}):
-            engine = Engine()
-        with patch("findpapers.engine.EnrichmentRunner") as mock_cls:
+    def test_enrichment_databases_none_by_default(self):
+        """enrichment_databases defaults to None (all databases)."""
+        engine = Engine()
+        with patch("findpapers.engine.SearchRunner") as mock_cls:
             mock_runner = MagicMock()
-            mock_runner.run.return_value = {}
+            mock_runner.run.return_value = MagicMock(spec=SearchResult)
             mock_cls.return_value = mock_runner
 
-            engine.enrich([], show_progress=False)
+            engine.search("[ml]")
 
-        mock_runner.run.assert_called_once_with(verbose=False, show_progress=False)
+        _, kwargs = mock_cls.call_args
+        assert kwargs["enrichment_databases"] is None
+
+    def test_enrichment_databases_empty_list_disables_enrichment(self):
+        """enrichment_databases=[] is forwarded to SearchRunner to disable enrichment."""
+        engine = Engine()
+        with patch("findpapers.engine.SearchRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = MagicMock(spec=SearchResult)
+            mock_cls.return_value = mock_runner
+
+            engine.search("[ml]", enrichment_databases=[])
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs["enrichment_databases"] == []
 
 
 # ---------------------------------------------------------------------------

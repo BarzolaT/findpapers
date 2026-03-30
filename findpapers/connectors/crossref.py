@@ -82,6 +82,9 @@ class CrossRefConnector(CitationConnectorBase, DOILookupConnectorBase):
     API documentation: https://api.crossref.org/swagger-ui/index.html
     """
 
+    _DATABASE_NAME: str = "crossref"
+    """Database identifier used in :attr:`~findpapers.core.paper.Paper.databases`."""
+
     def __init__(self, email: str | None = None) -> None:
         """Create a CrossRef connector.
 
@@ -102,7 +105,7 @@ class CrossRefConnector(CitationConnectorBase, DOILookupConnectorBase):
         str
             ``"crossref"``.
         """
-        return "crossref"
+        return self._DATABASE_NAME
 
     @property
     def min_request_interval(self) -> float:
@@ -591,4 +594,5 @@ class CrossRefConnector(CitationConnectorBase, DOILookupConnectorBase):
             keywords=keywords or None,
             page_range=pages,
             page_count=page_count,
+            databases={CrossRefConnector._DATABASE_NAME},
         )

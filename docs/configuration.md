@@ -86,9 +86,6 @@ result = engine.search("[machine learning]", num_workers=4)
 # Download PDFs in parallel
 engine.download(result.papers, "./pdfs", num_workers=8)
 
-# Enrich in parallel
-engine.enrich(result.papers, num_workers=4)
-
 # Snowball in parallel
 graph = engine.snowball(result.papers[:5], num_workers=4)
 ```
@@ -119,7 +116,6 @@ Download, enrichment, and paper-lookup operations accept a `timeout` parameter (
 
 ```python
 engine.download(result.papers, "./pdfs", timeout=30.0)
-engine.enrich(result.papers, timeout=15.0)
 paper = engine.get("10.1038/nature12373", timeout=15.0)
 paper = engine.get("https://arxiv.org/abs/1706.03762", timeout=15.0)
 ```

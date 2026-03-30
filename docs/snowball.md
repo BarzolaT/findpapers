@@ -30,6 +30,7 @@ graph = engine.snowball(
     num_workers=1,                  # int - number of parallel workers
     verbose=False,                  # bool - enable detailed logging
     show_progress=True,             # bool - show progress bars
+    enrichment_databases=None,      # list[str] | None - databases for post-snowball enrichment
 )
 ```
 
@@ -45,6 +46,7 @@ graph = engine.snowball(
 | `num_workers` | `int` | `1` | Number of parallel workers used to query connectors |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
 | `show_progress` | `bool` | `True` | Display tqdm progress bars while papers are being expanded |
+| `enrichment_databases` | `list[str] \| None` | `None` | Databases used to enrich graph nodes after snowballing. `None` uses all available sources (`"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`). Pass `[]` to disable enrichment. |
 
 ## Return Value
 
@@ -134,6 +136,25 @@ graph = engine.snowball(
 ```
 
 Papers with an unknown publication date are excluded when either `since` or `until` is active.
+
+## Enrichment
+
+After building the citation graph, `snowball()` can automatically enrich all discovered nodes with additional metadata from multiple databases. Use the `enrichment_databases` parameter:
+
+```python
+# Enrich graph nodes with all available databases (default)
+graph = engine.snowball(seed, enrichment_databases=None)
+
+# Enrich only via CrossRef
+graph = engine.snowball(seed, enrichment_databases=["crossref"])
+
+# Skip enrichment entirely
+graph = engine.snowball(seed, enrichment_databases=[])
+```
+
+Databases that already provided a given paper during snowballing are excluded from its enrichment.
+
+Available identifiers for `enrichment_databases`: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`.
 
 ## Data Sources
 

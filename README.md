@@ -18,7 +18,7 @@ Findpapers searches for papers through **arXiv**, **IEEE Xplore**, **OpenAlex**,
 - **Massive coverage** - access hundreds of millions of papers across six databases that together span every scientific discipline
 - **Multi-database search** - query all databases in parallel with one boolean search expression - no need to learn six different query syntaxes
 - **Smart deduplication** - automatically merges duplicate papers found across different databases
-- **Paper enrichment** - fetch additional metadata (abstracts, keywords, citations) via CrossRef and web scraping
+- **Paper enrichment** - automatically fetch additional metadata (abstracts, keywords, citations) during search and snowball
 - **PDF downloading** - download PDFs with automatic URL resolution for major publishers
 - **Citation snowballing** - build citation graphs by traversing references and citations (forward and backward)
 - **Flexible export** - save results as JSON, BibTeX, or CSV
@@ -48,9 +48,6 @@ result = engine.search(
     "[machine learning] AND [healthcare]",
     since=datetime.date(2022, 1, 1),
 )
-
-# Enrich papers with additional metadata (abstracts, keywords, citations)
-engine.enrich(result.papers)
 
 # Download PDFs
 engine.download(result.papers, "./pdfs")
@@ -93,7 +90,6 @@ The table below summarizes each supported database - for full details on authent
 | [Query Syntax](https://github.com/jonatasgrosman/findpapers/blob/main/docs/query-syntax.md) | How to write search queries, boolean operators, wildcards, and filter codes |
 | [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) | Environment variables, proxy, SSL, and API keys |
 | [Search](https://github.com/jonatasgrosman/findpapers/blob/main/docs/search.md) | Multi-database search with boolean queries |
-| [Enrich](https://github.com/jonatasgrosman/findpapers/blob/main/docs/enrich.md) | Enrich papers with additional metadata from CrossRef and web scraping |
 | [Download](https://github.com/jonatasgrosman/findpapers/blob/main/docs/download.md) | Download PDFs for papers |
 | [Snowball](https://github.com/jonatasgrosman/findpapers/blob/main/docs/snowball.md) | Build citation graphs via forward and backward snowballing |
 | [Get](https://github.com/jonatasgrosman/findpapers/blob/main/docs/get.md) | Look up a single paper |

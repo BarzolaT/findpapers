@@ -100,7 +100,7 @@ See [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/
 
 ## Typical Workflow
 
-Downloading usually comes after searching and enriching papers:
+Downloading usually comes after searching papers.
 
 ```python
 import findpapers
@@ -110,14 +110,11 @@ engine = findpapers.Engine()
 # 1. Search
 result = engine.search("[machine learning] AND [healthcare]")
 
-# 2. Enrich (may discover new PDF URLs)
-engine.enrich(result.papers, num_workers=4)
-
-# 3. Download
+# 2. Download
 metrics = engine.download(result.papers, "./pdfs", num_workers=8)
 
 print(f"Downloaded {metrics['downloaded_papers']} of {metrics['total_papers']} papers")
 
-# 4. Save results
+# 3. Save results
 findpapers.save_to_json(result, "results.json")
 ```

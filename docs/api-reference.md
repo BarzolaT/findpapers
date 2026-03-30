@@ -69,6 +69,7 @@ engine.search(
 | `num_workers` | `int` | Number of parallel database workers. Defaults to `1`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bars. Defaults to `True`. |
+| `enrichment_databases` | `list[str] \| None` | Databases for post-search enrichment. `None` (default) uses all available sources. `[]` disables enrichment. |
 
 **Returns:** `SearchResult` with deduplicated papers.
 
@@ -100,31 +101,6 @@ engine.download(
 | `show_progress` | `bool` | Display progress bar. Defaults to `True`. |
 
 **Returns:** Metrics dictionary with keys: `total_papers`, `downloaded_papers`, `runtime_in_seconds`.
-
-### `enrich()`
-
-Enrich papers with additional metadata from CrossRef and web scraping. Papers are modified **in-place**.
-
-```python
-engine.enrich(
-    papers: list[Paper],
-    *,
-    num_workers: int = 1,
-    timeout: float | None = 10.0,
-    verbose: bool = False,
-    show_progress: bool = True,
-) -> dict[str, int | float]
-```
-
-| Parameter | Type | Description |
-|---|---|---|
-| `papers` | `list[Paper]` | Papers to enrich. |
-| `num_workers` | `int` | Number of parallel workers. Defaults to `1`. |
-| `timeout` | `float \| None` | HTTP timeout in seconds. Defaults to `10.0`. |
-| `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
-| `show_progress` | `bool` | Display progress bar. Defaults to `True`. |
-
-**Returns:** Metrics dictionary with keys: `total_papers`, `enriched_papers`, `unchanged_papers`, `failed_papers`, `runtime_in_seconds`.
 
 ### `get()`
 
@@ -170,6 +146,7 @@ engine.snowball(
     num_workers: int = 1,
     verbose: bool = False,
     show_progress: bool = True,
+    enrichment_databases: list[str] | None = None,
 ) -> CitationGraph
 ```
 
@@ -184,6 +161,7 @@ engine.snowball(
 | `num_workers` | `int` | Number of parallel workers. Defaults to `1`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bars. Defaults to `True`. |
+| `enrichment_databases` | `list[str] \| None` | Databases for post-snowball enrichment. `None` (default) uses all available sources. `[]` disables enrichment. |
 
 **Returns:** `CitationGraph` with all discovered papers and citation edges.
 
