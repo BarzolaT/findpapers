@@ -15,7 +15,7 @@ from findpapers.exceptions import InvalidParameterError, MissingApiKeyError, Uns
 from findpapers.query.parser import QueryParser
 from findpapers.query.propagator import FilterPropagator
 from findpapers.query.validator import QueryValidator
-from findpapers.runners.discovery_runner import DiscoveryRunner
+from findpapers.runners.discovery_runner import DEFAULT_ENRICHMENT_DATABASES, DiscoveryRunner
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.parallel import execute_tasks
 from findpapers.utils.progress import make_progress_bar
@@ -139,7 +139,7 @@ class SearchRunner(DiscoveryRunner):
         num_workers: int = 1,
         since: dt.date | None = None,
         until: dt.date | None = None,
-        enrichment_databases: list[str] | None = None,
+        enrichment_databases: list[str] | None = DEFAULT_ENRICHMENT_DATABASES,
         proxy: str | None = None,
         ssl_verify: bool = True,
     ) -> None:
@@ -172,9 +172,9 @@ class SearchRunner(DiscoveryRunner):
         until : dt.date | None
             Upper-bound publication date filter.
         enrichment_databases : list[str] | None
-            Databases for post-search enrichment.  ``None`` uses
-            ``crossref`` and ``web_scraping`` (default); ``[]`` disables
-            enrichment entirely.
+            Databases for post-search enrichment.  Defaults to
+            ``DEFAULT_ENRICHMENT_DATABASES`` (``["crossref", "web_scraping"]``).
+            Pass ``None`` or ``[]`` to disable enrichment entirely.
         proxy : str | None
             Optional HTTP/HTTPS proxy URL for enrichment requests.
         ssl_verify : bool

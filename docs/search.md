@@ -48,7 +48,7 @@ result = engine.search(
 | `num_workers` | `int` | `1` | Number of parallel workers used to query databases concurrently |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
 | `show_progress` | `bool` | `True` | Display tqdm progress bars while papers are being fetched |
-| `enrichment_databases` | `list[str] \| None` | `None` | Databases used to enrich papers after search and filtering. `None` uses `"crossref"` and `"web_scraping"` (default). Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`. Pass `[]` to disable enrichment. |
+| `enrichment_databases` | `list[str] \| None` | `["crossref", "web_scraping"]` | Databases used to enrich papers after search and filtering. Defaults to `"crossref"` and `"web_scraping"`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`. Pass `[]` or `None` to disable enrichment. |
 
 ## Return Value
 
@@ -132,7 +132,7 @@ After collecting and deduplicating papers, `search()` can automatically enrich t
 ```python
 # Enrich with crossref and web_scraping (default) — covers most metadata gaps
 # without consuming quota from rate-limited databases
-result = engine.search("[transformers]", enrichment_databases=None)
+result = engine.search("[transformers]")
 
 # Enrich with a broader set of sources
 result = engine.search("[transformers]", enrichment_databases=["crossref", "web_scraping", "openalex", "semantic_scholar"])

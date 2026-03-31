@@ -26,6 +26,7 @@ from typing import Literal
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Paper
 from findpapers.core.search_result import SearchResult
+from findpapers.runners.discovery_runner import DEFAULT_ENRICHMENT_DATABASES
 from findpapers.runners.download_runner import DownloadRunner
 from findpapers.runners.get_runner import GetRunner
 from findpapers.runners.search_runner import SearchRunner
@@ -150,7 +151,7 @@ class Engine:
         num_workers: int = 1,
         verbose: bool = False,
         show_progress: bool = True,
-        enrichment_databases: list[str] | None = None,
+        enrichment_databases: list[str] | None = DEFAULT_ENRICHMENT_DATABASES,
     ) -> SearchResult:
         """Search for academic papers across multiple databases.
 
@@ -219,14 +220,14 @@ class Engine:
             keep log output clean).
         enrichment_databases : list[str] | None
             Databases used to enrich papers after search and filtering.
-            ``None`` (default) runs enrichment against ``"crossref"`` and
-            ``"web_scraping"``, which cover the majority of metadata gaps
-            without consuming quota from rate-limited databases.  Pass an
-            explicit list to enable additional (or different) sources.
-            Accepted values: ``"arxiv"``, ``"crossref"``, ``"ieee"``,
-            ``"openalex"``, ``"pubmed"``, ``"scopus"``,
-            ``"semantic_scholar"``, ``"web_scraping"``.
-            Pass ``[]`` to disable enrichment entirely.
+            Defaults to ``["crossref", "web_scraping"]``, which cover the
+            majority of metadata gaps without consuming quota from
+            rate-limited databases.  Pass an explicit list to enable
+            additional (or different) sources.  Accepted values:
+            ``"arxiv"``, ``"crossref"``, ``"ieee"``, ``"openalex"``,
+            ``"pubmed"``, ``"scopus"``, ``"semantic_scholar"``,
+            ``"web_scraping"``.
+            Pass ``None`` or ``[]`` to disable enrichment entirely.
 
         Returns
         -------
@@ -479,7 +480,7 @@ class Engine:
         num_workers: int = 1,
         verbose: bool = False,
         show_progress: bool = True,
-        enrichment_databases: list[str] | None = None,
+        enrichment_databases: list[str] | None = DEFAULT_ENRICHMENT_DATABASES,
     ) -> CitationGraph:
         """Build a citation graph around seed papers via snowballing.
 
@@ -532,12 +533,12 @@ class Engine:
             progress output.
         enrichment_databases : list[str] | None
             Databases used to enrich graph nodes after snowballing.
-            ``None`` (default) runs enrichment against ``"crossref"`` and
-            ``"web_scraping"``.  Pass an explicit list to enable additional
-            (or different) sources.  Accepted values: ``"arxiv"``,
-            ``"crossref"``, ``"ieee"``, ``"openalex"``, ``"pubmed"``,
-            ``"scopus"``, ``"semantic_scholar"``, ``"web_scraping"``.
-            Pass ``[]`` to disable enrichment entirely.
+            Defaults to ``["crossref", "web_scraping"]``.  Pass an
+            explicit list to enable additional (or different) sources.
+            Accepted values: ``"arxiv"``, ``"crossref"``, ``"ieee"``,
+            ``"openalex"``, ``"pubmed"``, ``"scopus"``,
+            ``"semantic_scholar"``, ``"web_scraping"``.
+            Pass ``None`` or ``[]`` to disable enrichment entirely.
 
         Returns
         -------

@@ -131,10 +131,15 @@ class TestEnrichmentDatabasesDefault:
         """DEFAULT_ENRICHMENT_DATABASES contains only crossref and web_scraping."""
         assert set(DEFAULT_ENRICHMENT_DATABASES) == {"crossref", "web_scraping"}
 
-    def test_none_stores_none_internally(self):
-        """enrichment_databases=None is stored as None (resolved lazily in _enrich_papers)."""
+    def test_none_stores_empty_list(self):
+        """enrichment_databases=None is stored as [] (disables enrichment)."""
+        runner = DiscoveryRunner(enrichment_databases=None)
+        assert runner._enrichment_databases == []
+
+    def test_default_stores_default_databases(self):
+        """Default (no arg) stores DEFAULT_ENRICHMENT_DATABASES normalised."""
         runner = DiscoveryRunner()
-        assert runner._enrichment_databases is None
+        assert runner._enrichment_databases == DEFAULT_ENRICHMENT_DATABASES
 
     def test_explicit_list_stored_normalised(self):
         """An explicit list is lower-cased and stored."""
@@ -151,8 +156,41 @@ class TestEnrichmentDatabasesDefault:
         with pytest.raises(InvalidParameterError, match="Unknown enrichment database"):
             DiscoveryRunner(enrichment_databases=["not_a_db"])
 
-    def test_enrich_papers_uses_default_when_none(self):
-        """When enrichment_databases is None, _enrich_papers uses only crossref and web_scraping."""
+    def test_enrich_papers_skips_when_empty(self):
+        """When enrichment_databases=[], _enrich_papers performs no lookups."""
+        runner = DiscoveryRunner(enrichment_databases=[])
+
+        import datetime
+
+        from findpapers.core.author import Author
+        from findpapers.core.source import Source
+
+        paper = Paper(
+            title="Test Paper",
+            abstract="",
+            authors=[Author(name="A. Author")],
+            source=Source(title="Fake Journal"),
+            publication_date=datetime.date(2023, 1, 1),
+            doi="10.1234/test",
+            databases=set(),
+        )
+
+        called = []
+
+        def _fake_get_runner(**kwargs):
+            called.append(kwargs)
+            mock = MagicMock()
+            mock.run.return_value = None
+            mock.close = MagicMock()
+            return mock
+
+        with patch("findpapers.runners.discovery_runner.GetRunner", side_effect=_fake_get_runner):
+            runner._enrich_papers([paper], verbose=False, show_progress=False)
+
+        assert called == [], "GetRunner should not be called when enrichment is disabled"
+
+    def test_enrich_papers_uses_default_databases_when_no_arg(self):
+        """With default args, _enrich_papers uses crossref and web_scraping."""
         runner = DiscoveryRunner()
 
         import datetime

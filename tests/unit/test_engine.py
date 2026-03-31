@@ -217,7 +217,7 @@ class TestEngineSearch:
             num_workers=3,
             since=None,
             until=None,
-            enrichment_databases=None,
+            enrichment_databases=["crossref", "web_scraping"],
             proxy=None,
             ssl_verify=True,
         )
@@ -340,8 +340,8 @@ class TestEngineSearchEnrichmentDatabases:
         _, kwargs = mock_cls.call_args
         assert kwargs["enrichment_databases"] == ["arxiv", "pubmed"]
 
-    def test_enrichment_databases_none_by_default(self):
-        """enrichment_databases defaults to None (all databases)."""
+    def test_enrichment_databases_default_is_list(self):
+        """enrichment_databases defaults to DEFAULT_ENRICHMENT_DATABASES (not None)."""
         engine = Engine()
         with patch("findpapers.engine.SearchRunner") as mock_cls:
             mock_runner = MagicMock()
@@ -349,6 +349,19 @@ class TestEngineSearchEnrichmentDatabases:
             mock_cls.return_value = mock_runner
 
             engine.search("[ml]")
+
+        _, kwargs = mock_cls.call_args
+        assert kwargs["enrichment_databases"] == ["crossref", "web_scraping"]
+
+    def test_enrichment_databases_none_disables_enrichment(self):
+        """enrichment_databases=None is forwarded to SearchRunner (disables enrichment)."""
+        engine = Engine()
+        with patch("findpapers.engine.SearchRunner") as mock_cls:
+            mock_runner = MagicMock()
+            mock_runner.run.return_value = MagicMock(spec=SearchResult)
+            mock_cls.return_value = mock_runner
+
+            engine.search("[ml]", enrichment_databases=None)
 
         _, kwargs = mock_cls.call_args
         assert kwargs["enrichment_databases"] is None

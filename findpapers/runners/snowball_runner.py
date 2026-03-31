@@ -22,7 +22,7 @@ from findpapers.connectors.citation_base import CitationConnectorBase
 from findpapers.core.citation_graph import CitationGraph
 from findpapers.core.paper import Database, Paper
 from findpapers.exceptions import InvalidParameterError
-from findpapers.runners.discovery_runner import DiscoveryRunner
+from findpapers.runners.discovery_runner import DEFAULT_ENRICHMENT_DATABASES, DiscoveryRunner
 from findpapers.utils.logging_config import configure_verbose_logging
 from findpapers.utils.progress import make_progress_bar
 
@@ -110,7 +110,7 @@ class SnowballRunner(DiscoveryRunner):
         ieee_api_key: str | None = None,
         scopus_api_key: str | None = None,
         pubmed_api_key: str | None = None,
-        enrichment_databases: list[str] | None = None,
+        enrichment_databases: list[str] | None = DEFAULT_ENRICHMENT_DATABASES,
         proxy: str | None = None,
         ssl_verify: bool = True,
     ) -> None:
@@ -145,9 +145,9 @@ class SnowballRunner(DiscoveryRunner):
         pubmed_api_key : str | None
             PubMed API key for enrichment.
         enrichment_databases : list[str] | None
-            Databases for post-snowball enrichment.  ``None`` uses
-            ``crossref`` and ``web_scraping`` (default); ``[]`` disables
-            enrichment.
+            Databases for post-snowball enrichment.  Defaults to
+            ``DEFAULT_ENRICHMENT_DATABASES`` (``["crossref", "web_scraping"]``).
+            Pass ``None`` or ``[]`` to disable enrichment.
         proxy : str | None
             Optional proxy URL for enrichment requests.
         ssl_verify : bool

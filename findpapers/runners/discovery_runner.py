@@ -51,8 +51,9 @@ class DiscoveryRunner:
     ssl_verify : bool
         Whether to verify SSL certificates during enrichment.
     enrichment_databases : list[str] | None
-        Databases for post-discovery enrichment.  ``None`` (default) uses
-        ``crossref`` and ``web_scraping``; ``[]`` disables enrichment entirely.
+        Databases for post-discovery enrichment.  Defaults to
+        ``DEFAULT_ENRICHMENT_DATABASES`` (``["crossref", "web_scraping"]``).
+        Pass ``None`` or ``[]`` to disable enrichment entirely.
 
     Raises
     ------
@@ -73,7 +74,7 @@ class DiscoveryRunner:
         semantic_scholar_api_key: str | None = None,
         proxy: str | None = None,
         ssl_verify: bool = True,
-        enrichment_databases: list[str] | None = None,
+        enrichment_databases: list[str] | None = DEFAULT_ENRICHMENT_DATABASES,
     ) -> None:
         """Initialise shared filter and enrichment state."""
         self._since = since
@@ -90,7 +91,10 @@ class DiscoveryRunner:
         self._ssl_verify = ssl_verify
 
         # Validate and normalise the enrichment database list.
-        if enrichment_databases is not None and len(enrichment_databases) > 0:
+        # None and [] both mean "no enrichment".
+        if enrichment_databases is None or len(enrichment_databases) == 0:
+            self._enrichment_databases: list[str] = []
+        else:
             normalised = [db.strip().lower() for db in enrichment_databases]
             unknown = [db for db in normalised if db not in GET_DATABASES]
             if unknown:
@@ -98,10 +102,7 @@ class DiscoveryRunner:
                     f"Unknown enrichment database(s): {', '.join(unknown)}. "
                     f"Accepted values: {', '.join(sorted(GET_DATABASES))}"
                 )
-            self._enrichment_databases: list[str] | None = normalised
-        else:
-            # None → use all available; [] → skip (preserved as-is).
-            self._enrichment_databases = enrichment_databases
+            self._enrichment_databases = normalised
 
     def _matches_filters(self, paper: Paper) -> bool:
         """Return ``True`` when *paper* passes all configured date filters.
@@ -160,11 +161,7 @@ class DiscoveryRunner:
         -------
         None
         """
-        all_dbs: frozenset[str] = (
-            frozenset(self._enrichment_databases)
-            if self._enrichment_databases is not None
-            else frozenset(DEFAULT_ENRICHMENT_DATABASES)
-        )
+        all_dbs: frozenset[str] = frozenset(self._enrichment_databases)
 
         enrich_queue: list[tuple[Paper, str, list[str]]] = []
         for paper in papers:

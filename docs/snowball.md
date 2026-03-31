@@ -46,7 +46,7 @@ graph = engine.snowball(
 | `num_workers` | `int` | `1` | Number of parallel workers used to query connectors |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
 | `show_progress` | `bool` | `True` | Display tqdm progress bars while papers are being expanded |
-| `enrichment_databases` | `list[str] \| None` | `None` | Databases used to enrich graph nodes after snowballing. `None` uses `"crossref"` and `"web_scraping"` (default). Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`. Pass `[]` to disable enrichment. |
+| `enrichment_databases` | `list[str] \| None` | `["crossref", "web_scraping"]` | Databases used to enrich graph nodes after snowballing. Defaults to `"crossref"` and `"web_scraping"`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`. Pass `[]` or `None` to disable enrichment. |
 
 ## Return Value
 
@@ -144,7 +144,7 @@ After building the citation graph, `snowball()` can automatically enrich all dis
 ```python
 # Enrich with crossref and web_scraping (default) — covers most metadata gaps
 # without consuming quota from rate-limited databases
-graph = engine.snowball(seed, enrichment_databases=None)
+graph = engine.snowball(seed)
 
 # Enrich with a broader set of sources
 graph = engine.snowball(seed, enrichment_databases=["crossref", "web_scraping", "openalex", "semantic_scholar"])
