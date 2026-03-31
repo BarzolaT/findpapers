@@ -815,8 +815,9 @@ class OpenAlexConnector(
 
             try:
                 response = self._get(_BASE_URL, params)
-            except requests.RequestException:
-                logger.exception("OpenAlex request failed (cursor=%s).", cursor)
+            except requests.RequestException as exc:
+                logger.warning("OpenAlex request failed (cursor=%s): %s", cursor, exc)
+                logger.debug("OpenAlex request exception details:", exc_info=True)
                 break
 
             data = response.json()

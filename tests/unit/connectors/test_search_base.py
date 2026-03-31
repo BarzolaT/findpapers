@@ -253,11 +253,11 @@ class TestSearchConnectorBaseSearch:
             searcher.search(mock_query)
 
     def test_caught_exceptions_are_logged(self, caplog) -> None:
-        """Caught network errors are logged at ERROR level with traceback."""
+        """Caught network errors are logged at WARNING level without traceback."""
         searcher = self._make_searcher_with_validation(is_valid=True)
         mock_query = MagicMock()
         with (
-            caplog.at_level(logging.ERROR, logger="findpapers.connectors.search_base"),
+            caplog.at_level(logging.WARNING, logger="findpapers.connectors.search_base"),
             patch.object(searcher, "_fetch_papers", side_effect=requests.Timeout("timed out")),
         ):
             searcher.search(mock_query)

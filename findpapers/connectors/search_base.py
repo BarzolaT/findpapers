@@ -141,6 +141,7 @@ class SearchConnectorBase(ConnectorBase):
 
         try:
             return self._fetch_papers(query, max_papers, progress_callback, since, until)
-        except (requests.RequestException, ConnectorError):
-            logger.exception("Error while searching '%s'.", self.name)
+        except (requests.RequestException, ConnectorError) as exc:
+            logger.warning("Error while searching '%s': %s", self.name, exc)
+            logger.debug("Search exception details:", exc_info=True)
             return []

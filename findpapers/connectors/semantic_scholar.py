@@ -747,8 +747,9 @@ class SemanticScholarConnector(
 
             try:
                 response = self._get(_BULK_SEARCH_URL, params)
-            except requests.RequestException:
-                logger.exception("Semantic Scholar request failed (token=%s).", token)
+            except requests.RequestException as exc:
+                logger.warning("Semantic Scholar request failed (token=%s): %s", token, exc)
+                logger.debug("Semantic Scholar request exception details:", exc_info=True)
                 break
 
             data = response.json()

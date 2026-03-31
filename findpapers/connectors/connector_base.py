@@ -18,22 +18,16 @@ from urllib.parse import urlencode
 
 import requests
 
+from findpapers.utils.logging_config import SENSITIVE_PARAM_NAMES
 from findpapers.utils.version import package_version
 
 logger = logging.getLogger(__name__)
 
 _REPO_URL = "https://github.com/jonatasgrosman/findpapers"
 
-# Parameter names (compared case-insensitively) that carry API credentials
-# and must be redacted before logging.
-_SENSITIVE_PARAM_NAMES: frozenset[str] = frozenset(
-    {
-        "api_key",
-        "apikey",
-        "x-api-key",
-        "x-els-apikey",
-    }
-)
+# Alias kept for internal use; the canonical definition lives in
+# findpapers.utils.logging_config so the SensitiveDataFilter can share it.
+_SENSITIVE_PARAM_NAMES: frozenset[str] = SENSITIVE_PARAM_NAMES
 
 # Header names (compared case-insensitively) that carry API credentials
 # and must be redacted before logging.

@@ -527,8 +527,9 @@ class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase, URLLookupConn
 
             try:
                 ids, total = self._search_ids(pubmed_query, offset, page_size, date_params)
-            except (requests.RequestException, ValueError):
-                logger.exception("PubMed esearch failed (offset=%d).", offset)
+            except (requests.RequestException, ValueError) as exc:
+                logger.warning("PubMed esearch failed (offset=%d): %s", offset, exc)
+                logger.debug("PubMed esearch exception details:", exc_info=True)
                 break
 
             if not ids:
@@ -536,8 +537,9 @@ class PubmedConnector(SearchConnectorBase, DOILookupConnectorBase, URLLookupConn
 
             try:
                 article_elements = self._fetch_details(ids)
-            except (requests.RequestException, ET.ParseError):
-                logger.exception("PubMed efetch failed (pmids=%s).", ids)
+            except (requests.RequestException, ET.ParseError) as exc:
+                logger.warning("PubMed efetch failed (pmids=%s): %s", ids, exc)
+                logger.debug("PubMed efetch exception details:", exc_info=True)
                 break
 
             for el in article_elements:

@@ -384,8 +384,9 @@ class ScopusConnector(SearchConnectorBase, DOILookupConnectorBase):
 
             try:
                 response = self._get(_BASE_URL, params)
-            except requests.RequestException:
-                logger.exception("Scopus request failed (offset=%d).", offset)
+            except requests.RequestException as exc:
+                logger.warning("Scopus request failed (offset=%d): %s", offset, exc)
+                logger.debug("Scopus request exception details:", exc_info=True)
                 break
 
             data = response.json()

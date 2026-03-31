@@ -429,8 +429,9 @@ class IEEEConnector(SearchConnectorBase, DOILookupConnectorBase, URLLookupConnec
 
             try:
                 response = self._get(_BASE_URL, params)
-            except requests.RequestException:
-                logger.exception("IEEE request failed (offset=%d).", offset)
+            except requests.RequestException as exc:
+                logger.warning("IEEE request failed (offset=%d): %s", offset, exc)
+                logger.debug("IEEE request exception details:", exc_info=True)
                 break
 
             data = response.json()
