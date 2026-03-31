@@ -217,7 +217,12 @@ class DiscoveryRunner:
             )
             result = runner.run(verbose=verbose)
             if result is not None:
+                # Preserve the paper's original databases: enrichment provides
+                # additional metadata but should not register new database
+                # sources for the paper.
+                original_databases = set(paper.databases)
                 paper.merge(result)
+                paper.databases = original_databases
 
         for _item, _result, error in execute_tasks(
             enrich_queue,

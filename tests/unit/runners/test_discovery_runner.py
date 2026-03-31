@@ -256,3 +256,45 @@ class TestEnrichmentDatabasesDefault:
 
         assert len(captured_databases) == 1
         assert captured_databases[0] == ["openalex"]
+
+    def test_enrich_papers_does_not_add_databases_to_paper(self):
+        """Enrichment must not add new databases to paper.databases."""
+        import datetime
+
+        from findpapers.core.author import Author
+        from findpapers.core.source import Source
+
+        runner = DiscoveryRunner(enrichment_databases=["crossref", "web_scraping"])
+
+        paper = Paper(
+            title="Test Paper",
+            abstract="",
+            authors=[Author(name="A. Author")],
+            source=Source(title="Fake Journal"),
+            publication_date=datetime.date(2023, 1, 1),
+            doi="10.1234/test",
+            databases={"arxiv"},
+        )
+
+        def _fake_get_runner(**kwargs):
+            enriched = Paper(
+                title="Test Paper",
+                abstract="An enriched abstract.",
+                authors=[Author(name="A. Author")],
+                source=Source(title="Fake Journal"),
+                publication_date=datetime.date(2023, 1, 1),
+                doi="10.1234/test",
+                databases={"crossref"},
+            )
+            mock = MagicMock()
+            mock.run.return_value = enriched
+            mock.close = MagicMock()
+            return mock
+
+        with patch("findpapers.runners.discovery_runner.GetRunner", side_effect=_fake_get_runner):
+            runner._enrich_papers([paper], verbose=False, show_progress=False)
+
+        # The paper should have the enriched abstract but keep only its
+        # original database set (enrichment databases must not be added).
+        assert paper.abstract == "An enriched abstract."
+        assert paper.databases == {"arxiv"}
