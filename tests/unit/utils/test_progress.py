@@ -94,3 +94,16 @@ class TestMakeProgressBar:
         pbar = make_progress_bar(total=10)
         assert pbar.disable is False
         pbar.close()
+
+    def test_position_is_set(self):
+        """Passing position pins the bar to that terminal row."""
+        pbar = make_progress_bar(position=2)
+        assert pbar.pos == -2  # tqdm stores position as negative index internally
+        pbar.close()
+
+    def test_position_defaults_to_none(self):
+        """When position is omitted the bar uses tqdm's default placement."""
+        pbar = make_progress_bar()
+        # tqdm places the bar at row 0 by default (pos is stored as 0).
+        assert pbar.pos == 0
+        pbar.close()

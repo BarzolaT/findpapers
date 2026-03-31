@@ -8,6 +8,8 @@ from concurrent.futures import TimeoutError as FuturesTimeoutError
 from time import perf_counter
 from typing import TypeVar
 
+from tqdm.contrib.logging import logging_redirect_tqdm
+
 from findpapers.utils.progress import make_progress_bar
 
 T = TypeVar("T")
@@ -112,7 +114,10 @@ def execute_tasks(
                 yield item, result, error
         else:
             # Parallel path: submit all tasks and iterate results as they complete.
-            with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            # logging_redirect_tqdm ensures log records emitted by worker
+            # threads are written via tqdm.write() instead of directly to
+            # stderr, preventing them from corrupting active progress bars.
+            with logging_redirect_tqdm(), ThreadPoolExecutor(max_workers=num_workers) as executor:
                 futures = {executor.submit(task, item): item for item in items}
                 remaining = None if timeout is None else max(timeout - (perf_counter() - start), 0)
                 yielded_futures: set[object] = set()

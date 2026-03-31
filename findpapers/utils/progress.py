@@ -11,6 +11,7 @@ def make_progress_bar(
     unit: str = "item",
     disable: bool = False,
     leave: bool = True,
+    position: int | None = None,
 ) -> tqdm:
     """Create a tqdm progress bar with the project's standard style.
 
@@ -38,6 +39,11 @@ def make_progress_bar(
         When ``True`` (default) the completed bar remains on screen.
         Pass ``False`` for transient bars that should clear themselves
         when done (e.g. per-item inner bars inside a larger loop).
+    position : int | None
+        Zero-based row offset for the bar.  ``None`` (default) lets tqdm
+        assign the position automatically.  Set an explicit value when
+        multiple bars must be shown simultaneously at fixed rows (e.g. one
+        bar per parallel worker).
 
     Returns
     -------
@@ -58,4 +64,5 @@ def make_progress_bar(
         leave=leave,
         dynamic_ncols=True,
         disable=disable,
+        position=position,
     )

@@ -615,6 +615,8 @@ class TestSnowballRunnerMetrics:
                     "__enter__": lambda self: self,
                     "__exit__": lambda self, *args: False,
                     "update": lambda self, n=1: None,
+                    "reset": lambda self, total=None: None,
+                    "set_description": lambda self, desc="": None,
                 },
             )()
             mock_pbar.return_value = mock_ctx
@@ -822,12 +824,11 @@ class TestSnowballRunnerParallelErrors:
             paper: Paper,
             *,
             show_progress: bool = True,
-            parallel: bool = False,
         ) -> tuple[str, list[Paper] | None, list[Paper] | None]:
             """Raise for the 'bad' connector, delegate otherwise."""
             if connector is bad:
                 raise RuntimeError("unexpected crash")
-            return original(connector, paper, show_progress=show_progress, parallel=parallel)
+            return original(connector, paper, show_progress=show_progress)
 
         with patch.object(runner, "_query_single_connector", side_effect=patched):
             graph = runner.run(show_progress=False)

@@ -458,78 +458,67 @@ class SearchRunner(DiscoveryRunner):
             due to unsupported queries are **not** included in failures.
         """
 
-        def _run_searcher(
-            searcher: SearchConnectorBase,
-            *,
-            parallel: bool = False,
-        ) -> tuple[list[Paper], float]:
-            """Run a single searcher with a per-database tqdm bar.
+        num_searchers = len(self._searchers)
+        num_workers = min(self._num_workers, num_searchers)
+
+        # Create a persistent progress bar for every database upfront, each
+        # pinned to a fixed terminal row via ``position``.  This guarantees
+        # all bars are visible simultaneously in both serial and parallel
+        # modes — workers update their own bar in-place rather than printing
+        # new lines or clearing a shared temporary bar.
+        db_bars = [
+            make_progress_bar(
+                desc=f"  {searcher.name}",
+                unit="paper",
+                disable=not show_progress,
+                leave=True,
+                position=i,
+            )
+            for i, searcher in enumerate(self._searchers)
+        ]
+        bar_by_searcher = dict(zip(self._searchers, db_bars, strict=True))
+
+        def _run_searcher(searcher: SearchConnectorBase) -> tuple[list[Paper], float]:
+            """Run a single searcher and update its pre-assigned progress bar.
 
             Parameters
             ----------
             searcher : SearchConnectorBase
                 Connector to execute.
-            parallel : bool
-                When ``True``, the searcher is being called from a thread
-                pool.  The inner progress bar is disabled to avoid
-                interleaved output across threads.
 
             Returns
             -------
             tuple[list[Paper], float]
                 Retrieved papers and wall-clock runtime in seconds.
             """
-            inner_show = show_progress and not parallel
-            with make_progress_bar(
-                desc=f"  {searcher.name}",
-                unit="paper",
-                disable=not inner_show,
-                leave=False,
-            ) as pbar:
+            pbar = bar_by_searcher[searcher]
 
-                def _cb(current: int, total: int | None) -> None:
-                    pbar.total = total
-                    pbar.n = current
-                    pbar.refresh()
+            def _cb(current: int, total: int | None) -> None:
+                pbar.total = total
+                pbar.n = current
+                pbar.refresh()
 
-                db_start = perf_counter()
-                papers = searcher.search(
-                    self._query,
-                    max_papers=self._max_papers_per_database,
-                    progress_callback=_cb,
-                    since=self._since,
-                    until=self._until,
-                )
-                elapsed = perf_counter() - db_start
-                return papers, elapsed
-
-        num_searchers = len(self._searchers)
-        num_workers = min(self._num_workers, num_searchers)
-        parallel = num_workers > 1
-
-        # Wrap searchers so _run_searcher receives the parallel flag.
-        def _run_searcher_bound(searcher: SearchConnectorBase) -> tuple[list[Paper], float]:
-            return _run_searcher(searcher, parallel=parallel)
+            db_start = perf_counter()
+            papers = searcher.search(
+                self._query,
+                max_papers=self._max_papers_per_database,
+                progress_callback=_cb,
+                since=self._since,
+                until=self._until,
+            )
+            elapsed = perf_counter() - db_start
+            return papers, elapsed
 
         failed: list[str] = []
         db_runtimes: dict[str, float] = {}
-        db_count = 0
-        with make_progress_bar(
-            desc=f"Database 1/{num_searchers}",
-            total=num_searchers,
-            unit="db",
-            leave=True,
-            disable=not show_progress,
-        ) as outer_pbar:
+        try:
             for searcher, result, error in execute_tasks(
                 self._searchers,
-                _run_searcher_bound,
+                _run_searcher,
                 num_workers=num_workers,
                 timeout=None,
                 use_progress=False,
             ):
-                db_count += 1
-                outer_pbar.set_description(f"Database {db_count}/{num_searchers}")
                 if error is not None or result is None:
                     metrics[f"total_papers_from_{searcher.name}"] = 0
                     if isinstance(error, UnsupportedQueryError):
@@ -543,7 +532,9 @@ class SearchRunner(DiscoveryRunner):
                     db_runtimes[searcher.name] = elapsed
                     metrics[f"total_papers_from_{searcher.name}"] = len(papers)
                     self._results.extend(papers)
-                outer_pbar.update(1)
+        finally:
+            for pbar in db_bars:
+                pbar.close()
 
         return failed, db_runtimes
 

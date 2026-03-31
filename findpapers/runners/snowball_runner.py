@@ -197,6 +197,9 @@ class SnowballRunner(DiscoveryRunner):
             email=email,
             semantic_scholar_api_key=semantic_scholar_api_key,
         )
+        # Populated by run() before any connector queries; empty dict means
+        # show_progress=False or run() has not been called yet (bars are None).
+        self._connector_bars: dict[str, tuple[tqdm | None, tqdm | None]] = {}
 
     # ------------------------------------------------------------------
     # Public interface
@@ -261,27 +264,89 @@ class SnowballRunner(DiscoveryRunner):
             else None
         )
 
-        try:
-            for level in range(1, self._max_depth + 1):
-                if not frontier:
-                    break
+        # Pre-create persistent progress bars for every connector direction so
+        # they remain visible at fixed terminal rows in both serial and parallel
+        # modes.  Bars are reset via ``pbar.reset()`` for each new paper rather
+        # than being created and destroyed, avoiding the flicker that ``leave=False``
+        # produces and the blank output that occurred when parallel mode disabled
+        # inner bars entirely.  The level bar sits at position 0 (bottom);
+        # per-connector bars occupy positions above it.
+        _bar_pos = 1
+        _connector_bar_positions: dict[str, tuple[int | None, int | None]] = {}
+        for _c in self._connectors:
+            _b_pos: int | None = None
+            _f_pos: int | None = None
+            if self._direction in ("both", "backward"):
+                _b_pos = _bar_pos
+                _bar_pos += 1
+            if self._direction in ("both", "forward"):
+                _f_pos = _bar_pos
+                _bar_pos += 1
+            _connector_bar_positions[_c.name] = (_b_pos, _f_pos)
 
-                if verbose:
-                    logger.info(
-                        "Level %d/%d: processing %d papers.",
-                        level,
-                        self._max_depth,
-                        len(frontier),
+        self._connector_bars = {}
+        with contextlib.ExitStack() as _bar_stack:
+            for _c in self._connectors:
+                _b_pos, _f_pos = _connector_bar_positions[_c.name]
+                _b_bar: tqdm | None = (
+                    _bar_stack.enter_context(
+                        make_progress_bar(
+                            desc=f"  {_c.name} backward",
+                            total=None,
+                            unit="paper",
+                            disable=not show_progress,
+                            leave=True,
+                            position=_b_pos,
+                        )
                     )
+                    if _b_pos is not None
+                    else None
+                )
+                _f_bar: tqdm | None = (
+                    _bar_stack.enter_context(
+                        make_progress_bar(
+                            desc=f"  {_c.name} forward",
+                            total=None,
+                            unit="paper",
+                            disable=not show_progress,
+                            leave=True,
+                            position=_f_pos,
+                        )
+                    )
+                    if _f_pos is not None
+                    else None
+                )
+                self._connector_bars[_c.name] = (_b_bar, _f_bar)
 
-                next_frontier: list[Paper] = []
-
-                with make_progress_bar(
-                    desc=f"Level {level}/{self._max_depth}",
-                    total=len(frontier),
+            _level_bar = _bar_stack.enter_context(
+                make_progress_bar(
+                    desc="",
+                    total=0,
                     unit="paper",
                     disable=not show_progress,
-                ) as pbar:
+                    leave=True,
+                    position=0,
+                )
+            )
+
+            try:
+                for level in range(1, self._max_depth + 1):
+                    if not frontier:
+                        break
+
+                    if verbose:
+                        logger.info(
+                            "Level %d/%d: processing %d papers.",
+                            level,
+                            self._max_depth,
+                            len(frontier),
+                        )
+
+                    next_frontier: list[Paper] = []
+
+                    _level_bar.reset(total=len(frontier))
+                    _level_bar.set_description(f"Level {level}/{self._max_depth}")
+
                     if self._top_n_per_level is None:
                         # No limit: add every discovered paper to the graph.
                         for paper in frontier:
@@ -289,7 +354,7 @@ class SnowballRunner(DiscoveryRunner):
                                 paper, graph, pool, show_progress=show_progress
                             )
                             next_frontier.extend(discovered)
-                            pbar.update(1)
+                            _level_bar.update(1)
                     else:
                         # Collect all candidates from the whole frontier
                         # WITHOUT adding them to the graph so we can rank
@@ -299,7 +364,7 @@ class SnowballRunner(DiscoveryRunner):
                             all_raw.extend(
                                 self._collect_candidates(paper, pool, show_progress=show_progress)
                             )
-                            pbar.update(1)
+                            _level_bar.update(1)
 
                         # Group novel candidates by graph key.
                         # For duplicates, keep the representation with the
@@ -342,21 +407,21 @@ class SnowballRunner(DiscoveryRunner):
                                     graph.add_edge(canonical, source)
                             next_frontier.append(canonical)
 
-                frontier = next_frontier
+                    frontier = next_frontier
 
-                if verbose:
-                    logger.info(
-                        "Level %d/%d complete: %d new papers discovered%s.",
-                        level,
-                        self._max_depth,
-                        len(next_frontier),
-                        f" (top {self._top_n_per_level} kept)" if self._top_n_per_level else "",
-                    )
-        finally:
-            if pool is not None:
-                pool.shutdown(wait=True)
-            for connector in self._connectors:
-                connector.close()
+                    if verbose:
+                        logger.info(
+                            "Level %d/%d complete: %d new papers discovered%s.",
+                            level,
+                            self._max_depth,
+                            len(next_frontier),
+                            f" (top {self._top_n_per_level} kept)" if self._top_n_per_level else "",
+                        )
+            finally:
+                if pool is not None:
+                    pool.shutdown(wait=True)
+                for connector in self._connectors:
+                    connector.close()
 
         elapsed = perf_counter() - start
         self._metrics = {
@@ -527,13 +592,12 @@ class SnowballRunner(DiscoveryRunner):
         paper: Paper,
         *,
         show_progress: bool = True,
-        parallel: bool = False,
     ) -> tuple[str, list[Paper] | None, list[Paper] | None]:
         """Query a single connector for references and/or citing papers.
 
-        When *show_progress* is ``True``, a nested tqdm progress bar is
-        created for each fetch direction using the expected total from
-        :meth:`~CitationConnectorBase.get_expected_counts`.
+        Pre-created progress bars stored in ``self._connector_bars`` are reset
+        and reused for each paper so they remain visible at fixed terminal
+        positions in both serial and parallel modes.
 
         Parameters
         ----------
@@ -543,10 +607,6 @@ class SnowballRunner(DiscoveryRunner):
             The paper to look up.
         show_progress : bool
             Display per-connector progress bars for long pagination.
-        parallel : bool
-            When ``True``, the connector is being called from a thread pool.
-            Inner progress bars are disabled in this case to avoid
-            interleaved output across threads.
 
         Returns
         -------
@@ -557,38 +617,32 @@ class SnowballRunner(DiscoveryRunner):
         references: list[Paper] | None = None
         citing: list[Paper] | None = None
 
-        def _pbar_callback(pbar: tqdm) -> Callable[[int], None]:
-            """Return a typed callback wrapping ``pbar.update``."""
+        backward_bar, forward_bar = self._connector_bars.get(connector.name, (None, None))
+
+        def _pbar_callback(pbar: tqdm | None) -> Callable[[int], None]:
+            """Return a callback that increments *pbar* when it is not ``None``."""
 
             def _cb(n: int) -> None:
-                pbar.update(n)
+                if pbar is not None:
+                    pbar.update(n)
 
             return _cb
-
-        # Inner bars are disabled when running in parallel (multiple threads
-        # would interleave writes and garble the terminal output).
-        inner_show = show_progress and not parallel
 
         # Fetch expected counts for determinate progress bars.
         cit_count: int | None = None
         ref_count: int | None = None
-        if inner_show:
+        if show_progress and (backward_bar is not None or forward_bar is not None):
             with contextlib.suppress(Exception):
                 cit_count, ref_count = connector.get_expected_counts(paper)
 
         if self._direction in ("both", "backward"):
+            if backward_bar is not None:
+                backward_bar.reset(total=ref_count)
             try:
-                with make_progress_bar(
-                    desc=f"  {connector.name} backward",
-                    total=ref_count,
-                    unit="paper",
-                    disable=not inner_show,
-                    leave=False,
-                ) as pbar:
-                    references = connector.fetch_references(
-                        paper,
-                        progress_callback=_pbar_callback(pbar),
-                    )
+                references = connector.fetch_references(
+                    paper,
+                    progress_callback=_pbar_callback(backward_bar),
+                )
             except Exception:
                 logger.warning(
                     "Error fetching references from %s for '%s'.",
@@ -598,18 +652,13 @@ class SnowballRunner(DiscoveryRunner):
                 references = []
 
         if self._direction in ("both", "forward"):
+            if forward_bar is not None:
+                forward_bar.reset(total=cit_count)
             try:
-                with make_progress_bar(
-                    desc=f"  {connector.name} forward",
-                    total=cit_count,
-                    unit="paper",
-                    disable=not inner_show,
-                    leave=False,
-                ) as pbar:
-                    citing = connector.fetch_cited_by(
-                        paper,
-                        progress_callback=_pbar_callback(pbar),
-                    )
+                citing = connector.fetch_cited_by(
+                    paper,
+                    progress_callback=_pbar_callback(forward_bar),
+                )
             except Exception:
                 logger.warning(
                     "Error fetching cited-by from %s for '%s'.",
@@ -665,7 +714,6 @@ class SnowballRunner(DiscoveryRunner):
                 connector,
                 paper,
                 show_progress=show_progress,
-                parallel=True,
             ): connector
             for connector in self._connectors
         }
