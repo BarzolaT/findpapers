@@ -99,13 +99,13 @@ class TestShouldSkipConnector:
             is True
         )
 
-    def test_arxiv_doi_skips_scopus(self):
-        """arXiv DOI prefix causes Scopus to be skipped."""
+    def test_arxiv_doi_does_not_skip_scopus(self):
+        """arXiv DOI prefix does not skip Scopus (Scopus indexes arXiv preprints)."""
         assert (
             GetRunner._should_skip_connector(
                 "scopus", "10.48550/arxiv.1706.03762", "10.48550/arxiv.1706.03762"
             )
-            is True
+            is False
         )
 
     def test_arxiv_doi_does_not_skip_arxiv(self):
@@ -164,11 +164,11 @@ class TestShouldSkipConnector:
             is True
         )
 
-    def test_arxiv_url_skips_scopus(self):
-        """arXiv landing-page URL causes Scopus to be skipped."""
+    def test_arxiv_url_does_not_skip_scopus(self):
+        """arXiv landing-page URL does not skip Scopus (Scopus indexes arXiv preprints)."""
         assert (
             GetRunner._should_skip_connector("scopus", None, "https://arxiv.org/abs/1706.03762")
-            is True
+            is False
         )
 
     def test_arxiv_url_does_not_skip_semantic_scholar(self):

@@ -28,9 +28,9 @@ from findpapers.utils.normalization import DOI_URL_PREFIXES
 # DOI prefix → databases to skip.
 # The prefix comparison is case-insensitive.
 _DOI_PREFIX_SKIP: tuple[tuple[str, frozenset[str]], ...] = (
-    # arXiv assigns the 10.48550 prefix to all its preprints.  IEEE Xplore and
-    # Scopus do not index arXiv preprints.
-    ("10.48550/", frozenset({Database.IEEE, Database.SCOPUS})),
+    # arXiv assigns the 10.48550 prefix to all its preprints.  IEEE Xplore does
+    # not index arXiv preprints.
+    ("10.48550/", frozenset({Database.IEEE})),
     # bioRxiv and medRxiv share the 10.1101 prefix.  IEEE Xplore does not
     # index biomedical preprints.
     ("10.1101/", frozenset({Database.IEEE})),
@@ -38,8 +38,8 @@ _DOI_PREFIX_SKIP: tuple[tuple[str, frozenset[str]], ...] = (
 
 # URL substring (case-insensitive) → databases to skip.
 _URL_SUBSTRING_SKIP: tuple[tuple[str, frozenset[str]], ...] = (
-    # arXiv landing pages — not indexed by IEEE or Scopus.
-    ("arxiv.org", frozenset({Database.IEEE, Database.SCOPUS})),
+    # arXiv landing pages — not indexed by IEEE.
+    ("arxiv.org", frozenset({Database.IEEE})),
     # bioRxiv / medRxiv landing pages — not indexed by IEEE.
     ("biorxiv.org", frozenset({Database.IEEE})),
     ("medrxiv.org", frozenset({Database.IEEE})),
