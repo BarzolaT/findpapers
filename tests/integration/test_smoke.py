@@ -132,10 +132,20 @@ class TestDOILookup:
 
 
 class TestEnrichment:
-    """Verify that ``Engine.enrich`` can process papers without errors."""
+    """Verify that ``Engine.search`` enriches papers correctly.
 
-    def test_enrich_papers(self) -> None:
-        """Search a small set, then enrich and verify metrics."""
+    Enrichment is not a standalone method — it is applied automatically
+    during :meth:`~findpapers.engine.Engine.search` and
+    :meth:`~findpapers.engine.Engine.snowball` via the
+    ``enrichment_databases`` parameter.
+    """
+
+    def test_search_with_default_enrichment(self) -> None:
+        """Search with default enrichment and verify papers have a DOI.
+
+        The default enrichment databases (CrossRef + web scraping) should
+        populate DOIs for arXiv papers that don't carry a DOI natively.
+        """
         engine = _build_engine()
         result = engine.search(
             _SEARCH_QUERY,
@@ -144,13 +154,24 @@ class TestEnrichment:
             show_progress=False,
         )
 
-        assert len(result.papers) > 0, "Need at least one paper to enrich"
+        assert len(result.papers) > 0, "Need at least one paper to verify enrichment"
 
-        metrics = engine.enrich(result.papers, timeout=15.0, show_progress=False)
+        papers_with_doi = [p for p in result.papers if p.doi]
+        assert len(papers_with_doi) > 0, "No papers have a DOI after enrichment"
 
-        assert isinstance(metrics, dict)
-        assert "total_papers" in metrics
-        assert metrics["total_papers"] == len(result.papers)
+    def test_search_without_enrichment(self) -> None:
+        """Search with enrichment disabled should still return papers."""
+        engine = _build_engine()
+        result = engine.search(
+            _SEARCH_QUERY,
+            databases=["arxiv"],
+            max_papers_per_database=3,
+            show_progress=False,
+            enrichment_databases=None,
+        )
+
+        assert isinstance(result, SearchResult)
+        assert len(result.papers) > 0, "No papers returned when enrichment is disabled"
 
 
 class TestSnowball:
@@ -167,7 +188,7 @@ class TestSnowball:
 
         assert graph is not None, "Snowball returned None"
         # The seed itself should always be in the graph.
-        assert graph.paper_count >= 1, "Citation graph has no papers"
+        assert graph.node_count >= 1, "Citation graph has no papers"
 
 
 class TestSave:
