@@ -225,6 +225,8 @@ class SnowballRunner(DiscoveryRunner):
         CitationGraph
             The built citation graph.
         """
+        _root_logger = logging.getLogger()
+        _saved_log_level = _root_logger.level
         if verbose:
             configure_verbose_logging()
             logger.info("=== SnowballRunner Configuration ===")
@@ -441,6 +443,7 @@ class SnowballRunner(DiscoveryRunner):
             logger.info("Runtime: %.2f s", elapsed)
             logger.info("========================")
 
+        _root_logger.setLevel(_saved_log_level)
         return graph
 
     # ------------------------------------------------------------------

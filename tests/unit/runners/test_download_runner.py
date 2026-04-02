@@ -269,6 +269,20 @@ class TestDownloadRunnerVerbose:
             runner.run(verbose=False)
         assert "DownloadRunner Configuration" not in " ".join(caplog.messages)
 
+    def test_verbose_true_restores_root_logger_level(self, tmp_path):
+        """run(verbose=True) restores the root logger level on exit."""
+        import logging
+
+        runner = DownloadRunner(papers=[], output_directory=str(tmp_path))
+        root_logger = logging.getLogger()
+        original_level = root_logger.level
+        root_logger.setLevel(logging.WARNING)
+        try:
+            runner.run(verbose=True)
+            assert root_logger.level == logging.WARNING
+        finally:
+            root_logger.setLevel(original_level)
+
     def test_show_progress_false_disables_progress_bar(self, make_paper, tmp_path):
         """show_progress=False suppresses the tqdm progress bar."""
         papers = [make_paper()]

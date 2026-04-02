@@ -592,6 +592,24 @@ class TestGetRunnerDoiPath:
 
         assert result is None
 
+    def test_verbose_true_restores_root_logger_level(self):
+        """run(verbose=True) restores the root logger level on exit."""
+        import logging
+
+        with patch(
+            "findpapers.connectors.crossref.CrossRefConnector.fetch_work",
+            return_value=None,
+        ):
+            root_logger = logging.getLogger()
+            original_level = root_logger.level
+            root_logger.setLevel(logging.WARNING)
+            try:
+                runner = _make_runner()
+                runner.run(verbose=True)
+                assert root_logger.level == logging.WARNING
+            finally:
+                root_logger.setLevel(original_level)
+
 
 # ---------------------------------------------------------------------------
 # run() — landing-page URL path

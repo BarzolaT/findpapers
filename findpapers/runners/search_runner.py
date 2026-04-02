@@ -251,6 +251,8 @@ class SearchRunner(DiscoveryRunner):
         SearchResult
             Search result object containing papers and metadata.
         """
+        _root_logger = logging.getLogger()
+        _saved_log_level = _root_logger.level
         if verbose:
             configure_verbose_logging()
             logger.info("=== SearchRunner Configuration ===")
@@ -341,6 +343,7 @@ class SearchRunner(DiscoveryRunner):
             until=self._until,
             failed_databases=failed_databases or None,
         )
+        _root_logger.setLevel(_saved_log_level)
         return self._search
 
     # ------------------------------------------------------------------

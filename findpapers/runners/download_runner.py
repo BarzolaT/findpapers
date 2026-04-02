@@ -96,6 +96,8 @@ class DownloadRunner:
             Metrics with at least ``total_papers``, ``downloaded_papers``,
             and ``runtime_in_seconds``.
         """
+        _root_logger = logging.getLogger()
+        _saved_log_level = _root_logger.level
         if verbose:
             configure_verbose_logging()
             logger.info("=== DownloadRunner Configuration ===")
@@ -171,6 +173,7 @@ class DownloadRunner:
             logger.info("Runtime: %.2f s", metrics["runtime_in_seconds"])
             logger.info("========================")
 
+        _root_logger.setLevel(_saved_log_level)
         return dict(self._metrics)
 
     # ------------------------------------------------------------------

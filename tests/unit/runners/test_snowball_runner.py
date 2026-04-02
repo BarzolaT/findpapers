@@ -712,6 +712,24 @@ class TestSnowballRunnerVerbose:
 
         assert graph.node_count == 3
 
+    def test_verbose_true_restores_root_logger_level(self, make_paper) -> None:
+        """run(verbose=True) restores the root logger level on exit."""
+        import logging
+
+        seed = make_paper("Seed", doi="10.1000/seed")
+        connector = FakeCitationConnector(references={})
+        runner = SnowballRunner(seed_papers=[seed], max_depth=1, direction="backward")
+        runner._connectors = [connector]
+
+        root_logger = logging.getLogger()
+        original_level = root_logger.level
+        root_logger.setLevel(logging.WARNING)
+        try:
+            runner.run(verbose=True, show_progress=False)
+            assert root_logger.level == logging.WARNING
+        finally:
+            root_logger.setLevel(original_level)
+
 
 class TestSnowballRunnerParallelErrors:
     """Tests for error handling in parallel connector execution."""

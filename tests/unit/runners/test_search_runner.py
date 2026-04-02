@@ -549,6 +549,18 @@ class TestSearchRunnerVerbose:
             runner.run(verbose=False)
         assert "SearchRunner Configuration" not in " ".join(caplog.messages)
 
+    def test_verbose_true_restores_root_logger_level(self, make_paper):
+        """run(verbose=True) restores the root logger level on exit."""
+        runner = self._make_runner_with_mock_papers([make_paper()])
+        root_logger = logging.getLogger()
+        original_level = root_logger.level
+        root_logger.setLevel(logging.WARNING)
+        try:
+            runner.run(verbose=True)
+            assert root_logger.level == logging.WARNING
+        finally:
+            root_logger.setLevel(original_level)
+
     def test_show_progress_false_disables_progress_bars(self, make_paper):
         """show_progress=False suppresses tqdm progress bars."""
         runner = self._make_runner_with_mock_papers([make_paper()])

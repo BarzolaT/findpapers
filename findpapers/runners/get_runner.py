@@ -327,6 +327,8 @@ class GetRunner:
             available metadata from all queried sources, or ``None`` when no
             source found a match.
         """
+        _root_logger = logging.getLogger()
+        _saved_log_level = _root_logger.level
         if verbose:
             configure_verbose_logging()
             logger.info("=== GetRunner ===")
@@ -394,6 +396,7 @@ class GetRunner:
             if doi is None:
                 # No DOI available; return whatever the scraper found (may be None).
                 self._result = base_paper
+                _root_logger.setLevel(_saved_log_level)
                 return self._result
 
             # Stage 2: DOI-based lookup — CrossRef first, then all others.
@@ -449,6 +452,7 @@ class GetRunner:
             else:
                 logger.info("Lookup not found (%.2f s)", runtime)
 
+        _root_logger.setLevel(_saved_log_level)
         return self._result
 
     # ------------------------------------------------------------------
