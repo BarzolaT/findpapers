@@ -453,8 +453,8 @@ class TestSearchRunnerPipeline:
             f"Expected warning not found in: {caplog.messages}"
         )
 
-    def test_regular_error_warning_requires_verbose(self, caplog):
-        """A generic searcher error only emits a warning when verbose=True."""
+    def test_regular_error_warning_always_emitted(self, caplog):
+        """A generic searcher error always emits a warning regardless of verbose."""
         runner = SearchRunner(query="[ml]", databases=["arxiv"])
         mock_searcher = MagicMock()
         mock_searcher.name = Database.ARXIV
@@ -467,7 +467,42 @@ class TestSearchRunnerPipeline:
         warning_messages = [
             m for m in caplog.messages if "network timeout" in m or "Error fetching" in m
         ]
-        assert warning_messages == [], "Generic error should not warn when verbose=False"
+        assert warning_messages, "Generic error should warn even when verbose=False"
+
+    def test_progress_bar_finalized_after_zero_results(self, make_paper):
+        """Progress bar exits indeterminate mode and shows 'done' when connector returns 0 papers."""
+        runner = SearchRunner(query="[ml]", databases=["arxiv"])
+        captured_pbars: list = []
+
+        original_mpb = __import__(
+            "findpapers.utils.progress", fromlist=["make_progress_bar"]
+        ).make_progress_bar
+
+        def _capture_pbar(**kwargs):
+            pbar = original_mpb(**kwargs)
+            captured_pbars.append(pbar)
+            return pbar
+
+        mock_searcher = MagicMock()
+        mock_searcher.name = Database.ARXIV
+        # Return empty list (simulates a connector that finds nothing / fails early)
+        mock_searcher.search.return_value = []
+        runner._searchers = [mock_searcher]
+
+        with patch("findpapers.runners.search_runner.make_progress_bar", side_effect=_capture_pbar):
+            runner.run(show_progress=True)
+
+        # Every bar must have a non-None total after the run finishes
+        for pbar in captured_pbars:
+            assert pbar.total is not None, "Progress bar should not stay in indeterminate mode"
+        # Bars with 0 results should carry the 'done' postfix so the user can
+        # distinguish a finished-with-no-results bar from one still running.
+        for pbar in captured_pbars:
+            if pbar.total == 0:
+                postfix_str = pbar.postfix or ""
+                assert "done" in postfix_str, (
+                    f"Bar with 0 results should show 'done' postfix, got: {postfix_str!r}"
+                )
 
 
 class TestSearchRunnerVerbose:

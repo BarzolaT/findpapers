@@ -26,8 +26,15 @@ class CitationConnectorBase(ConnectorBase):
 
     A connector that only supports backward snowballing (references) should
     override :meth:`fetch_references` and leave :meth:`fetch_cited_by`
-    returning an empty list.  Vice-versa for forward-only connectors.
+    returning an empty list, and set :attr:`supports_forward` to ``False``.
+    Vice-versa for forward-only connectors.
     """
+
+    #: Whether this connector supports backward snowballing (fetch_references).
+    supports_backward: bool = True
+
+    #: Whether this connector supports forward snowballing (fetch_cited_by).
+    supports_forward: bool = True
 
     def get_expected_counts(self, paper: Paper) -> tuple[int | None, int | None]:
         """Return expected citation and reference counts for *paper*.

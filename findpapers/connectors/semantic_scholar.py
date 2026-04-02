@@ -783,6 +783,12 @@ class SemanticScholarConnector(
             if not token or len(items) < page_size:
                 break
 
+        # Ensure the progress bar is updated even when the loop exits early
+        # (e.g. on the first request returning no items or a request error),
+        # so the bar never stays frozen at its initial 0-paper state.
+        if progress_callback is not None:
+            progress_callback(len(papers), total)
+
         result = papers[:max_papers] if max_papers is not None else papers
 
         # Batch-fetch author affiliations after paper retrieval

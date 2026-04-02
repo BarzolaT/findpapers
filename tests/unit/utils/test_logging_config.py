@@ -14,24 +14,83 @@ from findpapers.utils.logging_config import (
 )
 
 
+def _save_root_state() -> tuple[int, list[logging.Handler]]:
+    """Save the root logger's level and handler list for later restoration."""
+    root = logging.getLogger()
+    return root.level, root.handlers[:]
+
+
+def _restore_root_state(level: int, handlers: list[logging.Handler]) -> None:
+    """Restore the root logger to a previously saved state."""
+    root = logging.getLogger()
+    root.setLevel(level)
+    for h in root.handlers[:]:
+        root.removeHandler(h)
+    for h in handlers:
+        root.addHandler(h)
+
+
 class TestConfigureVerboseLogging:
     """Tests for configure_verbose_logging()."""
 
     def test_root_logger_set_to_debug(self) -> None:
         """Root logger level should be set to DEBUG after calling configure_verbose_logging."""
-        original_level = logging.getLogger().level
+        saved_level, saved_handlers = _save_root_state()
         try:
             logging.getLogger().setLevel(logging.WARNING)
+            # Remove all handlers so the StreamHandler-add path is exercised.
+            for h in logging.getLogger().handlers[:]:
+                logging.getLogger().removeHandler(h)
             configure_verbose_logging()
             assert logging.getLogger().level == logging.DEBUG
         finally:
-            logging.getLogger().setLevel(original_level)
+            _restore_root_state(saved_level, saved_handlers)
+
+    def test_adds_stderr_handler_to_root_when_none_exists(self) -> None:
+        """configure_verbose_logging() adds a StreamHandler to root when absent."""
+        import sys
+
+        saved_level, saved_handlers = _save_root_state()
+        try:
+            for h in logging.getLogger().handlers[:]:
+                logging.getLogger().removeHandler(h)
+            configure_verbose_logging()
+            root_handlers = logging.getLogger().handlers
+            has_stderr = any(
+                isinstance(h, logging.StreamHandler)
+                and getattr(h, "stream", None) in {sys.stdout, sys.stderr}
+                for h in root_handlers
+            )
+            assert has_stderr, (
+                "Root logger should have a stderr StreamHandler after configure_verbose_logging()"
+            )
+        finally:
+            _restore_root_state(saved_level, saved_handlers)
+
+    def test_does_not_add_duplicate_handler(self) -> None:
+        """configure_verbose_logging() is idempotent: calling it twice adds only one handler."""
+        saved_level, saved_handlers = _save_root_state()
+        try:
+            for h in logging.getLogger().handlers[:]:
+                logging.getLogger().removeHandler(h)
+            configure_verbose_logging()
+            count_after_first = len(logging.getLogger().handlers)
+            configure_verbose_logging()
+            assert len(logging.getLogger().handlers) == count_after_first, (
+                "configure_verbose_logging() should not add a duplicate handler"
+            )
+        finally:
+            _restore_root_state(saved_level, saved_handlers)
 
     def test_noisy_loggers_set_to_warning(self) -> None:
         """Known noisy third-party loggers should be set to WARNING."""
-        configure_verbose_logging()
-        for name in _NOISY_LOGGERS:
-            assert logging.getLogger(name).level == logging.WARNING
+        saved_level, saved_handlers = _save_root_state()
+        try:
+            configure_verbose_logging()
+            for name in _NOISY_LOGGERS:
+                assert logging.getLogger(name).level == logging.WARNING
+        finally:
+            _restore_root_state(saved_level, saved_handlers)
 
     def test_noisy_loggers_list_is_not_empty(self) -> None:
         """The noisy loggers tuple should contain known entries."""

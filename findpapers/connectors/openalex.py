@@ -847,6 +847,12 @@ class OpenAlexConnector(
 
             cursor = next_cursor
 
+        # Ensure the progress bar is updated even when the loop exits early
+        # (e.g. on the first request returning no results or a request error),
+        # so the bar never stays frozen at its initial 0-paper state.
+        if progress_callback is not None:
+            progress_callback(processed, total)
+
     def _fetch_papers(
         self,
         query: Query,

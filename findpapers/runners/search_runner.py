@@ -468,7 +468,7 @@ class SearchRunner(DiscoveryRunner):
         # new lines or clearing a shared temporary bar.
         db_bars = [
             make_progress_bar(
-                desc=f"  {searcher.name}",
+                desc=f"Searching - {searcher.name}",
                 unit="paper",
                 disable=not show_progress,
                 leave=True,
@@ -507,6 +507,22 @@ class SearchRunner(DiscoveryRunner):
                 until=self._until,
             )
             elapsed = perf_counter() - db_start
+
+            # When the connector exits early (e.g. first request returns an
+            # error or zero results) total may still be None, leaving the bar
+            # in indeterminate mode.  Force an exit from indeterminate state so
+            # the bar looks visually finished rather than frozen.
+            if pbar.total is None:
+                pbar.total = pbar.n
+            # A bar with total == 0 (whether explicitly reported by the API or
+            # set above after an early exit) retains the indeterminate
+            # '?paper/s' display in tqdm, which looks identical to 'still
+            # running'.  Adding a 'done' postfix makes it obvious at a glance
+            # that the search completed with no results.
+            if pbar.total == 0:
+                pbar.set_postfix_str("done")
+            pbar.refresh()
+
             return papers, elapsed
 
         failed: list[str] = []
@@ -525,15 +541,23 @@ class SearchRunner(DiscoveryRunner):
                         logger.warning("Skipping '%s': %s", searcher.name, error)
                     else:
                         failed.append(searcher.name)
-                        if verbose:
-                            logger.warning("Error fetching from %s: %s", searcher.name, error)
+                        logger.warning("Error fetching from %s: %s", searcher.name, error)
+                        logger.debug("Exception details for %s:", searcher.name, exc_info=error)
                 else:
                     papers, elapsed = result
                     db_runtimes[searcher.name] = elapsed
                     metrics[f"total_papers_from_{searcher.name}"] = len(papers)
                     self._results.extend(papers)
         finally:
+            # Ensure every bar exits indeterminate mode before closing,
+            # covering the edge case where _run_searcher itself raised an
+            # unhandled exception and never got to finalize its own bar.
             for pbar in db_bars:
+                if pbar.total is None:
+                    pbar.total = pbar.n
+                if pbar.total == 0:
+                    pbar.set_postfix_str("done")
+                pbar.refresh()
                 pbar.close()
 
         return failed, db_runtimes

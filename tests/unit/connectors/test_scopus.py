@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -445,6 +446,49 @@ class TestScopusConnectorSearch:
         assert len(get_calls) >= 1
         params = get_calls[0]
         assert params["date"] == "2020"
+
+    def test_service_error_body_logs_warning(self, simple_query, mock_response, caplog):
+        """A Scopus 200 OK response with a service-error body logs a warning."""
+        searcher = ScopusConnector(api_key="dummy")
+        service_error_data = {
+            "service-error": {
+                "status": {
+                    "statusCode": "AUTHENTICATION_ERROR",
+                    "statusText": "Invalid API key",
+                }
+            }
+        }
+        response = mock_response(json_data=service_error_data)
+        response.raise_for_status = MagicMock()
+
+        with (
+            patch.object(searcher, "_get", return_value=response),
+            patch.object(searcher, "_rate_limit"),
+            caplog.at_level(logging.WARNING, logger="findpapers.connectors.scopus"),
+        ):
+            papers = searcher.search(simple_query)
+
+        assert papers == []
+        assert any("Scopus API error" in m for m in caplog.messages)
+
+    def test_error_response_body_logs_warning(self, simple_query, mock_response, caplog):
+        """A Scopus 200 OK response with an error-response body logs a warning."""
+        searcher = ScopusConnector(api_key="dummy")
+        error_body = {
+            "error-response": {"error-code": "QUOTA_EXCEEDED", "error-message": "over limit"}
+        }
+        response = mock_response(json_data=error_body)
+        response.raise_for_status = MagicMock()
+
+        with (
+            patch.object(searcher, "_get", return_value=response),
+            patch.object(searcher, "_rate_limit"),
+            caplog.at_level(logging.WARNING, logger="findpapers.connectors.scopus"),
+        ):
+            papers = searcher.search(simple_query)
+
+        assert papers == []
+        assert any("Scopus API error" in m for m in caplog.messages)
 
 
 class TestScopusConnectorIsOpenAccess:

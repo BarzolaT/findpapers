@@ -269,17 +269,18 @@ class SnowballRunner(DiscoveryRunner):
         # modes.  Bars are reset via ``pbar.reset()`` for each new paper rather
         # than being created and destroyed, avoiding the flicker that ``leave=False``
         # produces and the blank output that occurred when parallel mode disabled
-        # inner bars entirely.  The level bar sits at position 0 (bottom);
-        # per-connector bars occupy positions above it.
-        _bar_pos = 1
+        # inner bars entirely.  Each bar description is updated before every paper
+        # expansion to embed the current level/seed context (e.g.
+        # "Level 1/3 - seed 2/3 - backward: crossref").
+        _bar_pos = 0
         _connector_bar_positions: dict[str, tuple[int | None, int | None]] = {}
         for _c in self._connectors:
             _b_pos: int | None = None
             _f_pos: int | None = None
-            if self._direction in ("both", "backward"):
+            if self._direction in ("both", "backward") and _c.supports_backward:
                 _b_pos = _bar_pos
                 _bar_pos += 1
-            if self._direction in ("both", "forward"):
+            if self._direction in ("both", "forward") and _c.supports_forward:
                 _f_pos = _bar_pos
                 _bar_pos += 1
             _connector_bar_positions[_c.name] = (_b_pos, _f_pos)
@@ -291,7 +292,7 @@ class SnowballRunner(DiscoveryRunner):
                 _b_bar: tqdm | None = (
                     _bar_stack.enter_context(
                         make_progress_bar(
-                            desc=f"  {_c.name} backward",
+                            desc=f"{_c.name} backward",
                             total=None,
                             unit="paper",
                             disable=not show_progress,
@@ -305,7 +306,7 @@ class SnowballRunner(DiscoveryRunner):
                 _f_bar: tqdm | None = (
                     _bar_stack.enter_context(
                         make_progress_bar(
-                            desc=f"  {_c.name} forward",
+                            desc=f"{_c.name} forward",
                             total=None,
                             unit="paper",
                             disable=not show_progress,
@@ -317,17 +318,6 @@ class SnowballRunner(DiscoveryRunner):
                     else None
                 )
                 self._connector_bars[_c.name] = (_b_bar, _f_bar)
-
-            _level_bar = _bar_stack.enter_context(
-                make_progress_bar(
-                    desc="",
-                    total=0,
-                    unit="paper",
-                    disable=not show_progress,
-                    leave=True,
-                    position=0,
-                )
-            )
 
             try:
                 for level in range(1, self._max_depth + 1):
@@ -344,27 +334,24 @@ class SnowballRunner(DiscoveryRunner):
 
                     next_frontier: list[Paper] = []
 
-                    _level_bar.reset(total=len(frontier))
-                    _level_bar.set_description(f"Level {level}/{self._max_depth}")
-
                     if self._top_n_per_level is None:
                         # No limit: add every discovered paper to the graph.
-                        for paper in frontier:
+                        for seed_i, paper in enumerate(frontier, 1):
+                            self._set_connector_bar_descs(level, len(frontier), seed_i)
                             discovered = self._expand_paper(
                                 paper, graph, pool, show_progress=show_progress
                             )
                             next_frontier.extend(discovered)
-                            _level_bar.update(1)
                     else:
                         # Collect all candidates from the whole frontier
                         # WITHOUT adding them to the graph so we can rank
                         # and filter before committing anything.
                         all_raw: list[tuple[Paper, Paper, bool]] = []
-                        for paper in frontier:
+                        for seed_i, paper in enumerate(frontier, 1):
+                            self._set_connector_bar_descs(level, len(frontier), seed_i)
                             all_raw.extend(
                                 self._collect_candidates(paper, pool, show_progress=show_progress)
                             )
-                            _level_bar.update(1)
 
                         # Group novel candidates by graph key.
                         # For duplicates, keep the representation with the
@@ -459,6 +446,33 @@ class SnowballRunner(DiscoveryRunner):
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
+
+    def _set_connector_bar_descs(self, level: int, total_seeds: int, seed_i: int) -> None:
+        """Update all connector progress bar descriptions with current phase context.
+
+        Sets each bar's label to ``"Level L/N - seed S/T - direction: name"``
+        so the user always knows which level, which seed paper, and which
+        connector/direction is running.
+
+        Parameters
+        ----------
+        level : int
+            Current BFS level (1-based).
+        total_seeds : int
+            Total number of papers in the current frontier.
+        seed_i : int
+            1-based index of the paper currently being expanded.
+
+        Returns
+        -------
+        None
+        """
+        prefix = f"Level {level}/{self._max_depth} - seed {seed_i}/{total_seeds}"
+        for connector_name, (b_bar, f_bar) in self._connector_bars.items():
+            if b_bar is not None:
+                b_bar.set_description(f"{prefix} - backward - {connector_name}")
+            if f_bar is not None:
+                f_bar.set_description(f"{prefix} - forward - {connector_name}")
 
     def _build_connectors(
         self,
@@ -628,6 +642,17 @@ class SnowballRunner(DiscoveryRunner):
 
             return _cb
 
+        def _finalize_bar(pbar: tqdm | None) -> None:
+            """Reconcile bar total with actual count so it always shows 100%.
+
+            The expected count (from metadata) can differ from the actual
+            number of items returned by the API.  Setting ``total = n``
+            after fetching ensures the bar reaches 100% regardless.
+            """
+            if pbar is not None and pbar.total is not None and pbar.n != pbar.total:
+                pbar.total = pbar.n
+                pbar.refresh()
+
         # Fetch expected counts for determinate progress bars.
         cit_count: int | None = None
         ref_count: int | None = None
@@ -635,7 +660,7 @@ class SnowballRunner(DiscoveryRunner):
             with contextlib.suppress(Exception):
                 cit_count, ref_count = connector.get_expected_counts(paper)
 
-        if self._direction in ("both", "backward"):
+        if self._direction in ("both", "backward") and connector.supports_backward:
             if backward_bar is not None:
                 backward_bar.reset(total=ref_count)
             try:
@@ -650,8 +675,9 @@ class SnowballRunner(DiscoveryRunner):
                     paper.title,
                 )
                 references = []
+            _finalize_bar(backward_bar)
 
-        if self._direction in ("both", "forward"):
+        if self._direction in ("both", "forward") and connector.supports_forward:
             if forward_bar is not None:
                 forward_bar.reset(total=cit_count)
             try:
@@ -666,6 +692,7 @@ class SnowballRunner(DiscoveryRunner):
                     paper.title,
                 )
                 citing = []
+            _finalize_bar(forward_bar)
 
         return connector.name, references, citing
 

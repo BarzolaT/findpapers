@@ -617,6 +617,9 @@ class TestSnowballRunnerMetrics:
                     "update": lambda self, n=1: None,
                     "reset": lambda self, total=None: None,
                     "set_description": lambda self, desc="": None,
+                    "refresh": lambda self: None,
+                    "n": 0,
+                    "total": None,
                 },
             )()
             mock_pbar.return_value = mock_ctx

@@ -390,6 +390,17 @@ class ScopusConnector(SearchConnectorBase, DOILookupConnectorBase):
                 break
 
             data = response.json()
+
+            # Scopus returns HTTP 200 with a ``service-error`` or
+            # ``error-response`` body when the API key is invalid, the
+            # institutional IP is not authorised, or the quota is exceeded.
+            # Detect these and emit a warning so the failure is not silent.
+            api_error = data.get("service-error") or data.get("error-response")
+            if api_error:
+                logger.warning("Scopus API error (offset=%d): %s", offset, api_error)
+                logger.debug("Full Scopus error body (offset=%d): %s", offset, data)
+                break
+
             search_results = data.get("search-results", {})
 
             if total is None:
@@ -419,5 +430,11 @@ class ScopusConnector(SearchConnectorBase, DOILookupConnectorBase):
                 break
 
             offset += len(entries)
+
+        # Ensure the progress bar is updated even when the loop exits early
+        # (e.g. on the first request returning no entries or a request error),
+        # so the bar never stays frozen at its initial 0-paper state.
+        if progress_callback is not None:
+            progress_callback(processed, total)
 
         return papers[:max_papers] if max_papers is not None else papers

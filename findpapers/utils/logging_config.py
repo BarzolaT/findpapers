@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
+import sys
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 # Third-party loggers that produce excessive output at DEBUG level.
@@ -122,10 +123,32 @@ class _SanitizingHandler(logging.Handler):
 def configure_verbose_logging() -> None:
     """Enable DEBUG-level logging while suppressing noisy third-party loggers.
 
-    Sets the root logger to DEBUG and restricts known noisy HTTP-related
-    loggers to WARNING so that only findpapers' own debug messages appear.
+    Sets the root logger to DEBUG, adds a stderr ``StreamHandler`` when none
+    exists (so DEBUG records are actually emitted), and restricts known noisy
+    HTTP-related loggers to WARNING so that only findpapers' own debug
+    messages appear.
+
+    The ``_SanitizingHandler`` installed on the ``findpapers`` logger ensures
+    that API credentials are redacted before records reach the stream handler.
+    Calling this function multiple times is safe: the stream handler is only
+    added once.
     """
-    logging.getLogger().setLevel(logging.DEBUG)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    # Only add a stderr handler when root has no console handler yet, which
+    # avoids double-printing in environments that already configure one (e.g.
+    # pytest, Django). logging_redirect_tqdm will temporarily replace this
+    # handler with a tqdm-safe variant during parallel execution.
+    _has_console_handler = any(
+        isinstance(h, logging.StreamHandler)
+        and not isinstance(h, logging.FileHandler)
+        and getattr(h, "stream", None) in {sys.stdout, sys.stderr}
+        for h in root.handlers
+    )
+    if not _has_console_handler:
+        _handler = logging.StreamHandler()
+        _handler.setLevel(logging.DEBUG)
+        root.addHandler(_handler)
     for name in _NOISY_LOGGERS:
         logging.getLogger(name).setLevel(logging.WARNING)
 

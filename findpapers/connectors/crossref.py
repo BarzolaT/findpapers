@@ -85,6 +85,9 @@ class CrossRefConnector(CitationConnectorBase, DOILookupConnectorBase):
     _DATABASE_NAME: str = "crossref"
     """Database identifier used in :attr:`~findpapers.core.paper.Paper.databases`."""
 
+    supports_forward: bool = False
+    """CrossRef does not expose a forward-citation (cited-by) endpoint."""
+
     def __init__(self, email: str | None = None) -> None:
         """Create a CrossRef connector.
 

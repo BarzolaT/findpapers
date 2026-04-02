@@ -458,4 +458,10 @@ class IEEEConnector(SearchConnectorBase, DOILookupConnectorBase, URLLookupConnec
 
             offset += len(articles)
 
+        # Ensure the progress bar is updated even when the loop exits early
+        # (e.g. on the first request returning no articles or a request error),
+        # so the bar never stays frozen at its initial 0-paper state.
+        if progress_callback is not None:
+            progress_callback(processed, total)
+
         return papers[:max_papers] if max_papers is not None else papers
