@@ -57,15 +57,15 @@ class TestOpenAlexConnectorInit:
 class TestOpenAlexPrepareHeaders:
     """Tests for _prepare_headers."""
 
-    def test_default_user_agent(self):
-        """Without email, default User-Agent is used."""
+    def test_no_user_agent_injected(self):
+        """_prepare_headers does not inject a User-Agent header."""
         headers = OpenAlexConnector()._prepare_headers({})
-        assert "findpapers" in headers["User-Agent"]
+        assert "User-Agent" not in headers
 
-    def test_custom_user_agent_with_email(self):
-        """With email, User-Agent contains the email address."""
-        headers = OpenAlexConnector(email="me@example.com")._prepare_headers({})
-        assert "me@example.com" in headers["User-Agent"]
+    def test_caller_headers_preserved(self):
+        """Caller-supplied headers are returned as-is."""
+        headers = OpenAlexConnector()._prepare_headers({"Accept": "application/json"})
+        assert headers["Accept"] == "application/json"
 
 
 class TestOpenAlexConnectorParsePaper:

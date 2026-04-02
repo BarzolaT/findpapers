@@ -158,29 +158,27 @@ class TestSearchConnectorBaseGetLogging:
 
 
 class TestSearchConnectorBasePrepareHeaders:
-    """Tests for ConnectorBase._prepare_headers (library User-Agent injection)."""
+    """Tests for ConnectorBase._prepare_headers."""
 
-    def test_user_agent_injected_by_default(self) -> None:
-        """Base _prepare_headers always adds a findpapers User-Agent."""
+    def test_empty_headers_returns_empty_dict(self) -> None:
+        """_prepare_headers with no input returns an empty dict."""
         searcher = _StubConnector()
         result = searcher._prepare_headers({})
-        assert "User-Agent" in result
-        assert "findpapers" in result["User-Agent"]
+        assert result == {}
 
     def test_caller_headers_preserved(self) -> None:
-        """Caller-supplied headers are present alongside the User-Agent."""
+        """Caller-supplied headers are returned unchanged."""
         searcher = _StubConnector()
         custom = {"Accept": "application/json", "X-Custom": "value"}
         result = searcher._prepare_headers(custom)
         assert result["Accept"] == "application/json"
         assert result["X-Custom"] == "value"
-        assert "findpapers" in result["User-Agent"]
 
-    def test_caller_can_override_user_agent(self) -> None:
-        """Explicit User-Agent from caller takes precedence over the default."""
+    def test_no_user_agent_injected(self) -> None:
+        """_prepare_headers does not inject a User-Agent header."""
         searcher = _StubConnector()
-        result = searcher._prepare_headers({"User-Agent": "Custom/1.0"})
-        assert result["User-Agent"] == "Custom/1.0"
+        result = searcher._prepare_headers({})
+        assert "User-Agent" not in result
 
 
 class TestSearchConnectorBaseSearch:

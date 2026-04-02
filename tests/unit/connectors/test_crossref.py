@@ -446,8 +446,8 @@ class TestCrossRefConnector:
         with pytest.raises(Exception, match="Server error"):
             self.connector.fetch_work("10.1234/error")
 
-    def test_user_agent_header_sent(self) -> None:
-        """CrossRef polite-pool User-Agent header is included."""
+    def test_no_user_agent_header_sent(self) -> None:
+        """CrossRef requests do not include a User-Agent header."""
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"status": "ok", "message": {}}
@@ -461,8 +461,8 @@ class TestCrossRefConnector:
 
         self.connector.fetch_work("10.1234/test")
 
-        headers = mock_session.get.call_args[1].get("headers", {})
-        assert "findpapers" in headers.get("User-Agent", "")
+        headers = mock_session.get.call_args[1].get("headers") or {}
+        assert "User-Agent" not in headers
 
     def test_build_paper_delegates(self) -> None:
         """build_paper delegates to _build_paper."""

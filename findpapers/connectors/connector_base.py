@@ -19,11 +19,8 @@ from urllib.parse import urlencode
 import requests
 
 from findpapers.utils.logging_config import SENSITIVE_PARAM_NAMES
-from findpapers.utils.version import package_version
 
 logger = logging.getLogger(__name__)
-
-_REPO_URL = "https://github.com/jonatasgrosman/findpapers"
 
 # Alias kept for internal use; the canonical definition lives in
 # findpapers.utils.logging_config so the SensitiveDataFilter can share it.
@@ -401,27 +398,8 @@ class ConnectorBase(ABC):
         """
         return params
 
-    def _library_user_agent(self) -> str:
-        """Build the library's standard ``User-Agent`` string.
-
-        Format: ``findpapers/<version> (<repo_url>; mailto:<email>)`` when an
-        email is available, or ``findpapers/<version> (<repo_url>)`` otherwise.
-        Several academic APIs (CrossRef, OpenAlex) grant higher rate-limits
-        when a ``mailto:`` clause is present.
-
-        Returns
-        -------
-        str
-            User-Agent header value.
-        """
-        version = package_version()
-        email: str | None = getattr(self, "_email", None)
-        if email:
-            return f"findpapers/{version} ({_REPO_URL}; mailto:{email})"
-        return f"findpapers/{version} ({_REPO_URL})"
-
     def _prepare_headers(self, headers: dict) -> dict:
-        """Inject the library ``User-Agent`` and return augmented headers.
+        """Return a copy of the provided headers without modifications.
 
         Subclasses should call ``super()._prepare_headers(headers)`` and then
         add their own keys (API tokens, Accept types, etc.).
@@ -434,9 +412,9 @@ class ConnectorBase(ABC):
         Returns
         -------
         dict
-            Headers with ``User-Agent`` set (caller values take precedence).
+            Copy of the input headers.
         """
-        return {"User-Agent": self._library_user_agent(), **headers}
+        return dict(headers)
 
     def _get(
         self,
