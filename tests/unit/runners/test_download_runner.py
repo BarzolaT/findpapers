@@ -37,7 +37,7 @@ class TestDownloadRunnerRun:
     def test_metrics_populated_after_run(self, make_paper, tmp_path):
         """Metrics contain expected keys after run()."""
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
-        with patch.object(runner, "_download_paper", return_value=(False, [])):
+        with patch.object(runner, "_download_paper", return_value=(False, [], None)):
             metrics = runner.run()
         assert "total_papers" in metrics
         assert "downloaded_papers" in metrics
@@ -53,14 +53,14 @@ class TestDownloadRunnerRun:
     def test_download_success_increments_count(self, make_paper, tmp_path):
         """Successful download increments downloaded_papers metric."""
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
-        with patch.object(runner, "_download_paper", return_value=(True, ["http://url"])):
+        with patch.object(runner, "_download_paper", return_value=(True, ["http://url"], None)):
             metrics = runner.run()
         assert metrics["downloaded_papers"] == 1
 
     def test_download_failure_logged(self, make_paper, tmp_path):
         """Failed download leaves downloaded_papers at 0."""
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
-        with patch.object(runner, "_download_paper", return_value=(False, ["http://url"])):
+        with patch.object(runner, "_download_paper", return_value=(False, ["http://url"], None)):
             metrics = runner.run()
         assert metrics["downloaded_papers"] == 0
         # Log file must exist with a [FAILED] entry
@@ -73,7 +73,7 @@ class TestDownloadRunnerRun:
         """Successful download is logged with [OK] prefix."""
         paper = make_paper(title="Good Paper")
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
-        with patch.object(runner, "_download_paper", return_value=(True, ["http://ok-url"])):
+        with patch.object(runner, "_download_paper", return_value=(True, ["http://ok-url"], None)):
             runner.run()
         log_file = os.path.join(str(tmp_path), "download_log.txt")
         assert os.path.exists(log_file)
@@ -85,7 +85,7 @@ class TestDownloadRunnerRun:
         """Download log contains both [OK] and [FAILED] entries."""
         papers = [make_paper(title="Success Paper"), make_paper(title="Failure Paper")]
         runner = DownloadRunner(papers=papers, output_directory=str(tmp_path))
-        results = iter([(True, ["http://ok"]), (False, ["http://fail"])])
+        results = iter([(True, ["http://ok"], None), (False, ["http://fail"], None)])
         with patch.object(runner, "_download_paper", side_effect=lambda *a, **kw: next(results)):
             runner.run()
         content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
@@ -96,7 +96,9 @@ class TestDownloadRunnerRun:
         """URLs in the log are indented with '  -> ' prefix."""
         paper = make_paper(title="Indented URL Paper")
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
-        with patch.object(runner, "_download_paper", return_value=(True, ["http://indented-url"])):
+        with patch.object(
+            runner, "_download_paper", return_value=(True, ["http://indented-url"], None)
+        ):
             runner.run()
         content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
         assert "  -> http://indented-url" in content
@@ -123,11 +125,91 @@ class TestDownloadRunnerRun:
         runner = DownloadRunner(
             papers=[make_paper(title="Cached Paper")], output_directory=str(tmp_path)
         )
-        with patch.object(runner, "_download_paper", return_value=(True, [])):
+        with patch.object(runner, "_download_paper", return_value=(True, [], None)):
             runner.run()
         content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
         assert "[OK] Cached Paper" in content
         assert "(already downloaded, skipped)" in content
+
+    def test_log_shows_paper_page_url_for_failure(self, make_paper, tmp_path):
+        """Failed download log includes a 'Page:' line with the paper's URL."""
+        paper = make_paper(title="Page URL Failure", url="http://example.com/paper-page")
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(
+            runner, "_download_paper", return_value=(False, ["http://pdf-url"], None)
+        ):
+            runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "  Page: http://example.com/paper-page" in content
+        assert "  -> http://pdf-url" in content
+
+    def test_log_shows_paper_page_url_for_success(self, make_paper, tmp_path):
+        """Successful download log includes a 'Page:' line with the paper's URL."""
+        paper = make_paper(title="Page URL Success", url="http://example.com/landing")
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_download_paper", return_value=(True, ["http://ok-pdf"], None)):
+            runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "  Page: http://example.com/landing" in content
+
+    def test_resolved_landing_url_takes_priority_over_paper_url(self, make_paper, tmp_path):
+        """resolved_landing_url (the publisher page after DOI redirect) is preferred
+        over paper.url (e.g. a Semantic Scholar page) for the 'Page:' log line.
+        """
+        paper = make_paper(
+            title="DOI Redirect Priority",
+            url="https://www.semanticscholar.org/paper/abc123",
+        )
+        publisher_url = "https://ieeexplore.ieee.org/document/11271154"
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(
+            runner,
+            "_download_paper",
+            return_value=(
+                False,
+                ["https://ieeexplore.ieee.org/ielam/63/11411904/11271154-aam.pdf"],
+                publisher_url,
+            ),
+        ):
+            runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert f"  Page: {publisher_url}" in content
+        assert "semanticscholar.org" not in content
+
+        """When paper.url is None but doi is set, the Page: line uses the doi.org URL."""
+        paper = Paper(
+            title="DOI Only Paper",
+            abstract="Abstract.",
+            authors=[Author(name="Author A")],
+            source=None,
+            publication_date=None,
+            url=None,
+            pdf_url=None,
+            doi="10.1000/xyz",
+        )
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_download_paper", return_value=(False, [], None)):
+            runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "  Page: https://doi.org/10.1000/xyz" in content
+
+    def test_log_no_page_line_when_no_url_and_no_doi(self, tmp_path):
+        """When paper has neither url nor doi, no Page: line is written."""
+        paper = Paper(
+            title="Bare Paper",
+            abstract="Abstract.",
+            authors=[Author(name="Author B")],
+            source=None,
+            publication_date=None,
+            url=None,
+            pdf_url=None,
+            doi=None,
+        )
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_download_paper", return_value=(False, [], None)):
+            runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "  Page:" not in content
 
 
 class TestDownloadRunnerVerbose:
@@ -147,7 +229,7 @@ class TestDownloadRunnerVerbose:
 
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with (
-            patch.object(runner, "_download_paper", return_value=(True, ["http://url"])),
+            patch.object(runner, "_download_paper", return_value=(True, ["http://url"], None)),
             caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"),
         ):
             runner.run(verbose=True)
@@ -159,7 +241,7 @@ class TestDownloadRunnerVerbose:
 
         runner = DownloadRunner(papers=[make_paper()], output_directory=str(tmp_path))
         with (
-            patch.object(runner, "_download_paper", return_value=(True, ["http://url"])),
+            patch.object(runner, "_download_paper", return_value=(True, ["http://url"], None)),
             caplog.at_level(logging.INFO, logger="findpapers.runners.download_runner"),
         ):
             runner.run(verbose=True)
@@ -209,7 +291,7 @@ class TestDownloadRunnerVerbose:
         papers = [make_paper()]
         runner = DownloadRunner(papers=papers, output_directory=str(tmp_path))
         with (
-            patch.object(runner, "_download_paper", return_value=(True, [])),
+            patch.object(runner, "_download_paper", return_value=(True, [], None)),
             patch("findpapers.utils.parallel.make_progress_bar") as mock_pbar,
         ):
             runner.run(show_progress=False)
@@ -749,14 +831,70 @@ class TestDownloadRunnerEdgeCases:
 
         assert metrics["downloaded_papers"] == 0
 
-    def test_duplicate_resolved_pdf_url_is_not_retried(self, make_paper, tmp_path):
-        """A resolved PDF URL is not attempted more than once even when multiple
-        HTML landing pages (e.g. publisher URL + DOI redirect) resolve to the
-        same PDF URL.
+    def test_landing_page_is_pdf_logs_url_not_skipped_placeholder(self, tmp_path):
+        """When paper.url itself points to a PDF, the download succeeds and the
+        log shows the PDF URL on a '  ->' line, not '(already downloaded, skipped)'.
 
-        This reproduces the bug observed in the download log where, for example,
-        both ``linkinghub.elsevier.com`` and ``doi.org`` redirected to the same
-        ScienceDirect PDF URL, causing it to be tried twice.
+        This covers the bug where the landing-page-is-PDF path returned
+        ``(True, [])`` — which the log interpreted as 'file already existed'.
+        """
+        pdf_url = "https://www.ijmems.in/uploads/paper.pdf"
+        paper = Paper(
+            title="Direct PDF Paper",
+            abstract="Abstract.",
+            authors=[Author(name="Author")],
+            source=None,
+            publication_date=None,
+            url=pdf_url,
+            pdf_url=None,
+            doi=None,
+        )
+        pdf_resp = self._make_response(content_type="application/pdf", content=b"%PDF-ok")
+        pdf_resp.url = pdf_url
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_request", return_value=pdf_resp):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 1
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "(already downloaded, skipped)" not in content
+        assert f"  -> {pdf_url}" in content
+
+    def test_pdf_url_equals_paper_url_logs_arrow_not_skipped_placeholder(self, tmp_path):
+        """When paper.pdf_url == paper.url, the URL must appear in the '  ->' log
+        line and not be silently swallowed as if the file already existed.
+
+        This covers the bug where the paper_url filter removed the only URL from
+        attempted_urls, producing '(already downloaded, skipped)' for a fresh download.
+        """
+        shared_url = "https://example.com/paper.pdf"
+        paper = Paper(
+            title="Same URL Paper",
+            abstract="Abstract.",
+            authors=[Author(name="Author")],
+            source=None,
+            publication_date=None,
+            url=shared_url,
+            pdf_url=shared_url,
+            doi=None,
+        )
+        pdf_resp = self._make_response(content_type="application/pdf", content=b"%PDF-ok")
+        pdf_resp.url = shared_url
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_request", return_value=pdf_resp):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 1
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "(already downloaded, skipped)" not in content
+        assert f"  -> {shared_url}" in content
+
+    def test_duplicate_resolved_pdf_url_is_not_retried(self, make_paper, tmp_path):
+        """When both paper.url and paper.doi are set, only the DOI landing page
+        is visited (DOI takes priority).  The resolved PDF URL is tried exactly
+        once regardless of how many candidates could have produced the same URL.
         """
         pdf_url = (
             "https://www.sciencedirect.com/science/article/pii/S1234/pdfft"
@@ -764,17 +902,14 @@ class TestDownloadRunnerEdgeCases:
         )
         paper = make_paper(title="Duplicate Resolved URL")
         paper.pdf_url = None
-        # Both URL and DOI will redirect to the same landing page, which
-        # resolves to the same PDF URL — it must only be fetched once.
         paper.url = "https://linkinghub.elsevier.com/retrieve/pii/S1234"
         paper.doi = "10.1016/j.foo.2026.001"
 
-        # Both the publisher URL and the DOI redirect to the same landing page.
         landing_url = "https://linkinghub.elsevier.com/retrieve/pii/S1234"
         html_resp = self._make_response(content_type="text/html", content=b"<html>")
         html_resp.url = landing_url
 
-        # PDF URL also returns HTML (simulates a paywall / login page failure)
+        # Resolved PDF URL returns HTML (paywall/login page)
         pdf_html_resp = self._make_response(content_type="text/html", content=b"<html>login</html>")
         pdf_html_resp.url = pdf_url
 
@@ -783,11 +918,10 @@ class TestDownloadRunnerEdgeCases:
         def _fake_request(url, **kwargs):
             request_urls.append(url)
             if "doi.org" in url:
-                return html_resp  # same landing URL as paper.url candidate
+                return html_resp  # DOI redirects to the Elsevier landing page
             if url == landing_url:
                 return html_resp
-            # Any attempt to fetch the resolved PDF URL
-            return pdf_html_resp
+            return pdf_html_resp  # resolved PDF URL returns a paywall page
 
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
         with (
@@ -797,9 +931,12 @@ class TestDownloadRunnerEdgeCases:
             metrics = runner.run()
 
         assert metrics["downloaded_papers"] == 0
-        # The landing page and the resolved PDF URL must each appear at most once.
-        assert request_urls.count(landing_url) <= 1
-        assert request_urls.count(pdf_url) <= 1
+        # DOI is preferred as the landing page source; paper.url is never fetched.
+        doi_reqs = [u for u in request_urls if "doi.org" in u]
+        assert len(doi_reqs) == 1
+        assert paper.url not in request_urls
+        # The resolved PDF URL is tried exactly once.
+        assert request_urls.count(pdf_url) == 1
 
     def test_doi_url_logged_as_final_redirect_url(self, make_paper, tmp_path):
         """When a DOI URL redirects to a publisher landing page, the log shows
@@ -836,9 +973,14 @@ class TestDownloadRunnerEdgeCases:
 
         assert metrics["downloaded_papers"] == 1
         log = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
-        # The log must show the landing page URL, not the doi.org URL.
-        assert landing_url in log
-        assert "doi.org" not in log
+        # Page: shows the final resolved landing URL (after DOI redirect) for manual access.
+        assert "  Page: https://linkinghub.elsevier.com/retrieve/pii/S9999" in log
+        # -> lines show only actual PDF-level attempts (pattern URL), not the
+        # landing page itself.
+        attempted_lines = [line for line in log.splitlines() if line.startswith("  -> ")]
+        assert any(pdf_url in line for line in attempted_lines)
+        assert not any("doi.org" in line for line in attempted_lines)
+        assert not any(landing_url in line for line in attempted_lines)
 
     def test_relative_pdf_url_is_skipped(self, make_paper, tmp_path):
         """Relative URLs stored in paper.pdf_url are silently skipped and never
@@ -1064,10 +1206,10 @@ class TestResolvePdfUrl:
         assert result == "https://dl.acm.org/doi/pdf/10.1145/1234567.1234568"
 
     def test_ieee_document_path(self) -> None:
-        """IEEE document path is converted to stamp/stamp.jsp URL."""
+        """IEEE document path is converted directly to stampPDF/getPDF.jsp URL."""
         url = "https://ieeexplore.ieee.org/document/9999999"
         result = _resolve_pdf_url(url)
-        assert result == "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9999999"
+        assert result == "https://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=9999999&ref="
 
     def test_ieee_arnumber_querystring(self) -> None:
         """IEEE URL with arnumber query param is converted."""

@@ -133,7 +133,7 @@ class DownloadRunner:
         proxies = self._build_proxies(self._proxy)
         ssl_verify = self._ssl_verify
 
-        def _download_task(paper: Paper) -> tuple[bool, list[str]]:
+        def _download_task(paper: Paper) -> tuple[bool, list[str], str | None]:
             return self._download_paper(
                 paper,
                 self._output_directory,
@@ -153,16 +153,29 @@ class DownloadRunner:
             use_progress=show_progress,
         ):
             if error is not None or result is None:
-                self._log_download_error(log_path, paper.title, [])
+                # No landing page was resolved; use paper.url as fallback.
+                paper_url = paper.url or (
+                    f"https://doi.org/{paper.doi}" if paper.doi is not None else None
+                )
+                self._log_download_error(log_path, paper.title, paper_url, [])
                 if verbose:
                     logger.warning("Error downloading '%s': %s", paper.title, error)
                 continue
-            downloaded, attempted_urls = result
+            downloaded, attempted_urls, resolved_landing_url = result
+            # Prefer the publisher landing page URL obtained after following DOI
+            # redirects; fall back to paper.url when no landing page was fetched
+            # (e.g. attempt 1 succeeded directly from paper.pdf_url), and use a
+            # doi.org URL as last resort when only a DOI is available.
+            paper_url = (
+                resolved_landing_url
+                or paper.url
+                or (f"https://doi.org/{paper.doi}" if paper.doi is not None else None)
+            )
             if downloaded:
                 metrics["downloaded_papers"] += 1
-                self._log_download_success(log_path, paper.title, attempted_urls)
+                self._log_download_success(log_path, paper.title, paper_url, attempted_urls)
             else:
-                self._log_download_error(log_path, paper.title, attempted_urls)
+                self._log_download_error(log_path, paper.title, paper_url, attempted_urls)
 
         metrics["runtime_in_seconds"] = perf_counter() - start
         self._metrics = metrics
@@ -309,9 +322,12 @@ class DownloadRunner:
             return f"https://dl.acm.org/doi/pdf/{resolved_doi}"
 
         if host == "https://ieeexplore.ieee.org":
-            # stamp.jsp is an HTML frame-loader; the actual PDF is served by
-            # stampPDF/getPDF.jsp with the same arnumber parameter.
-            if path.startswith("/stamp/"):
+            # stampPDF/getPDF.jsp is the endpoint that serves the actual PDF
+            # binary.  stamp/stamp.jsp is just an HTML iframe loader — it
+            # never returns application/pdf and should never be used as a
+            # final download target.
+            if path.startswith("/stamp/stamp.jsp"):
+                # Already at the viewer; extract arnumber and jump to PDF.
                 arnumber = qs.get("arnumber", [None])[0]
                 if arnumber is None:
                     return None
@@ -322,7 +338,8 @@ class DownloadRunner:
                 doc_id = qs["arnumber"][0]
             else:
                 return None
-            return f"{host}/stamp/stamp.jsp?tp=&arnumber={doc_id}"
+            # Go directly to the PDF endpoint, skipping the stamp viewer.
+            return f"{host}/stampPDF/getPDF.jsp?tp=&arnumber={doc_id}&ref="
 
         if host in ("https://www.sciencedirect.com", "https://linkinghub.elsevier.com"):
             paper_id = path.split("/")[-1]
@@ -437,6 +454,7 @@ class DownloadRunner:
         self,
         log_path: str,
         title: str,
+        paper_url: str | None,
         attempted_urls: list[str],
     ) -> None:
         """Append a success entry to the download log file.
@@ -447,8 +465,12 @@ class DownloadRunner:
             Path to the download log file.
         title : str
             Paper title.
+        paper_url : str | None
+            The paper's landing-page URL (``paper.url`` or a DOI URL).
+            Written as a separate ``Page:`` line so the user can visit it
+            manually if needed.
         attempted_urls : list[str]
-            URLs that were tried.
+            PDF download URLs that were tried.
 
         Returns
         -------
@@ -456,8 +478,10 @@ class DownloadRunner:
         """
         with open(log_path, "a", encoding="utf-8") as fp:
             fp.write(f"\n[OK] {title}\n")
+            if paper_url:
+                fp.write(f"  Page: {paper_url}\n")
             if not attempted_urls:
-                fp.write("  -> (already downloaded, skipped)\n")
+                fp.write("  (already downloaded, skipped)\n")
             else:
                 for url in attempted_urls:
                     fp.write(f"  -> {url}\n")
@@ -466,6 +490,7 @@ class DownloadRunner:
         self,
         log_path: str,
         title: str,
+        paper_url: str | None,
         attempted_urls: list[str],
     ) -> None:
         """Append a failure entry to the download log file.
@@ -476,8 +501,12 @@ class DownloadRunner:
             Path to the download log file.
         title : str
             Paper title.
+        paper_url : str | None
+            The paper's landing-page URL (``paper.url`` or a DOI URL).
+            Written as a separate ``Page:`` line so the user can visit it
+            manually to attempt a download.
         attempted_urls : list[str]
-            URLs that were tried.
+            PDF download URLs that were tried.
 
         Returns
         -------
@@ -485,8 +514,10 @@ class DownloadRunner:
         """
         with open(log_path, "a", encoding="utf-8") as fp:
             fp.write(f"\n[FAILED] {title}\n")
+            if paper_url:
+                fp.write(f"  Page: {paper_url}\n")
             if not attempted_urls:
-                fp.write("  -> (no URLs available)\n")
+                fp.write("  (no URLs available)\n")
             else:
                 for url in attempted_urls:
                     fp.write(f"  -> {url}\n")
@@ -498,7 +529,7 @@ class DownloadRunner:
         timeout: float | None,
         proxies: dict[str, str] | None,
         ssl_verify: bool = True,
-    ) -> tuple[bool, list[str]]:
+    ) -> tuple[bool, list[str], str | None]:
         """Attempt to download the PDF for a single paper.
 
         Parameters
@@ -516,105 +547,132 @@ class DownloadRunner:
 
         Returns
         -------
-        tuple[bool, list[str]]
-            ``(downloaded, attempted_urls)`` where *downloaded* is ``True``
-            when the PDF was saved successfully.
+        tuple[bool, list[str], str | None]
+            ``(downloaded, attempted_urls, resolved_landing_url)`` where
+            *downloaded* is ``True`` when the PDF was saved successfully and
+            *resolved_landing_url* is the final URL of the publisher landing
+            page after DOI redirect (``None`` when no landing page was
+            fetched, e.g. attempt 1 succeeded directly).
         """
         attempted_urls: list[str] = []
         year = getattr(paper.publication_date, "year", None) if paper.publication_date else None
         output_filepath = os.path.join(output_directory, self._build_filename(year, paper.title))
         if os.path.exists(output_filepath):
             logger.info("PDF already exists, skipping: %s", output_filepath)
-            return True, attempted_urls
+            return True, attempted_urls, None
 
-        # Build ordered candidate URL list: pdf_url first, then url, then DOI
-        # so the most likely direct PDF source is tried before HTML landing pages.
-        candidate_urls: list[str] = []
-        seen: set[str] = set()  # guards pre-request candidate dedup
-        visited: set[str] = set()  # guards post-redirect final-URL dedup
+        def _is_absolute(url: str) -> bool:
+            return url.startswith(("http://", "https://"))
 
-        def _add(u: str | None) -> None:
-            # Skip relative URLs — they cannot be requested and indicate bad data
-            # from a connector (e.g. pdf_url stored as "/en/download/…").
-            if u and u.startswith(("http://", "https://")) and u not in seen:
-                candidate_urls.append(u)
-                seen.add(u)
+        def _try_fetch_pdf(url: str) -> bool:
+            """Fetch *url*, save to disk when PDF is returned; add to attempted list.
 
-        _add(paper.pdf_url)
-        _add(paper.url)
-        if paper.doi is not None:
-            _add(f"https://doi.org/{paper.doi}")
-
-        for url in candidate_urls:
+            Returns ``True`` on success.  Silently skips relative URLs and
+            swallows :exc:`OSError` so a single failure never aborts the run.
+            """
+            if not _is_absolute(url):
+                logger.debug("Skipping non-absolute URL: %s", url)
+                return False
+            attempted_urls.append(url)
             try:
                 response = self._request(
                     url, timeout=timeout, proxies=proxies, ssl_verify=ssl_verify
                 )
-                if response is None:
-                    # Log the original URL when no response was received.
-                    attempted_urls.append(url)
-                    logger.debug("No response for %s", url)
-                    continue
-                # Use the final URL after redirects so the log reflects where
-                # the request actually landed (e.g. DOI → publisher landing page).
-                # Skip entirely if this final URL was already visited via a
-                # different candidate (e.g. paper.url and doi both redirect here).
-                if response.url in visited:
-                    logger.debug("Skipping already-visited URL: %s", response.url)
-                    continue
-                visited.add(response.url)
-                attempted_urls.append(response.url)
-                # Log response summary here as well so that callers running
-                # in different execution contexts (threads) always see the
-                # response regardless of _request internals.
-                self._log_response(response)
-                content_type = response.headers.get("content-type", "").lower()
-
-                if "text/html" in content_type:
-                    # Build a prioritised list of PDF URL candidates from the landing page:
-                    # 1. Meta tag (publisher-agnostic, preferred when available).
-                    # 2. Known publisher URL pattern as fallback.
-                    # Both are tried in order; the first that returns a PDF wins.
-                    html_pdf_candidates: list[str] = []
-                    meta_pdf = self._extract_meta_pdf_url(response.content, base_url=response.url)
-                    if meta_pdf:
-                        html_pdf_candidates.append(meta_pdf)
-                    pattern_pdf = self._resolve_pdf_url(response.url, doi=paper.doi)
-                    if pattern_pdf and pattern_pdf not in html_pdf_candidates:
-                        html_pdf_candidates.append(pattern_pdf)
-
-                    for pdf_candidate in html_pdf_candidates:
-                        if pdf_candidate in visited:
-                            continue
-                        visited.add(pdf_candidate)
-                        attempted_urls.append(pdf_candidate)
-                        pdf_response = self._request(
-                            pdf_candidate, timeout=timeout, proxies=proxies, ssl_verify=ssl_verify
-                        )
-                        if pdf_response is None:
-                            logger.debug("No response for %s", pdf_candidate)
-                            continue
-                        self._log_response(pdf_response)
-                        if (
-                            "application/pdf"
-                            in pdf_response.headers.get("content-type", "").lower()
-                        ):
-                            with open(output_filepath, "wb") as fp:
-                                fp.write(pdf_response.content)
-                            return True, attempted_urls
-                    # None of the landing-page candidates yielded a PDF;
-                    # move on to the next main URL candidate.
-                    continue
-
-                if "application/pdf" in content_type:
-                    with open(output_filepath, "wb") as fp:
-                        fp.write(response.content)
-                    return True, attempted_urls
             except OSError:
-                attempted_urls.append(url)
-                logger.debug("Download attempt failed", exc_info=True)
+                logger.debug("Request failed for %s", url, exc_info=True)
+                return False
+            if response is None:
+                logger.debug("No response for %s", url)
+                return False
+            self._log_response(response)
+            if "application/pdf" not in response.headers.get("content-type", "").lower():
+                return False
+            try:
+                with open(output_filepath, "wb") as fp:
+                    fp.write(response.content)
+            except OSError:
+                logger.debug("Failed to write PDF from %s", url, exc_info=True)
+                return False
+            return True
 
-        return False, attempted_urls
+        # ─────────────────────────────────────────────────────────────────────
+        # Attempt 1 — paper.pdf_url
+        # Direct PDF link supplied by the data source (e.g. from an OA
+        # repository).  Tried first as it is the most likely to succeed.
+        # ─────────────────────────────────────────────────────────────────────
+        if paper.pdf_url and _try_fetch_pdf(paper.pdf_url):
+            return True, attempted_urls, None
+
+        # Attempts 2 and 3 both require visiting the paper's landing page to
+        # discover the actual PDF URL.  We prefer the DOI URL (canonical,
+        # always resolves to the publisher); paper.url is used as a fallback
+        # when no DOI is available.
+        if paper.doi is not None:
+            landing_url: str = f"https://doi.org/{paper.doi}"
+        elif paper.url and _is_absolute(paper.url):
+            landing_url = paper.url
+        else:
+            return False, attempted_urls, None  # no way to discover a PDF URL
+
+        try:
+            landing_response = self._request(
+                landing_url, timeout=timeout, proxies=proxies, ssl_verify=ssl_verify
+            )
+        except OSError:
+            logger.debug("Landing page request failed for %s", landing_url, exc_info=True)
+            return False, attempted_urls, None
+
+        if landing_response is None:
+            logger.debug("No response for landing page %s", landing_url)
+            return False, attempted_urls, None
+
+        self._log_response(landing_response)
+        landing_content_type = landing_response.headers.get("content-type", "").lower()
+
+        # Edge case: the landing URL itself serves a PDF (e.g. paper.url
+        # points directly to an open-access PDF file).
+        if "application/pdf" in landing_content_type:
+            attempted_urls.append(landing_response.url)
+            try:
+                with open(output_filepath, "wb") as fp:
+                    fp.write(landing_response.content)
+                return True, attempted_urls, landing_response.url
+            except OSError:
+                logger.debug("Failed to write PDF from landing page %s", landing_url, exc_info=True)
+                return False, attempted_urls, landing_response.url
+
+        if "text/html" not in landing_content_type:
+            logger.debug(
+                "Landing page %s returned unexpected content-type: %s",
+                landing_url,
+                landing_content_type,
+            )
+            return False, attempted_urls, None
+
+        # Final URL after any redirects (e.g. doi.org → publisher landing page).
+        final_landing_url = landing_response.url
+
+        # ─────────────────────────────────────────────────────────────────────
+        # Attempt 2 — meta tag PDF URL
+        # Many publishers embed the PDF URL in a <meta name="citation_pdf_url">
+        # tag.  This is publisher-agnostic and preferred over hardcoded patterns.
+        # ─────────────────────────────────────────────────────────────────────
+        meta_pdf_url = self._extract_meta_pdf_url(
+            landing_response.content, base_url=final_landing_url
+        )
+        if meta_pdf_url and _try_fetch_pdf(meta_pdf_url):
+            return True, attempted_urls, final_landing_url
+
+        # ─────────────────────────────────────────────────────────────────────
+        # Attempt 3 — publisher-specific PDF URL pattern
+        # Derived from the landing page's *final* URL (after DOI redirects)
+        # using known publisher URL conventions (see _resolve_pdf_url).
+        # ─────────────────────────────────────────────────────────────────────
+        pattern_pdf_url = self._resolve_pdf_url(final_landing_url, doi=paper.doi)
+        if pattern_pdf_url and pattern_pdf_url != meta_pdf_url and _try_fetch_pdf(pattern_pdf_url):
+            return True, attempted_urls, final_landing_url
+
+        return False, attempted_urls, final_landing_url
 
     def _request(
         self,
