@@ -24,96 +24,6 @@ class TestDownloadRunnerInit:
         assert runner._output_directory == "/tmp/out"
 
 
-class TestDownloadRunnerBuildFilename:
-    """Tests for _build_filename helper."""
-
-    def test_filename_includes_year_and_title(self, make_paper):
-        """Filename starts with year and contains sanitised title."""
-        paper = make_paper(title="My Test Paper")
-        paper.publication_date = date(2023, 5, 1)
-        runner = DownloadRunner(papers=[], output_directory="/tmp")
-        filename = runner._build_filename(paper)
-        assert filename.startswith("2023")
-        assert filename.endswith(".pdf")
-
-    def test_filename_sanitises_spaces(self, make_paper):
-        """Spaces in title are replaced with underscores."""
-        paper = make_paper(title="Hello World")
-        runner = DownloadRunner(papers=[], output_directory="/tmp")
-        filename = runner._build_filename(paper)
-        assert " " not in filename
-
-    def test_filename_unknown_year_when_no_date(self, make_paper):
-        """Papers without publication_date use 'unknown' as year."""
-        paper = make_paper()
-        paper.publication_date = None
-        runner = DownloadRunner(papers=[], output_directory="/tmp")
-        filename = runner._build_filename(paper)
-        assert filename.startswith("unknown")
-
-
-class TestDownloadRunnerBuildProxies:
-    """Tests for _build_proxies helper."""
-
-    def test_proxy_from_arg(self):
-        """Proxy from constructor argument is used."""
-        runner = DownloadRunner(papers=[], output_directory="/tmp", proxy="http://proxy:8080")
-        proxies = runner._build_proxies()
-        assert proxies == {"http": "http://proxy:8080", "https": "http://proxy:8080"}
-
-    def test_no_proxy_returns_none(self, monkeypatch):
-        """None is returned when no proxy is configured."""
-        monkeypatch.delenv("FINDPAPERS_PROXY", raising=False)
-        runner = DownloadRunner(papers=[], output_directory="/tmp")
-        assert runner._build_proxies() is None
-
-    def test_proxy_from_env(self, monkeypatch):
-        """Proxy is read from FINDPAPERS_PROXY env variable."""
-        monkeypatch.setenv("FINDPAPERS_PROXY", "http://env-proxy:9090")
-        runner = DownloadRunner(papers=[], output_directory="/tmp")
-        proxies = runner._build_proxies()
-        assert proxies is not None
-        assert proxies["http"] == "http://env-proxy:9090"
-
-
-class TestDownloadRunnerResolvePdfUrl:
-    """Tests for _resolve_pdf_url publisher patterns."""
-
-    def _runner(self):
-        return DownloadRunner(papers=[], output_directory="/tmp")
-
-    def test_unknown_host_returns_none(self, make_paper):
-        """Unknown host returns None."""
-        runner = self._runner()
-        result = runner._resolve_pdf_url("https://unknown.host/article/123", make_paper())
-        assert result is None
-
-    def test_springer_url_resolved(self, make_paper):
-        """Springer URL is correctly resolved to PDF."""
-        runner = self._runner()
-        url = "https://link.springer.com/article/10.1007/s00000-000-0000-0"
-        result = runner._resolve_pdf_url(url, make_paper())
-        assert result is not None
-        assert result.endswith(".pdf")
-        assert "/content/pdf/" in result
-
-    def test_ieee_url_with_document_path(self, make_paper):
-        """IEEE document URL is resolved using path."""
-        runner = self._runner()
-        url = "https://ieeexplore.ieee.org/document/12345"
-        result = runner._resolve_pdf_url(url, make_paper())
-        assert result is not None
-        assert "12345" in result
-
-    def test_frontiersin_url_resolved(self, make_paper):
-        """Frontiers in article URL resolved to PDF."""
-        runner = self._runner()
-        url = "https://www.frontiersin.org/articles/10.3389/fnins.2020.12345/full"
-        result = runner._resolve_pdf_url(url, make_paper())
-        assert result is not None
-        assert result.endswith("/pdf")
-
-
 class TestDownloadRunnerRun:
     """Tests for the run() method."""
 
@@ -672,7 +582,8 @@ class TestDownloadRunnerEdgeCases:
         paper = make_paper(title="Already There")
         runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
         # Pre-create the file that _build_filename would generate
-        filename = runner._build_filename(paper)
+        year = getattr(paper.publication_date, "year", None) if paper.publication_date else None
+        filename = DownloadRunner._build_filename(year, paper.title)
         filepath = tmp_path / filename
         filepath.write_bytes(b"%PDF-existing")
 
@@ -826,3 +737,593 @@ class TestDownloadRunnerEdgeCases:
             metrics = runner.run()
 
         assert metrics["downloaded_papers"] == 0
+
+    def test_duplicate_resolved_pdf_url_is_not_retried(self, make_paper, tmp_path):
+        """A resolved PDF URL is not attempted more than once even when multiple
+        HTML landing pages (e.g. publisher URL + DOI redirect) resolve to the
+        same PDF URL.
+
+        This reproduces the bug observed in the download log where, for example,
+        both ``linkinghub.elsevier.com`` and ``doi.org`` redirected to the same
+        ScienceDirect PDF URL, causing it to be tried twice.
+        """
+        pdf_url = (
+            "https://www.sciencedirect.com/science/article/pii/S1234/pdfft"
+            "?isDTMRedir=true&download=true"
+        )
+        paper = make_paper(title="Duplicate Resolved URL")
+        paper.pdf_url = None
+        # Both URL and DOI will redirect to the same landing page, which
+        # resolves to the same PDF URL — it must only be fetched once.
+        paper.url = "https://linkinghub.elsevier.com/retrieve/pii/S1234"
+        paper.doi = "10.1016/j.foo.2026.001"
+
+        # Both the publisher URL and the DOI redirect to the same landing page.
+        landing_url = "https://linkinghub.elsevier.com/retrieve/pii/S1234"
+        html_resp = self._make_response(content_type="text/html", content=b"<html>")
+        html_resp.url = landing_url
+
+        # PDF URL also returns HTML (simulates a paywall / login page failure)
+        pdf_html_resp = self._make_response(content_type="text/html", content=b"<html>login</html>")
+        pdf_html_resp.url = pdf_url
+
+        request_urls: list[str] = []
+
+        def _fake_request(url, **kwargs):
+            request_urls.append(url)
+            if "doi.org" in url:
+                return html_resp  # same landing URL as paper.url candidate
+            if url == landing_url:
+                return html_resp
+            # Any attempt to fetch the resolved PDF URL
+            return pdf_html_resp
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with (
+            patch.object(runner, "_request", side_effect=_fake_request),
+            patch.object(DownloadRunner, "_resolve_pdf_url", return_value=pdf_url),
+        ):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 0
+        # The landing page and the resolved PDF URL must each appear at most once.
+        assert request_urls.count(landing_url) <= 1
+        assert request_urls.count(pdf_url) <= 1
+
+    def test_doi_url_logged_as_final_redirect_url(self, make_paper, tmp_path):
+        """When a DOI URL redirects to a publisher landing page, the log shows
+        the final URL (after redirects) rather than the original doi.org URL.
+        """
+        paper = make_paper(title="DOI Redirect Paper")
+        paper.pdf_url = None
+        paper.url = None
+        paper.doi = "10.1016/j.foo.2026.001"
+
+        landing_url = "https://linkinghub.elsevier.com/retrieve/pii/S9999"
+        html_resp = self._make_response(content_type="text/html", content=b"<html>")
+        # Simulate the DOI redirecting to the publisher landing page.
+        html_resp.url = landing_url
+
+        pdf_url = (
+            "https://www.sciencedirect.com/science/article/pii/S9999"
+            "/pdfft?isDTMRedir=true&download=true"
+        )
+        pdf_resp = self._make_response(content_type="application/pdf", content=b"%PDF-ok")
+        pdf_resp.url = pdf_url
+
+        def _fake_request(url, **kwargs):
+            if "doi.org" in url:
+                return html_resp
+            return pdf_resp
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with (
+            patch.object(runner, "_request", side_effect=_fake_request),
+            patch.object(DownloadRunner, "_resolve_pdf_url", return_value=pdf_url),
+        ):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 1
+        log = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        # The log must show the landing page URL, not the doi.org URL.
+        assert landing_url in log
+        assert "doi.org" not in log
+
+    def test_relative_pdf_url_is_skipped(self, make_paper, tmp_path):
+        """Relative URLs stored in paper.pdf_url are silently skipped and never
+        logged, since they cannot be requested without a base URL.
+        """
+        paper = make_paper(title="Relative PDF Paper")
+        paper.pdf_url = "/en/download/article-file/5252864"  # relative path
+        paper.url = None
+        paper.doi = None
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        requested_urls: list[str] = []
+
+        def _fake_request(url, **kwargs):
+            requested_urls.append(url)
+            return None
+
+        with patch.object(runner, "_request", side_effect=_fake_request):
+            runner.run()
+
+        # The relative URL must never have been requested or logged.
+        assert requested_urls == []
+        log = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "/en/download/article-file/5252864" not in log
+
+
+# ---------------------------------------------------------------------------
+# Tests for DownloadRunner static method helpers
+# ---------------------------------------------------------------------------
+
+# Shortcuts for cleaner test code
+_resolve_pdf_url = DownloadRunner._resolve_pdf_url
+_build_filename = DownloadRunner._build_filename
+_build_proxies = DownloadRunner._build_proxies
+_extract_meta_pdf_url = DownloadRunner._extract_meta_pdf_url
+
+
+class TestExtractMetaPdfUrl:
+    """Tests for _extract_meta_pdf_url()."""
+
+    def test_citation_pdf_url_meta_tag(self) -> None:
+        """citation_pdf_url meta tag is extracted."""
+        html = b'<html><head><meta name="citation_pdf_url" content="https://example.com/paper.pdf"></head></html>'
+        assert _extract_meta_pdf_url(html) == "https://example.com/paper.pdf"
+
+    def test_fulltext_pdf_url_meta_tag(self) -> None:
+        """fulltext_pdf_url meta tag is extracted."""
+        html = b'<html><head><meta name="fulltext_pdf_url" content="https://example.com/full.pdf"></head></html>'
+        assert _extract_meta_pdf_url(html) == "https://example.com/full.pdf"
+
+    def test_citation_pdf_url_takes_precedence_over_fulltext(self) -> None:
+        """citation_pdf_url is returned before fulltext_pdf_url (document order)."""
+        html = (
+            b"<html><head>"
+            b'<meta name="citation_pdf_url" content="https://example.com/cite.pdf">'
+            b'<meta name="fulltext_pdf_url" content="https://example.com/full.pdf">'
+            b"</head></html>"
+        )
+        assert _extract_meta_pdf_url(html) == "https://example.com/cite.pdf"
+
+    def test_missing_meta_returns_none(self) -> None:
+        """HTML with no relevant meta tags returns None."""
+        html = b"<html><head><title>Paper</title></head></html>"
+        assert _extract_meta_pdf_url(html) is None
+
+    def test_empty_content_attr_ignored(self) -> None:
+        """Meta tag with empty content attribute is ignored."""
+        html = b'<html><head><meta name="citation_pdf_url" content=""></head></html>'
+        assert _extract_meta_pdf_url(html) is None
+
+    def test_invalid_html_returns_none(self) -> None:
+        """Completely invalid bytes that cannot be parsed return None."""
+        assert _extract_meta_pdf_url(b"\x00\x01\x02") is None
+
+    def test_relative_url_resolved_against_base(self) -> None:
+        """Relative meta URL is resolved to an absolute URL using base_url."""
+        html = b'<html><head><meta name="citation_pdf_url" content="/en/download/article-file/123"></head></html>'
+        result = _extract_meta_pdf_url(
+            html, base_url="https://dergipark.org.tr/en/pub/tuje/article/456"
+        )
+        assert result == "https://dergipark.org.tr/en/download/article-file/123"
+
+    def test_absolute_url_not_altered_by_base(self) -> None:
+        """Absolute meta URL is returned unchanged even when base_url is provided."""
+        html = b'<html><head><meta name="citation_pdf_url" content="https://other.host/paper.pdf"></head></html>'
+        result = _extract_meta_pdf_url(html, base_url="https://dergipark.org.tr/en/pub/article/1")
+        assert result == "https://other.host/paper.pdf"
+
+    def test_no_base_url_returns_relative_as_is(self) -> None:
+        """When base_url is empty, relative content is returned unchanged (legacy)."""
+        html = (
+            b'<html><head><meta name="citation_pdf_url" content="/relative/path.pdf"></head></html>'
+        )
+        result = _extract_meta_pdf_url(html)
+        assert result == "/relative/path.pdf"
+
+    def test_meta_pdf_url_used_before_pattern_resolver(self, make_paper, tmp_path) -> None:
+        """When HTML contains citation_pdf_url, it is tried first; the pattern-resolved
+        URL is only requested if the meta URL does not return a PDF."""
+        paper = make_paper(title="Meta Tag Paper")
+        paper.pdf_url = None
+        paper.url = "https://link.springer.com/article/10.1007/s00000-000-0000-0"
+        paper.doi = None
+
+        # A meta URL distinct from the Springer pattern URL.
+        meta_pdf_url = "https://link.springer.com/content/pdf/direct-from-meta.pdf"
+        html_content = (
+            f'<html><head><meta name="citation_pdf_url" content="{meta_pdf_url}"></head></html>'
+        ).encode()
+
+        html_resp = MagicMock()
+        html_resp.status_code = 200
+        html_resp.reason = "OK"
+        html_resp.headers = {"content-type": "text/html"}
+        html_resp.content = html_content
+        html_resp.url = paper.url
+        html_resp.ok = True
+
+        pdf_resp = MagicMock()
+        pdf_resp.status_code = 200
+        pdf_resp.reason = "OK"
+        pdf_resp.headers = {"content-type": "application/pdf"}
+        pdf_resp.content = b"%PDF-data"
+        pdf_resp.url = meta_pdf_url
+        pdf_resp.ok = True
+
+        requested_urls: list[str] = []
+
+        def _fake_request(url, **kwargs):
+            requested_urls.append(url)
+            if url == paper.url:
+                return html_resp
+            return pdf_resp  # meta URL returns PDF directly
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_request", side_effect=_fake_request):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 1
+        # Meta URL was used; the Springer pattern URL was never requested.
+        pattern_url = "https://link.springer.com/content/pdf/10.1007/s00000-000-0000-0.pdf"
+        assert meta_pdf_url in requested_urls
+        assert pattern_url not in requested_urls
+
+    def test_pattern_resolver_used_when_meta_url_fails(self, make_paper, tmp_path) -> None:
+        """When the meta PDF URL does not return a PDF, the pattern-resolved URL is tried."""
+        paper = make_paper(title="Meta Fail Fallback")
+        paper.pdf_url = None
+        paper.url = "https://link.springer.com/article/10.1007/s00000-000-0000-0"
+        paper.doi = None
+
+        meta_pdf_url = "https://link.springer.com/content/pdf/direct-from-meta.pdf"
+        pattern_url = "https://link.springer.com/content/pdf/10.1007/s00000-000-0000-0.pdf"
+        html_content = (
+            f'<html><head><meta name="citation_pdf_url" content="{meta_pdf_url}"></head></html>'
+        ).encode()
+
+        html_resp = MagicMock()
+        html_resp.status_code = 200
+        html_resp.reason = "OK"
+        html_resp.headers = {"content-type": "text/html"}
+        html_resp.content = html_content
+        html_resp.url = paper.url
+        html_resp.ok = True
+
+        # Meta URL returns HTML (e.g. paywall), not a PDF.
+        meta_fail_resp = MagicMock()
+        meta_fail_resp.status_code = 200
+        meta_fail_resp.reason = "OK"
+        meta_fail_resp.headers = {"content-type": "text/html"}
+        meta_fail_resp.content = b"<html>paywall</html>"
+        meta_fail_resp.url = meta_pdf_url
+        meta_fail_resp.ok = True
+
+        pdf_resp = MagicMock()
+        pdf_resp.status_code = 200
+        pdf_resp.reason = "OK"
+        pdf_resp.headers = {"content-type": "application/pdf"}
+        pdf_resp.content = b"%PDF-ok"
+        pdf_resp.url = pattern_url
+        pdf_resp.ok = True
+
+        def _fake_request(url, **kwargs):
+            if url == paper.url:
+                return html_resp
+            if url == meta_pdf_url:
+                return meta_fail_resp
+            return pdf_resp  # pattern URL succeeds
+
+        runner = DownloadRunner(papers=[paper], output_directory=str(tmp_path))
+        with patch.object(runner, "_request", side_effect=_fake_request):
+            metrics = runner.run()
+
+        assert metrics["downloaded_papers"] == 1
+
+
+class TestResolvePdfUrl:
+    """Tests for _resolve_pdf_url()."""
+
+    def test_acm_doi_embedded_in_path(self) -> None:
+        """ACM URL with DOI in path resolves to /doi/pdf/ variant."""
+        url = "https://dl.acm.org/doi/10.1145/1234567.1234568"
+        result = _resolve_pdf_url(url)
+        assert result == "https://dl.acm.org/doi/pdf/10.1145/1234567.1234568"
+
+    def test_acm_uses_explicit_doi(self) -> None:
+        """ACM URL without embedded DOI uses the doi parameter."""
+        url = "https://dl.acm.org/doi/abs/short"
+        result = _resolve_pdf_url(url, doi="10.9999/test")
+        assert result == "https://dl.acm.org/doi/pdf/10.9999/test"
+
+    def test_acm_no_doi_returns_none(self) -> None:
+        """ACM URL with no extractable DOI returns None."""
+        result = _resolve_pdf_url("https://dl.acm.org/", doi=None)
+        assert result is None
+
+    def test_acm_already_pdf_path_uses_doi(self) -> None:
+        """ACM /doi/pdf/ path with doi param still resolves correctly."""
+        result = _resolve_pdf_url(
+            "https://dl.acm.org/doi/pdf/10.1145/1234567.1234568",
+            doi="10.1145/1234567.1234568",
+        )
+        assert result == "https://dl.acm.org/doi/pdf/10.1145/1234567.1234568"
+
+    def test_ieee_document_path(self) -> None:
+        """IEEE document path is converted to stamp/stamp.jsp URL."""
+        url = "https://ieeexplore.ieee.org/document/9999999"
+        result = _resolve_pdf_url(url)
+        assert result == "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9999999"
+
+    def test_ieee_arnumber_querystring(self) -> None:
+        """IEEE URL with arnumber query param is converted."""
+        url = "https://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=8888888"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "arnumber=8888888" in result
+
+    def test_ieee_stamp_url_resolves_to_get_pdf(self) -> None:
+        """IEEE stamp.jsp URL is resolved to the stampPDF/getPDF.jsp endpoint."""
+        url = "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10000095"
+        result = _resolve_pdf_url(url)
+        assert (
+            result == "https://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=10000095&ref="
+        )
+
+    def test_ieee_stamp_url_without_arnumber_returns_none(self) -> None:
+        """IEEE stamp.jsp URL without arnumber returns None."""
+        url = "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp="
+        result = _resolve_pdf_url(url)
+        assert result is None
+
+    def test_ieee_unknown_path_returns_none(self) -> None:
+        """IEEE URL without document path or arnumber returns None."""
+        url = "https://ieeexplore.ieee.org/search/searchresult.jsp"
+        result = _resolve_pdf_url(url)
+        assert result is None
+
+    def test_sciencedirect_url(self) -> None:
+        """ScienceDirect URL is converted to pdfft download URL."""
+        url = "https://www.sciencedirect.com/science/article/pii/S0004370221000060"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "pdfft?isDTMRedir=true&download=true" in result
+        assert "S0004370221000060" in result
+
+    def test_linkinghub_elsevier_url(self) -> None:
+        """linkinghub.elsevier.com URL is handled like ScienceDirect."""
+        url = "https://linkinghub.elsevier.com/retrieve/pii/S0004370221000060"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "sciencedirect.com" in result
+
+    def test_rsc_articlelanding(self) -> None:
+        """RSC articlelanding URL becomes articlepdf URL."""
+        url = "https://pubs.rsc.org/en/content/articlelanding/2021/sc/d1sc01234a"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/articlepdf/" in result
+
+    def test_tandfonline_full_to_pdf(self) -> None:
+        """Tandfonline /full URL becomes /pdf URL."""
+        url = "https://www.tandfonline.com/doi/full/10.1080/00000000.2021.123456"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/pdf" in result
+        assert "/full" not in result
+
+    def test_frontiersin_full_to_pdf(self) -> None:
+        """Frontiers /full URL becomes /pdf URL."""
+        url = "https://www.frontiersin.org/articles/10.3389/fpsyg.2021.123456/full"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/pdf" in result
+
+    def test_pubs_acs_doi_to_doi_pdf(self) -> None:
+        """ACS /doi URL becomes /doi/pdf URL."""
+        url = "https://pubs.acs.org/doi/10.1021/acs.jcim.1c00000"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/doi/pdf/" in result
+
+    def test_sagepub_doi_to_doi_pdf(self) -> None:
+        """SAGE /doi URL becomes /doi/pdf URL."""
+        url = "https://journals.sagepub.com/doi/10.1177/00000000000000"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/doi/pdf/" in result
+
+    def test_sagepub_already_doi_pdf_returns_none(self) -> None:
+        """SAGE URL already containing /doi/pdf/ is not double-modified."""
+        url = "https://journals.sagepub.com/doi/pdf/10.1177/00000000000000"
+        result = _resolve_pdf_url(url)
+        assert result is None
+
+    def test_pubs_acs_already_doi_pdf_returns_none(self) -> None:
+        """ACS URL already containing /doi/pdf/ is not double-modified."""
+        url = "https://pubs.acs.org/doi/pdf/10.1021/acs.jcim.1c00000"
+        result = _resolve_pdf_url(url)
+        assert result is None
+
+    def test_royalsociety_already_doi_pdf_returns_none(self) -> None:
+        """Royal Society URL already containing /doi/pdf/ is not double-modified."""
+        url = "https://royalsocietypublishing.org/doi/pdf/10.1098/rsif.2021.0000"
+        result = _resolve_pdf_url(url)
+        assert result is None
+
+    def test_springer_article_to_content_pdf(self) -> None:
+        """Springer /article/ URL is converted to /content/pdf/ + .pdf."""
+        url = "https://link.springer.com/article/10.1007/s00000-021-00000-0"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/content/pdf/" in result
+        assert result.endswith(".pdf")
+
+    def test_isca_abstracts_to_pdfs(self) -> None:
+        """ISCA /abstracts/*.html URL becomes /pdfs/*.pdf."""
+        url = "https://www.isca-speech.org/archive/abstracts/interspeech_2021/paper.html"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/pdfs/" in result
+        assert result.endswith(".pdf")
+
+    def test_wiley_full_to_pdfdirect(self) -> None:
+        """Wiley /full/ URL becomes /pdfdirect/."""
+        url = "https://onlinelibrary.wiley.com/doi/full/10.1002/joc.0001"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/pdfdirect/" in result
+
+    def test_wiley_abs_to_pdfdirect(self) -> None:
+        """Wiley /abs/ URL becomes /pdfdirect/."""
+        url = "https://onlinelibrary.wiley.com/doi/abs/10.1002/joc.0001"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/pdfdirect/" in result
+
+    def test_jmir_appends_pdf(self) -> None:
+        """JMIR URL gets /pdf appended."""
+        url = "https://www.jmir.org/2021/1/e12345"
+        result = _resolve_pdf_url(url)
+        assert result == f"{url}/pdf"
+
+    def test_mdpi_appends_pdf(self) -> None:
+        """MDPI URL gets /pdf appended."""
+        url = "https://www.mdpi.com/1234-5678/12/3/45"
+        result = _resolve_pdf_url(url)
+        assert result == f"{url}/pdf"
+
+    def test_pnas_adds_full_pdf_suffix(self) -> None:
+        """PNAS /content/ URL gets /content/pnas/ and .full.pdf suffix."""
+        url = "https://www.pnas.org/content/118/1/e2015816118"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/content/pnas/" in result
+        assert result.endswith(".full.pdf")
+
+    def test_jneurosci_adds_full_pdf_suffix(self) -> None:
+        """JNeurosci /content/ URL gets /content/jneuro/ and .full.pdf suffix."""
+        url = "https://www.jneurosci.org/content/41/1/1"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/content/jneuro/" in result
+        assert result.endswith(".full.pdf")
+
+    def test_ijcai_paper_id_padding(self) -> None:
+        """IJCAI paper ID is zero-padded to 4 digits."""
+        url = "https://www.ijcai.org/proceedings/2021/42"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert result.endswith("0042.pdf")
+
+    def test_ijcai_already_4_digit_id(self) -> None:
+        """IJCAI paper ID already 4 digits is preserved."""
+        url = "https://www.ijcai.org/proceedings/2021/1234"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert result.endswith("1234.pdf")
+
+    def test_asmp_springeropen(self) -> None:
+        """ASMP Springer Open /articles/ URL becomes /track/pdf/."""
+        url = "https://asmp-eurasipjournals.springeropen.com/articles/10.1186/s13636-021-00000-0"
+        result = _resolve_pdf_url(url)
+        assert result is not None
+        assert "/track/pdf/" in result
+
+    def test_unknown_publisher_returns_none(self) -> None:
+        """Unrecognised publisher returns None."""
+        url = "https://www.unknown-publisher.edu/paper/123"
+        result = _resolve_pdf_url(url)
+        assert result is None
+
+    def test_doi_param_ignored_for_non_acm(self) -> None:
+        """doi parameter is ignored for non-ACM publishers."""
+        url = "https://www.unknown-publisher.edu/paper/123"
+        result = _resolve_pdf_url(url, doi="10.9999/test")
+        assert result is None
+
+
+class TestBuildFilename:
+    """Tests for _build_filename()."""
+
+    def test_basic_filename(self) -> None:
+        """Standard year and title produce sanitised filename."""
+        name = _build_filename(2024, "Deep Learning Survey")
+        assert name.endswith(".pdf")
+        assert "2024" in name
+        assert "Deep" in name
+
+    def test_special_chars_replaced(self) -> None:
+        """Special characters in title are replaced with underscores."""
+        name = _build_filename(2020, "Title: A & B (2020)")
+        assert ".pdf" in name
+        stem = name[:-4]
+        for ch in stem:
+            assert ch.isalnum() or ch in "_-"
+
+    def test_none_year_uses_unknown(self) -> None:
+        """None year produces 'unknown' in filename."""
+        name = _build_filename(None, "Some Paper")
+        assert "unknown" in name
+
+    def test_none_title_uses_paper(self) -> None:
+        """None title produces 'paper' in filename."""
+        name = _build_filename(2021, None)
+        assert "paper" in name
+
+    def test_empty_title_uses_paper(self) -> None:
+        """Empty string title produces 'paper' in filename."""
+        name = _build_filename(2021, "")
+        assert "paper" in name
+
+    def test_always_ends_with_pdf(self) -> None:
+        """Filename always ends with .pdf."""
+        assert _build_filename(2022, "My Paper").endswith(".pdf")
+        assert _build_filename(None, None).endswith(".pdf")
+
+    def test_hyphen_preserved(self) -> None:
+        """Hyphens in title are preserved in the filename."""
+        name = _build_filename(2023, "State-of-the-Art")
+        assert "-" in name
+
+
+class TestBuildProxies:
+    """Tests for _build_proxies()."""
+
+    def test_explicit_proxy(self) -> None:
+        """Explicit proxy URL produces http and https entries."""
+        proxies = _build_proxies("http://proxy.example.com:8080")
+        assert proxies == {
+            "http": "http://proxy.example.com:8080",
+            "https": "http://proxy.example.com:8080",
+        }
+
+    def test_no_proxy_returns_none(self, monkeypatch) -> None:
+        """No proxy and no env var returns None."""
+        monkeypatch.delenv("FINDPAPERS_PROXY", raising=False)
+        result = _build_proxies(None)
+        assert result is None
+
+    def test_env_var_used_when_no_explicit(self, monkeypatch) -> None:
+        """FINDPAPERS_PROXY env var is used when proxy param is None."""
+        monkeypatch.setenv("FINDPAPERS_PROXY", "http://env-proxy:3128")
+        proxies = _build_proxies(None)
+        assert proxies is not None
+        assert proxies["http"] == "http://env-proxy:3128"
+        assert proxies["https"] == "http://env-proxy:3128"
+
+    def test_explicit_proxy_takes_precedence(self, monkeypatch) -> None:
+        """Explicit proxy overrides FINDPAPERS_PROXY env var."""
+        monkeypatch.setenv("FINDPAPERS_PROXY", "http://env-proxy:3128")
+        proxies = _build_proxies("http://explicit-proxy:9090")
+        assert proxies is not None
+        assert proxies["http"] == "http://explicit-proxy:9090"
+
+    def test_empty_string_proxy_treated_as_none(self, monkeypatch) -> None:
+        """Empty proxy string with no env var returns None."""
+        monkeypatch.delenv("FINDPAPERS_PROXY", raising=False)
+        result = _build_proxies("")
+        assert result is None
