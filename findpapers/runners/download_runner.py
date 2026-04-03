@@ -456,8 +456,11 @@ class DownloadRunner:
         """
         with open(log_path, "a", encoding="utf-8") as fp:
             fp.write(f"\n[OK] {title}\n")
-            for url in attempted_urls:
-                fp.write(f"  -> {url}\n")
+            if not attempted_urls:
+                fp.write("  -> (already downloaded, skipped)\n")
+            else:
+                for url in attempted_urls:
+                    fp.write(f"  -> {url}\n")
 
     def _log_download_error(
         self,

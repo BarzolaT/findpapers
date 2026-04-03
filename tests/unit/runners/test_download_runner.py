@@ -118,6 +118,17 @@ class TestDownloadRunnerRun:
         content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
         assert "(no URLs available)" in content
 
+    def test_log_success_no_urls_uses_skipped_placeholder(self, make_paper, tmp_path):
+        """Success with no URLs (PDF already existed) logs an 'already downloaded' note."""
+        runner = DownloadRunner(
+            papers=[make_paper(title="Cached Paper")], output_directory=str(tmp_path)
+        )
+        with patch.object(runner, "_download_paper", return_value=(True, [])):
+            runner.run()
+        content = (tmp_path / "download_log.txt").read_text(encoding="utf-8")
+        assert "[OK] Cached Paper" in content
+        assert "(already downloaded, skipped)" in content
+
 
 class TestDownloadRunnerVerbose:
     """Tests for the verbose=True logging path."""
