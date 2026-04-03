@@ -1390,3 +1390,62 @@ class TestPaperFunders:
         """A single scalar funder string is wrapped into a set by from_dict."""
         paper = Paper.from_dict({"title": "T", "funders": "NSF"})
         assert paper.funders == {"NSF"}
+
+
+class TestPaperTitleNormalization:
+    """Tests for title HTML-stripping and whitespace normalization in Paper.__init__."""
+
+    def test_html_tags_stripped_from_title(self) -> None:
+        """HTML tags are removed from the title at construction time."""
+        paper = Paper(
+            title="400/50 V <i>LLC</i> Module",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        assert paper.title == "400/50 V LLC Module"
+
+    def test_newlines_in_title_collapsed(self) -> None:
+        """Embedded newlines in the title are collapsed to a single space."""
+        paper = Paper(
+            title="Part One\nPart Two\n  Part Three",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        assert paper.title == "Part One Part Two Part Three"
+
+    def test_html_and_newlines_combined(self) -> None:
+        """HTML tags and newlines are both cleaned from a title."""
+        paper = Paper(
+            title="Vertically Mounted\n  <i>LLC</i>\n  Module for Datacenters",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        assert paper.title == "Vertically Mounted LLC Module for Datacenters"
+
+    def test_leading_trailing_whitespace_stripped(self) -> None:
+        """Leading and trailing whitespace is stripped from the title."""
+        paper = Paper(
+            title="   My Paper   ",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        assert paper.title == "My Paper"
+
+    def test_plain_title_unchanged(self) -> None:
+        """A plain title without HTML or extra whitespace is left unchanged."""
+        paper = Paper(
+            title="Deep Learning: A Survey",
+            abstract="",
+            authors=[],
+            source=None,
+            publication_date=None,
+        )
+        assert paper.title == "Deep Learning: A Survey"

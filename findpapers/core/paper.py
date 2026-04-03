@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import datetime
 import logging
+import re
 from enum import StrEnum
 from typing import Any
 
@@ -185,7 +186,7 @@ class Paper:
         if not title:
             raise ModelValidationError("Paper's title cannot be null")
 
-        self.title = title
+        self.title = self._normalize_title(title)
         self.abstract = abstract
         self.authors: list[Author] = list(authors or [])
         self.source = source
@@ -296,6 +297,29 @@ class Paper:
         if self.title:
             return self.title.strip().lower()
         return None
+
+    @staticmethod
+    def _normalize_title(title: str) -> str:
+        """Strip HTML tags and normalize whitespace in a paper title.
+
+        Removes any HTML markup (e.g. ``<i>...</i>`` injected by publisher
+        APIs) and collapses consecutive whitespace characters (including
+        newlines and tabs) into a single space.
+
+        Parameters
+        ----------
+        title : str
+            Raw title string, possibly containing HTML tags or newlines.
+
+        Returns
+        -------
+        str
+            Clean title with HTML removed and whitespace normalized.
+        """
+        # Remove HTML tags (e.g. <i>, <sub>, <sup>, etc.)
+        stripped = re.sub(r"<[^>]+>", "", title)
+        # Collapse all whitespace (newlines, tabs, multiple spaces) to a single space
+        return " ".join(stripped.split())
 
     @staticmethod
     def _sanitize_date(
