@@ -57,15 +57,16 @@ arXiv is one of the most important open-access repositories in science. Founded 
 
 - Full boolean query support
 - Supports `*` and `?` wildcards (not in first character position)
-- Extracts title, abstract, authors (with affiliations), publication date, DOI, URLs, comments, and source/journal info
-- Papers are typed as repository source
+- Extracts title, abstract, authors (with affiliations), publication date, DOI, landing-page URL, PDF URL, source, paper type, fields of study, subjects (from arXiv category taxonomy), and comments
+- All papers are marked as open access
 
 #### Limitations
 
-- No citation count data
-- No keywords
+- No citation count, keywords, language, retraction status, funder, or page range data
+- **Not usable for snowballing** — the arXiv API does not expose citation or reference data
 - **Stemming:** arXiv uses Lucene-based stemming, so `ti[transformer]` also matches "transformers" and "transforming". Keep this in mind when looking for exact terms
 - **Hyphens:** Hyphens are treated as spaces (`ti[self-attention]` is equivalent to `ti[self attention]`). Findpapers normalizes hyphens automatically
+- **Filter support:** `ti[]`, `abs[]`, `au[]`, and `tiabs[]` are supported; `key[]`, `src[]`, and `aff[]` are not
 
 ---
 
@@ -83,13 +84,16 @@ IEEE Xplore is the digital library of the Institute of Electrical and Electronic
 
 #### Features
 
-- Extracts title, abstract, authors (with affiliations), DOI, URLs, keywords (IEEE terms, author terms, MeSH terms), citation count, source, paper type, page range, and open access status
+- Extracts title, abstract, authors (with per-author affiliations), DOI, landing-page URL, PDF URL, keywords (author-provided terms and MeSH terms), subjects (INSPEC/IEEE controlled vocabulary), citation count, source, paper type, page range, and open access status
 - Supports boolean queries with `*` wildcard
+- Citation counts are available and will be populated on resulting papers
 
 #### Limitations
 
+- **Not usable for snowballing** — the IEEE API does not expose citation or reference lists
+- No language, retraction status, or funder data
 - Publication date has year-level granularity only
-- Only `*` wildcard supported (not `?`)
+- Only `*` wildcard supported (not `?`); requires at least 3 characters before the `*`
 - **Title-only filter disabled:** The `ti[]` filter is disabled for IEEE because the API's `"Article Title"` field silently returns zero results in `querytext` mode (used for boolean expressions).
 
 ---
@@ -108,12 +112,14 @@ OpenAlex is the largest fully open index of scholarly works in the world. It was
 
 #### Features
 
-- Extracts title, abstract, authors (with institutional affiliations), publication date, DOI, URLs, PDF URLs, citation count, keywords, source, paper type, page range, language (ISO 639-1 code), open access status, retraction status, and funders
-- **Citation-capable:** supports both forward (cited-by) and backward (references) snowballing
+- Extracts title, abstract, authors (with institutional affiliations), publication date, DOI, landing-page URL, PDF URL, citation count, keywords, source, paper type, page range, language (ISO 639-1 code), open access status, retraction status, funders, fields of study, and subjects
+- **Citation-capable:** supports both forward snowballing (papers that cite a seed) and backward snowballing (references cited by a seed)
 - Best source selection (prefers journals/conferences over repositories)
 
 #### Limitations
 
+- **Wildcards are not supported** — queries using `*` or `?` will raise an error
+- `key[]` (keywords) and `src[]` (source) filter codes are not supported
 - Abstract reconstruction from inverted index may occasionally differ from the original
 
 ---
@@ -132,12 +138,15 @@ PubMed is the world's most important database for biomedical and life sciences r
 
 #### Features
 
-- Extracts title, abstract, authors (with affiliations), publication date, DOI, URL, keywords (MeSH terms and author keywords), page range, source (journal with ISSN), paper type, language (ISO 639-1 code), retraction status, and funders
+- Extracts title, abstract, authors (with affiliations), publication date, DOI, URL (PMID-based landing page), keywords (MeSH headings and author keywords), subjects (major MeSH topic headings), page range, source (journal with ISSN), paper type, language (ISO 639-1 code), retraction status, and funders
 - Supports `*` wildcard
 
 #### Limitations
 
-- Only `*` wildcard supported (not `?`)
+- **Not usable for snowballing** — PubMed does not expose citation or reference data through its API
+- No PDF URL, citation count, open access status, or fields of study data
+- Source type is always `JOURNAL` — conference papers and other types cannot be distinguished
+- Only `*` wildcard supported (not `?`); requires at least 4 characters before the `*`
 - **Author name format:** PubMed indexes authors as "LastName Initials" (e.g., `Doudna JA`). When using the `au` filter, provide the name in this format for reliable results: `au[Doudna JA]`. Full first names (e.g., `au[Jennifer Doudna]`) may return no results
 - **Phrase length limit:** PubMed's phrase index only supports exact-match phrases up to approximately 3 words. Queries like `ti[deep learning]` (2 words) work, but `ti[deep learning for image recognition]` (5 words) returns zero results. Keep `ti[]`, `abs[]`, and `tiabs[]` terms short (1–3 words) for best results. To search for longer concepts, combine shorter phrases with AND: `ti[deep learning] AND ti[image recognition]`
 
@@ -158,13 +167,15 @@ Scopus is Elsevier's flagship abstract and citation database, and one of the two
 #### Features
 
 - Extracts title, publication date, DOI, URL, citation count, source (with ISSN, eISSN, ISBN, publisher), paper type, page range, and open access status
-- Supports boolean queries with wildcards
+- Supports boolean queries with `*` and `?` wildcards (requires at least 3 characters before the wildcard)
+- Citation counts are available and will be populated on resulting papers
 
 #### Limitations
 
-- Only the first author is returned per result
-- No keywords
-- No abstracts are returned by the API; enrichment is recommended to fill in missing metadata
+- **Not usable for snowballing** — the Scopus Search API does not expose reference or citing-paper lists
+- Only the first author is returned per result (full author lists require a separate API call not performed by Findpapers)
+- No abstract, keywords, PDF URL, language, subjects, fields of study, retraction status, or funder data; enrichment is strongly recommended to fill in missing metadata
+- No URL-based paper lookup — only search and DOI lookup are supported
 - Date filtering has year-level granularity only
 
 ---
@@ -183,14 +194,15 @@ Semantic Scholar is a free, AI-powered academic search engine developed by the A
 
 #### Features
 
-- Extracts title, abstract, authors (with affiliations), publication date, DOI, URLs, PDF URL, citation count, fields of study, source (journal or venue), paper type, page range, and open access status
-- Supports both forward (cited-by) and backward (references) snowballing
+- Extracts title, abstract, authors (with affiliations, resolved in a batch request after search), publication date, DOI, landing-page URL, PDF URL, citation count, source (journal or venue), paper type, page range, open access status, fields of study, and subjects
+- **Citation-capable:** supports both forward snowballing (papers that cite a seed) and backward snowballing (references cited by a seed)
 
 #### Limitations
 
-- No keywords
+- No keywords, language, retraction status, or funder data
 - When exact publication date is unavailable, falls back to year only (January 1)
-- Only `tiabs` (title + abstract) filter is supported
+- Only `tiabs[]` (title + abstract) filter is supported — `ti[]`, `abs[]`, `au[]`, `aff[]`, `src[]`, and `key[]` are all silently resolved to title + abstract
+- `?` wildcard not supported; `*` is allowed
 
 ---
 
@@ -208,11 +220,12 @@ CrossRef is a nonprofit organization that serves as the official DOI (Digital Ob
 
 #### Features
 
-- Extracts title, abstract, authors (with affiliations), DOI, URLs, PDF URL, citation count, keywords (from subject field), source (with ISSN, ISBN, publisher), and page range
-- Backward snowballing
+- Extracts title, abstract, authors (with affiliations), DOI, landing-page URL, PDF URL, citation count, keywords (from CrossRef subject field), source (with ISSN, ISBN, publisher), and page range
+- **Backward snowballing only:** follows the reference list of a paper (papers it cites) by resolving each cited DOI
 
 #### Limitations
 
 - Not available as a search database. Used only for DOI lookups, enrichment, and backward snowballing
+- No paper type, language, open access status, retraction status, or funder data
 - Forward snowballing (cited-by) is not supported by the CrossRef API
-- Reference lists may be incomplete - only references with DOIs can be followed
+- Reference lists may be incomplete — only references that carry a DOI can be followed
