@@ -63,7 +63,7 @@ class DownloadRunner:
         papers: list[Paper],
         output_directory: str,
         num_workers: int = 1,
-        timeout: float | None = 10.0,
+        timeout: float | None = 30.0,
         proxy: str | None = None,
         ssl_verify: bool = True,
     ) -> None:

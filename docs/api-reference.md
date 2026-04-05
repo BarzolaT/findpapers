@@ -85,7 +85,7 @@ engine.download(
     output_directory: str,
     *,
     num_workers: int = 1,
-    timeout: float | None = 10.0,
+    timeout: float | None = 30.0,
     verbose: bool = False,
     show_progress: bool = True,
 ) -> dict[str, int | float]
@@ -96,7 +96,7 @@ engine.download(
 | `papers` | `list[Paper]` | Papers to download. |
 | `output_directory` | `str` | Directory where PDFs and logs will be saved. |
 | `num_workers` | `int` | Number of parallel download workers. Defaults to `1`. |
-| `timeout` | `float \| None` | HTTP timeout in seconds. Defaults to `10.0`. |
+| `timeout` | `float \| None` | HTTP timeout in seconds. Defaults to `30.0`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bar. Defaults to `True`. |
 
@@ -560,7 +560,7 @@ DownloadRunner(
     papers: list[Paper],
     output_directory: str,
     num_workers: int = 1,
-    timeout: float | None = 10.0,
+    timeout: float | None = 30.0,
     proxy: str | None = None,
     ssl_verify: bool = True,
 )
