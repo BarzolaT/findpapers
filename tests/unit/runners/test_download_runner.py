@@ -1239,19 +1239,16 @@ class TestResolvePdfUrl:
         assert result is None
 
     def test_sciencedirect_url(self) -> None:
-        """ScienceDirect URL is converted to pdfft download URL."""
+        """ScienceDirect URL resolve is disabled; returns None."""
         url = "https://www.sciencedirect.com/science/article/pii/S0004370221000060"
         result = _resolve_pdf_url(url)
-        assert result is not None
-        assert "pdfft?isDTMRedir=true&download=true" in result
-        assert "S0004370221000060" in result
+        assert result is None
 
     def test_linkinghub_elsevier_url(self) -> None:
-        """linkinghub.elsevier.com URL is handled like ScienceDirect."""
+        """linkinghub.elsevier.com URL resolve is disabled; returns None."""
         url = "https://linkinghub.elsevier.com/retrieve/pii/S0004370221000060"
         result = _resolve_pdf_url(url)
-        assert result is not None
-        assert "sciencedirect.com" in result
+        assert result is None
 
     def test_rsc_articlelanding(self) -> None:
         """RSC articlelanding URL becomes articlepdf URL."""

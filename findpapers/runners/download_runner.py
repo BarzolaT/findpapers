@@ -341,13 +341,6 @@ class DownloadRunner:
             # Go directly to the PDF endpoint, skipping the stamp viewer.
             return f"{host}/stampPDF/getPDF.jsp?tp=&arnumber={doc_id}&ref="
 
-        if host in ("https://www.sciencedirect.com", "https://linkinghub.elsevier.com"):
-            paper_id = path.split("/")[-1]
-            return (
-                "https://www.sciencedirect.com/science/article/pii/"
-                f"{paper_id}/pdfft?isDTMRedir=true&download=true"
-            )
-
         if host == "https://pubs.rsc.org":
             return response_url.replace("/articlelanding/", "/articlepdf/")
 
