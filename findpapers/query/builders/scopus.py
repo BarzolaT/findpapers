@@ -6,11 +6,6 @@ import re
 
 from findpapers.core.query import FilterCode, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
-from findpapers.query.builders.common import (
-    convert_expression,
-    get_effective_filter,
-    iter_term_nodes,
-)
 
 
 class ScopusQueryBuilder(QueryBuilder):
@@ -42,8 +37,8 @@ class ScopusQueryBuilder(QueryBuilder):
         QueryValidationResult
             Validation result.
         """
-        for term in iter_term_nodes(query.root):
-            filter_code = get_effective_filter(term)
+        for term in self.iter_term_nodes(query.root):
+            filter_code = self.get_effective_filter(term)
             if not self.supports_filter(filter_code):
                 return QueryValidationResult(
                     is_valid=False,
@@ -99,7 +94,7 @@ class ScopusQueryBuilder(QueryBuilder):
         def convert_term(term_node: QueryNode) -> str:
             term = term_node.value or ""
             quoted = f'"{term}"'
-            filter_code = get_effective_filter(term_node)
+            filter_code = self.get_effective_filter(term_node)
 
             if filter_code == FilterCode.TITLE:
                 return f"TITLE({quoted})"
@@ -123,9 +118,9 @@ class ScopusQueryBuilder(QueryBuilder):
 
         def group_wrapper(group_node: QueryNode, inner: str) -> str | None:
             """Wrap a plain group expression with the Scopus field operator."""
-            return _scopus_field_wrap(get_effective_filter(group_node), inner)
+            return _scopus_field_wrap(self.get_effective_filter(group_node), inner)
 
-        return convert_expression(
+        return self.convert_expression(
             query.root,
             convert_term,
             connector_map,

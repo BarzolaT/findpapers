@@ -4,11 +4,6 @@ from __future__ import annotations
 
 from findpapers.core.query import FilterCode, NodeType, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
-from findpapers.query.builders.common import (
-    convert_expression,
-    get_effective_filter,
-    iter_term_nodes,
-)
 
 
 class IEEEQueryBuilder(QueryBuilder):
@@ -49,8 +44,8 @@ class IEEEQueryBuilder(QueryBuilder):
         QueryValidationResult
             Validation result.
         """
-        for term in iter_term_nodes(query.root):
-            filter_code = get_effective_filter(term)
+        for term in self.iter_term_nodes(query.root):
+            filter_code = self.get_effective_filter(term)
             if not self.supports_filter(filter_code):
                 return QueryValidationResult(
                     is_valid=False,
@@ -99,7 +94,7 @@ class IEEEQueryBuilder(QueryBuilder):
 
         def convert_term(term_node: QueryNode) -> str:
             term = term_node.value or ""
-            filter_code = get_effective_filter(term_node)
+            filter_code = self.get_effective_filter(term_node)
             if filter_code == FilterCode.TITLE:
                 return f'"Article Title":{self._quote(term)}'
             if filter_code == FilterCode.ABSTRACT:
@@ -131,7 +126,7 @@ class IEEEQueryBuilder(QueryBuilder):
             Only single-field filters can be wrapped at the group level.
             Compound filters (tiabs, tiabskey) fall back to per-term.
             """
-            filter_code = get_effective_filter(group_node)
+            filter_code = self.get_effective_filter(group_node)
             field_map: dict[FilterCode, str] = {
                 # NOTE: FilterCode.TITLE / "Article Title" excluded — broken
                 # in querytext mode (returns 0 results).
@@ -146,7 +141,7 @@ class IEEEQueryBuilder(QueryBuilder):
                 return None  # compound filters fall back to per-term
             return f"{field}:({inner})"
 
-        expression = convert_expression(
+        expression = self.convert_expression(
             query.root,
             convert_term,
             connector_map,
@@ -188,7 +183,7 @@ class IEEEQueryBuilder(QueryBuilder):
             IEEE parameters for single-field mode.
         """
         term = term_node.value or ""
-        filter_code = get_effective_filter(term_node)
+        filter_code = self.get_effective_filter(term_node)
         mapping = {
             # NOTE: FilterCode.TITLE / "article_title" param actually works
             # for simple single-term queries, but we exclude ti[] from

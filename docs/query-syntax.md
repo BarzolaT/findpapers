@@ -56,10 +56,10 @@ ti[neural network] AND abs([image segmentation] OR [object detection])
 | `au` | Author | Search by author name |
 | `src` | Source | Search by publication source name (journal, conference) |
 | `aff` | Affiliation | Search by author affiliation |
-| `tiabs` | Title + Abstract | Search in title and abstract (default) |
+| `tiabs` | Title + Abstract | Search in title and abstract |
 | `tiabskey` | Title + Abstract + Keywords | Search in title, abstract, and keywords |
 
-When no filter code is specified, the default behavior is `tiabs` (title and abstract).
+When no filter code is specified, the default behavior depends on the target database: `tiabskey` (title, abstract, and keywords) is used for databases that support it (IEEE, PubMed, Scopus), and `tiabs` (title and abstract) is used for the rest (arXiv, OpenAlex, Semantic Scholar).
 
 ### Filter Code Propagation
 

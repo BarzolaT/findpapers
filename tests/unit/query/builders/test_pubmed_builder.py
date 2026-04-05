@@ -10,6 +10,14 @@ from findpapers.core.query import Query
 from findpapers.query.builders.pubmed import PubmedQueryBuilder
 
 
+def test_pubmed_default_filter_is_tiabskey(parse_and_propagate: Callable[[str], Query]) -> None:
+    """PubMed default filter (no explicit code) expands to tiabskey (tiab + ot)."""
+    query = parse_and_propagate("[heart attack]")
+    converted = PubmedQueryBuilder().convert_query(query)
+    assert '"heart attack"[tiab]' in converted
+    assert '"heart attack"[ot]' in converted
+
+
 def test_pubmed_rejects_question_wildcard(parse_and_propagate: Callable[[str], Query]) -> None:
     """PubMed rejects '?' wildcard."""
     query = parse_and_propagate("[data?]")

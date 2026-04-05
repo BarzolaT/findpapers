@@ -1,17 +1,38 @@
-"""Unit tests for findpapers.query.builders.common helpers."""
+"""Unit tests for QueryBuilder static/instance helper methods."""
 
 from __future__ import annotations
 
 from findpapers.core.query import ConnectorType, FilterCode, NodeType, Query, QueryNode
-from findpapers.query.builders.common import (
-    clone_query,
-    convert_expression,
-    get_effective_filter,
-    has_wildcard,
-    iter_connectors,
-    iter_term_nodes,
-    quote_term,
-)
+from findpapers.query.builder import QueryBuilder, QueryValidationResult
+
+# ---------------------------------------------------------------------------
+# Minimal concrete builders used only in these unit tests
+# ---------------------------------------------------------------------------
+
+
+class _NoKeywordsBuilder(QueryBuilder):
+    """Builder that does not support tiabskey — used in unit tests only."""
+
+    _SUPPORTED_FILTERS = frozenset({FilterCode.TITLE_ABSTRACT})
+
+    def validate_query(self, query: Query) -> QueryValidationResult:
+        return QueryValidationResult(is_valid=True)
+
+    def convert_query(self, query: Query) -> str:
+        return ""
+
+
+class _KeywordsBuilder(QueryBuilder):
+    """Builder that supports tiabskey — used in unit tests only."""
+
+    _SUPPORTED_FILTERS = frozenset({FilterCode.TITLE_ABSTRACT, FilterCode.TITLE_ABSTRACT_KEYWORDS})
+
+    def validate_query(self, query: Query) -> QueryValidationResult:
+        return QueryValidationResult(is_valid=True)
+
+    def convert_query(self, query: Query) -> str:
+        return ""
+
 
 # ---------------------------------------------------------------------------
 # get_effective_filter
@@ -19,7 +40,7 @@ from findpapers.query.builders.common import (
 
 
 class TestGetEffectiveFilter:
-    """Tests for get_effective_filter()."""
+    """Tests for QueryBuilder.get_effective_filter()."""
 
     def test_explicit_filter_takes_priority(self) -> None:
         """When filter_code is set, it wins over inherited and default."""
@@ -29,7 +50,7 @@ class TestGetEffectiveFilter:
             filter_code=FilterCode.TITLE,
             inherited_filter_code=FilterCode.ABSTRACT,
         )
-        assert get_effective_filter(node) == FilterCode.TITLE
+        assert _NoKeywordsBuilder().get_effective_filter(node) == FilterCode.TITLE
 
     def test_inherited_filter_used_when_no_explicit(self) -> None:
         """When no explicit filter_code, inherited_filter_code is used."""
@@ -38,12 +59,31 @@ class TestGetEffectiveFilter:
             value="test",
             inherited_filter_code=FilterCode.KEYWORDS,
         )
-        assert get_effective_filter(node) == FilterCode.KEYWORDS
+        assert _NoKeywordsBuilder().get_effective_filter(node) == FilterCode.KEYWORDS
 
-    def test_default_filter_when_none_set(self) -> None:
-        """When neither explicit nor inherited is set, default is TITLE_ABSTRACT."""
+    def test_default_filter_when_none_set_no_keywords(self) -> None:
+        """Builder without tiabskey support defaults to TITLE_ABSTRACT."""
         node = QueryNode(node_type=NodeType.TERM, value="test")
-        assert get_effective_filter(node) == FilterCode.TITLE_ABSTRACT
+        assert _NoKeywordsBuilder().get_effective_filter(node) == FilterCode.TITLE_ABSTRACT
+
+    def test_default_filter_with_tiabskey_supporting_builder(self) -> None:
+        """Builder that supports tiabskey defaults to TITLE_ABSTRACT_KEYWORDS."""
+        node = QueryNode(node_type=NodeType.TERM, value="test")
+        assert _KeywordsBuilder().get_effective_filter(node) == FilterCode.TITLE_ABSTRACT_KEYWORDS
+
+    def test_explicit_filter_overrides_builder_default(self) -> None:
+        """Explicit filter_code wins over builder-aware default."""
+        node = QueryNode(node_type=NodeType.TERM, value="test", filter_code=FilterCode.TITLE)
+        assert _KeywordsBuilder().get_effective_filter(node) == FilterCode.TITLE
+
+    def test_inherited_filter_overrides_builder_default(self) -> None:
+        """Inherited filter wins over builder-aware default."""
+        node = QueryNode(
+            node_type=NodeType.TERM,
+            value="test",
+            inherited_filter_code=FilterCode.ABSTRACT,
+        )
+        assert _KeywordsBuilder().get_effective_filter(node) == FilterCode.ABSTRACT
 
 
 # ---------------------------------------------------------------------------
@@ -52,12 +92,12 @@ class TestGetEffectiveFilter:
 
 
 class TestIterTermNodes:
-    """Tests for iter_term_nodes()."""
+    """Tests for QueryBuilder.iter_term_nodes()."""
 
     def test_single_term(self) -> None:
         """A single term node returns itself."""
         node = QueryNode(node_type=NodeType.TERM, value="machine")
-        result = iter_term_nodes(node)
+        result = QueryBuilder.iter_term_nodes(node)
         assert len(result) == 1
         assert result[0].value == "machine"
 
@@ -69,14 +109,14 @@ class TestIterTermNodes:
         group = QueryNode(node_type=NodeType.GROUP, children=[term1, connector, term2])
         root = QueryNode(node_type=NodeType.ROOT, children=[group])
 
-        result = iter_term_nodes(root)
+        result = QueryBuilder.iter_term_nodes(root)
         assert len(result) == 2
         assert {n.value for n in result} == {"a", "b"}
 
     def test_no_terms_returns_empty(self) -> None:
         """A tree with no term nodes returns an empty list."""
         root = QueryNode(node_type=NodeType.ROOT, children=[])
-        assert iter_term_nodes(root) == []
+        assert QueryBuilder.iter_term_nodes(root) == []
 
 
 # ---------------------------------------------------------------------------
@@ -85,7 +125,7 @@ class TestIterTermNodes:
 
 
 class TestIterConnectors:
-    """Tests for iter_connectors()."""
+    """Tests for QueryBuilder.iter_connectors()."""
 
     def test_collects_connectors(self) -> None:
         """Finds connector values in a subtree."""
@@ -94,13 +134,13 @@ class TestIterConnectors:
         term = QueryNode(node_type=NodeType.TERM, value="x")
         group = QueryNode(node_type=NodeType.GROUP, children=[term, c1, term, c2, term])
 
-        result = iter_connectors(group)
+        result = QueryBuilder.iter_connectors(group)
         assert result == [ConnectorType.AND, ConnectorType.OR]
 
     def test_no_connectors(self) -> None:
         """A tree with no connectors returns an empty list."""
         node = QueryNode(node_type=NodeType.TERM, value="x")
-        assert iter_connectors(node) == []
+        assert QueryBuilder.iter_connectors(node) == []
 
 
 # ---------------------------------------------------------------------------
@@ -109,23 +149,23 @@ class TestIterConnectors:
 
 
 class TestHasWildcard:
-    """Tests for has_wildcard()."""
+    """Tests for QueryBuilder.has_wildcard()."""
 
     def test_star_wildcard(self) -> None:
         """Detects '*' wildcard."""
-        assert has_wildcard("machine*") is True
+        assert QueryBuilder.has_wildcard("machine*") is True
 
     def test_question_wildcard(self) -> None:
         """Detects '?' wildcard."""
-        assert has_wildcard("col?r") is True
+        assert QueryBuilder.has_wildcard("col?r") is True
 
     def test_no_wildcard(self) -> None:
         """Plain term has no wildcard."""
-        assert has_wildcard("machine") is False
+        assert QueryBuilder.has_wildcard("machine") is False
 
     def test_empty_string(self) -> None:
         """Empty string has no wildcard."""
-        assert has_wildcard("") is False
+        assert QueryBuilder.has_wildcard("") is False
 
 
 # ---------------------------------------------------------------------------
@@ -134,15 +174,15 @@ class TestHasWildcard:
 
 
 class TestQuoteTerm:
-    """Tests for quote_term()."""
+    """Tests for QueryBuilder.quote_term()."""
 
     def test_term_with_spaces_is_quoted(self) -> None:
         """Multi-word term is wrapped in double quotes."""
-        assert quote_term("machine learning") == '"machine learning"'
+        assert QueryBuilder.quote_term("machine learning") == '"machine learning"'
 
     def test_single_word_not_quoted(self) -> None:
         """Single-word term is left unchanged."""
-        assert quote_term("machine") == "machine"
+        assert QueryBuilder.quote_term("machine") == "machine"
 
 
 # ---------------------------------------------------------------------------
@@ -151,12 +191,12 @@ class TestQuoteTerm:
 
 
 class TestConvertExpression:
-    """Tests for convert_expression()."""
+    """Tests for QueryBuilder.convert_expression()."""
 
     def test_simple_term(self) -> None:
         """A single term node is converted using term_converter."""
         node = QueryNode(node_type=NodeType.TERM, value="test")
-        result = convert_expression(
+        result = QueryBuilder.convert_expression(
             node,
             term_converter=lambda n: n.value or "",
             connector_map={ConnectorType.AND: "AND", ConnectorType.OR: "OR"},
@@ -170,7 +210,7 @@ class TestConvertExpression:
         term2 = QueryNode(node_type=NodeType.TERM, value="b")
         group = QueryNode(node_type=NodeType.GROUP, children=[term1, conn, term2])
 
-        result = convert_expression(
+        result = QueryBuilder.convert_expression(
             group,
             term_converter=lambda n: n.value or "",
             connector_map={ConnectorType.AND: "AND", ConnectorType.OR: "OR"},
@@ -193,7 +233,7 @@ class TestConvertExpression:
             children=[inner_group, outer_conn, outer_term],
         )
 
-        result = convert_expression(
+        result = QueryBuilder.convert_expression(
             root,
             term_converter=lambda n: n.value or "",
             connector_map={ConnectorType.AND: "AND", ConnectorType.OR: "OR"},
@@ -207,7 +247,7 @@ class TestConvertExpression:
 
 
 class TestCloneQuery:
-    """Tests for clone_query()."""
+    """Tests for QueryBuilder.clone_query()."""
 
     def test_clone_preserves_raw_query(self) -> None:
         """Cloned query has the same raw_query."""
@@ -215,7 +255,7 @@ class TestCloneQuery:
             raw_query="[machine learning] AND [deep learning]",
             root=QueryNode(node_type=NodeType.ROOT),
         )
-        cloned = clone_query(original)
+        cloned = QueryBuilder.clone_query(original)
         assert cloned.raw_query == original.raw_query
 
     def test_clone_is_independent(self) -> None:
@@ -227,7 +267,7 @@ class TestCloneQuery:
                 children=[QueryNode(node_type=NodeType.TERM, value="test")],
             ),
         )
-        cloned = clone_query(original)
+        cloned = QueryBuilder.clone_query(original)
         cloned.root.children.clear()
         # Original should still have its child
         assert len(original.root.children) == 1

@@ -7,12 +7,6 @@ import itertools
 from findpapers.core.query import ConnectorType, FilterCode, NodeType, Query, QueryNode
 from findpapers.exceptions import UnsupportedQueryError
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
-from findpapers.query.builders.common import (
-    get_effective_filter,
-    has_wildcard,
-    iter_connectors,
-    iter_term_nodes,
-)
 
 
 class OpenAlexQueryBuilder(QueryBuilder):
@@ -41,14 +35,14 @@ class OpenAlexQueryBuilder(QueryBuilder):
         QueryValidationResult
             Validation result.
         """
-        for term in iter_term_nodes(query.root):
-            filter_code = get_effective_filter(term)
+        for term in self.iter_term_nodes(query.root):
+            filter_code = self.get_effective_filter(term)
             if not self.supports_filter(filter_code):
                 return QueryValidationResult(
                     is_valid=False,
                     error_message=f"Filter '{filter_code}' is not supported by OpenAlex.",
                 )
-            if term.value and (has_wildcard(term.value) or "~" in term.value):
+            if term.value and (self.has_wildcard(term.value) or "~" in term.value):
                 return QueryValidationResult(
                     is_valid=False,
                     error_message="Wildcards are not supported by OpenAlex.",
@@ -68,14 +62,14 @@ class OpenAlexQueryBuilder(QueryBuilder):
         dict
             OpenAlex parameters.
         """
-        connectors = set(iter_connectors(query.root))
+        connectors = set(self.iter_connectors(query.root))
         if ConnectorType.OR in connectors or ConnectorType.AND_NOT in connectors:
             return {"search": self._to_openalex_boolean_search(query.root)}
 
         filters: list[str] = []
-        for term_node in iter_term_nodes(query.root):
+        for term_node in self.iter_term_nodes(query.root):
             term = term_node.value or ""
-            filter_code = get_effective_filter(term_node)
+            filter_code = self.get_effective_filter(term_node)
             filters.append(self._build_filter_fragment(filter_code, term))
         return {"filter": ",".join(filters)}
 
@@ -94,7 +88,7 @@ class OpenAlexQueryBuilder(QueryBuilder):
         """
         # OpenAlex lacks field-aware OR inside `filter` for mixed cases.
         # Decompose pure OR branches into independent AND-only queries.
-        connectors = set(iter_connectors(query.root))
+        connectors = set(self.iter_connectors(query.root))
         if ConnectorType.OR in connectors and ConnectorType.AND_NOT not in connectors:
             clauses = self._to_dnf_with_filters(query.root)
             return self._build_queries_from_clauses(clauses, query.raw_query)
@@ -177,7 +171,7 @@ class OpenAlexQueryBuilder(QueryBuilder):
             Clauses of (term, filter_code).
         """
         if node.node_type == NodeType.TERM:
-            return [[(node.value or "", get_effective_filter(node))]]
+            return [[(node.value or "", self.get_effective_filter(node))]]
 
         operands: list[QueryNode] = [
             child for child in node.children if child.node_type in (NodeType.TERM, NodeType.GROUP)
@@ -210,9 +204,9 @@ class OpenAlexQueryBuilder(QueryBuilder):
                     [
                         (
                             term_node.value or "",
-                            get_effective_filter(term_node),
+                            self.get_effective_filter(term_node),
                         )
-                        for term_node in iter_term_nodes(node)
+                        for term_node in self.iter_term_nodes(node)
                     ]
                 ]
         return current

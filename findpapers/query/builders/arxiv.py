@@ -4,13 +4,6 @@ from __future__ import annotations
 
 from findpapers.core.query import FilterCode, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
-from findpapers.query.builders.common import (
-    clone_query,
-    convert_expression,
-    get_effective_filter,
-    iter_term_nodes,
-    quote_term,
-)
 
 
 class ArxivQueryBuilder(QueryBuilder):
@@ -38,8 +31,8 @@ class ArxivQueryBuilder(QueryBuilder):
         QueryValidationResult
             Validation result.
         """
-        for term in iter_term_nodes(query.root):
-            filter_code = get_effective_filter(term)
+        for term in self.iter_term_nodes(query.root):
+            filter_code = self.get_effective_filter(term)
             if not self.supports_filter(filter_code):
                 return QueryValidationResult(
                     is_valid=False,
@@ -76,8 +69,8 @@ class ArxivQueryBuilder(QueryBuilder):
         # This is a server-side behavior that cannot be disabled via the API,
         # and is most noticeable in title filters where exact matches are expected.
         def convert_term(term_node: QueryNode) -> str:
-            term = quote_term(term_node.value or "")
-            filter_code = get_effective_filter(term_node)
+            term = self.quote_term(term_node.value or "")
+            filter_code = self.get_effective_filter(term_node)
 
             if filter_code == FilterCode.TITLE:
                 return f"ti:{term}"
@@ -87,7 +80,7 @@ class ArxivQueryBuilder(QueryBuilder):
                 return f"au:{term}"
             return f"(ti:{term} OR abs:{term})"
 
-        return convert_expression(preprocessed.root, convert_term, connector_map)
+        return self.convert_expression(preprocessed.root, convert_term, connector_map)
 
     def preprocess_terms(self, query: Query) -> Query:
         """Replace hyphens with spaces for arXiv compatibility.
@@ -102,8 +95,8 @@ class ArxivQueryBuilder(QueryBuilder):
         Query
             Query with terms normalized for arXiv.
         """
-        cloned_query = clone_query(query)
-        for term in iter_term_nodes(cloned_query.root):
+        cloned_query = self.clone_query(query)
+        for term in self.iter_term_nodes(cloned_query.root):
             if term.value:
                 term.value = term.value.replace("-", " ")
         return cloned_query

@@ -10,6 +10,15 @@ from findpapers.core.query import Query
 from findpapers.query.builders.scopus import ScopusQueryBuilder
 
 
+def test_scopus_default_filter_is_tiabskey(parse_and_propagate: Callable[[str], Query]) -> None:
+    """Scopus default filter (no explicit code) maps to TITLE-ABS-KEY."""
+    query = parse_and_propagate("[heart attack]")
+    result = ScopusQueryBuilder().validate_query(query)
+    assert result.is_valid is True
+    converted = ScopusQueryBuilder().convert_query(query)
+    assert converted == 'TITLE-ABS-KEY("heart attack")'
+
+
 def test_scopus_conversion(parse_and_propagate: Callable[[str], Query]) -> None:
     """Scopus maps filters and connectors to native syntax."""
     query = parse_and_propagate("ti[transformer] AND abs[attention]")

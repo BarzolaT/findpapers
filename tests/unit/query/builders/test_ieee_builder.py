@@ -24,6 +24,18 @@ def test_ieee_rejects_title_filter(parse_and_propagate: Callable[[str], Query]) 
     assert result.is_valid is False
 
 
+def test_ieee_default_filter_is_tiabskey(parse_and_propagate: Callable[[str], Query]) -> None:
+    """IEEE default filter (no explicit code) uses Abstract + Index Terms."""
+    query = parse_and_propagate("[heart attack]")
+    result = IEEEQueryBuilder().validate_query(query)
+    assert result.is_valid is True
+    converted = IEEEQueryBuilder().convert_query(query)
+    # Single-term tiabskey falls back to querytext with Abstract OR Index Terms
+    assert "querytext" in converted
+    assert '"Abstract"' in converted["querytext"]
+    assert '"Index Terms"' in converted["querytext"]
+
+
 @pytest.mark.parametrize(
     ("query_string", "expected_payload"),
     [

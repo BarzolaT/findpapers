@@ -4,11 +4,6 @@ from __future__ import annotations
 
 from findpapers.core.query import FilterCode, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
-from findpapers.query.builders.common import (
-    convert_expression,
-    get_effective_filter,
-    iter_term_nodes,
-)
 
 
 class PubmedQueryBuilder(QueryBuilder):
@@ -40,8 +35,8 @@ class PubmedQueryBuilder(QueryBuilder):
         QueryValidationResult
             Validation result.
         """
-        for term in iter_term_nodes(query.root):
-            filter_code = get_effective_filter(term)
+        for term in self.iter_term_nodes(query.root):
+            filter_code = self.get_effective_filter(term)
             if not self.supports_filter(filter_code):
                 return QueryValidationResult(
                     is_valid=False,
@@ -86,7 +81,7 @@ class PubmedQueryBuilder(QueryBuilder):
 
         def convert_term(term_node: QueryNode) -> str:
             term = term_node.value or ""
-            filter_code = get_effective_filter(term_node)
+            filter_code = self.get_effective_filter(term_node)
 
             def tagged(tag: str) -> str:
                 return f'"{term}"[{tag}]'
@@ -123,7 +118,7 @@ class PubmedQueryBuilder(QueryBuilder):
             Compound filters that expand to multiple tags (e.g. tiabskey)
             fall back to per-term conversion.
             """
-            filter_code = get_effective_filter(group_node)
+            filter_code = self.get_effective_filter(group_node)
             tag_map: dict[FilterCode, str] = {
                 FilterCode.TITLE: "ti",
                 FilterCode.ABSTRACT: "ab",
@@ -138,7 +133,7 @@ class PubmedQueryBuilder(QueryBuilder):
                 return None  # compound filters fall back to per-term
             return f"({inner})[{tag}]"
 
-        return convert_expression(
+        return self.convert_expression(
             query.root,
             convert_term,
             connector_map,

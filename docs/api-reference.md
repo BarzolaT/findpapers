@@ -499,7 +499,7 @@ from findpapers import FilterCode
 | `AUTHOR` | `"au"` | Author name field. |
 | `SOURCE` | `"src"` | Source/venue field. |
 | `AFFILIATION` | `"aff"` | Affiliation field. |
-| `TITLE_ABSTRACT` | `"tiabs"` | Title + abstract (default). |
+| `TITLE_ABSTRACT` | `"tiabs"` | Title + abstract. |
 | `TITLE_ABSTRACT_KEYWORDS` | `"tiabskey"` | Title + abstract + keywords. |
 
 ### ConnectorType

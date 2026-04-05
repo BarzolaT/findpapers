@@ -6,12 +6,6 @@ import re
 
 from findpapers.core.query import FilterCode, Query, QueryNode
 from findpapers.query.builder import QueryBuilder, QueryValidationResult
-from findpapers.query.builders.common import (
-    clone_query,
-    convert_expression,
-    get_effective_filter,
-    iter_term_nodes,
-)
 
 
 class SemanticScholarQueryBuilder(QueryBuilder):
@@ -32,10 +26,10 @@ class SemanticScholarQueryBuilder(QueryBuilder):
         QueryValidationResult
             Validation result.
         """
-        term_nodes = iter_term_nodes(query.root)
+        term_nodes = self.iter_term_nodes(query.root)
 
         for term in term_nodes:
-            filter_code = get_effective_filter(term)
+            filter_code = self.get_effective_filter(term)
             if not self.supports_filter(filter_code):
                 return QueryValidationResult(
                     is_valid=False,
@@ -75,7 +69,7 @@ class SemanticScholarQueryBuilder(QueryBuilder):
             term = term_node.value or ""
             return f'"{term}"' if " " in term else term
 
-        expression = convert_expression(preprocessed.root, convert_term, connector_map)
+        expression = self.convert_expression(preprocessed.root, convert_term, connector_map)
         normalized_query = " ".join(expression.split())
         normalized_query = re.sub(r"\(\s*\)", "", normalized_query)
         normalized_query = " ".join(normalized_query.split())
@@ -95,8 +89,8 @@ class SemanticScholarQueryBuilder(QueryBuilder):
         Query
             Preprocessed query.
         """
-        cloned = clone_query(query)
-        for term in iter_term_nodes(cloned.root):
+        cloned = self.clone_query(query)
+        for term in self.iter_term_nodes(cloned.root):
             if term.value:
                 term.value = term.value.replace("-", " ")
         return cloned
