@@ -180,6 +180,38 @@ class TestSnowballRunnerInit:
         runner = SnowballRunner(seed_papers=[seed], top_n_per_level=10)
         assert runner._top_n_per_level == 10
 
+    def test_databases_none_uses_all_connectors(self, make_paper) -> None:
+        """databases=None (default) builds all citation connectors."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        runner = SnowballRunner(seed_papers=[seed])
+        assert len(runner._connectors) == 3
+
+    def test_databases_single_value_filters_connectors(self, make_paper) -> None:
+        """Passing a single database restricts the connectors to that one."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        runner = SnowballRunner(seed_papers=[seed], databases=["openalex"])
+        assert len(runner._connectors) == 1
+        assert runner._connectors[0].name == "openalex"
+
+    def test_databases_multiple_values_filters_connectors(self, make_paper) -> None:
+        """Passing multiple databases restricts connectors to those databases."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        runner = SnowballRunner(seed_papers=[seed], databases=["crossref", "semantic_scholar"])
+        connector_names = {c.name for c in runner._connectors}
+        assert connector_names == {"crossref", "semantic_scholar"}
+
+    def test_databases_empty_list_raises(self, make_paper) -> None:
+        """An empty databases list raises InvalidParameterError."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        with pytest.raises(InvalidParameterError, match="databases must not be an empty list"):
+            SnowballRunner(seed_papers=[seed], databases=[])
+
+    def test_databases_unknown_value_raises(self, make_paper) -> None:
+        """An unknown database identifier raises InvalidParameterError."""
+        seed = make_paper("Seed", doi="10.1000/seed")
+        with pytest.raises(InvalidParameterError, match="Unknown citation database"):
+            SnowballRunner(seed_papers=[seed], databases=["no_such_db"])
+
 
 class TestSnowballRunnerRun:
     """Tests for the snowball execution logic."""

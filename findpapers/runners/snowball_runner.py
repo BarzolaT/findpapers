@@ -84,6 +84,12 @@ class SnowballRunner(DiscoveryRunner):
         NCBI PubMed API key used during the enrichment phase.
     wos_api_key : str | None
         Clarivate Web of Science API key used during the enrichment phase.
+    databases : list[str] | None
+        Citation database identifiers to use for snowballing.  ``None``
+        (default) uses all available citation databases (``openalex``,
+        ``semantic_scholar``, ``crossref``).  Pass an explicit list to
+        restrict which connectors are queried.  An empty list raises
+        :class:`~findpapers.exceptions.InvalidParameterError`.
     enrichment_databases : list[str] | None
         Databases used to enrich graph nodes after snowballing completes.
         ``None`` (default) uses ``crossref`` and ``web_scraping``; pass
@@ -113,6 +119,7 @@ class SnowballRunner(DiscoveryRunner):
         scopus_api_key: str | None = None,
         pubmed_api_key: str | None = None,
         wos_api_key: str | None = None,
+        databases: list[str] | None = None,
         enrichment_databases: list[str] | None = DEFAULT_ENRICHMENT_DATABASES,
         proxy: str | None = None,
         ssl_verify: bool = True,
@@ -149,6 +156,11 @@ class SnowballRunner(DiscoveryRunner):
             PubMed API key for enrichment.
         wos_api_key : str | None
             Clarivate Web of Science API key for enrichment.
+        databases : list[str] | None
+            Citation database identifiers to use for snowballing.  ``None``
+            uses all available citation databases.  Pass an explicit list to
+            restrict which connectors are queried.  Accepted values:
+            ``"crossref"``, ``"openalex"``, ``"semantic_scholar"``.
         enrichment_databases : list[str] | None
             Databases for post-snowball enrichment.  Defaults to
             ``DEFAULT_ENRICHMENT_DATABASES`` (``["crossref", "web_scraping"]``).
@@ -162,6 +174,7 @@ class SnowballRunner(DiscoveryRunner):
         ------
         InvalidParameterError
             If *max_depth* is less than 1, *top_n_per_level* is less than 1,
+            *databases* is an empty list or contains unknown identifiers,
             or *enrichment_databases* contains unknown database names.
         """
         if max_depth < 1:
@@ -170,6 +183,20 @@ class SnowballRunner(DiscoveryRunner):
             raise InvalidParameterError(
                 f"top_n_per_level must be >= 1 when set, got {top_n_per_level}"
             )
+
+        valid_citation_databases = {db.value for db in CITATION_REGISTRY}
+        if databases is not None and len(databases) == 0:
+            raise InvalidParameterError(
+                "databases must not be an empty list. "
+                "Pass None to use all available citation databases."
+            )
+        if databases is not None:
+            unknown = [db for db in databases if db not in valid_citation_databases]
+            if unknown:
+                raise InvalidParameterError(
+                    f"Unknown citation database(s): {', '.join(unknown)}. "
+                    f"Accepted values: {', '.join(sorted(valid_citation_databases))}"
+                )
 
         super().__init__(
             since=since,
@@ -199,6 +226,7 @@ class SnowballRunner(DiscoveryRunner):
         self._metrics: dict[str, int | float] = {}
 
         self._connectors = self._build_connectors(
+            databases=databases,
             openalex_api_key=openalex_api_key,
             email=email,
             semantic_scholar_api_key=semantic_scholar_api_key,
@@ -486,14 +514,18 @@ class SnowballRunner(DiscoveryRunner):
     def _build_connectors(
         self,
         *,
+        databases: list[str] | None,
         openalex_api_key: str | None,
         email: str | None,
         semantic_scholar_api_key: str | None,
     ) -> list[CitationConnectorBase]:
-        """Build all available citation connectors.
+        """Build citation connectors, optionally restricted to *databases*.
 
         Parameters
         ----------
+        databases : list[str] | None
+            Citation database identifiers to include.  ``None`` includes all
+            connectors registered in :data:`~findpapers.connectors.CITATION_REGISTRY`.
         openalex_api_key : str | None
             OpenAlex API key.
         email : str | None
@@ -504,7 +536,7 @@ class SnowballRunner(DiscoveryRunner):
         Returns
         -------
         list[CitationConnectorBase]
-            Available citation connectors.
+            Available citation connectors matching the *databases* filter.
         """
         # Per-connector constructor credentials.  Connectors with no entry
         # are constructed with no arguments.  The classes are looked up in
@@ -516,7 +548,12 @@ class SnowballRunner(DiscoveryRunner):
             Database.CROSSREF: {"email": email},
         }
 
-        return [cls(**_credentials.get(name, {})) for name, cls in CITATION_REGISTRY.items()]
+        allowed = {db.strip().lower() for db in databases} if databases is not None else None
+        return [
+            cls(**_credentials.get(name, {}))
+            for name, cls in CITATION_REGISTRY.items()
+            if allowed is None or name.value in allowed
+        ]
 
     def _expand_paper(
         self,

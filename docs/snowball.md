@@ -25,6 +25,7 @@ graph = engine.snowball(
     max_depth=1,                    # int - maximum traversal depth
     direction="both",               # "both" | "backward" | "forward"
     top_n_per_level=None,           # int | None - keep only top N papers per level
+    databases=None,                 # list[str] | None - citation databases to use for snowballing
     since=None,                     # datetime.date | None - exclude papers before this date
     until=None,                     # datetime.date | None - exclude papers after this date
     num_workers=1,                  # int - number of parallel workers
@@ -40,6 +41,7 @@ graph = engine.snowball(
 | `max_depth` | `int` | `1` | Maximum number of snowball iterations |
 | `direction` | `"both" \| "backward" \| "forward"` | `"both"` | Direction of citation traversal |
 | `top_n_per_level` | `int \| None` | `None` | Keep only the N most-cited papers per level in the graph; the rest are discarded. Seed papers are always expanded. `None` means no limit |
+| `databases` | `list[str] \| None` | `None` | Citation databases to query during snowballing. `None` uses all available citation databases. Accepted values: `"crossref"`, `"openalex"`, `"semantic_scholar"` |
 | `since` | `datetime.date \| None` | `None` | Only add discovered papers published on or after this date. Seed papers are never filtered |
 | `until` | `datetime.date \| None` | `None` | Only add discovered papers published on or before this date. Seed papers are never filtered |
 

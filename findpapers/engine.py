@@ -482,6 +482,7 @@ class Engine:
         max_depth: int = 1,
         direction: Literal["both", "backward", "forward"] = "both",
         top_n_per_level: int | None = None,
+        databases: list[str] | None = None,
         since: dt.date | None = None,
         until: dt.date | None = None,
         num_workers: int = 1,
@@ -492,7 +493,9 @@ class Engine:
         """Build a citation graph around seed papers via snowballing.
 
         Starting from one or more seed papers, iteratively fetches their
-        references (backward) and/or citing papers (forward) using all
+        references (backward) and/or citing papers (forward) using the
+        selected citation-capable connectors (OpenAlex, Semantic Scholar,
+        CrossRef) or a user-configured subset.  The result is a directed
         available citation-capable connectors (OpenAlex, Semantic Scholar,
         CrossRef).  The result is a directed
         :class:`~findpapers.core.citation_graph.CitationGraph` where each
@@ -538,6 +541,12 @@ class Engine:
             When ``True`` (default), display tqdm progress bars while
             papers are being expanded.  Set to ``False`` to suppress
             progress output.
+        databases : list[str] | None
+            Citation database identifiers to use for snowballing.  ``None``
+            (default) uses all available citation databases.  Pass an
+            explicit list to restrict which connectors are queried.
+            Accepted values: ``"crossref"``, ``"openalex"``,
+            ``"semantic_scholar"``.
         enrichment_databases : list[str] | None
             Databases used to enrich graph nodes after snowballing.
             Defaults to ``["crossref", "web_scraping"]``.  Pass an
@@ -591,6 +600,7 @@ class Engine:
             max_depth=max_depth,
             direction=direction,
             top_n_per_level=top_n_per_level,
+            databases=databases,
             openalex_api_key=self._openalex_api_key,
             email=self._email,
             semantic_scholar_api_key=self._semantic_scholar_api_key,

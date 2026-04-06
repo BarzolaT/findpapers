@@ -145,6 +145,7 @@ engine.snowball(
     max_depth: int = 1,
     direction: Literal["both", "backward", "forward"] = "both",
     top_n_per_level: int | None = None,
+    databases: list[str] | None = None,
     since: datetime.date | None = None,
     until: datetime.date | None = None,
     num_workers: int = 1,
@@ -160,6 +161,7 @@ engine.snowball(
 | `max_depth` | `int` | Maximum traversal depth. Defaults to `1`. |
 | `direction` | `Literal["both", "backward", "forward"]` | Snowball direction. Defaults to `"both"`. |
 | `top_n_per_level` | `int \| None` | Keep only the N most-cited papers per level; papers outside the top N are discarded entirely. Seed papers are always expanded. Defaults to `None` (no limit). |
+| `databases` | `list[str] \| None` | Citation databases to query during snowballing. `None` uses all available citation databases. Accepted values: `"crossref"`, `"openalex"`, `"semantic_scholar"`. |
 | `since` | `datetime.date \| None` | Only add discovered papers published on or after this date. Seed papers are never filtered. `None` disables the filter. |
 | `until` | `datetime.date \| None` | Only add discovered papers published on or before this date. Seed papers are never filtered. `None` disables the filter. |
 | `num_workers` | `int` | Number of parallel workers. Defaults to `1`. |
@@ -629,6 +631,7 @@ SnowballRunner(
     scopus_api_key: str | None = None,
     pubmed_api_key: str | None = None,
     wos_api_key: str | None = None,
+    databases: list[str] | None = None,
     enrichment_databases: list[str] | None = ["crossref", "web_scraping"],
     proxy: str | None = None,
     ssl_verify: bool = True,
