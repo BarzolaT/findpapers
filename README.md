@@ -9,9 +9,9 @@
 
 > **WARNING:** A new release is currently being prepared. The `main` branch may change frequently until then. If something stops working, update the tool and check the latest version of the [documentation](https://github.com/jonatasgrosman/findpapers/tree/main/docs). If you find a bug, please [open an issue](https://github.com/jonatasgrosman/findpapers/issues).
 
-Findpapers is a Python library that gives researchers unified access to **hundreds of millions of academic papers** from different databases - all through a single query. Instead of searching the databases one by one, each with its own interface and query language, Findpapers lets you write one boolean expression and run it everywhere at once, automatically merging and deduplicating the results.
+Findpapers is a Python library that gives researchers unified access to **hundreds of millions of academic papers** from different databases - all through a single query. Instead of searching the databases one by one, each with its own interface and query language, Findpapers lets you write one boolean expression and run it everywhere at once, automatically merging and deduplicating the results. It also fetches additional metadata (abstracts, keywords, citations) during search and snowballing, and can download PDFs with automatic URL resolution for major publishers. Whether you're doing a literature review, building a citation graph, or just looking for related work, Findpapers makes it easy to find the papers you need - no matter where they're published.
 
-Findpapers searches for papers through **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, **Semantic Scholar**, and **Web of Science** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science. It also supports paper enrichment, PDF downloading, citation graph building (snowballing), and export to multiple formats.
+Findpapers searches for papers through **arXiv**, **CrossRef**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, **Semantic Scholar**, and **Web of Science** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science.
 
 ## Key Features
 
@@ -71,12 +71,13 @@ The table below summarizes each supported database - for full details on authent
 | Database | Size (papers) | API Key | Coverage |
 |----------|------------|---------|----------|
 | [arXiv](https://arxiv.org) | 3M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Open-access preprints in physics, math, CS, biology, economics, and more |
-| [IEEE Xplore](https://ieeexplore.ieee.org) | 7M+ [²](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Journals, conferences, and standards in electrical engineering and CS |
-| [OpenAlex](https://openalex.org) | 480M+ [³](https://openalex.org) | Optional | The largest open catalog of scholarly works across all disciplines |
-| [PubMed](https://pubmed.ncbi.nlm.nih.gov) | 40M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Biomedical and life sciences literature (MEDLINE, PMC, and more) |
-| [Scopus](https://www.scopus.com) | 100M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Peer-reviewed literature in science, technology, medicine, social sciences, and humanities |
-| [Semantic Scholar](https://www.semanticscholar.org) | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | AI-powered academic graph covering all fields of science |
-| [Web of Science](https://www.webofscience.com) | 240M+ [⁷](https://clarivate.libguides.com/librarianresources/coverage) | Required | Multidisciplinary curated index of peer-reviewed literature with citation data |
+| [CrossRef](https://www.crossref.org) | 180M+ [²](https://www.crossref.org/about) | Not required | DOI-based metadata enrichment and backward snowballing (not a search database) |
+| [IEEE Xplore](https://ieeexplore.ieee.org) | 7M+ [³](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Journals, conferences, and standards in electrical engineering and CS |
+| [OpenAlex](https://openalex.org) | 480M+ [⁴](https://openalex.org) | Optional | The largest open catalog of scholarly works across all disciplines |
+| [PubMed](https://pubmed.ncbi.nlm.nih.gov) | 40M+ [⁵](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Biomedical and life sciences literature (MEDLINE, PMC, and more) |
+| [Scopus](https://www.scopus.com) | 100M+ [⁶](https://www.elsevier.com/products/scopus) | Required | Peer-reviewed literature in science, technology, medicine, social sciences, and humanities |
+| [Semantic Scholar](https://www.semanticscholar.org) | 214M+ [⁷](https://www.semanticscholar.org/product/api) | Optional | AI-powered academic graph covering all fields of science |
+| [Web of Science](https://www.webofscience.com) | 240M+ [⁸](https://clarivate.libguides.com/librarianresources/coverage) | Required | Multidisciplinary curated index of peer-reviewed literature with citation data |
 
 
 > **Every API key from the databases listed above can be obtained at no cost** - just create an account on each provider's website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus, Web of Science) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for more details on how to get these API keys, and [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.

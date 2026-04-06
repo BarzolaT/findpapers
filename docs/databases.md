@@ -2,7 +2,7 @@
 
 One of the biggest advantages of Findpapers is that it connects you to **hundreds of millions of academic papers** from seven major databases through a single query. Instead of visiting each portal separately and learning its query syntax, you write one search expression and Findpapers handles the rest - translating your query, running parallel searches, and merging all results with automatic deduplication.
 
-Findpapers searches for papers through **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, **Semantic Scholar**, and **Web of Science** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science. In addition, **CrossRef** is used internally for DOI-based metadata enrichment and backward snowballing.
+Findpapers searches for papers through **arXiv**, **CrossRef**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, **Semantic Scholar**, and **Web of Science** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science.
 
 ## Overview
 
@@ -11,15 +11,15 @@ The table below shows a quick databases comparison.
 | Database | Size (papers) | API Key | Search | Snowballing | Rate Limit |
 |----------|------------|---------|--------|-------------|------------|
 | arXiv | 3M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Yes | No | ~3 s between requests |
+| CrossRef | 180M+ [⁸](https://www.crossref.org/about) | Not required | No | Backward only | ~10 req/s |
 | IEEE Xplore | 7M+ [²](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Yes | No | ~200 req/day |
 | OpenAlex | 480M+ [³](https://openalex.org) | Optional | Yes | Yes (both) | ~10 req/s with email |
 | PubMed | 40M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Yes | No | 3 req/s (10 with key) |
 | Scopus | 100M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Yes | No | 20k req/week |
 | Semantic Scholar | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | Yes | Yes (both) | ~1 req/s with key |
 | Web of Science | 240M+ [⁷](https://clarivate.com/webofsciencegroup/solutions/web-of-science/) | Required | Yes | No | 1 req/s (Free Trial) / 5 req/s (Institutional) |
-| CrossRef | 180M+ [⁸](https://www.crossref.org/about) | Not required | No | Backward only | ~10 req/s |
 
-> **Every API key from the databases listed above can be obtained at no cost** - just create an account on each provider's website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus, Web of Science) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). See the **Databases** section for more details on how to get these API keys, and [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
+> **Every API key from the databases listed above can be obtained at no cost** - just create an account on each provider's website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus, Web of Science) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). See the **Supported Databases** section for more details on how to get these API keys, and [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
 
 ---
 
@@ -68,6 +68,32 @@ arXiv is one of the most important open-access repositories in science. Founded 
 - **Stemming:** arXiv uses Lucene-based stemming, so `ti[transformer]` also matches "transformers" and "transforming". Keep this in mind when looking for exact terms
 - **Hyphens:** Hyphens are treated as spaces (`ti[self-attention]` is equivalent to `ti[self attention]`). Findpapers normalizes hyphens automatically
 - **Filter support:** `ti[]`, `abs[]`, `au[]`, and `tiabs[]` are supported; `key[]`, `src[]`, and `aff[]` are not
+
+---
+
+### CrossRef
+
+- **URL:** https://www.crossref.org
+- **API:** CrossRef REST API
+- **Authentication:** Not required
+- **Estimated DOIs:** 180 million+ ([source](https://www.crossref.org/about))
+- **Coverage:** Metadata for scholarly works with DOIs across all disciplines
+
+CrossRef is a nonprofit organization that serves as the official DOI (Digital Object Identifier) registration agency for scholarly content. It provides authoritative, structured metadata for millions of DOIs, including publisher information, reference lists, licensing data, and funding details. While Findpapers does not use CrossRef as a search database, it plays a critical role behind the scenes: it enriches papers found in other databases with additional metadata (abstracts, keywords, citation counts) and enables backward snowballing by following the reference lists attached to each DOI.
+
+> **Note:** No API key is needed. Providing your email enables the CrossRef "polite pool", which offers faster and more reliable responses (~50 requests/s instead of ~10 requests/s for anonymous users).
+
+#### Features
+
+- Extracts title, abstract, authors (with affiliations), DOI, landing-page URL, PDF URL, citation count, keywords (from CrossRef subject field), source (with ISSN, ISBN, publisher), and page range
+- **Backward snowballing only:** follows the reference list of a paper (papers it cites) by resolving each cited DOI
+
+#### Limitations
+
+- Not available as a search database. Used only for DOI lookups, enrichment, and backward snowballing
+- No paper type, language, open access status, retraction status, or funder data
+- Forward snowballing (cited-by) is not supported by the CrossRef API
+- Reference lists may be incomplete — only references that carry a DOI can be followed
 
 ---
 
@@ -232,29 +258,3 @@ Web of Science is one of the two largest curated indexes of peer-reviewed litera
 - **Not usable for snowballing** — the Starter API does not expose reference or citing-paper lists
 - No author affiliations, language, open access status, retraction status, funder, or PDF URL data
 - Only `ti[]`, `au[]`, `src[]`, `aff[]`, and `tiabskey[]` filters are supported. The `abs[]`, `key[]`, and `tiabs[]` filters are **not available** in the WoS Starter API (there is no abstract-only or keyword-only field tag)
-
----
-
-### CrossRef
-
-- **URL:** https://www.crossref.org
-- **API:** CrossRef REST API
-- **Authentication:** Not required
-- **Estimated DOIs:** 180 million+ ([source](https://www.crossref.org/about))
-- **Coverage:** Metadata for scholarly works with DOIs across all disciplines
-
-CrossRef is a nonprofit organization that serves as the official DOI (Digital Object Identifier) registration agency for scholarly content. It provides authoritative, structured metadata for millions of DOIs, including publisher information, reference lists, licensing data, and funding details. While Findpapers does not use CrossRef as a search database, it plays a critical role behind the scenes: it enriches papers found in other databases with additional metadata (abstracts, keywords, citation counts) and enables backward snowballing by following the reference lists attached to each DOI.
-
-> **Note:** No API key is needed. Providing your email enables the CrossRef "polite pool", which offers faster and more reliable responses (~50 requests/s instead of ~10 requests/s for anonymous users).
-
-#### Features
-
-- Extracts title, abstract, authors (with affiliations), DOI, landing-page URL, PDF URL, citation count, keywords (from CrossRef subject field), source (with ISSN, ISBN, publisher), and page range
-- **Backward snowballing only:** follows the reference list of a paper (papers it cites) by resolving each cited DOI
-
-#### Limitations
-
-- Not available as a search database. Used only for DOI lookups, enrichment, and backward snowballing
-- No paper type, language, open access status, retraction status, or funder data
-- Forward snowballing (cited-by) is not supported by the CrossRef API
-- Reference lists may be incomplete — only references that carry a DOI can be followed
