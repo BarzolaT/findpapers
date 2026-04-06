@@ -72,7 +72,7 @@ The table below summarizes each supported database - for full details on authent
 |----------|------------|---------|----------|
 | [arXiv](https://arxiv.org) | 3M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Open-access preprints in physics, math, CS, biology, economics, and more |
 | [IEEE Xplore](https://ieeexplore.ieee.org) | 7M+ [²](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Journals, conferences, and standards in electrical engineering and CS |
-| [OpenAlex](https://openalex.org) | 243M+ [³](https://openalex.org/about) | Optional | The largest open catalog of scholarly works across all disciplines |
+| [OpenAlex](https://openalex.org) | 480M+ [³](https://openalex.org) | Optional | The largest open catalog of scholarly works across all disciplines |
 | [PubMed](https://pubmed.ncbi.nlm.nih.gov) | 40M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Biomedical and life sciences literature (MEDLINE, PMC, and more) |
 | [Scopus](https://www.scopus.com) | 100M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Peer-reviewed literature in science, technology, medicine, social sciences, and humanities |
 | [Semantic Scholar](https://www.semanticscholar.org) | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | AI-powered academic graph covering all fields of science |

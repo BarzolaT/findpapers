@@ -12,7 +12,7 @@ The table below shows a quick databases comparison.
 |----------|------------|---------|--------|-------------|------------|
 | arXiv | 3M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Yes | No | ~3 s between requests |
 | IEEE Xplore | 7M+ [²](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Yes | No | ~200 req/day |
-| OpenAlex | 243M+ [³](https://openalex.org/about) | Optional | Yes | Yes (both) | ~10 req/s with email |
+| OpenAlex | 480M+ [³](https://openalex.org) | Optional | Yes | Yes (both) | ~10 req/s with email |
 | PubMed | 40M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Yes | No | 3 req/s (10 with key) |
 | Scopus | 100M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Yes | No | 20k req/week |
 | Semantic Scholar | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | Yes | Yes (both) | ~1 req/s with key |
