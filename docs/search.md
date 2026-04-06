@@ -48,7 +48,7 @@ result = engine.search(
 | `num_workers` | `int` | `1` | Number of parallel workers used to query databases concurrently |
 | `verbose` | `bool` | `False` | Enable detailed DEBUG-level log messages |
 | `show_progress` | `bool` | `True` | Display tqdm progress bars while papers are being fetched |
-| `enrichment_databases` | `list[str] \| None` | `["crossref", "web_scraping"]` | Databases used to enrich papers after search and filtering. Defaults to `"crossref"` and `"web_scraping"`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`. Pass `[]` or `None` to disable enrichment. |
+| `enrichment_databases` | `list[str] \| None` | `["crossref", "web_scraping"]` | Databases used to enrich papers after search and filtering. Defaults to `"crossref"` and `"web_scraping"`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`, `"wos"`. Pass `[]` or `None` to disable enrichment. |
 
 ## Return Value
 
@@ -89,7 +89,7 @@ engine = findpapers.Engine(
 result = engine.search("[transformers]")
 ```
 
-Available database identifiers: `"arxiv"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`. See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for details on each.
+Available database identifiers: `"arxiv"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"wos"`. See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for details on each.
 
 ## Limiting Results
 

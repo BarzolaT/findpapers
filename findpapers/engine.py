@@ -307,7 +307,7 @@ class Engine:
         output_directory: str,
         *,
         num_workers: int = 1,
-        timeout: float | None = 10.0,
+        timeout: float | None = 30.0,
         verbose: bool = False,
         show_progress: bool = True,
     ) -> dict[str, int | float]:

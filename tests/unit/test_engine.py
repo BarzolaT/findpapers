@@ -297,7 +297,7 @@ class TestEngineDownload:
         assert result == fake_metrics
 
     def test_download_default_per_call_params(self):
-        """num_workers defaults to 1, verbose to False, timeout to 10.0."""
+        """num_workers defaults to 1, verbose to False, timeout to 30.0."""
         engine = Engine()
         with patch("findpapers.engine.DownloadRunner") as mock_cls:
             mock_runner = MagicMock()
@@ -308,7 +308,7 @@ class TestEngineDownload:
 
         _, kwargs = mock_cls.call_args
         assert kwargs["num_workers"] == 1
-        assert kwargs["timeout"] == 10.0
+        assert kwargs["timeout"] == 30.0
         mock_runner.run.assert_called_once_with(verbose=False, show_progress=True)
 
     def test_download_show_progress_false(self):

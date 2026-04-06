@@ -25,6 +25,7 @@ Engine(
     openalex_api_key: str | None = None,
     email: str | None = None,
     semantic_scholar_api_key: str | None = None,
+    wos_api_key: str | None = None,
     proxy: str | None = None,
     ssl_verify: bool = True,
 )
@@ -38,6 +39,7 @@ Engine(
 | `openalex_api_key` | `str \| None` | OpenAlex API key. Falls back to `FINDPAPERS_OPENALEX_API_TOKEN` env var. |
 | `email` | `str \| None` | Contact email for polite-pool access. Falls back to `FINDPAPERS_EMAIL` env var. |
 | `semantic_scholar_api_key` | `str \| None` | Semantic Scholar API key. Falls back to `FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN` env var. |
+| `wos_api_key` | `str \| None` | Clarivate Web of Science API key. Falls back to `FINDPAPERS_WOS_API_TOKEN` env var. |
 | `proxy` | `str \| None` | Proxy URL for HTTP requests. Falls back to `FINDPAPERS_PROXY` env var. |
 | `ssl_verify` | `bool` | Whether to verify SSL certificates. Defaults to `True`. Falls back to `FINDPAPERS_SSL_VERIFY` env var. |
 
@@ -62,14 +64,14 @@ engine.search(
 | Parameter | Type | Description |
 |---|---|---|
 | `query` | `str` | Boolean query with optional field filters (e.g., `"ti[deep learning] AND abs[transformer]"`). See [Query Syntax](query-syntax.md). |
-| `databases` | `list[str] \| None` | Database identifiers to query. `None` uses all available databases. |
+| `databases` | `list[str] \| None` | Database identifiers to query. `None` uses all available databases. Accepted values: `"arxiv"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"wos"`. |
 | `max_papers_per_database` | `int \| None` | Maximum number of papers to retrieve per database. |
 | `since` | `datetime.date \| None` | Only include papers published on or after this date. |
 | `until` | `datetime.date \| None` | Only include papers published on or before this date. |
 | `num_workers` | `int` | Number of parallel database workers. Defaults to `1`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bars. Defaults to `True`. |
-| `enrichment_databases` | `list[str] \| None` | Databases for post-search enrichment. Defaults to `["crossref", "web_scraping"]`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`. Pass `[]` or `None` to disable enrichment. |
+| `enrichment_databases` | `list[str] \| None` | Databases for post-search enrichment. Defaults to `["crossref", "web_scraping"]`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`, `"wos"`. Pass `[]` or `None` to disable enrichment. |
 
 **Returns:** `SearchResult` with deduplicated papers.
 
@@ -110,6 +112,7 @@ Fetch a single paper by its DOI or landing-page URL.
 engine.get(
     identifier: str,
     *,
+    databases: list[str] | None = None,
     timeout: float | None = 10.0,
     verbose: bool = False,
 ) -> Paper | None
@@ -118,6 +121,7 @@ engine.get(
 | Parameter | Type | Description |
 |---|---|---|
 | `identifier` | `str` | Bare DOI, DOI URL (`doi.org`/`dx.doi.org`), or paper landing-page URL. |
+| `databases` | `list[str] \| None` | Sources to consult. `None` uses all available sources. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`, `"wos"`. |
 | `timeout` | `float \| None` | HTTP timeout in seconds. Defaults to `10.0`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 
@@ -128,7 +132,7 @@ engine.get(
 
 **Returns:** `Paper`, or `None` if the paper cannot be found or the page yields no metadata.
 
-**Raises:** `ValueError` if identifier is a bare DOI that is empty or blank after sanitization.
+**Raises:** `InvalidParameterError` if identifier is a bare DOI that is empty or blank after sanitization, or if `databases` is an empty list or contains an unrecognised value.
 
 ### `snowball()`
 
@@ -161,7 +165,7 @@ engine.snowball(
 | `num_workers` | `int` | Number of parallel workers. Defaults to `1`. |
 | `verbose` | `bool` | Enable debug logging. Defaults to `False`. |
 | `show_progress` | `bool` | Display progress bars. Defaults to `True`. |
-| `enrichment_databases` | `list[str] \| None` | Databases for post-snowball enrichment. Defaults to `["crossref", "web_scraping"]`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`. Pass `[]` or `None` to disable enrichment. |
+| `enrichment_databases` | `list[str] \| None` | Databases for post-snowball enrichment. Defaults to `["crossref", "web_scraping"]`. Accepted values: `"arxiv"`, `"crossref"`, `"ieee"`, `"openalex"`, `"pubmed"`, `"scopus"`, `"semantic_scholar"`, `"web_scraping"`, `"wos"`. Pass `[]` or `None` to disable enrichment. |
 
 **Returns:** `CitationGraph` with all discovered papers and citation edges.
 
@@ -284,6 +288,7 @@ from findpapers import Database
 | `PUBMED` | `"pubmed"` | PubMed biomedical literature database. |
 | `SCOPUS` | `"scopus"` | Elsevier Scopus abstract and citation database. |
 | `SEMANTIC_SCHOLAR` | `"semantic_scholar"` | Semantic Scholar AI-powered research database. |
+| `WOS` | `"wos"` | Clarivate Web of Science citation index. |
 
 `Database` is a `StrEnum`, so `Database.ARXIV == "arxiv"` is `True`. `"web_scraping"` is intentionally absent — web scraping is a retrieval mechanism, not a database, and is never stored in `Paper.databases`.
 
@@ -539,9 +544,11 @@ SearchRunner(
     openalex_api_key: str | None = None,
     email: str | None = None,
     semantic_scholar_api_key: str | None = None,
+    wos_api_key: str | None = None,
     num_workers: int = 1,
     since: datetime.date | None = None,
     until: datetime.date | None = None,
+    enrichment_databases: list[str] | None = ["crossref", "web_scraping"],
 )
 ```
 
@@ -570,27 +577,6 @@ DownloadRunner(
 |---|---|---|
 | `run(verbose=False, show_progress=True)` | `dict[str, int \| float]` | Execute downloads and return metrics. |
 
-### EnrichmentRunner
-
-```python
-from findpapers import EnrichmentRunner
-```
-
-```python
-EnrichmentRunner(
-    papers: list[Paper],
-    email: str | None = None,
-    num_workers: int = 1,
-    timeout: float | None = 10.0,
-    proxy: str | None = None,
-    ssl_verify: bool = True,
-)
-```
-
-| Method | Returns | Description |
-|---|---|---|
-| `run(verbose=False, show_progress=True)` | `dict[str, int \| float]` | Execute enrichment and return metrics. |
-
 ### GetRunner
 
 ```python
@@ -601,6 +587,13 @@ from findpapers import GetRunner
 GetRunner(
     identifier: str,
     email: str | None = None,
+    databases: list[str] | None = None,
+    ieee_api_key: str | None = None,
+    scopus_api_key: str | None = None,
+    pubmed_api_key: str | None = None,
+    openalex_api_key: str | None = None,
+    semantic_scholar_api_key: str | None = None,
+    wos_api_key: str | None = None,
     timeout: float | None = 10.0,
     proxy: str | None = None,
     ssl_verify: bool = True,
@@ -632,6 +625,13 @@ SnowballRunner(
     num_workers: int = 1,
     since: datetime.date | None = None,
     until: datetime.date | None = None,
+    ieee_api_key: str | None = None,
+    scopus_api_key: str | None = None,
+    pubmed_api_key: str | None = None,
+    wos_api_key: str | None = None,
+    enrichment_databases: list[str] | None = ["crossref", "web_scraping"],
+    proxy: str | None = None,
+    ssl_verify: bool = True,
 )
 ```
 
@@ -712,6 +712,7 @@ from findpapers import (
     UnsupportedQueryError,
     ModelValidationError,
     InvalidParameterError,
+    MissingApiKeyError,
     ConnectorError,
     PersistenceError,
 )
@@ -724,5 +725,6 @@ from findpapers import (
 | `UnsupportedQueryError` | `FindpapersError`, `ValueError` | Raised when a query uses features not supported by a specific database. |
 | `ModelValidationError` | `FindpapersError`, `ValueError` | Raised when a model object (Paper, Author, Source) has invalid data (e.g. missing title). |
 | `InvalidParameterError` | `FindpapersError`, `ValueError` | Raised when a function or runner receives an invalid argument (e.g. empty DOI, unknown database). |
+| `MissingApiKeyError` | `InvalidParameterError`, `ValueError` | Raised when a connector that requires an API key is used without one (e.g. IEEE, Scopus, WoS). |
 | `ConnectorError` | `FindpapersError` | Raised when an external database API encounters an unrecoverable error. |
 | `PersistenceError` | `FindpapersError` | Raised when save/load encounters an unsupported data type or format. |
