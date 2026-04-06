@@ -223,7 +223,6 @@ ti([deep learning] OR [neural network]) AND abs([medical imaging] OR [radiology]
 | `[] AND [term b]` | ❌ | Empty term |
 | `["term a"]` | ❌ | Double quotes not allowed inside brackets |
 | `[?erm]` | ❌ | Wildcard at start of term |
-| `[te*]` | ❌ | Fewer than 3 characters before `*` |
 | `[ter*s]` | ❌ | `*` not at end of term |
 | `[t?rm?]` | ❌ | Multiple wildcards in one term |
 | `[some term*]` | ❌ | Wildcard in multi-word term |
