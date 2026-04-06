@@ -21,6 +21,7 @@ _FINDPAPERS_ENV_VARS = {
     "FINDPAPERS_OPENALEX_API_TOKEN": "",
     "FINDPAPERS_EMAIL": "",
     "FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN": "",
+    "FINDPAPERS_WOS_API_TOKEN": "",
     "FINDPAPERS_PROXY": "",
     "FINDPAPERS_SSL_VERIFY": "",
 }
@@ -51,6 +52,7 @@ class TestEngineInit:
             "FINDPAPERS_OPENALEX_API_TOKEN": "",
             "FINDPAPERS_EMAIL": "",
             "FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN": "",
+            "FINDPAPERS_WOS_API_TOKEN": "",
             "FINDPAPERS_PROXY": "",
             "FINDPAPERS_SSL_VERIFY": "",
         }
@@ -102,6 +104,7 @@ class TestEngineInit:
             "FINDPAPERS_OPENALEX_API_TOKEN": "env-oalex",
             "FINDPAPERS_EMAIL": "env@example.com",
             "FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN": "env-s2",
+            "FINDPAPERS_WOS_API_TOKEN": "env-wos",
             "FINDPAPERS_PROXY": "http://env-proxy:8080",
         }
         with patch.dict(os.environ, env, clear=False):
@@ -113,6 +116,7 @@ class TestEngineInit:
         assert engine._openalex_api_key == "env-oalex"
         assert engine._email == "env@example.com"
         assert engine._semantic_scholar_api_key == "env-s2"
+        assert engine._wos_api_key == "env-wos"
         assert engine._proxy == "http://env-proxy:8080"
 
     def test_explicit_values_override_env(self):
@@ -214,6 +218,7 @@ class TestEngineSearch:
             openalex_api_key="oalex-k",
             email="me@example.com",
             semantic_scholar_api_key="s2-k",
+            wos_api_key=None,
             num_workers=3,
             since=None,
             until=None,

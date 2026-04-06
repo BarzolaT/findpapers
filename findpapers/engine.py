@@ -66,6 +66,9 @@ class Engine:
     semantic_scholar_api_key : str | None
         Semantic Scholar API key.  Optional — increases the rate limit.
         Falls back to ``FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN``.
+    wos_api_key : str | None
+        Clarivate Web of Science API key.  Required to query ``"wos"``.
+        Falls back to ``FINDPAPERS_WOS_API_TOKEN``.
     proxy : str | None
         Proxy URL (e.g. ``"http://proxy:8080"``).
         Falls back to ``FINDPAPERS_PROXY``.
@@ -92,6 +95,7 @@ class Engine:
         openalex_api_key: str | None = None,
         email: str | None = None,
         semantic_scholar_api_key: str | None = None,
+        wos_api_key: str | None = None,
         proxy: str | None = None,
         ssl_verify: bool = True,
     ) -> None:
@@ -116,6 +120,7 @@ class Engine:
             or os.environ.get("FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN")
             or None
         )
+        self._wos_api_key = wos_api_key or os.environ.get("FINDPAPERS_WOS_API_TOKEN") or None
         self._proxy = proxy or os.environ.get("FINDPAPERS_PROXY") or None
 
         # ssl_verify: only fall back to env when caller omits the argument
@@ -286,6 +291,7 @@ class Engine:
             openalex_api_key=self._openalex_api_key,
             email=self._email,
             semantic_scholar_api_key=self._semantic_scholar_api_key,
+            wos_api_key=self._wos_api_key,
             num_workers=num_workers,
             since=since,
             until=until,
@@ -462,6 +468,7 @@ class Engine:
             pubmed_api_key=self._pubmed_api_key,
             openalex_api_key=self._openalex_api_key,
             semantic_scholar_api_key=self._semantic_scholar_api_key,
+            wos_api_key=self._wos_api_key,
             timeout=timeout,
             proxy=self._proxy,
             ssl_verify=self._ssl_verify,
@@ -590,6 +597,7 @@ class Engine:
             ieee_api_key=self._ieee_api_key,
             scopus_api_key=self._scopus_api_key,
             pubmed_api_key=self._pubmed_api_key,
+            wos_api_key=self._wos_api_key,
             num_workers=num_workers,
             since=since,
             until=until,

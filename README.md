@@ -11,12 +11,12 @@
 
 Findpapers is a Python library that gives researchers unified access to **hundreds of millions of academic papers** from different databases - all through a single query. Instead of searching the databases one by one, each with its own interface and query language, Findpapers lets you write one boolean expression and run it everywhere at once, automatically merging and deduplicating the results.
 
-Findpapers searches for papers through **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, and **Semantic Scholar** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science. It also supports paper enrichment, PDF downloading, citation graph building (snowballing), and export to multiple formats.
+Findpapers searches for papers through **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, **Semantic Scholar**, and **Web of Science** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science. It also supports paper enrichment, PDF downloading, citation graph building (snowballing), and export to multiple formats.
 
 ## Key Features
 
-- **Massive coverage** - access hundreds of millions of papers across six databases that together span every scientific discipline
-- **Multi-database search** - query all databases in parallel with one boolean search expression - no need to learn six different query syntaxes
+- **Massive coverage** - access hundreds of millions of papers across seven databases that together span every scientific discipline
+- **Multi-database search** - query all databases in parallel with one boolean search expression - no need to learn seven different query syntaxes
 - **Smart deduplication** - automatically merges duplicate papers found across different databases
 - **Paper enrichment** - automatically fetch additional metadata (abstracts, keywords, citations) during search and snowball
 - **PDF downloading** - download PDFs with automatic URL resolution for major publishers
@@ -76,10 +76,10 @@ The table below summarizes each supported database - for full details on authent
 | [PubMed](https://pubmed.ncbi.nlm.nih.gov) | 40M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Biomedical and life sciences literature (MEDLINE, PMC, and more) |
 | [Scopus](https://www.scopus.com) | 100M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Peer-reviewed literature in science, technology, medicine, social sciences, and humanities |
 | [Semantic Scholar](https://www.semanticscholar.org) | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | AI-powered academic graph covering all fields of science |
+| [Web of Science](https://www.webofscience.com) | 240M+ [⁷](https://clarivate.libguides.com/librarianresources/coverage) | Required | Multidisciplinary curated index of peer-reviewed literature with citation data |
 
-*Estimated paper counts were consulted in March 2026 from each database's official website. Click the superscript links for the original sources. These numbers grow continuously.*
 
-> **Every API key from the databases listed above can be obtained at no cost** - just create an account on each provider’s website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for more details on how to get these API keys, and [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
+> **Every API key from the databases listed above can be obtained at no cost** - just create an account on each provider's website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus, Web of Science) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for more details on how to get these API keys, and [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
 
 ## Documentation
 

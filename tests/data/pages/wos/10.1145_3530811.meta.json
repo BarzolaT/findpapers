@@ -1,0 +1,10 @@
+{
+  "key": "10.1145/3530811",
+  "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893245700001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+  "doi": "10.1145/3530811",
+  "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000893245700001?&SID=USW2EC0FCEIVv0GmgeWwNriGJ6DyP",
+  "status": 200,
+  "content_type": "text/html; charset=utf-8",
+  "size_bytes": 14079,
+  "error": null
+}

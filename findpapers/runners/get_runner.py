@@ -108,6 +108,8 @@ class GetRunner:
         OpenAlex API key.  Optional — increases the OpenAlex daily quota.
     semantic_scholar_api_key : str | None
         Semantic Scholar API key.  Optional — provides a dedicated quota.
+    wos_api_key : str | None
+        Clarivate Web of Science API key.  When omitted WoS is skipped.
     timeout : float | None
         HTTP request timeout in seconds.  ``None`` uses the ``requests``
         default.
@@ -149,6 +151,7 @@ class GetRunner:
         pubmed_api_key: str | None = None,
         openalex_api_key: str | None = None,
         semantic_scholar_api_key: str | None = None,
+        wos_api_key: str | None = None,
         timeout: float | None = 10.0,
         proxy: str | None = None,
         ssl_verify: bool = True,
@@ -177,6 +180,8 @@ class GetRunner:
             OpenAlex API key.
         semantic_scholar_api_key : str | None
             Semantic Scholar API key.
+        wos_api_key : str | None
+            Clarivate Web of Science API key.
         timeout : float | None
             HTTP request timeout in seconds.
         proxy : str | None
@@ -221,9 +226,12 @@ class GetRunner:
             Database.PUBMED: {"api_key": pubmed_api_key},
             Database.SCOPUS: {"api_key": scopus_api_key},
             Database.SEMANTIC_SCHOLAR: {"api_key": semantic_scholar_api_key},
+            Database.WOS: {"api_key": wos_api_key},
         }
         # Sources whose connector requires an API key to function.
-        _key_required: frozenset[Database] = frozenset({Database.IEEE, Database.SCOPUS})
+        _key_required: frozenset[Database] = frozenset(
+            {Database.IEEE, Database.SCOPUS, Database.WOS}
+        )
 
         # Build DOI-lookup connectors from the registry.
         _doi_map: dict[Database, DOILookupConnectorBase] = {}
@@ -244,6 +252,7 @@ class GetRunner:
         self._semantic_scholar: DOILookupConnectorBase | None = _doi_map.get(
             Database.SEMANTIC_SCHOLAR
         )
+        self._wos: DOILookupConnectorBase | None = _doi_map.get(Database.WOS)
 
         if timeout is not None:
             for connector in self._doi_connectors:
@@ -294,6 +303,7 @@ class GetRunner:
             self._arxiv,
             self._ieee,
             self._scopus,
+            self._wos,
         ]
         return [c for c in connectors if c is not None]
 
@@ -425,6 +435,7 @@ class GetRunner:
                 (self._scopus, "Scopus", Database.SCOPUS),
                 (self._semantic_scholar, "Semantic Scholar", Database.SEMANTIC_SCHOLAR),
                 (self._openalex, "OpenAlex", Database.OPENALEX),
+                (self._wos, "WoS", Database.WOS),
             ):
                 if self._should_skip_connector(database, doi, self._identifier):
                     if verbose:

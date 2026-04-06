@@ -24,7 +24,7 @@ Three connectors are available (case-insensitive):
 
 Connectors must have at least one whitespace before and after them.
 
-All six databases support all three boolean connectors.
+All seven databases support all three boolean connectors.
 
 ## Grouping
 
@@ -59,7 +59,7 @@ ti[neural network] AND abs([image segmentation] OR [object detection])
 | `tiabs` | Title + Abstract | Search in title and abstract |
 | `tiabskey` | Title + Abstract + Keywords | Search in title, abstract, and keywords |
 
-When no filter code is specified, the default behavior depends on the target database: `tiabskey` (title, abstract, and keywords) is used for databases that support it (IEEE, PubMed, Scopus), and `tiabs` (title and abstract) is used for the rest (arXiv, OpenAlex, Semantic Scholar).
+When no filter code is specified, the default behavior depends on the target database: `tiabskey` (title, abstract, and keywords) is used for databases that support it (IEEE, PubMed, Scopus, Web of Science), and `tiabs` (title and abstract) is used for the rest (arXiv, OpenAlex, Semantic Scholar).
 
 ### Filter Code Propagation
 
@@ -73,16 +73,16 @@ In this example, `[neural network]` inherits the `ti` filter from the group, but
 
 Not all databases support every filter code. When a query uses a filter code that a database doesn't handle, that database is automatically skipped.
 
-| Filter Code | Field | arXiv | IEEE | OpenAlex | PubMed | Scopus | Semantic Scholar |
-|-------------|-------|-------|------|----------|--------|--------|------------------|
-| `ti` | Title | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
-| `abs` | Abstract | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `key` | Keywords | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
-| `au` | Author | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `src` | Source | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
-| `aff` | Affiliation | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `tiabs` | Title + Abstract | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `tiabskey` | Title + Abstract + Keywords | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Filter Code | Field | arXiv | IEEE | OpenAlex | PubMed | Scopus | Semantic Scholar | WoS |
+|-------------|-------|-------|------|----------|--------|--------|------------------|-----|
+| `ti` | Title | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| `abs` | Abstract | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| `key` | Keywords | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| `au` | Author | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| `src` | Source | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
+| `aff` | Affiliation | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| `tiabs` | Title + Abstract | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `tiabskey` | Title + Abstract + Keywords | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ |
 
 ## Wildcards
 
@@ -103,11 +103,11 @@ Two wildcards are available:
 
 Not all databases support wildcards. When a query uses a wildcard that a database doesn't handle, that database is automatically skipped.
 
-| Feature | arXiv | IEEE | OpenAlex | PubMed | Scopus | Semantic Scholar |
-|---------|-------|------|----------|--------|--------|------------------|
-| `?` (single char) | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `*` (zero or more) | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
-| Min chars before `*` | 1 | 3 | - | 4 | 3 | 1 |
+| Feature | arXiv | IEEE | OpenAlex | PubMed | Scopus | Semantic Scholar | WoS |
+|---------|-------|------|----------|--------|--------|------------------|-----|
+| `?` (single char) | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
+| `*` (zero or more) | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Min chars before `*` | 1 | 3 | - | 4 | 3 | 1 | 3 |
 
 
 ## Examples

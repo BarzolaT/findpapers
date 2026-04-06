@@ -15,11 +15,12 @@ engine = findpapers.Engine(
     pubmed_api_key="your-pubmed-key",       # Optional (improves rate limit)
     openalex_api_key="your-openalex-key",   # Optional (improves quota)
     semantic_scholar_api_key="your-s2-key", # Optional (improves rate limit)
+    wos_api_key="your-wos-key",             # Required for Web of Science searches
     email="researcher@university.edu",      # Optional (enables polite pool for OpenAlex and CrossRef)
 )
 ```
 
-Without any keys, Findpapers can query arXiv, OpenAlex, PubMed, and Semantic Scholar. To unlock IEEE and Scopus, provide their respective API keys. See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for details on how to get each key.
+Without any keys, Findpapers can query arXiv, OpenAlex, PubMed, and Semantic Scholar. To unlock IEEE, Scopus, and Web of Science, provide their respective API keys. See [Databases](https://github.com/jonatasgrosman/findpapers/blob/main/docs/databases.md) for details on how to get each key.
 
 > **Tip:** All API keys from the supported databases can be obtained at no cost. We strongly recommend getting all of them for better rate limits and broader coverage.
 
@@ -53,6 +54,7 @@ engine = findpapers.Engine(
     openalex_api_key=None,          # str | None - OpenAlex API key
     email=None,                     # str | None - contact email for polite pool access
     semantic_scholar_api_key=None,  # str | None - Semantic Scholar API key
+    wos_api_key=None,               # str | None - Clarivate Web of Science API key
     proxy=None,                     # str | None - HTTP/HTTPS proxy URL
     ssl_verify=True,                # bool - verify SSL certificates
 )
@@ -68,6 +70,7 @@ export FINDPAPERS_SCOPUS_API_TOKEN="your-scopus-key"
 export FINDPAPERS_PUBMED_API_TOKEN="your-pubmed-key"
 export FINDPAPERS_OPENALEX_API_TOKEN="your-openalex-key"
 export FINDPAPERS_SEMANTIC_SCHOLAR_API_TOKEN="your-s2-key"
+export FINDPAPERS_WOS_API_TOKEN="your-wos-key"
 export FINDPAPERS_EMAIL="researcher@university.edu"
 export FINDPAPERS_PROXY="http://proxy.example.com:8080"
 export FINDPAPERS_SSL_VERIFY="true"

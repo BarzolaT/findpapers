@@ -1,43 +1,13 @@
 {
-  "collected_at": "2026-03-03T15:37:21.566000+00:00",
+  "collected_at": "2026-04-05T22:11:34.790307+00:00",
   "databases": [
     {
-      "db": "arxiv",
+      "db": "wos",
       "collected": 10,
       "errors": 0,
-      "skipped": false
-    },
-    {
-      "db": "ieee",
-      "collected": 10,
-      "errors": 0,
-      "skipped": false
-    },
-    {
-      "db": "pubmed",
-      "collected": 10,
-      "errors": 0,
-      "skipped": false
-    },
-    {
-      "db": "scopus",
-      "collected": 10,
-      "errors": 4,
-      "skipped": false
-    },
-    {
-      "db": "openalex",
-      "collected": 10,
-      "errors": 3,
-      "skipped": false
-    },
-    {
-      "db": "semanticscholar",
-      "collected": 10,
-      "errors": 7,
       "skipped": false
     }
   ],
-  "total_collected": 60,
-  "total_errors": 14
+  "total_collected": 10,
+  "total_errors": 0
 }

@@ -92,6 +92,9 @@ class Database(StrEnum):
     SEMANTIC_SCHOLAR = "semantic_scholar"
     """Semantic Scholar AI-powered research database."""
 
+    WOS = "wos"
+    """Web of Science (Clarivate) bibliographic database."""
+
 
 # Maximum number of days into the future that a publication date is considered
 # plausible.  Dates beyond this threshold are treated as data-quality errors

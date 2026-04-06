@@ -32,6 +32,7 @@ _SENSITIVE_HEADER_NAMES: frozenset[str] = frozenset(
     {
         "x-els-apikey",
         "x-api-key",
+        "x-apikey",
         "authorization",
     }
 )

@@ -1,0 +1,13 @@
+{
+  "collected_at": "2026-04-05T15:57:53.842249",
+  "api_url": "https://api.clarivate.com/apis/wos-starter/v1/documents",
+  "query": "TS=(\"machine learning\" OR \"deep learning\") AND TS=(\"natural language processing\" OR \"NLP\")",
+  "date_range": {
+    "from": "2020-01-01",
+    "to": "2022-12-31"
+  },
+  "limit": 50,
+  "response_status": 200,
+  "total_records": 7405,
+  "records_returned": 50
+}

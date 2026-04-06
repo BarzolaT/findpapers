@@ -159,8 +159,8 @@ def _extract_json_dois(
     if isinstance(data, list):
         items = data
     elif isinstance(data, dict):
-        # Various APIs wrap the list: OpenAlex → "results", Crossref → "items", etc.
-        for key in ("results", "collection", "items", "papers", "data", "articles"):
+        # Various APIs wrap the list: OpenAlex → "results", WoS → "hits", etc.
+        for key in ("results", "collection", "hits", "items", "papers", "data", "articles"):
             if isinstance(data.get(key), list):
                 items = data[key]
                 break
@@ -271,6 +271,16 @@ DB_CONFIGS: dict[str, dict] = {
             p,
             url_fields=[],
             doi_fields=["externalIds.DOI"],
+        ),
+    },
+    "wos": {
+        "sample": "wos/sample_response.json",
+        # WoS Starter wraps hits in a top-level "hits" key.
+        # The record URL is in links.record and the DOI in identifiers.doi.
+        "extractor": lambda p: _extract_json_dois(
+            p,
+            url_fields=["links.record"],
+            doi_fields=["identifiers.doi"],
         ),
     },
 }

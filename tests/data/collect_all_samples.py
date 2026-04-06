@@ -34,6 +34,7 @@ COLLECTORS = {
     "scopus": "scopus/collect_sample.py",
     "openalex": "openalex/collect_sample.py",
     "semanticscholar": "semanticscholar/collect_sample.py",
+    "wos": "wos/collect_sample.py",
     "citations": "collect_citation_samples.py",
 }
 
@@ -69,7 +70,7 @@ def run_page_collector(selected_dbs: list[str]) -> bool:
     sample data uses a non-standard structure) are silently skipped.
     """
     # Only forward databases that the page collector actually supports.
-    _PAGES_SUPPORTED = {"arxiv", "ieee", "pubmed", "scopus", "openalex", "semanticscholar"}
+    _PAGES_SUPPORTED = {"arxiv", "ieee", "pubmed", "scopus", "openalex", "semanticscholar", "wos"}
     page_dbs = [db for db in selected_dbs if db in _PAGES_SUPPORTED]
 
     if not page_dbs:

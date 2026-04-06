@@ -68,7 +68,7 @@ class SearchRunner(DiscoveryRunner):
     databases : list[str] | None
         Database identifiers to query.  When ``None`` all supported databases
         are used.  Supported values: ``"arxiv"``, ``"ieee"``, ``"openalex"``,
-        ``"pubmed"``, ``"scopus"``, ``"semantic_scholar"``.
+        ``"pubmed"``, ``"scopus"``, ``"semantic_scholar"``, ``"wos"``.
     max_papers_per_database : int | None
         Maximum papers to retrieve from each database.  ``None`` means
         unlimited.
@@ -84,6 +84,8 @@ class SearchRunner(DiscoveryRunner):
         Contact email for polite-pool access (OpenAlex, CrossRef).
     semantic_scholar_api_key : str | None
         Semantic Scholar API key (increases rate limit).
+    wos_api_key : str | None
+        Clarivate Web of Science API key.
     num_workers : int
         Number of parallel workers for running database searchers
         concurrently.  Defaults to ``1``, which runs all searchers
@@ -136,6 +138,7 @@ class SearchRunner(DiscoveryRunner):
         openalex_api_key: str | None = None,
         email: str | None = None,
         semantic_scholar_api_key: str | None = None,
+        wos_api_key: str | None = None,
         num_workers: int = 1,
         since: dt.date | None = None,
         until: dt.date | None = None,
@@ -165,6 +168,8 @@ class SearchRunner(DiscoveryRunner):
             Contact email for polite-pool access (CrossRef, OpenAlex).
         semantic_scholar_api_key : str | None
             Semantic Scholar API key.
+        wos_api_key : str | None
+            Clarivate Web of Science API key.
         num_workers : int
             Number of parallel workers.  Defaults to ``1``.
         since : dt.date | None
@@ -198,6 +203,7 @@ class SearchRunner(DiscoveryRunner):
             openalex_api_key=openalex_api_key,
             email=email,
             semantic_scholar_api_key=semantic_scholar_api_key,
+            wos_api_key=wos_api_key,
             proxy=proxy,
             ssl_verify=ssl_verify,
             enrichment_databases=enrichment_databases,
@@ -225,6 +231,7 @@ class SearchRunner(DiscoveryRunner):
             openalex_api_key=openalex_api_key,
             email=email,
             semantic_scholar_api_key=semantic_scholar_api_key,
+            wos_api_key=wos_api_key,
         )
 
     # ------------------------------------------------------------------
@@ -360,6 +367,7 @@ class SearchRunner(DiscoveryRunner):
         openalex_api_key: str | None,
         email: str | None,
         semantic_scholar_api_key: str | None,
+        wos_api_key: str | None,
     ) -> tuple[list[SearchConnectorBase], list[str]]:
         """Instantiate the requested searchers.
 
@@ -379,6 +387,8 @@ class SearchRunner(DiscoveryRunner):
             Polite-pool email.
         semantic_scholar_api_key : str | None
             Semantic Scholar API key.
+        wos_api_key : str | None
+            Web of Science API key.
 
         Returns
         -------
@@ -400,6 +410,7 @@ class SearchRunner(DiscoveryRunner):
             Database.PUBMED: {"api_key": pubmed_api_key},
             Database.SCOPUS: {"api_key": scopus_api_key},
             Database.SEMANTIC_SCHOLAR: {"api_key": semantic_scholar_api_key},
+            Database.WOS: {"api_key": wos_api_key},
         }
 
         valid_values = {db.value for db in SEARCH_REGISTRY}

@@ -1,0 +1,102 @@
+[
+  {
+    "key": "10.1145/3529755",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892356400017&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.1145/3529755",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000892356400017?&SID=USW2EC0B3569Jqx6x2j2wTqpi5Nde",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  },
+  {
+    "key": "10.1145/3530811",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893245700001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.1145/3530811",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000893245700001?&SID=USW2EC0FCEIVv0GmgeWwNriGJ6DyP",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  },
+  {
+    "key": "10.1145/3482853",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886932500015&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.1145/3482853",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000886932500015?&SID=USW2EC0FCEAtQI1d7nSRnzftzS3vs",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  },
+  {
+    "key": "10.26599/TST.2021.9010095",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000862392800004&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.26599/TST.2021.9010095",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000862392800004?&SID=USW2EC0E0Czivck0jBdOkXRivYrK1",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  },
+  {
+    "key": "10.1145/3490238",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000778458900012&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.1145/3490238",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000778458900012?&SID=USW2EC0DACW1i8VVThxRL6VVo9FiQ",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  },
+  {
+    "key": "10.1109/TPDS.2022.3219819",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892922900002&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.1109/TPDS.2022.3219819",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000892922900002?&SID=USW2EC0F79IRJrd0d40I4EgD5kj4o",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  },
+  {
+    "key": "10.32604/cmc.2023.030262",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890984200016&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.32604/cmc.2023.030262",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000890984200016?&SID=USW2EC0B0ASEzcmYF8exaNt7Qs4Of",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  },
+  {
+    "key": "10.1007/978-3-031-16078-3_49",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890320100049&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.1007/978-3-031-16078-3_49",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000890320100049?&SID=USW2EC0C3C2qzBC9hatWLb9WmRTIY",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  },
+  {
+    "key": "10.1007/978-3-031-16072-1_28",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890312800028&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.1007/978-3-031-16072-1_28",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000890312800028?&SID=USW2EC0E0CVCudXeAawxwS4xonwBe",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  },
+  {
+    "key": "10.3934/mbe.2023067",
+    "url": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886663600008&DestLinkType=FullRecord&DestApp=WOS_CPL",
+    "doi": "10.3934/mbe.2023067",
+    "final_url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000886663600008?&SID=USW2EC0E0ClGXhtl2eJtJdjiiDCIj",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "size_bytes": 14079,
+    "error": null
+  }
+]

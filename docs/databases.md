@@ -1,8 +1,8 @@
 # Databases
 
-One of the biggest advantages of Findpapers is that it connects you to **hundreds of millions of academic papers** from six major databases through a single query. Instead of visiting each portal separately and learning its query syntax, you write one search expression and Findpapers handles the rest - translating your query, running parallel searches, and merging all results with automatic deduplication.
+One of the biggest advantages of Findpapers is that it connects you to **hundreds of millions of academic papers** from seven major databases through a single query. Instead of visiting each portal separately and learning its query syntax, you write one search expression and Findpapers handles the rest - translating your query, running parallel searches, and merging all results with automatic deduplication.
 
-Findpapers searches for papers through **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, and **Semantic Scholar** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science. In addition, **CrossRef** is used internally for DOI-based metadata enrichment and backward snowballing.
+Findpapers searches for papers through **arXiv**, **IEEE Xplore**, **OpenAlex**, **PubMed**, **Scopus**, **Semantic Scholar**, and **Web of Science** - together covering virtually every peer-reviewed paper, preprint, and conference proceeding published across all fields of science. In addition, **CrossRef** is used internally for DOI-based metadata enrichment and backward snowballing.
 
 ## Overview
 
@@ -16,9 +16,10 @@ The table below shows a quick databases comparison.
 | PubMed | 40M+ [⁴](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Yes | No | 3 req/s (10 with key) |
 | Scopus | 100M+ [⁵](https://www.elsevier.com/products/scopus) | Required | Yes | No | 20k req/week |
 | Semantic Scholar | 214M+ [⁶](https://www.semanticscholar.org/product/api) | Optional | Yes | Yes (both) | ~1 req/s with key |
-| CrossRef | 180M+ [⁷](https://www.crossref.org/about) | Not required | No | Backward only | ~10 req/s |
+| Web of Science | 180M+ [⁷](https://clarivate.com/webofsciencegroup/solutions/web-of-science/) | Required | Yes | No | 1 req/s (Free Trial) / 5 req/s (Institutional) |
+| CrossRef | 180M+ [⁸](https://www.crossref.org/about) | Not required | No | Backward only | ~10 req/s |
 
-> **Every API key from the databases listed above can be obtained at no cost** - just create an account on each provider’s website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). See the **Databases** section for more details on how to get these API keys, and [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
+> **Every API key from the databases listed above can be obtained at no cost** - just create an account on each provider's website. We strongly recommend getting all of them before using Findpapers, as they unlock additional databases (IEEE, Scopus, Web of Science) and dramatically improve rate limits and reliability on the others (OpenAlex, PubMed, Semantic Scholar). See the **Databases** section for more details on how to get these API keys, and [Configuration](https://github.com/jonatasgrosman/findpapers/blob/main/docs/configuration.md) for how to set them up.
 
 ---
 
@@ -33,7 +34,7 @@ result = engine.search(
 )
 ```
 
-Valid database identifiers: `arxiv`, `ieee`, `openalex`, `pubmed`, `scopus`, `semantic_scholar`.
+Valid database identifiers: `arxiv`, `ieee`, `openalex`, `pubmed`, `scopus`, `semantic_scholar`, `wos`.
 
 ## Rate Limiting
 
@@ -203,6 +204,34 @@ Semantic Scholar is a free, AI-powered academic search engine developed by the A
 - When exact publication date is unavailable, falls back to year only (January 1)
 - Only `tiabs[]` (title + abstract) filter is supported — `ti[]`, `abs[]`, `au[]`, `aff[]`, `src[]`, and `key[]` are all silently resolved to title + abstract
 - `?` wildcard not supported; `*` is allowed
+
+---
+
+### Web of Science
+
+- **URL:** https://www.webofscience.com
+- **API:** Clarivate Web of Science Starter API v1
+- **Authentication:** API key **required** - free, just register
+- **Estimated papers:** 240 million+ ([source](https://clarivate.libguides.com/librarianresources/coverage))
+- **Coverage:** Multidisciplinary index of peer-reviewed literature across all scientific disciplines, with authoritative citation data
+
+Web of Science is one of the two largest curated indexes of peer-reviewed literature in the world (alongside Scopus). Maintained by Clarivate, it has been indexing scientific literature since 1900 and is considered the gold standard for citation-based research evaluation. It is especially valued by research institutions and funding agencies for its high curation standards and its citation data (including the Journal Impact Factor). Its multidisciplinary coverage spans the sciences, social sciences, arts, and humanities.
+
+> **Note:** Register at the [Clarivate Developer Portal](https://developer.clarivate.com/apis/wos-starter) to obtain a free API key. Free Trial keys are limited to 50 requests per day and do not return citation counts. Institutional members have access to higher quotas (5,000+ req/day) and citation data. Use your institutional email when registering to ensure you get the correct plan.
+
+#### Features
+
+- Extracts title, authors, publication date, DOI, landing-page URL, keywords (author-provided), citation count (institutional plans only), source (with ISSN, eISSN, ISBN), paper type, and page range
+- Supports boolean queries with `*` and `?` wildcards (requires at least 3 characters before `*`)
+- Supports DOI lookup and Web of Science URL lookup
+
+#### Limitations
+
+- **Abstracts are not returned** by the Starter API — the `abstract` field will remain empty unless filled by enrichment (e.g. CrossRef)
+- **Citation counts require an institutional-plan key** — free trial keys always receive no citation data
+- **Not usable for snowballing** — the Starter API does not expose reference or citing-paper lists
+- No author affiliations, language, open access status, retraction status, funder, or PDF URL data
+- Only `ti[]`, `au[]`, `src[]`, `aff[]`, and `tiabskey[]` filters are supported. The `abs[]`, `key[]`, and `tiabs[]` filters are **not available** in the WoS Starter API (there is no abstract-only or keyword-only field tag)
 
 ---
 

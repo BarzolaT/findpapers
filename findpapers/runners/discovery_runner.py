@@ -46,6 +46,8 @@ class DiscoveryRunner:
         Contact email for polite-pool access during enrichment.
     semantic_scholar_api_key : str | None
         Semantic Scholar API key for enrichment.
+    wos_api_key : str | None
+        Clarivate Web of Science API key for enrichment.
     proxy : str | None
         Optional HTTP/HTTPS proxy URL for enrichment requests.
     ssl_verify : bool
@@ -72,6 +74,7 @@ class DiscoveryRunner:
         openalex_api_key: str | None = None,
         email: str | None = None,
         semantic_scholar_api_key: str | None = None,
+        wos_api_key: str | None = None,
         proxy: str | None = None,
         ssl_verify: bool = True,
         enrichment_databases: list[str] | None = DEFAULT_ENRICHMENT_DATABASES,
@@ -87,6 +90,7 @@ class DiscoveryRunner:
         self._openalex_api_key = openalex_api_key
         self._email = email
         self._semantic_scholar_api_key = semantic_scholar_api_key
+        self._wos_api_key = wos_api_key
         self._proxy = proxy
         self._ssl_verify = ssl_verify
 
@@ -186,6 +190,7 @@ class DiscoveryRunner:
         openalex_api_key = self._openalex_api_key
         email = self._email
         semantic_scholar_api_key = self._semantic_scholar_api_key
+        wos_api_key = self._wos_api_key
         proxy = self._proxy
         ssl_verify = self._ssl_verify
 
@@ -211,6 +216,7 @@ class DiscoveryRunner:
                 pubmed_api_key=pubmed_api_key,
                 openalex_api_key=openalex_api_key,
                 semantic_scholar_api_key=semantic_scholar_api_key,
+                wos_api_key=wos_api_key,
                 timeout=10.0,
                 proxy=proxy,
                 ssl_verify=ssl_verify,

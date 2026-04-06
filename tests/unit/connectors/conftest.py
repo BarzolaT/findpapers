@@ -134,6 +134,12 @@ def semantic_scholar_sample_json():
 
 
 @pytest.fixture
+def wos_sample_json():
+    """Read WoS sample JSON response."""
+    return json.loads((DATA_DIR / "wos" / "sample_response.json").read_text())
+
+
+@pytest.fixture
 def ss_citation_samples():
     """Read Semantic Scholar citation API responses (keyed by DOI)."""
     return json.loads(

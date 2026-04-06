@@ -46,6 +46,7 @@ from findpapers.connectors.scopus import ScopusConnector
 from findpapers.connectors.search_base import SearchConnectorBase
 from findpapers.connectors.semantic_scholar import SemanticScholarConnector
 from findpapers.connectors.url_lookup_base import URLLookupConnectorBase
+from findpapers.connectors.wos import WosConnector
 from findpapers.core.paper import Database
 
 # Central mapping of Database identifiers to their search connector classes.
@@ -56,6 +57,7 @@ SEARCH_REGISTRY: dict[Database, type[SearchConnectorBase]] = {
     Database.PUBMED: PubmedConnector,
     Database.SCOPUS: ScopusConnector,
     Database.SEMANTIC_SCHOLAR: SemanticScholarConnector,
+    Database.WOS: WosConnector,
 }
 
 # Mapping of Database identifiers to DOI-lookup connector classes.
@@ -68,6 +70,7 @@ DOI_LOOKUP_REGISTRY: dict[Database, type[DOILookupConnectorBase]] = {
     Database.PUBMED: PubmedConnector,
     Database.SCOPUS: ScopusConnector,
     Database.SEMANTIC_SCHOLAR: SemanticScholarConnector,
+    Database.WOS: WosConnector,
 }
 
 # Mapping of Database identifiers to URL-lookup connector classes.
@@ -78,6 +81,7 @@ URL_LOOKUP_REGISTRY: dict[Database, type[URLLookupConnectorBase]] = {
     Database.OPENALEX: OpenAlexConnector,
     Database.PUBMED: PubmedConnector,
     Database.SEMANTIC_SCHOLAR: SemanticScholarConnector,
+    Database.WOS: WosConnector,
 }
 
 # Mapping of Database identifiers to their citation connector classes.

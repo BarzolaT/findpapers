@@ -29,8 +29,8 @@ class TestDatabase:
         assert Database.SEMANTIC_SCHOLAR == "semantic_scholar"
 
     def test_all_members_present(self) -> None:
-        """Seven databases are defined."""
-        assert len(Database) == 7
+        """Eight databases are defined."""
+        assert len(Database) == 8
 
 
 # ---------------------------------------------------------------------------

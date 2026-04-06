@@ -82,6 +82,8 @@ class SnowballRunner(DiscoveryRunner):
         Elsevier / Scopus API key used during the enrichment phase.
     pubmed_api_key : str | None
         NCBI PubMed API key used during the enrichment phase.
+    wos_api_key : str | None
+        Clarivate Web of Science API key used during the enrichment phase.
     enrichment_databases : list[str] | None
         Databases used to enrich graph nodes after snowballing completes.
         ``None`` (default) uses ``crossref`` and ``web_scraping``; pass
@@ -110,6 +112,7 @@ class SnowballRunner(DiscoveryRunner):
         ieee_api_key: str | None = None,
         scopus_api_key: str | None = None,
         pubmed_api_key: str | None = None,
+        wos_api_key: str | None = None,
         enrichment_databases: list[str] | None = DEFAULT_ENRICHMENT_DATABASES,
         proxy: str | None = None,
         ssl_verify: bool = True,
@@ -144,6 +147,8 @@ class SnowballRunner(DiscoveryRunner):
             Scopus API key for enrichment.
         pubmed_api_key : str | None
             PubMed API key for enrichment.
+        wos_api_key : str | None
+            Clarivate Web of Science API key for enrichment.
         enrichment_databases : list[str] | None
             Databases for post-snowball enrichment.  Defaults to
             ``DEFAULT_ENRICHMENT_DATABASES`` (``["crossref", "web_scraping"]``).
@@ -175,6 +180,7 @@ class SnowballRunner(DiscoveryRunner):
             openalex_api_key=openalex_api_key,
             email=email,
             semantic_scholar_api_key=semantic_scholar_api_key,
+            wos_api_key=wos_api_key,
             proxy=proxy,
             ssl_verify=ssl_verify,
             enrichment_databases=enrichment_databases,

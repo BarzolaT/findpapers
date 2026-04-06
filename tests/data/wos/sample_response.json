@@ -1,0 +1,3755 @@
+{
+  "metadata": {
+    "total": 7405,
+    "page": 1,
+    "limit": 50
+  },
+  "hits": [
+    {
+      "uid": "WOS:000892356400017",
+      "title": "On the Explainability of Natural Language Processing Deep Models",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "ACM COMPUTING SURVEYS",
+        "publishYear": 2023,
+        "publishMonth": "JUN",
+        "volume": "55",
+        "issue": "5",
+        "articleNumber": "103",
+        "pages": {
+          "count": 31
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "El Zini, Julia",
+            "wosStandard": "El Zini, J",
+            "researcherId": "GXN-1342-2022"
+          },
+          {
+            "displayName": "Awad, Mariette",
+            "wosStandard": "Awad, M",
+            "researcherId": "Z-1255-2019"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892356400017&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892356400017&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892356400017&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892356400017&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 77
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1145/3529755",
+        "issn": "0360-0300",
+        "eissn": "1557-7341"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "ExAI",
+          "NLP",
+          "language models",
+          "transformers",
+          "neural machine translation",
+          "transparent embedding models",
+          "explaining decisions"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000893245700001",
+      "title": "Efficient Transformers: A Survey",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "ACM COMPUTING SURVEYS",
+        "publishYear": 2023,
+        "publishMonth": "JUN",
+        "volume": "55",
+        "issue": "6",
+        "articleNumber": "109",
+        "pages": {
+          "count": 28
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Tay, Yi",
+            "wosStandard": "Tay, Y",
+            "researcherId": "IUG-0187-2023"
+          },
+          {
+            "displayName": "Dehghani, Mostafa",
+            "wosStandard": "Dehghani, M",
+            "researcherId": "OVI-8037-2025"
+          },
+          {
+            "displayName": "Bahri, Dara",
+            "wosStandard": "Bahri, D",
+            "researcherId": "CEU-7756-2022"
+          },
+          {
+            "displayName": "Metzler, Donald",
+            "wosStandard": "Metzler, D",
+            "researcherId": "CHL-8913-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893245700001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893245700001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893245700001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893245700001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 582
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1145/3530811",
+        "issn": "0360-0300",
+        "eissn": "1557-7341"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Transformers",
+          "attention",
+          "deep learning",
+          "neural networks"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000886932500015",
+      "title": "A Brief Overview of Universal Sentence Representation Methods: A Linguistic View",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "ACM COMPUTING SURVEYS",
+        "publishYear": 2023,
+        "publishMonth": "APR",
+        "volume": "55",
+        "issue": "3",
+        "articleNumber": "56",
+        "pages": {
+          "count": 42
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Li, Ruiqi",
+            "wosStandard": "Li, RQ",
+            "researcherId": "HNK-6037-2023"
+          },
+          {
+            "displayName": "Zhao, Xiang",
+            "wosStandard": "Zhao, X",
+            "researcherId": "EIW-6915-2022"
+          },
+          {
+            "displayName": "Moens, Marie-Francine",
+            "wosStandard": "Moens, MF",
+            "researcherId": "B-8378-2014"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886932500015&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886932500015&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886932500015&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886932500015&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 14
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1145/3482853",
+        "issn": "0360-0300",
+        "eissn": "1557-7341"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Sentence embedding",
+          "universal representation",
+          "deep learning",
+          "representation learning"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000862392800004",
+      "title": "Fusing Syntactic Structure Information and Lexical Semantic Information for End-to-End Aspect-Based Sentiment Analysis",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "TSINGHUA SCIENCE AND TECHNOLOGY",
+        "publishYear": 2023,
+        "publishMonth": "APR",
+        "volume": "28",
+        "issue": "2",
+        "pages": {
+          "range": "230-243",
+          "begin": "230",
+          "end": "243",
+          "count": 14
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Bie, Yong",
+            "wosStandard": "Bie, Y",
+            "researcherId": "GPS-7082-2022"
+          },
+          {
+            "displayName": "Yang, Yan",
+            "wosStandard": "Yang, Y",
+            "researcherId": "DTG-6382-2022"
+          },
+          {
+            "displayName": "Zhang, Yiling",
+            "wosStandard": "Zhang, YL",
+            "researcherId": "GXI-0695-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000862392800004&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000862392800004&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000862392800004&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000862392800004&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 14
+        }
+      ],
+      "identifiers": {
+        "doi": "10.26599/TST.2021.9010095",
+        "issn": "1007-0214",
+        "eissn": "1878-7606"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Sentiment analysis",
+          "Analytical models",
+          "Fuses",
+          "Semantics",
+          "Pipelines",
+          "Syntactics",
+          "Decoding",
+          "deep learning",
+          "natural language processing",
+          "aspect-based sentiment analysis",
+          "graph convolutional"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000778458900012",
+      "title": "Biomedical Question Answering: A Survey of Approaches and Challenges",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "ACM COMPUTING SURVEYS",
+        "publishYear": 2023,
+        "publishMonth": "MAR",
+        "volume": "55",
+        "issue": "2",
+        "articleNumber": "35",
+        "pages": {
+          "count": 36
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Jin, Qiao",
+            "wosStandard": "Jin, Q",
+            "researcherId": "KBH-7854-2024"
+          },
+          {
+            "displayName": "Yuan, Zheng",
+            "wosStandard": "Yuan, Z",
+            "researcherId": "GOP-2223-2022"
+          },
+          {
+            "displayName": "Xiong, Guangzhi",
+            "wosStandard": "Xiong, GZ",
+            "researcherId": "EIS-7871-2022"
+          },
+          {
+            "displayName": "Yu, Qianlan",
+            "wosStandard": "Yu, QL",
+            "researcherId": "IIP-5569-2023"
+          },
+          {
+            "displayName": "Ying, Huaiyuan",
+            "wosStandard": "Ying, HY",
+            "researcherId": "GIM-4681-2022"
+          },
+          {
+            "displayName": "Tan, Chuanqi",
+            "wosStandard": "Tan, CQ",
+            "researcherId": "FZY-8338-2022"
+          },
+          {
+            "displayName": "Chen, Mosha",
+            "wosStandard": "Chen, MS",
+            "researcherId": "FZG-0091-2022"
+          },
+          {
+            "displayName": "Huang, Songfang",
+            "wosStandard": "Huang, SF",
+            "researcherId": "CUG-6492-2022"
+          },
+          {
+            "displayName": "Liu, Xiaozhong",
+            "wosStandard": "Liu, XZ",
+            "researcherId": "GAH-8658-2022"
+          },
+          {
+            "displayName": "Yu, Sheng",
+            "wosStandard": "Yu, S",
+            "researcherId": "DUA-2255-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000778458900012&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000778458900012&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000778458900012&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000778458900012&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 87
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1145/3490238",
+        "issn": "0360-0300",
+        "eissn": "1557-7341"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Question answering",
+          "natural language processing",
+          "machine learning",
+          "biomedicine"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000892922900002",
+      "title": "Parallel Training of Pre-Trained Models via Chunk-Based Dynamic Memory Management",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "IEEE TRANSACTIONS ON PARALLEL AND DISTRIBUTED SYSTEMS",
+        "publishYear": 2023,
+        "publishMonth": "JAN 1",
+        "volume": "34",
+        "issue": "1",
+        "pages": {
+          "range": "304-315",
+          "begin": "304",
+          "end": "315",
+          "count": 12
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Fang, Jiarui",
+            "wosStandard": "Fang, JR",
+            "researcherId": "ITV-5081-2023"
+          },
+          {
+            "displayName": "Zhu, Zilin",
+            "wosStandard": "Zhu, ZL",
+            "researcherId": "DSI-0232-2022"
+          },
+          {
+            "displayName": "Li, Shenggui",
+            "wosStandard": "Li, SG",
+            "researcherId": "GSF-6059-2022"
+          },
+          {
+            "displayName": "Su, Hui",
+            "wosStandard": "Su, H",
+            "researcherId": "IOV-9694-2023"
+          },
+          {
+            "displayName": "Yu, Yang",
+            "wosStandard": "Yu, Y",
+            "researcherId": "LRL-7288-2024"
+          },
+          {
+            "displayName": "Zhou, Jie",
+            "wosStandard": "Zhou, J",
+            "researcherId": "HHV-6485-2022"
+          },
+          {
+            "displayName": "You, Yang",
+            "wosStandard": "You, Y",
+            "researcherId": "MSN-7828-2025"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892922900002&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892922900002&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892922900002&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000892922900002&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 23
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1109/TPDS.2022.3219819",
+        "issn": "1045-9219",
+        "eissn": "1558-2183"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Deep learning",
+          "parallel computing",
+          "distributed system",
+          "NLP"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000890984200016",
+      "title": "Sentiment Analysis and Classification Using Deep Semantic Information and Contextual Knowledge",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "CMC-COMPUTERS MATERIALS & CONTINUA",
+        "publishYear": 2023,
+        "volume": "74",
+        "issue": "1",
+        "pages": {
+          "range": "671-691",
+          "begin": "671",
+          "end": "691",
+          "count": 21
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Al-Absi, Ahmed Abdulhakim",
+            "wosStandard": "Al-Absi, AA",
+            "researcherId": "FXC-4034-2022"
+          },
+          {
+            "displayName": "Kang, Dae-Ki",
+            "wosStandard": "Kang, DK",
+            "researcherId": "AAL-2185-2020"
+          },
+          {
+            "displayName": "Al-Absi, Mohammed Abdulhakim",
+            "wosStandard": "Al-Absi, MA",
+            "researcherId": "AAC-7922-2019"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890984200016&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890984200016&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890984200016&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890984200016&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 6
+        }
+      ],
+      "identifiers": {
+        "doi": "10.32604/cmc.2023.030262",
+        "issn": "1546-2218",
+        "eissn": "1546-2226"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Sentiment analysis",
+          "aspect-sa",
+          "deep learning",
+          "DSCNet"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000890320100049",
+      "title": "A Deep Learning Approach to UML Class Diagrams Discovery from Textual Specifications of Software Systems",
+      "types": [
+        "Meeting"
+      ],
+      "sourceTypes": [
+        "Proceedings Paper"
+      ],
+      "source": {
+        "sourceTitle": "INTELLIGENT SYSTEMS AND APPLICATIONS, VOL 2",
+        "publishYear": 2023,
+        "volume": "543",
+        "pages": {
+          "range": "706-725",
+          "begin": "706",
+          "end": "725",
+          "count": 20
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Rigou, Yves",
+            "wosStandard": "Rigou, Y",
+            "researcherId": "FSF-7817-2022"
+          },
+          {
+            "displayName": "Khriss, Ismail",
+            "wosStandard": "Khriss, I",
+            "researcherId": "FHG-5864-2022"
+          }
+        ],
+        "bookEditors": [
+          {
+            "displayName": "Arai, K"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890320100049&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890320100049&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890320100049&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 0
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-3-031-16078-3_49",
+        "issn": "2367-3370",
+        "eissn": "2367-3389",
+        "isbn": "978-3-031-16077-6",
+        "eisbn": "978-3-031-16078-3"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Software engineering",
+          "Specification",
+          "UML class diagram",
+          "Deep learning",
+          "Natural language processing",
+          "Entity extraction",
+          "Coreference resolution",
+          "Relation classification"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000890312800028",
+      "title": "HiSAT: Hierarchical Framework for Sentiment Analysis on Twitter Data",
+      "types": [
+        "Meeting"
+      ],
+      "sourceTypes": [
+        "Proceedings Paper"
+      ],
+      "source": {
+        "sourceTitle": "INTELLIGENT SYSTEMS AND APPLICATIONS, VOL 1",
+        "publishYear": 2023,
+        "volume": "542",
+        "pages": {
+          "range": "376-392",
+          "begin": "376",
+          "end": "392",
+          "count": 17
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Kommu, Amrutha",
+            "wosStandard": "Kommu, A",
+            "researcherId": "HHK-5458-2022"
+          },
+          {
+            "displayName": "Patel, Snehal",
+            "wosStandard": "Patel, S",
+            "researcherId": "FRX-6014-2022"
+          },
+          {
+            "displayName": "Derosa, Sebastian",
+            "wosStandard": "Derosa, S",
+            "researcherId": "HGJ-3857-2022"
+          },
+          {
+            "displayName": "Wang, Jiayin",
+            "wosStandard": "Wang, JY",
+            "researcherId": "PFF-5794-2025"
+          },
+          {
+            "displayName": "Varde, Aparna S.",
+            "wosStandard": "Varde, AS",
+            "researcherId": "GHM-2794-2022"
+          }
+        ],
+        "bookEditors": [
+          {
+            "displayName": "Arai, K"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890312800028&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890312800028&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890312800028&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000890312800028&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 1
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-3-031-16072-1_28",
+        "issn": "2367-3370",
+        "eissn": "2367-3389",
+        "isbn": "978-3-031-16071-4",
+        "eisbn": "978-3-031-16072-1"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Bayesian models",
+          "Knowledge discovery",
+          "Logistic Regression",
+          "NLP",
+          "Opinion mining",
+          "Random Forest",
+          "Social media",
+          "Text mining"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000886663600008",
+      "title": "Extractive text summarization model based on advantage actor-critic and graph matrix methodology",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "MATHEMATICAL BIOSCIENCES AND ENGINEERING",
+        "publishYear": 2023,
+        "volume": "20",
+        "issue": "1",
+        "pages": {
+          "range": "1488-1504",
+          "begin": "1488",
+          "end": "1504",
+          "count": 17
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Yang, Senqi",
+            "wosStandard": "Yang, SQ",
+            "researcherId": "HSW-2614-2023"
+          },
+          {
+            "displayName": "Duan, Xuliang",
+            "wosStandard": "Duan, XL",
+            "researcherId": "IVF-4346-2023"
+          },
+          {
+            "displayName": "Wang, Xi",
+            "wosStandard": "Wang, X",
+            "researcherId": "EDM-3770-2022"
+          },
+          {
+            "displayName": "Tang, Dezhao",
+            "wosStandard": "Tang, DZ",
+            "researcherId": "GRU-7772-2022"
+          },
+          {
+            "displayName": "Xiao, Zeyan",
+            "wosStandard": "Xiao, ZY",
+            "researcherId": "HDK-2042-2022"
+          },
+          {
+            "displayName": "Guo, Yan",
+            "wosStandard": "Guo, Y",
+            "researcherId": "FZH-8555-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886663600008&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886663600008&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886663600008&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000886663600008&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 2
+        }
+      ],
+      "identifiers": {
+        "doi": "10.3934/mbe.2023067",
+        "issn": "1547-1063",
+        "eissn": "1551-0018",
+        "pmid": "36650820"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "artificial intelligence",
+          "natural language processing",
+          "automatic summarization",
+          "deep reinforcement learning",
+          "extractive summarization model"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000867270000038",
+      "title": "Supervised Automatic Text Summarization of Konkani Texts Using Linear Regression-Based Feature Weighing and Language-Independent Features",
+      "types": [
+        "Meeting"
+      ],
+      "sourceTypes": [
+        "Proceedings Paper"
+      ],
+      "source": {
+        "sourceTitle": "INTERNATIONAL CONFERENCE ON INNOVATIVE COMPUTING AND COMMUNICATIONS, ICICC 2022, VOL 1",
+        "publishYear": 2023,
+        "volume": "473",
+        "pages": {
+          "range": "439-457",
+          "begin": "439",
+          "end": "457",
+          "count": 19
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "D'Silva, Jovi",
+            "wosStandard": "D'Silva, J",
+            "researcherId": "ABE-1931-2021"
+          },
+          {
+            "displayName": "Sharma, Uzzal",
+            "wosStandard": "Sharma, U",
+            "researcherId": "ABC-5044-2020"
+          }
+        ],
+        "bookEditors": [
+          {
+            "displayName": "Gupta, D"
+          },
+          {
+            "displayName": "Khanna, A"
+          },
+          {
+            "displayName": "Bhattacharyya, S"
+          },
+          {
+            "displayName": "Hassanien, AE"
+          },
+          {
+            "displayName": "Anand, S"
+          },
+          {
+            "displayName": "Jaiswal, A"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000867270000038&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000867270000038&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000867270000038&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 0
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-981-19-2821-5_38",
+        "issn": "2367-3370",
+        "eissn": "2367-3389",
+        "isbn": "978-981-19-2820-8",
+        "eisbn": "978-981-19-2821-5"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Supervised machine learning",
+          "Text summarization",
+          "Konkani",
+          "Regression",
+          "Extractive",
+          "Natural language processing",
+          "Low resource",
+          "Language-independent features"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000867270000041",
+      "title": "Natural Language-Based Naive Bayes Classifier Model for Sentence Classification",
+      "types": [
+        "Meeting"
+      ],
+      "sourceTypes": [
+        "Proceedings Paper"
+      ],
+      "source": {
+        "sourceTitle": "INTERNATIONAL CONFERENCE ON INNOVATIVE COMPUTING AND COMMUNICATIONS, ICICC 2022, VOL 1",
+        "publishYear": 2023,
+        "volume": "473",
+        "pages": {
+          "range": "499-508",
+          "begin": "499",
+          "end": "508",
+          "count": 10
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Yadav, Amita",
+            "wosStandard": "Yadav, A",
+            "researcherId": "MNC-4549-2025"
+          },
+          {
+            "displayName": "Rathee, Sonia",
+            "wosStandard": "Rathee, S",
+            "researcherId": "KDE-3905-2024"
+          },
+          {
+            "displayName": "Shalu",
+            "wosStandard": "Shalu",
+            "researcherId": "KAJ-1546-2024"
+          },
+          {
+            "displayName": "Zafar, Sherin",
+            "wosStandard": "Zafar, S",
+            "researcherId": "GQQ-9221-2022"
+          }
+        ],
+        "bookEditors": [
+          {
+            "displayName": "Gupta, D"
+          },
+          {
+            "displayName": "Khanna, A"
+          },
+          {
+            "displayName": "Bhattacharyya, S"
+          },
+          {
+            "displayName": "Hassanien, AE"
+          },
+          {
+            "displayName": "Anand, S"
+          },
+          {
+            "displayName": "Jaiswal, A"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000867270000041&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000867270000041&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000867270000041&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000867270000041&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 1
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-981-19-2821-5_41",
+        "issn": "2367-3370",
+        "eissn": "2367-3389",
+        "isbn": "978-981-19-2820-8",
+        "eisbn": "978-981-19-2821-5"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Text classification",
+          "Naive Bayes",
+          "Machine learning algorithm",
+          "Sentence detection"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000871789600056",
+      "title": "A Self-supervised Classification Algorithm for Sensor Fault Identification for Robust Structural Health Monitoring",
+      "types": [
+        "Meeting"
+      ],
+      "sourceTypes": [
+        "Proceedings Paper"
+      ],
+      "source": {
+        "sourceTitle": "EUROPEAN WORKSHOP ON STRUCTURAL HEALTH MONITORING (EWSHM 2022), VOL 1",
+        "publishYear": 2023,
+        "volume": "253",
+        "pages": {
+          "range": "564-574",
+          "begin": "564",
+          "end": "574",
+          "count": 11
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Oncescu, Andreea-Maria",
+            "wosStandard": "Oncescu, AM",
+            "researcherId": "GCD-7585-2022"
+          },
+          {
+            "displayName": "Cicirello, Alice",
+            "wosStandard": "Cicirello, A",
+            "researcherId": "EPD-2624-2022"
+          }
+        ],
+        "bookEditors": [
+          {
+            "displayName": "Rizzo, P"
+          },
+          {
+            "displayName": "Milazzo, A"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000871789600056&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000871789600056&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000871789600056&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000871789600056&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 6
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-3-031-07254-3_57",
+        "issn": "2366-2557",
+        "eissn": "2366-2565",
+        "isbn": "978-3-031-07253-6",
+        "eisbn": "978-3-031-07254-3"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Sensor failures",
+          "Monitoring device failure",
+          "Self-supervised machine learning",
+          "Natural language processing",
+          "SHM"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000871059600019",
+      "title": "Cyberbullying-related Hate Speech Detection Using Shallow-to-deep Learning",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "CMC-COMPUTERS MATERIALS & CONTINUA",
+        "publishYear": 2023,
+        "volume": "74",
+        "issue": "1",
+        "pages": {
+          "range": "2115-2131",
+          "begin": "2115",
+          "end": "2131",
+          "count": 17
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Sultan, Daniyar",
+            "wosStandard": "Sultan, D",
+            "researcherId": "DXS-4470-2022"
+          },
+          {
+            "displayName": "Toktarova, Aigerim",
+            "wosStandard": "Toktarova, A",
+            "researcherId": "JMP-6424-2023"
+          },
+          {
+            "displayName": "Zhumadillayeva, Ainur",
+            "wosStandard": "Zhumadillayeva, A",
+            "researcherId": "AAQ-7182-2020"
+          },
+          {
+            "displayName": "Aldeshov, Sapargali",
+            "wosStandard": "Aldeshov, S",
+            "researcherId": "EKD-5863-2022"
+          },
+          {
+            "displayName": "Mussiraliyeva, Shynar",
+            "wosStandard": "Mussiraliyeva, S",
+            "researcherId": "ABA-9832-2021"
+          },
+          {
+            "displayName": "Beissenova, Gulbakhram",
+            "wosStandard": "Beissenova, G",
+            "researcherId": "ELR-6000-2022"
+          },
+          {
+            "displayName": "Tursynbayev, Abay",
+            "wosStandard": "Tursynbayev, A",
+            "researcherId": "GYX-7145-2022"
+          },
+          {
+            "displayName": "Baenova, Gulmira",
+            "wosStandard": "Baenova, G",
+            "researcherId": "EKA-6880-2022"
+          },
+          {
+            "displayName": "Imanbayeva, Aigul",
+            "wosStandard": "Imanbayeva, A",
+            "researcherId": "GYV-9548-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000871059600019&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000871059600019&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000871059600019&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000871059600019&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 18
+        }
+      ],
+      "identifiers": {
+        "doi": "10.32604/cmc.2023.032993",
+        "issn": "1546-2218",
+        "eissn": "1546-2226"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Cyberbullying",
+          "machine learning",
+          "deep learning",
+          "classification",
+          "NLP"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000874650100006",
+      "title": "A Study of BERT-Based Classification Performance of Text-Based Health Counseling Data",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "CMES-COMPUTER MODELING IN ENGINEERING & SCIENCES",
+        "publishYear": 2023,
+        "volume": "135",
+        "issue": "1",
+        "pages": {
+          "range": "795-808",
+          "begin": "795",
+          "end": "808",
+          "count": 14
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Sung, Yeol Woo",
+            "wosStandard": "Sung, YW",
+            "researcherId": "ECD-8316-2022"
+          },
+          {
+            "displayName": "Park, Dae Seung",
+            "wosStandard": "Park, DS",
+            "researcherId": "DLY-5855-2022"
+          },
+          {
+            "displayName": "Kim, Cheong Ghil",
+            "wosStandard": "Kim, CG",
+            "researcherId": "DTC-8204-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000874650100006&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000874650100006&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000874650100006&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000874650100006&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 7
+        }
+      ],
+      "identifiers": {
+        "doi": "10.32604/cmes.2022.022465",
+        "issn": "1526-1492",
+        "eissn": "1526-1506"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "BERT",
+          "NLP",
+          "deep learning",
+          "healthcare",
+          "machine learning"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000866386000023",
+      "title": "Design and Development of a Digital Preservation Voice Enabled Application for Cultural Heritage Towards Fishing in Vernacular Language",
+      "types": [
+        "Meeting"
+      ],
+      "sourceTypes": [
+        "Proceedings Paper"
+      ],
+      "source": {
+        "sourceTitle": "PERVASIVE COMPUTING AND SOCIAL NETWORKING, ICPCSN 2022",
+        "publishYear": 2023,
+        "volume": "475",
+        "pages": {
+          "range": "295-308",
+          "begin": "295",
+          "end": "308",
+          "count": 14
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Vadamodula, Prasad",
+            "wosStandard": "Vadamodula, P",
+            "researcherId": "ITU-6358-2023"
+          },
+          {
+            "displayName": "Cristin, R.",
+            "wosStandard": "Cristin, R",
+            "researcherId": "EPW-4673-2022"
+          },
+          {
+            "displayName": "Daniya, T.",
+            "wosStandard": "Daniya, T",
+            "researcherId": "AAT-3599-2021"
+          }
+        ],
+        "bookEditors": [
+          {
+            "displayName": "Ranganathan, G"
+          },
+          {
+            "displayName": "Bestak, R"
+          },
+          {
+            "displayName": "Fernando, X"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866386000023&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866386000023&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866386000023&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 0
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-981-19-2840-6_23",
+        "issn": "2367-3370",
+        "eissn": "2367-3389",
+        "isbn": "978-981-19-2839-0",
+        "eisbn": "978-981-19-2840-6"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Heritage",
+          "Culture",
+          "Fish farming",
+          "Natural language processing",
+          "Deep learning",
+          "Synthesizers",
+          "Coders and encoders"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000866386000035",
+      "title": "Evaluating an Automated Analysis Using Machine Learning and Natural Language Processing Approaches to Classify Computer Science Students' Reflective Writing",
+      "types": [
+        "Meeting"
+      ],
+      "sourceTypes": [
+        "Proceedings Paper"
+      ],
+      "source": {
+        "sourceTitle": "PERVASIVE COMPUTING AND SOCIAL NETWORKING, ICPCSN 2022",
+        "publishYear": 2023,
+        "volume": "475",
+        "pages": {
+          "range": "463-477",
+          "begin": "463",
+          "end": "477",
+          "count": 15
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Alrashidi, Huda",
+            "wosStandard": "Alrashidi, H",
+            "researcherId": "HSG-2825-2023"
+          },
+          {
+            "displayName": "Almujally, Nouf",
+            "wosStandard": "Almujally, N",
+            "researcherId": "HJI-8835-2023"
+          },
+          {
+            "displayName": "Kadhum, Methaq",
+            "wosStandard": "Kadhum, M",
+            "researcherId": "CYW-1373-2022"
+          },
+          {
+            "displayName": "Ullmann, Thomas Daniel",
+            "wosStandard": "Ullmann, TD",
+            "researcherId": "OTG-7138-2025"
+          },
+          {
+            "displayName": "Joy, Mike",
+            "wosStandard": "Joy, M",
+            "researcherId": "D-2164-2011"
+          }
+        ],
+        "bookEditors": [
+          {
+            "displayName": "Ranganathan, G"
+          },
+          {
+            "displayName": "Bestak, R"
+          },
+          {
+            "displayName": "Fernando, X"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866386000035&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866386000035&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866386000035&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866386000035&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 1
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-981-19-2840-6_36",
+        "issn": "2367-3370",
+        "eissn": "2367-3389",
+        "isbn": "978-981-19-2839-0",
+        "eisbn": "978-981-19-2840-6"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Reflection assessment",
+          "Machine learning",
+          "Natural language processing",
+          "Reflective writing",
+          "Refection",
+          "Computer science education"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000866533700050",
+      "title": "Detection of Fake News Using Clustering Algorithms",
+      "types": [
+        "Meeting"
+      ],
+      "sourceTypes": [
+        "Proceedings Paper"
+      ],
+      "source": {
+        "sourceTitle": "SOFT COMPUTING FOR SECURITY APPLICATIONS, ICSCS 2022",
+        "publishYear": 2023,
+        "volume": "1428",
+        "pages": {
+          "range": "655-664",
+          "begin": "655",
+          "end": "664",
+          "count": 10
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Lavanya, K.",
+            "wosStandard": "Lavanya, K",
+            "researcherId": "IVG-2641-2023"
+          },
+          {
+            "displayName": "Yasaswini, L.",
+            "wosStandard": "Yasaswini, L",
+            "researcherId": "EIM-8410-2022"
+          },
+          {
+            "displayName": "Anusha, Ch. Naga",
+            "wosStandard": "Anusha, CN",
+            "researcherId": "EKI-7539-2022"
+          },
+          {
+            "displayName": "Vyshnavi, K.",
+            "wosStandard": "Vyshnavi, K",
+            "researcherId": "GGN-1617-2022"
+          },
+          {
+            "displayName": "Vyshnavi, M.",
+            "wosStandard": "Vyshnavi, M",
+            "researcherId": "EFH-1942-2022"
+          }
+        ],
+        "bookEditors": [
+          {
+            "displayName": "Ranganathan, G"
+          },
+          {
+            "displayName": "Fernando, X"
+          },
+          {
+            "displayName": "Piramuthu, S"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866533700050&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866533700050&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000866533700050&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 0
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-981-19-3590-9_51",
+        "issn": "2194-5357",
+        "eissn": "2194-5365",
+        "isbn": "978-981-19-3589-3",
+        "eisbn": "978-981-19-3590-9"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Machine learning",
+          "Random forest",
+          "Naive Bayes",
+          "Fake news detection"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000865803000027",
+      "title": "Regression Prediction of Performance Parameters in Ship Propulsion Equipment Simulation Model Based on One-Dimensional Convolutional Neural Network",
+      "types": [
+        "Meeting"
+      ],
+      "sourceTypes": [
+        "Proceedings Paper"
+      ],
+      "source": {
+        "sourceTitle": "PROCEEDINGS OF INCOME-VI AND TEPEN 2021: PERFORMANCE ENGINEERING AND MAINTENANCE ENGINEERING",
+        "publishYear": 2023,
+        "volume": "117",
+        "pages": {
+          "range": "315-327",
+          "begin": "315",
+          "end": "327",
+          "count": 13
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Huang, Liangyuan",
+            "wosStandard": "Huang, LY",
+            "researcherId": "GWG-8346-2022"
+          },
+          {
+            "displayName": "Shen, Guoji",
+            "wosStandard": "Shen, GJ",
+            "researcherId": "AAG-9613-2019"
+          }
+        ],
+        "bookEditors": [
+          {
+            "displayName": "Zhang, H"
+          },
+          {
+            "displayName": "Feng, G"
+          },
+          {
+            "displayName": "Wang, H"
+          },
+          {
+            "displayName": "Gu, F"
+          },
+          {
+            "displayName": "Sinha, JK"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000865803000027&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000865803000027&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000865803000027&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 0
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/978-3-030-99075-6_27",
+        "issn": "2211-0984",
+        "eissn": "2211-0992",
+        "isbn": "978-3-030-99074-9",
+        "eisbn": "978-3-030-99075-6"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "One-dimensional convolutional neural network",
+          "Ship propulsion equipment simulation model",
+          "Performance parameters",
+          "Regression prediction"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000860764400010",
+      "title": "Artificial Fish Swarm Optimization with Deep Learning Enabled Opinion Mining Approach",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "COMPUTER SYSTEMS SCIENCE AND ENGINEERING",
+        "publishYear": 2023,
+        "volume": "45",
+        "issue": "1",
+        "pages": {
+          "range": "737-751",
+          "begin": "737",
+          "end": "751",
+          "count": 15
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Alotaibi, Saud S.",
+            "wosStandard": "Alotaibi, SS",
+            "researcherId": "AAE-5224-2019"
+          },
+          {
+            "displayName": "Alabdulkreem, Eatedal",
+            "wosStandard": "Alabdulkreem, E",
+            "researcherId": "PJT-6286-2026"
+          },
+          {
+            "displayName": "Althahabi, Sami",
+            "wosStandard": "Althahabi, S",
+            "researcherId": "CCQ-9456-2022"
+          },
+          {
+            "displayName": "Hamza, Manar Ahmed",
+            "wosStandard": "Hamza, MA",
+            "researcherId": "AHC-1078-2022"
+          },
+          {
+            "displayName": "Rizwanullah, Mohammed",
+            "wosStandard": "Rizwanullah, M",
+            "researcherId": "AIB-6030-2022"
+          },
+          {
+            "displayName": "Zamani, Abu Sarwar",
+            "wosStandard": "Zamani, A",
+            "researcherId": "AAH-2196-2021"
+          },
+          {
+            "displayName": "Motwakel, Abdelwahed",
+            "wosStandard": "Motwakel, A",
+            "researcherId": "AFM-6103-2022"
+          },
+          {
+            "displayName": "Marzouk, Radwa",
+            "wosStandard": "Marzouk, R",
+            "researcherId": "GRR-4559-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000860764400010&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000860764400010&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000860764400010&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000860764400010&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 2
+        }
+      ],
+      "identifiers": {
+        "doi": "10.32604/csse.2023.030170",
+        "issn": "0267-6192"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Sentiment analysis",
+          "opinion mining",
+          "natural language processing",
+          "artificial fish swarm algorithm",
+          "deep learning"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000850588800010",
+      "title": "Deep Learning with Natural Language Processing Enabled Sentimental Analysis on Sarcasm Classification",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "COMPUTER SYSTEMS SCIENCE AND ENGINEERING",
+        "publishYear": 2023,
+        "volume": "44",
+        "issue": "3",
+        "pages": {
+          "range": "2553-2567",
+          "begin": "2553",
+          "end": "2567",
+          "count": 15
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Sait, Abdul Rahaman Wahab",
+            "wosStandard": "Sait, ARW",
+            "researcherId": "AFT-9562-2022"
+          },
+          {
+            "displayName": "Ishak, Mohamad Khairi",
+            "wosStandard": "Ishak, MK",
+            "researcherId": "F-5295-2019"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000850588800010&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000850588800010&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000850588800010&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000850588800010&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 14
+        }
+      ],
+      "identifiers": {
+        "doi": "10.32604/csse.2023.029603",
+        "issn": "0267-6192"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Sentiment analysis",
+          "sarcasm detection",
+          "deep learning",
+          "natural language processing",
+          "n-grams",
+          "hyperparameter tuning"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000820278900003",
+      "title": "Detection of Toxic Content on Social Networking Platforms Using Fine Tuned ULMFiT Model",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "INTELLIGENT AUTOMATION AND SOFT COMPUTING",
+        "publishYear": 2023,
+        "volume": "35",
+        "issue": "1",
+        "pages": {
+          "range": "15-30",
+          "begin": "15",
+          "end": "30",
+          "count": 16
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Naveed, Hafsa",
+            "wosStandard": "Naveed, H",
+            "researcherId": "HVG-4659-2023"
+          },
+          {
+            "displayName": "Sohail, Abid",
+            "wosStandard": "Sohail, A",
+            "researcherId": "DWB-8738-2022"
+          },
+          {
+            "displayName": "Zain, Jasni Mohamad",
+            "wosStandard": "Zain, JM",
+            "researcherId": "AGU-3976-2022"
+          },
+          {
+            "displayName": "Saleem, Noman",
+            "wosStandard": "Saleem, N",
+            "researcherId": "FVA-2404-2022"
+          },
+          {
+            "displayName": "Ali, Rao Faizan",
+            "wosStandard": "Ali, RF",
+            "researcherId": "AAX-4889-2020"
+          },
+          {
+            "displayName": "Anwar, Shahid",
+            "wosStandard": "Anwar, S",
+            "researcherId": "C-7644-2014"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000820278900003&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000820278900003&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000820278900003&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 0
+        }
+      ],
+      "identifiers": {
+        "doi": "10.32604/iasc.2023.023277",
+        "issn": "1079-8587",
+        "eissn": "2326-005X"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Machine learning",
+          "text mining",
+          "quora mining",
+          "arti fi cial intelligence",
+          "natural language processing"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000814059200009",
+      "title": "An Optimised Defensive Technique to Recognize Adversarial Iris Images Using Curvelet Transform",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "INTELLIGENT AUTOMATION AND SOFT COMPUTING",
+        "publishYear": 2023,
+        "volume": "35",
+        "issue": "1",
+        "pages": {
+          "range": "627-643",
+          "begin": "627",
+          "end": "643",
+          "count": 17
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Meenakshi, K.",
+            "wosStandard": "Meenakshi, K",
+            "researcherId": "ABB-2482-2020"
+          },
+          {
+            "displayName": "Maragatham, G.",
+            "wosStandard": "Maragatham, G",
+            "researcherId": "ABC-6758-2021"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000814059200009&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000814059200009&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000814059200009&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000814059200009&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 10
+        }
+      ],
+      "identifiers": {
+        "doi": "10.32604/iasc.2023.026961",
+        "issn": "1079-8587",
+        "eissn": "2326-005X"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Adversarial attacks",
+          "biometrics",
+          "curvelet transform",
+          "CNN",
+          "particle swarm optimization",
+          "adversarial iris recognition"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000810059700011",
+      "title": "Intelligent Machine Learning with Metaheuristics Based Sentiment Analysis and Classification",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "COMPUTER SYSTEMS SCIENCE AND ENGINEERING",
+        "publishYear": 2023,
+        "volume": "44",
+        "issue": "1",
+        "pages": {
+          "range": "235-247",
+          "begin": "235",
+          "end": "247",
+          "count": 13
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Bhaskaran, R.",
+            "wosStandard": "Bhaskaran, R",
+            "researcherId": "AEJ-6834-2022"
+          },
+          {
+            "displayName": "Saravanan, S.",
+            "wosStandard": "Saravanan, S",
+            "researcherId": "KZQ-4646-2024"
+          },
+          {
+            "displayName": "Kavitha, M.",
+            "wosStandard": "Kavitha, M",
+            "researcherId": "ABC-6403-2021"
+          },
+          {
+            "displayName": "Jeyalakshmi, C.",
+            "wosStandard": "Jeyalakshmi, C",
+            "researcherId": "R-7723-2019"
+          },
+          {
+            "displayName": "Kadry, Seifedine",
+            "wosStandard": "Kadry, S",
+            "researcherId": "C-7437-2011"
+          },
+          {
+            "displayName": "Rauf, Hafiz Tayyab",
+            "wosStandard": "Rauf, HT",
+            "researcherId": "AAA-7762-2021"
+          },
+          {
+            "displayName": "Alkhammash, Reem",
+            "wosStandard": "Alkhammash, R",
+            "researcherId": "ABC-1909-2021"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000810059700011&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000810059700011&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000810059700011&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000810059700011&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 4
+        }
+      ],
+      "identifiers": {
+        "doi": "10.32604/csse.2023.024399",
+        "issn": "0267-6192"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Sentiment analysis",
+          "data classification",
+          "machine learning",
+          "red deer algorithm",
+          "extreme learning machine",
+          "natural language processing"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000810052600011",
+      "title": "Oppositional Harris Hawks Optimization with Deep Learning-Based Image Captioning",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "COMPUTER SYSTEMS SCIENCE AND ENGINEERING",
+        "publishYear": 2023,
+        "volume": "44",
+        "issue": "1",
+        "pages": {
+          "range": "579-593",
+          "begin": "579",
+          "end": "593",
+          "count": 15
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Kavitha, V. R.",
+            "wosStandard": "Kavitha, VR",
+            "researcherId": "ADY-9842-2022"
+          },
+          {
+            "displayName": "Nimala, K.",
+            "wosStandard": "Nimala, K",
+            "researcherId": "HMV-0398-2023"
+          },
+          {
+            "displayName": "Beno, A.",
+            "wosStandard": "Beno, A",
+            "researcherId": "CDZ-8119-2022"
+          },
+          {
+            "displayName": "Ramya, K. C.",
+            "wosStandard": "Ramya, KC",
+            "researcherId": "V-1410-2019"
+          },
+          {
+            "displayName": "Kadry, Seifedine",
+            "wosStandard": "Kadry, S",
+            "researcherId": "C-7437-2011"
+          },
+          {
+            "displayName": "Kang, Byeong-Gwon",
+            "wosStandard": "Kang, BG",
+            "researcherId": "FCJ-6716-2022"
+          },
+          {
+            "displayName": "Nam, Yunyoung",
+            "wosStandard": "Nam, Y",
+            "researcherId": "AAI-4536-2020"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000810052600011&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000810052600011&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000810052600011&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 0
+        }
+      ],
+      "identifiers": {
+        "doi": "10.32604/csse.2023.024553",
+        "issn": "0267-6192"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Image captioning",
+          "natural language processing",
+          "artificial intelligence",
+          "machine learning",
+          "deep learning"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:001127159800005",
+      "title": "RDNN: Rumor Detection Neural Network for Veracity Analysis in Social Media Text",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "KSII TRANSACTIONS ON INTERNET AND INFORMATION SYSTEMS",
+        "publishYear": 2022,
+        "publishMonth": "DEC 31",
+        "volume": "16",
+        "issue": "12",
+        "pages": {
+          "range": "3868-3888",
+          "begin": "3868",
+          "end": "3888",
+          "count": 21
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "SuthanthiraDevi, P.",
+            "wosStandard": "SuthanthiraDevi, P",
+            "researcherId": "ABD-3904-2021"
+          },
+          {
+            "displayName": "Karthika, S.",
+            "wosStandard": "Karthika, S",
+            "researcherId": "ABD-1886-2021"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001127159800005&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001127159800005&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001127159800005&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001127159800005&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 1
+        }
+      ],
+      "identifiers": {
+        "doi": "10.3837/tiis.2022.12.005",
+        "issn": "1976-7277"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Attention mechanism",
+          "Bidirectional Long Short Term Memory (Bi-LSTM)",
+          "Convolution Neural Network (CNN)",
+          "Deep Learning",
+          "Natural Language Processing"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:001127159800013",
+      "title": "GCNXSS: An Attack Detection Approach for Cross-Site Scripting Based on Graph Convolutional Networks",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "KSII TRANSACTIONS ON INTERNET AND INFORMATION SYSTEMS",
+        "publishYear": 2022,
+        "publishMonth": "DEC 31",
+        "volume": "16",
+        "issue": "12",
+        "pages": {
+          "range": "4008-4023",
+          "begin": "4008",
+          "end": "4023",
+          "count": 16
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Pan, Hongyu",
+            "wosStandard": "Pan, HY",
+            "researcherId": "PHW-3278-2026"
+          },
+          {
+            "displayName": "Fang, Yong",
+            "wosStandard": "Fang, Y",
+            "researcherId": "CPP-7033-2022"
+          },
+          {
+            "displayName": "Huang, Cheng",
+            "wosStandard": "Huang, C",
+            "researcherId": "KKF-9124-2024"
+          },
+          {
+            "displayName": "Guo, Wenbo",
+            "wosStandard": "Guo, WB",
+            "researcherId": "GZK-1272-2022"
+          },
+          {
+            "displayName": "Wan, Xuelin",
+            "wosStandard": "Wan, XL",
+            "researcherId": "EES-7897-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001127159800013&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001127159800013&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001127159800013&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001127159800013&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 3
+        }
+      ],
+      "identifiers": {
+        "doi": "10.3837/tiis.2022.12.013",
+        "issn": "1976-7277"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Web security",
+          "Cross-site Scripting",
+          "Graph Convolutional Networks(GCN)"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000864603000001",
+      "title": "A text classification method based on LSTM and graph attention network",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "CONNECTION SCIENCE",
+        "publishYear": 2022,
+        "publishMonth": "DEC 31",
+        "volume": "34",
+        "issue": "1",
+        "pages": {
+          "range": "2466-2480",
+          "begin": "2466",
+          "end": "2480",
+          "count": 15
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Wang, Haitao",
+            "wosStandard": "Wang, HT",
+            "researcherId": "LPH-2494-2024"
+          },
+          {
+            "displayName": "Li, Fangbing",
+            "wosStandard": "Li, FB",
+            "researcherId": "KGJ-9865-2024"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000864603000001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000864603000001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000864603000001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000864603000001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 18
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1080/09540091.2022.2128047",
+        "issn": "0954-0091",
+        "eissn": "1360-0494"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Text classification",
+          "LSTM",
+          "graph attention network",
+          "dependency syntax",
+          "deep learning"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000740530300001",
+      "title": "DSS-TRM: deep spatial-spectral transformer for hyperspectral image classification",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "EUROPEAN JOURNAL OF REMOTE SENSING",
+        "publishYear": 2022,
+        "publishMonth": "DEC 31",
+        "volume": "55",
+        "issue": "1",
+        "pages": {
+          "range": "103-114",
+          "begin": "103",
+          "end": "114",
+          "count": 12
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Liu, Bing",
+            "wosStandard": "Liu, B",
+            "researcherId": "O-3000-2017"
+          },
+          {
+            "displayName": "Yu, Anzhu",
+            "wosStandard": "Yu, AZ",
+            "researcherId": "ACU-2176-2022"
+          },
+          {
+            "displayName": "Gao, Kuiliang",
+            "wosStandard": "Gao, KL",
+            "researcherId": "DVS-0122-2022"
+          },
+          {
+            "displayName": "Tan, Xiong",
+            "wosStandard": "Tan, X",
+            "researcherId": "GCR-5858-2022"
+          },
+          {
+            "displayName": "Sun, Yifan",
+            "wosStandard": "Sun, YF",
+            "researcherId": "AFH-2942-2022"
+          },
+          {
+            "displayName": "Yu, Xuchu",
+            "wosStandard": "Yu, XC",
+            "researcherId": "CHM-7661-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000740530300001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000740530300001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000740530300001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000740530300001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 46
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1080/22797254.2021.2023910",
+        "eissn": "2279-7254"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Hyperspectral image classification",
+          "self attention",
+          "spatial-spectral transformer",
+          "deep learning"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000899668900001",
+      "title": "A novel hybrid deep learning model for aspect based sentiment analysis",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "CONCURRENCY AND COMPUTATION-PRACTICE & EXPERIENCE",
+        "publishYear": 2023,
+        "publishMonth": "FEB 15",
+        "volume": "35",
+        "issue": "4",
+        "pages": {
+          "count": 13
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Kuppusamy, Mouthami",
+            "wosStandard": "Kuppusamy, M",
+            "researcherId": "FOC-9537-2022"
+          },
+          {
+            "displayName": "Selvaraj, Anandamurugan",
+            "wosStandard": "Selvaraj, A",
+            "researcherId": "AAL-5667-2020"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000899668900001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000899668900001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000899668900001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000899668900001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 11
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1002/cpe.7538",
+        "issn": "1532-0626",
+        "eissn": "1532-0634"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "aspect extraction",
+          "bi-directional long short-term memory",
+          "convolutional neural network",
+          "sentiment analysis"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:001313974400004",
+      "title": "ACADEMIC TEXT CLUSTERING USING NATURAL LANGUAGE PROCESSING",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "KONYA JOURNAL OF ENGINEERING SCIENCES",
+        "publishYear": 2022,
+        "publishMonth": "DEC 16",
+        "volume": "10",
+        "specialIssue": "SI",
+        "pages": {
+          "range": "41-51",
+          "begin": "41",
+          "end": "51",
+          "count": 11
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Taskiran, Salimkan Fatma",
+            "wosStandard": "Taskiran, SF",
+            "researcherId": "LJZ-8082-2024"
+          },
+          {
+            "displayName": "Kaya, Ersin",
+            "wosStandard": "Kaya, E",
+            "researcherId": "V-7558-2019"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001313974400004&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001313974400004&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001313974400004&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001313974400004&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 1
+        }
+      ],
+      "identifiers": {
+        "doi": "10.36306/konjes.1081213",
+        "eissn": "2667-8055"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Natural Language Processing",
+          "Machine Learning",
+          "Text Representation"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000897053100001",
+      "title": "Investigating Opinions on Public Policies in Digital Media: Setting up a Supervised Machine Learning Tool for Stance Classification",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "COMMUNICATION METHODS AND MEASURES",
+        "publishYear": 2023,
+        "publishMonth": "APR 3",
+        "volume": "17",
+        "issue": "2",
+        "pages": {
+          "range": "150-184",
+          "begin": "150",
+          "end": "184",
+          "count": 35
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Viehmann, Christina",
+            "wosStandard": "Viehmann, C",
+            "researcherId": "AAO-3061-2020"
+          },
+          {
+            "displayName": "Beck, Tilman",
+            "wosStandard": "Beck, T",
+            "researcherId": "CFJ-1306-2022"
+          },
+          {
+            "displayName": "Maurer, Marcus",
+            "wosStandard": "Maurer, M",
+            "researcherId": "ABG-2174-2020"
+          },
+          {
+            "displayName": "Quiring, Oliver",
+            "wosStandard": "Quiring, O",
+            "researcherId": "FUZ-5540-2022"
+          },
+          {
+            "displayName": "Gurevych, Iryna",
+            "wosStandard": "Gurevych, I",
+            "researcherId": "CSI-9800-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000897053100001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000897053100001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000897053100001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000897053100001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 4
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1080/19312458.2022.2151579",
+        "issn": "1931-2458",
+        "eissn": "1931-2466"
+      },
+      "keywords": {
+        "authorKeywords": []
+      }
+    },
+    {
+      "uid": "WOS:001223227900009",
+      "title": "Improving text classification with transformers and layer normalization",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "MACHINE LEARNING WITH APPLICATIONS",
+        "publishYear": 2022,
+        "publishMonth": "DEC 15",
+        "volume": "10",
+        "articleNumber": "100403",
+        "pages": {
+          "count": 9
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Rodrawangpai, Ben",
+            "wosStandard": "Rodrawangpai, B",
+            "researcherId": "DQD-1796-2022"
+          },
+          {
+            "displayName": "Daungjaiboon, Witawat",
+            "wosStandard": "Daungjaiboon, W",
+            "researcherId": "EPG-3167-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001223227900009&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001223227900009&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001223227900009&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001223227900009&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 32
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.mlwa.2022.100403",
+        "eissn": "2666-8270"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Computational modeling",
+          "Machine learning",
+          "Natural language processing",
+          "Pattern classification",
+          "Semantics",
+          "Text analysis",
+          "Transformers"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000898635000001",
+      "title": "Global reconstruction of language models with linguistic rules - Explainable AI for online consumer reviews",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "ELECTRONIC MARKETS",
+        "publishYear": 2022,
+        "publishMonth": "DEC",
+        "volume": "32",
+        "issue": "4",
+        "pages": {
+          "range": "2123-2138",
+          "begin": "2123",
+          "end": "2138",
+          "count": 16
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Binder, Markus",
+            "wosStandard": "Binder, M",
+            "researcherId": "CGN-8728-2022"
+          },
+          {
+            "displayName": "Heinrich, Bernd",
+            "wosStandard": "Heinrich, B",
+            "researcherId": "EZY-9865-2022"
+          },
+          {
+            "displayName": "Hopf, Marcus",
+            "wosStandard": "Hopf, M",
+            "researcherId": "ABB-1554-2021"
+          },
+          {
+            "displayName": "Schiller, Alexander",
+            "wosStandard": "Schiller, A",
+            "researcherId": "DPK-5898-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000898635000001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000898635000001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000898635000001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000898635000001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 14
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/s12525-022-00612-5",
+        "issn": "1019-6781",
+        "eissn": "1422-8890"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Explainable AI",
+          "Text analytics",
+          "Language models",
+          "BERT",
+          "Linguistic rules",
+          "Online consumer reviews"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000895974500001",
+      "title": "The use of natural language processing in palliative care research: A scoping review",
+      "types": [
+        "Review"
+      ],
+      "sourceTypes": [
+        "Review"
+      ],
+      "source": {
+        "sourceTitle": "PALLIATIVE MEDICINE",
+        "publishYear": 2023,
+        "publishMonth": "FEB",
+        "volume": "37",
+        "issue": "2",
+        "pages": {
+          "range": "275-290",
+          "begin": "275",
+          "end": "290",
+          "count": 16
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Sarmet, Max",
+            "wosStandard": "Sarmet, M",
+            "researcherId": "AAZ-4747-2021"
+          },
+          {
+            "displayName": "Kabani, Aamna",
+            "wosStandard": "Kabani, A",
+            "researcherId": "FBW-2191-2022"
+          },
+          {
+            "displayName": "Coelho, Luis",
+            "wosStandard": "Coelho, L",
+            "researcherId": "O-6904-2019"
+          },
+          {
+            "displayName": "dos Reis, Sara Seabra",
+            "wosStandard": "dos Reis, SS",
+            "researcherId": "HIV-7093-2022"
+          },
+          {
+            "displayName": "Zeredo, Jorge L.",
+            "wosStandard": "Zeredo, JL",
+            "researcherId": "EIO-0433-2022"
+          },
+          {
+            "displayName": "Mehta, Ambereen K.",
+            "wosStandard": "Mehta, AK",
+            "researcherId": "DHH-3397-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000895974500001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000895974500001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000895974500001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000895974500001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 25
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1177/02692163221141969",
+        "issn": "0269-2163",
+        "eissn": "1477-030X",
+        "pmid": "36495082"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Natural language processing",
+          "data mining",
+          "artificial intelligence",
+          "software",
+          "palliative care",
+          "qualitative research"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000894168000001",
+      "title": "Apt and actionable possible identities matter: The case of academic outcomes",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "JOURNAL OF ADOLESCENCE",
+        "publishYear": 2023,
+        "publishMonth": "FEB",
+        "volume": "95",
+        "issue": "2",
+        "pages": {
+          "range": "354-371",
+          "begin": "354",
+          "end": "371",
+          "count": 18
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "O'Donnell, S. Casey",
+            "wosStandard": "O'Donnell, SC",
+            "researcherId": "AAW-5729-2020"
+          },
+          {
+            "displayName": "Oyserman, Daphna",
+            "wosStandard": "Oyserman, D",
+            "researcherId": "U-3207-2019"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894168000001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894168000001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894168000001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894168000001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 8
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1002/jad.12118",
+        "issn": "0140-1971",
+        "eissn": "1095-9254",
+        "pmid": "36480014"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "academic expectations",
+          "academic outcomes",
+          "identity-based motivation",
+          "machine learning",
+          "natural language processing",
+          "possible selves"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000893793800001",
+      "title": "Textual Analysis in Accounting: What's Next?",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "CONTEMPORARY ACCOUNTING RESEARCH",
+        "publishYear": 2023,
+        "publishMonth": "MAY",
+        "volume": "40",
+        "issue": "2",
+        "pages": {
+          "range": "765-805",
+          "begin": "765",
+          "end": "805",
+          "count": 41
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Bochkay, Khrystyna",
+            "wosStandard": "Bochkay, K",
+            "researcherId": "CGQ-2055-2022"
+          },
+          {
+            "displayName": "Brown, Stephen V.",
+            "wosStandard": "Brown, SV",
+            "researcherId": "A-2513-2016"
+          },
+          {
+            "displayName": "Leone, Andrew J.",
+            "wosStandard": "Leone, AJ",
+            "researcherId": "KCX-8967-2024"
+          },
+          {
+            "displayName": "Tucker, Jennifer Wu",
+            "wosStandard": "Tucker, JW",
+            "researcherId": "HQA-4572-2023"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893793800001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893793800001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893793800001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893793800001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 154
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1111/1911-3846.12825",
+        "issn": "0823-9150",
+        "eissn": "1911-3846"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "textual analysis",
+          "machine learning",
+          "deep learning",
+          "textual data",
+          "content analysis",
+          "text"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000894545600001",
+      "title": "Detecting intimate partner violence circumstance for suicide: development and validation of a tool using natural language processing and supervised machine learning in the National Violent Death Reporting System",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "INJURY PREVENTION",
+        "publishYear": 2023,
+        "publishMonth": "APR",
+        "volume": "29",
+        "issue": "2",
+        "pages": {
+          "range": "134-141",
+          "begin": "134",
+          "end": "141",
+          "count": 8
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Kafka, Julie M.",
+            "wosStandard": "Kafka, JM",
+            "researcherId": "ITU-9871-2023"
+          },
+          {
+            "displayName": "Fliss, Mike D.",
+            "wosStandard": "Fliss, MD",
+            "researcherId": "CPB-9799-2022"
+          },
+          {
+            "displayName": "Trangenstein, Pamela J.",
+            "wosStandard": "Trangenstein, PJ",
+            "researcherId": "GBH-2063-2022"
+          },
+          {
+            "displayName": "Reyes, Luz McNaughton",
+            "wosStandard": "Reyes, LM",
+            "researcherId": "DMM-8562-2022"
+          },
+          {
+            "displayName": "Pence, Brian W.",
+            "wosStandard": "Pence, BW",
+            "researcherId": "DKN-6643-2022"
+          },
+          {
+            "displayName": "Moracco, Kathryn E.",
+            "wosStandard": "Moracco, KE",
+            "researcherId": "GEO-2130-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894545600001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894545600001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894545600001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894545600001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 16
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1136/ip-2022-044662",
+        "issn": "1353-8047",
+        "eissn": "1475-5785",
+        "pmid": "36600568"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Suicide",
+          "Self?Harm",
+          "Violence",
+          "Firearm",
+          "Epidemiology",
+          "Methodology",
+          "Mortality"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000894399100001",
+      "title": "Intelligent lead-based bidirectional long short term memory for COVID-19 sentiment analysis",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "SOCIAL NETWORK ANALYSIS AND MINING",
+        "publishYear": 2022,
+        "publishMonth": "DEC 6",
+        "volume": "13",
+        "issue": "1",
+        "articleNumber": "1",
+        "pages": {
+          "count": 17
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Kumari, Santoshi",
+            "wosStandard": "Kumari, S",
+            "researcherId": "FFP-5631-2022"
+          },
+          {
+            "displayName": "Pushphavathi, T. P.",
+            "wosStandard": "Pushphavathi, TP",
+            "researcherId": "PFB-5312-2025"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894399100001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894399100001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894399100001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894399100001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 3
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/s13278-022-01005-4",
+        "issn": "1869-5450",
+        "eissn": "1869-5469",
+        "pmid": "36532863"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Sentiment analysis",
+          "Deep learning",
+          "COVID-19",
+          "Optimization",
+          "LSTM"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000894425900001",
+      "title": "A deep connection to Khasi language through pre-trained embedding",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "INNOVATIONS IN SYSTEMS AND SOFTWARE ENGINEERING",
+        "publishYear": 2025,
+        "publishMonth": "MAR",
+        "volume": "21",
+        "issue": "1",
+        "pages": {
+          "range": "179-193",
+          "begin": "179",
+          "end": "193",
+          "count": 15
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Thabah, N. Donald Jefferson",
+            "wosStandard": "Thabah, NDJ",
+            "researcherId": "HIU-7868-2022"
+          },
+          {
+            "displayName": "Mitri, Aiom Minnette",
+            "wosStandard": "Mitri, AM",
+            "researcherId": "HIU-1520-2022"
+          },
+          {
+            "displayName": "Saha, Goutam",
+            "wosStandard": "Saha, G",
+            "researcherId": "AAY-5583-2020"
+          },
+          {
+            "displayName": "Maji, Arnab Kumar",
+            "wosStandard": "Maji, AK",
+            "researcherId": "IUP-3517-2023"
+          },
+          {
+            "displayName": "Purkayastha, Bipul Shyam",
+            "wosStandard": "Purkayastha, BS",
+            "researcherId": "DNB-6768-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894425900001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894425900001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894425900001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000894425900001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 1
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1007/s11334-022-00497-9",
+        "issn": "1614-5046",
+        "eissn": "1614-5054"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Word embeddings",
+          "Transformers",
+          "BERT",
+          "Word2Vec",
+          "Khasi word embedding"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000893953900001",
+      "title": "The Augmented Social Scientist: Using Sequential Transfer Learning to Annotate Millions of Texts with Human-Level Accuracy",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "SOCIOLOGICAL METHODS & RESEARCH",
+        "publishYear": 2024,
+        "publishMonth": "AUG",
+        "volume": "53",
+        "issue": "3",
+        "pages": {
+          "range": "1167-1200",
+          "begin": "1167",
+          "end": "1200",
+          "count": 34
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Do, Salome",
+            "wosStandard": "Do, S",
+            "researcherId": "HIH-2886-2022"
+          },
+          {
+            "displayName": "Ollion, Etienne",
+            "wosStandard": "Ollion, E",
+            "researcherId": "DJP-1080-2022"
+          },
+          {
+            "displayName": "Shen, Rubing",
+            "wosStandard": "Shen, RB",
+            "researcherId": "HIA-7166-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893953900001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893953900001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893953900001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893953900001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 28
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1177/00491241221134526",
+        "issn": "0049-1241",
+        "eissn": "1552-8294"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "computational social sciences",
+          "natural language processing",
+          "supervised machine learning",
+          "sequential transfer learning",
+          "digital humanities",
+          "text as data"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000893096400001",
+      "title": "Using artificial intelligence to improve pain assessment and pain management: a scoping review",
+      "types": [
+        "Review"
+      ],
+      "sourceTypes": [
+        "Review"
+      ],
+      "source": {
+        "sourceTitle": "JOURNAL OF THE AMERICAN MEDICAL INFORMATICS ASSOCIATION",
+        "publishYear": 2023,
+        "publishMonth": "FEB 16",
+        "volume": "30",
+        "issue": "3",
+        "pages": {
+          "range": "570-587",
+          "begin": "570",
+          "end": "587",
+          "count": 18
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Zhang, Meina",
+            "wosStandard": "Zhang, MN",
+            "researcherId": "IYS-4495-2023"
+          },
+          {
+            "displayName": "Zhu, Linzee",
+            "wosStandard": "Zhu, LZ",
+            "researcherId": "HHY-6475-2022"
+          },
+          {
+            "displayName": "Lin, Shih-Yin",
+            "wosStandard": "Lin, SY",
+            "researcherId": "GCZ-1937-2022"
+          },
+          {
+            "displayName": "Herr, Keela",
+            "wosStandard": "Herr, K",
+            "researcherId": "AAO-2146-2020"
+          },
+          {
+            "displayName": "Chi, Chih-Lin",
+            "wosStandard": "Chi, CL",
+            "researcherId": "EPO-9854-2022"
+          },
+          {
+            "displayName": "Demir, Ibrahim",
+            "wosStandard": "Demir, I",
+            "researcherId": "F-1273-2011"
+          },
+          {
+            "displayName": "Lopez, Karen Dunn",
+            "wosStandard": "Lopez, KD",
+            "researcherId": "JQM-3555-2023"
+          },
+          {
+            "displayName": "Chi, Nai-Ching",
+            "wosStandard": "Chi, NC",
+            "researcherId": "GAF-4854-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893096400001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893096400001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893096400001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000893096400001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 71
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1093/jamia/ocac231",
+        "issn": "1067-5027",
+        "eissn": "1527-974X",
+        "pmid": "36458955"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "artificial intelligence",
+          "pain assessment",
+          "pain management",
+          "pain",
+          "pain control"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:001309437800012",
+      "title": "A graph-based approach to client relationship management in fund administration",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "MACHINE LEARNING WITH APPLICATIONS",
+        "publishYear": 2022,
+        "publishMonth": "DEC",
+        "volume": "10",
+        "articleNumber": "100433",
+        "pages": {
+          "count": 11
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Frangos, Michalis",
+            "wosStandard": "Frangos, M",
+            "researcherId": "GXQ-0411-2022"
+          },
+          {
+            "displayName": "O'Shea, Fergal",
+            "wosStandard": "O'Shea, F",
+            "researcherId": "FZN-4475-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001309437800012&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001309437800012&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001309437800012&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 0
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.mlwa.2022.100433",
+        "eissn": "2666-8270"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Knowledge graphs",
+          "Graph neural networks",
+          "Natural language processing",
+          "Machine learning",
+          "Deep learning",
+          "Fund administration",
+          "Asset management",
+          "Client relationship management"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:001392559000011",
+      "title": "Usable Amharic text corpus for natural language processing applications",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "APPLIED CORPUS LINGUISTICS",
+        "publishYear": 2022,
+        "publishMonth": "DEC",
+        "volume": "2",
+        "issue": "3",
+        "articleNumber": "100033",
+        "pages": {
+          "count": 9
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Woldeyohannis, Michael Melese",
+            "wosStandard": "Woldeyohannis, MM",
+            "researcherId": "GSM-6990-2022"
+          },
+          {
+            "displayName": "Meshesha, Million",
+            "wosStandard": "Meshesha, M",
+            "researcherId": "HGA-1142-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001392559000011&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001392559000011&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001392559000011&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001392559000011&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 8
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.acorp.2022.100033",
+        "eissn": "2666-7991"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Amharic",
+          "Semitic",
+          "Under-resourced",
+          "Text Corpus",
+          "Document Classification"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:001314502900005",
+      "title": "Artificial intelligence in hepatopancreaticobiliary surgery - promises and perils",
+      "types": [
+        "Review"
+      ],
+      "sourceTypes": [
+        "Review"
+      ],
+      "source": {
+        "sourceTitle": "ARTIFICIAL INTELLIGENCE SURGERY",
+        "publishYear": 2022,
+        "publishMonth": "DEC",
+        "volume": "2",
+        "issue": "4",
+        "pages": {
+          "range": "213-223",
+          "begin": "213",
+          "end": "223",
+          "count": 11
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Boutros, Christina",
+            "wosStandard": "Boutros, C",
+            "researcherId": "IKH-1323-2023"
+          },
+          {
+            "displayName": "Singh, Vivek",
+            "wosStandard": "Singh, V",
+            "researcherId": "DVA-3631-2022"
+          },
+          {
+            "displayName": "Ocuin, Lee",
+            "wosStandard": "Ocuin, L",
+            "researcherId": "AAA-2788-2020"
+          },
+          {
+            "displayName": "Marks, Jeffrey M.",
+            "wosStandard": "Marks, JM",
+            "researcherId": "FJU-8963-2022"
+          },
+          {
+            "displayName": "Hashimoto, Daniel A.",
+            "wosStandard": "Hashimoto, DA",
+            "researcherId": "H-3473-2019"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001314502900005&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001314502900005&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001314502900005&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001314502900005&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 4
+        }
+      ],
+      "identifiers": {
+        "doi": "10.20517/ais.2022.32",
+        "eissn": "2771-0408"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Artificial intelligence",
+          "computer vision",
+          "natural language processing",
+          "machine learning",
+          "hepatopancreaticobiliary surgery"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:001134192500005",
+      "title": "Memristor based object detection using neural network",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "HIGH-CONFIDENCE COMPUTING",
+        "publishYear": 2022,
+        "publishMonth": "DEC",
+        "volume": "2",
+        "issue": "4",
+        "articleNumber": "100085",
+        "pages": {
+          "count": 5
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Ravikumar, Ki",
+            "wosStandard": "Ravikumar, K",
+            "researcherId": "JYU-5635-2024"
+          },
+          {
+            "displayName": "Sukumar, R.",
+            "wosStandard": "Sukumar, R",
+            "researcherId": "IRG-4469-2023"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001134192500005&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001134192500005&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001134192500005&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001134192500005&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 7
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.hcc.2022.100085",
+        "eissn": "2667-2952"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Memristor",
+          "Deep learning",
+          "Object detection",
+          "CIFAR-10"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:001309437800007",
+      "title": "A Natural Language Processing and deep learning based model for automated vehicle diagnostics using free-text customer service reports",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "MACHINE LEARNING WITH APPLICATIONS",
+        "publishYear": 2022,
+        "publishMonth": "DEC",
+        "volume": "10",
+        "articleNumber": "100424",
+        "pages": {
+          "count": 8
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Khodadadi, Ali",
+            "wosStandard": "Khodadadi, A",
+            "researcherId": "N-2130-2017"
+          },
+          {
+            "displayName": "Ghandiparsi, Soroush",
+            "wosStandard": "Ghandiparsi, S",
+            "researcherId": "AAR-4884-2021"
+          },
+          {
+            "displayName": "Chuah, Chen-Nee",
+            "wosStandard": "Chuah, CN",
+            "researcherId": "GDC-5093-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001309437800007&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001309437800007&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001309437800007&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:001309437800007&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 7
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1016/j.mlwa.2022.100424",
+        "eissn": "2666-8270"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Customer service",
+          "NLP",
+          "CNN",
+          "BiLSTM",
+          "Claim validation",
+          "Classification",
+          "Vehicle diagnostic",
+          "Content extraction",
+          "Automotive data mining"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000900346700001",
+      "title": "Classification of Scientific Documents in the Kazakh Language Using Deep Neural Networks and a Fusion of Images and Text",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "BIG DATA AND COGNITIVE COMPUTING",
+        "publishYear": 2022,
+        "publishMonth": "DEC",
+        "volume": "6",
+        "issue": "4",
+        "articleNumber": "123",
+        "pages": {
+          "count": 12
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Bogdanchikov, Andrey",
+            "wosStandard": "Bogdanchikov, A",
+            "researcherId": "JAC-6717-2023"
+          },
+          {
+            "displayName": "Ayazbayev, Dauren",
+            "wosStandard": "Ayazbayev, D",
+            "researcherId": "HJN-4352-2023"
+          },
+          {
+            "displayName": "Varlamis, Iraklis",
+            "wosStandard": "Varlamis, I",
+            "researcherId": "Q-9191-2018"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000900346700001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000900346700001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000900346700001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000900346700001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 2
+        }
+      ],
+      "identifiers": {
+        "doi": "10.3390/bdcc6040123",
+        "eissn": "2504-2289"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "convolutional neural network",
+          "document classification",
+          "word embedding"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000897354000001",
+      "title": "A RoBERTa Approach for Automated Processing of Sustainability Reports",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "SUSTAINABILITY",
+        "publishYear": 2022,
+        "publishMonth": "DEC",
+        "volume": "14",
+        "issue": "23",
+        "articleNumber": "16139",
+        "pages": {
+          "count": 25
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Angin, Merih",
+            "wosStandard": "Angin, M",
+            "researcherId": "B-1387-2017"
+          },
+          {
+            "displayName": "Tasdemir, Beyza",
+            "wosStandard": "Tasdemir, B",
+            "researcherId": "HDD-3754-2022"
+          },
+          {
+            "displayName": "Yilmaz, Cenk Arda",
+            "wosStandard": "Yilmaz, CA",
+            "researcherId": "HCX-7170-2022"
+          },
+          {
+            "displayName": "Demiralp, Goekcan",
+            "wosStandard": "Demiralp, G",
+            "researcherId": "HDE-7760-2022"
+          },
+          {
+            "displayName": "Atay, Mert",
+            "wosStandard": "Atay, M",
+            "researcherId": "HCQ-7772-2022"
+          },
+          {
+            "displayName": "Angin, Pelin",
+            "wosStandard": "Angin, P",
+            "researcherId": "J-5820-2017"
+          },
+          {
+            "displayName": "Dikmener, Gokhan",
+            "wosStandard": "Dikmener, G",
+            "researcherId": "HJC-4343-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000897354000001&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000897354000001&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000897354000001&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000897354000001&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 19
+        }
+      ],
+      "identifiers": {
+        "doi": "10.3390/su142316139",
+        "eissn": "2071-1050"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "corporate social responsibility",
+          "natural language processing",
+          "RoBERTa",
+          "sustainable development goals"
+        ]
+      }
+    },
+    {
+      "uid": "WOS:000891796100027",
+      "title": "On the Rate of Convergence of a Classifier Based on a Transformer Encoder",
+      "types": [
+        "Article"
+      ],
+      "sourceTypes": [
+        "Article"
+      ],
+      "source": {
+        "sourceTitle": "IEEE TRANSACTIONS ON INFORMATION THEORY",
+        "publishYear": 2022,
+        "publishMonth": "DEC",
+        "volume": "68",
+        "issue": "12",
+        "pages": {
+          "range": "8139-8155",
+          "begin": "8139",
+          "end": "8155",
+          "count": 17
+        }
+      },
+      "names": {
+        "authors": [
+          {
+            "displayName": "Gurevych, Iryna",
+            "wosStandard": "Gurevych, I",
+            "researcherId": "CSI-9800-2022"
+          },
+          {
+            "displayName": "Kohler, Michael",
+            "wosStandard": "Kohler, M",
+            "researcherId": "PGX-8403-2026"
+          },
+          {
+            "displayName": "Sahin, Goezde Guel",
+            "wosStandard": "Sahin, GG",
+            "researcherId": "GCE-5770-2022"
+          }
+        ]
+      },
+      "links": {
+        "record": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000891796100027&DestLinkType=FullRecord&DestApp=WOS_CPL",
+        "citingArticles": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000891796100027&DestLinkType=CitingArticles&DestApp=WOS_CPL",
+        "references": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000891796100027&DestLinkType=CitedReferences&DestApp=WOS",
+        "related": "https://www.webofscience.com/api/gateway?GWVersion=2&SrcApp=jgrosman-search&SrcAuth=WosAPI&KeyUT=WOS:000891796100027&DestLinkType=RelatedRecords&DestApp=WOS_CPL"
+      },
+      "citations": [
+        {
+          "db": "WOS",
+          "count": 7
+        }
+      ],
+      "identifiers": {
+        "doi": "10.1109/TIT.2022.3191747",
+        "issn": "0018-9448",
+        "eissn": "1557-9654"
+      },
+      "keywords": {
+        "authorKeywords": [
+          "Transformers",
+          "Convergence",
+          "Pattern recognition",
+          "Natural language processing",
+          "Encoding",
+          "Electronic mail",
+          "Deep learning",
+          "Curse of dimensionality",
+          "transformer",
+          "classification",
+          "rate of convergence"
+        ]
+      }
+    }
+  ]
+}
