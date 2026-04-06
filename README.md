@@ -71,7 +71,7 @@ The table below summarizes each supported database - for full details on authent
 | Database | Size (papers) | API Key | Coverage |
 |----------|------------|---------|----------|
 | [arXiv](https://arxiv.org) | 3M+ [¹](https://arxiv.org/stats/monthly_submissions) | Not required | Open-access preprints in physics, math, CS, biology, economics, and more |
-| [CrossRef](https://www.crossref.org) | 180M+ [²](https://www.crossref.org/about) | Not required | DOI-based metadata enrichment and backward snowballing (not a search database) |
+| [CrossRef](https://www.crossref.org) | 180M+ [²](https://www.crossref.org/about) | Not required | Authoritative DOI registry for scholarly works across all disciplines |
 | [IEEE Xplore](https://ieeexplore.ieee.org) | 7M+ [³](https://innovate.ieee.org/about-the-ieee-xplore-digital-library) | Required | Journals, conferences, and standards in electrical engineering and CS |
 | [OpenAlex](https://openalex.org) | 480M+ [⁴](https://openalex.org) | Optional | The largest open catalog of scholarly works across all disciplines |
 | [PubMed](https://pubmed.ncbi.nlm.nih.gov) | 40M+ [⁵](https://pubmed.ncbi.nlm.nih.gov/about/) | Optional | Biomedical and life sciences literature (MEDLINE, PMC, and more) |
