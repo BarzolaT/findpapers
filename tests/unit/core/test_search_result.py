@@ -6,7 +6,8 @@ import datetime
 
 import pytest
 
-from findpapers.core.paper import Database
+from findpapers.core.author import Author
+from findpapers.core.paper import Database, Paper
 from findpapers.core.search_result import SearchResult
 from findpapers.core.source import Source
 
@@ -244,3 +245,230 @@ class TestFailedDatabases:
         """Older saves without the key produce an empty list."""
         sr = SearchResult.from_dict({"metadata": {}, "papers": []})
         assert sr.failed_databases == []
+
+
+# ---------------------------------------------------------------------------
+# Deduplication and Merge
+# ---------------------------------------------------------------------------
+
+
+class TestMerge:
+    """Test for deduplication and Merge"""
+
+    def test_deduplication_merges_same_doi(self, make_paper):
+        """Two papers with the same DOI are merged into one."""
+        sr = SearchResult(query="[q]")
+        p1 = make_paper(title="Paper A", doi="10.1234/test")
+        sr.add_paper(p1)
+        p2 = make_paper(title="Paper B", doi="10.1234/test")
+        sr.add_paper(p2)
+        sr._deduplicate_and_merge(metrics={})
+        assert len(sr.papers) == 1
+
+    def test_deduplication_keeps_different_dois(self, make_paper):
+        """Papers with different DOIs *and* different titles are kept separately."""
+        sr = SearchResult(query="[q]")
+        p1 = make_paper(title="Paper A", doi="10.1234/aaa")
+        sr.add_paper(p1)
+        p2 = make_paper(title="Paper B", doi="10.1234/bbb")
+        sr.add_paper(p2)
+        sr._deduplicate_and_merge(metrics={})
+        assert len(sr.papers) == 2
+
+    def test_deduplication_second_pass_merges_same_title_different_doi(self, make_paper):
+        """Pass 2 merges papers with the same title even when DOIs differ.
+
+        This covers the common cross-database case where the same work is
+        indexed with an arXiv DOI in one database and the publisher DOI in
+        another (e.g. ``10.48550/arxiv.1706.03762`` vs ``10.5555/3295222.3295349``
+        for "Attention is All You Need").
+        """
+        sr = SearchResult(query="[q]")
+        p1 = make_paper(title="Attention is All You Need", doi="10.48550/arxiv.1706.03762")
+        sr.add_paper(p1)
+        p2 = make_paper(title="Attention is All You Need", doi="10.5555/3295222.3295349")
+        sr.add_paper(p2)
+        sr._deduplicate_and_merge(metrics={})
+        assert len(sr.papers) == 1
+
+    def test_deduplication_second_pass_merges_same_title_one_without_year(self):
+        """Pass 2 merges same-title papers when one lacks a publication date.
+
+        This is the canonical cross-database case: a preprint indexed by
+        arXiv may carry a publication date while the same work indexed by
+        OpenAlex (or another database) has no publication_date in its record.
+        The two copies must be merged rather than kept as separate duplicates.
+        """
+        sr = SearchResult(query="[q]")
+        p1 = Paper(
+            title="Attention is All You Need",
+            abstract="abstract with year",
+            authors=[Author(name="Vaswani et al.")],
+            source=Source(title="arXiv"),
+            publication_date=datetime.date(2017, 6, 12),
+            url="http://arxiv.org/abs/1706.03762",
+            doi="10.48550/arxiv.1706.03762",
+        )
+        sr.add_paper(p1)
+        p2 = Paper(
+            title="Attention is All You Need",
+            abstract="abstract without year",
+            authors=[Author(name="Vaswani et al.")],
+            source=Source(title="OpenAlex Source"),
+            publication_date=None,  # intentionally missing
+            url="http://openalex.org/W2963403868",
+            doi="10.5555/3295222.3295349",
+        )
+        sr.add_paper(p2)
+        sr._deduplicate_and_merge(metrics={})
+        assert len(sr.papers) == 1
+
+    def test_deduplication_second_pass_keeps_same_title_different_year(self):
+        """Papers with the same title but different publication years are kept separate."""
+        sr = SearchResult(query="[q]")
+        p1 = Paper(
+            title="Annual Report on AI",
+            abstract="abstract",
+            authors=[Author(name="A")],
+            source=Source(title="Journal"),
+            publication_date=datetime.date(2022, 1, 1),
+            url="http://example.com/2022",
+            doi="10.1234/ai-2022",
+        )
+        sr.add_paper(p1)
+        p2 = Paper(
+            title="Annual Report on AI",
+            abstract="abstract",
+            authors=[Author(name="A")],
+            source=Source(title="Journal"),
+            publication_date=datetime.date(2023, 1, 1),
+            url="http://example.com/2023",
+            doi="10.1234/ai-2023",
+        )
+        sr.add_paper(p2)
+        sr._deduplicate_and_merge(metrics={})
+        assert len(sr.papers) == 2
+
+    def test_deduplication_second_pass_merges_preprints_across_year_boundary(self):
+        """Same preprint on two servers across Dec/Jan boundary is merged into one.
+
+        This is the canonical Zenodo+SSRN cross-year scenario: a preprint
+        deposited to Zenodo on 2025-12-25 and mirrored to SSRN on 2026-01-01
+        receives different DOIs from each platform.  After pass 1 both entries
+        survive (different DOIs).  Pass 2 must detect that (a) both DOIs are
+        preprint DOIs and (b) the years differ by exactly 1, and therefore
+        merge them rather than reporting a duplicate title.
+        """
+        sr = SearchResult(query="[q]")
+        p1 = Paper(
+            title="Attention is All You Need... Unless You Are a CISO",
+            abstract="abstract from zenodo",
+            authors=[Author(name="Author A")],
+            source=Source(title="Zenodo"),
+            publication_date=datetime.date(2025, 12, 25),
+            url="https://zenodo.org/records/18056028",
+            doi="10.5281/zenodo.18056028",
+        )
+        sr.add_paper(p1)
+        p2 = Paper(
+            title="Attention is All You Need... Unless You Are a CISO",
+            abstract="abstract from ssrn",
+            authors=[Author(name="Author A")],
+            source=Source(title="SSRN"),
+            publication_date=datetime.date(2026, 1, 1),
+            url="https://ssrn.com/abstract=5967774",
+            doi="10.2139/ssrn.5967774",
+        )
+        sr.add_paper(p2)
+        sr._deduplicate_and_merge(metrics={})
+        assert len(sr.papers) == 1
+
+    def test_deduplication_second_pass_merges_preprint_with_published_version(self):
+        """Preprint DOI + publisher DOI with adjacent years are merged into one.
+
+        The common "preprint-to-published" case: a Zenodo deposit from 2026
+        and a book chapter from 2025 share the same title.  Only the Zenodo
+        record is a preprint, but that is sufficient for the year-adjacent rule
+        to fire — the old ``both_preprints`` requirement was too strict and
+        left such pairs as false duplicates.
+        """
+        sr = SearchResult(query="[q]")
+        p1 = Paper(
+            title="Attention is All You Need",
+            abstract="preprint version",
+            authors=[Author(name="Vaswani et al.")],
+            source=Source(title="Zenodo"),
+            publication_date=datetime.date(2026, 1, 17),
+            url="https://zenodo.org/records/18289747",
+            doi="10.5281/zenodo.18289747",
+        )
+        sr.add_paper(p1)
+        p2 = Paper(
+            title="Attention Is All You Need",
+            abstract="book chapter version",
+            authors=[Author(name="Vaswani et al.")],
+            source=Source(title="Deep Learning Book"),
+            publication_date=datetime.date(2025, 10, 31),
+            url="https://doi.org/10.1201/9781003561460-19",
+            doi="10.1201/9781003561460-19",
+        )
+        sr.add_paper(p2)
+        sr._deduplicate_and_merge(metrics={})
+        assert len(sr.papers) == 1
+
+    def test_deduplication_second_pass_keeps_non_preprint_adjacent_years(self):
+        """Two non-preprint papers with same title and adjacent years are kept separate.
+
+        If neither DOI is a preprint, the year-adjacent rule must NOT fire —
+        annual reports and series papers with consecutive-year DOIs are
+        intentionally distinct entries.
+        """
+        sr = SearchResult(query="[q]")
+        p1 = Paper(
+            title="Annual Report on AI",
+            abstract="abstract",
+            authors=[Author(name="A")],
+            source=Source(title="Journal"),
+            publication_date=datetime.date(2022, 1, 1),
+            url="http://example.com/2022",
+            doi="10.1234/ai-2022",
+        )
+        sr.add_paper(p1)
+        p2 = Paper(
+            title="Annual Report on AI",
+            abstract="abstract",
+            authors=[Author(name="A")],
+            source=Source(title="Journal"),
+            publication_date=datetime.date(2023, 1, 1),
+            url="http://example.com/2023",
+            doi="10.1234/ai-2023",
+        )
+        sr.add_paper(p2)
+        sr._deduplicate_and_merge(metrics={})
+        assert len(sr.papers) == 2
+
+    def test_deduplication_second_pass_keeps_preprints_with_large_year_gap(self):
+        """Preprints with the same title but years >1 apart are kept separate."""
+        sr = SearchResult(query="[q]")
+        p1 = Paper(
+            title="Survey of Transformers",
+            abstract="abstract 2022",
+            authors=[Author(name="Author A")],
+            source=Source(title="Zenodo"),
+            publication_date=datetime.date(2022, 1, 1),
+            url="https://zenodo.org/records/1",
+            doi="10.5281/zenodo.1",
+        )
+        sr.add_paper(p1)
+        p2 = Paper(
+            title="Survey of Transformers",
+            abstract="abstract 2024",
+            authors=[Author(name="Author B")],
+            source=Source(title="arXiv"),
+            publication_date=datetime.date(2024, 6, 1),
+            url="https://arxiv.org/abs/2406.00001",
+            doi="10.48550/arxiv.2406.00001",
+        )
+        sr.add_paper(p2)
+        sr._deduplicate_and_merge(metrics={})
+        assert len(sr.papers) == 2

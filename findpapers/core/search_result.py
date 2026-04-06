@@ -6,8 +6,9 @@ import contextlib
 import datetime
 from typing import Any
 
-from ..utils.version import package_version
-from .paper import Paper
+from findpapers.core.paper import Paper
+from findpapers.utils.dedup import _are_years_compatible
+from findpapers.utils.version import package_version
 
 
 class SearchResult:
@@ -167,3 +168,101 @@ class SearchResult:
             runtime_seconds_per_database=metadata.get("runtime_seconds_per_database"),
             failed_databases=metadata.get("failed_databases"),
         )
+
+    def _deduplicate_and_merge(self, metrics: dict[str, int | float]) -> None:
+        """Collapse duplicate papers in two passes.
+
+        **Pass 1** groups papers by their primary key (DOI when available,
+        otherwise a normalised ``title|year`` string).  This resolves exact
+        duplicates found within the same database or between databases that
+        share the same DOI.
+
+        **Pass 2** groups the results of pass 1 by normalised title and
+        merges entries whose publication years are *compatible* — i.e. they
+        share the same year, at least one has no year (incomplete metadata),
+        or at least one entry carries a preprint DOI and their years differ by
+        at most one (to handle both the case of the same preprint deposited to
+        two servers across the Dec/Jan calendar boundary and the common
+        preprint-to-published transition, e.g. Zenodo 2026 + book chapter
+        2025).  Papers with the same title and *different known years* where
+        neither is from a preprint server are intentionally kept separate.
+
+        This correctly handles the common cross-database case where the same
+        work is indexed with different DOIs (e.g. an arXiv preprint DOI vs a
+        publisher DOI) and one of the database records lacks a publication
+        date.
+
+        When two papers are deemed duplicates their data is merged using
+        :meth:`~findpapers.core.paper.Paper.merge` (most-complete strategy).
+
+        Parameters
+        ----------
+        metrics : dict[str, int | float]
+            Metrics dict (currently unused; reserved for future statistics).
+
+        Returns
+        -------
+        None
+        """
+        # Pass 1: primary key dedup (DOI > title|year > title).
+        pass1: dict[str, Paper] = {}
+        for paper in self.papers:
+            key = self._dedupe_key(paper)
+            if key in pass1:
+                pass1[key].merge(paper)
+            else:
+                pass1[key] = paper
+
+        # Pass 2: title-based dedup that handles missing year metadata.
+        # Group survivors from pass 1 by normalised title, then within each
+        # title group greedily merge papers whose years are compatible.
+        by_title: dict[str, list[Paper]] = {}
+        untitled: list[Paper] = []
+        for paper in pass1.values():
+            norm_title = paper.title.strip().lower() if paper.title else ""
+            if norm_title:
+                by_title.setdefault(norm_title, []).append(paper)
+            else:
+                untitled.append(paper)
+
+        result: list[Paper] = list(untitled)
+        for candidates in by_title.values():
+            # Greedily merge into the first compatible representative.
+            groups: list[Paper] = []
+            for paper in candidates:
+                paper_year = getattr(paper.publication_date, "year", None)
+                merged_into: Paper | None = None
+                for representative in groups:
+                    rep_year = getattr(representative.publication_date, "year", None)
+                    if _are_years_compatible(rep_year, paper_year, representative.doi, paper.doi):
+                        merged_into = representative
+                        break
+                if merged_into is not None:
+                    merged_into.merge(paper)
+                else:
+                    groups.append(paper)
+            result.extend(groups)
+
+        self.papers = result
+
+    def _dedupe_key(
+        self, paper: Paper
+    ) -> str | None:  # TODO I think it should be a method of paper
+        """Build a stable primary deduplication key for a paper.
+
+        Uses the DOI when available; otherwise falls back to a normalised
+        ``title|year`` combination.
+
+        Parameters
+        ----------
+        paper : Paper
+            Paper to key.
+
+        Returns
+        -------
+        str
+            Dedupe key string.
+        """
+        if paper.doi:
+            return paper._identity_key()
+        return paper._title_year_key()

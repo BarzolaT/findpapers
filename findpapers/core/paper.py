@@ -301,6 +301,29 @@ class Paper:
             return self.title.strip().lower()
         return None
 
+    def _title_year_key(self) -> str:
+        """Build a normalised ``title|year`` deduplication key for a paper.
+
+        Used as the pass-1 fallback dedup key when no DOI is available.
+
+        Parameters
+        ----------
+        paper : Paper
+            Paper to key.
+
+        Returns
+        -------
+        str
+            Title/year key string.
+        """
+        title = self.title
+        year = getattr(self.publication_date, "year", None)
+        if title and year:
+            return f"title:{str(title).strip().lower()}|year:{year}"
+        if title:
+            return f"title:{str(title).strip().lower()}"
+        return f"object:{id(self)}"
+
     @staticmethod
     def _normalize_title(title: str) -> str:
         """Strip HTML tags and normalize whitespace in a paper title.
