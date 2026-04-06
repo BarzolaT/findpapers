@@ -227,8 +227,17 @@ class DiscoveryRunner:
                 # additional metadata but should not register new database
                 # sources for the paper.
                 original_databases = set(paper.databases)
+                # Save the enriched URL before merging so we can restore it
+                # afterwards.  merge() uses merge_value() which keeps the longer
+                # string, but enrichment should always replace the URL with the
+                # final URL after all redirects (web_scraping URL > crossref URL,
+                # resolved inside GetRunner.run()).
+                enriched_url = result.url
                 paper.merge(result)
                 paper.databases = original_databases
+                # Replace the paper URL with the enriched one when available.
+                if enriched_url is not None:
+                    paper.url = enriched_url
 
         for _item, _result, error in execute_tasks(
             enrich_queue,

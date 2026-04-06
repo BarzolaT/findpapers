@@ -298,3 +298,88 @@ class TestEnrichmentDatabasesDefault:
         # original database set (enrichment databases must not be added).
         assert paper.abstract == "An enriched abstract."
         assert paper.databases == {"arxiv"}
+
+    def test_enrich_papers_replaces_url_with_enriched_url(self):
+        """Enrichment replaces the paper URL with the final URL from GetRunner."""
+        import datetime
+
+        from findpapers.core.author import Author
+        from findpapers.core.source import Source
+
+        runner = DiscoveryRunner(enrichment_databases=["crossref", "web_scraping"])
+
+        paper = Paper(
+            title="Test Paper",
+            abstract="",
+            authors=[Author(name="A. Author")],
+            source=Source(title="Fake Journal"),
+            publication_date=datetime.date(2023, 1, 1),
+            doi="10.1234/test",
+            url="https://doi.org/10.1234/test",
+            databases={"arxiv"},
+        )
+
+        def _fake_get_runner(**kwargs):
+            enriched = Paper(
+                title="Test Paper",
+                abstract="",
+                authors=[Author(name="A. Author")],
+                source=Source(title="Fake Journal"),
+                publication_date=datetime.date(2023, 1, 1),
+                doi="10.1234/test",
+                url="https://publisher.com/articles/test",
+                databases={"crossref"},
+            )
+            mock = MagicMock()
+            mock.run.return_value = enriched
+            mock.close = MagicMock()
+            return mock
+
+        with patch("findpapers.runners.discovery_runner.GetRunner", side_effect=_fake_get_runner):
+            runner._enrich_papers([paper], verbose=False, show_progress=False)
+
+        # The enriched URL must replace the original URL (even when shorter).
+        assert paper.url == "https://publisher.com/articles/test"
+        assert paper.databases == {"arxiv"}
+
+    def test_enrich_papers_keeps_original_url_when_enriched_url_is_none(self):
+        """When the enrichment result has no URL, the original URL is preserved."""
+        import datetime
+
+        from findpapers.core.author import Author
+        from findpapers.core.source import Source
+
+        runner = DiscoveryRunner(enrichment_databases=["crossref", "web_scraping"])
+
+        paper = Paper(
+            title="Test Paper",
+            abstract="",
+            authors=[Author(name="A. Author")],
+            source=Source(title="Fake Journal"),
+            publication_date=datetime.date(2023, 1, 1),
+            doi="10.1234/test",
+            url="https://doi.org/10.1234/test",
+            databases={"arxiv"},
+        )
+
+        def _fake_get_runner(**kwargs):
+            enriched = Paper(
+                title="Test Paper",
+                abstract="An enriched abstract.",
+                authors=[Author(name="A. Author")],
+                source=Source(title="Fake Journal"),
+                publication_date=datetime.date(2023, 1, 1),
+                doi="10.1234/test",
+                url=None,
+                databases={"crossref"},
+            )
+            mock = MagicMock()
+            mock.run.return_value = enriched
+            mock.close = MagicMock()
+            return mock
+
+        with patch("findpapers.runners.discovery_runner.GetRunner", side_effect=_fake_get_runner):
+            runner._enrich_papers([paper], verbose=False, show_progress=False)
+
+        # The original URL must be retained when enrichment yields no URL.
+        assert paper.url == "https://doi.org/10.1234/test"

@@ -413,6 +413,11 @@ class GetRunner:
             if verbose:
                 logger.info("Stage 2 — DOI lookup: %s", doi)
 
+            # Preserve the web-scraping URL (Stage 1 result) before Stage 2 merges
+            # can overwrite it.  The scraped URL is the actual final URL after all
+            # HTTP redirects and has priority over the CrossRef-registered URL.
+            scraped_url: str | None = base_paper.url if base_paper is not None else None
+
             crossref_paper = self._run_doi_connector(
                 self._crossref, "CrossRef", doi, verbose=verbose
             )
@@ -443,9 +448,14 @@ class GetRunner:
                     continue
                 base_paper = self._run_and_merge(connector, name, doi, base_paper, verbose=verbose)
 
-            # Restore CrossRef URL as the final canonical URL when available.
-            if base_paper is not None and crossref_url is not None:
-                base_paper.url = crossref_url
+            # URL priority: scraped URL (final URL after all HTTP redirects) >
+            # CrossRef URL.  Only fall back to the CrossRef URL when web scraping
+            # did not yield any URL.
+            if base_paper is not None:
+                if scraped_url is not None:
+                    base_paper.url = scraped_url
+                elif crossref_url is not None:
+                    base_paper.url = crossref_url
 
         finally:
             for doi_connector in self._doi_connectors:

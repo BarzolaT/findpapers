@@ -538,8 +538,9 @@ class TestGetRunnerDoiPath:
         assert result.keywords is not None
         assert "ML" in result.keywords
 
-    def test_crossref_url_has_priority(self):
-        """CrossRef URL is preserved even when a later connector has a longer URL."""
+    def test_crossref_url_has_priority_over_other_doi_connectors(self):
+        """CrossRef URL is preserved over a longer URL from another DOI connector when
+        there is no scraped URL (bare DOI path without a successful web-scraping stage)."""
         base_paper = _fake_paper(url="https://doi.org/10.1234/test")
         extra_paper = Paper(
             title="Fake Paper Title",
@@ -696,8 +697,8 @@ class TestGetRunnerUrlPath:
 
         assert result is None
 
-    def test_crossref_url_priority_after_url_scraping(self):
-        """CrossRef URL takes priority even when the scraped paper had a different URL."""
+    def test_scraping_url_has_priority_over_crossref_url(self):
+        """Scraped URL (final URL after HTTP redirects) wins over the CrossRef URL."""
         scraped_paper = _fake_paper(doi="10.1234/test", url="https://example.com/paper")
         crossref_paper = _fake_paper(url="https://doi.org/10.1234/test", databases={"crossref"})
 
@@ -719,7 +720,7 @@ class TestGetRunnerUrlPath:
             result = runner.run()
 
         assert result is scraped_paper
-        assert result.url == "https://doi.org/10.1234/test"
+        assert result.url == "https://example.com/paper"
 
 
 # ---------------------------------------------------------------------------
