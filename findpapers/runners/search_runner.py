@@ -570,8 +570,9 @@ class SearchRunner(DiscoveryRunner):
                 if pbar.total is None:
                     pbar.total = pbar.n
                 if pbar.total == 0:
-                    pbar.set_postfix_str("done")
-                pbar.refresh()
+                    # refresh=False: avoid the same positional misalignment
+                    # that removing pbar.refresh() above is meant to fix.
+                    pbar.set_postfix_str("done", refresh=False)
                 pbar.close()
 
         return failed, db_runtimes
