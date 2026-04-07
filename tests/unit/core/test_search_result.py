@@ -248,12 +248,12 @@ class TestFailedDatabases:
 
 
 # ---------------------------------------------------------------------------
-# Deduplication and Merge
+# Deduplication
 # ---------------------------------------------------------------------------
 
 
-class TestMerge:
-    """Test for deduplication and Merge"""
+class TestDeduplication:
+    """Test for deduplication"""
 
     def test_deduplication_merges_same_doi(self, make_paper):
         """Two papers with the same DOI are merged into one."""
@@ -472,3 +472,162 @@ class TestMerge:
         sr.add_paper(p2)
         sr._deduplicate_and_merge(metrics={})
         assert len(sr.papers) == 2
+
+
+# ---------------------------------------------------------------------------
+# Deduplication
+# ---------------------------------------------------------------------------
+
+
+class TestMerge:
+    """Test for merge"""
+
+    def test_merge_paper_same_doi(self, make_paper):
+        """Two papers with the same DOI are merged into one."""
+        sr1 = SearchResult(query="[q]")
+        p1 = make_paper(title="Paper A", doi="10.1234/test")
+        sr1.add_paper(p1)
+        p2 = make_paper(title="Paper B", doi="10.1234/test")
+        result = sr1.merge_with(p2)
+        assert len(result.papers) == 1
+
+    def test_merge_searchresult_keeps_different_dois(self, make_paper):
+        """Papers with different DOIs *and* different titles are kept separately."""
+        sr1 = SearchResult(query="[q]")
+        p1 = make_paper(title="Paper A", doi="10.1234/aaa")
+        sr1.add_paper(p1)
+        sr2 = SearchResult(query="[q]")
+        p2 = make_paper(title="Paper B", doi="10.1234/bbb")
+        sr2.add_paper(p2)
+        result = sr1.merge_with(sr2)
+        assert len(result.papers) == 2
+
+    def test_merge_paperlist_same_title_different_doi_different_year(self, make_paper):
+        """Pass 2 merges papers with the same title even when DOIs differ.
+
+        This covers the common cross-database case where the same work is
+        indexed with an arXiv DOI in one database and the publisher DOI in
+        another (e.g. ``10.48550/arxiv.1706.03762`` vs ``10.5555/3295222.3295349``
+        for "Attention is All You Need").
+        """
+        sr = SearchResult(query="[q]")
+        p1 = make_paper(title="Attention is All You Need", doi="10.48550/arxiv.1706.03762")
+        sr.add_paper(p1)
+        p2 = make_paper(title="Attention is All You Need", doi="10.5555/3295222.3295349")
+        p3 = make_paper(title="Annual Report on AI", doi="10.1234/ai-2022")
+        result = sr.merge_with([p2, p3])
+        assert len(result.papers) == 2
+
+    def test_databases_merged(self):
+        """Databases of the result is the merge of all the databases"""
+        sr = SearchResult(query="[q]", databases=['Zenodo'])
+        p1 = Paper(
+            title="Paper 1",
+            abstract="abstract 2022",
+            authors=[Author(name="Author A")],
+            source=Source(title="Zenodo"),
+            databases={'Zenodo'},
+            publication_date=datetime.date(2022, 1, 1),
+            url="https://zenodo.org/records/1",
+            doi="10.1234/zenodo.1",
+        )
+        sr.add_paper(p1)
+        p2 = Paper(
+            title="Paper 2",
+            abstract="abstract 2024",
+            authors=[Author(name="Author B")],
+            source=Source(title="arXiv"),
+            databases={'arXiv'},
+            publication_date=datetime.date(2024, 6, 1),
+            url="https://arxiv.org/abs/2406.00001",
+            doi="10.1234/arxiv.2406.00001",
+        )
+        result = sr.merge_with(p2)
+        assert result.databases is not None
+        assert set(result.databases) == {"arXiv", "Zenodo"}
+
+    def test_max_papers_per_database_mismatch(self):
+        """max_papers_per_database does not match will be set to None"""
+        sr1 = SearchResult(query="[q]", max_papers_per_database=10)
+        p1 = Paper(
+            title="Paper 1",
+            abstract="abstract 2022",
+            authors=[Author(name="Author A")],
+            source=Source(title="arXiv"),
+            publication_date=datetime.date(2022, 1, 1),
+            url="https://zenodo.org/records/1",
+            doi="10.1234/zenodo.1",
+        )
+        sr1.add_paper(p1)
+        sr2 = SearchResult(query="[q]", max_papers_per_database=5)
+        p2 = Paper(
+            title="Paper 1",
+            abstract="abstract 2022",
+            authors=[Author(name="Author A")],
+            source=Source(title="arXiv"),
+            publication_date=datetime.date(2022, 1, 1),
+            url="https://zenodo.org/records/1",
+            doi="10.1234/zenodo.1",
+        )
+        sr2.add_paper(p2)
+        result = sr1.merge_with(sr2)
+        assert result.max_papers_per_database is None
+
+    def test_max_papers_per_database_match(self):
+        """max_papers_per_database does  match will be kept"""
+        sr1 = SearchResult(query="[q]", max_papers_per_database=10)
+        p1 = Paper(
+            title="Paper 1",
+            abstract="abstract 2022",
+            authors=[Author(name="Author A")],
+            source=Source(title="arXiv"),
+            publication_date=datetime.date(2022, 1, 1),
+            url="https://zenodo.org/records/1",
+            doi="10.1234/zenodo.1",
+        )
+        sr1.add_paper(p1)
+        sr2 = SearchResult(query="[q]", max_papers_per_database=10)
+        p2 = Paper(
+            title="Paper 1",
+            abstract="abstract 2022",
+            authors=[Author(name="Author A")],
+            source=Source(title="arXiv"),
+            publication_date=datetime.date(2022, 1, 1),
+            url="https://zenodo.org/records/1",
+            doi="10.1234/zenodo.1",
+        )
+        sr2.add_paper(p2)
+        result = sr1.merge_with(sr2)
+        assert result.max_papers_per_database == 10
+
+    def test_failed_databases_filtered(self):
+        """failed_databases is updated because a paper was added"""
+        sr = SearchResult(
+            query="[q]",
+            databases=["arXiv", "Pubmed", "wos"],
+            failed_databases=["arXiv", "Pubmed", "wos"],
+        )
+        p1 = Paper(
+            title="Paper 1",
+            abstract="abstract 2022",
+            authors=[Author(name="Author A")],
+            source=Source(title="arXiv"),
+            databases={'arXiv'},
+            publication_date=datetime.date(2022, 1, 1),
+            url="https://zenodo.org/records/1",
+            doi="10.1234/zenodo.1",
+        )
+        result = sr.merge_with(p1)
+        assert result.failed_databases == ["Pubmed", "wos"]
+
+    def test_runtime_and_processed_at_updated(self, make_paper):
+        """Test metadata automatic update"""
+        sr1 = SearchResult(query="[q]")
+        p1 = make_paper(title="Paper A", doi="10.1234/aaa")
+        sr1.add_paper(p1)
+        sr2 = SearchResult(query="[q]")
+        p2 = make_paper(title="Paper B", doi="10.1234/bbb")
+        sr2.add_paper(p2)
+        result = sr1.merge_with(sr2)
+        assert result.runtime_seconds_per_database == {}
+        assert result.processed_at is not None

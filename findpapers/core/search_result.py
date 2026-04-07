@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import contextlib
+import copy
 import datetime
+import logging
 from typing import Any
 
 from findpapers.core.paper import Paper
 from findpapers.utils.dedup import _are_years_compatible
 from findpapers.utils.version import package_version
+
+logger = logging.getLogger(__name__)
 
 
 class SearchResult:
@@ -71,6 +75,16 @@ class SearchResult:
             runtime_seconds_per_database or {}
         )
         self.failed_databases: list[str] = list(failed_databases or [])
+
+    def copy(self) -> SearchResult:
+        """
+        Create a deep copy of the instance.
+        Returns
+        -------
+        SearchResulg
+            A deep copy of the current instance
+        """
+        return copy.deepcopy(self)
 
     def add_paper(self, paper: Paper) -> None:
         """Add a paper to the results.
@@ -245,9 +259,72 @@ class SearchResult:
 
         self.papers = result
 
-    def _dedupe_key(
-        self, paper: Paper
-    ) -> str | None:  # TODO I think it should be a method of paper
+    def merge_with(self, other: SearchResult | Paper | list[Paper]) -> SearchResult:
+        """
+        Merge the current SearchResult with another SearchResult, paper or list of papers and return a new combined SearchResult.
+
+        Only papers that match the current search filters are included in the merge.
+        Metadata fields are updated accordingly, if no merge can be done the metadata is set to None.
+
+        Parameters
+        ----------
+        other : SearchResult or Paper or list of Paper
+
+        Returns
+        -------
+        SearchResult
+            A new SearchResult instance containing the merged papers, along with updated metadata.
+
+        Raises
+        ------
+        ValueError
+            If `other` is not an instance of SearchResult, Paper, or a list of Paper.
+
+        Examples
+        --------
+        >>> result1 = SearchResult(...)
+        >>> result2 = SearchResult(...)
+        >>> merged = result1.merge_with(result2)
+
+        >>> paper = Paper(...)
+        >>> merged = result1.merge_with(paper)
+
+        >>> papers = [Paper(...), Paper(...)]
+        >>> merged = result1.merge_with(papers)
+        """
+        result = self.copy()
+        if isinstance(other, Paper):
+            if result._matches_filters(other):
+                other_papers = [other]
+            else:
+                logger.warning(
+                    "Paper does not match search result filters, nothing to merge aborting"
+                )
+                return result
+        elif isinstance(other, list):
+            other_papers = [p for p in other if result._matches_filters(p)]
+        elif isinstance(other, SearchResult):
+            other_papers = [p for p in other.papers if result._matches_filters(p)]
+        else:
+            raise ValueError("Invalid type to merge with SearchResult")
+        result.papers += other_papers
+        other_databases = {
+            db for p in other_papers if p.databases is not None for db in p.databases
+        }
+        result._deduplicate_and_merge(metrics={})
+        base_databases = set(self.databases or [])
+        result.databases = list(base_databases.union(other_databases))
+        if (
+            isinstance(other, SearchResult)
+            and other.max_papers_per_database != self.max_papers_per_database
+        ):
+            result.max_papers_per_database = None
+        result.failed_databases = [db for db in self.failed_databases if db not in other_databases]
+        result.runtime_seconds_per_database = {}
+        result.processed_at = datetime.datetime.now(datetime.UTC)
+        return result
+
+    def _dedupe_key(self, paper: Paper) -> str:  # TODO I think it should be a method of paper
         """Build a stable primary deduplication key for a paper.
 
         Uses the DOI when available; otherwise falls back to a normalised
@@ -263,6 +340,32 @@ class SearchResult:
         str
             Dedupe key string.
         """
-        if paper.doi:
-            return paper._identity_key()
+        if paper.doi is not None:
+            return paper.doi
         return paper._title_year_key()
+
+    def _matches_filters(self, paper: Paper) -> bool:
+        """Return ``True`` when *paper* passes all configured date filters.
+
+        Checks the ``since``/``until`` date range.  Any filter that is
+        ``None`` (not configured) is treated as a pass-through.  Papers with
+        no ``publication_date`` are excluded when any date filter is active.
+
+        Parameters
+        ----------
+        paper : Paper
+            Candidate paper to evaluate.
+
+        Returns
+        -------
+        bool
+            ``True`` if the paper satisfies all active filters.
+        """
+        if self.since is not None and (
+            paper.publication_date is None or paper.publication_date < self.since
+        ):
+            return False
+        return not (
+            self.until is not None
+            and (paper.publication_date is None or paper.publication_date > self.until)
+        )
